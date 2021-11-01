@@ -1,0 +1,21 @@
+{
+	"network": "florencenet",
+	"rpc": "https://api.tez.ie/rpc/florencenet",
+	"bcd": {
+		"api": "https://api.better-call.dev",
+		"gui": "https://better-call.dev"
+	},
+	"tzkt": {
+		"api": "https://api.florencenet.tzkt.io"
+	},
+	"contracts": {
+		"nftFaucet": "KT1DzPX2SHnviWURFUfD5NQ9FcHQVmYFuPYu",
+		"marketplace": {
+			"fixedPrice": {
+				"tez": "KT1X9YgJbwhGgPcJqtvcyn6ceGeUZ7DwPsDm"
+			}
+		}
+	},
+	"ipfsApi": "https://minter-api.tqhosted.com",
+	"ipfsGateway": "https://tqtezos.mypinata.cloud"
+}
