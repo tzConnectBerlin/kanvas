@@ -102,18 +102,18 @@ export default function IconExpansionTreeView() {
             }}
         >
             <CustomTreeItem nodeId="1" label="Categories">
-                <CustomTreeItem nodeId="2" label="Calendar" />
-                <CustomTreeItem nodeId="3" label="Chrome" />
-                <CustomTreeItem nodeId="4" label="Webstorm" />
+                <CustomTreeItem nodeId="2" label="category 1" />
+                <CustomTreeItem nodeId="3" label="category 2" />
+                <CustomTreeItem nodeId="4" label="category 3" />
             </CustomTreeItem>
             <CustomTreeItem nodeId="5" label="NFTs">
-                <CustomTreeItem nodeId="10" label="OSS" />
-                <CustomTreeItem nodeId="6" label="redactedI">
-                    <CustomTreeItem nodeId="7" label="src">
-                        <CustomTreeItem nodeId="8" label="index.js" />
+                <CustomTreeItem nodeId="10" label="nft 1" />
+                <CustomTreeItem nodeId="6" label="nft 2">
+                    <CustomTreeItem nodeId="7" label="top bids">
+                        <CustomTreeItem nodeId="8" label="placeholder" />
                         <CustomTreeItem
                             nodeId="9"
-                            label="tree-view.js"
+                            label="placeholder"
                         />
                     </CustomTreeItem>
                 </CustomTreeItem>
