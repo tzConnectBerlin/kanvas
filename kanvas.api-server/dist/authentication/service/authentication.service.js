@@ -11,9 +11,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthenticationService = void 0;
 const jwt_1 = require("@nestjs/jwt");
-const common_1 = require("@nestjs/common");
-const user_service_1 = require("../../user/service/user.service");
 const user_entity_1 = require("../../user/entity/user.entity");
+const user_service_1 = require("../../user/service/user.service");
+const token_interface_1 = require("../../interfaces/token.interface");
+const common_1 = require("@nestjs/common");
 const bcrypt = require('bcrypt');
 let AuthenticationService = class AuthenticationService {
     constructor(userService, jwtService) {
@@ -24,10 +25,12 @@ let AuthenticationService = class AuthenticationService {
         return await this.userService.findByAddress(userData.address);
     }
     async login(userData) {
-        console.log('yooo');
         const user = await this.validate(userData);
         await this.verifyPassword(userData.signedPayload, user.signedPayload);
-        return this.getCookieWithJwtToken({ id: user.id, address: user.address }, user);
+        return this.getCookieWithJwtToken({ id: user.id, name: user.name, address: user.address }, user);
+    }
+    async getLoggedUser(address) {
+        return await this.userService.findByAddress(address);
     }
     async register(user) {
         const hashedSignedDartPayload = await bcrypt.hash(user.signedPayload, 10);
@@ -46,7 +49,7 @@ let AuthenticationService = class AuthenticationService {
     async verifyPassword(signedDartPayload, hashedSignedDartPayload) {
         const isSignedDartPayloadMatching = await bcrypt.compare(signedDartPayload, hashedSignedDartPayload);
         if (!isSignedDartPayloadMatching) {
-            throw new common_1.HttpException('Wrong credentials provided', common_1.HttpStatus.BAD_REQUEST);
+            throw new common_1.HttpException('Wrong credentials provided', common_1.HttpStatus.UNAUTHORIZED);
         }
     }
     getCookieWithJwtToken(data, user) {
@@ -55,6 +58,7 @@ let AuthenticationService = class AuthenticationService {
         return {
             token: token,
             id: user.id,
+            name: user.name,
             maxAge: process.env.JWT_EXPIRATION_TIME,
             address: data.address,
         };

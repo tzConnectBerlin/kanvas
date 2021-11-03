@@ -75,7 +75,7 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
     }
 
     &.MuiInputBase-root {
-        font-family: 'Open Sans Medium' !important;
+        font-family: 'Roboto Medium' !important;
     }
 
     &.MuiInputBase-input {

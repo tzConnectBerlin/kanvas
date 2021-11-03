@@ -25,11 +25,11 @@ export class UserService {
 
         const user = await manager.findOne(UserEntity, { where: {address: userAddress}})
         
+        
         if (!user) {
-            console.log('exce[roipn')
             throw new HttpException('User not registered.', HttpStatus.NOT_FOUND)
         }
-        console.log('nop exception')
+        
         return user
     }
 

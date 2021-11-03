@@ -171,43 +171,43 @@ export const lightTheme = createTheme({
       h1: {
         fontSize: '4.5rem',
         lineHeight: '1.5',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
       h2: {
         fontSize: '1.6rem',
         lineHeight: '1.3',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
       h3: {
         fontSize: '1.3rem',
         lineHeight: '1.3',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
       h4: {
         fontSize: '1.2rem',
         lineHeight: '1.3',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
       h5: {
         fontSize: '1rem',
         lineHeight: '1.3',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
       h6: {
         fontWeight: 700,
         fontSize: '0.625rem',
         lineHeight: '1.3',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
       subtitle1: {
         fontSize: '0.75rem',
         lineHeight: '1.3',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
       body1: {
         fontSize: '1rem',
         lineHeight: '1.3',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
     },
     breakpoints: {
@@ -246,42 +246,42 @@ export const darkTheme = createTheme({
       h1: {
         fontSize: '4.5rem',
         lineHeight: '1.5',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
       h2: {
         fontSize: '1.6rem',
         lineHeight: '1.3',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
       h3: {
         fontSize: '1.3rem',
         lineHeight: '1.3',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
       h4: {
         fontSize: '1.2rem',
         lineHeight: '1.3',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
       h5: {
         fontSize: '1rem',
         lineHeight: '1.3',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
       h6: {
         fontSize: '0.625rem',
         lineHeight: '1.3',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
       subtitle1: {
         fontSize: '0.75rem',
         lineHeight: '1.3',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
       body1: {
         fontSize: '1rem',
         lineHeight: '1.3',
-        fontFamily: 'Open Sans'
+        fontFamily: 'Roboto'
       },
     },
     breakpoints: {

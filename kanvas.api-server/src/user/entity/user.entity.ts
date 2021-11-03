@@ -12,7 +12,7 @@ export class UserEntity {
     @Column({unique: true})
     address: string;
 
-    @Column({unique: true})
+    @Column({unique: true, select: false})
     signedPayload: string;
 
 }

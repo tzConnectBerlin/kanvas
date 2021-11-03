@@ -27,7 +27,7 @@ __decorate([
     __metadata("design:type", String)
 ], UserEntity.prototype, "address", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ unique: true }),
+    (0, typeorm_1.Column)({ unique: true, select: false }),
     __metadata("design:type", String)
 ], UserEntity.prototype, "signedPayload", void 0);
 UserEntity = __decorate([

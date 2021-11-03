@@ -58,6 +58,7 @@ build/Release
 
 # production
 build
+**/dist
 
 # configs
 config/sandbox-bootstrapped.json

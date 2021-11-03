@@ -44,7 +44,7 @@ const UnreadIndicator = styled.div<{theme?: Theme}>`
 `
 
 const StyledMediumSpan = styled.span`
-    font-family: 'Open Sans Medium';
+    font-family: 'Roboto Medium';
     
     :hover {
         text-decoration: underline;
@@ -52,7 +52,7 @@ const StyledMediumSpan = styled.span`
 `
 
 const StyledLightSpan = styled.span`
-    font-family: 'Open Sans Light';
+    font-family: 'Roboto Light';
 `
 
 const Notifications : FC<NotificationsProps> = ({...props}) => {

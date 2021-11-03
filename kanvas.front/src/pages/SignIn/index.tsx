@@ -49,17 +49,17 @@ interface IUserParams {
 }
 
 const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props }) => {
-    
+
     const [socialLoading, setSocialLoading] = useState(false)
     const [beaconLoading, setBeaconLoading] = useState(false)
     const [signInParams, setSignInParams] = useState<IUserParams>({address: null, signedPayload: null})
-    
+
     // const [signUser, signUserResponse] = useLazyQuery(SIGN_USER)
     const [signUserResponse, signUser] = useAxios({url: 'http://localhost:3000/auth/login', method: 'POST', headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       }}, { manual: true})
-    
+
     const [registerUserResponse, registerUser] = useAxios({url: 'http://localhost:3000/auth/register', method: 'POST', headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'

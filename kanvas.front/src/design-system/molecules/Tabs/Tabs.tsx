@@ -23,7 +23,7 @@ const StyledTab = styled(Tab)<{theme?: Theme}>`
         padding-right: 4rem;
         align-items: start;
 
-        font-family: 'Open Sans Light';
+        font-family: 'Roboto Light';
         font-size: 1rem;
         text-align: left;
         text-transform: none;
@@ -33,7 +33,7 @@ const StyledTab = styled(Tab)<{theme?: Theme}>`
         transition: color 0.2s;
 
         &[aria-selected="true"] {
-            font-family: 'Open Sans Medium';
+            font-family: 'Roboto Medium';
             color: ${props => props.theme.palette.text.primary} !important;
         }
 

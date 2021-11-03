@@ -1,13 +1,11 @@
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/user/service/user.service';
 import { UserEntity } from 'src/user/entity/user.entity';
-interface ITokenPayload {
-    id: number;
-    address: string;
-}
+import { UserService } from 'src/user/service/user.service';
+import { ITokenPayload } from 'src/interfaces/token.interface';
 interface IAuthentication {
-    token: string;
     id: number;
+    name: string;
+    token: string;
     maxAge: string;
     address: string;
 }
@@ -19,6 +17,7 @@ export declare class AuthenticationService {
     login(userData: UserEntity): Promise<any | {
         status: number;
     }>;
+    getLoggedUser(address: string): Promise<UserEntity>;
     register(user: UserEntity): Promise<any>;
     private verifyPassword;
     getCookieWithJwtToken(data: ITokenPayload, user: UserEntity): IAuthentication;

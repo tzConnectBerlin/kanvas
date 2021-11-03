@@ -1,18 +1,15 @@
 import { JwtService } from  '@nestjs/jwt';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { UserService } from 'src/user/service/user.service';
 import { UserEntity } from 'src/user/entity/user.entity';
+import { UserService } from 'src/user/service/user.service';
+import { ITokenPayload } from 'src/interfaces/token.interface';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 const bcrypt = require('bcrypt');
 
-interface ITokenPayload {
-    id: number;
-    address: string;
-}
-
 interface IAuthentication {
-    token: string; 
     id: number;
+    name: string;
+    token: string; 
     maxAge: string;
     address: string; 
 }
@@ -29,13 +26,16 @@ export class AuthenticationService {
     }
 
     public async login(userData: UserEntity): Promise< any | { status: number }>{
-        console.log('yooo')
+        
         const user = await this.validate(userData);
 
         await this.verifyPassword(userData.signedPayload, user.signedPayload);
        
-        return this.getCookieWithJwtToken({id: user.id, address: user.address}, user);
-            
+        return this.getCookieWithJwtToken({id: user.id, name: user.name, address: user.address}, user);
+    }
+
+    public async getLoggedUser(address: string): Promise<UserEntity> {
+        return await this.userService.findByAddress(address);
     }
 
     public async register(user: UserEntity): Promise<any>{
@@ -68,7 +68,7 @@ export class AuthenticationService {
             hashedSignedDartPayload
         );
         if (!isSignedDartPayloadMatching) {
-            throw new HttpException('Wrong credentials provided', HttpStatus.BAD_REQUEST);
+            throw new HttpException('Wrong credentials provided', HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -77,8 +77,9 @@ export class AuthenticationService {
         const token = this.jwtService.sign(payload);
         
         return {
-          token: token, 
+          token: token,
           id: user.id,
+          name: user.name,
           maxAge: process.env.JWT_EXPIRATION_TIME, 
           address: data.address, 
         };

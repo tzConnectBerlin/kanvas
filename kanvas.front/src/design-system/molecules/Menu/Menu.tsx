@@ -65,7 +65,7 @@ const StyledLink = styled(NavLink)<SearchProps>`
     
     &.active {
         p {
-            font-family: 'Open Sans Medium' !important;
+            font-family: 'Roboto Medium' !important;
             color: ${props => props.theme.palette.text.primary} !important;
         }
     }

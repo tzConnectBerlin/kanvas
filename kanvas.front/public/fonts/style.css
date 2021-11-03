@@ -1,29 +1,29 @@
 /* Semi-Bold */
 
 @font-face {
-    font-family: 'Open Sans Bold';
+    font-family: 'Roboto Bold';
     src:
-        url('OpenSans-Bold.woff2') format('woff2');
+        url('Roboto-Bold.woff2') format('woff2');
 }
 
 /* Medium */
 
 @font-face {
-    font-family: 'Open Sans Medium';
+    font-family: 'Roboto Medium';
     src: 
-        url('OpenSans-Medium.woff2') format('woff2');
+        url('Roboto-Medium.woff2') format('woff2');
 }
 
 @font-face {
-    font-family: 'Open Sans';
+    font-family: 'Roboto';
     src: 
-        url('OpenSans-Medium.woff2') format('woff2');
+        url('Roboto-Medium.woff2') format('woff2');
 }
 
 /* Light */
 
 @font-face {
-    font-family: 'Open Sans Light';
+    font-family: 'Roboto Light';
     src: 
-        url('OpenSans-Light.woff2') format('woff2');    
+        url('Roboto-Light.woff2') format('woff2');    
 }

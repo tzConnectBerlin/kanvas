@@ -65,7 +65,7 @@ export const Typography : FC<TypographyProps> = ({size, weight, children, trunca
     return (
         <StyledTypography
             className={truncate ? 'truncate ' + props.className : props.className}
-            fontFamily={`Open Sans ${weight ? weight : 'Light'}`}
+            fontFamily={`Roboto ${weight ? weight : 'Light'}`}
             fontSize={size === 'subtitle1' ? '1.1rem' : fontSize as any}
             lines={lines}
             variant={variant}
