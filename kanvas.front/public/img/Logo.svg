@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480.84 351.13">
+  <defs>
+    <style>
+      .cls-1 {
+        font-size: 91.04px;
+        font-family: OpenSans-Bold, Open Sans;
+        font-weight: 700;
+      }
+    </style>
+  </defs>
+  <title>Asset 1</title>
+  <g id="Layer_2" data-name="Layer 2">
+    <g id="Layer_1-2" data-name="Layer 1">
+      <path d="M177.69,192.39l5.18,132.07-85-136.71L68.8,208.61V324.46H0V0H68.8V148.47L95.87,110.3,183.76,0H260.1L146.92,143.59Z"/>
+      <text class="cls-1" transform="translate(213.99 324.46)">anvas</text>
+    </g>
+  </g>
+</svg>

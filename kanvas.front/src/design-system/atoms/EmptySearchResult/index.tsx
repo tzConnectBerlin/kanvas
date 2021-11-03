@@ -1,0 +1,1 @@
+export { EmptySearchResult } from './EmptySearchResult';

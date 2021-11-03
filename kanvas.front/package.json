@@ -1,86 +1,80 @@
 {
-  "name": "client",
-  "version": "0.7.0",
+  "name": "d-art.front",
+  "version": "0.1.0",
   "private": true,
-  "license": "MIT",
   "dependencies": {
-    "@chakra-ui/react": "1.1.2",
-    "@emotion/core": "10.0.28",
-    "@emotion/react": "11.1.4",
-    "@emotion/styled": "11.0.0",
-    "@reduxjs/toolkit": "1.5.0",
-    "@taquito/beacon-wallet": "9.0.1",
-    "@taquito/signer": "9.0.1",
-    "@taquito/taquito": "9.0.1",
-    "@taquito/tzip12": "9.0.1",
-    "@taquito/tzip16": "9.0.1",
-    "@tqtezos/minter-contracts": "1.4.1",
-    "@types/lodash": "4.14.165",
-    "@types/react": "16.9.12",
-    "@types/react-dom": "16.9.0",
-    "@types/react-dropzone": "5.1.0",
-    "@types/react-redux": "7.1.16",
-    "axios-retry": "3.1.9",
-    "buffer": "6.0.3",
-    "clear": "0.1.0",
-    "clui": "0.3.6",
-    "csv": "5.5.0",
-    "figlet": "1.5.0",
-    "fp-ts": "2.10.3",
-    "framer-motion": "3.1.4",
-    "immer": "9.0.6",
-    "io-ts": "2.2.16",
-    "io-ts-types": "0.5.16",
-    "joi": "17.3.0",
-    "react": "16.13.1",
-    "react-dom": "16.13.1",
-    "react-dropzone": "11.2.4",
-    "react-feather": "2.0.9",
-    "react-icons": "4.2.0",
-    "react-redux": "7.2.2",
-    "shelljs": "0.8.4",
-    "ts-deepmerge": "1.0.8",
-    "typescript": "4.1.3",
-    "wouter": "2.5.1"
-  },
-  "devDependencies": {
-    "@testing-library/jest-dom": "4.2.4",
-    "@testing-library/react": "9.3.2",
-    "@testing-library/user-event": "7.1.2",
-    "@tsed/logger": "5.5.2",
-    "@types/async-retry": "1.4.2",
-    "@types/clear": "0.1.1",
-    "@types/clui": "0.3.0",
-    "@types/configstore": "4.0.0",
-    "@types/figlet": "1.5.1",
-    "@types/inquirer": "7.3.1",
-    "@types/jest": "24.0.0",
-    "@types/shelljs": "0.8.8",
-    "async-retry": "1.3.1",
-    "axios": "0.21.2",
-    "configstore": "5.0.1",
-    "prettier": "2.1.1",
-    "react-scripts": "3.4.1",
-    "ts-node": "9.1.1"
+    "@airgap/beacon-sdk": "^2.3.2",
+    "@apollo/client": "^3.4.13",
+    "@emotion/react": "^11.4.1",
+    "@emotion/styled": "^11.0.0",
+    "@mui/icons-material": "^5.0.0",
+    "@mui/material": "^5.0.0",
+    "@mui/styled-engine-sc": "^5.0.0",
+    "@storybook/addon-docs": "^6.3.8",
+    "@taquito/beacon-wallet": "^10.1.2",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
+    "@tezos-contrib/react-wallet-provider": "^1.0.0-alpha.12",
+    "@types/jest": "^26.0.15",
+    "@types/node": "^12.0.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "@types/react-scroll": "^1.8.3",
+    "animate.css": "^4.1.1",
+    "apollo-link": "^1.2.14",
+    "apollo-link-rest": "^0.8.0-beta.0",
+    "apollo-upload-client": "^16.0.0",
+    "axios": "^0.24.0",
+    "axios-hooks": "^3.0.0",
+    "babel-loader": "8.1.0",
+    "bootstrap": "^5.1.0",
+    "emotion-theming": "^11.0.0",
+    "formik": "^2.2.9",
+    "graphql": "^16.0.1",
+    "graphql-anywhere": "^4.2.7",
+    "kukai-embed": "^0.6.6",
+    "qs": "^6.10.1",
+    "react": "^17.0.2",
+    "react-animated-css": "^1.2.1",
+    "react-dom": "^17.0.2",
+    "react-dropzone": "^11.4.2",
+    "react-grid-layout": "^1.3.0",
+    "react-icons": "^4.2.0",
+    "react-router-dom": "^5.3.0",
+    "react-scripts": "4.0.3",
+    "react-scroll": "^1.8.4",
+    "react-toastify": "^8.0.3",
+    "storybook-addon-themes": "^6.1.0",
+    "styled-components": "^5.3.1",
+    "subscriptions-transport-ws": "^0.9.19",
+    "typescript": "^4.1.2",
+    "web-vitals": "^1.0.1",
+    "yup": "^0.32.9"
   },
   "scripts": {
-    "start": "yarn start:testnet",
-    "start:testnet": "cp ./config/testnet.json src/config.json && react-scripts start",
-    "start:sandbox": "cp ./config/sandbox-bootstrapped.json src/config.json && react-scripts start",
-    "start:mainnet": "cp ./config/mainnet.json src/config.json && react-scripts start",
-    "start:custom": "cp ./config/custom-bootstrapped.json src/config.json && react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
-    "build:custom": "cp ./config/custom-bootstrapped.json src/config.json && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "bootstrap": "ts-node -P scripts/tsconfig.json scripts/bootstrap.ts",
-    "bootstrap:contracts": "ts-node -P scripts/tsconfig.json scripts/bootstrap-contracts-config.ts",
-    "bootstrap:custom": "yarn bootstrap:contracts custom",
-    "bootstrap:sandbox": "docker-compose down && docker-compose up -d && yarn bootstrap:contracts sandbox",
-    "teardown:sandbox": "docker-compose down"
+    "storybook": "start-storybook -p 6006 -s public",
+    "build-storybook": "build-storybook -s public"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "**/*.stories.*"
+        ],
+        "rules": {
+          "import/no-anonymous-default-export": "off"
+        }
+      }
+    ]
   },
   "browserslist": {
     "production": [
@@ -94,8 +88,15 @@
       "last 1 safari version"
     ]
   },
-  "resolutions": {
-    "**/@typescript-eslint/eslint-plugin": "^4.1.1",
-    "**/@typescript-eslint/parser": "^4.1.1"
+  "devDependencies": {
+    "@storybook/addon-actions": "^6.3.8",
+    "@storybook/addon-essentials": "^6.3.8",
+    "@storybook/addon-links": "^6.3.8",
+    "@storybook/node-logger": "^6.3.8",
+    "@storybook/preset-create-react-app": "^3.2.0",
+    "@storybook/react": "^6.3.8",
+    "@types/apollo-upload-client": "^14.1.0",
+    "@types/react-grid-layout": "^1.1.3",
+    "@types/react-router-dom": "^5.3.0"
   }
 }

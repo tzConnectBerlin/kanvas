@@ -1,0 +1,1 @@
+export { StickyLogo } from './StickyLogo';

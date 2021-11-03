@@ -1,0 +1,1 @@
+export { QuickSearchResult } from './QuickSearchResult';

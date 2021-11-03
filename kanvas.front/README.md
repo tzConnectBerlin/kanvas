@@ -1,168 +1,46 @@
-<<<<<<< HEAD
-# kanvas
-=======
-![OpenMinter header](/docs/assets/minterhead.png)
+# Getting Started with Create React App
 
-[![](https://img.shields.io/badge/license-MIT-brightgreen)](LICENSE) [![](https://img.shields.io/github/v/release/tqtezos/minter)](https://github.com/tqtezos/minter)
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## OpenMinter
+## Available Scripts
 
-OpenMinter is dApp framework for enabling the creation and collection
-of non-fungible tokens (NFTs) on Tezos. The dApp enables anyone to
-create an NFT by filling in just a few fields, create new collection
-contracts, see their NFTs across contracts, and enable marketplace
-capabilities to trade them.
+In the project directory, you can run:
 
-### Notice
+### `yarn start`
 
-This software is in beta. At the moment, the [smart contracts](https://github.com/tqtezos/minter-sdk)
-that OpenMinter uses have **not** been formally audited. Please
-use this software at your own risk.
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-### Quickstart
+The page will reload if you make edits.\
+You will also see any lint errors in the console.
 
-To start an OpenMinter instance on `testnet`, make sure you have [yarn][yarn]
-installed (`v1.22.*` or above), and run:
+### `yarn test`
 
-```
-yarn install
-yarn start
-```
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-## Support
+### `yarn build`
 
-OpenMinter supports the following networks and software components:
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-#### 🌐 Mainnet and Florencenet
-#### 📦 Sandboxed development via [Flextesa][flextesa]
-#### 🎨 Multimedia NFTs powered by [TZIP-21](https://tzip.tezosagora.org/proposal/tzip-21/)
-#### ⚙️ Smart contracts based on [minter-sdk](https://github.com/tqtezos/minter-sdk)
-#### 👛 Wallets compatible with [Beacon](https://www.walletbeacon.io/)
-#### 📖 Indexing via [tzkt](https://api.tzkt.io/)
-#### 🚀 [IPFS](https://ipfs.io/) via a local node or [Pinata](https://pinata.cloud/)
-#### 🏭 Batch minting support
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-The following dependencies are required to run OpenMinter.
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-| Dependency | Version | Environments
-|-|-|-|
-| [Yarn][yarn] | `v1.22.*` or above | All
-| [Docker][docker] | `v20.10.*` or above | Sandbox
+### `yarn eject`
 
-[bcdhub]: https://github.com/baking-bad/bcdhub
-[flextesa]: https://gitlab.com/tezos/flextesa
-[postgres]: https://www.postgresql.org/
-[ipfs]: https://ipfs.io/
-[docker]: https://www.docker.com/get-started
-[yarn]: https://classic.yarnpkg.com/en/docs/install
+**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
-## Usage
+If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-### Configuration
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
-The Minter can be configured to run on three different networks: `sandbox`,
-`testnet` (currently set to edonet), and `mainnet`.
+You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-Each network has its own configuration file in the `config` folder under
-`<network>.json`. The schema of these files can be defined as this TypeScript type:
+## Learn More
 
-```typescript
-type Config = {
-  rpc: string,
-  network: string,
-  bcd: {
-    api: string,
-    gui: string
-  },
-  contracts?: {
-    nftFaucet?: string
-    marketplace?: {
-      fixedPrice: {
-        tez: string;
-      }
-    }
-  }
-}
-```
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-### Installation
-
-To install and build the dependences required for local development, run:
-
-```sh
-$ yarn install
-```
-
-The installation process will fetch toplevel NPM dependences
-
-### Running
-
-To start OpenMinter on `testnet`, run:
-
-```sh
-yarn start # or yarn start:testnet
-```
-
-To run OpenMinter configured for `mainnet`, run:
-
-```sh
-yarn start:mainnet
-```
-
-### Bootstrapping Your Own Contracts
-
-OpenMinter ships with a set of contracts on mainnet and testnet that are intended
-only as a reference implementation and demo. In most cases, you will want to
-originate your own contracts to run OpenMinter. OpenMinter includes a configuration
-wizard CLI tool to make this process quick and easy.
-
-To start the configuration wizard, run:
-
-```sh
-yarn bootstrap
-```
-
-Once the configuration wizard is complete, you can run OpenMinter with your
-custom config by running:
-
-```sh
-yarn start:custom
-```
-
-And to build OpenMinter for a production deployment with your custom config, run:
-
-```sh
-yarn build:custom
-```
-
-## Sandboxed Mode
-
-Sandboxed mode is available for OpenMinter for local testing purposes. Make sure
-[Docker][docker] is installed on your system to run the local services.
-
-> **NOTE**: All data in sandboxed mode is ephemeral. Restarts will _not_ persist
-> any blockchain or indexer data.
-
-### Setup and Starting
-
-To start local sandbox services and create the required default contracts, run:
-
-```sh
-yarn bootstrap:sandbox
-```
-
-Finally, to run the OpenMinter UI, run:
-
-```sh
-yarn start:sandbox
-```
-
-### Stopping
-
-Pressing `Ctrl-C` (or `Command-C` on MacOS) after starting the OpenMinter UI
-will quit the React Scripts process. To teardown the Docker compose system, run:
-
-```sh
-yarn teardown:sandbox
-```
->>>>>>> 6854b44 (Initial commit (fork of minter framework))
+To learn React, check out the [React documentation](https://reactjs.org/).
