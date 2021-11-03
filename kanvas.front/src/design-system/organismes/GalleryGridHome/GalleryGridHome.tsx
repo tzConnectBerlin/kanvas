@@ -40,34 +40,9 @@ export const GalleryGridHome: FC<GalleryGridHomeProps> = ({ ...props }) => {
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState(true);
   return (
-    <>
-      {props.loading ? (
-        <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
-          <Box
-            sx={{ justifyContent: "center", width: "100%", marginTop: "5rem" }}
-          >
-            <Stack direction="column" sx={{ alignItems: "center" }}>
-              <Typography
-                size="h2"
-                weight="Light"
-                color="#C4C4C4"
-                sx={{ marginBottom: "0.5rem" }}
-              >
-                {" "}
-                Loading...{" "}
-              </Typography>
-              <Typography size="body" weight="Light" color="#e77f52">
-                {" "}
-                Please wait a moment{" "}
-              </Typography>
-            </Stack>
-          </Box>
-        </Animated>
-      ) : props.assets && props.assets.length > 0 ? (
-
-        <>
-         {/* Toggle options */}
-         <Container
+    <>    
+        {/* Toggle options */}
+        <Container
             sx={{ py: 0, display: 'flex' }}
             maxWidth="lg"
         >
@@ -94,89 +69,61 @@ export const GalleryGridHome: FC<GalleryGridHomeProps> = ({ ...props }) => {
                 Toggle data
             </Button>
         </Container>
-
-
-            <Container
-                sx={{ py: 8, overflow: 'hidden' }}
-                maxWidth="lg"
-            >
-                {/* Grid Component - NFT GALLERY */}
-                <Grid container spacing={2}>
-                    <Slide
-                        direction="down"
-                        in={menuOpen}
-                        mountOnEnter
-                        unmountOnExit
+        
+        {/* Gallery */}
+        <Container
+            sx={{ py: 8, overflow: 'hidden' }}
+            maxWidth="lg"
+        >
+            {/* Grid Component - NFT GALLERY */}
+            <Grid container spacing={2}>
+                <Slide
+                    direction="down"
+                    in={menuOpen}
+                    mountOnEnter
+                    unmountOnExit
+                >
+                    <Grid item md={3}>
+                        <IconExpansionTreeView />
+                    </Grid>
+                </Slide>
+                {data ? (
+                    <Grid
+                        item
+                        container
+                        md={menuOpen ? 9 : 12}
+                        spacing={3}
                     >
-                        <Grid item md={3}>
-                            <IconExpansionTreeView />
-                        </Grid>
-                    </Slide>
-                    {data ? (
-                        <Grid
-                            item
-                            container
-                            md={menuOpen ? 9 : 12}
-                            spacing={3}
-                        >
-                            {cards.map((card) => (
-                                <Grid
-                                    item
-                                    key={card}
-                                    xs={12}
-                                    sm={6}
-                                    md={menuOpen ? 4 : 3}
-                                >
-                                    <GalleryCard
-                                        loading={!loading}
-                                    />
-                                </Grid>
-                            ))}
-                        </Grid>
-                    ) : (
-                        <Container maxWidth="sm">
-                            <Typography
-                                // component="h1"
-                                // variant="h2"
-                                size="h2"
-                                weight="Light"
-                                align="center"
-                                gutterBottom
+                        {cards.map((card) => (
+                            <Grid
+                                item
+                                key={card}
+                                xs={12}
+                                sm={6}
+                                md={menuOpen ? 4 : 3}
                             >
-                                No Data
-                            </Typography>
-                        </Container>
-                    )}
-                </Grid>
-            </Container>
-        </>
-      ) : (
-        <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
-          <Box
-            sx={{ justifyContent: "center", width: "100%", marginTop: "5rem" }}
-          >
-            <Stack direction="column" sx={{ alignItems: "center" }}>
-              <Typography
-                size="h2"
-                weight="Light"
-                color="#C4C4C4"
-                sx={{ marginBottom: "0.5rem" }}
-              >
-                 {props.emptyMessage}{" "}
-              </Typography>
-              <Typography
-                size="body"
-                weight="Light"
-                color="#e77f52"
-                type="link"
-              >
-                {" "}
-                {props.emptyLink}{" "}
-              </Typography>              
-            </Stack>
-          </Box>
-        </Animated>
-      )}
+                                <GalleryCard
+                                    loading={!loading}
+                                />
+                            </Grid>
+                        ))}
+                    </Grid>
+                ) : (
+                    <Container maxWidth="sm">
+                        <Typography
+                            // component="h1"
+                            // variant="h2"
+                            size="h2"
+                            weight="Light"
+                            align="center"
+                            gutterBottom
+                        >
+                            No Data
+                        </Typography>
+                    </Container>
+                )}
+            </Grid>
+        </Container>        
     </>
   );
 };
