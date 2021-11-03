@@ -42,7 +42,7 @@ export const GalleryCard: React.FC<GalleryCardProps> = ({ loading }) => {
                 alignItems: "center",
                 position: "absolute",
                 bottom: "-7px",
-                width: "100%",
+                width: "90%",
                 backgroundColor: " rgba( 255, 255, 255, 0.005)",
                 backdropFilter:
                   "blur(10px) saturate(100%) contrast(45%) brightness(130%)",
