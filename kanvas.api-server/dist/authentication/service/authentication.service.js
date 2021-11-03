@@ -24,6 +24,7 @@ let AuthenticationService = class AuthenticationService {
         return await this.userService.findByAddress(userData.address);
     }
     async login(userData) {
+        console.log('yooo');
         const user = await this.validate(userData);
         await this.verifyPassword(userData.signedPayload, user.signedPayload);
         return this.getCookieWithJwtToken({ id: user.id, address: user.address }, user);

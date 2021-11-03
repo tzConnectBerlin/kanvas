@@ -32,8 +32,10 @@ let UserService = class UserService {
         const manager = (0, typeorm_2.getManager)();
         const user = await manager.findOne(user_entity_1.UserEntity, { where: { address: userAddress } });
         if (!user) {
+            console.log('exce[roipn');
             throw new common_1.HttpException('User not registered.', common_1.HttpStatus.NOT_FOUND);
         }
+        console.log('nop exception');
         return user;
     }
 };

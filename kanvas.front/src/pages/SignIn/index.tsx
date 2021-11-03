@@ -43,15 +43,28 @@ const WrapperTitle = styled.div`
     }
 `
 
+interface IUserParams {
+    address: string | null;
+    signedPayload: string | null;
+}
+
 const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props }) => {
     
     const [socialLoading, setSocialLoading] = useState(false)
     const [beaconLoading, setBeaconLoading] = useState(false)
-    
+    const [signInParams, setSignInParams] = useState<IUserParams>({address: null, signedPayload: null})
     
     // const [signUser, signUserResponse] = useLazyQuery(SIGN_USER)
-    const [signUserResponse, signUser] = useAxios({url: 'http://localhost:3000/auth/login', method: 'post'}, { manual: true })
+    const [signUserResponse, signUser] = useAxios({url: 'http://localhost:3000/auth/login', method: 'POST', headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }}, { manual: true})
     
+    const [registerUserResponse, registerUser] = useAxios({url: 'http://localhost:3000/auth/register', method: 'POST', headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }}, { manual: true})
+
     const history = useHistory()
 
     // Sign expression function to sign user in
@@ -59,7 +72,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
 
         // The data to format
         const dappUrl = "d-art.io";
-        const input = `Welcome to D /a:rt/ ${userAddress}`;
+        const input = `Welcome to Kanvas ${userAddress}`;
 
         // The full string
         const formattedInput: string = [
@@ -82,7 +95,8 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
             
             try {
                 const signedPayload = await beaconWallet.client.requestSignPayload(payload)
-                signUser({data: { address: userAddress, signedPayload: signedPayload.signature }})
+                setSignInParams({ address: userAddress, signedPayload: signedPayload.signature })
+                signUser({data: { name: userAddress, address: userAddress, signedPayload: signedPayload.signature }})
             } catch (error) {
                 console.log(error)
                 setBeaconLoading(false)
@@ -92,6 +106,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
         } else if (embedKukai && loginType === "embed") {
             try {
                 const signedPayload = await embedKukai.signExpr('0501000000' + payload.payload.slice(2), 'Kanvas - sign in', 'Allow user to sign an expression with there wallet in order to sign them in.') 
+                setSignInParams({ address: userAddress, signedPayload: signedPayload })
                 signUser({data: { address: userAddress, signedPayload: signedPayload }})
             } catch (error) {
                 setSocialLoading(false)
@@ -150,28 +165,41 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
 
     useEffect(() => {
         if (signUserResponse.data) {
-                    
-            localStorage.setItem('Kanvas - Bearer', signUserResponse.data.signIn.token)
-            localStorage.setItem('Kanvas - address', signUserResponse.data.signIn.address)
+            
+            setSocialLoading(false)
+            setBeaconLoading(false)
 
-            // history.push(`/profile/${signUserResponse.data.signIn.userName}`)
+            localStorage.setItem('Kanvas - Bearer', signUserResponse.data.token)
+            localStorage.setItem('Kanvas - address', signUserResponse.data.address)
+
+            history.push(`/store`)
         }
         
     }, [signUserResponse.data])
+
+    useEffect(() => {
+        if (registerUserResponse.data) {
+            
+            setSocialLoading(false)
+            setBeaconLoading(false)
+            
+            localStorage.setItem('Kanvas - Bearer', registerUserResponse.data.signIn.token)
+            localStorage.setItem('Kanvas - address', registerUserResponse.data.signIn.address)
+
+            history.push(`/store`)
+        }
+        
+    }, [registerUserResponse.data])
 
     useEffect( () => {
         if (signUserResponse.error) {
             setSocialLoading(false)
             setBeaconLoading(false)
 
-            debugger
-            
-            // props.setSignedPayload(signUserResponse.variables?.signedPayload)
-            // sessionStorage.setItem('userAddress', signUserResponse.variables?.address)
-
-            if (signUserResponse.error.message === 'No user found for this address.') {
+            if (signUserResponse.error?.response?.data.message === 'User not registered.') {
                 // Check if we have information from the user thanks to kukai
-                history.push(`/account/create`)
+                registerUser({data: signInParams})
+                
             } else {
                 toast.error(signUserResponse.error.message, {position: toast.POSITION.TOP_RIGHT, transition: fade})
             }

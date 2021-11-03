@@ -29,6 +29,7 @@ export class AuthenticationService {
     }
 
     public async login(userData: UserEntity): Promise< any | { status: number }>{
+        console.log('yooo')
         const user = await this.validate(userData);
 
         await this.verifyPassword(userData.signedPayload, user.signedPayload);
