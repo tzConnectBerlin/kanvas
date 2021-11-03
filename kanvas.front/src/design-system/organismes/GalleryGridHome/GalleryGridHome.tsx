@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import FlexSpacer from "../../atoms/FlexSpacer";
 import Typography from "../../atoms/Typography";
-
+import { CustomButton } from '../../atoms/Button';
 import { Animated } from "react-animated-css";
 import { FC, useEffect, useState } from "react";
 import { Theme, Stack, Box, Container, Grid, Slide, IconButton, Button } from "@mui/material";
@@ -48,26 +48,15 @@ export const GalleryGridHome: FC<GalleryGridHomeProps> = ({ ...props }) => {
         >
             <IconButton
                 onClick={handleClick}
-                color="primary"
                 aria-label="upload picture"
                 component="span"
             >
                 <ListIcon />
             </IconButton>
-
-            <Button
-                onClick={() => setLoading(!loading)}
-                aria-label="loading"
-                color="primary"
-            >
-                Toggle loading
-            </Button>
-            <Button
-                onClick={() => setData(!data)}
-                aria-label="data"
-            >
-                Toggle data
-            </Button>
+             
+            <CustomButton style={{margin: '0 20px'}} size="large" onClick={() => setLoading(!loading)} aria-label="loading" label={`Toggle ${loading ? 'loaded' : 'loading'}`}/>
+            <CustomButton size="large" onClick={() => setData(!data)} aria-label="data" label={`Toggle ${!data ? 'data' : 'no data'}`} />
+            
         </Container>
         
         {/* Gallery */}
