@@ -1,11 +1,12 @@
+import { useState } from 'react';
 import styled from "@emotion/styled";
 import PageWrapper from "../../design-system/commons/PageWrapper";
 import { GET_NFTS } from '../../api/queries/nfts';
-
-import { Grid, Stack, Paper } from "@mui/material";
+import { Grid, Stack, Paper, Container } from "@mui/material";
 import { Typography } from "../../design-system/atoms/Typography";
 import FlexSpacer from "../../design-system/atoms/FlexSpacer";
 import useAxios from 'axios-hooks';
+import GalleryGridHome from '../../design-system/organismes/GalleryGridHome';
 
 const StyledStack = styled(Stack)`
     overflow: hidden;
@@ -24,10 +25,19 @@ const PaperStyled = styled(Paper)`
     justify-content: center;
     align-items: center;
 `
+const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 const StorePage = () => {
     
     const [{ data: nfts, loading: getLoading, error: getError }, refetch] = useAxios('http://localhost:3000/nfts')
+    const [menuOpen, setMenuOpen] = useState(true);
+
+    const handleClick = () => {
+        setMenuOpen(!menuOpen);
+    };
+
+    const [loading, setLoading] = useState(false);
+    const [data, setData] = useState(true);
 
     return (
         <PageWrapper>
@@ -50,7 +60,8 @@ const StorePage = () => {
                                 </GridStyled>
                             ))
                         : 
-                            <Typography size="h3" weight='Medium'> Nothing to display...</Typography>
+                           // <Typography size="h3" weight='Medium'> Nothing to display...</Typography>
+                            <GalleryGridHome />
                     }
                 </GridStyled>
             </StyledStack>
