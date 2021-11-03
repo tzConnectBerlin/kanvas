@@ -76,6 +76,7 @@ export const GalleryGridHome: FC<GalleryGridHomeProps> = ({ ...props }) => {
                         <IconExpansionTreeView />
                     </Grid>
                 </Slide>
+
                 {data ? (
                     <Grid
                         item
@@ -87,8 +88,7 @@ export const GalleryGridHome: FC<GalleryGridHomeProps> = ({ ...props }) => {
                             <Grid
                                 item
                                 key={card}
-                                xs={12}
-                                sm={6}
+                                xs={12}                               
                                 md={menuOpen ? 4 : 3}
                             >
                                 <GalleryCard
