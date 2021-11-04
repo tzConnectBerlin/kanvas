@@ -68,10 +68,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, height }) => {
                     flexDirection: "column",
                     alignItems: "flex-end",
                   }}
-                >
-                  <IconButton aria-label="add to favorites">
-                    <FavoriteIcon />
-                  </IconButton>
+                >              
                   <Typography weight="SemiBold" size="h3" color="#FFF">28.3tz</Typography>
                 </div>
               </CardActions>

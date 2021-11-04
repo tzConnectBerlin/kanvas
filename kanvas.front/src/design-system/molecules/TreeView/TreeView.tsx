@@ -8,7 +8,13 @@ import TreeItem, {
     TreeItemContentProps,
 } from '@mui/lab/TreeItem';
 import clsx from 'clsx';
-import Typography from '@mui/material/Typography';
+import Typography from '../../atoms/Typography';
+import styled from  "@emotion/styled";
+import { Theme } from '@mui/material';
+
+const StyledDivWrapper = styled.div<{theme?: Theme}>`
+    color: ${props => props.color? props.color : props.theme.palette.text.primary ?? 'black'} !important;
+`
 
 const CustomContent = React.forwardRef(function CustomContent(
     props: TreeItemContentProps,
@@ -67,15 +73,16 @@ const CustomContent = React.forwardRef(function CustomContent(
             ref={ref as React.Ref<HTMLDivElement>}
         >
             {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
-            <div
+            <StyledDivWrapper
                 onClick={handleExpansionClick}
                 className={classes.iconContainer}
             >
                 {icon}
-            </div>
+            </StyledDivWrapper>
             <Typography
                 onClick={handleSelectionClick}
-                component="div"
+                size="div"
+                weight="Light"
                 className={classes.label}
             >
                 {label}

@@ -84,8 +84,7 @@ const ProductPage = () => {
                             <Grid
                                 item
                                 container
-                                md={5}
-                               
+                                md={5}                               
                                 spacing={2}
                                 sx={{
                                     display: 'flex',
