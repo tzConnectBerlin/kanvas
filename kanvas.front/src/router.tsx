@@ -19,6 +19,8 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import { INotification, NotificationEnum, CurrencyEnum } from './interfaces/notification';
 import ProductPage from './pages/Product';
+import CreateNFT from './pages/CreateNFT/index';
+
 
 const StyledBrowserRouter = styled(BrowserRouter)<{theme?: Theme}>`
     #root {
@@ -100,7 +102,7 @@ const Router = () => {
     const [embedKukai, setEmbedKukai] = useState<KukaiEmbed>();
     const [beaconWallet, setBeaconWallet] = useState<BeaconWallet>()
     const[ signedPayload, setSignedPayload] = useState('')
-  
+
     const [selectedTheme, setSelectedTheme] = useState<'light' | 'dark'>(localStorage.getItem('Kanvas - theme') as "light" | "dark")
 
     const darkThemeResponsive = responsiveFontSizes(darkTheme);
@@ -126,7 +128,7 @@ const Router = () => {
           const test = localStorage.getItem('Kanvas - Bearer')
           debugger
         });
-    
+
         return () => {
           // When the component unmounts remove the event listener
           window.removeEventListener("storage", () => {});
@@ -141,16 +143,14 @@ const Router = () => {
     return(
         <ThemeProvider theme={localStorage.getItem('Kanvas - theme') === 'dark' ? darkThemeResponsive : lightThemeResponsive } >
             <StyledBrowserRouter>
-                <Header embedKukai={embedKukai} switchTheme={handleSelectTheme} selectedTheme={selectedTheme} notifications={undefined}/> 
+                <Header embedKukai={embedKukai} switchTheme={handleSelectTheme} selectedTheme={selectedTheme} notifications={undefined}/>
                 <Switch>
                     <Route exact path="/store" component={StorePage} />
-                    <Route path="/auctions-sales" component={AuctionsAndSales} />
-                    <Route path="/browse" component={Browse} />
                     <Route path="/sign-in" render={props => <SignIn beaconWallet={beaconWallet} embedKukai={embedKukai} setSignedPayload={setSignedPayload} {...props} />} />
-                    <Route path="/account/:status" render={props => <Account signedPayload={signedPayload} {...props} />}  />
                     <Route path="/profile/:username" component={Profile} />
                     <Route path="/notifications" render={props => <Notifications notifications={notifications} {...props} />}  />
                     <Route path="/product" component={ProductPage} />
+                    <Route path="/create-nft" render={props => <CreateNFT {...props} />}  />
                 </Switch>
             </StyledBrowserRouter>
         </ThemeProvider>

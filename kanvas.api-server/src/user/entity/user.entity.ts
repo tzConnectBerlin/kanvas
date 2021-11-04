@@ -12,6 +12,6 @@ export class UserEntity {
     @Column({unique: true})
     address: string;
 
-    @Column({unique: true, select: false})
+    @Column({unique: true})
     signedPayload: string;
 }
