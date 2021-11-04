@@ -17,6 +17,7 @@ export interface NftCardProps {
   title?: string;
   height?: string;
 }
+
 const StyledBioWrapper = styled.div<{theme?: Theme}>`
 color: ${props => props.color? props.color : props.theme.palette.text.primary ?? 'black'} !important;
 `
