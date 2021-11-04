@@ -18,6 +18,7 @@ import { Header } from './design-system/organismes/Header';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import { INotification, NotificationEnum, CurrencyEnum } from './interfaces/notification';
+import ProductPage from './pages/Product';
 
 const StyledBrowserRouter = styled(BrowserRouter)<{theme?: Theme}>`
     #root {
@@ -149,6 +150,7 @@ const Router = () => {
                     <Route path="/account/:status" render={props => <Account signedPayload={signedPayload} {...props} />}  />
                     <Route path="/profile/:username" component={Profile} />
                     <Route path="/notifications" render={props => <Notifications notifications={notifications} {...props} />}  />
+                    <Route path="/product" component={ProductPage} />
                 </Switch>
             </StyledBrowserRouter>
         </ThemeProvider>
