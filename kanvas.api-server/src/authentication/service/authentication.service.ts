@@ -65,8 +65,6 @@ export class AuthenticationService {
     }
 
     private async verifyPassword(signedDartPayload: string, hashedSignedDartPayload: string) {
-        console.log(signedDartPayload)
-        console.log(hashedSignedDartPayload)
         const isSignedDartPayloadMatching = await bcrypt.compare(
             signedDartPayload,
             hashedSignedDartPayload
