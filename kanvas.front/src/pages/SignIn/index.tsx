@@ -83,16 +83,16 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
         .join(" ");
 
         const bytes = "05" + char2Bytes(formattedInput);
-        
+
         const payload: RequestSignPayloadInput = {
-            signingType: SigningType.MICHELINE,    
+            signingType: SigningType.MICHELINE,
             payload: bytes,
             sourceAddress: userAddress,
         }
-        
+
         // Beacon signExpression
         if (beaconWallet && loginType === "beacon") {
-            
+
             try {
                 const signedPayload = await beaconWallet.client.requestSignPayload(payload)
                 setSignInParams({ address: userAddress, signedPayload: signedPayload.signature })
@@ -101,11 +101,11 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
                 console.log(error)
                 setBeaconLoading(false)
             }
-        
-        
+
+
         } else if (embedKukai && loginType === "embed") {
             try {
-                const signedPayload = await embedKukai.signExpr('0501000000' + payload.payload.slice(2), 'Kanvas - sign in', 'Allow user to sign an expression with there wallet in order to sign them in.') 
+                const signedPayload = await embedKukai.signExpr('0501000000' + payload.payload.slice(2), 'Kanvas - sign in', 'Allow user to sign an expression with there wallet in order to sign them in.')
                 setSignInParams({ address: userAddress, signedPayload: signedPayload })
                 signUser({data: { address: userAddress, signedPayload: signedPayload }})
             } catch (error) {
@@ -126,7 +126,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
                 .catch((permissionError: ErrorResponse) => {
                     console.log(permissionError)
                     setBeaconLoading(false)
-                })   
+                })
 
             setBeaconLoading(false)
 
@@ -136,9 +136,9 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
             if (!embedKukai.initialized) {
                 await embedKukai.init();
             }
-            
+
             let userInfo : any = null;
-            
+
             if (!embedKukai.user) {
                 setSocialLoading(false)
                 userInfo = await embedKukai.login();
@@ -165,7 +165,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
 
     useEffect(() => {
         if (signUserResponse.data) {
-            
+
             setSocialLoading(false)
             setBeaconLoading(false)
 
@@ -174,21 +174,21 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
 
             history.push(`/store`)
         }
-        
+
     }, [signUserResponse.data])
 
     useEffect(() => {
         if (registerUserResponse.data) {
-            
+
             setSocialLoading(false)
             setBeaconLoading(false)
-            
-            localStorage.setItem('Kanvas - Bearer', registerUserResponse.data.signIn.token)
-            localStorage.setItem('Kanvas - address', registerUserResponse.data.signIn.address)
+
+            localStorage.setItem('Kanvas - Bearer', registerUserResponse.data.token)
+            localStorage.setItem('Kanvas - address', registerUserResponse.data.address)
 
             history.push(`/store`)
         }
-        
+
     }, [registerUserResponse.data])
 
     useEffect( () => {
@@ -199,7 +199,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
             if (signUserResponse.error?.response?.data.message === 'User not registered.') {
                 // Check if we have information from the user thanks to kukai
                 registerUser({data: signInParams})
-                
+
             } else {
                 toast.error(signUserResponse.error.message, {position: toast.POSITION.TOP_RIGHT, transition: fade})
             }
@@ -209,7 +209,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
     return (
         <PageWrapper>
             <StyledStack direction="column" spacing={3}>
-                
+
                 <FlexSpacer minHeight={12} />
 
                 <WrapperTitle>
@@ -219,18 +219,18 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
                     <FlexSpacer minHeight={1} />
                     <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{justifyContent: 'center'}}> Welcome to Kanvas ! Let’s begin by</Typography>
                     <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{justifyContent: 'center'}}> connecting your wallet. </Typography>
-                    
+
                 </WrapperTitle>
 
                 <FlexSpacer minHeight={4} />
 
-                
+
                 <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} sx={{ alignItems: "center", justifyContent: 'center' }}>
                     <CustomButton size="large" onClick={() => requestUserWalletPermission('beacon')} label="Connect wallet" loading={beaconLoading} />
                     <Typography size="h4" weight='Light'> Or </Typography>
                     <CustomButton size="large" onClick={() => requestUserWalletPermission('embed')} label="Social sign in" loading={socialLoading} />
                 </Stack>
-  
+
 
                 <StyledExternalLink href="" target='_blank'>
                     <Typography size="h4" weight='Light' color={'#15a0e1'} sx={{justifyContent: 'center'}}> What's a wallet ? </Typography>

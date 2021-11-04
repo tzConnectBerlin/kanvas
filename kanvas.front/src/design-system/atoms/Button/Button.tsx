@@ -139,10 +139,7 @@ export const CustomButton : FC<CustomButtonProps> = ({
                 (
                     <StyledContainer onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
                         {
-                            props.verified && isHover ?
-                              <StyledClearContent />
-                            :
-                              props.icon
+                          props.icon
                         }
                         <Typography size="inherit" weight={textSize}> {label} </Typography>
                     </StyledContainer>

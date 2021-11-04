@@ -6,6 +6,7 @@ import Browse from './pages/Browse/index';
 import StorePage from './pages/StorePage';
 import Notifications from './pages/Notifications';
 import AuctionsAndSales from './pages/Auctions&Sales/index';
+import CreateNFT from './pages/CreateNFT';
 
 import { RPC_URL } from './global';
 import { Theme } from '@mui/material';
@@ -18,7 +19,8 @@ import { Header } from './design-system/organismes/Header';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import { INotification, NotificationEnum, CurrencyEnum } from './interfaces/notification';
-import CreateNFT from './pages/CreateNFT/index';
+import ProductPage from './pages/Product';
+
 
 const StyledBrowserRouter = styled(BrowserRouter)<{theme?: Theme}>`
     #root {
@@ -55,7 +57,7 @@ const Router = () => {
         window.addEventListener("storage", () => {
           // When storage changes refetch
           const test = localStorage.getItem('Kanvas - Bearer')
-          debugger
+
         });
 
         return () => {
@@ -77,6 +79,7 @@ const Router = () => {
                     <Route exact path="/store" component={StorePage} />
                     <Route path="/sign-in" render={props => <SignIn beaconWallet={beaconWallet} embedKukai={embedKukai} setSignedPayload={setSignedPayload} {...props} />} />
                     <Route path="/profile/:username" component={Profile} />
+                    <Route path="/product" component={ProductPage} />
                     <Route path="/create-nft" render={props => <CreateNFT {...props} />}  />
                     <Route path="/nft/:id" render={props => <CreateNFT {...props} />}  />
                 </Switch>

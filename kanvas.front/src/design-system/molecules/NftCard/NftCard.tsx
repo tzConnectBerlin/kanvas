@@ -1,6 +1,7 @@
 import {
   CardActionArea,
   CardActions,
+  Grid,
   IconButton,
   Skeleton,
   Stack,
@@ -14,8 +15,11 @@ import { useHistory } from "react-router-dom";
 
 export interface NftCardProps {
   loading?: boolean;
-  title?: string;
-  nftId?: string;
+  id?: string;
+  name?: string;
+  price?: number;
+  height?: number;
+  ipfsHash?: string;
 }
 
 export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
@@ -27,17 +31,17 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
   }
 
   return (
-    <>
-      {loading ? (
+      loading ? (
         <Card
           sx={{
-            height: "100%",
+            borderRadius: 0,
+            height: props.height,
             display: "flex",
             flexDirection: "column",
             position: "relative",
           }}
         >
-          <CardActionArea onClick={() => handleRedirect(`/nft/${props.nftId}`)}>
+          <CardActionArea onClick={() => handleRedirect(`/nft/${props.id}`)} sx={{width: 'auto'}}>
             <CardMedia
               component="img"
               image="https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg"
@@ -50,8 +54,9 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                 justifyContent: "space-between",
                 alignItems: "center",
                 position: "absolute",
-                bottom: "-7px",
-                width: "-webkit-fill-available",
+                bottom: "0",
+                right: "0",
+                left: "0",
                 backgroundColor: "rgba( 0, 0, 0, 0.35)",
                 backdropFilter:
                   "blur(10px) saturate(100%) contrast(45%) brightness(130%)",
@@ -61,10 +66,11 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                 <Typography weight="SemiBold" size="h4"
                   color="#FFF"
                 >
-                  NFT name
+                  {props.name}
                 </Typography>
                 <Typography weight="Light" size="body" color="#FFF">
-                  Artist name</Typography>
+                  Artist name
+                </Typography>
                 <Typography weight="Light" size="body" color="#FFF">
                   Remaining time
                 </Typography>
@@ -76,11 +82,9 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     flexDirection: "column",
                     alignItems: "flex-end",
                   }}
-                >
-                  <IconButton aria-label="add to favorites">
-                    <FavoriteIcon />
-                  </IconButton>
-                  <Typography weight="SemiBold" size="h3" color="#FFF">28.3tz</Typography>
+
+                  >
+                  <Typography weight="SemiBold" size="h3" color="#FFF">{props.price ? props.price : '- ' }tz</Typography>
                 </div>
               </CardActions>
             </CardContent>
@@ -92,7 +96,6 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
           <Skeleton variant="circular" width={40} height={40} />
           <Skeleton variant="text" />
         </Stack>
-      )}
-    </>
+      )
   );
 };

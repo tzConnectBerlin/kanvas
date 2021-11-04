@@ -22,7 +22,9 @@ const StyledMenuItem = styled(MenuItem)`
     margin-left: 0.5em !important;
     margin-right: 0.5em !important;
     padding-left: 0.5em;
-    border-radius: 1em;
+    border-radius: 0;
+
+    
 `
 
 const paperProps = {
@@ -65,7 +67,7 @@ const StyledMenu = styled(Menu)<{theme?: Theme}>`
 `
 
 export const ProfilePopover : FC<ProfilePopoverProps> = ({...props}) => {
-    
+
     const navigateTo = (path: string) => {
         props.history.push(path)
     }
@@ -86,30 +88,30 @@ export const ProfilePopover : FC<ProfilePopoverProps> = ({...props}) => {
         >
             <Stack spacing={1}>
                 <StyledMenuItem onClick={() => navigateTo(`/profile/${props.userName}`)}>
-                    <Avatar src={props.avatarSrc} /> 
+                    <Avatar src={props.avatarSrc} />
                     <Typography size="inherit" weight="SemiBold"> Go to profile </Typography>
                 </StyledMenuItem>
-            
+
                 <StyledMenuItem onClick={() => navigateTo('/notifications')}>
                     {
                         props.notifications ?
                             <CustomBadge color="error" badgeContent={props.notifications} max={99}>
                                 <Avatar>
                                     <NotificationsRoundedIcon />
-                                </Avatar> 
+                                </Avatar>
                             </CustomBadge>
                         :
                             <Avatar>
                                 <NotificationsRoundedIcon />
-                            </Avatar> 
+                            </Avatar>
                     }
                     <Typography size="inherit" weight="Medium"> Notifications </Typography>
                 </StyledMenuItem>
-                
+
                 <StyledMenuItem onClick={() => props.logOut()}>
                     <Avatar>
                         <LogoutRoundedIcon sx={{'&.MuiSvgIcon-root': { marginLeft: 0.5, height: '65%', width: '60%'}}} />
-                    </Avatar> 
+                    </Avatar>
                     <Typography size="inherit" weight="Medium"> Sign out </Typography>
                 </StyledMenuItem>
             </Stack>

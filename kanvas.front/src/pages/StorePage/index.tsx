@@ -1,68 +1,65 @@
-import { useState } from 'react';
-import styled from "@emotion/styled";
-import PageWrapper from "../../design-system/commons/PageWrapper";
-import { GET_NFTS } from '../../api/queries/nfts';
-import { Grid, Stack, Paper, Container } from "@mui/material";
-import { Typography } from "../../design-system/atoms/Typography";
-import FlexSpacer from "../../design-system/atoms/FlexSpacer";
 import useAxios from 'axios-hooks';
+import styled from "@emotion/styled";
+import ListIcon from '@mui/icons-material/List';
 import NftGrid from '../../design-system/organismes/NftGrid';
-import { FaRegClosedCaptioning } from 'react-icons/fa';
+import FlexSpacer from "../../design-system/atoms/FlexSpacer";
+import PageWrapper from "../../design-system/commons/PageWrapper";
+import IconExpansionTreeView from '../../design-system/molecules/TreeView/TreeView';
+
+import { useEffect, useState } from 'react';
+import { Grid, Stack, Paper, Theme } from "@mui/material";
+import { CustomButton } from '../../design-system/atoms/Button';
+import { Typography } from "../../design-system/atoms/Typography";
 
 const StyledStack = styled(Stack)`
     overflow: hidden;
-    width: 100vw;
+    max-width: 100rem;
+    width: 100%;
     height: 100%;
 `
 
-const GridStyled = styled(Grid)`
-    width: 100%;
-
-`
-
-const PaperStyled = styled(Paper)`
-    height: 20rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+const StyledListIcon = styled(ListIcon)<{theme?: Theme}>`
+    color: ${props => props.theme.palette.text.primary};
+    padding-right: 1rem;
 `
 
 const StorePage = () => {
 
-    const [{ data: nfts, loading: getLoading, error: getError }, refetch] = useAxios('http://localhost:3000/nfts')
-    const [menuOpen, setMenuOpen] = useState(true);
+    const [nftsResponse, getNfts] = useAxios('http://localhost:3000/nfts', { manual: true })
 
-    const handleClick = () => {
-        setMenuOpen(!menuOpen);
-    };
+    const [filterOpen, setFilterOpen] = useState(false);
 
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState(true);
+
+    useEffect(() => {
+        getNfts()
+    },[])
 
     return (
         <PageWrapper>
             <StyledStack direction='column' spacing={3}>
 
-                <FlexSpacer minHeight={12} />
+                <FlexSpacer minHeight={10} />
 
-                <Typography size="h1" weight='SemiBold'> Store front</Typography>
+                <Typography size="h1" weight='SemiBold' sx={{justifyContent: 'center'}}> Store front</Typography>
+
+                <FlexSpacer minHeight={1} />
+
+                {/* Toggle options */}
+                <Stack direction="row">
+                    <CustomButton size="medium" onClick={() => setFilterOpen(!filterOpen)} aria-label="loading" icon={<StyledListIcon />} label='Filters' sx={{marginLeft: '1.5rem !important'}} />
+                    <FlexSpacer/>
+                    <CustomButton size="medium" onClick={() => setData(!data)} aria-label="data" label={'Sort'} sx={{marginRight: '1.5rem !important'}} />
+                </Stack>
+
+                <Stack direction="row">
+                    <IconExpansionTreeView open={filterOpen} filterFunction={() => {}} />
+
+                    <NftGrid open={filterOpen} nfts={nftsResponse.data} loading={nftsResponse.loading}/>
+                </Stack>
 
                 <FlexSpacer minHeight={5} />
-
-                <GridStyled spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                    {
-                        false ?
-                            nfts.map((nft: any, index: number) => (
-                                <GridStyled item xs={2} sm={4} md={4} key={index}>
-                                    <PaperStyled>
-                                        {nft.name}
-                                    </PaperStyled>
-                                </GridStyled>
-                            ))
-                        :
-                            <NftGrid />
-                    }
-                </GridStyled>
             </StyledStack>
         </PageWrapper>
     )

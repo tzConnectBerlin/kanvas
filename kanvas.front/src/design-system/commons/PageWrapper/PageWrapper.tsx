@@ -9,14 +9,14 @@ export const PageWrapper = styled.div<{ theme?: Theme }>`
     justify-content: center;
     background-color: ${props => props.theme.palette.background.default};
 
-    padding-left: 10rem;
-    padding-right: 10rem;
-    
+    padding-left: 6rem;
+    padding-right: 6rem;
+
     transition: all 0.2s;
 
     @media (max-width: 1100px) {
-        padding-left: 10rem;
-        padding-right: 10em;
+        padding-left: 6rem;
+        padding-right: 6em;
     }
 
     @media (max-width: 650px) {
