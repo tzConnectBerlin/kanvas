@@ -1,14 +1,14 @@
-import { GalleryGrid } from './GalleryGrid';
+import { NftCard } from '.';
 import { Story, Meta } from '@storybook/react';
 
 export default {
-  title: 'organismes/GalleryGrid',
-  component: GalleryGrid,
+  title: 'organismes/NftCard',
+  component: NftCard,
 } as Meta;
 
 const Template: Story<any> = (args: any) => 
-    <GalleryGrid {...args} />
-  ;
+    <NftCard {...args} />
+;
 
 export const Editable = Template.bind({});
 Editable.args = {

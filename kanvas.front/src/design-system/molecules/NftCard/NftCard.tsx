@@ -4,19 +4,19 @@ import {
   IconButton,
   Skeleton,
   Stack,
-  Typography,
 } from "@mui/material";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import Typography from "../../atoms/Typography";
 
-export interface GalleryCardProps {
+export interface NftCardProps {
   loading?: boolean;
   title?: string;
 }
 
-export const GalleryCard: React.FC<GalleryCardProps> = ({ loading }) => {
+export const NftCard: React.FC<NftCardProps> = ({ loading }) => {
   return (
     <>
       {loading ? (
@@ -31,7 +31,7 @@ export const GalleryCard: React.FC<GalleryCardProps> = ({ loading }) => {
           <CardActionArea href="/product">
             <CardMedia
               component="img"
-              image="https://source.unsplash.com/random"
+              image="https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg"
               alt="random"
             />
             <CardContent
@@ -43,16 +43,21 @@ export const GalleryCard: React.FC<GalleryCardProps> = ({ loading }) => {
                 position: "absolute",
                 bottom: "-7px",
                 width: "-webkit-fill-available",
-                backgroundColor: " rgba( 255, 255, 255, 0.005)",
+                backgroundColor: "rgba( 0, 0, 0, 0.35)",
                 backdropFilter:
                   "blur(10px) saturate(100%) contrast(45%) brightness(130%)",
               }}
             >
               <div style={{ display: "block" }}>
-                <Typography gutterBottom variant="h5" component="h4">
-                  NFTname
+                <Typography weight="Bold" size="h4"
+                 color="#FFF"
+>
+                  NFT name
                 </Typography>
-                <Typography variant="h6">artist name</Typography>
+                <Typography weight="Light" size="body"  color="#FFF">
+                  Artist name</Typography>
+                  <Typography weight="Light" size="body"  color="#FFF">
+Remaining time</Typography>
               </div>
               <CardActions disableSpacing>
                 <div
@@ -65,7 +70,7 @@ export const GalleryCard: React.FC<GalleryCardProps> = ({ loading }) => {
                   <IconButton aria-label="add to favorites">
                     <FavoriteIcon />
                   </IconButton>
-                  <Typography component="span">28.300 tz</Typography>
+                  <Typography weight="Bold" size="h3" color="#FFF">28.3tz</Typography>
                 </div>
               </CardActions>
             </CardContent>
@@ -73,7 +78,7 @@ export const GalleryCard: React.FC<GalleryCardProps> = ({ loading }) => {
         </Card>
       ) : (
         <Stack spacing={1}>
-          <Skeleton variant="rectangular" width={"100%"} height={118} />
+          <Skeleton variant="rectangular" width={"100%"} height={302} />
           <Skeleton variant="circular" width={40} height={40} />
           <Skeleton variant="text" />
         </Stack>

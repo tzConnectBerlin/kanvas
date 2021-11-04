@@ -6,7 +6,7 @@ import { Grid, Stack, Paper, Container } from "@mui/material";
 import { Typography } from "../../design-system/atoms/Typography";
 import FlexSpacer from "../../design-system/atoms/FlexSpacer";
 import useAxios from 'axios-hooks';
-import GalleryGridHome from '../../design-system/organismes/GalleryGridHome';
+import NftGrid from '../../design-system/organismes/NftGrid';
 
 const StyledStack = styled(Stack)`
     overflow: hidden;
@@ -49,7 +49,7 @@ const StorePage = () => {
             
                 <FlexSpacer minHeight={5} />
 
-                <GridStyled container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+                <GridStyled spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                     {
                         nfts ?
                             nfts.map((nft: any, index: number) => (
@@ -60,8 +60,7 @@ const StorePage = () => {
                                 </GridStyled>
                             ))
                         : 
-                           // <Typography size="h3" weight='Medium'> Nothing to display...</Typography>
-                            <GalleryGridHome />
+                            <NftGrid />
                     }
                 </GridStyled>
             </StyledStack>
