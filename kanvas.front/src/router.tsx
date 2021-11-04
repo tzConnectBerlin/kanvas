@@ -126,7 +126,6 @@ const Router = () => {
         window.addEventListener("storage", () => {
           // When storage changes refetch
           const test = localStorage.getItem('Kanvas - Bearer')
-          debugger
         });
 
         return () => {

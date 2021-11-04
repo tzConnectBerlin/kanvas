@@ -21,7 +21,8 @@ export interface NftGridProps {
   emptyLink?: string;
   loading?: boolean;
 }
- 
+
+
 const WrapperElement = styled.span`
   padding: 2rem;
   display: flex;
