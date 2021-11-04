@@ -21,9 +21,9 @@ const StyledStack = styled(Stack)`
 
 const StyledNotificationStack = styled(Stack)<{theme?: Theme}>`
     cursor: pointer;
-    
+
     height: 5.5em;
-    
+
     padding-left: 0.875em;
     margin-top: 1rem;
     margin-bottom: 1rem;
@@ -45,7 +45,7 @@ const UnreadIndicator = styled.div<{theme?: Theme}>`
 
 const StyledMediumSpan = styled.span`
     font-family: 'Poppins Medium';
-    
+
     :hover {
         text-decoration: underline;
     }
@@ -57,7 +57,7 @@ const StyledLightSpan = styled.span`
 
 const Notifications : FC<NotificationsProps> = ({...props}) => {
     const history = useHistory();
-    
+
     const navigateTo = (path: string) => {
         history.push(path)
     }
@@ -112,13 +112,13 @@ const Notifications : FC<NotificationsProps> = ({...props}) => {
     const createDescription = (notification: INotification): JSX.Element => {
         switch (notification.type) {
             case NotificationEnum.FOLLOWING:
-                return <Typography size="h4" weight="Medium"  sx={{cursor: 'pointer', display: 'block !important' }} onClick={() => navigateTo(`/profile/${notification.concernedUser.userName}`)}> 
+                return <Typography size="h4" weight="Medium"  sx={{cursor: 'pointer', display: 'block !important' }} onClick={() => navigateTo(`/profile/${notification.concernedUser.userName}`)}>
                             <StyledMediumSpan> { notification.concernedUser.firstName + ' ' + notification.concernedUser.lastName + ' ' }</StyledMediumSpan>
-                            
+
                             <StyledLightSpan> { notification.description } </StyledLightSpan>
-                            
+
                         </Typography>
-                            
+
             case NotificationEnum.NFT_CREATION:
                 return <Stack direction="row" spacing={0.7}>
                             <Typography size="h4" weight="Medium" sx={{cursor: 'pointer'}} type='link' onClick={() => navigateTo(``)}> { '"' + notification.concernedNft?.title + '"' } </Typography>
@@ -126,15 +126,15 @@ const Notifications : FC<NotificationsProps> = ({...props}) => {
                         </Stack>
             case NotificationEnum.NFT_GOT_SOLD:
                 return <Stack direction="row" spacing={0.7}>
-                            <Typography size="h4" weight="Light" sx={{cursor: 'pointer', display: 'block !important'}}> 
+                            <Typography size="h4" weight="Light" sx={{cursor: 'pointer', display: 'block !important'}}>
                                 <StyledLightSpan> Your artwork </StyledLightSpan>
                                 <StyledMediumSpan> { ' "' + notification.concernedNft?.title + '" ' } </StyledMediumSpan>
                                 <StyledLightSpan> got sold for { notification.saleInfo!.price + notification.saleInfo!.currency } to </StyledLightSpan>
                                 <StyledMediumSpan> { notification.concernedUser.firstName + ' ' + notification.concernedUser.lastName } </StyledMediumSpan>
                                 <StyledLightSpan> { 'you received ' + notification.saleInfo!.sellerPrice + notification.saleInfo!.currency + '.' } </StyledLightSpan>
                             </Typography>
-                            
-            
+
+
                         </Stack>
             case NotificationEnum.NFT_RECEIVE_BID:
                 return <Stack direction="row" spacing={0.7}>
@@ -143,35 +143,35 @@ const Notifications : FC<NotificationsProps> = ({...props}) => {
                         </Stack>
             case NotificationEnum.NEW_NFT_FROM_FOLLOWING:
                 return ( <>
-                    
+
                     </>)
             case NotificationEnum.FOLLOWING_CREATED_AUCTION:
                 return ( <>
-                    
+
                     </>)
             case NotificationEnum.FOLLOWING_CREATED_DROP:
                 return ( <>
-                    
+
                     </>)
             case NotificationEnum.FOLLOWING_CREATED_FIXED_PRICE:
                 return ( <>
-                    
+
                     </>)
             case NotificationEnum.OUTBID:
                 return ( <>
-                    
+
                     </>)
             case NotificationEnum.WON_AUCTION:
                 return ( <>
-                    
+
                     </>)
             case NotificationEnum.NEW_NFT:
                 return ( <>
-                    
+
                     </>)
             default:
                 return ( <>
-                    
+
                     </>)
         }
     }
@@ -180,7 +180,7 @@ const Notifications : FC<NotificationsProps> = ({...props}) => {
         <PageWrapper>
             <StyledStack>
                 <FlexSpacer minHeight={10} />
-                    
+
                 <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
                     <Typography size="h1" weight='SemiBold'> Notifications </Typography>
                 </Animated>
@@ -189,17 +189,17 @@ const Notifications : FC<NotificationsProps> = ({...props}) => {
 
                 <Stack direction="column" >
                     {
-                        props.notifications.map((notification: INotification) => 
+                        props.notifications.map((notification: INotification) =>
                             <StyledNotificationStack direction="row" spacing={6} sx={{alignItems: 'center'}}>
                                 <Avatar src={notification.type === NotificationEnum.FOLLOWING ? notification.concernedUser.profilePicture : notification.concernedNft?.url} height={75} width={75} borderRadius={getAvatarRadius(notification.type)}/>
                                 <Stack direction="column" sx={{justifyContent: 'center'}}>
                                     {
                                         createDescription(notification)
                                     }
-                                    <Typography size="body2" weight="Light"  color={'#e77f52'} sx={{cursor: 'pointer'}}> { getTimeInfo(notification.date) } </Typography>
+                                    <Typography size="body2" weight="Light"  color={'#0088a7'} sx={{cursor: 'pointer'}}> { getTimeInfo(notification.date) } </Typography>
                                 </Stack>
                                 <FlexSpacer/>
-                                
+
                                 {
                                     notification.read ?
                                         undefined

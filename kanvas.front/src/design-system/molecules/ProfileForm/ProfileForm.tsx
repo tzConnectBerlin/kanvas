@@ -56,7 +56,7 @@ const StyledStack = styled(Stack)`
 
 const StyledInput = styled(TextField)<{theme?: Theme}>`
     .MuiInput-input {
-        padding: 4px 0 8px !important;   
+        padding: 4px 0 8px !important;
     }
 
     .MuiInput-root:after {
@@ -134,7 +134,6 @@ const StyledProgressDiv = styled.div<StyledProgressDivProps>`
 
 const StyledAvataWrapper = styled.div`
     position: relative;
-    
 `
 
 const ClearContentWrapper =  styled.div<{theme?: Theme}>`
@@ -216,24 +215,24 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
     const [profilePictureFile, setProfilePictureFile] = useState<unknown>(undefined)
     const [isUserNameValid, setIsUserNameValid] = useState(true)
     const [dropZoneErrorMessage, setDropZoneErrorMessage] = useState<string | null>(null)
-    
+
     const [getInstagramUserInfo, instagramUserInfo] = useLazyQuery(GET_INSTAGRAM_USER_INFO)
     const [getTwitterAccessTokens, twitterAccessTokens] = useLazyQuery(GET_TWITTER_ACCESS_TOKENS)
     const [getTwitterUserInfo, twitterUserInfo] = useLazyQuery(GET_TWITTER_USER_INFO)
     const [checkIfUsernameValid, userNameCheckResponse] = useLazyQuery(CHECK_IF_USERNAME_VALID)
-    
+
     const dataURLtoFile = (dataurl: any, filename: any) => {
- 
+
         var arr = dataurl.split(','),
             mime = arr[0].match(/:(.*?);/)[1],
-            bstr = atob(arr[1]), 
-            n = bstr.length, 
+            bstr = atob(arr[1]),
+            n = bstr.length,
             u8arr = new Uint8Array(n);
-            
+
         while(n--){
             u8arr[n] = bstr.charCodeAt(n);
         }
-        
+
         return new File([u8arr], filename, {type:mime});
     }
 
@@ -241,8 +240,8 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
         initialValues: props.initialValues,
         validationSchema: validationSchema,
         enableReinitialize: true,
-        onSubmit: async (values) => { 
-    
+        onSubmit: async (values) => {
+
             props.update ?
                 props.submit({variables: {...values, profilePicture: dataURLtoFile(JSON.parse(sessionStorage.getItem('profilePicture')!).blob, 'profilePicture')}})
             :
@@ -253,7 +252,7 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
     // useEffect for profilepicture initial values in case of refresh
     useEffect(() => {
         if (props.instagramCode) {
-            instagramUserInfo.loading = true;    
+            instagramUserInfo.loading = true;
             getInstagramUserInfo({variables: { code:props.instagramCode }})
         }
 
@@ -264,7 +263,7 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                 if ('blob' in blobJson) {
                     setProfilePicture(blobJson.blob)
                 }
-            } catch (error) { 
+            } catch (error) {
                 console.log(error)
             }
         }
@@ -284,20 +283,20 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
 
     // useEffect for username verification
     useEffect(() => {
-        
+
         if (formik.values.userName.length >= 3) {
             userNameCheckResponse.loading = true
-            
+
             const delayUserNameAvailabilitySearch = setTimeout(() => {
                 checkIfUsernameValid({ variables: { userName: formik.values.userName}})
             }, 800)
-             
+
             return () => { clearTimeout(delayUserNameAvailabilitySearch) }
         }
     }, [formik.values.userName])
 
     useEffect(() => {
-        
+
         if (userNameCheckResponse.data) {
             setIsUserNameValid(userNameCheckResponse.data.checkIfUsernameValid)
         }
@@ -317,9 +316,9 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
             twitterUserInfo.loading = true
             getTwitterUserInfo({variables: { oauthToken: props.twitterOauthToken, oauthVerifier: props.twitterOauthVerifier}})
         }
-        
+
     }, [props.twitterOauthToken])
-    
+
     useEffect(() => {
         if (twitterUserInfo.data) {
             formik.setFieldValue('twitterLink', twitterUserInfo.data.getTwitterUserInfo.twitterLink)
@@ -338,10 +337,10 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
 
     const handleTwitterClick = () => {
         if (formik.values.twitterLink !== '') {
-            formik.setFieldValue('twitterLink', ''); 
+            formik.setFieldValue('twitterLink', '');
             sessionStorage.setItem('twitterLink', '')
         }  else {
-            getTwitterAccessTokens() 
+            getTwitterAccessTokens()
         }
     }
 
@@ -359,7 +358,7 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                                 id='firstName'
                                 name='firstName'
                                 variant="standard"
-                                placeholder="Type Here" 
+                                placeholder="Type Here"
                                 autoFocus
                                 onFocus={() => scrollTo('firstName')}
                                 onBlur={formik.handleBlur}
@@ -378,7 +377,7 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                                 id='lastName'
                                 name='lastName'
                                 variant="standard"
-                                placeholder="Type Here" 
+                                placeholder="Type Here"
                                 onFocus={() => scrollTo('lastName')}
                                 onBlur={formik.handleBlur}
                                 onChange={(event) => { formik.handleChange(event); sessionStorage.setItem('lastName', event.currentTarget.value) } }
@@ -389,14 +388,14 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                         </Element>
                     </StyledStack>
                 </StyledStack>
-                {/* 
-                
+                {/*
+
                 // Organisation field
 
                 <FlexSpacer minHeight={4}/>
 
                 <StyledStack direction="column" spacing={4}>
-                    <div>    
+                    <div>
                         <Typography size="h3" weight='Medium'> Organisation </Typography>
                         <FlexSpacer minHeight={0.5}/>
                         <Typography size="h5" weight='Light' color="#C4C4C4" > Connect your profile via twitter and instagram, In order to verify it. </Typography>
@@ -406,7 +405,7 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                             id='organisation'
                             name='organisation'
                             variant="standard"
-                            placeholder="Type Here" 
+                            placeholder="Type Here"
                             autoFocus
                             onFocus={() => scrollTo('organisation')}
                             onBlur={formik.handleBlur}
@@ -429,7 +428,7 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                                 <Element name='userName'>
                                     <StyledInput
                                         id='userName'
-                                        name='userName' 
+                                        name='userName'
                                         placeholder="Type Here"
                                         onFocus={() => scrollTo('userName')}
                                         onBlur={formik.handleBlur}
@@ -452,11 +451,11 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
 
                 <StyledStack direction="column" spacing={4}>
                     <Typography size="h3" weight='Medium'> Upload your photo </Typography>
-                    <Element name='profilePicture' 
+                    <Element name='profilePicture'
                             onFocus={() => scrollTo('profilePicture')}>
                         <Stack direction="row" spacing={8}>
                             {
-                                formik.values.profilePicture ? 
+                                formik.values.profilePicture ?
                                     <StyledAvataWrapper>
                                         <ClearContentWrapper onClick={() => formik.setFieldValue('profilePicture', '')}>
                                             <StyledClearContent />
@@ -470,9 +469,9 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                         </Stack>
                     </Element>
                 </StyledStack>
-                
+
                 <FlexSpacer minHeight={1}/>
-                
+
                 <Typography size="body1" weight='Light' color='error'> { dropZoneErrorMessage } </Typography>
 
                 <FlexSpacer minHeight={3}/>
@@ -483,7 +482,7 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                         <StyledInput
                             id='bio'
                             name='bio'
-                            placeholder="Type Here" 
+                            placeholder="Type Here"
                             variant="standard"
                             inputProps={{
                                 maxLength: 350,
@@ -506,7 +505,7 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                         <Element name='verifyProfile'>
                             <Stack direction="row" spacing={4}>
                                 <Typography size="h3" weight='Medium'> Verify your Profile </Typography>
-                                
+
                                 <Stack direction="row" spacing={0.5} sx={{paddingBottom: '0.4rem', alignItems: 'end'}}>
                                     <StyledProgressDiv completed={formik.values.instagramLink !== '' || formik.values.twitterLink !== ''}/>
                                     <StyledProgressDiv completed={formik.values.instagramLink !== '' && formik.values.twitterLink !== ''}/>
@@ -519,12 +518,12 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                                 twitterAccessTokens.error?.toString()
                             }
                     </div>
-                    <Stack direction="row" spacing={4} >  
-                        
+                    <Stack direction="row" spacing={4} >
+
                         <Badge badgeContent={formik.values.twitterLink !== '' ? <StyledVerifiedRoundedIcon/> : null} anchorOrigin={{vertical: 'bottom', horizontal: 'right'}} sx={{ fontSize: '1rem'}}>
                             <CustomButton size="medium" onClick={() => handleTwitterClick()} icon={<StyledTwitterIcon verified={formik.values.twitterLink !== ''}/>} label={formik.values.twitterLink !== '' ? 'Verified via Twitter' : 'Verify via Twitter'} onFocus={() => scrollTo('verifyProfile')} loading={twitterAccessTokens.loading || twitterUserInfo.loading} verified={formik.values.twitterLink !== ''} />
                         </Badge>
-                        
+
                         {
                             formik.values.instagramLink !== '' ?
                                 <Badge badgeContent={<StyledVerifiedRoundedIcon/>} anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}>
@@ -535,7 +534,7 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                         }
                     </Stack>
                 </StyledStack>
-                
+
                 <FlexSpacer minHeight={4}/>
 
                 <StyledStack direction="column" spacing={4}>
@@ -543,8 +542,8 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                     <Element name='websiteLinkContainer'>
                         <StyledInput
                             id='websiteLink'
-                            name='websiteLink' 
-                            placeholder="Type Here" 
+                            name='websiteLink'
+                            placeholder="Type Here"
                             inputProps={ariaLabel}
                             variant="standard"
                             onChange={(event) => { formik.handleChange(event); sessionStorage.setItem('websiteLink', event.currentTarget.value) }}
@@ -558,8 +557,8 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                     <Element name='linkedinLinkContainer'>
                         <StyledInput
                             id='linkedinLink'
-                            name='linkedinLink' 
-                            placeholder="Type Here" 
+                            name='linkedinLink'
+                            placeholder="Type Here"
                             variant="standard"
                             onChange={(event) => { formik.handleChange(event); sessionStorage.setItem('linkedinLink', event.currentTarget.value) }}
                             onFocus={() => scrollTo('linkedinLinkContainer')}
@@ -572,8 +571,8 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                     <Element name='facebookLinkContainer'>
                         <StyledInput
                             id='facebookLink'
-                            name='facebookLink' 
-                            placeholder="Type Here" 
+                            name='facebookLink'
+                            placeholder="Type Here"
                             variant="standard"
                             onChange={(event) => { formik.handleChange(event); sessionStorage.setItem('facebookLink', event.currentTarget.value) }}
                             onFocus={() => scrollTo('facebookLinkContainer')}
@@ -586,8 +585,8 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                     <Element name='discordLinkContainer'>
                         <StyledInput
                             id='discordLink'
-                            name='discordLink' 
-                            placeholder="Type Here" 
+                            name='discordLink'
+                            placeholder="Type Here"
                             variant="standard"
                             onChange={(event) => { formik.handleChange(event); sessionStorage.setItem('discordLink', event.currentTarget.value) }}
                             onFocus={() => scrollTo('discordLinkContainer')}
@@ -600,12 +599,12 @@ export const ProfileForm : FC<ProfileFormProps> = ({...props}) => {
                 </StyledStack>
 
                 <FlexSpacer minHeight={5}/>
-                
+
                 <CustomButton size="large" onClick={() => formik.handleSubmit()} label={props.update ? 'Save' : 'Register'} sx={{width: '10rem'}} loading={props.loading}/>
 
                 <FlexSpacer minHeight={5}/>
             </form>
-        </Box>     
+        </Box>
     )
 }
 

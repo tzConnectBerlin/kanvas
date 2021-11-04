@@ -69,12 +69,12 @@ const lightThemePalette: PaletteOptions = {
       dark: 'rgba(30, 30, 30, 1)',
       main: 'rgba(1, 102, 255, 1)',
       light: 'rgba(1, 102, 255, 0.12)',
-      contrastText: '#e77f52',
+      contrastText: '#0088a7',
     },
     secondary: {
       dark: 'rgba(1, 102, 255, 0.10)',
       main: 'rgba(1, 102, 255, 0.12)',
-      contrastText: '#e77f52',
+      contrastText: '#0088a7',
     },
     success: {
       dark: 'rgba(212, 241, 204, 1)',
@@ -118,12 +118,12 @@ const darkThemePalette: PaletteOptions = {
       dark: '#ebebeb',
       main: 'rgba(1, 102, 255, 1)',
       light: 'rgba(1, 102, 255, 0.12)',
-      contrastText: '#e77f52',
+      contrastText: '#0088a7',
     },
     secondary: {
       dark: 'rgba(1, 102, 255, 0.10)',
       main: 'rgba(1, 102, 255, 0.12)',
-      contrastText: 'r#e77f52',
+      contrastText: 'r#0088a7',
     },
     success: {
       dark: 'rgba(212, 241, 204, 1)',
@@ -162,7 +162,7 @@ const darkThemePalette: PaletteOptions = {
     mode: 'dark',
 };
 
-  
+
 export const lightTheme = createTheme({
     palette: lightThemePalette,
     typography: {
