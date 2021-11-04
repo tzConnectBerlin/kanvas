@@ -15,6 +15,8 @@ interface StyledTreeViewProps {
 
 interface TreeViewProps extends StyledTreeViewProps {
     nodes?: any;
+    selectedFilters: any[];
+    setSelectedFilters: Function;
     filterFunction: Function;
 }
 
@@ -98,9 +100,7 @@ const data = {
     ],
   };
 
-const IconExpansionTreeView : FC<TreeViewProps> = ({...props}) => {
-
-    const [selectedFilters, setSelectedFilters] = useState<any[]>([])
+const IconExpansionTreeView : FC<TreeViewProps> = ({selectedFilters, setSelectedFilters, ...props}) => {
 
     const handleMultiSelect = (nodesName: string) => {
         if (selectedFilters.indexOf(nodesName) !== -1) {
