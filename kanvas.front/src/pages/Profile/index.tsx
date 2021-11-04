@@ -24,7 +24,7 @@ interface ParamTypes {
 }
 
 interface ProfileProps {
-    
+
 }
 
 const StyledStack = styled(Stack)`
@@ -40,14 +40,14 @@ const StyledButtonWrapper = styled.div`
 const StyledAnimated = styled(Animated)<{display: boolean}>`
     display: ${props => props.display ? 'initial' : 'none'};
     height: auto;
-`   
+`
 
 const StyledDiv = styled.div<{editionMode?: boolean}>`
     max-height: ${props => props.editionMode ? '265px' : '400px'};
     min-height: ${props => props.editionMode ? '265px' : '330px'};;
     transition: max-height 0.5s, min-height 0.5s;
 
-    
+
     @media (max-width: 650px) {
         padding-top: 2rem;
         padding-left: 2rem;
@@ -56,10 +56,10 @@ const StyledDiv = styled.div<{editionMode?: boolean}>`
 `
 
 const Profile : FC<ProfileProps> = () => {
-    
+
     let { username } = useParams<ParamTypes>();
     let { tab } = useParams<ParamTypes>();
-    
+
     const history = useHistory()
 
     const [selectedTab, setSelectedTab] = useState('Gallery')
@@ -80,7 +80,7 @@ const Profile : FC<ProfileProps> = () => {
     // Edition conditions for the gallery
     const [layouts, setLayouts] = useState<any>()
     const [editionMode, setEditionMode] = useState(false)
-    
+
     // Fill coordinate to give a proper display when no layouts set
     const fillCoordinateInMatrix = (elements: any[], maxColumn: number) => {
         const layouts = [];
@@ -107,7 +107,7 @@ const Profile : FC<ProfileProps> = () => {
 
     useEffect(() => {
         const savedLayouts = localStorage.getItem("rgl-8")
-        
+
         if (savedLayouts) {
             const parsed = JSON.parse(savedLayouts)
             setLayouts(parsed)
@@ -146,7 +146,7 @@ const Profile : FC<ProfileProps> = () => {
                 return element
             })
         }
-        
+
         setLayouts(newLayouts)
     }
 
@@ -158,11 +158,11 @@ const Profile : FC<ProfileProps> = () => {
     // Handle switch tabs and new data coming in
     useEffect(() => {
         if (gallery.data?.getUserGallery && user.data?.getUser) {
-            
+
             // Create the assets to give to the grid
             let assets = gallery.data.getUserGallery.map((asset: any) => {
-                return <ArtworkCard 
-                            url={asset.url} 
+                return <ArtworkCard
+                            url={asset.url}
                             artistName={asset.creator.firstName + ' ' + asset.creator.lastName}
                             // TODO adapt based on the new data structure from backend
                             drop={{startDate: undefined, price: undefined}}
@@ -190,11 +190,11 @@ const Profile : FC<ProfileProps> = () => {
 
     useEffect(() => {
         if (creations.data?.getUserCreations && user.data?.getUser) {
-            
+
             // Create the assets to give to the grid
             let assets = creations.data.getUserCreations.map((asset: any) => {
-                return <ArtworkCard 
-                            url={asset.url} 
+                return <ArtworkCard
+                            url={asset.url}
                             artistName={asset.creator.firstName + ' ' + asset.creator.lastName}
                             // TODO adapt based on the new data structure from backend
                             drop={{startDate: undefined, price: undefined}}
@@ -213,7 +213,7 @@ const Profile : FC<ProfileProps> = () => {
                 const xssLayouts = fillCoordinateInMatrix(creations.data.getUserCreations, 1)
                 setLayouts({lg: lgLayouts, md: mdSmLayouts, sm: mdSmLayouts, xs: xssLayouts, xxs: xssLayouts})
             }
-            
+
         } if ((!gallery.loading && !creations.data) || (creations.data?.getUserCreations && creations.data?.getUserCreations.length === 0 && user.data?.getUser)) {
             setAssets([])
             setEmptyMessage('Empty Creations')
@@ -224,7 +224,7 @@ const Profile : FC<ProfileProps> = () => {
     const handleSwitchTab = (newValue: number) => {
         switch(newValue) {
             // Gallery
-            case 1: 
+            case 1:
                 getUserGallery({variables: { userName: username, skip: 0 }})
                 setSelectedTab('Gallery')
                 break;
@@ -241,7 +241,7 @@ const Profile : FC<ProfileProps> = () => {
     }
 
 
-    // Save layouts sections 
+    // Save layouts sections
     const saveGalleryLayouts = () => {
         editUserGalleryLayouts({variables: {userName: username, galleryLayouts: JSON.stringify(layouts)}})
             .then(result => {
@@ -278,7 +278,7 @@ const Profile : FC<ProfileProps> = () => {
 
     const [saveLayouts, setSaveLayouts] = useState(false)
 
-    // useEffect hook to make sure that the layouts saved are static 
+    // useEffect hook to make sure that the layouts saved are static
     useEffect(() => {
         if (saveLayouts && layouts.lg[0].static) {
             handleSaveLayouts()
@@ -294,7 +294,7 @@ const Profile : FC<ProfileProps> = () => {
                 pathname: '/account/edit',
                 state: { currentUser }
             })
-        } 
+        }
     }
 
     return (
@@ -302,19 +302,19 @@ const Profile : FC<ProfileProps> = () => {
             <StyledStack direction='column'>
 
                 <FlexSpacer minHeight={10} />
-                
+
                 <StyledDiv editionMode={editionMode}>
                     <StyledAnimated animationIn="fadeIn" animationOut="fadeOut" isVisible={editionMode} display={editionMode}>
                         <Typography size="h1" weight='SemiBold'> Edit your gallery </Typography>
                         <Typography size="h3" weight='Light' color={'#C4C4C4'}> Drag and drop items to reorganize them the way</Typography>
                         <Typography size="h3" weight='Light' color={'#C4C4C4'} sx={{marginBottom: '2rem'}}> you want and hold the arrow to resize. </Typography>
                     </StyledAnimated>
-                    
+
                     <StyledAnimated animationIn="fadeIn" animationOut="fadeOut" isVisible={true} display={!editionMode}>
                         <HeaderProfile user={user.data?.getUser} loading={user.loading} editProfile={editProfile}/>
-                    
+
                         <FlexSpacer minHeight={4} />
-                    
+
                         <Tabs tabs={[{
                                 label: 'Gallery',
                                 value: 1
@@ -326,7 +326,7 @@ const Profile : FC<ProfileProps> = () => {
                     </StyledAnimated>
                 </StyledDiv>
                 <FlexSpacer minHeight={2} />
-                
+
                 {
                     // If current user is the same as the user page
                     localStorage.getItem('Kanvas - address') === user.data?.getUser?.userName ?
@@ -357,7 +357,7 @@ const Profile : FC<ProfileProps> = () => {
                             <Box sx={{justifyContent: 'center', width: '100%'}}>
                                 <Stack direction='column' sx={{alignItems: 'center'}}>
                                     <Typography size="h2" weight='Light' color="#C4C4C4" sx={{marginBottom: '0.5rem'}}> Oops something wrong happened </Typography>
-                                    <Typography size="body" weight='Light' color="#e77f52" type='link'> Refresh the page </Typography>
+                                    <Typography size="body" weight='Light' color="#0088a7" type='link'> Refresh the page </Typography>
                                 </Stack>
                             </Box>
                         :
@@ -365,11 +365,11 @@ const Profile : FC<ProfileProps> = () => {
                                 <Box sx={{justifyContent: 'center', width: '100%'}}>
                                     <Stack direction='column' sx={{alignItems: 'center'}}>
                                         <Typography size="h2" weight='Light' color="#C4C4C4" sx={{marginBottom: '0.5rem'}}> Oops something wrong happened </Typography>
-                                        <Typography size="body" weight='Light' color="#e77f52" type='link'> Refresh the page </Typography>
+                                        <Typography size="body" weight='Light' color="#0088a7" type='link'> Refresh the page </Typography>
                                     </Stack>
                                 </Box>
                             :
-                                undefined    
+                                undefined
                 }
 
             </StyledStack>

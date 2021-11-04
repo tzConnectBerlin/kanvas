@@ -44,11 +44,11 @@ const StyledPictureStack = styled(Stack)`
 const LinkWrapper = styled.a<{theme?: Theme, display?: boolean}>`
 
     cursor: pointer;
-    
+
     filter: ${props => props.theme.dropShadow.default};
     background: ${props => props.theme.button.background } ;
     transition: filter 0.2s, width 0.3s;
-    
+
     width: 32px;
     height: 32px;
 
@@ -58,7 +58,7 @@ const LinkWrapper = styled.a<{theme?: Theme, display?: boolean}>`
     align-items: center;
     justify-content: center;
 
-    
+
     margin-top: 0.3rem !important;
 
     &:hover {
@@ -122,7 +122,7 @@ const MobileLinksStack = styled(Stack)`
 `
 
 const DesktopLgLinksStack = styled(Stack)`
-    
+
     align-items: center;
     margin-bottom: 0;
 
@@ -133,7 +133,7 @@ const DesktopLgLinksStack = styled(Stack)`
 
 const DesktopMdLinksStack = styled(Stack)`
     margin-bottom: 1.2rem;
-    
+
     @media (min-width: 1100px) {
         display: none;
     }
@@ -151,7 +151,7 @@ const AddressStack = styled(Stack)`
 
 const MobileWrapperStack = styled(Stack)`
     display: none;
-    
+
     padding-bottom: 3rem;
     border-bottom: 1px solid #C4C4C4;
 
@@ -183,7 +183,7 @@ export const HeaderProfile : FC<HeaderProfileProps> = ({...props}) => {
     const copyAddressToClipBoard = () => {
         try {
             navigator.clipboard.writeText(props.user?.address)
-        
+
             setTooltipText('Copied !');  // copy succeed.
             setShowCopyOverlay(true)
 
@@ -193,7 +193,7 @@ export const HeaderProfile : FC<HeaderProfileProps> = ({...props}) => {
             setTimeout(() => {setShowCopyOverlay(false)}, 1000);
         }
     }
-    
+
     return (
         <>
             {/* Desktop version  */}
@@ -202,7 +202,7 @@ export const HeaderProfile : FC<HeaderProfileProps> = ({...props}) => {
                     <Avatar  src={`${props.user?.profilePicture}?${Date.now()}`} height={150} width={150} loading={props.loading} />
                     <AddressStack direction='row' spacing={2} sx={{maxWidth: 200 ,alignItems: 'center'}}>
                         <Typography size="body" weight='Light' color='#C4C4C4' noWrap={true} align='center' display='initial !important' width='6rem'> { props.loading ? <Skeleton width='5rem'/> : props.user?.address } </Typography>
-                        <FiCopyStyled onClick={() => props.loading ? {} : copyAddressToClipBoard()} loading={props.loading} />    
+                        <FiCopyStyled onClick={() => props.loading ? {} : copyAddressToClipBoard()} loading={props.loading} />
                     </AddressStack>
                     <StyledAnimated animationIn="fadeIn" animationOut="fadeOut" isVisible={showCopyOverlay}>
                         <Typography size="body" weight='Light' color='#363636' noWrap={true} align='center' width='6rem' sx={{position: 'absolute', bottom: '-2rem', justifyContent: 'center'}}> { tooltipText } </Typography>
@@ -238,7 +238,7 @@ export const HeaderProfile : FC<HeaderProfileProps> = ({...props}) => {
                                 </DesktopLgLinksStack>
                         }
                         <FlexSpacer minWidth={0} />
-                        
+
                         {
                             // Here goes validation if user profile is logged in user
                             localStorage.getItem('Kanvas - address') === props.user?.userName ?
@@ -249,7 +249,7 @@ export const HeaderProfile : FC<HeaderProfileProps> = ({...props}) => {
 
                     </Stack>
 
-                    <Typography size="h5" weight='Light' noWrap={true} color='#e77f52' align='left' sx={{marginBottom: '1rem'}}> { props.loading ? <Skeleton width='5rem' /> : `@${props.user?.userName}` } </Typography>
+                    <Typography size="h5" weight='Light' noWrap={true} color='#0088a7' align='left' sx={{marginBottom: '1rem'}}> { props.loading ? <Skeleton width='5rem' /> : `@${props.user?.userName}` } </Typography>
 
                     {
                         props.loading ?
@@ -276,7 +276,7 @@ export const HeaderProfile : FC<HeaderProfileProps> = ({...props}) => {
                                 </LinkWrapper> : undefined }
                             </DesktopMdLinksStack>
                     }
-                    
+
                     <StyledTypography size="body1" weight='Light' color='#9b9b9b' truncate={true} align='left' width={400} sx={{ alignItems: 'left'}}> { props.user?.bio } </StyledTypography>
 
                     <FlexSpacer minHeight={1} />
@@ -284,10 +284,10 @@ export const HeaderProfile : FC<HeaderProfileProps> = ({...props}) => {
                     <Stack direction='row' spacing={2} >
                         <Typography size="body1" weight='Medium'  align='left'> { props.loading ? <Skeleton animation="pulse" variant="circular" width='12px' height='12px' /> : 0 } </Typography>
                         <Typography size="body1" weight='Light' color='#C4C4C4' truncate={true} align='left'> Artworks </Typography>
-                        
+
                         <Typography size="body1" weight='Medium'  align='left' sx={{marginLeft: '3rem !important'}}> { props.loading ? <Skeleton animation="pulse" variant="circular" width='12px' height='12px' /> : 0 } </Typography>
                         <Typography size="body1" weight='Light' color='#C4C4C4' truncate={true} align='left'> Followers </Typography>
-                        
+
                         <Typography size="body1" weight='Medium'  align='left' sx={{marginLeft: '3rem  !important'}}> { props.loading ? <Skeleton animation="pulse" variant="circular" width='12px' height='12px' /> : 0 } </Typography>
                         <Typography size="body1" weight='Light' color='#C4C4C4' truncate={true} align='left'> Followings </Typography>
                     </Stack>
@@ -303,8 +303,8 @@ export const HeaderProfile : FC<HeaderProfileProps> = ({...props}) => {
 
                     <Stack direction='column' sx={{ width: '100%', alignItems: 'end'}}>
                         <Typography fontSize={'1.8rem'} weight='SemiBold' noWrap={true} align='right' display='block' sx={{width: '60%'}}> { props.loading ? <Skeleton width='15rem'/> : props.user?.firstName + ' ' + props.user?.lastName } </Typography>
-                        <Typography size="h5" weight='Light' noWrap={true} color='#e77f52' align='right' sx={{marginBottom: '1.5rem'}}> { props.loading ? <Skeleton width='5rem' /> : `@${props.user?.userName}` } </Typography>
-                        
+                        <Typography size="h5" weight='Light' noWrap={true} color='#0088a7' align='right' sx={{marginBottom: '1.5rem'}}> { props.loading ? <Skeleton width='5rem' /> : `@${props.user?.userName}` } </Typography>
+
                         {
                             props.loading ?
                                 undefined
@@ -349,7 +349,7 @@ export const HeaderProfile : FC<HeaderProfileProps> = ({...props}) => {
                                 <Skeleton animation="pulse" width='134px' />
                                 <Skeleton animation="pulse" width='64px' sx={{marginBottom: '1rem'}}/>
                             </>
-                        : 
+                        :
                             <>
                                 <Typography size="body1" weight='SemiBold'  align='left' sx={{marginBottom: '1rem  !important'}}> Bio </Typography>
                                 <StyledTypography size="body1" weight='Light' color='#9b9b9b' truncate={true} align='left' width={'100%'} sx={{alignItems: 'left', marginBottom: '2rem  !important'}}> { props.user?.bio } </StyledTypography>

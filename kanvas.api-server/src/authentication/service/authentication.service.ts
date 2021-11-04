@@ -35,7 +35,10 @@ export class AuthenticationService {
     }
 
     public async getLoggedUser(address: string): Promise<UserEntity> {
-        return await this.userService.findByAddress(address);
+        const user = await this.userService.findByAddress(address);
+        user.signedPayload = undefined
+
+        return user
     }
 
     public async register(user: UserEntity): Promise<any>{
@@ -62,6 +65,8 @@ export class AuthenticationService {
     }
 
     private async verifyPassword(signedDartPayload: string, hashedSignedDartPayload: string) {
+        console.log(signedDartPayload)
+        console.log(hashedSignedDartPayload)
         const isSignedDartPayloadMatching = await bcrypt.compare(
             signedDartPayload,
             hashedSignedDartPayload
