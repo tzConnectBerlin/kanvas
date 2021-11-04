@@ -16,7 +16,7 @@ const StyledStack = styled(Stack)`
 
 const GridStyled = styled(Grid)`
     width: 100%;
-    
+
 `
 
 const PaperStyled = styled(Paper)`
@@ -25,10 +25,9 @@ const PaperStyled = styled(Paper)`
     justify-content: center;
     align-items: center;
 `
-const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 const StorePage = () => {
-    
+
     const [{ data: nfts, loading: getLoading, error: getError }, refetch] = useAxios('http://localhost:3000/nfts')
     const [menuOpen, setMenuOpen] = useState(true);
 
@@ -42,11 +41,11 @@ const StorePage = () => {
     return (
         <PageWrapper>
             <StyledStack direction='column' spacing={3}>
-                
+
                 <FlexSpacer minHeight={12} />
 
                 <Typography size="h1" weight='SemiBold'> Store front</Typography>
-            
+
                 <FlexSpacer minHeight={5} />
 
                 <GridStyled spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
@@ -59,7 +58,7 @@ const StorePage = () => {
                                     </PaperStyled>
                                 </GridStyled>
                             ))
-                        : 
+                        :
                             <NftGrid />
                     }
                 </GridStyled>

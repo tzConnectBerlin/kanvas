@@ -68,7 +68,8 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, height }) => {
                     flexDirection: "column",
                     alignItems: "flex-end",
                   }}
-                >              
+
+                  >
                   <Typography weight="SemiBold" size="h3" color="#FFF">28.3tz</Typography>
                 </div>
               </CardActions>

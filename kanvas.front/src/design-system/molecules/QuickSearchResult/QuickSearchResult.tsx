@@ -10,7 +10,7 @@ import { EmptySearchResult } from '../../atoms/EmptySearchResult';
 import {  BoxProps as MBoxProps, Box, Paper, Grid, Skeleton, Stack, Theme } from '@mui/material';
 
 interface QuickSearResultProps {
-    profilesSearchResult: any; 
+    profilesSearchResult: any;
     artworksSearchResult: any;
     tagsSearchResult: any;
     searchString: string | unknown;
@@ -66,7 +66,7 @@ const ProfileResultWrapper = styled(Stack)<{theme?: Theme}>`
     .MuiSkeleton-root {
         transform: scale(1)
     }
-    
+
     &:hover {
         border-left: 2px solid ${props => props.theme.palette.primary.contrastText};
     }
@@ -77,7 +77,7 @@ const StyledGrid = styled(Grid)`
 `
 
 export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
-    
+
     const history = useHistory()
 
     const navigateTo = (userName: string) => {
@@ -107,12 +107,12 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
             <StyledPaper >
                 {/* Check if we only got errors and it is not loading from the api in which case we display the empty content */}
                 {
-                    props.profilesSearchResult.error && !props.profilesSearchResult.loading && props.artworksSearchResult.error && !props.artworksSearchResult.loading && props.tagsSearchResult.error && !props.tagsSearchResult.loading ? 
+                    props.profilesSearchResult.error && !props.profilesSearchResult.loading && props.artworksSearchResult.error && !props.artworksSearchResult.loading && props.tagsSearchResult.error && !props.tagsSearchResult.loading ?
                         <EmptySearchResult searchString={props.searchString}/>
                     :
                         undefined
                 }
-                {    
+                {
                     props.profilesSearchResult.loading ?
                         <>
                             <StyledHeaderStack direction='row'>
@@ -120,11 +120,11 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                             </StyledHeaderStack>
                             <StyledContentStack spacing={1}>
                                 {
-                                    [{},{},{}].map( () => 
+                                    [{},{},{}].map( () =>
                                         <ProfileResultWrapper direction="row" spacing={4} >
                                             <Skeleton animation="wave" variant="circular" width={65} height={65} />
                                             <Skeleton animation="wave" height={14} width="50%" sx={{borderRadius: 2}}/>
-                                        </ProfileResultWrapper> 
+                                        </ProfileResultWrapper>
                                     )
                                 }
                             </StyledContentStack>
@@ -137,7 +137,7 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                                 <StyledHeaderStack direction='row'>
                                     <Typography size="h4" weight="SemiBold"> Profiles </Typography>
                                     <FlexSpacer/>
-                                    <Typography size="inherit" weight="Light" color="#e77f52 !important" sx={{cursor: 'pointer'}}> See all </Typography>
+                                    <Typography size="inherit" weight="Light" color="#0088a7 !important" sx={{cursor: 'pointer'}}> See all </Typography>
                                 </StyledHeaderStack>
                                 <StyledContentStack spacing={1}>
                                     {
@@ -146,13 +146,13 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                                                 <Avatar src={`${profile.profilePicture}?${Date.now()}`} height={65} width={65} />
                                                 <Stack direction="column">
                                                     <Typography size="h4" weight="Medium" sx={{cursor: 'pointer'}}> { profile.firstName + ' ' + profile.lastName } </Typography>
-                                                    <Typography size="body2" weight="Light" color={'#e77f52'} sx={{cursor: 'pointer'}}> @{ profile.userName } </Typography>
+                                                    <Typography size="body2" weight="Light" color={'#0088a7'} sx={{cursor: 'pointer'}}> @{ profile.userName } </Typography>
                                                 </Stack>
-                                            </ProfileResultWrapper> 
+                                            </ProfileResultWrapper>
                                         )
                                     }
                                 </StyledContentStack>
-                            </> 
+                            </>
                 }
                 {
                     props.artworksSearchResult.loading ?
@@ -162,11 +162,11 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                             </StyledHeaderStack>
                             <StyledContentStack spacing={1}>
                                 {
-                                    [{},{},{}].map( () => 
+                                    [{},{},{}].map( () =>
                                         <ProfileResultWrapper direction="row" spacing={4}>
                                             <Skeleton animation="wave" width={65} height={65} sx={{borderRadius: 0}} />
                                             <Skeleton animation="wave" height={14} width="50%" sx={{borderRadius: 2}}/>
-                                        </ProfileResultWrapper> 
+                                        </ProfileResultWrapper>
                                     )
                                 }
                             </StyledContentStack>
@@ -179,20 +179,20 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                                 <StyledHeaderStack direction='row'>
                                     <Typography size="h4" weight="SemiBold"> Artworks </Typography>
                                     <FlexSpacer/>
-                                    <Typography size="inherit" weight="Light" color="#e77f52 !important" sx={{cursor: 'pointer'}}> See all </Typography>
+                                    <Typography size="inherit" weight="Light" color="#0088a7 !important" sx={{cursor: 'pointer'}}> See all </Typography>
                                 </StyledHeaderStack>
                                 <StyledContentStack spacing={1}>
                                     {
-                                        props.artworksSearchResult.data?.getArtworksSearch.map( (artwork: any) => 
+                                        props.artworksSearchResult.data?.getArtworksSearch.map( (artwork: any) =>
                                             <ProfileResultWrapper direction="row" spacing={5}>
                                                 <Avatar src={artwork.url}  height={65} width={65} borderRadius={0} />
                                                 <Typography size="h4" weight="Medium" sx={{cursor: 'pointer'}}> { artwork.title } </Typography>
-                                            </ProfileResultWrapper> 
+                                            </ProfileResultWrapper>
                                         )
                                     }
 
                                 </StyledContentStack>
-                            </> 
+                            </>
                 }
                 {
                     props.tagsSearchResult.loading ?
@@ -203,7 +203,7 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                             <StyledContentStack sx={{marginLeft: '1em'}}>
                                 <StyledGrid container spacing={2}>
                                     {
-                                        [{},{},{}].map( () => 
+                                        [{},{},{}].map( () =>
                                             <Grid item>
                                                 <Skeleton animation="wave" height={40} width={140} sx={{transform: 'scale(1)', borderRadius: 5}}/>
                                             </Grid>
@@ -216,33 +216,33 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                         !props.tagsSearchResult.called || props.tagsSearchResult.error ?
                             undefined
                         :
-                            
+
                             <>
                                 <StyledHeaderStack direction='row'>
                                     <Typography size="h4" weight="SemiBold"> Tags </Typography>
                                     <FlexSpacer/>
-                                    <Typography size="inherit" weight="Light" color="#e77f52 !important" sx={{cursor: 'pointer'}}> See all </Typography>
+                                    <Typography size="inherit" weight="Light" color="#0088a7 !important" sx={{cursor: 'pointer'}}> See all </Typography>
                                 </StyledHeaderStack>
                                 <StyledContentStack sx={{marginLeft: '1em'}}>
                                     <StyledGrid container spacing={2}>
                                         {
                                             props.tagsSearchResult.data?.getTagsSearch ?
-                                                props.tagsSearchResult.data?.getTagsSearch.map( (tag: any) => 
+                                                props.tagsSearchResult.data?.getTagsSearch.map( (tag: any) =>
                                                     <Grid item>
                                                         <CustomButton size="medium" textSize="Light" primary={false} label={tag.name}/>
                                                     </Grid>
                                                 )
                                             :
-                                                props.tagsSearchResult.data?.getTagsSuggestions.map( (tag: any) => 
+                                                props.tagsSearchResult.data?.getTagsSuggestions.map( (tag: any) =>
                                                     <Grid item>
                                                         <CustomButton size="medium" textSize="Light" primary={false} label={tag.name}/>
                                                     </Grid>
                                                 )
-                                                
+
                                         }
                                     </StyledGrid>
                                 </StyledContentStack>
-                            </> 
+                            </>
                 }
             </StyledPaper>
         </StyledBox>

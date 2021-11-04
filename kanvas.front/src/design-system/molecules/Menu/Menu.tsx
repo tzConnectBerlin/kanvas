@@ -62,7 +62,7 @@ const StyledLink = styled(NavLink)<SearchProps>`
     @media (max-width: 1100px) {
         height: 2rem;
     }
-    
+
     &.active {
         p {
             font-family: 'Poppins Medium' !important;
@@ -84,7 +84,7 @@ const WrapperMenuIcon = styled.div<MenuIconProps>`
     height: 40px;
     width: 40px;
     border-radius: 2rem;
-    
+
     background-color: ${props => props.theme.palette.background.paper };
     filter: ${props => props.theme.dropShadow.default };
     transition: filter 0.2s;
@@ -168,14 +168,14 @@ const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
    @media (max-width: 1100px) {
         display: flex;
         height: ${props => props.expandMenu ? 'auto': '0%'};
-        opacity: ${props => props.expandMenu ? '1' : '0'};      
+        opacity: ${props => props.expandMenu ? '1' : '0'};
         width: auto;
 
         position: fixed;
-        top: 5em; 
+        top: 5em;
         left: 0;
         right: 0;
-       
+
         z-index: 5;
         transition: 0.3s;
 
@@ -192,7 +192,7 @@ const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
 
 const DesktopMenuContent = styled(Stack)`
     display: none;
-    
+
     @media (min-width: 1100px) {
         display: flex;
     }
@@ -229,22 +229,22 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
     return (
         <>
             <StyledMenuStack direction={{xs: 'column', sm: 'column', md: 'row' }} spacing={4} sx={{display: 'flex', alignItems: 'center'}} >
-                
+
                 {/* Closer div for mobile menu */}
 
                 <StyledMenuCloser onClick={() => setExpandMenu(false)} expandMenu={expandMenu}>
                 </StyledMenuCloser>
 
                 {/* Mobile Menu Header */}
-                
+
                 <MobileStyledMenuHeader direction={'row'} spacing={2} isSearchOpen={props.isSearchOpen}>
-                    
+
                     {/* QuickSearch wrapper to close menu in case open */}
-                    
+
                     <div onClick={() => setExpandMenu(false)}>
                         <QuickSearch setSearchOpen={props.setSearchOpen} />
                     </div>
-                    
+
                     {/* Menu button, and closing button for search bar */}
 
                     <WrapperMenuIcon onClick={props.isSearchOpen ? () => props.setSearchOpen(false) : () => setExpandMenu(!expandMenu)}>
@@ -253,21 +253,21 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
                             <MenuBarDown expandMenu={props.isSearchOpen ? props.isSearchOpen : expandMenu} />
                         </MenuBarWrapper>
                     </WrapperMenuIcon>
-                    
+
                     <WrapperThemeIcon isSearchOpen={props.isSearchOpen}>
                         {
                             selectedTheme === 'dark' ?
                                 <Brightness3Icon onClick={() => switchTheme('light')} sx={{cursor: 'pointer', bottom: 0}}/>
                             :
-                                <WbSunnyOutlinedIcon onClick={() => switchTheme('dark')} sx={{cursor: 'pointer',  bottom: 0}}/> 
+                                <WbSunnyOutlinedIcon onClick={() => switchTheme('dark')} sx={{cursor: 'pointer',  bottom: 0}}/>
                         }
                     </WrapperThemeIcon>
                 </MobileStyledMenuHeader>
-                
+
                 {/* Mobile Menu Content */}
 
                 <MobileStyledMenuContent expandMenu={expandMenu} direction="column" spacing={2} sx={{alignItems: 'beginning'}}>
-                    
+
                     <StyledLink to='/store' >
                         <Typography size="h2" weight="SemiBold" color='#9b9b9b' sx={{cursor: 'pointer'}}> Store </Typography>
                     </StyledLink>
@@ -278,21 +278,21 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
 
                     {
                         // add localStorage.getItem in a useState hook to get the state after signning in.
-                        localStorage.getItem('Kanvas - address') === user?.userName ?
+                        localStorage.getItem('Kanvas - address') === user?.address ?
                             user?.role === 'creator' ?
                                 <CustomButton size="medium" onClick={onLogout} label="Add artwork" />
-                            : 
+                            :
                                 undefined
-                        : 
+                        :
                             <CustomButton size="medium" onClick={() => navigateTo('sign-in')} label="Sign in" />
                     }
-                    
+
                     <FlexSpacer borderBottom={true}/>
-                    
+
                     {/* Sub menu to navigate to personnal pages such as notifications profile or simply to logout */}
 
                     {
-                        localStorage.getItem('Kanvas - address') === user?.userName ? 
+                        localStorage.getItem('Kanvas - address') === user?.address ?
                             <>
                                 <Stack direction="row" sx={{alignItems: "center"}} spacing={3}>
                                     <Avatar src={`${avatarSrc}?${Date.now()}`} sx={{cursor: 'pointer !important'}} />
@@ -303,7 +303,7 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
                                     <CustomBadge color="error" badgeContent={props.notifications} max={99} profile={true}>
                                         <Avatar>
                                             <NotificationsRoundedIcon />
-                                        </Avatar> 
+                                        </Avatar>
                                     </CustomBadge>
                                     <Typography size="inherit" weight="Medium"> Notifications </Typography>
                                 </Stack>
@@ -311,7 +311,7 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
                                 <Stack direction="row" spacing={3} onClick={onLogout}>
                                     <Avatar>
                                         <LogoutRoundedIcon sx={{'&.MuiSvgIcon-root': { marginLeft: 0.5, height: '65%', width: '60%'}}} />
-                                    </Avatar> 
+                                    </Avatar>
                                     <Typography size="inherit" weight="Medium"> Sign out </Typography>
                                 </Stack>
                             </>
@@ -319,13 +319,13 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
                             undefined
                     }
 
-                    
+
                 </MobileStyledMenuContent>
 
                 {/* Desktop Menu */}
 
                 <DesktopMenuContent  direction={{xs: 'column', sm: 'column', md: 'row' }} spacing={4} sx={{display: 'flex', alignItems: 'center'}}>
-                    
+
                     {/* Link to general pages */}
 
                     {
@@ -336,32 +336,32 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
                                 <StyledLink to='/store' isSearchOpen={props.isSearchOpen}>
                                     <Typography size="inherit" weight="Light" color='#9b9b9b' sx={{cursor: 'pointer'}}> Store </Typography>
                                 </StyledLink>
-                                
+
                                 {/* Quick Search controlling the opacity and position of the links above */}
 
                                 <QuickSearch setSearchOpen={props.setSearchOpen}/>
                             </>
                     }
-                    
-                
+
+
                     {/* Call to action button: `Sign in`, `Add artwork` for curators and artists, and profile avatar to display the submenu */}
 
                     {
-                        localStorage.getItem('Kanvas - address') === user?.userName ?
-                            user?.role === 'collector' ? 
+                        localStorage.getItem('Kanvas - address') === user?.address ?
+                            user?.role === 'collector' ?
                                 <CustomBadge color="error" badgeContent={props.notifications} max={99} profile={true}>
                                     <Avatar src={`${avatarSrc}?${Date.now()}`} onClick={(e) => anchorEl === null ? handleClick(e) : handleClose()} sx={{cursor: 'pointer !important'}}/>
                                 </CustomBadge>
                             :
                                 <>
-                                    <CustomButton size="medium" onClick={onLogout} label="Add artwork" />
+                                    <CustomButton size="medium" onClick={() => {history.push('/create-nft')}} label="Create NFT" />
                                     <CustomBadge color="error" badgeContent={props.notifications} max={99} profile={true}>
                                         <Avatar src={`${avatarSrc}?${Date.now()}`} onClick={(e) => anchorEl === null ? handleClick(e) : handleClose()} sx={{cursor: 'pointer !important'}}/>
                                     </CustomBadge>
                                 </>
                         :
                             location.pathname === '/sign-in' || location.pathname === '/account/create' || location.pathname === '/account/edit' ?
-                                undefined                                
+                                undefined
                             :
                                 <CustomButton size="medium" onClick={() => navigateTo('sign-in')} label="Sign in" loading={props.loading}/>
                     }
@@ -386,6 +386,6 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
                 onClose={handleClose}
                 onClick={handleClose}
             />
-        </>       
+        </>
     )
 }

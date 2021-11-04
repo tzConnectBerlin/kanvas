@@ -25,10 +25,10 @@ export interface CustomButtonProps extends MButtonProps {
   label: string;
   /**
    * Optional click handler
-   */ 
+   */
   textSize?: 'Light' | 'Medium' | 'SemiBold'
-  onClick?: () => void; 
-  
+  onClick?: () => void;
+
   loading?: boolean;
 
   icon?: any;
@@ -51,16 +51,16 @@ const StyledClearContent = styled(ClearRounded)<{theme?: Theme}>`
 
 const StyledButton = styled(MButton)<StyledButtonProps>`
   border-radius: 0;
-  
+
   height: ${({ size }) => size === 'large' ? '44px' : size === 'medium' ? '40px' : '38px'};
 
   padding: 0.2em 1.5em 0.4em;
-  
+
   font-size: ${({ size }) => size === 'large' ? '1.125rem' : size === 'medium' ? '0.975' : '0.8'};
 
-  
-  box-shadow: none;  
-  
+
+  box-shadow: none;
+
   background-color: ${props => props.verified ? props.theme.palette.text.primary : !props.primary ? 'transparent' : props.theme.button.background } ;
 
   outline: ${props => `solid 1px ${props.theme.palette.text.primary}`};
@@ -70,11 +70,11 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
 
   &:hover {
     outline: ${props => `solid 2px ${props.theme.palette.text.primary}`};
-    border: ${({ bordercolor }) => bordercolor !== '' ? "solid 1px #e77f52" : ''};
+    border: ${({ bordercolor }) => bordercolor !== '' ? "solid 1px #0088a7" : ''};
     box-shadow: none;
     background-color: ${props => props.verified ? props.theme.palette.text.primary : !props.primary ? 'transparent' : props.theme.button.background } ;
   }
-  
+
   &:active {
       outline: ${({ bordercolor }) => bordercolor !== '' ? '' : 'drop-shadow(0px 0px 6px #98989833)'};
       border: ${({ bordercolor }) => bordercolor !== '' ? "solid 1px #ffb494" : `solid 1px black`};
@@ -119,9 +119,9 @@ export const CustomButton : FC<CustomButtonProps> = ({
   loading = false,
   ...props
 }) => {
-  
+
   const [isHover, setIsHover] = useState(false)
-  
+
   return (
     <StyledButton
       variant={variant}
