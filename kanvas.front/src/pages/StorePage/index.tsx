@@ -7,6 +7,7 @@ import { Typography } from "../../design-system/atoms/Typography";
 import FlexSpacer from "../../design-system/atoms/FlexSpacer";
 import useAxios from 'axios-hooks';
 import NftGrid from '../../design-system/organismes/NftGrid';
+import { FaRegClosedCaptioning } from 'react-icons/fa';
 
 const StyledStack = styled(Stack)`
     overflow: hidden;
@@ -50,7 +51,7 @@ const StorePage = () => {
 
                 <GridStyled spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
                     {
-                        nfts ?
+                        false ?
                             nfts.map((nft: any, index: number) => (
                                 <GridStyled item xs={2} sm={4} md={4} key={index}>
                                     <PaperStyled>

@@ -10,13 +10,22 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import Typography from "../../atoms/Typography";
+import { useHistory } from "react-router-dom";
 
 export interface NftCardProps {
   loading?: boolean;
   title?: string;
+  nftId?: string;
 }
 
-export const NftCard: React.FC<NftCardProps> = ({ loading }) => {
+export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
+
+  const history = useHistory()
+
+  const handleRedirect = (path: string) => {
+    history.push(path)
+  }
+
   return (
     <>
       {loading ? (
@@ -28,7 +37,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading }) => {
             position: "relative",
           }}
         >
-          <CardActionArea href="/product">
+          <CardActionArea onClick={() => handleRedirect(`/nft/${props.nftId}`)}>
             <CardMedia
               component="img"
               image="https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg"
