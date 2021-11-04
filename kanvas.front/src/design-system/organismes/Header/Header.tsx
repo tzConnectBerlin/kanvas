@@ -56,7 +56,6 @@ export const Header : FC<HeaderProps> = ({ user, selectedTheme, onLogout, onCrea
 
     const history = useHistory();
 
-    // const loggedUser = useQuery(GET_LOGGED_USER)
     // const loggedUser = {data: undefined, loading: false}
     const [loggedUser] = useAxios({url: 'http://localhost:3000/auth/logged_user', headers: {
         'Content-Type': 'application/json',

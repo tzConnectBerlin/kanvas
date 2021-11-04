@@ -14,15 +14,16 @@ import Typography from "../../atoms/Typography";
 export interface NftCardProps {
   loading?: boolean;
   title?: string;
+  height?: string;
 }
 
-export const NftCard: React.FC<NftCardProps> = ({ loading }) => {
+export const NftCard: React.FC<NftCardProps> = ({ loading, height }) => {
   return (
     <>
       {loading ? (
         <Card
           sx={{
-            height: "100%",
+            height: height,
             display: "flex",
             flexDirection: "column",
             position: "relative",
@@ -67,10 +68,8 @@ export const NftCard: React.FC<NftCardProps> = ({ loading }) => {
                     flexDirection: "column",
                     alignItems: "flex-end",
                   }}
-                >
-                  <IconButton aria-label="add to favorites">
-                    <FavoriteIcon />
-                  </IconButton>
+
+                  >
                   <Typography weight="SemiBold" size="h3" color="#FFF">28.3tz</Typography>
                 </div>
               </CardActions>

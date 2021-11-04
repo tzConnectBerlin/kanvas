@@ -18,7 +18,9 @@ import { Header } from './design-system/organismes/Header';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import { INotification, NotificationEnum, CurrencyEnum } from './interfaces/notification';
+import ProductPage from './pages/Product';
 import CreateNFT from './pages/CreateNFT/index';
+
 
 const StyledBrowserRouter = styled(BrowserRouter)<{theme?: Theme}>`
     #root {
@@ -146,6 +148,8 @@ const Router = () => {
                     <Route exact path="/store" component={StorePage} />
                     <Route path="/sign-in" render={props => <SignIn beaconWallet={beaconWallet} embedKukai={embedKukai} setSignedPayload={setSignedPayload} {...props} />} />
                     <Route path="/profile/:username" component={Profile} />
+                    <Route path="/notifications" render={props => <Notifications notifications={notifications} {...props} />}  />
+                    <Route path="/product" component={ProductPage} />
                     <Route path="/create-nft" render={props => <CreateNFT {...props} />}  />
                 </Switch>
             </StyledBrowserRouter>

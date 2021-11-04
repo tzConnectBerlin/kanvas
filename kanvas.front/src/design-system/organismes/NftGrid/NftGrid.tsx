@@ -85,7 +85,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                                     key={card}
                                     xs={12}    
                                     md={menuOpen ? 6 : 4}                                     
-                                    lg={menuOpen ? 4 : 3}                                     
+                                    lg={menuOpen ? 4 : 3}  
                                 >
                                     <NftCard
                                         loading={!loading}
