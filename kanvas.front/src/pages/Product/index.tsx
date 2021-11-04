@@ -63,8 +63,8 @@ const ProductPage = () => {
                         maxWidth="lg"
                     >
                         <Grid container spacing={2}>
-                            <Grid item container sm={12} md={7} spacing={3}>
-                                <Grid item xs={12} md={11}>
+                            <Grid container sm={12} md={7} >
+                                <Grid xs={12} md={11}>
                                     <Card
                                         sx={{
                                             display: 'flex',
@@ -95,14 +95,14 @@ const ProductPage = () => {
                                 <Typography
                                     size="h2"
                                     weight="SemiBold"
-                                    sx={{ pt: 4 }}
+                                    sx={{ pt: 4,  mb: 6 }}
                                 >
                                     {productName}
                                 </Typography>
                                 <Typography
                                     size="h5"
                                     weight="SemiBold"
-                                    sx={{ pt: 4, mt: 6 }}
+                                    sx={{ pt: 4}}
                                 >
                                     About the artist:
                                 </Typography>

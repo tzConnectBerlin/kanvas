@@ -14,15 +14,16 @@ import Typography from "../../atoms/Typography";
 export interface NftCardProps {
   loading?: boolean;
   title?: string;
+  height?: string;
 }
 
-export const NftCard: React.FC<NftCardProps> = ({ loading }) => {
+export const NftCard: React.FC<NftCardProps> = ({ loading, height }) => {
   return (
     <>
       {loading ? (
         <Card
           sx={{
-            height: "100%",
+            height: height,
             display: "flex",
             flexDirection: "column",
             position: "relative",
