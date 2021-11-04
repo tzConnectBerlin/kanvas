@@ -4,7 +4,7 @@ Back end for the white label store for selling NFTs.
 
 Built with [Nest](https://github.com/nestjs/nest) framework.
 
-Please note that yuou must use Yarn, not NPM to install dependencies.
+Please note that you must use Yarn, not NPM to install dependencies.
 
 ## Installation
 
@@ -39,6 +39,8 @@ $ yarn run start:dev
 # production mode
 $ yarn run start:prod
 ```
+
+It should now be available at `http://localhost:3000/`.
 
 ## Test
 
