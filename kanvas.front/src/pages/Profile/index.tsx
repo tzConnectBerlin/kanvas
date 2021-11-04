@@ -12,11 +12,11 @@ import { GET_USER } from '../../api/queries/user';
 import { useHistory, useParams } from 'react-router';
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { CustomButton } from '../../design-system/atoms/Button';
-import { GalleryGrid } from '../../design-system/organismes/GalleryGrid';
 import { GET_USER_CREATIONS, GET_USER_GALLERY } from '../../api/queries/artwork';
 import { ArtworkCard } from '../../design-system/molecules/ArtworkCard/ArtworkCard';
 import { HeaderProfile } from '../../design-system/molecules/HeaderProfile/HeaderProfile';
 import { EDIT_USER_CREATION_LAYOUTS, EDIT_USER_GALLERY_LAYOUTS } from '../../api/mutations/user';
+import NftGrid from '../../design-system/organismes/NftGrid';
 
 interface ParamTypes {
     username: string;
@@ -351,7 +351,7 @@ const Profile : FC<ProfileProps> = () => {
 
                 {
                     layouts ?
-                        <GalleryGrid editable={editionMode} layouts={layouts} setLayouts={setLayouts} assets={assets} emptyMessage={emptyMessage} emptyLink={emptyLink} loading={gallery.loading || creations.loading} />
+                        <NftGrid editable={editionMode} layouts={layouts} setLayouts={setLayouts} assets={assets} emptyMessage={emptyMessage} emptyLink={emptyLink} loading={gallery.loading || creations.loading} />
                     :
                         selectedTab === 'Gallery' && gallery.error ?
                             <Box sx={{justifyContent: 'center', width: '100%'}}>
