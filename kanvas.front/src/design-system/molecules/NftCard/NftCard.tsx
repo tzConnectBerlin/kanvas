@@ -50,14 +50,15 @@ export const NftCard: React.FC<NftCardProps> = ({ loading }) => {
             >
               <div style={{ display: "block" }}>
                 <Typography weight="Bold" size="h4"
-                 color="#FFF"
->
+                  color="#FFF"
+                >
                   NFT name
                 </Typography>
-                <Typography weight="Light" size="body"  color="#FFF">
+                <Typography weight="Light" size="body" color="#FFF">
                   Artist name</Typography>
-                  <Typography weight="Light" size="body"  color="#FFF">
-Remaining time</Typography>
+                <Typography weight="Light" size="body" color="#FFF">
+                  Remaining time
+                </Typography>
               </div>
               <CardActions disableSpacing>
                 <div
