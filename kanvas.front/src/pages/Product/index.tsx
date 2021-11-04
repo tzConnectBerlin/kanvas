@@ -36,6 +36,8 @@ const ProductPage = () => {
     
     const [{ data: nfts, loading: getLoading, error: getError }, refetch] = useAxios('http://localhost:3000/nfts')
     const productName = "TzPunks # 8210"
+    const lorenIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. "
+    const lorenIpsumShort = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
 
     return (
         <PageWrapper>
@@ -72,7 +74,8 @@ const ProductPage = () => {
                                     >
                                         <CardMedia
                                             component="img"
-                                            image="https://i.picsum.photos/id/866/200/300.jpg?hmac=rcadCENKh4rD6MAp6V_ma-AyWv641M4iiOpe1RyFHeI"
+                                            height="600"
+                                            image="https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg"
                                             alt="random"
                                         />
                                     </Card>
@@ -90,49 +93,63 @@ const ProductPage = () => {
                                 }}
                             >
                                 <Typography
-                                    size="h1"
-                                    weight="Bold"
-                                    sx={{ pt: 4, mt: 6 }}
+                                    size="h2"
+                                    weight="SemiBold"
+                                    sx={{ pt: 4 }}
                                 >
                                     {productName}
                                 </Typography>
                                 <Typography
                                     size="h5"
-                                    weight="Light"
+                                    weight="SemiBold"
                                     sx={{ pt: 4, mt: 6 }}
                                 >
-                                    About the artist
+                                    About the artist:
                                 </Typography>
                                 <Typography
-                                    size="body"
+                                    size="h5"
                                     weight="Light"
-                                    sx={{ pt: 4, mt: 6 }}
+                                    sx={{ pt: 2,  mb: 1 }}
                                 >
-                                    Artist: Lorem Ypsum
+                                     {lorenIpsumShort}
                                 </Typography>
+                             
                                 <Typography
                                     size="body"
-                                    weight="Light"
-                                    sx={{ pt: 4, mt: 6 }}
+                                    weight="SemiBold"
+                                    sx={{ pt: 4 }}
                                 >
-                                    Artist: Lorem Ypsum
+                                    Description:  
+                                </Typography>
+                                <Typography
+                                    size="h5"
+                                    weight="Light"
+                                    sx={{ pt: 2,  mb: 1 }}
+                                >
+                                     {lorenIpsum}
                                 </Typography>
                                 <Typography
                                     size="body1"
-                                    weight="Light"
-                                    sx={{ pt: 4, mt: 6 }}
+                                    weight="SemiBold"
+                                    sx={{ pt: 4 }}
                                 >
-                                    Time left
+                                    Remaining time                                
                                 </Typography>
-        
+                                <Typography
+                                    size="h5"
+                                    weight="Light"
+                                    sx={{ pt: 2,  mb: 1 }}
+                                >
+                                     12:12:43:00
+                                </Typography>
                                 <Stack
-                                    sx={{ pt: 4, mt: 6 }}
+                                    sx={{ pt: 4, mt: 2 }}
                                     direction="row"
                                     spacing={2}
                                 >
                                     <CustomButton size="large" label="Primary action" primary />
                                       
-                                     <CustomButton size="large" label="Secondary action" backgroundColor="" primary={false}/>
+                                    <CustomButton size="large" label="Secondary action" backgroundColor="" primary={false}/>
                                    
                                 </Stack>
                             </Grid>

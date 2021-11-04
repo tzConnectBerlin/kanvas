@@ -49,7 +49,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading }) => {
               }}
             >
               <div style={{ display: "block" }}>
-                <Typography weight="Bold" size="h4"
+                <Typography weight="SemiBold" size="h4"
                   color="#FFF"
                 >
                   NFT name
@@ -71,7 +71,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading }) => {
                   <IconButton aria-label="add to favorites">
                     <FavoriteIcon />
                   </IconButton>
-                  <Typography weight="Bold" size="h3" color="#FFF">28.3tz</Typography>
+                  <Typography weight="SemiBold" size="h3" color="#FFF">28.3tz</Typography>
                 </div>
               </CardActions>
             </CardContent>

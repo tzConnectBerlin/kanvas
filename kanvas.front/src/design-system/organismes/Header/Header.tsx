@@ -57,7 +57,6 @@ export const Header : FC<HeaderProps> = ({ user, selectedTheme, onLogout, onCrea
     const history = useHistory();
 
     // const loggedUser = useQuery(GET_LOGGED_USER)
-    const loggedUser = useAxios('http://localhost:3000/')
     const loggedUser = {data: undefined, loading: false}
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [currentLoggedUser, setCurrentLoggedUser] = useState<IUser | undefined>(undefined)
