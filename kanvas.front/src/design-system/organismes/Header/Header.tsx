@@ -69,10 +69,8 @@ export const Header : FC<HeaderProps> = ({ user, selectedTheme, onLogout, onCrea
 
     useEffect(() => {
         if (loggedUser.data) {
-            debugger
             setCurrentLoggedUser(loggedUser.data)
         } else if (loggedUser.error) {
-            debugger
         }
     }, [loggedUser])
 
