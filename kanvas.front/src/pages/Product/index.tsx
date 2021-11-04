@@ -35,16 +35,15 @@ const PaperStyled = styled(Paper)`
 const ProductPage = () => {
     
     const [{ data: nfts, loading: getLoading, error: getError }, refetch] = useAxios('http://localhost:3000/nfts')
-    const productName = "TzPunks # 8210"
-    const lorenIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. "
+    const nftName = "AD # 8210"
+    const artistName = "Aurelia Durand"
     const lorenIpsumShort = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+    const lorenIpsum = "Lorem ipsum dolor sit amet, labore et dolore magna aliqua."
 
     return (
         <PageWrapper>
-            <StyledStack direction='column' spacing={3}>
-                
-          
-            
+            <StyledStack direction='column' spacing={3}>                          
+        
                 <FlexSpacer minHeight={5} />
 
                 <GridStyled container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
@@ -81,6 +80,7 @@ const ProductPage = () => {
                                     </Card>
                                 </Grid>
                             </Grid>
+
                             <Grid
                                 item
                                 container
@@ -91,13 +91,22 @@ const ProductPage = () => {
                                     flexDirection: 'column',
                                 }}
                             >
+                                
+                                {/* Headline */}
                                 <Typography
                                     size="h2"
-                                    weight="SemiBold"
-                                    sx={{ pt: 4,  mb: 6 }}
+                                    weight="SemiBold"                                   
                                 >
-                                    {productName}
+                                    {nftName}
                                 </Typography>
+                                <Typography
+                                    size="h4"
+                                    weight="SemiBold"
+                                    sx={{ pt: 1,  mb: 4 }}
+                                >
+                                    {artistName}
+                                </Typography>
+                                {/* Headline */}
                                 <Typography
                                     size="h5"
                                     weight="SemiBold"
@@ -145,10 +154,10 @@ const ProductPage = () => {
                                     sx={{ pt: 4, mt: 2 }}
                                     direction="row"
                                     spacing={2}
-                                >
-                                    <CustomButton size="large" label="Primary action" primary />
+                                 >
+                                    <CustomButton size="large" label="Primary" sx={{ mx: 2 }}/>
                                       
-                                    <CustomButton size="large" label="Secondary action" backgroundColor="" primary={false}/>
+                                    <CustomButton size="large" label="Secondary"/>
                                    
                                 </Stack>
                             </Grid>
