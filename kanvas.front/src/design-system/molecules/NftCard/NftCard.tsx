@@ -8,15 +8,18 @@ import {
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import Typography from "../../atoms/Typography";
+import styled from  "@emotion/styled";
+import { Theme } from '@mui/material';
 
 export interface NftCardProps {
   loading?: boolean;
   title?: string;
   height?: string;
 }
-
+const StyledBioWrapper = styled.div<{theme?: Theme}>`
+color: ${props => props.color? props.color : props.theme.palette.text.primary ?? 'black'} !important;
+`
 export const NftCard: React.FC<NftCardProps> = ({ loading, height }) => {
   return (
     <>
@@ -49,7 +52,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, height }) => {
                   "blur(10px) saturate(100%) contrast(45%) brightness(130%)",
               }}
             >
-              <div style={{ display: "block" }}>
+              <StyledBioWrapper style={{ display: "block" }}>
                 <Typography weight="SemiBold" size="h4"
                   color="#FFF"
                 >
@@ -60,19 +63,12 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, height }) => {
                 <Typography weight="Light" size="body" color="#FFF">
                   Remaining time
                 </Typography>
-              </div>
-              <CardActions disableSpacing>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-end",
-                  }}
-
-                  >
-                  <Typography weight="SemiBold" size="h3" color="#FFF">28.3tz</Typography>
-                </div>
-              </CardActions>
+              </StyledBioWrapper>
+              <CardActions disableSpacing sx={{marginTop: 'auto', marginBottom: '-10px'}}>
+                   <Typography weight="SemiBold" sx={{alignSelf: 'end',  pb: '0'}} size="h3" color="#FFF">
+                    28.3tz
+                  </Typography>
+               </CardActions>
             </CardContent>
           </CardActionArea>
         </Card>
