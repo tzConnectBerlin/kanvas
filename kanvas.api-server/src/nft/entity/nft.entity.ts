@@ -11,7 +11,7 @@ interface IMetadata {
 export class NftEntity {
     @PrimaryGeneratedColumn()
     id: number;
-     
+
     @Column()
     name: string;
 
@@ -23,15 +23,15 @@ export class NftEntity {
 
     @Column()
     dataUrl: string;
-    
+
     @Column()
     contract: string;
 
     @Column()
     tokenId: string;
-    
+
     @JoinTable({ name: 'categories_nfts' })
     @ManyToMany(() => CategoryEntity, category => category.nfts)
     categories: CategoryDto[];
-    
+
 }

@@ -21,7 +21,7 @@ export const EmptySearchResult : FC<EmptySearchResultProps> = ({...props}) => {
     return (
         <StyledStack spacing={1}>
             <SearchRounded fontSize="large" height='1.5em' width='1.5em'/>
-            <Typography size="h2" weight="Bold">No search results</Typography>
+            <Typography size="h2" weight="SemiBold">No search results</Typography>
             <Typography size="inherit" weight="Light" color='#9b9b9b'>There are no results for '{props.searchString}' </Typography>
         </StyledStack>
     )

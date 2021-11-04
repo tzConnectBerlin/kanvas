@@ -171,43 +171,43 @@ export const lightTheme = createTheme({
       h1: {
         fontSize: '4.5rem',
         lineHeight: '1.5',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
       h2: {
         fontSize: '1.6rem',
         lineHeight: '1.3',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
       h3: {
         fontSize: '1.3rem',
         lineHeight: '1.3',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
       h4: {
         fontSize: '1.2rem',
         lineHeight: '1.3',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
       h5: {
         fontSize: '1rem',
         lineHeight: '1.3',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
       h6: {
         fontWeight: 700,
         fontSize: '0.625rem',
         lineHeight: '1.3',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
       subtitle1: {
         fontSize: '0.75rem',
         lineHeight: '1.3',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
       body1: {
         fontSize: '1rem',
         lineHeight: '1.3',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
     },
     breakpoints: {
@@ -246,42 +246,42 @@ export const darkTheme = createTheme({
       h1: {
         fontSize: '4.5rem',
         lineHeight: '1.5',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
       h2: {
         fontSize: '1.6rem',
         lineHeight: '1.3',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
       h3: {
         fontSize: '1.3rem',
         lineHeight: '1.3',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
       h4: {
         fontSize: '1.2rem',
         lineHeight: '1.3',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
       h5: {
         fontSize: '1rem',
         lineHeight: '1.3',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
       h6: {
         fontSize: '0.625rem',
         lineHeight: '1.3',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
       subtitle1: {
         fontSize: '0.75rem',
         lineHeight: '1.3',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
       body1: {
         fontSize: '1rem',
         lineHeight: '1.3',
-        fontFamily: 'Roboto'
+        fontFamily: 'Poppins'
       },
     },
     breakpoints: {

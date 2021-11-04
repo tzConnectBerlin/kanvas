@@ -44,7 +44,7 @@ const UnreadIndicator = styled.div<{theme?: Theme}>`
 `
 
 const StyledMediumSpan = styled.span`
-    font-family: 'Roboto Medium';
+    font-family: 'Poppins Medium';
     
     :hover {
         text-decoration: underline;
@@ -52,7 +52,7 @@ const StyledMediumSpan = styled.span`
 `
 
 const StyledLightSpan = styled.span`
-    font-family: 'Roboto Light';
+    font-family: 'Poppins Light';
 `
 
 const Notifications : FC<NotificationsProps> = ({...props}) => {
@@ -182,7 +182,7 @@ const Notifications : FC<NotificationsProps> = ({...props}) => {
                 <FlexSpacer minHeight={10} />
                     
                 <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
-                    <Typography size="h1" weight='Bold'> Notifications </Typography>
+                    <Typography size="h1" weight='SemiBold'> Notifications </Typography>
                 </Animated>
 
                 <FlexSpacer minHeight={4} />

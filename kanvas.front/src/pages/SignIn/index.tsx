@@ -214,7 +214,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
 
                 <WrapperTitle>
                     <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
-                        <Typography size="h1" weight='Bold' sx={{justifyContent: 'center'}}> Sign in</Typography>
+                        <Typography size="h1" weight='SemiBold' sx={{justifyContent: 'center'}}> Sign in</Typography>
                     </Animated>
                     <FlexSpacer minHeight={1} />
                     <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{justifyContent: 'center'}}> Welcome to Kanvas ! Let’s begin by</Typography>
@@ -233,7 +233,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
   
 
                 <StyledExternalLink href="" target='_blank'>
-                    <Typography size="h4" weight='Light' color={'#1578e1'} sx={{justifyContent: 'center'}}> What's a wallet ? </Typography>
+                    <Typography size="h4" weight='Light' color={'#15a0e1'} sx={{justifyContent: 'center'}}> What's a wallet ? </Typography>
                 </StyledExternalLink>
             </StyledStack>
 

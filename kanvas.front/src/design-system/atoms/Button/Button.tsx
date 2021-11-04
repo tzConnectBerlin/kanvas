@@ -26,7 +26,7 @@ export interface CustomButtonProps extends MButtonProps {
   /**
    * Optional click handler
    */ 
-  textSize?: 'Light' | 'Medium' | 'Bold'
+  textSize?: 'Light' | 'Medium' | 'SemiBold'
   onClick?: () => void; 
   
   loading?: boolean;

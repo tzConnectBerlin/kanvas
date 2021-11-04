@@ -87,7 +87,7 @@ export const ProfilePopover : FC<ProfilePopoverProps> = ({...props}) => {
             <Stack spacing={1}>
                 <StyledMenuItem onClick={() => navigateTo(`/profile/${props.userName}`)}>
                     <Avatar src={props.avatarSrc} /> 
-                    <Typography size="inherit" weight="Bold"> Go to profile </Typography>
+                    <Typography size="inherit" weight="SemiBold"> Go to profile </Typography>
                 </StyledMenuItem>
             
                 <StyledMenuItem onClick={() => navigateTo('/notifications')}>

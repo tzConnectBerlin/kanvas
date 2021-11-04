@@ -35,7 +35,7 @@ const StorePage = () => {
                 
                 <FlexSpacer minHeight={12} />
 
-                <Typography size="h1" weight='Bold'> Store front</Typography>
+                <Typography size="h1" weight='SemiBold'> Store front</Typography>
             
                 <FlexSpacer minHeight={5} />
 

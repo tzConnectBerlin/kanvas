@@ -98,7 +98,7 @@ const Account : FC<AcccountProps> = ({...props}) => {
                 <FlexSpacer minHeight={10} />
                 
                 <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
-                    <Typography size="h1" weight='Bold'> { status.charAt(0).toUpperCase() + status.slice(1)} your profile </Typography>
+                    <Typography size="h1" weight='SemiBold'> { status.charAt(0).toUpperCase() + status.slice(1)} your profile </Typography>
                 </Animated>
                 <Typography size="h2" weight='Light' color={'#C4C4C4'}> No worries, you will be all set</Typography>
                 <Typography size="h2" weight='Light' color={'#C4C4C4'}> In one single click. </Typography>

@@ -4,8 +4,8 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 export class AuthProviderEntity {
     @PrimaryGeneratedColumn()
     id: number;
-     
+
     @Column()
     name: string;
-  
+
 }

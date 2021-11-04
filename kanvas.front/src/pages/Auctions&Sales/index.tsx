@@ -6,7 +6,7 @@ import { Typography } from "../../design-system/atoms/Typography";
 const AuctionsAndSales = () => {
     return (
         <PageWrapper>
-            <Typography size="h1" weight='Bold'> Auctions & Sales </Typography>
+            <Typography size="h1" weight='SemiBold'> Auctions & Sales </Typography>
         </PageWrapper>
     )
 }

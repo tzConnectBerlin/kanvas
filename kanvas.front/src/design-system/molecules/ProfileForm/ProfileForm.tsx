@@ -64,7 +64,7 @@ const StyledInput = styled(TextField)<{theme?: Theme}>`
     }
 
     .MuiFormHelperText-root {
-        font-family: 'Roboto Medium';
+        font-family: 'Poppins Medium';
         font-size: 0.9rem;
         margin-top: 2.5rem !important;
 
@@ -73,7 +73,7 @@ const StyledInput = styled(TextField)<{theme?: Theme}>`
 `
 
 const StyledFormHelperText = styled(FormHelperText)`
-    font-family: 'Roboto Medium';
+    font-family: 'Poppins Medium';
     font-size: 0.9rem;
     margin-top: 0.4rem !important;
     text-align: right;

@@ -9,7 +9,7 @@ export class AuthProviderService {
         @InjectRepository(AuthProviderEntity)
         private readonly userRepository: Repository<AuthProviderEntity>
     ) {}
-    
+
     async create (user: AuthProviderEntity): Promise<AuthProviderEntity> {
         return this.userRepository.save(user);
     }

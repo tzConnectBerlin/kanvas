@@ -305,7 +305,7 @@ const Profile : FC<ProfileProps> = () => {
                 
                 <StyledDiv editionMode={editionMode}>
                     <StyledAnimated animationIn="fadeIn" animationOut="fadeOut" isVisible={editionMode} display={editionMode}>
-                        <Typography size="h1" weight='Bold'> Edit your gallery </Typography>
+                        <Typography size="h1" weight='SemiBold'> Edit your gallery </Typography>
                         <Typography size="h3" weight='Light' color={'#C4C4C4'}> Drag and drop items to reorganize them the way</Typography>
                         <Typography size="h3" weight='Light' color={'#C4C4C4'} sx={{marginBottom: '2rem'}}> you want and hold the arrow to resize. </Typography>
                     </StyledAnimated>

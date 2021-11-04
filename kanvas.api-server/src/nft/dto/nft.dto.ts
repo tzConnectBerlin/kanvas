@@ -17,7 +17,7 @@ export class NftDto {
 
     @IsString()
     dataUrl: string;
-    
+
     @IsString()
     contract: string;
 

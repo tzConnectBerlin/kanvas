@@ -10,17 +10,17 @@ export  class  AuthenticationController {
 
     @Get('logged_user')
     @UseGuards(JwtAuthGuard)
-    async loggedUser(@CurrentUser() currentUser: UserEntity): Promise<any> {    
+    async loggedUser(@CurrentUser() currentUser: UserEntity): Promise<any> {
       return this.authService.getLoggedUser(currentUser.address);
-    } 
+    }
 
     @Post('login')
     async login(@Body() user: UserEntity): Promise<any> {
       return this.authService.login(user);
-    }  
+    }
 
     @Post('register')
     async register(@Body() user: UserEntity): Promise<any> {
       return this.authService.register(user);
-    } 
+    }
 }

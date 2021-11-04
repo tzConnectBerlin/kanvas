@@ -5,7 +5,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 export class UserEntity {
     @PrimaryGeneratedColumn()
     id: number;
-    
+
     @Column({ nullable: true})
     name: string;
 
@@ -14,5 +14,4 @@ export class UserEntity {
 
     @Column({unique: true, select: false})
     signedPayload: string;
-
 }

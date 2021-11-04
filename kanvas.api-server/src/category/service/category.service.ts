@@ -10,7 +10,7 @@ export class CategoryService {
         @InjectRepository(CategoryEntity)
         private readonly categoryRepository: Repository<CategoryEntity>
     ) {}
-    
+
     async create (category: CategoryEntity): Promise<CategoryEntity> {
         return this.categoryRepository.save(category);
     }

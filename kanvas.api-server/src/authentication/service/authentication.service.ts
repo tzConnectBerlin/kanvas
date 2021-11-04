@@ -9,9 +9,9 @@ const bcrypt = require('bcrypt');
 interface IAuthentication {
     id: number;
     name: string;
-    token: string; 
+    token: string;
     maxAge: string;
-    address: string; 
+    address: string;
 }
 
 @Injectable()
@@ -26,11 +26,11 @@ export class AuthenticationService {
     }
 
     public async login(userData: UserEntity): Promise< any | { status: number }>{
-        
+
         const user = await this.validate(userData);
 
         await this.verifyPassword(userData.signedPayload, user.signedPayload);
-       
+
         return this.getCookieWithJwtToken({id: user.id, name: user.name, address: user.address}, user);
     }
 
@@ -41,26 +41,25 @@ export class AuthenticationService {
     public async register(user: UserEntity): Promise<any>{
         const hashedSignedDartPayload : string = await bcrypt.hash(user.signedPayload, 10);
         try {
-          
             const createdUser = await this.userService.create({
                 ...user,
                 signedPayload: hashedSignedDartPayload
             });
 
           createdUser.signedPayload = undefined;
-          
+
           return createdUser;
 
         } catch (error) {
-         
+
             // Uniqure violation error code from postgres
             if (error?.code === '23505') {
                 throw new HttpException('User with this credentials already exists', HttpStatus.BAD_REQUEST);
             }
-         
+
             throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    } 
+    }
 
     private async verifyPassword(signedDartPayload: string, hashedSignedDartPayload: string) {
         const isSignedDartPayloadMatching = await bcrypt.compare(
@@ -75,13 +74,13 @@ export class AuthenticationService {
     public getCookieWithJwtToken(data: ITokenPayload, user: UserEntity) : IAuthentication {
         const payload: ITokenPayload = data;
         const token = this.jwtService.sign(payload);
-        
+
         return {
           token: token,
           id: user.id,
           name: user.name,
-          maxAge: process.env.JWT_EXPIRATION_TIME, 
-          address: data.address, 
+          maxAge: process.env.JWT_EXPIRATION_TIME,
+          address: data.address,
         };
       }
 }

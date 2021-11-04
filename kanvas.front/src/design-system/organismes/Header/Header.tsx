@@ -39,7 +39,8 @@ const StyledBox = styled(Box)<{theme?: Theme}>`
     @media (max-width: 900px) {
         padding-left: 1.5rem;
         padding-right: 1rem !important;
-        transition: padding-left 0.2s, padding-right 0.2s;
+        transition: padding-limport { useAxios } from 'axios-hooks';
+eft 0.2s, padding-right 0.2s;
     }
 
 `
@@ -56,6 +57,7 @@ export const Header : FC<HeaderProps> = ({ user, selectedTheme, onLogout, onCrea
     const history = useHistory();
 
     // const loggedUser = useQuery(GET_LOGGED_USER)
+    const loggedUser = useAxios('http://localhost:3000/')
     const loggedUser = {data: undefined, loading: false}
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [currentLoggedUser, setCurrentLoggedUser] = useState<IUser | undefined>(undefined)

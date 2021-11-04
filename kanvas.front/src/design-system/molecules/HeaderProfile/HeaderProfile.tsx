@@ -211,7 +211,7 @@ export const HeaderProfile : FC<HeaderProfileProps> = ({...props}) => {
 
                 <Stack direction='column' sx={{width: '100%'}}>
                     <Stack direction='row' spacing={2} sx={{ alignItems: 'center', width: '100%'}}>
-                        <Typography size="h2" weight='Bold' noWrap={true} align='left' sx={{marginRight: '2rem'}} display='block'> { props.loading ? <Skeleton width='15rem'/> : props.user?.firstName + ' ' + props.user?.lastName } </Typography>
+                        <Typography size="h2" weight='SemiBold' noWrap={true} align='left' sx={{marginRight: '2rem'}} display='block'> { props.loading ? <Skeleton width='15rem'/> : props.user?.firstName + ' ' + props.user?.lastName } </Typography>
                         {
                             props.loading ?
                                 <Skeleton animation="pulse" variant="circular" width='30px' height='30px' />
@@ -302,7 +302,7 @@ export const HeaderProfile : FC<HeaderProfileProps> = ({...props}) => {
                     </StyledPictureStack>
 
                     <Stack direction='column' sx={{ width: '100%', alignItems: 'end'}}>
-                        <Typography fontSize={'1.8rem'} weight='Bold' noWrap={true} align='right' display='block' sx={{width: '60%'}}> { props.loading ? <Skeleton width='15rem'/> : props.user?.firstName + ' ' + props.user?.lastName } </Typography>
+                        <Typography fontSize={'1.8rem'} weight='SemiBold' noWrap={true} align='right' display='block' sx={{width: '60%'}}> { props.loading ? <Skeleton width='15rem'/> : props.user?.firstName + ' ' + props.user?.lastName } </Typography>
                         <Typography size="h5" weight='Light' noWrap={true} color='#e77f52' align='right' sx={{marginBottom: '1.5rem'}}> { props.loading ? <Skeleton width='5rem' /> : `@${props.user?.userName}` } </Typography>
                         
                         {
@@ -351,7 +351,7 @@ export const HeaderProfile : FC<HeaderProfileProps> = ({...props}) => {
                             </>
                         : 
                             <>
-                                <Typography size="body1" weight='Bold'  align='left' sx={{marginBottom: '1rem  !important'}}> Bio </Typography>
+                                <Typography size="body1" weight='SemiBold'  align='left' sx={{marginBottom: '1rem  !important'}}> Bio </Typography>
                                 <StyledTypography size="body1" weight='Light' color='#9b9b9b' truncate={true} align='left' width={'100%'} sx={{alignItems: 'left', marginBottom: '2rem  !important'}}> { props.user?.bio } </StyledTypography>
                             </>
                 }

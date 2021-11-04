@@ -7,7 +7,7 @@ import { CategoryDto } from '../dto/category.dto';
 export class CategoryEntity {
     @PrimaryGeneratedColumn()
     id: number;
-     
+
     @Column()
     name: string;
 

@@ -11,7 +11,7 @@ export class UserService {
         @InjectRepository(UserEntity)
         private readonly userRepository: Repository<UserEntity>
     ) {}
-    
+
     async create (user: UserDto): Promise<UserDto> {
         return this.userRepository.save(user);
     }
@@ -24,13 +24,11 @@ export class UserService {
         const manager = getManager()
 
         const user = await manager.findOne(UserEntity, { where: {address: userAddress}})
-        
-        
+
         if (!user) {
             throw new HttpException('User not registered.', HttpStatus.NOT_FOUND)
         }
-        
+
         return user
     }
-
 }

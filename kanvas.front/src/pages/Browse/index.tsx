@@ -7,7 +7,7 @@ import { Typography } from "../../design-system/atoms/Typography";
 const Browse = () => {
     return (
         <PageWrapper>
-            <Typography size="h1" weight='Bold'> Browse </Typography>
+            <Typography size="h1" weight='SemiBold'> Browse </Typography>
         </PageWrapper>
     )
 }

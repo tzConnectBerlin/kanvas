@@ -4,7 +4,7 @@ import { FC } from 'react';
 import { Theme, Typography as MTypography, TypographyProps as MTypographyProps } from '@mui/material';
 
 export interface TypographyProps extends Omit<MTypographyProps, 'variant'> {
-    weight: "Bold" | "Medium" | "Light";
+    weight: "SemiBold" | "Medium" | "Light";
     size?: | 'body1'
         | 'body2'
         | 'button'
@@ -65,7 +65,7 @@ export const Typography : FC<TypographyProps> = ({size, weight, children, trunca
     return (
         <StyledTypography
             className={truncate ? 'truncate ' + props.className : props.className}
-            fontFamily={`Roboto ${weight ? weight : 'Light'}`}
+            fontFamily={`Poppins ${weight ? weight : 'Light'}`}
             fontSize={size === 'subtitle1' ? '1.1rem' : fontSize as any}
             lines={lines}
             variant={variant}

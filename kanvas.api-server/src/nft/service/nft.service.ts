@@ -12,7 +12,7 @@ export class NftService {
         @InjectRepository(NftEntity)
         private readonly nftRepository: Repository<NftEntity>
     ) {}
-    
+
     async create (nft: NftDto): Promise<NftEntity> {
         return this.nftRepository.save(nft);
     }
@@ -48,20 +48,20 @@ export class NftService {
         const nfts = await connection
 								.createQueryBuilder(NftEntity,'nfts')
 								.innerJoinAndSelect(
-									'nfts.categories', 
+									'nfts.categories',
 									'categories'
 								)
 								.where('categories.name = :categoryName', { categoryName: categoryName })
 								.take(12)
 								.skip(skip)
 								.getMany();
-                
+
         console.log(nfts)
 
         if (!nfts) {
             throw new HttpException('No Nfts for this category.', HttpStatus.NOT_FOUND)
-        }                   
-        
+        }
+
         return nfts
     }
 }

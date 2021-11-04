@@ -116,7 +116,7 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                     props.profilesSearchResult.loading ?
                         <>
                             <StyledHeaderStack direction='row'>
-                                <Typography size="h4" weight="Bold"> Profiles </Typography>
+                                <Typography size="h4" weight="SemiBold"> Profiles </Typography>
                             </StyledHeaderStack>
                             <StyledContentStack spacing={1}>
                                 {
@@ -135,7 +135,7 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                         :
                             <>
                                 <StyledHeaderStack direction='row'>
-                                    <Typography size="h4" weight="Bold"> Profiles </Typography>
+                                    <Typography size="h4" weight="SemiBold"> Profiles </Typography>
                                     <FlexSpacer/>
                                     <Typography size="inherit" weight="Light" color="#e77f52 !important" sx={{cursor: 'pointer'}}> See all </Typography>
                                 </StyledHeaderStack>
@@ -158,7 +158,7 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                     props.artworksSearchResult.loading ?
                         <>
                             <StyledHeaderStack direction='row'>
-                                <Typography size="h4" weight="Bold"> Artworks </Typography>
+                                <Typography size="h4" weight="SemiBold"> Artworks </Typography>
                             </StyledHeaderStack>
                             <StyledContentStack spacing={1}>
                                 {
@@ -177,7 +177,7 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                         :
                             <>
                                 <StyledHeaderStack direction='row'>
-                                    <Typography size="h4" weight="Bold"> Artworks </Typography>
+                                    <Typography size="h4" weight="SemiBold"> Artworks </Typography>
                                     <FlexSpacer/>
                                     <Typography size="inherit" weight="Light" color="#e77f52 !important" sx={{cursor: 'pointer'}}> See all </Typography>
                                 </StyledHeaderStack>
@@ -198,7 +198,7 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                     props.tagsSearchResult.loading ?
                         <>
                             <StyledHeaderStack direction='row'>
-                                <Typography size="h4" weight="Bold"> Tags </Typography>
+                                <Typography size="h4" weight="SemiBold"> Tags </Typography>
                             </StyledHeaderStack>
                             <StyledContentStack sx={{marginLeft: '1em'}}>
                                 <StyledGrid container spacing={2}>
@@ -219,7 +219,7 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                             
                             <>
                                 <StyledHeaderStack direction='row'>
-                                    <Typography size="h4" weight="Bold"> Tags </Typography>
+                                    <Typography size="h4" weight="SemiBold"> Tags </Typography>
                                     <FlexSpacer/>
                                     <Typography size="inherit" weight="Light" color="#e77f52 !important" sx={{cursor: 'pointer'}}> See all </Typography>
                                 </StyledHeaderStack>

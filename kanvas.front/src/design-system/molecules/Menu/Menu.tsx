@@ -65,7 +65,7 @@ const StyledLink = styled(NavLink)<SearchProps>`
     
     &.active {
         p {
-            font-family: 'Roboto Medium' !important;
+            font-family: 'Poppins Medium' !important;
             color: ${props => props.theme.palette.text.primary} !important;
         }
     }
@@ -269,7 +269,7 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
                 <MobileStyledMenuContent expandMenu={expandMenu} direction="column" spacing={2} sx={{alignItems: 'beginning'}}>
                     
                     <StyledLink to='/store' >
-                        <Typography size="h2" weight="Bold" color='#9b9b9b' sx={{cursor: 'pointer'}}> Store </Typography>
+                        <Typography size="h2" weight="SemiBold" color='#9b9b9b' sx={{cursor: 'pointer'}}> Store </Typography>
                     </StyledLink>
 
                     <FlexSpacer borderBottom={false} minHeight={2}/>
