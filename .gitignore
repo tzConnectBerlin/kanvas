@@ -73,3 +73,6 @@ yarn-debug.log*
 yarn-error.log*
 
 nginx.vars
+
+# vim
+*.swp
