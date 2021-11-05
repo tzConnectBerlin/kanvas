@@ -26,6 +26,7 @@
   },
   "homepage": "http://localhost:3001/",
   "include": [
-    "src"
+    "src",
+    "@types",
   ]
 }
