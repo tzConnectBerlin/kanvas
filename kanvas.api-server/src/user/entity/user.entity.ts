@@ -4,4 +4,5 @@ export class UserEntity {
     name: string;
     address: string;
     signedPayload: string;
+    roles: string[];
 }

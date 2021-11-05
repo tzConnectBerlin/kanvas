@@ -2,7 +2,7 @@ import { JwtService } from  '@nestjs/jwt';
 import { UserEntity } from 'src/user/entity/user.entity';
 import { UserService } from 'src/user/service/user.service';
 import { ITokenPayload } from 'src/interfaces/token.interface';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Logger, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 const bcrypt = require('bcrypt');
 
@@ -31,7 +31,12 @@ export class AuthenticationService {
 
         await this.verifyPassword(userData.signedPayload, user.signedPayload);
 
-        return this.getCookieWithJwtToken({id: user.id, name: user.name, address: user.address}, user);
+        return this.getCookieWithJwtToken({
+                id: user.id,
+                name: user.name,
+                address: user.address,
+                roles: user.roles
+            }, user);
     }
 
     public async getLoggedUser(address: string): Promise<UserEntity> {
