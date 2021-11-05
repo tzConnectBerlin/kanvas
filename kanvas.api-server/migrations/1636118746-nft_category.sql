@@ -5,7 +5,7 @@
 BEGIN;
 CREATE TABLE nft_category (
        id SERIAL PRIMARY KEY,
-       nft_category_name TEXT NOT NULL,
+       category TEXT NOT NULL,
        description TEXT NOT NULL,
        parent INT,
        CONSTRAINT fk_nft FOREIGN KEY(parent) REFERENCES nft(id)
