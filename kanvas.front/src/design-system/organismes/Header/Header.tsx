@@ -69,7 +69,6 @@ export const Header : FC<HeaderProps> = ({ user, selectedTheme, onLogout, onCrea
 
     useEffect(() => {
         if (loggedUser.data) {
-
             setCurrentLoggedUser(loggedUser.data)
         } else if (loggedUser.error) {
 

@@ -9,9 +9,13 @@ import {
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import Typography from "../../atoms/Typography";
+
 import { useHistory } from "react-router-dom";
+
+import styled from  "@emotion/styled";
+import { Theme } from '@mui/material';
+
 
 export interface NftCardProps {
   loading?: boolean;
@@ -21,6 +25,10 @@ export interface NftCardProps {
   height?: number;
   ipfsHash?: string;
 }
+
+const StyledBioWrapper = styled.div<{theme?: Theme}>`
+  color: ${props => props.color? props.color : props.theme.palette.text.primary ?? 'black'} !important;
+`
 
 export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
 
@@ -62,7 +70,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                   "blur(10px) saturate(100%) contrast(45%) brightness(130%)",
               }}
             >
-              <div style={{ display: "block" }}>
+              <StyledBioWrapper style={{ display: "block" }}>
                 <Typography weight="SemiBold" size="h4"
                   color="#FFF"
                 >
@@ -74,7 +82,8 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                 <Typography weight="Light" size="body" color="#FFF">
                   Remaining time
                 </Typography>
-              </div>
+              </StyledBioWrapper>
+
               <CardActions disableSpacing>
                 <div
                   style={{
@@ -84,9 +93,10 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                   }}
 
                   >
-                  <Typography weight="SemiBold" size="h3" color="#FFF">{props.price ? props.price : '- ' }tz</Typography>
-                </div>
-              </CardActions>
+                    <Typography weight="SemiBold" size="h3" color="#FFF">{props.price ? props.price : '- ' }tz</Typography>
+                  </div>
+                </CardActions>
+
             </CardContent>
           </CardActionArea>
         </Card>
