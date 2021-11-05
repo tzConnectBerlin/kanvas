@@ -1,20 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm/dist/common/typeorm.decorators';
-import { Repository } from 'typeorm/repository/Repository';
 import { AuthProviderEntity } from '../entity/auth-provider.entity';
 
 @Injectable()
 export class AuthProviderService {
-    constructor(
-        @InjectRepository(AuthProviderEntity)
-        private readonly userRepository: Repository<AuthProviderEntity>
-    ) {}
-
-    async create (user: AuthProviderEntity): Promise<AuthProviderEntity> {
-        return this.userRepository.save(user);
+    async create(_user: AuthProviderEntity): Promise<AuthProviderEntity> {
+        throw new Error("Not implemented yet")
     }
-
-    async findAll (): Promise<AuthProviderEntity[]> {
-        return this.userRepository.find();
+    async findAll(): Promise<AuthProviderEntity[]> {
+        throw new Error("Not implemented yet")
     }
 }
