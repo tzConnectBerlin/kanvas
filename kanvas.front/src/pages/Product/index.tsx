@@ -18,11 +18,12 @@ const StyledStack = styled(Stack)`
     overflow: hidden;
     width: 100vw;
     height: 100%;
+    align-items: center;
 `
 
 const GridStyled = styled(Grid)`
     width: 100%;
-    
+
 `
 
 const PaperStyled = styled(Paper)`
@@ -33,8 +34,8 @@ const PaperStyled = styled(Paper)`
 `
 
 const ProductPage = () => {
-    
-    const [{ data: nfts, loading: getLoading, error: getError }, refetch] = useAxios('http://localhost:3000/nfts')
+
+
     const nftName = "AD # 8210"
     const artistName = "Aurelia Durand"
     const lorenIpsumShort = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
@@ -42,24 +43,14 @@ const ProductPage = () => {
 
     return (
         <PageWrapper>
-            <StyledStack direction='column' spacing={3}>                          
-        
+            <StyledStack direction='column' spacing={3}>
+
                 <FlexSpacer minHeight={5} />
 
-                <GridStyled container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                    {
-                        nfts ?
-                            nfts.map((nft: any, index: number) => (
-                                <GridStyled item xs={2} sm={4} md={4} key={index}>
-                                    <PaperStyled>
-                                        {nft.name}
-                                    </PaperStyled>
-                                </GridStyled>
-                            ))
-                        : 
-                        <Container
-                        sx={{ py: 8, overflow: 'hidden' }}
-                        maxWidth="lg"
+
+                <Container
+                    sx={{ py: 8, overflow: 'hidden' }}
+                    maxWidth="lg"
                     >
                         <Grid container spacing={2}>
                             <Grid container sm={12} md={7} >
@@ -84,18 +75,18 @@ const ProductPage = () => {
                             <Grid
                                 item
                                 container
-                                md={5}                               
+                                md={5}
                                 spacing={2}
                                 sx={{
                                     display: 'flex',
                                     flexDirection: 'column',
                                 }}
                             >
-                                
+
                                 {/* Headline */}
                                 <Typography
                                     size="h2"
-                                    weight="SemiBold"                                   
+                                    weight="SemiBold"
                                 >
                                     {nftName}
                                 </Typography>
@@ -121,13 +112,13 @@ const ProductPage = () => {
                                 >
                                      {lorenIpsumShort}
                                 </Typography>
-                             
+
                                 <Typography
                                     size="body"
                                     weight="SemiBold"
                                     sx={{ pt: 4 }}
                                 >
-                                    Description:  
+                                    Description:
                                 </Typography>
                                 <Typography
                                     size="h5"
@@ -141,7 +132,7 @@ const ProductPage = () => {
                                     weight="SemiBold"
                                     sx={{ pt: 4 }}
                                 >
-                                    Remaining time                                
+                                    Remaining time
                                 </Typography>
                                 <Typography
                                     size="h5"
@@ -156,15 +147,13 @@ const ProductPage = () => {
                                     spacing={2}
                                  >
                                     <CustomButton size="large" label="Primary" sx={{ mx: 2 }}/>
-                                      
+
                                     <CustomButton size="large" label="Secondary"/>
-                                   
+
                                 </Stack>
                             </Grid>
                         </Grid>
                     </Container>
-                    }
-                </GridStyled>
             </StyledStack>
         </PageWrapper>
     )
