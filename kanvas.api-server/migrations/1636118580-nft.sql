@@ -6,11 +6,11 @@ BEGIN;
 CREATE TABLE nft (
        nft_id SERIAL PRIMARY KEY,
        nft_name TEXT NOT NULL,
-       ipfsHash TEXT NOT NULL,
+       ipfs_hash TEXT NOT NULL,
        metadata JSONB NOT NULL,	--can be empty though, but not NULL
-       dataUri TEXT,
+       data_uri TEXT,
        contract TEXT,
-       tokenId TEXT
+       token_id TEXT
 );
 COMMIT;
 

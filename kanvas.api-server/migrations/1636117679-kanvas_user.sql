@@ -7,8 +7,8 @@ BEGIN;
 CREATE TABLE kanvas_user (
        kanvas_user_id SERIAL PRIMARY KEY,
        user_name TEXT NOT NULL,
-       adress TEXT,
-       signedPayload TEXT
+       address TEXT,
+       signed_payload TEXT
 );
 CREATE TABLE mtm_kanvas_user_user_role (
        kanvas_user_id INT REFERENCES kanvas_user(kanvas_user_id) ON UPDATE CASCADE ON DELETE CASCADE,
