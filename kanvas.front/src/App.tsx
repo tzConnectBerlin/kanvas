@@ -1,9 +1,9 @@
 import './App.css';
 import "animate.css/animate.min.css";
 import "react-toastify/dist/ReactToastify.css";
-
 import Router from './router';
 import styled from '@emotion/styled';
+import './i18n/config';
 import { Suspense } from 'react';
 import { ToastContainer, cssTransition } from 'react-toastify';
 
@@ -25,7 +25,7 @@ export const fade = cssTransition({
 });
 
 function App() {
-  
+
   return (    
     <Suspense fallback={<p>loading...</p>}>
       <Router/>

@@ -11,18 +11,23 @@ import {
     Container,
     Grid,
     Stack,
+    useMediaQuery,
+    Theme,
+    useTheme
 } from '@mui/material';
 import { CustomButton } from '../../design-system/atoms/Button';
+import { useTranslation } from 'react-i18next';
+import { FC } from "react";
 
 const StyledStack = styled(Stack)`
     overflow: hidden;
     width: 100vw;
     height: 100%;
+    align-items: center;
 `
 
 const GridStyled = styled(Grid)`
-    width: 100%;
-    
+    width: 100%;   
 `
 
 const PaperStyled = styled(Paper)`
@@ -32,32 +37,38 @@ const PaperStyled = styled(Paper)`
     align-items: center;
 `
 
-const ProductPage = () => {
+
+export interface ProductPageProps {
+    id?: string;
+    theme?: Theme;
+    loading?: boolean;
+    responsive?: boolean;
+}
+
+
+
+export const ProductPage : FC<ProductPageProps> = ({loading=false, responsive=false, id, ...props}) => {
+    const { t } = useTranslation(['translation']);
     
+    const theme = useTheme()
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    // const isMobile = useMediaQuery(' (max-width:382px)');
+
     const [{ data: nfts, loading: getLoading, error: getError }, refetch] = useAxios('http://localhost:3000/nfts')
-    const nftName = "AD # 8210"
-    const artistName = "Aurelia Durand"
-    const lorenIpsumShort = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-    const lorenIpsum = "Lorem ipsum dolor sit amet, labore et dolore magna aliqua."
+    
+    
+
+    const data = {
+        nftName: 'AD # 8210',
+        artistName: 'Aurélia Durand',
+        time: '12:12:43:00'                              
+    }
 
     return (
         <PageWrapper>
-            <StyledStack direction='column' spacing={3}>                          
-        
+            <StyledStack direction='column' spacing={3}>                                  
                 <FlexSpacer minHeight={5} />
-
-                <GridStyled container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
-                    {
-                        nfts ?
-                            nfts.map((nft: any, index: number) => (
-                                <GridStyled item xs={2} sm={4} md={4} key={index}>
-                                    <PaperStyled>
-                                        {nft.name}
-                                    </PaperStyled>
-                                </GridStyled>
-                            ))
-                        : 
-                        <Container
+                    <Container
                         sx={{ py: 8, overflow: 'hidden' }}
                         maxWidth="lg"
                     >
@@ -93,33 +104,37 @@ const ProductPage = () => {
                             >
                                 
                                 {/* Headline */}
-                                <Typography
-                                    size="h2"
-                                    weight="SemiBold"                                   
-                                >
-                                    {nftName}
-                                </Typography>
+
                                 <Typography
                                     size="h4"
-                                    weight="SemiBold"
-                                    sx={{ pt: 1,  mb: 4 }}
+                                    weight="SemiBold"                                    
+                                    sx={{marginTop: isMobile?'5rem':undefined, pt: 1,  mb: 1}}
                                 >
-                                    {artistName}
+                                    {data.artistName}
                                 </Typography>
+                             
+                                <Typography
+                                    size="h2"
+                                    weight="SemiBold"
+                                    >
+                                    {data.nftName}
+                                </Typography>
+                                    
+                              
                                 {/* Headline */}
                                 <Typography
                                     size="h5"
                                     weight="SemiBold"
                                     sx={{ pt: 4}}
                                 >
-                                    About the artist:
+                                   {t('product.description.part_1')}
                                 </Typography>
                                 <Typography
                                     size="h5"
                                     weight="Light"
                                     sx={{ pt: 2,  mb: 1 }}
                                 >
-                                     {lorenIpsumShort}
+                                     {t('common.lorenIpsumShort')}
                                 </Typography>
                              
                                 <Typography
@@ -127,44 +142,40 @@ const ProductPage = () => {
                                     weight="SemiBold"
                                     sx={{ pt: 4 }}
                                 >
-                                    Description:  
+                                   {t('product.description.part_2')}
                                 </Typography>
                                 <Typography
                                     size="h5"
                                     weight="Light"
                                     sx={{ pt: 2,  mb: 1 }}
                                 >
-                                     {lorenIpsum}
+                                    {t('common.lorenIpsum')}
                                 </Typography>
                                 <Typography
                                     size="body1"
                                     weight="SemiBold"
                                     sx={{ pt: 4 }}
                                 >
-                                    Remaining time                                
+                                   {t('product.description.part_3')}
                                 </Typography>
                                 <Typography
                                     size="h5"
                                     weight="Light"
                                     sx={{ pt: 2,  mb: 1 }}
                                 >
-                                     12:12:43:00
+                                     {data.time}
                                 </Typography>
                                 <Stack
                                     sx={{ pt: 4, mt: 2 }}
                                     direction="row"
                                     spacing={2}
-                                 >
-                                    <CustomButton size="large" label="Primary" sx={{ mx: 2 }}/>
-                                      
-                                    <CustomButton size="large" label="Secondary"/>
-                                   
+                                 >                                    
+                                    <CustomButton size="large" label={t('product.button_1')}  sx={{width: isMobile? '100%' :undefined, mx: 2}} />                                                                                                                                                                                              
                                 </Stack>
                             </Grid>
                         </Grid>
-                    </Container>
-                    }
-                </GridStyled>
+                    </Container>               
+           
             </StyledStack>
         </PageWrapper>
     )
