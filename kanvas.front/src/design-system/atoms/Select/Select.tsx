@@ -6,18 +6,18 @@ import FormControl from '@mui/material/FormControl';
 
 import { FC } from 'react';
 import { Theme } from '@mui/material';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Select, {SelectProps as MuiSelectProps, SelectChangeEvent } from '@mui/material/Select';
 
-interface SelectedProps {
-
+interface SelectedProps extends MuiSelectProps {
+    id: string;
+    selectedOption: string;
+    setSelectedOption: Function;
 }
 
-const StyledDiv = styled.div<{theme?: Theme}>`
-    color: ${props => props.theme.palette.text.primary} !important;
-`
 
 const StyledFormControl = styled(FormControl)<{theme?: Theme}>`
-    margin-top: 0;
+    margin: 0;
+    margin-right: 1.4rem;
 
     .MuiOutlinedInput-root.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-formControl:after {
         border: none;
@@ -77,31 +77,30 @@ const StyledInputLabel = styled(InputLabel)<{theme?: Theme}>`
 
 export const CustomSelect : FC<SelectedProps> = ({...props}) => {
 
-    const [sort, setSort] = React.useState('');
-
     const handleChange = (event: SelectChangeEvent) => {
-        setSort(event.target.value);
+        props.setSelectedOption(event.target.value);
     };
 
   return (
-    <StyledDiv>
-        <StyledFormControl  variant="outlined" sx={{ m: 1, minWidth: 80, maxHeight: 40}}>
-            <StyledInputLabel variant="filled" id="demo-simple-select-autowidth-label" shrink={false} disableAnimation>{sort !== '' ? '' : "Sort"}</StyledInputLabel>
-                <Select
-                    labelId="demo-simple-select-autowidth-label"
-                    id="demo-simple-select-autowidth"
-                    value={sort}
-                    onChange={handleChange}
-                    autoWidth
-                >
-                    <MenuItem value="">
-                        <em>None</em>
-                    </MenuItem>
-                    <MenuItem value={10}>Twenty</MenuItem>
-                    <MenuItem value={21}>Twenty one</MenuItem>
-                    <MenuItem value={22}>Twenty one and a half</MenuItem>
-                </Select>
-        </StyledFormControl>
-    </StyledDiv>
+    <StyledFormControl  variant="outlined" sx={{ m: 1, minWidth: 80, maxHeight: 40}} disabled={props.disabled ?? false}>
+        <StyledInputLabel variant="filled" id={`${props.id}-label"`} shrink={false} disableAnimation>{props.selectedOption !== '' ? '' : "Sort"}</StyledInputLabel>
+            <Select
+                labelId={`${props.id}-label"`}
+                id={props.id}
+                value={props.selectedOption}
+                onChange={handleChange}
+                autoWidth
+            >
+                <MenuItem value="">
+                    <em>None</em>
+                </MenuItem>
+                <MenuItem value={'asc-name'}>asc - Name</MenuItem>
+                <MenuItem value={'desc-name'}>desc - Name</MenuItem>
+                <MenuItem value={'asc-price'}>asc - Price</MenuItem>
+                <MenuItem value={'desc-price'}>desc - Price</MenuItem>
+                <MenuItem value={'asc-created'}>asc - Created</MenuItem>
+                <MenuItem value={'desc-created'}>desc - Created</MenuItem>
+            </Select>
+    </StyledFormControl>
   );
 }

@@ -12,6 +12,7 @@ import { Grid, Stack, Paper, Theme, Pagination } from "@mui/material";
 import { CustomButton } from '../../design-system/atoms/Button';
 import { CustomSelect } from '../../design-system/atoms/Select';
 import { Typography } from "../../design-system/atoms/Typography";
+import { useLocation, useParams } from 'react-router-dom';
 
 const StyledStack = styled(Stack)`
     overflow: hidden;
@@ -54,6 +55,12 @@ const StyledPagination = styled(Pagination)<{theme?: Theme}>`
 
 const StorePage = () => {
 
+    const search = useLocation().search
+
+    const categories = new URLSearchParams(search).get('categories')
+    const sort = new URLSearchParams(search).get('sort')
+    const page = new URLSearchParams(search).get('page')
+
     // Api calls for the categories and the nfts
     const [nftsResponse, getNfts] = useAxios('http://localhost:3000/nfts', { manual: true })
     const [categoriesResponse, getCategories] = useAxios('http://localhost:3000/categories', { manual: true })
@@ -64,10 +71,19 @@ const StorePage = () => {
     const [data, setData] = useState(true);
 
     const [selectedFilters, setSelectedFilters] = useState<any[]>([])
+    const [selectedSort, setSelectedSort] = useState('')
 
-    const handleChange = () => {
+    const handlePaginationChange = () => {
         // Call endpoint with correcponding variables
     }
+
+    useEffect(() => {
+
+        console.log(categories)
+        console.log(sort)
+        console.log(page)
+
+    }, [])
 
     useEffect(() => {
         getNfts()
@@ -86,12 +102,9 @@ const StorePage = () => {
 
                 {/* Toggle options */}
                 <Stack direction="row">
-                    <CustomButton size="medium" onClick={() => setFilterOpen(!filterOpen)} aria-label="loading" icon={<StyledListIcon />} label={`Filters ${selectedFilters.length > 0 ? `  - ${selectedFilters.length}` : ''}`} sx={{marginLeft: '1.5rem !important'}} />
+                    <CustomButton size="medium" onClick={() => setFilterOpen(!filterOpen)} aria-label="loading" icon={<StyledListIcon />} label={`Filters ${selectedFilters.length > 0 ? `  - ${selectedFilters.length}` : ''}`} sx={{marginLeft: '1.5rem !important'}} disabled={nftsResponse.loading} />
                     <FlexSpacer/>
-
-
-                    <CustomSelect />
-                    <CustomButton size="medium" onClick={() => setData(!data)} aria-label="data" label={'Sort'} icon={<StyledKeyboardArrowDownOutlinedIcon />} sx={{marginRight: '1.5rem !important'}} />
+                    <CustomSelect id='Sort filter - store page' selectedOption={selectedSort} setSelectedOption={setSelectedSort} disabled={nftsResponse.loading}/>
                 </Stack>
 
                 <Stack direction="row">
@@ -102,8 +115,9 @@ const StorePage = () => {
 
                 <Stack direction="row">
                     <FlexSpacer/>
-                    <StyledPagination count={10} onChange={handleChange} variant="outlined" shape="rounded" />
+                    <StyledPagination count={10} onChange={handlePaginationChange} variant="outlined" shape="rounded" disabled={nftsResponse.loading}/>
                 </Stack>
+
                 <FlexSpacer minHeight={5} />
             </StyledStack>
         </PageWrapper>
