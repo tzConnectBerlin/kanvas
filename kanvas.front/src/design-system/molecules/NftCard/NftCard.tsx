@@ -39,7 +39,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
   }
 
   return (
-      loading ? (
+      !loading ? (
         <Card
           sx={{
             borderRadius: 0,
@@ -103,8 +103,6 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
       ) : (
         <Stack spacing={1}>
           <Skeleton variant="rectangular" width={"100%"} height={302} />
-          <Skeleton variant="circular" width={40} height={40} />
-          <Skeleton variant="text" />
         </Stack>
       )
   );

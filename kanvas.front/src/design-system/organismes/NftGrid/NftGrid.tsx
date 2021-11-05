@@ -34,12 +34,7 @@ const StyledGridItem = styled(Grid)`
     padding: 1.5rem;
 `
 
-const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
 export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
-
-    const [loading, setLoading] = useState(false);
-    const [data, setData] = useState(true);
 
     return (
         <>
@@ -60,25 +55,49 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                                 name={nft.name}
                                 ipfsHash={nft.ipfsHash}
                                 price={nft.price}
-                                loading={!loading}
+                                loading={props.loading}
                             />
                         </StyledGridItem>
                     ))}
                 </StyledGrid>
-            ) : (
-                <StyledGrid>
-                    <FlexSpacer minHeight={5} />
-                    <Typography
-                        size="h3"
-                        weight="Light"
-                        align="center"
-                        sx={{ display: 'flex', justifyContent: 'center'}}
-                        gutterBottom
+            ) :
+
+                props.loading ?
+                    <StyledGrid
+                        container
+                        lg={props.open ? 12 : 9}
+                        md={props.open ? 9 : 6}
+
                     >
-                        No Data
-                    </Typography>
-                </StyledGrid>
-            )}
+                        {[0,0,0,0,0,0,0,0,0].map((nft) => (
+                            <StyledGridItem item
+                                lg={props.open ? 4 : 3}
+                                md={props.open ? 6 : 4}
+                                xs={12}
+                                >
+                                <NftCard
+                                    name={''}
+                                    ipfsHash={''}
+                                    price={0}
+                                    loading={true}
+                                />
+                            </StyledGridItem>
+                        ))}
+                    </StyledGrid>
+                :
+                    <StyledGrid>
+                        <FlexSpacer minHeight={5} />
+                        <Typography
+                            size="h3"
+                            weight="Light"
+                            align="center"
+                            sx={{ display: 'flex', justifyContent: 'center'}}
+                            gutterBottom
+                        >
+                            No Data
+                        </Typography>
+                    </StyledGrid>
+            }
         </>
     );
 };

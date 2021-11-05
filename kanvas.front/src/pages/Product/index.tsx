@@ -27,7 +27,7 @@ const StyledStack = styled(Stack)`
 `
 
 const GridStyled = styled(Grid)`
-    width: 100%;   
+    width: 100%;
 `
 
 const PaperStyled = styled(Paper)`
@@ -36,7 +36,6 @@ const PaperStyled = styled(Paper)`
     justify-content: center;
     align-items: center;
 `
-
 
 export interface ProductPageProps {
     id?: string;
@@ -49,28 +48,29 @@ export interface ProductPageProps {
 
 export const ProductPage : FC<ProductPageProps> = ({loading=false, responsive=false, id, ...props}) => {
     const { t } = useTranslation(['translation']);
-    
+
     const theme = useTheme()
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     // const isMobile = useMediaQuery(' (max-width:382px)');
 
     const [{ data: nfts, loading: getLoading, error: getError }, refetch] = useAxios('http://localhost:3000/nfts')
-    
-    
+
+
 
     const data = {
         nftName: 'AD # 8210',
         artistName: 'Aurélia Durand',
-        time: '12:12:43:00'                              
+        time: '12:12:43:00'
     }
 
     return (
         <PageWrapper>
-            <StyledStack direction='column' spacing={3}>                                  
+            <StyledStack direction='column' spacing={3}>
                 <FlexSpacer minHeight={5} />
                     <Container
                         sx={{ py: 8, overflow: 'hidden' }}
                         maxWidth="lg"
+
                     >
                         <Grid container spacing={2}>
                             <Grid container sm={12} md={7} >
@@ -95,32 +95,33 @@ export const ProductPage : FC<ProductPageProps> = ({loading=false, responsive=fa
                             <Grid
                                 item
                                 container
-                                md={5}                               
+                                md={5}
                                 spacing={2}
                                 sx={{
                                     display: 'flex',
                                     flexDirection: 'column',
                                 }}
                             >
-                                
+
                                 {/* Headline */}
 
                                 <Typography
+
                                     size="h4"
-                                    weight="SemiBold"                                    
+                                    weight="SemiBold"
                                     sx={{marginTop: isMobile?'5rem':undefined, pt: 1,  mb: 1}}
                                 >
                                     {data.artistName}
                                 </Typography>
-                             
+
                                 <Typography
                                     size="h2"
                                     weight="SemiBold"
                                     >
                                     {data.nftName}
                                 </Typography>
-                                    
-                              
+
+
                                 {/* Headline */}
                                 <Typography
                                     size="h5"
@@ -136,13 +137,15 @@ export const ProductPage : FC<ProductPageProps> = ({loading=false, responsive=fa
                                 >
                                      {t('common.lorenIpsumShort')}
                                 </Typography>
-                             
+
                                 <Typography
                                     size="body"
                                     weight="SemiBold"
                                     sx={{ pt: 4 }}
                                 >
+
                                    {t('product.description.part_2')}
+
                                 </Typography>
                                 <Typography
                                     size="h5"
@@ -169,13 +172,13 @@ export const ProductPage : FC<ProductPageProps> = ({loading=false, responsive=fa
                                     sx={{ pt: 4, mt: 2 }}
                                     direction="row"
                                     spacing={2}
-                                 >                                    
-                                    <CustomButton size="large" label={t('product.button_1')}  sx={{width: isMobile? '100%' :undefined, mx: 2}} />                                                                                                                                                                                              
+
+                                 >
+                                    <CustomButton size="large" label={t('product.button_1')}  sx={{width: isMobile? '100%' :undefined, mx: 2}} />
                                 </Stack>
                             </Grid>
                         </Grid>
-                    </Container>               
-           
+                    </Container>
             </StyledStack>
         </PageWrapper>
     )

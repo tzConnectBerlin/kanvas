@@ -83,7 +83,16 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
   }
 
   &:disabled {
+    background-color: ${props => props.theme.palette.background.default};
     border-color: transparent;
+
+    svg {
+      color: #C4C4C4 !important;
+    }
+
+    p {
+      color: #C4C4C4 !important;
+    }
   }
 
   @media (max-width: 1100px) {
@@ -131,6 +140,7 @@ export const CustomButton : FC<CustomButtonProps> = ({
       {...props}
       primary={primary}
       disableRipple
+      disabled={props.disabled}
     >
         {
             loading ?
