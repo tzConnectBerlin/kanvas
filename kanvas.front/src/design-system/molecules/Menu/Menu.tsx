@@ -81,12 +81,11 @@ interface MenuIconProps {
 }
 
 const WrapperMenuIcon = styled.div<MenuIconProps>`
-    height: 40px;
-    width: 40px;
-    border-radius: 2rem;
+    height: 2.1rem;
+    width: 2.1rem;
 
     background-color: ${props => props.theme.palette.background.paper };
-    filter: ${props => props.theme.dropShadow.default };
+    outline: ${props => `solid 1px ${props.theme.palette.text.primary}`};
     transition: filter 0.2s;
 
     display: flex;
@@ -98,7 +97,8 @@ const WrapperMenuIcon = styled.div<MenuIconProps>`
     transition-property: opacity, transform, visibility, filter;
 
     &:hover {
-        filter: ${props => props.theme.dropShadow.hover };
+        cursor: pointer;
+        outline: ${props => `solid 2px ${props.theme.palette.text.primary}`};
         transition: filter 0.2s;
     }
 `
@@ -166,8 +166,8 @@ const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
    display: none;
 
    @media (max-width: 1100px) {
-        display: flex;
-        height: ${props => props.expandMenu ? 'auto': '0%'};
+        display: ${props => props.expandMenu ? 'flex': 'none'};
+        height: ${props => props.expandMenu ? 'auto': '0'};
         opacity: ${props => props.expandMenu ? '1' : '0'};
         width: auto;
 

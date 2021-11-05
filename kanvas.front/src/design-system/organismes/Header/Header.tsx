@@ -71,12 +71,13 @@ export const Header : FC<HeaderProps> = ({ user, selectedTheme, onLogout, onCrea
         if (loggedUser.data) {
             setCurrentLoggedUser(loggedUser.data)
         } else if (loggedUser.error) {
+
         }
     }, [loggedUser])
 
     return (
         <StyledBox sx={{
-            height: '6rem',
+            height: '5rem',
             display: 'flex',
             alignItems: 'center',
             paddingRight: '2rem'

@@ -54,7 +54,7 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
 
   height: ${({ size }) => size === 'large' ? '44px' : size === 'medium' ? '40px' : '38px'};
 
-  padding: 0.2em 1.5em 0.4em;
+  padding: 0.3em 1.5em 0.4em;
 
   font-size: ${({ size }) => size === 'large' ? '1.125rem' : size === 'medium' ? '0.975' : '0.8'};
 
@@ -139,10 +139,7 @@ export const CustomButton : FC<CustomButtonProps> = ({
                 (
                     <StyledContainer onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
                         {
-                            props.verified && isHover ?
-                              <StyledClearContent />
-                            :
-                              props.icon
+                          props.icon
                         }
                         <Typography size="inherit" weight={textSize}> {label} </Typography>
                     </StyledContainer>

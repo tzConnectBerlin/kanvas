@@ -1,6 +1,7 @@
 import {
   CardActionArea,
   CardActions,
+  Grid,
   IconButton,
   Skeleton,
   Stack,
@@ -9,31 +10,46 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "../../atoms/Typography";
+
+import { useHistory } from "react-router-dom";
+
 import styled from  "@emotion/styled";
 import { Theme } from '@mui/material';
 
+
 export interface NftCardProps {
   loading?: boolean;
-  title?: string;
-  height?: string;
+  id?: string;
+  name?: string;
+  price?: number;
+  height?: number;
+  ipfsHash?: string;
 }
 
 const StyledBioWrapper = styled.div<{theme?: Theme}>`
-color: ${props => props.color? props.color : props.theme.palette.text.primary ?? 'black'} !important;
+  color: ${props => props.color? props.color : props.theme.palette.text.primary ?? 'black'} !important;
 `
-export const NftCard: React.FC<NftCardProps> = ({ loading, height }) => {
+
+export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
+
+  const history = useHistory()
+
+  const handleRedirect = (path: string) => {
+    history.push(path)
+  }
+
   return (
-    <>
-      {loading ? (
+      loading ? (
         <Card
           sx={{
-            height: height,
+            borderRadius: 0,
+            height: props.height,
             display: "flex",
             flexDirection: "column",
             position: "relative",
           }}
         >
-          <CardActionArea href="/product">
+          <CardActionArea onClick={() => handleRedirect(`/nft/${props.id}`)} sx={{width: 'auto'}}>
             <CardMedia
               component="img"
               image="https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg"
@@ -46,8 +62,9 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, height }) => {
                 justifyContent: "space-between",
                 alignItems: "center",
                 position: "absolute",
-                bottom: "-7px",
-                width: "-webkit-fill-available",
+                bottom: "0",
+                right: "0",
+                left: "0",
                 backgroundColor: "rgba( 0, 0, 0, 0.35)",
                 backdropFilter:
                   "blur(10px) saturate(100%) contrast(45%) brightness(130%)",
@@ -57,19 +74,29 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, height }) => {
                 <Typography weight="SemiBold" size="h4"
                   color="#FFF"
                 >
-                  NFT name
+                  {props.name}
                 </Typography>
                 <Typography weight="Light" size="body" color="#FFF">
-                  Artist name</Typography>
+                  Artist name
+                </Typography>
                 <Typography weight="Light" size="body" color="#FFF">
                   Remaining time
                 </Typography>
               </StyledBioWrapper>
-              <CardActions disableSpacing sx={{marginTop: 'auto', marginBottom: '-10px'}}>
-                   <Typography weight="SemiBold" sx={{alignSelf: 'end',  pb: '0'}} size="h3" color="#FFF">
-                    28.3tz
-                  </Typography>
-               </CardActions>
+
+              <CardActions disableSpacing>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-end",
+                  }}
+
+                  >
+                    <Typography weight="SemiBold" size="h3" color="#FFF">{props.price ? props.price : '- ' }tz</Typography>
+                  </div>
+                </CardActions>
+
             </CardContent>
           </CardActionArea>
         </Card>
@@ -79,7 +106,6 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, height }) => {
           <Skeleton variant="circular" width={40} height={40} />
           <Skeleton variant="text" />
         </Stack>
-      )}
-    </>
+      )
   );
 };
