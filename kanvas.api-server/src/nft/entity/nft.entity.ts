@@ -6,7 +6,7 @@ export class NftEntity {
     name: string;
     ipfsHash: string;
     metadata: any;		// TODO wut
-    dataUrl: string;
+    dataUri: string;
     contract: string;
     tokenId: string;
     categories: CategoryEntity[];

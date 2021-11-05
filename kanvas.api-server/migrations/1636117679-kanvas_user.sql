@@ -4,21 +4,21 @@
 
 BEGIN;
 -- mtm = many to many
-CREATE TABLE mtm_kanvas_user_user_role (
-       kanvas_user_id INT NOT NULL,
-       user_role_id INT NOT NULL
-);
 CREATE TABLE kanvas_user (
-       id SERIAL PRIMARY KEY,
+       kanvas_user_id SERIAL PRIMARY KEY,
        user_name TEXT NOT NULL,
        adress TEXT,
        signedPayload TEXT
+);
+CREATE TABLE mtm_kanvas_user_user_role (
+       kanvas_user_id INT REFERENCES kanvas_user(kanvas_user_id) ON UPDATE CASCADE ON DELETE CASCADE,
+       user_role_id INT REFERENCES user_role(user_role_id) ON UPDATE CASCADE ON DELETE CASCADE,
 );
 COMMIT;
 
 -- ==== DOWN ====
 
 BEGIN;
-DROP TABLE mtm_kanvas_user_user_role;
 DROP TABLE kanvas_user;
+DROP TABLE mtm_kanvas_user_user_role;
 COMMIT;
