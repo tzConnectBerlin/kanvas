@@ -1,11 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-
-@Entity('auth_provider')
+// TODO let's just use some immutable data to represent this instead of classes
 export class AuthProviderEntity {
-    @PrimaryGeneratedColumn()
     id: number;
-
-    @Column()
     name: string;
-
 }

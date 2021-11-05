@@ -5,7 +5,7 @@ import { NftDto } from '../dto/nft.dto';
 
 @Controller('nfts')
 export class NftController {
-    constructor (private nftService: NftService) {}
+    constructor(private nftService: NftService) { }
 
     @Post()
     async create(@Body() nft: NftDto): Promise<NftEntity> {
@@ -15,10 +15,5 @@ export class NftController {
     @Get()
     async findAll(): Promise<NftEntity[]> {
         return this.nftService.findAll();
-    }
-
-    @Get('filters')
-    findByCategories(@Query('category') category: string, @Query('skip') skip: number ): Promise<NftEntity[]> {
-        return this.nftService.findByCategories(category, skip);
     }
 }

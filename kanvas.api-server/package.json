@@ -26,17 +26,16 @@
     "@nestjs/jwt": "^8.0.0",
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-express": "^7.6.13",
-    "@nestjs/typeorm": "^8.0.2",
+    "@types/passport-jwt": "^3.0.6",
     "bcrypt": "^5.0.1",
     "class-validator": "^0.13.1",
+    "dotenv": "^10.0.0",
     "passport": "^0.5.0",
     "passport-jwt": "^4.0.0",
     "pg": "^8.7.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
-    "rxjs": "^7",
-    "typeorm": "^0.2.38",
-    "typeorm-naming-strategies": "^2.0.0"
+    "rxjs": "^7"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.5.6",
