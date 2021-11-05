@@ -4,7 +4,7 @@
 
 BEGIN;
 CREATE TABLE user_role (
-       user_role_id SERIAL PRIMARY KEY,
+       id SERIAL PRIMARY KEY,
        role_label TEXT UNIQUE NOT NULL
 );
 COMMIT;

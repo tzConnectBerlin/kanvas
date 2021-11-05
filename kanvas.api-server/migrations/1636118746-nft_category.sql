@@ -4,15 +4,15 @@
 
 BEGIN;
 CREATE TABLE nft_category (
-       nft_category_id SERIAL PRIMARY KEY,
+       id SERIAL PRIMARY KEY,
        nft_category_name TEXT NOT NULL,
        description TEXT NOT NULL,
        parent INT,
-       CONSTRAINT fk_nft FOREIGN KEY(parent) REFERENCES nft(nft_id)
+       CONSTRAINT fk_nft FOREIGN KEY(parent) REFERENCES nft(id)
 );
 CREATE TABLE mtm_nft_category (
-       nft_category_id INT REFERENCES nft_category(nft_category_id) ON UPDATE CASCADE ON DELETE CASCADE,
-       nft_id INT REFERENCES nft(nft_id) ON UPDATE CASCADE ON DELETE CASCADE
+       nft_category_id INT REFERENCES nft_category(id) ON UPDATE CASCADE ON DELETE CASCADE,
+       nft_id INT REFERENCES nft(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 COMMIT;
 

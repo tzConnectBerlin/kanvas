@@ -4,7 +4,7 @@
 
 BEGIN;
 CREATE TABLE nft (
-       nft_id SERIAL PRIMARY KEY,
+       id SERIAL PRIMARY KEY,
        nft_name TEXT NOT NULL,
        ipfs_hash TEXT NOT NULL,
        metadata JSONB NOT NULL,	--can be empty though, but not NULL
