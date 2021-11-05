@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post } from '@nestjs/common'
+import { Body, Controller, Get, Query, Post } from '@nestjs/common'
 import { NftService } from '../service/nft.service'
 import { NftEntity } from 'src/nft/entity/nft.entity'
+import { FilterParams, AllNftsParams } from '../params'
 
 @Controller('nfts')
 export class NftController {
@@ -11,8 +12,14 @@ export class NftController {
     return this.nftService.create(nft)
   }
 
+  @Get('/filter')
+  async filter(@Query() params: FilterParams) {
+    console.log('parsed params: ', params)
+    return this.nftService.filter(params)
+  }
+
   @Get()
-  async findAll(): Promise<NftEntity[]> {
-    return this.nftService.findAll()
+  async findAll(@Query() params: AllNftsParams): Promise<NftEntity[]> {
+    return this.nftService.findAll(params)
   }
 }

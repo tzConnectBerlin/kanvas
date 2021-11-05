@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common'
 import { NftController } from './controller/nft.controller'
-import { NftEntity } from './entity/nft.entity'
 import { NftService } from './service/nft.service'
-import { CategoryEntity } from 'src/category/entity/category.entity'
+import { DbModule } from 'src/db.module'
 
 @Module({
-  imports: [],
+  imports: [DbModule],
   controllers: [NftController],
   providers: [NftService],
 })
