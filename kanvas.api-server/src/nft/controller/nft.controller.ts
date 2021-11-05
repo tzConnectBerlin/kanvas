@@ -1,24 +1,18 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { NftService } from '../service/nft.service';
-import { NftEntity } from 'src/nft/entity/nft.entity';
-import { NftDto } from '../dto/nft.dto';
+import { Body, Controller, Get, Post } from '@nestjs/common'
+import { NftService } from '../service/nft.service'
+import { NftEntity } from 'src/nft/entity/nft.entity'
 
 @Controller('nfts')
 export class NftController {
-    constructor (private nftService: NftService) {}
+  constructor(private nftService: NftService) {}
 
-    @Post()
-    async create(@Body() nft: NftDto): Promise<NftEntity> {
-        return this.nftService.create(nft);
-    }
+  @Post()
+  async create(@Body() nft: NftEntity): Promise<NftEntity> {
+    return this.nftService.create(nft)
+  }
 
-    @Get()
-    async findAll(): Promise<NftEntity[]> {
-        return this.nftService.findAll();
-    }
-
-    @Get('filters')
-    findByCategories(@Query('category') category: string, @Query('skip') skip: number ): Promise<NftEntity[]> {
-        return this.nftService.findByCategories(category, skip);
-    }
+  @Get()
+  async findAll(): Promise<NftEntity[]> {
+    return this.nftService.findAll()
+  }
 }

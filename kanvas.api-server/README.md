@@ -30,11 +30,11 @@ With Docker you can also run a development version of the database with `./scrip
 ## Running the app
 
 ### Migrations
+
 Replace the username/password and db name with values that match your setup
 `$ ./script/shmig -t postgresql -d postgres://dev_user:dev_password@localhost/dev_database up`
 
 To create a new migration, run `./script/shmig -t postgresql -d postgres://dev_user:dev_password@localhost/dev_database create my_table_name`
-
 
 ```bash
 # development
@@ -63,4 +63,5 @@ $ yarn run test:cov
 ```
 
 ## License
+
 Copyright All rights reserved TZ Connect, Berlin Germany

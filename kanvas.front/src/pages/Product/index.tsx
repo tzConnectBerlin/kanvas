@@ -11,8 +11,13 @@ import {
     Container,
     Grid,
     Stack,
+    useMediaQuery,
+    Theme,
+    useTheme
 } from '@mui/material';
 import { CustomButton } from '../../design-system/atoms/Button';
+import { useTranslation } from 'react-i18next';
+import { FC } from "react";
 
 const StyledStack = styled(Stack)`
     overflow: hidden;
@@ -23,7 +28,6 @@ const StyledStack = styled(Stack)`
 
 const GridStyled = styled(Grid)`
     width: 100%;
-
 `
 
 const PaperStyled = styled(Paper)`
@@ -33,24 +37,40 @@ const PaperStyled = styled(Paper)`
     align-items: center;
 `
 
-const ProductPage = () => {
+export interface ProductPageProps {
+    id?: string;
+    theme?: Theme;
+    loading?: boolean;
+    responsive?: boolean;
+}
 
 
-    const nftName = "AD # 8210"
-    const artistName = "Aurelia Durand"
-    const lorenIpsumShort = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-    const lorenIpsum = "Lorem ipsum dolor sit amet, labore et dolore magna aliqua."
+
+export const ProductPage : FC<ProductPageProps> = ({loading=false, responsive=false, id, ...props}) => {
+    const { t } = useTranslation(['translation']);
+
+    const theme = useTheme()
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    // const isMobile = useMediaQuery(' (max-width:382px)');
+
+    const [{ data: nfts, loading: getLoading, error: getError }, refetch] = useAxios('http://localhost:3000/nfts')
+
+
+
+    const data = {
+        nftName: 'AD # 8210',
+        artistName: 'Aurélia Durand',
+        time: '12:12:43:00'
+    }
 
     return (
         <PageWrapper>
             <StyledStack direction='column' spacing={3}>
-
                 <FlexSpacer minHeight={5} />
+                    <Container
+                        sx={{ py: 8, overflow: 'hidden' }}
+                        maxWidth="lg"
 
-
-                <Container
-                    sx={{ py: 8, overflow: 'hidden' }}
-                    maxWidth="lg"
                     >
                         <Grid container spacing={2}>
                             <Grid container sm={12} md={7} >
@@ -84,33 +104,38 @@ const ProductPage = () => {
                             >
 
                                 {/* Headline */}
+
+                                <Typography
+
+                                    size="h4"
+                                    weight="SemiBold"
+                                    sx={{marginTop: isMobile?'5rem':undefined, pt: 1,  mb: 1}}
+                                >
+                                    {data.artistName}
+                                </Typography>
+
                                 <Typography
                                     size="h2"
                                     weight="SemiBold"
-                                >
-                                    {nftName}
+                                    >
+                                    {data.nftName}
                                 </Typography>
-                                <Typography
-                                    size="h4"
-                                    weight="SemiBold"
-                                    sx={{ pt: 1,  mb: 4 }}
-                                >
-                                    {artistName}
-                                </Typography>
+
+
                                 {/* Headline */}
                                 <Typography
                                     size="h5"
                                     weight="SemiBold"
                                     sx={{ pt: 4}}
                                 >
-                                    About the artist:
+                                   {t('product.description.part_1')}
                                 </Typography>
                                 <Typography
                                     size="h5"
                                     weight="Light"
                                     sx={{ pt: 2,  mb: 1 }}
                                 >
-                                     {lorenIpsumShort}
+                                     {t('common.lorenIpsumShort')}
                                 </Typography>
 
                                 <Typography
@@ -118,38 +143,38 @@ const ProductPage = () => {
                                     weight="SemiBold"
                                     sx={{ pt: 4 }}
                                 >
-                                    Description:
+
+                                   {t('product.description.part_2')}
+
                                 </Typography>
                                 <Typography
                                     size="h5"
                                     weight="Light"
                                     sx={{ pt: 2,  mb: 1 }}
                                 >
-                                     {lorenIpsum}
+                                    {t('common.lorenIpsum')}
                                 </Typography>
                                 <Typography
                                     size="body1"
                                     weight="SemiBold"
                                     sx={{ pt: 4 }}
                                 >
-                                    Remaining time
+                                   {t('product.description.part_3')}
                                 </Typography>
                                 <Typography
                                     size="h5"
                                     weight="Light"
                                     sx={{ pt: 2,  mb: 1 }}
                                 >
-                                     12:12:43:00
+                                     {data.time}
                                 </Typography>
                                 <Stack
                                     sx={{ pt: 4, mt: 2 }}
                                     direction="row"
                                     spacing={2}
+
                                  >
-                                    <CustomButton size="large" label="Primary" sx={{ mx: 2 }}/>
-
-                                    <CustomButton size="large" label="Secondary"/>
-
+                                    <CustomButton size="large" label={t('product.button_1')}  sx={{width: isMobile? '100%' :undefined, mx: 2}} />
                                 </Stack>
                             </Grid>
                         </Grid>

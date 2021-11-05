@@ -1,37 +1,13 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { JoinTable, ManyToMany } from "typeorm";
-import { CategoryEntity } from 'src/category/entity/category.entity';
-import { CategoryDto } from "src/category/dto/category.dto";
+import { CategoryEntity } from 'src/category/entity/category.entity'
 
-interface IMetadata {
-
-}
-
-@Entity('nfts')
+// TODO let's replace this and all other models with just a simple immutable key/value object - preferably using Immutable.js
 export class NftEntity {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column()
-    name: string;
-
-    @Column({ nullable: true})
-    ipfsHash: string;
-
-    @Column('jsonb')
-    metadata: IMetadata;
-
-    @Column()
-    dataUrl: string;
-
-    @Column()
-    contract: string;
-
-    @Column()
-    tokenId: string;
-
-    @JoinTable({ name: 'categories_nfts' })
-    @ManyToMany(() => CategoryEntity, category => category.nfts)
-    categories: CategoryDto[];
-
+  id: number
+  name: string
+  ipfsHash: string
+  metadata: any // TODO expand on the meaning of this type
+  dataUri: string
+  contract: string
+  tokenId: string
+  categories: CategoryEntity[]
 }
