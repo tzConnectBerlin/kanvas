@@ -1,12 +1,11 @@
-import { UserDto } from '../dto/user.dto';
 import { UserEntity } from '../entity/user.entity';
 
 export class UserService {
-    async create(_user: UserDto): Promise<UserDto> {
+    async create(_user: UserEntity): Promise<UserEntity> {
         throw new Error("Not yet implemented") // TODO make a query here and parse the result
     }
 
-    async findAll(): Promise<UserDto[]> {
+    async findAll(): Promise<UserEntity[]> {
         throw new Error("Not yet implemented") // TODO make a query here and parse the result
     }
 
