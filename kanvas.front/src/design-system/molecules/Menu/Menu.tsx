@@ -81,8 +81,8 @@ interface MenuIconProps {
 }
 
 const WrapperMenuIcon = styled.div<MenuIconProps>`
-    height: 2.4rem;
-    width: 2.4rem;
+    height: 2.1rem;
+    width: 2.1rem;
 
     background-color: ${props => props.theme.palette.background.paper };
     outline: ${props => `solid 1px ${props.theme.palette.text.primary}`};

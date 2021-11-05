@@ -21,7 +21,7 @@ const Search = styled.div<{ theme?: Theme}>`
 
     max-width: 35rem;
     min-width: 15rem;
-    height: 2.4rem !important;
+    height: 2.1rem !important;
     transition: width 0.3s;
 
     display: flex;
