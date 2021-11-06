@@ -17,6 +17,7 @@ import { KukaiEmbed, Networks } from 'kukai-embed';
 import { BeaconWallet } from '@taquito/beacon-wallet';
 import { initTezos, initWallet } from './contracts/init';
 import { Header } from './design-system/organismes/Header';
+import { Footer } from './design-system/organismes/Footer';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import { INotification, NotificationEnum, CurrencyEnum } from './interfaces/notification';
@@ -76,7 +77,7 @@ const Router = () => {
             <StyledBrowserRouter>
                 <Header embedKukai={embedKukai} switchTheme={handleSelectTheme} selectedTheme={selectedTheme} notifications={undefined}/>
                 <Switch>
-                    <Route exact path="/store" component={StorePage} />
+                    <Route exact path="/" component={StorePage} />
                     <Route path="/sign-in" render={props => <SignIn beaconWallet={beaconWallet} embedKukai={embedKukai} setSignedPayload={setSignedPayload} {...props} />} />
                     <Route path="/profile/:username" component={Profile} />
                     <Route path="/product" component={ProductPage} />
@@ -84,6 +85,7 @@ const Router = () => {
                     <Route path="/create-nft" render={props => <CreateNFT {...props} />}  />
                     <Route path="/nft/:id" render={props => <CreateNFT {...props} />}  />
                 </Switch>
+                <Footer />
             </StyledBrowserRouter>
         </ThemeProvider>
     )
