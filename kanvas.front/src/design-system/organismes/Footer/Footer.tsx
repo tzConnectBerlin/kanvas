@@ -3,24 +3,61 @@ import Grid from '@mui/material/Grid';
 import { FC } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { Stack, Theme } from '@mui/material';
+import {
+    Stack,
+    Theme,
+    useMediaQuery,
+    useTheme,
+} from '@mui/material';
 import Typography from '../../atoms/Typography';
 import { Copyright } from '../../atoms/Copyright';
+import { useTranslation } from 'react-i18next';
 
 export interface FooterProps {
     selectedTheme?: string;
+    theme?: Theme;
 }
 
-const LinkStyled = styled(Link)`
-    transition: 0.2s;
-    position: absolute;
+const StyledBox = styled(Box) <{ theme?: Theme }>`
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    min-height: 8rem;
+    height: 100%;
+    padding: 2rem 0 1rem;
+    justify-content: space-between;
+    margin-top: -.2rem;
+    color: ${props => props.theme.palette.text.primary};
+    
+    background-color: ${props => props.theme.footer.background};
+
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+
+    position: sticky;
     top: 0;
+    z-index: 10;
+    transition: padding-left 0.2s, padding-right 0.2s;
+    padding:  3rem 3rem 1rem;
+
+    @media (max-width: 900px) {
+        padding-left: 1.5rem;
+        padding-right: 1rem !important;
+        transition: padding-left 0.2s, padding-right 0.2s;
+    }
+`
+const LinkStyled = styled(Link)`
+    display: block;
+    transition: 0.2s;
+    width: 100%;
+    height: 2.5rem;
     align-items: center;
 `
 
 const LogoStyled = styled.img<{ theme?: Theme }>`
     filter: ${props => props.theme.logo.filter ?? 'invert(0%)'};
+    display: block;
     height: 1.8rem;
     transition: height 0.2s;
 
@@ -38,36 +75,6 @@ const TwitterStyled = styled.img<{ theme?: Theme }>`
     filter: ${props => props.theme.logo.filter ?? 'invert(0%)'};
     height: 1.6rem;
 `
-const StyledBox = styled(Box) <{ theme?: Theme }>`
-    margin-bottom: -6rem;
-    color: ${props => props.theme.palette.text.primary};
-    
-    background-color: ${props => props.theme.footer.background};
-
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    transition: padding-left 0.2s, padding-right 0.2s;
-    padding-left: 3rem;
-
-    @media (max-width: 900px) {
-        padding-left: 1.5rem;
-        padding-right: 1rem !important;
-        transition: padding-left 0.2s, padding-right 0.2s;
-    }
-`
-
-
-// const Spacer = styled.div<FlexSpacerProps>`
-//     flex-grow: 1;
-//     justify-
-//     width: ${props => props.display ? '' : '0rem'};
-//     transition: width 0.2s;
-// `
-
 const iconStyle = {
     width: 25,
     height: 25,
@@ -80,7 +87,8 @@ const iconStyle = {
 const StyledLink = styled(Link) <{ theme?: Theme }>`
   color: ${props => props.theme.palette.text.primary};
   text-decoration: none;
-  
+
+
   @media (max-width: 1100px) {
       height: 2rem;
   }
@@ -95,99 +103,121 @@ const StyledLink = styled(Link) <{ theme?: Theme }>`
 
 export const Footer: FC<FooterProps> = () => {
     const { t } = useTranslation(['translation']);
+    const theme = useTheme()
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     return (
-        <StyledBox sx={{
-            height: '5rem',
-            display: 'flex',
-            alignItems: 'center',
-            paddingRight: '2rem',
-        }}>
-            <Grid direction="column" item xs={12} sm={12} md={3}>
-                <Grid item sx={{ display: 'flex' }}>
-                    <LinkStyled to='/'>
-                        <LogoStyled alt='Logo' src={'/img/Logo.svg'} />
-                    </LinkStyled>
+        <StyledBox >
+            <Grid item xs={12} md={4} lg={6} sx={{
+                display: 'flex',
+                height: '8rem',
+                flexDirection: 'column',
+            }}>
+                <LinkStyled to='/'>
+                    <LogoStyled alt='Logo' src={'/img/Logo.svg'} />
+                </LinkStyled>
+
+                <Typography size='body' weight='Light' sx={{
+                    marginTop: '.7rem', fontSize: '.7rem', alignSelf: 'start',
+                    marginBottom: '1rem'
+                }}>TODO: Some text here</Typography>
+            </Grid>
+
+            <Grid container md={7} lg={6} sx={{
+                marginLeft: 'auto',
+            }}>
+                <Grid item xs={6} md={3}>
+                    <Typography size="h6" weight="SemiBold" gutterBottom>
+                        {t('footer.headline_1')}
+                    </Typography>
+
+                    <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
+                        <Box component="li" sx={{ py: 0.5 }}>
+                            <StyledLink to="/store/">Store</StyledLink>
+                        </Box>
+                        <Box component="li" sx={{ py: 0.5 }}>
+                            <StyledLink to="/product/">Product</StyledLink>
+                        </Box>
+                    </Box>
+                </Grid>
+                <Grid item xs={6} md={3}>
+                    <Typography size="h6" weight="SemiBold" gutterBottom>
+                        {t('footer.headline_2')}
+                    </Typography>
+
+                    <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
+                        <Box component="li" sx={{ py: 0.5 }}>
+                            <StyledLink to="/vision/">Vision</StyledLink>
+                        </Box>
+                        <Box component="li" sx={{ py: 0.5 }}>
+                            <StyledLink to="/privacy/">NFT history</StyledLink>
+                        </Box>
+                    </Box>
                 </Grid>
 
-                <Grid item>
-                    <Copyright />
+                <Grid item xs={6} md={3} sx={{ height: '7rem' }}>
+                    <Typography weight="SemiBold" size="h6" gutterBottom>
+                        {t('footer.headline_2')}
+                    </Typography>
+
+                    <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
+                        <Box component="li" sx={{ py: 0.5 }}>
+                            <StyledLink to="/premium-themes/onepirate/terms/">Terms</StyledLink>
+                        </Box>
+                        <Box component="li" sx={{ py: 0.5 }}>
+                            <StyledLink to="/premium-themes/onepirate/privacy/">Privacy</StyledLink>
+                        </Box>
+                    </Box>
                 </Grid>
-            </Grid>
 
-            <Grid item xs={12} sm={12} md={4}>
-                <Typography size="h6" weight="SemiBold" gutterBottom>
-                    More About us
-                </Typography>
+                <Grid item xs={12} md={3}>
+                    <Typography weight="SemiBold" size="h6" gutterBottom>
+                        {t('footer.headline_3')}
+                    </Typography>
 
-                <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
-                    <Box component="li" sx={{ py: 0.5 }}>
-                        <StyledLink to="/vision/">Vision</StyledLink>
+                    <Box component="ul" sx={{ display: 'flex', paddingLeft: '0', margin: '.5rem 0 1.5rem' }}>
+                        <Box component="a"
+                            href="https://facebbok.com/tzconnect"
+                            sx={iconStyle}>
+                            <FacebookStyled
+                                src={'/img/facebook.png'}
+                                alt="Facebook"
+                            />
+                        </Box>
+                        <Box
+                            component="a"
+                            href="https://twitter.com/tzconnect"
+                            sx={iconStyle}
+                        >
+                            <TwitterStyled
+                                src={'/img/twitter.jpeg'}
+                                alt="Twitter"
+                            />
+                        </Box>
+                        <Box component="a"
+                            href="https://facebbok.com/tzconnect"
+                            sx={iconStyle}>
+                            <FacebookStyled
+                                src={'/img/facebook.png'}
+                                alt="Facebook"
+                            />
+                        </Box>
+                        <Box
+                            component="a"
+                            href="https://twitter.com/tzconnect"
+                            sx={iconStyle}
+                        >
+                            <TwitterStyled
+                                src={'/img/twitter.jpeg'}
+                                alt="Twitter"
+                            />
+                        </Box>
                     </Box>
-                    <Box component="li" sx={{ py: 0.5 }}>
-                        <StyledLink to="/privacy/">NFT history</StyledLink>
-                    </Box>
-                </Box>
-            </Grid>
 
-            <Grid item xs={12} sm={12} md={4}>
-                <Typography weight="SemiBold" size="h6" gutterBottom>
-                    Legal
-                </Typography>
-
-                <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
-                    <Box component="li" sx={{ py: 0.5 }}>
-                        <StyledLink to="/premium-themes/onepirate/terms/">Terms</StyledLink>
+                    <Box sx={{ marginTop: isMobile ? '2rem' : '3rem', marginBottom: '1rem'}} >
+                        <Copyright />
                     </Box>
-                    <Box component="li" sx={{ py: 0.5 }}>
-                        <StyledLink to="/premium-themes/onepirate/privacy/">Privacy</StyledLink>
-                    </Box>
-                </Box>
-            </Grid>
-
-            <Grid item xs={12} sm={8} md={4}>
-                <Typography weight="SemiBold" size="h6" gutterBottom>
-                    Social
-                </Typography>
-
-                <Box component="ul" sx={{ display: 'flex', paddingLeft: '0', margin: '.5rem 0 1.5rem' }}>
-                    <Box component="a"
-                        href="https://facebbok.com/tzconnect"
-                        sx={iconStyle}>
-                        <FacebookStyled
-                            src={'/img/facebook.png'}
-                            alt="Facebook"
-                        />
-                    </Box>
-                    <Box
-                        component="a"
-                        href="https://twitter.com/tzconnect"
-                        sx={iconStyle}
-                    >
-                        <TwitterStyled
-                            src={'/img/twitter.jpeg'}
-                            alt="Twitter"
-                        />
-                    </Box>
-                    <Box component="a"
-                        href="https://facebbok.com/tzconnect"
-                        sx={iconStyle}>
-                        <FacebookStyled
-                            src={'/img/facebook.png'}
-                            alt="Facebook"
-                        />
-                    </Box>
-                    <Box
-                        component="a"
-                        href="https://twitter.com/tzconnect"
-                        sx={iconStyle}
-                    >
-                        <TwitterStyled
-                            src={'/img/twitter.jpeg'}
-                            alt="Twitter"
-                        />
-                    </Box>
-                </Box>
+                </Grid>
             </Grid>
         </StyledBox>
     )
