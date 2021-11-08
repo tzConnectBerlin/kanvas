@@ -20,7 +20,7 @@ export const PageWrapper = styled.div<{ theme?: Theme }>`
     }
 
     @media (max-width: 650px) {
-        padding-left: 4rem;
-        padding-right: 4rem;
+        padding-left: 2rem;
+        padding-right: 2rem;
     }
 `

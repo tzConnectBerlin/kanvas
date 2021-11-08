@@ -50,7 +50,6 @@ const StyledPagination = styled(Pagination)<{theme?: Theme}>`
         display: flex;
         align-items: center !important;
     }
-
 `
 
 const StorePage = () => {
@@ -63,7 +62,7 @@ const StorePage = () => {
 
     // Api calls for the categories and the nfts
     const [nftsResponse, getNfts] = useAxios('http://localhost:3000/nfts', { manual: true })
-    const [categoriesResponse, getCategories] = useAxios('http://localhost:3000/categories', { manual: true })
+    // const [categoriesResponse, getCategories] = useAxios('http://localhost:3000/categories', { manual: true })
 
     // is filter open ?
     const [filterOpen, setFilterOpen] = useState(false);
@@ -78,16 +77,16 @@ const StorePage = () => {
     }
 
     useEffect(() => {
-
+        // chekc on the search for the used params
         console.log(categories)
         console.log(sort)
         console.log(page)
-
     }, [])
 
     useEffect(() => {
+        // fetch initial data
         getNfts()
-        getCategories()
+        // getCategories()
     },[])
 
     return (
