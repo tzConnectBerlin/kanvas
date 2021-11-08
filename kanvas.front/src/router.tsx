@@ -8,7 +8,7 @@ import Faq from './pages/Faq';
 import Notifications from './pages/Notifications';
 import AuctionsAndSales from './pages/Auctions&Sales/index';
 import CreateNFT from './pages/CreateNFT';
-
+import { Redirect } from 'react-router'
 import { RPC_URL } from './global';
 import { Theme } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -22,7 +22,7 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import { INotification, NotificationEnum, CurrencyEnum } from './interfaces/notification';
 import ProductPage from './pages/Product';
-
+import NotFound from './pages/NotFound';
 
 const StyledBrowserRouter = styled(BrowserRouter)<{theme?: Theme}>`
     #root {
@@ -77,13 +77,15 @@ const Router = () => {
             <StyledBrowserRouter>
                 <Header embedKukai={embedKukai} switchTheme={handleSelectTheme} selectedTheme={selectedTheme} notifications={undefined}/>
                 <Switch>
-                    <Route exact path="/" component={StorePage} />
+                    <Route exact path="/Store" component={StorePage} />
                     <Route path="/sign-in" render={props => <SignIn beaconWallet={beaconWallet} embedKukai={embedKukai} setSignedPayload={setSignedPayload} {...props} />} />
                     <Route path="/profile/:username" component={Profile} />
                     <Route path="/product" component={ProductPage} />
                     <Route path="/faq" component={Faq} />
                     <Route path="/create-nft" render={props => <CreateNFT {...props} />}  />
                     <Route path="/nft/:id" render={props => <CreateNFT {...props} />}  />
+                    <Route path='/404' component={NotFound} exact={true} />
+                    <Redirect from='*' to='/404' />
                 </Switch>
                 <Footer />
             </StyledBrowserRouter>
