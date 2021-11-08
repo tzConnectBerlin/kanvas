@@ -1,9 +1,10 @@
 
 export interface IUser {
     profilePicture: string
-    userName: string;
-    firstName: string;
-    lastName: string;
+    name?: string;
+    userName?: string;
+    firstName?: string;
+    lastName?: string;
     organisation?: string;
     address: string;
     bio?: string;
@@ -14,4 +15,5 @@ export interface IUser {
 	facebookLink?: string;
     linkedinLink?: string;
     role?: string;
+    createdAt?: Date;
 }

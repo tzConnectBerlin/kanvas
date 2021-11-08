@@ -2,9 +2,9 @@ import styled from "@emotion/styled";
 import FlexSpacer from "../../atoms/FlexSpacer";
 import Typography from "../../atoms/Typography";
 
-import { FC, useState } from "react";
-import { Stack, Grid } from "@mui/material";
-import { Layouts, Responsive, WidthProvider } from "react-grid-layout";
+import { FC } from "react";
+import { Grid } from "@mui/material";
+import { Layouts } from "react-grid-layout";
 
 import { NftCard } from "../../molecules/NftCard";
 import { INft } from "../../../interfaces/artwork";
@@ -32,6 +32,11 @@ const StyledGrid = styled(Grid)`
 
 const StyledGridItem = styled(Grid)`
     padding: 1.5rem;
+
+    @media (max-width: 650px) {
+        padding-left: 0;
+        padding-right: 0;
+    }
 `
 
 export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
@@ -91,10 +96,31 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                             size="h3"
                             weight="Light"
                             align="center"
+                            color="#C4C4C4"
                             sx={{ display: 'flex', justifyContent: 'center'}}
                             gutterBottom
                         >
-                            No Data
+                         {
+                            props.emptyMessage ?
+                                props.emptyMessage
+                            :
+                                'No Data'
+                         }
+                        </Typography>
+                        <Typography
+                            size="subtitle2"
+                            weight="Light"
+                            align="center"
+                            color="#0088a7"
+                            sx={{ display: 'flex', justifyContent: 'center'}}
+                            gutterBottom
+                        >
+                         {
+                            props.emptyLink ?
+                                props.emptyLink
+                            :
+                                undefined
+                         }
                         </Typography>
                     </StyledGrid>
             }
