@@ -45,7 +45,6 @@ export interface ProductPageProps {
 }
 
 
-
 export const ProductPage : FC<ProductPageProps> = ({loading=false, responsive=false, id, ...props}) => {
     const { t } = useTranslation(['translation']);
 

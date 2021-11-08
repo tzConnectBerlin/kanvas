@@ -11,25 +11,19 @@ interface TabsProps extends MTabsProps {
 const StyledTabs = styled(MTabs)<{theme?: Theme}>`
     .MuiTabs-indicator {
         background-color: ${props => props.theme.palette.text.primary} !important;
-        width: 6rem!important;
     }
 `
 
 const StyledTab = styled(Tab)<{theme?: Theme}>`
 
-
     &.MuiButtonBase-root {
-        padding-left: 0;
-        padding-right: 4rem;
-        align-items: start;
-
         font-family: 'Poppins Light';
         font-size: 1rem;
-        text-align: left;
+        text-align: center;
         text-transform: none;
         background-color: 'transparent' !important;
         color: '#C4C4C4';
-        
+
         transition: color 0.2s;
 
         &[aria-selected="true"] {
@@ -42,7 +36,7 @@ const StyledTab = styled(Tab)<{theme?: Theme}>`
 `
 
 export const Tabs : FC<TabsProps> = ({...props}) => {
-    
+
     const [value, setValue] = useState(props.tabs[0]?.value);
 
     const handleChange = (event: any, newValue: any) => {
@@ -60,12 +54,12 @@ export const Tabs : FC<TabsProps> = ({...props}) => {
                             value={tab.value}
                             wrapped={true}
                             disableRipple
-                        />  
+                        />
                     ))
                 }
             </StyledTabs>
         </Box>
-        
+
     )
 }
 
