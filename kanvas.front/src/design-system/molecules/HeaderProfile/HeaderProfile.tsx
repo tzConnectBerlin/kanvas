@@ -125,10 +125,10 @@ export const HeaderProfile : FC<HeaderProfileProps> = ({...props}) => {
 
                     <Stack direction='row' spacing={2} sx={{marginTop: '1.5rem'}}>
                         <Typography size="body1" weight='Medium'  align='left'> { props.loading ? <Skeleton animation="pulse" variant="circular" width='12px' height='12px' /> : 0 } </Typography>
-                        <Typography size="body1" weight='Light' color='#C4C4C4' truncate={true} align='left'> Nfts </Typography>
+                        <Typography size="body1" weight='Light' color='#C4C4C4' truncate={true} align='left'> { props.loading ? <Skeleton animation="pulse" width='24px' height='1.5rem' /> : 'Nfts' }</Typography>
                     </Stack>
 
-                    <StyledTypography size="body1" weight='Light' color='#9b9b9b' truncate={true} align='left' width={400} sx={{marginTop: '0.5rem', alignItems: 'left'}}> Joined in { new Intl.DateTimeFormat('en-US', {month: 'long'}).format(props.user?.createdAt) }, {props.user?.createdAt?.getFullYear()} </StyledTypography>
+                    <StyledTypography size="body1" weight='Light' color='#9b9b9b' truncate={true} align='left' width={400} sx={{marginTop: '0.5rem', alignItems: 'left'}}>  { props.loading ? <Skeleton animation="pulse" width='5rem' /> :  `Joined in ${new Intl.DateTimeFormat('en-US', {month: 'long'}).format(props.user?.createdAt)} , ${props.user?.createdAt?.getFullYear()}` }</StyledTypography>
 
                 </Stack>
             </DesktopWrapperStack>
@@ -137,7 +137,7 @@ export const HeaderProfile : FC<HeaderProfileProps> = ({...props}) => {
             <MobileWrapperStack direction='column'>
 
                 <StyledPictureStack direction='row' spacing={3} >
-                    <Avatar  src={props.user?.profilePicture} height={170} width={170} loading={props.loading} responsive={true}/>
+                    <Avatar  src={props.user?.profilePicture} height={190} width={190} loading={props.loading} responsive={true}/>
                     <FlexSpacer minWidth={4} />
                     {
                         props.loading ?
@@ -147,7 +147,7 @@ export const HeaderProfile : FC<HeaderProfileProps> = ({...props}) => {
                     }
                 </StyledPictureStack>
 
-                <Stack direction='column' sx={{ width: '100%', alignItems: 'start'}}>
+                <Stack direction='column' sx={{ width: '100%', alignItems: 'start', marginTop: '1rem'}}>
                     <Typography fontSize={'1.8rem'} weight='SemiBold' noWrap={true} align='right' display='block' > { props.loading ? <Skeleton width='15rem'/> : props.user?.name } </Typography>
 
                     <AddressStack direction='row' spacing={2} sx={{maxWidth: 400 ,alignItems: 'center'}}>
