@@ -54,6 +54,83 @@ const StyledDiv = styled.div`
     }
 `
 
+
+const mockUser : IUser = {
+    profilePicture: '',
+    name: 'Tristan Nicolaides',
+    userName: 'tristan_ncl',
+    address: 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd',
+    createdAt: new Date()
+}
+
+const mokeNft = [
+    {
+        "id": 4,
+        "name": "first_nft",
+        "ipfsHash": '',
+        "price": 10,
+        "metadata": {
+          "key2": "value1",
+          "test": "hey"
+        },
+        "dataUrl": "heyyy",
+        "contract": "contract_address",
+        "tokenId": "teojteojt"
+      },
+      {
+        "id": 3,
+        "name": "second_nft",
+        "ipfsHash": '',
+        "price": 12,
+        "metadata": {
+          "key2": "value1",
+          "test": "hey"
+        },
+        "dataUrl": "heyyy",
+        "contract": "contract_address",
+        "tokenId": "teojteojt"
+      },
+      {
+        "id": 4,
+        "name": "third_nft",
+        "ipfsHash": '',
+        "price": 10,
+        "metadata": {
+          "key2": "value1",
+          "test": "hey"
+        },
+        "dataUrl": "heyyy",
+        "contract": "contract_address",
+        "tokenId": "teojteojt"
+      },
+      {
+        "id": 3,
+        "name": "fourth_nft",
+        "ipfsHash": '',
+        "price": 12,
+        "metadata": {
+          "key2": "value1",
+          "test": "hey"
+        },
+        "dataUrl": "heyyy",
+        "contract": "contract_address",
+        "tokenId": "teojteojt"
+      },
+      {
+        "id": 3,
+        "name": "fourth_nft",
+        "ipfsHash": '',
+        "price": 12,
+        "metadata": {
+          "key2": "value1",
+          "test": "hey"
+        },
+        "dataUrl": "heyyy",
+        "contract": "contract_address",
+        "tokenId": "teojteojt"
+      }
+]
+
 const Profile : FC<ProfileProps> = () => {
 
     let { username } = useParams<ParamTypes>();
@@ -70,11 +147,6 @@ const Profile : FC<ProfileProps> = () => {
     // Getting user info and updating
     // const [getUser, user] = useLazyQuery(GET_USER)
     // const [getUserGallery1, gallery] = useLazyQuery(GET_USER_GALLERY)
-    // const [getUserCreations, creations] = useLazyQuery(GET_USER_CREATIONS)
-
-    // Editing layouts
-    // const [editUserGalleryLayouts, editUserGalleryLayoutsResponse] = useMutation(EDIT_USER_GALLERY_LAYOUTS);
-    // const [editUserCreationLayouts, editUserCreationLayoutsResponse] = useMutation(EDIT_USER_CREATION_LAYOUTS);
 
     useEffect(() => {
         if (username) {
@@ -113,82 +185,6 @@ const Profile : FC<ProfileProps> = () => {
         }
     }
 
-    const mockUser : IUser = {
-        profilePicture: '',
-        name: 'Tristan Nicolaides',
-        userName: 'tristan_ncl',
-        address: 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd',
-        createdAt: new Date()
-    }
-
-    const mokeNft = [
-        {
-            "id": 4,
-            "name": "first_nft",
-            "ipfsHash": '',
-            "price": 10,
-            "metadata": {
-              "key2": "value1",
-              "test": "hey"
-            },
-            "dataUrl": "heyyy",
-            "contract": "contract_address",
-            "tokenId": "teojteojt"
-          },
-          {
-            "id": 3,
-            "name": "second_nft",
-            "ipfsHash": '',
-            "price": 12,
-            "metadata": {
-              "key2": "value1",
-              "test": "hey"
-            },
-            "dataUrl": "heyyy",
-            "contract": "contract_address",
-            "tokenId": "teojteojt"
-          },
-          {
-            "id": 4,
-            "name": "third_nft",
-            "ipfsHash": '',
-            "price": 10,
-            "metadata": {
-              "key2": "value1",
-              "test": "hey"
-            },
-            "dataUrl": "heyyy",
-            "contract": "contract_address",
-            "tokenId": "teojteojt"
-          },
-          {
-            "id": 3,
-            "name": "fourth_nft",
-            "ipfsHash": '',
-            "price": 12,
-            "metadata": {
-              "key2": "value1",
-              "test": "hey"
-            },
-            "dataUrl": "heyyy",
-            "contract": "contract_address",
-            "tokenId": "teojteojt"
-          },
-          {
-            "id": 3,
-            "name": "fourth_nft",
-            "ipfsHash": '',
-            "price": 12,
-            "metadata": {
-              "key2": "value1",
-              "test": "hey"
-            },
-            "dataUrl": "heyyy",
-            "contract": "contract_address",
-            "tokenId": "teojteojt"
-          }
-    ]
-
     return (
         <PageWrapper>
             <StyledStack direction='column'>
@@ -210,7 +206,7 @@ const Profile : FC<ProfileProps> = () => {
                 </StyledDiv>
                 <FlexSpacer minHeight={2} />
 
-                <NftGrid open={false} nfts={mokeNft} emptyMessage={'No Nfts in collection yet'} emptyLink={'Click here to buy some in the store.'} loading={false} />
+                <NftGrid open={false} nfts={mokeNft} emptyMessage={'No Nfts in collection yet'} emptyLink={'Click here to buy some in the store.'} loading={user.loading} />
 
             </StyledStack>
         </PageWrapper>
