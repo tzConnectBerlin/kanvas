@@ -27,6 +27,7 @@
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-express": "^7.6.13",
     "@types/passport-jwt": "^3.0.6",
+    "@types/pg": "^8.6.1",
     "bcrypt": "^5.0.1",
     "class-validator": "^0.13.1",
     "dotenv": "^10.0.0",

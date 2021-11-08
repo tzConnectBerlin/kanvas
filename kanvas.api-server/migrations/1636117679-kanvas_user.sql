@@ -6,13 +6,13 @@ BEGIN;
 -- mtm = many to many
 CREATE TABLE kanvas_user (
        id SERIAL PRIMARY KEY,
-       user_name TEXT NOT NULL,
-       address TEXT,
+       user_name TEXT,
+       address TEXT UNIQUE NOT NULL,
        signed_payload TEXT
 );
 CREATE TABLE mtm_kanvas_user_user_role (
        kanvas_user_id INT REFERENCES kanvas_user(id) ON UPDATE CASCADE ON DELETE CASCADE,
-       user_role_id INT REFERENCES user_role(id) ON UPDATE CASCADE ON DELETE CASCADE,
+       user_role_id INT REFERENCES user_role(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 COMMIT;
 
