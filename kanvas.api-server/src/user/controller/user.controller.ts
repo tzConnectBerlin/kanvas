@@ -11,10 +11,4 @@ export class UserController {
   async create(@Body() user: UserEntity): Promise<UserEntity> {
     return this.userService.create(user)
   }
-
-  @Get()
-  @UseGuards(JwtAuthGuard)
-  async findAll(): Promise<UserEntity[]> {
-    return this.userService.findAll()
-  }
 }
