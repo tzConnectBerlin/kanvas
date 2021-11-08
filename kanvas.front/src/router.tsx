@@ -4,6 +4,7 @@ import Account from './pages/Account';
 import Profile from './pages/Profile';
 import Browse from './pages/Browse/index';
 import StorePage from './pages/StorePage';
+import Faq from './pages/Faq';
 import Notifications from './pages/Notifications';
 import AuctionsAndSales from './pages/Auctions&Sales/index';
 import CreateNFT from './pages/CreateNFT';
@@ -79,6 +80,7 @@ const Router = () => {
                     <Route path="/sign-in" render={props => <SignIn beaconWallet={beaconWallet} embedKukai={embedKukai} setSignedPayload={setSignedPayload} {...props} />} />
                     <Route path="/profile/:username" component={Profile} />
                     <Route path="/product" component={ProductPage} />
+                    <Route path="/faq" component={Faq} />
                     <Route path="/create-nft" render={props => <CreateNFT {...props} />}  />
                     <Route path="/nft/:id" render={props => <CreateNFT {...props} />}  />
                 </Switch>
