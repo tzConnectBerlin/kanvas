@@ -1,23 +1,36 @@
-{    
+{
   "title": "Welcome to react using react-i18next and typescript 4.1",
   "description": {
     "part1": "This is an example without namespaces.",
     "part2": "In order to infer the appropriate type for t function, you should use type augmentation to override the Resources type.",
     "part3": "Check out the @types/react-i18next to see an example."
-  },   
-  "product": {
-      "description": {
-          "part_1": "About the artist",
-          "part_2": "Description",
-          "part_3": "Remaining time",
-          "button": "Add to cart"
-      },    
-      "button_1": "Add to cart",
-      "button_2": "Added to cart"
   },
-  "common": {     
-     "lorenIpsumShort" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-     "lorenIpsum" : "Lorem ipsum dolor sit amet, labore et dolore magna aliqua.",
+  "product": {
+    "description": {
+      "part_1": "About the artist",
+      "part_2": "Description",
+      "part_3": "Remaining time",
+      "button": "Add to cart"
+    },
+    "button_1": "Add to cart",
+    "button_2": "Added to cart"
+  },
+  "faq": {     
+      "01_question": "Collapsible Group Item #1",
+      "02_question": "Collapsible Group Item #2",
+      "03_question": "Collapsible Group Item #3",
+      "04_question": "Collapsible Group Item #4",
+      "05_question": "Collapsible Group Item #5",
+      "01_response": "Response 1",
+      "02_response": "Response 2",
+      "03_response": "Response 3",
+      "04_response": "Response 4",
+      "05_response": "Response 5"     
+  },
+  "common": {
+    "lorenIpsumShort": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "lorenIpsum": "Lorem ipsum dolor sit amet, labore et dolore magna aliqua.",
+    "lorenIpsumLong": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex, sit amet blandit leo lobortis eget. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex, sit amet blandit leo lobortis eget.",
     "copyright": "Copyright © 2021 TZconnect"
   }
 }
