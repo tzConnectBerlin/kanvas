@@ -12,6 +12,7 @@ import {
 import Typography from '../../atoms/Typography';
 import { Copyright } from '../../atoms/Copyright';
 import { useTranslation } from 'react-i18next';
+import { darkTheme, lightTheme, lightTheme as theme } from '../../../theme';
 
 export interface FooterProps {
     selectedTheme?: string;
@@ -99,12 +100,13 @@ const StyledLink = styled(Link) <{ theme?: Theme }>`
           color: ${props => props.theme.palette.text.primary} !important;
       }
   }
-`
+`  
+
 
 export const Footer: FC<FooterProps> = () => {
     const { t } = useTranslation(['translation']);
-    const theme = useTheme()
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+     
+const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     return (
         <StyledBox >
@@ -118,7 +120,7 @@ export const Footer: FC<FooterProps> = () => {
                 </LinkStyled>
 
                 <Typography size='body' weight='Light' sx={{
-                    marginTop: '.7rem', fontSize: '.7rem', alignSelf: 'start',
+                    marginTop: '1rem', fontSize: '.7rem', alignSelf: 'start',
                     marginBottom: '1rem'
                 }}>TODO: Some text here</Typography>
             </Grid>
@@ -157,22 +159,25 @@ export const Footer: FC<FooterProps> = () => {
 
                 <Grid item xs={6} md={3} sx={{ height: '7rem' }}>
                     <Typography weight="SemiBold" size="h6" gutterBottom>
-                        {t('footer.headline_2')}
+                        {t('footer.headline_3')}
                     </Typography>
 
                     <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/premium-themes/onepirate/terms/">Terms</StyledLink>
+                            <StyledLink to="/terms/">Terms</StyledLink>
                         </Box>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/premium-themes/onepirate/privacy/">Privacy</StyledLink>
+                            <StyledLink to="/privacy/">Privacy</StyledLink>
+                        </Box>
+                        <Box component="li" sx={{ py: 0.5 }}>
+                            <StyledLink to="/faq/">F.A.Q</StyledLink>
                         </Box>
                     </Box>
                 </Grid>
 
                 <Grid item xs={12} md={3}>
                     <Typography weight="SemiBold" size="h6" gutterBottom>
-                        {t('footer.headline_3')}
+                        {t('footer.headline_4')}
                     </Typography>
 
                     <Box component="ul" sx={{ display: 'flex', paddingLeft: '0', margin: '.5rem 0 1.5rem' }}>
@@ -214,7 +219,7 @@ export const Footer: FC<FooterProps> = () => {
                         </Box>
                     </Box>
 
-                    <Box sx={{ marginTop: isMobile ? '2rem' : '3rem', marginBottom: '1rem'}} >
+                    <Box sx={{ marginTop: '2.5rem'}} >
                         <Copyright />
                     </Box>
                 </Grid>
