@@ -9,8 +9,14 @@ import MuiAccordionSummary, {
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import PageWrapper from "../../design-system/commons/PageWrapper";
 import FlexSpacer from "../../design-system/atoms/FlexSpacer";
-import { Stack } from "@mui/material";
+import { Grid, Stack } from "@mui/material";
 import { Typography } from "../../design-system/atoms/Typography";
+import { common } from '@mui/material/colors';
+import { useTranslation } from 'react-i18next';
+import TreeView from '@mui/lab/TreeView';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import TreeItem from '@mui/lab/TreeItem';
 
 const StyledStack = styled(Stack)`
     overflow: hidden;
@@ -20,15 +26,15 @@ const StyledStack = styled(Stack)`
 `
 
 const Accordion = styled((props: AccordionProps) => (
-    <MuiAccordion disableGutters elevation={0}  square {...props} />
+    <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(({ theme }) => ({
     border: `1px solid rgba(29, 34, 39, 0.87)`,
     marginTop: 0,
     '&:not(style)+:not(style)': {
-        marginTop: 0,   
+        marginTop: 0,
     },
     '&:not(:last-child)': {
-        borderBottom: 0,   
+        borderBottom: 0,
     },
     '&:before': {
         display: 'none',
@@ -55,7 +61,63 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
     borderTop: '1px solid rgba(29, 34, 39, 0.87)',
 }));
 
+interface RenderTree {
+    id: string;
+    name: string;
+    children?: readonly RenderTree[];
+  }
+  
+  const data: RenderTree = {
+    id: 'root',
+    name: 'Parent',
+    children: [
+      {
+        id: '1',
+        name: 'Child - 1',
+      },
+      {
+        id: '3',
+        name: 'Child - 3',
+        children: [
+          {
+            id: '4',
+            name: 'Child - 4',
+          },
+        ],
+      },
+    ],
+  };
+
 const Faq = () => {
+    const { t } = useTranslation(['translation']);
+
+    const faqItems = [
+        {
+            question: t('faq.01_question'),
+            answer: t('faq.01_response'),
+            id: 'faq-item-1'
+        },
+        {
+            question: t('faq.02_question'),
+            answer: t('faq.02_response'),
+            id: 'faq-item-2'
+        },
+        {
+            question: t('faq.03_question'),
+            answer: t('faq.03_response'),
+            id: t('faq-item-3')
+        },
+        {
+            question: t('faq.04_question'),
+            answer: t('faq.04_response'),
+            id: 'faq-item-4'
+        },
+        {
+            question: t('faq.05_question'),
+            answer: t('faq.05_response'),
+            id: 'faq-item-5'
+        }
+    ];
 
     const [expanded, setExpanded] = React.useState<string | false>('panel1');
 
@@ -64,6 +126,13 @@ const Faq = () => {
             setExpanded(newExpanded ? panel : false);
         };
 
+        const renderTree = (nodes: RenderTree) => (
+            <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name}>
+              {Array.isArray(nodes.children)
+                ? nodes.children.map((node) => renderTree(node))
+                : null}
+            </TreeItem>
+          );
     return (
         <PageWrapper>
             <StyledStack direction='column' spacing={3}>
@@ -74,45 +143,36 @@ const Faq = () => {
 
                 <FlexSpacer minHeight={1} />
 
-                <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
-                    <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
-                        <Typography size="body" weight="SemiBold">Collapsible Group Item #1</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <Typography size="body" weight="Light">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-                            malesuada lacus ex, sit amet blandit leo lobortis eget. Lorem ipsum dolor
-                            sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex,
-                            sit amet blandit leo lobortis eget.
-                        </Typography>
-                    </AccordionDetails>
-                </Accordion>
-                <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')}>
-                    <AccordionSummary aria-controls="panel2d-content" id="panel2d-header">
-                        <Typography size="body" weight="SemiBold">Collapsible Group Item #2</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <Typography size="body" weight="Light">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-                            malesuada lacus ex, sit amet blandit leo lobortis eget. Lorem ipsum dolor
-                            sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex,
-                            sit amet blandit leo lobortis eget.
-                        </Typography>
-                    </AccordionDetails>
-                </Accordion>
-                <Accordion expanded={expanded === 'panel3'} onChange={handleChange('panel3')}>
-                    <AccordionSummary aria-controls="panel3d-content" id="panel3d-header">
-                        <Typography size="body" weight="SemiBold">Collapsible Group Item #3</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <Typography size="body" weight="Light">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-                            malesuada lacus ex, sit amet blandit leo lobortis eget. Lorem ipsum dolor
-                            sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex,
-                            sit amet blandit leo lobortis eget.
-                        </Typography>
-                    </AccordionDetails>
-                </Accordion>
+                <Grid container>
+                    <Grid item xs={6}> 
+                        <TreeView
+                            aria-label="rich object"
+                            defaultCollapseIcon={<ExpandMoreIcon />}
+                            defaultExpanded={['root']}
+                            defaultExpandIcon={<ChevronRightIcon />}
+                            sx={{ height: 110, flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}
+                        >
+                            {renderTree(data)}
+                        </TreeView>
+                    </Grid>
+                    <Grid item xs={6}>
+                        {faqItems.map((value) =>
+                            <Accordion expanded={expanded === value.id} onChange={handleChange(`${value.id}`)} >
+                                <AccordionSummary aria-controls="panel1d-content" id={value.id} key={value.id}>
+                                    <Typography size="body" weight="SemiBold">{value.question}</Typography>
+                                </AccordionSummary>
+
+                                <AccordionDetails>
+                                    <Typography size="body" weight="Light">
+                                        {value.answer}
+                                    </Typography>
+                                </AccordionDetails>
+                            </Accordion>
+                        )
+                        }
+                    </Grid>
+                </Grid>
+
             </StyledStack>
         </PageWrapper>
     )
