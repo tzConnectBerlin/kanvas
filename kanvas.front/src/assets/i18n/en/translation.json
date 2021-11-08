@@ -1,0 +1,23 @@
+{
+  "product": {
+    "description": {
+      "part_1": "About the artist",
+      "part_2": "Description",
+      "part_3": "Remaining time"
+    },
+    "button_1": "Add to cart"
+  },
+  "common": {
+    "lorenIpsumShort": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "lorenIpsum": "Lorem ipsum dolor sit amet, labore et dolore magna aliqua.",
+    "button": {
+      "backToHome": "Back to home"
+    }
+  },
+  "footer": {
+    "headline_1": "Sitemap",
+    "headline_2": "More About us",
+    "headline_3": "Legal",
+    "headline_4": "Social"
+  }
+}

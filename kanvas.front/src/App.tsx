@@ -3,7 +3,7 @@ import "animate.css/animate.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import Router from './router';
 import styled from '@emotion/styled';
-import './i18n/config';
+import './assets/i18n/config';
 import { Suspense } from 'react';
 import { ToastContainer, cssTransition } from 'react-toastify';
 
