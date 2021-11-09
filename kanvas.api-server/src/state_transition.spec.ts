@@ -52,8 +52,13 @@ describe('NFT state transition', () => {
       categories: [],
       status: 'uploaded',
     }
-    expect(
-      transition(exampleNftStateTransitionConfig, nft, user, 'moderated'),
-    ).toBe(assoc('status', 'moderated', nft))
+    let actual = transition(
+      exampleNftStateTransitionConfig,
+      nft,
+      user,
+      'moderated',
+    ).val
+    let expected = assoc('status', 'moderated', nft)
+    expect(actual).toStrictEqual(expected)
   })
 })
