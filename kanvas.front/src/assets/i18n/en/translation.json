@@ -3,9 +3,12 @@
     "description": {
       "part_1": "About the artist",
       "part_2": "Description",
-      "part_3": "Remaining time"
+      "part_3": "Remaining time",
+      "price": "Price",
+      "button": "Add to cart"
     },
-    "button_1": "Add to cart"
+    "button_1": "Add to cart",
+    "button_2": "Added to cart"
   },
   "common": {
     "lorenIpsumShort": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
