@@ -96,8 +96,20 @@ LIMIT ${limit}
     }
   }
 
+  async byId(id: number): Promise<NftEntity> {
+    const nfts = await this.findByIds([id], this.conn)
+    if (nfts.length == 0) {
+      throw new HttpException(
+        'NFT with the requested id does not exist',
+        HttpStatus.BAD_REQUEST,
+      )
+    }
+    return nfts[0]
+  }
+
   async findByIds(nftIds: number[], dbConnection: any): Promise<NftEntity[]> {
-    const qryRes = await dbConnection`
+    try {
+      const qryRes = await dbConnection`
 SELECT
   nft.id, nft_name, ipfs_hash, metadata, data_uri, contract, token_id,
   ARRAY_AGG(ARRAY[cat.category, cat.description]) AS categories
@@ -111,22 +123,29 @@ GROUP BY
   nft.id, nft_name, ipfs_hash, metadata, data_uri, contract, token_id
 ORDER BY nft.id
 `
-    return qryRes.map((nftRow) => {
-      return {
-        id: nftRow['id'],
-        name: nftRow['nft_name'],
-        ipfsHash: nftRow['ipfs_hash'],
-        metadata: nftRow['metadata'],
-        dataUri: nftRow['dataUri'],
-        contract: nftRow['contract'],
-        tokenId: nftRow['token_id'],
-        categories: nftRow['categories'].map((categoryRow) => {
-          return {
-            name: categoryRow[0],
-            description: categoryRow[1],
-          }
-        }),
-      }
-    })
+      return qryRes.map((nftRow) => {
+        return {
+          id: nftRow['id'],
+          name: nftRow['nft_name'],
+          ipfsHash: nftRow['ipfs_hash'],
+          metadata: nftRow['metadata'],
+          dataUri: nftRow['dataUri'],
+          contract: nftRow['contract'],
+          tokenId: nftRow['token_id'],
+          categories: nftRow['categories'].map((categoryRow) => {
+            return {
+              name: categoryRow[0],
+              description: categoryRow[1],
+            }
+          }),
+        }
+      })
+    } catch (err) {
+      Logger.error('Error on nft filtered query, err: ' + err)
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      )
+    }
   }
 }
