@@ -2,6 +2,7 @@ import SignIn from './pages/SignIn';
 import styled from '@emotion/styled';
 import Profile from './pages/Profile';
 import StorePage from './pages/StorePage';
+import Faq from './pages/Faq';
 import CreateNFT from './pages/CreateNFT';
 import { Redirect } from 'react-router'
 import { RPC_URL } from './global';
@@ -75,6 +76,7 @@ const Router = () => {
                     <Route path="/sign-in" render={props => <SignIn beaconWallet={beaconWallet} embedKukai={embedKukai} setSignedPayload={setSignedPayload} {...props} />} />
                     <Route path="/profile/:username" component={Profile} />
                     <Route path="/product/:id" component={ProductPage} />
+                    <Route path="/faq" component={Faq} />
                     <Route path="/create-nft" render={props => <CreateNFT {...props} />}  />
                     <Route path="/nft/:id" render={props => <CreateNFT {...props} />}  />
                     <Route path='/404' component={NotFound} exact={true} />
