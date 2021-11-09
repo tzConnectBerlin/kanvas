@@ -78,7 +78,7 @@ const Router = () => {
                     <Route exact path="/store" component={StorePage} />
                     <Route path="/sign-in" render={props => <SignIn beaconWallet={beaconWallet} embedKukai={embedKukai} setSignedPayload={setSignedPayload} {...props} />} />
                     <Route path="/profile/:username" component={Profile} />
-                    <Route path="/product" component={ProductPage} />
+                    <Route path="/product/:id" component={ProductPage} />
                     <Route path="/create-nft" render={props => <CreateNFT {...props} />}  />
                     <Route path="/nft/:id" render={props => <CreateNFT {...props} />}  />
                 </Switch>

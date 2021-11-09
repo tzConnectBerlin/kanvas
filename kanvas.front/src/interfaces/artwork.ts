@@ -8,4 +8,6 @@ export interface INft {
     name: string;
     ipfsHash: string;
     price: number;
+    creator?: string;
+    startDate?: string;
 }
