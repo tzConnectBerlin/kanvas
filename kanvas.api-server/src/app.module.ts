@@ -6,6 +6,7 @@ import { NftModule } from './nft/nft.module'
 import { UserModule } from './user/user.module'
 import { AuthProviderModule } from './auth-provider/auth-provider.module'
 import { AuthenticationModule } from './authentication/authentication.module'
+import { DbModule } from './db.module'
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthenticationModule } from './authentication/authentication.module'
     NftModule,
     UserModule,
     AuthProviderModule,
+    DbModule,
   ],
   controllers: [AppController],
   providers: [AppService],
