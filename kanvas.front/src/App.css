@@ -154,3 +154,20 @@ li b {
   font-size: 19px;
   line-height: 14px;
 }
+
+ul {
+  list-style: none;
+}
+
+.scrollspy {
+  padding-left: 0;
+}
+
+.isCurrent {
+  font-weight: 900;
+  box-shadow: -2px 0 0 0 #003a54;
+}
+
+.isCurrent a span {
+  font-weight: bold;
+}
