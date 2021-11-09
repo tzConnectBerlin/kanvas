@@ -88,26 +88,12 @@ const iconStyle = {
 const StyledLink = styled(Link) <{ theme?: Theme }>`
   color: ${props => props.theme.palette.text.primary};
   text-decoration: none;
-<<<<<<< HEAD
   font-family: 'Poppins Medium' !important;
   font-size: .8rem;
-=======
-
->>>>>>> main
 
   @media (max-width: 1100px) {
       height: 2rem;
   }
-<<<<<<< HEAD
-=======
-
-  &.active {
-      p {
-          font-family: 'Poppins Medium' !important;
-          color: ${props => props.theme.palette.text.primary} !important;
-      }
-  }
->>>>>>> main
 `  
 
 
