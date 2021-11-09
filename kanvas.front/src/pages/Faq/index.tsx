@@ -6,6 +6,7 @@ import { Grid, Stack, Theme } from "@mui/material";
 import { Typography } from "../../design-system/atoms/Typography";
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
+import Scrollspy from 'react-scrollspy'
 
 
 export interface FaqProps {
@@ -18,6 +19,8 @@ const StyledAnchorLink = styled.a <{ theme?: Theme }>`
     text-decoration: none;
     font-family: 'Poppins Medium' !important;
     font-size: .8rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
 
     @media (max-width: 1100px) {
         height: 2rem;
@@ -39,12 +42,11 @@ const StyledSection = styled.section`
     margin-bottom: 5rem;
 `
 
-const StyledNav = styled.nav`
+const StickyNav = styled.nav`
     position: sticky!important;
     top: 10rem;
     left: 0;
     bottom: -28.125rem;
-
 `
 // TODO: Add offset 
 // Scroll to position
@@ -96,7 +98,7 @@ const Faq: FC<FaqProps> = () => {
         {
             question: t('faq.06_question'),
             answer: t('faq.06_answer'),
-            id: 'thread4'
+            id: 'thread5'
         }
     ];
 
@@ -106,29 +108,29 @@ const Faq: FC<FaqProps> = () => {
                 <FlexSpacer minHeight={10} />
 
                 <Grid container spacing={2} >
-
                     <Grid item xs={12} md={4} sx={{ position: 'relative' }}>
-                        <StyledNav>
-                            <Typography size="h2" weight='SemiBold'>{t('faq.headline')}</Typography>
-                            <FlexSpacer minHeight={3} />
-
-                            <ul style={{ listStyle: 'none', padding: 0 }}>
+                        <StickyNav>
+                            <Scrollspy
+                                className="scrollspy"
+                                items={['introduction', 'thread1', 'thread2', 'thread3', 'thread4', 'thread5']}
+                                currentClassName="isCurrent"                               
+                            >
                                 {faqItems.map((nav) => <>
                                     <li key={nav.id} >
-                                        <StyledAnchorLink
-                                            className={clsx(activeSection ? 'active' : '')}
-                                            href={`#${nav.id}`}>
+                                        <StyledAnchorLink href={`#${nav.id}`}>
                                             {nav.question}
-                                            {/* <li>{!Children ? <StyledAnchorLink className="anchor" href={`#${nav.id}`} >{nav.question}</StyledAnchorLink> : ''}</li> */}
                                         </StyledAnchorLink>
                                     </li>
                                 </>
                                 )
                                 }
-                            </ul>
-                        </StyledNav>
+                            </Scrollspy>
+                        </StickyNav>
                     </Grid>
+
                     <Grid item xs={12} md={7}>
+                        <Typography size="h1" weight='SemiBold'>{t('faq.headline')}</Typography>
+                        <FlexSpacer minHeight={3} />
 
                         {faqItems.map((node) => <>
                             <StyledSection id={node.id}>
