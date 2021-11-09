@@ -196,7 +196,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
             setSocialLoading(false)
             setBeaconLoading(false)
 
-            if (signUserResponse.error?.response?.data.message === 'User not registered.') {
+            if (signUserResponse.error?.response?.data.message === 'User not registered') {
                 // Check if we have information from the user thanks to kukai
                 registerUser({data: signInParams})
 

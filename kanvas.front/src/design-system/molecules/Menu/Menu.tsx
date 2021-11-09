@@ -220,6 +220,11 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
         setAnchorEl(null);
     };
 
+    const logout = () => {
+        localStorage.removeItem('Kanvas - Bearer')
+        localStorage.removeItem('Kanvas - address')
+    }
+
     useEffect(() => {
         if (user) {
             setAvatarSrc(user.profilePicture)
@@ -379,10 +384,10 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
             <ProfilePopover
                 open={Boolean(anchorEl)}
                 avatarSrc={`${avatarSrc}?${Date.now()}`}
-                userName={user?.userName}
+                address={user?.address}
                 history={history}
                 notifications={props.notifications}
-                logOut={() => console.log('logging out')}
+                logOut={logout}
                 onClose={handleClose}
                 onClick={handleClose}
             />

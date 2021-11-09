@@ -13,6 +13,7 @@ import { CustomButton } from '../../design-system/atoms/Button';
 import { CustomSelect } from '../../design-system/atoms/Select';
 import { Typography } from "../../design-system/atoms/Typography";
 import { useLocation, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const StyledStack = styled(Stack)`
     overflow: hidden;
@@ -82,6 +83,12 @@ const StorePage = () => {
         console.log(sort)
         console.log(page)
     }, [])
+
+    useEffect(() => {
+        if (nftsResponse.error) {
+            toast.error('An error occured while fetching the store.')
+        }
+    }, [nftsResponse.error])
 
     useEffect(() => {
         // fetch initial data

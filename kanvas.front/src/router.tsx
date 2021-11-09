@@ -1,11 +1,7 @@
 import SignIn from './pages/SignIn';
 import styled from '@emotion/styled';
-import Account from './pages/Account';
 import Profile from './pages/Profile';
-import Browse from './pages/Browse/index';
 import StorePage from './pages/StorePage';
-import Notifications from './pages/Notifications';
-import AuctionsAndSales from './pages/Auctions&Sales/index';
 import CreateNFT from './pages/CreateNFT';
 import { Redirect } from 'react-router'
 import { RPC_URL } from './global';
@@ -19,7 +15,6 @@ import { Header } from './design-system/organismes/Header';
 import { Footer } from './design-system/organismes/Footer';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
-import { INotification, NotificationEnum, CurrencyEnum } from './interfaces/notification';
 import ProductPage from './pages/Product';
 import NotFound from './pages/NotFound';
 
