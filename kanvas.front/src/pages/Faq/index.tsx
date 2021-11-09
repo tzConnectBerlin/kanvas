@@ -13,7 +13,6 @@ export interface FaqProps {
     theme?: Theme;
 }
 
-
 const StyledAnchorLink = styled.a <{ theme?: Theme }>`
     color: ${props => props.theme.palette.text.primary};
     text-decoration: none;
@@ -35,7 +34,9 @@ const StyledStack = styled(Stack)`
   height: 100%;
 `
 const StyledSection = styled.section`
-scroll-margin-top: 20em;
+    scroll-margin-top: 5em;
+    padding-top: 5rem;
+    margin-bottom: 5rem;
 `
 
 const StyledNav = styled.nav`
@@ -99,8 +100,6 @@ const Faq: FC<FaqProps> = () => {
         }
     ];
 
-
-
     return (
         <PageWrapper>
             <StyledStack direction='column' spacing={3}>
@@ -129,7 +128,7 @@ const Faq: FC<FaqProps> = () => {
                             </ul>
                         </StyledNav>
                     </Grid>
-                    <Grid item xs={12} md={8}>
+                    <Grid item xs={12} md={7}>
 
                         {faqItems.map((node) => <>
                             <StyledSection id={node.id}>
