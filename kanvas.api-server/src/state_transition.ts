@@ -25,22 +25,20 @@ export function transition(
   user: UserEntity,
   newStatus: string,
 ) {
-  let currentStatus = nft.status
   let transitionDeclaration = config.transitions.filter(
     (transitionDeclaration) =>
       and(
-        transitionDeclaration.from == currentStatus,
+        transitionDeclaration.from == nft.status,
         transitionDeclaration.to == newStatus,
       ),
   )[0]
 
   if (transitionDeclaration) {
     let requiredRole: string = transitionDeclaration.requires[0]
-    console.debug(requiredRole, user.roles)
     let actualRoles = user.roles.filter((role) => role === requiredRole)
     if (actualRoles.length === 0) {
       return Err(
-        `User #{user.id} does not have the required role to change nft #{nft.id} from from ${currentStatus} to ${newStatus}`,
+        `User #{user.id} does not have the required role to change nft #{nft.id} from from ${nft.status} to ${newStatus}`,
       )
     } else if (actualRoles[0] === requiredRole) {
       return Ok(assoc('status', newStatus, nft))
