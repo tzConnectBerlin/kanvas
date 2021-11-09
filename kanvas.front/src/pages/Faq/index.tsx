@@ -1,180 +1,166 @@
-import React, { useEffect, useState } from 'react';
-import useAxios from 'axios-hooks';
+import { Children, FC, useState } from 'react';
 import styled from "@emotion/styled";
-import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
-import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
-import MuiAccordionSummary, {
-    AccordionSummaryProps,
-} from '@mui/material/AccordionSummary';
-import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import PageWrapper from "../../design-system/commons/PageWrapper";
 import FlexSpacer from "../../design-system/atoms/FlexSpacer";
-import { Grid, Stack } from "@mui/material";
+import { Grid, Stack, Theme } from "@mui/material";
 import { Typography } from "../../design-system/atoms/Typography";
-import { common } from '@mui/material/colors';
 import { useTranslation } from 'react-i18next';
-import TreeView from '@mui/lab/TreeView';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import TreeItem from '@mui/lab/TreeItem';
+import clsx from 'clsx';
+export interface FaqProps {
+    selectedTheme?: string;
+    theme?: Theme;
+}
 
-const StyledStack = styled(Stack)`
-    overflow: hidden;
-    max-width: 100rem;
-    width: 100%;
-    height: 100%;
+
+
+const StyledAnchorLink = styled.a <{ theme?: Theme }>`
+    color: ${props => props.theme.palette.text.primary};
+    text-decoration: none;
+    font-family: 'Poppins Medium' !important;
+    font-size: .8rem;
+
+    @media (max-width: 1100px) {
+        height: 2rem;
+    }
+
+    &: {
+        box-shadow: -2px 0 0 0 #003a54;
+    }
 `
-
-const Accordion = styled((props: AccordionProps) => (
-    <MuiAccordion disableGutters elevation={0} square {...props} />
-))(({ theme }) => ({
-    border: `1px solid rgba(29, 34, 39, 0.87)`,
-    marginTop: 0,
-    '&:not(style)+:not(style)': {
-        marginTop: 0,
-    },
-    '&:not(:last-child)': {
-        borderBottom: 0,
-    },
-    '&:before': {
-        display: 'none',
-    },
-}));
-
-const AccordionSummary = styled((props: AccordionSummaryProps) => (
-    <MuiAccordionSummary
-        expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem' }} />}
-        {...props}
-    />
-))(({ theme }) => ({
-    flexDirection: 'row-reverse',
-    '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
-        transform: 'rotate(90deg)',
-    },
-    '& .MuiAccordionSummary-content': {
-        marginLeft: '2rem',
-    },
-}));
-
-const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
-    padding: '2rem',
-    borderTop: '1px solid rgba(29, 34, 39, 0.87)',
-}));
 
 interface RenderTree {
     id: string;
     name: string;
     children?: readonly RenderTree[];
-  }
-  
-  const data: RenderTree = {
-    id: 'root',
-    name: 'Parent',
-    children: [
-      {
-        id: '1',
-        name: 'Child - 1',
-      },
-      {
-        id: '3',
-        name: 'Child - 3',
-        children: [
-          {
-            id: '4',
-            name: 'Child - 4',
-          },
-        ],
-      },
-    ],
-  };
+}
 
-const Faq = () => {
+
+
+// Scroll to position
+//  const scrollToPosition = (el: any, offset?: any, left?: any, behavior?: any, block?: any) => {
+//     const elementPosition = el.offsetTop - offset;
+
+//     window.scroll({
+//       top: elementPosition,
+//       left,
+//       behavior,      
+//     });
+//   };
+
+const StyledStack = styled(Stack)`
+  max-width: 100rem;
+  width: 100%;
+  height: 100%;
+`
+const StyledSection = styled.section`
+scroll-margin-top: 20em;
+`
+
+const StyledNav = styled.nav`
+    position: sticky!important;
+    top: 10rem;
+    left: 0;
+    bottom: -28.125rem;
+
+`
+
+
+
+const Faq: FC<FaqProps> = () => {
     const { t } = useTranslation(['translation']);
+    const [activeSection, setActiveSection] = useState(false);
+
+    // const scrollWithOffset = (el?: Element, offset?: any,) => {
+    //     scrollToPosition(el, offset, 0, 'smooth', 'start');
+    //   };
 
     const faqItems = [
         {
             question: t('faq.01_question'),
-            answer: t('faq.01_response'),
-            id: 'faq-item-1'
+            answer: t('faq.01_answer'),
+            id: 'introduction'
         },
         {
             question: t('faq.02_question'),
-            answer: t('faq.02_response'),
-            id: 'faq-item-2'
+            answer: t('faq.02_answer'),
+            id: 'thread1'
         },
         {
             question: t('faq.03_question'),
-            answer: t('faq.03_response'),
-            id: t('faq-item-3')
+            answer: t('faq.03_answer'),
+            id: 'thread2'
         },
         {
             question: t('faq.04_question'),
-            answer: t('faq.04_response'),
-            id: 'faq-item-4'
+            answer: t('faq.04_answer'),
+            id: 'thread3'
         },
         {
             question: t('faq.05_question'),
-            answer: t('faq.05_response'),
-            id: 'faq-item-5'
+            answer: t('faq.05_answer'),
+            id: 'thread4'
+        },
+        {
+            question: t('faq.06_question'),
+            answer: t('faq.06_answer'),
+            id: 'thread4'
         }
     ];
 
-    const [expanded, setExpanded] = React.useState<string | false>('panel1');
 
-    const handleChange =
-        (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-            setExpanded(newExpanded ? panel : false);
-        };
 
-        const renderTree = (nodes: RenderTree) => (
-            <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name}>
-              {Array.isArray(nodes.children)
-                ? nodes.children.map((node) => renderTree(node))
-                : null}
-            </TreeItem>
-          );
     return (
         <PageWrapper>
             <StyledStack direction='column' spacing={3}>
 
                 <FlexSpacer minHeight={10} />
 
-                <Typography size="h1" weight='SemiBold' sx={{ justifyContent: 'center' }}> FAQ</Typography>
 
-                <FlexSpacer minHeight={1} />
 
-                <Grid container>
-                    <Grid item xs={6}> 
-                        <TreeView
-                            aria-label="rich object"
-                            defaultCollapseIcon={<ExpandMoreIcon />}
-                            defaultExpanded={['root']}
-                            defaultExpandIcon={<ChevronRightIcon />}
-                            sx={{ height: 110, flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}
-                        >
-                            {renderTree(data)}
-                        </TreeView>
+                <Grid container spacing={2} >
+
+                    <Grid item xs={12} md={4} sx={{ position: 'relative' }}>
+                        <StyledNav>
+                            <Typography size="h2" weight='SemiBold'>{t('faq.headline')}</Typography>
+                            <FlexSpacer minHeight={3} />
+
+                            <ul style={{ listStyle: 'none', padding: 0 }}>
+                                {faqItems.map((nav) => <>
+                                    <li key={nav.id} >
+                                        <StyledAnchorLink
+                                            className={clsx(activeSection ? 'active' : '')} 
+                                            href={`#${nav.id}`}                                             >
+                                            {nav.question}
+                                            {/* <li>{!Children ? <StyledAnchorLink className="anchor" href={`#${nav.id}`} >{nav.question}</StyledAnchorLink> : ''}</li> */}
+                                        </StyledAnchorLink>
+                                    </li>
+                                </>
+                                )
+                                }
+                            </ul>
+                        </StyledNav>
                     </Grid>
-                    <Grid item xs={6}>
-                        {faqItems.map((value) =>
-                            <Accordion expanded={expanded === value.id} onChange={handleChange(`${value.id}`)} >
-                                <AccordionSummary aria-controls="panel1d-content" id={value.id} key={value.id}>
-                                    <Typography size="body" weight="SemiBold">{value.question}</Typography>
-                                </AccordionSummary>
+                    <Grid item xs={12} md={8}>
 
-                                <AccordionDetails>
-                                    <Typography size="body" weight="Light">
-                                        {value.answer}
-                                    </Typography>
-                                </AccordionDetails>
-                            </Accordion>
+                        {faqItems.map((node) => <>
+                            <StyledSection id={node.id}>
+                                <Typography size="h2" weight='SemiBold'>{node.question}</Typography>
+                                <p>
+                                    {node.answer}
+
+                                </p>
+                                <p>{t('common.lorenIpsumLong')}</p>
+
+                                <p>{t('common.lorenIpsumLong')}</p>
+                            </StyledSection>
+                        </>
                         )
                         }
                     </Grid>
                 </Grid>
 
             </StyledStack>
-        </PageWrapper>
+        </PageWrapper >
     )
 }
 

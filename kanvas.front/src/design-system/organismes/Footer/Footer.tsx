@@ -4,15 +4,13 @@ import { FC } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import {
-    Stack,
     Theme,
     useMediaQuery,
-    useTheme,
 } from '@mui/material';
 import Typography from '../../atoms/Typography';
 import { Copyright } from '../../atoms/Copyright';
 import { useTranslation } from 'react-i18next';
-import { darkTheme, lightTheme, lightTheme as theme } from '../../../theme';
+import { darkTheme, lightTheme as theme } from '../../../theme';
 
 export interface FooterProps {
     selectedTheme?: string;
@@ -88,17 +86,11 @@ const iconStyle = {
 const StyledLink = styled(Link) <{ theme?: Theme }>`
   color: ${props => props.theme.palette.text.primary};
   text-decoration: none;
-
+  font-family: 'Poppins Medium' !important;
+  font-size: .8rem;
 
   @media (max-width: 1100px) {
       height: 2rem;
-  }
-
-  &.active {
-      p {
-          font-family: 'Poppins Medium' !important;
-          color: ${props => props.theme.palette.text.primary} !important;
-      }
   }
 `  
 
@@ -129,7 +121,7 @@ const isMobile = useMediaQuery(theme.breakpoints.down('md'));
                 marginLeft: 'auto',
             }}>
                 <Grid item xs={6} md={3}>
-                    <Typography size="h6" weight="SemiBold" gutterBottom>
+                    <Typography size="h5" weight="SemiBold" gutterBottom>
                         {t('footer.headline_1')}
                     </Typography>
 
@@ -143,7 +135,7 @@ const isMobile = useMediaQuery(theme.breakpoints.down('md'));
                     </Box>
                 </Grid>
                 <Grid item xs={6} md={3}>
-                    <Typography size="h6" weight="SemiBold" gutterBottom>
+                    <Typography size="h5" weight="SemiBold" gutterBottom>
                         {t('footer.headline_2')}
                     </Typography>
 
@@ -158,7 +150,7 @@ const isMobile = useMediaQuery(theme.breakpoints.down('md'));
                 </Grid>
 
                 <Grid item xs={6} md={3} sx={{ height: '7rem' }}>
-                    <Typography weight="SemiBold" size="h6" gutterBottom>
+                    <Typography weight="SemiBold" size="h5" gutterBottom>
                         {t('footer.headline_3')}
                     </Typography>
 
@@ -176,7 +168,7 @@ const isMobile = useMediaQuery(theme.breakpoints.down('md'));
                 </Grid>
 
                 <Grid item xs={12} md={3}>
-                    <Typography weight="SemiBold" size="h6" gutterBottom>
+                    <Typography weight="SemiBold" size="h5" gutterBottom>
                         {t('footer.headline_4')}
                     </Typography>
 

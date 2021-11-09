@@ -8,8 +8,9 @@
     "button_1": "Add to cart"
   },
   "common": {
-    "lorenIpsumShort": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    "lorenIpsum": "Lorem ipsum dolor sit amet, labore et dolore magna aliqua.",
+    "lorenIpsumLong": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.",
+    "lorenIpsumMedium": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "lorenIpsumShort": "Lorem ipsum dolor sit amet, labore et dolore magna aliqua.",
     "button": {
       "backToHome": "Back to home"
     }
@@ -19,5 +20,20 @@
     "headline_2": "More About us",
     "headline_3": "Legal",
     "headline_4": "Social"
+  },
+  "faq": {
+    "headline":"FAQ",
+    "01_question": "Introduction",
+    "01_answer": "TZconnect WL solution",
+    "02_question": "How does it work?",
+    "02_answer": "You can Mint and sell as you also can buy nfts...",
+    "03_question": "What is TZ connect white label?",
+    "03_answer": "Tt's a solution to create nft multi store commerce",
+    "04_question": "What are the tax costs for selling an NFT?",
+    "04_answer": "Aproximately 0.01269 tz per transaction.",
+    "05_question": "What are the costs for buying an NFT?",
+    "05_answer": "Aproximately 0.00269 tz per transaction.",
+    "06_question": "What are the costs for minting an NFT?",
+    "06_answer": "Aproximately 0.00269 tz per transaction."
   }
 }
