@@ -6,11 +6,12 @@ import { Grid, Stack, Theme } from "@mui/material";
 import { Typography } from "../../design-system/atoms/Typography";
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
+
+
 export interface FaqProps {
     selectedTheme?: string;
     theme?: Theme;
 }
-
 
 
 const StyledAnchorLink = styled.a <{ theme?: Theme }>`
@@ -28,25 +29,6 @@ const StyledAnchorLink = styled.a <{ theme?: Theme }>`
     }
 `
 
-interface RenderTree {
-    id: string;
-    name: string;
-    children?: readonly RenderTree[];
-}
-
-
-
-// Scroll to position
-//  const scrollToPosition = (el: any, offset?: any, left?: any, behavior?: any, block?: any) => {
-//     const elementPosition = el.offsetTop - offset;
-
-//     window.scroll({
-//       top: elementPosition,
-//       left,
-//       behavior,      
-//     });
-//   };
-
 const StyledStack = styled(Stack)`
   max-width: 100rem;
   width: 100%;
@@ -63,16 +45,26 @@ const StyledNav = styled.nav`
     bottom: -28.125rem;
 
 `
+// TODO: Add offset 
+// Scroll to position
+//  const scrollToPosition = (el: any, offset?: any, left?: any, behavior?: any, block?: any) => {
+//     const elementPosition = el.offsetTop - offset;
+
+//     window.scroll({
+//       top: elementPosition,
+//       left,
+//       behavior,      
+//     });
+//   };
+// const scrollWithOffset = (el?: Element, offset?: any,) => {
+//     scrollToPosition(el, offset, 0, 'smooth', 'start');
+//   };
 
 
 
 const Faq: FC<FaqProps> = () => {
     const { t } = useTranslation(['translation']);
     const [activeSection, setActiveSection] = useState(false);
-
-    // const scrollWithOffset = (el?: Element, offset?: any,) => {
-    //     scrollToPosition(el, offset, 0, 'smooth', 'start');
-    //   };
 
     const faqItems = [
         {
@@ -112,10 +104,7 @@ const Faq: FC<FaqProps> = () => {
     return (
         <PageWrapper>
             <StyledStack direction='column' spacing={3}>
-
                 <FlexSpacer minHeight={10} />
-
-
 
                 <Grid container spacing={2} >
 
@@ -128,8 +117,8 @@ const Faq: FC<FaqProps> = () => {
                                 {faqItems.map((nav) => <>
                                     <li key={nav.id} >
                                         <StyledAnchorLink
-                                            className={clsx(activeSection ? 'active' : '')} 
-                                            href={`#${nav.id}`}                                             >
+                                            className={clsx(activeSection ? 'active' : '')}
+                                            href={`#${nav.id}`}>
                                             {nav.question}
                                             {/* <li>{!Children ? <StyledAnchorLink className="anchor" href={`#${nav.id}`} >{nav.question}</StyledAnchorLink> : ''}</li> */}
                                         </StyledAnchorLink>
@@ -147,10 +136,8 @@ const Faq: FC<FaqProps> = () => {
                                 <Typography size="h2" weight='SemiBold'>{node.question}</Typography>
                                 <p>
                                     {node.answer}
-
                                 </p>
                                 <p>{t('common.lorenIpsumLong')}</p>
-
                                 <p>{t('common.lorenIpsumLong')}</p>
                             </StyledSection>
                         </>
@@ -158,7 +145,6 @@ const Faq: FC<FaqProps> = () => {
                         }
                     </Grid>
                 </Grid>
-
             </StyledStack>
         </PageWrapper >
     )
