@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 class AssertionError extends Error {
   constructor(message: string) {
     super(message)
