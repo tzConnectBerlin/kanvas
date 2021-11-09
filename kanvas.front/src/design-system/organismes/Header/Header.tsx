@@ -12,6 +12,8 @@ import { useQuery } from '@apollo/client';
 import { GET_LOGGED_USER } from '../../../api/queries/user';
 import { IUser } from '../../../interfaces/user';
 import useAxios from 'axios-hooks';
+import ShoppingCart from '../../organismes/ShoppingCart';
+
 
 export interface HeaderProps {
     user?: { role: string };
@@ -21,6 +23,8 @@ export interface HeaderProps {
     switchTheme: Function;
     onLogout?: () => void;
     onCreateAccount?: () => void;
+    cartOpen: boolean;
+    setCartOpen: Function;
 }
 
 const StyledBox = styled(Box)<{theme?: Theme}>`
@@ -42,7 +46,6 @@ const StyledBox = styled(Box)<{theme?: Theme}>`
         padding-right: 1rem !important;
         transition: padding-left 0.2s, padding-right 0.2s;
     }
-
 `
 
 const Spacer = styled.div<FlexSpacerProps>`
@@ -85,7 +88,21 @@ export const Header : FC<HeaderProps> = ({ user, selectedTheme, onLogout, onCrea
             <StickyLogo display={!isSearchOpen} />
             <Spacer display={!isSearchOpen} />
 
-            <Menu loading={loggedUser.loading} user={currentLoggedUser} setSearchOpen={setIsSearchOpen} isSearchOpen={isSearchOpen} embedKukai={props.embedKukai} notifications={notifications} selectedTheme={selectedTheme} switchTheme={switchTheme} onLogout={onLogout} onCreateAccount={onCreateAccount} history={history}/>
+            <Menu
+                loading={loggedUser.loading}
+                user={currentLoggedUser}
+                setSearchOpen={setIsSearchOpen}
+                isSearchOpen={isSearchOpen}
+                embedKukai={props.embedKukai}
+                notifications={notifications}
+                selectedTheme={selectedTheme}
+                switchTheme={switchTheme}
+                onLogout={onLogout}
+                onCreateAccount={onCreateAccount}
+                history={history}
+                openOrCloseShoppingCart={() => props.setCartOpen(!props.cartOpen)}
+            />
+
         </StyledBox>
     )
 }
