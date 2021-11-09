@@ -6,12 +6,19 @@ class AssertionError extends Error {
   }
 }
 
-let assert = (condition: boolean, message: string) => {
-  if (condition) {
-    return true
-  } else {
+export function assert(condition: boolean, message: string): void {
+  if (!condition) {
     throw new AssertionError(message)
   }
 }
 
-export { assert }
+export function assertEnv(v: string): string {
+  const res = process.env[v]
+
+  assert(
+    typeof res === 'string',
+    `Environment variable ${v} has to be set before starting this program`,
+  )
+
+  return res
+}

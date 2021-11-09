@@ -53,29 +53,14 @@ export class AuthenticationService {
       user.signedPayload,
       10,
     )
-    try {
-      const createdUser = await this.userService.create({
-        ...user,
-        signedPayload: hashedSignedDartPayload,
-      })
+    const createdUser = await this.userService.create({
+      ...user,
+      signedPayload: hashedSignedDartPayload,
+    })
 
-      createdUser.signedPayload = undefined
+    createdUser.signedPayload = undefined
 
-      return createdUser
-    } catch (error) {
-      // Uniqure violation error code from postgres
-      if (error?.code === '23505') {
-        throw new HttpException(
-          'User with this credentials already exists',
-          HttpStatus.BAD_REQUEST,
-        )
-      }
-
-      throw new HttpException(
-        'Something went wrong',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      )
-    }
+    return createdUser
   }
 
   private async verifyPassword(

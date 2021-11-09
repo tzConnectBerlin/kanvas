@@ -1,184 +1,188 @@
-import styled from "@emotion/styled";
-import PageWrapper from "../../design-system/commons/PageWrapper";
-import { GET_NFTS } from '../../api/queries/nfts';
-import { Typography } from "../../design-system/atoms/Typography";
-import FlexSpacer from "../../design-system/atoms/FlexSpacer";
 import useAxios from 'axios-hooks';
-import {
-    Paper,
-    Card,
-    CardMedia,
-    Container,
-    Grid,
-    Stack,
-    useMediaQuery,
-    Theme,
-    useTheme
-} from '@mui/material';
-import { CustomButton } from '../../design-system/atoms/Button';
-import { useTranslation } from 'react-i18next';
+import styled from "@emotion/styled";
+import FlexSpacer from "../../design-system/atoms/FlexSpacer";
+import PageWrapper from "../../design-system/commons/PageWrapper";
+
 import { FC } from "react";
+import { useTranslation } from 'react-i18next';
+import { CardMedia, Skeleton, Stack, Theme } from '@mui/material';
+import { CustomButton } from '../../design-system/atoms/Button';
+import { Typography } from "../../design-system/atoms/Typography";
+import { INft } from '../../interfaces/artwork';
+
+
+export interface ProductPageProps {
+    theme?: Theme;
+}
 
 const StyledStack = styled(Stack)`
     overflow: hidden;
     width: 100vw;
+    max-width: 100rem;
     height: 100%;
     align-items: center;
+    margin-bottom: 4rem;
 `
 
-const GridStyled = styled(Grid)`
-    width: 100%;
-`
-
-const PaperStyled = styled(Paper)`
-    height: 20rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
-export interface ProductPageProps {
-    id?: string;
-    theme?: Theme;
-    loading?: boolean;
-    responsive?: boolean;
+const data : INft = {
+    id: 1,
+    name: 'AD # 8210',
+    creator: 'Aurélia Durand',
+    ipfsHash: 'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
+    price: 20,
+    startDate: '12:12:43:00'
 }
 
-
-
-export const ProductPage : FC<ProductPageProps> = ({loading=false, responsive=false, id, ...props}) => {
+export const ProductPage : FC<ProductPageProps> = ({...props}) => {
     const { t } = useTranslation(['translation']);
 
-    const theme = useTheme()
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-    // const isMobile = useMediaQuery(' (max-width:382px)');
-
-    const [{ data: nfts, loading: getLoading, error: getError }, refetch] = useAxios('http://localhost:3000/nfts')
-
-
-
-    const data = {
-        nftName: 'AD # 8210',
-        artistName: 'Aurélia Durand',
-        time: '12:12:43:00'
-    }
+    const [getNft, refetch] = useAxios('http://localhost:3000/nfts')
 
     return (
         <PageWrapper>
             <StyledStack direction='column' spacing={3}>
-                <FlexSpacer minHeight={5} />
-                    <Container
-                        sx={{ py: 8, overflow: 'hidden' }}
-                        maxWidth="lg"
 
-                    >
-                        <Grid container spacing={2}>
-                            <Grid container sm={12} md={7} >
-                                <Grid xs={12} md={11}>
-                                    <Card
-                                        sx={{
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            position: 'relative',
-                                        }}
-                                    >
-                                        <CardMedia
-                                            component="img"
-                                            height="600"
-                                            image="https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg"
-                                            alt="random"
-                                        />
-                                    </Card>
-                                </Grid>
-                            </Grid>
+                <FlexSpacer minHeight={8} />
 
-                            <Grid
-                                item
-                                container
-                                md={5}
-                                spacing={2}
+                <Stack direction={{ sm: 'column', md: 'row' }} spacing={5} sx={{width: '100%'}}>
+                    {
+                        getNft.loading ?
+                            <Skeleton height='40rem' width='40rem' sx={{transform: 'none'}}/>
+                       :
+                            <CardMedia
+                                component="img"
+                                image="https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg"
+                                alt="random"
                                 sx={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
+                                    height: '75vh',
+                                    minHeight: 400,
+                                    maxHeight: 1000,
+                                    maxWidth: 1000
                                 }}
+                            />
+                    }
+
+                    <Stack direction ="column" sx={{position: 'relative', padding: '1rem'}}>
+
+                        {/* Headline */}
+
+                        <Typography
+                            size="h4"
+                            weight="SemiBold"
+                        >
+                            {   getNft.loading ?
+                                    <Skeleton width='15rem' height='2rem'/>
+                                :
+                                    data.creator
+                            }
+                        </Typography>
+
+                        <Typography
+                            size="h2"
+                            weight="SemiBold"
                             >
-
-                                {/* Headline */}
-
-                                <Typography
-
-                                    size="h4"
-                                    weight="SemiBold"
-                                    sx={{marginTop: isMobile?'5rem':undefined, pt: 1,  mb: 1}}
-                                >
-                                    {data.artistName}
-                                </Typography>
-
-                                <Typography
-                                    size="h2"
-                                    weight="SemiBold"
-                                    >
-                                    {data.nftName}
-                                </Typography>
+                            {   getNft.loading ?
+                                    <Skeleton width='10rem' height='2rem'/>
+                                :
+                                    data.name
+                            }
+                        </Typography>
 
 
-                                {/* Headline */}
-                                <Typography
-                                    size="h5"
-                                    weight="SemiBold"
-                                    sx={{ pt: 4}}
-                                >
-                                   {t('product.description.part_1')}
-                                </Typography>
-                                <Typography
-                                    size="h5"
-                                    weight="Light"
-                                    sx={{ pt: 2,  mb: 1 }}
-                                >
-                                     {t('common.lorenIpsumShort')}
-                                </Typography>
-
-                                <Typography
-                                    size="body"
-                                    weight="SemiBold"
-                                    sx={{ pt: 4 }}
-                                >
-
-                                   {t('product.description.part_2')}
-
-                                </Typography>
-                                <Typography
-                                    size="h5"
-                                    weight="Light"
-                                    sx={{ pt: 2,  mb: 1 }}
-                                >
-                                    {t('common.lorenIpsum')}
-                                </Typography>
-                                <Typography
-                                    size="body1"
-                                    weight="SemiBold"
-                                    sx={{ pt: 4 }}
-                                >
-                                   {t('product.description.part_3')}
-                                </Typography>
-                                <Typography
-                                    size="h5"
-                                    weight="Light"
-                                    sx={{ pt: 2,  mb: 1 }}
-                                >
-                                     {data.time}
-                                </Typography>
-                                <Stack
-                                    sx={{ pt: 4, mt: 2 }}
-                                    direction="row"
-                                    spacing={2}
-
-                                 >
-                                    <CustomButton size="large" label={t('product.button_1')}  sx={{width: isMobile? '100%' :undefined, mx: 2}} />
+                        {/* Headline */}
+                        <Typography
+                            size="h5"
+                            weight="SemiBold"
+                            sx={{ pt: 4}}
+                        >
+                            {   getNft.loading ?
+                                <Skeleton width='10rem' height='2rem'/>
+                            :
+                                t('product.description.part_1')
+                            }
+                        </Typography>
+                        <Typography
+                            size="h5"
+                            weight="Light"
+                            sx={{ pt: 2,  mb: 1 }}
+                        >
+                            {   getNft.loading ?
+                                <Stack direction="column">
+                                    <Skeleton width='40rem' height='1rem'/>
+                                    <Skeleton width='40rem' height='1rem'/>
+                                    <Skeleton width='40rem' height='1rem'/>
+                                    <Skeleton width='10rem' height='1rem'/>
                                 </Stack>
-                            </Grid>
-                        </Grid>
-                    </Container>
+                            :
+                                t('common.lorenIpsumShort')
+                            }
+                        </Typography>
+
+                        <Typography
+                            size="body"
+                            weight="SemiBold"
+                            sx={{ pt: 4 }}
+                        >
+                            {   getNft.loading ?
+                                <Skeleton width='10rem' height='2rem'/>
+                            :
+                                t('product.description.part_2')
+                            }
+                        </Typography>
+                        <Typography
+                            size="h5"
+                            weight="Light"
+                            sx={{ pt: 2,  mb: 1 }}
+                        >
+                            {   getNft.loading ?
+                                <Stack direction="column">
+                                    <Skeleton width='40rem' height='1rem'/>
+                                    <Skeleton width='40rem' height='1rem'/>
+                                    <Skeleton width='40rem' height='1rem'/>
+                                    <Skeleton width='10rem' height='1rem'/>
+                                </Stack>
+                            :
+                                t('common.lorenIpsum')
+                            }
+                        </Typography>
+                        <Typography
+                            size="body1"
+                            weight="SemiBold"
+                            sx={{ pt: 4 }}
+                        >
+                            {getNft.loading ? undefined : t('product.description.part_3')}
+                        </Typography>
+
+                        <Typography
+                            size="h5"
+                            weight="Light"
+                            sx={{ pt: 2,  mb: 1 }}
+                        >
+                            {getNft.loading ? undefined : data.startDate}
+                        </Typography>
+
+                        <Typography
+                            size="body1"
+                            weight="SemiBold"
+                            sx={{ pt: 4 }}
+                        >
+                            {getNft.loading ? undefined : t('product.description.price')}
+                        </Typography>
+
+                        <Typography
+                            size="h5"
+                            weight="Light"
+                            sx={{ pt: 2,  mb: 1 }}
+                        >
+                            {getNft.loading ? undefined : `${data.price} ꜩ`}
+                        </Typography>
+
+                        <FlexSpacer minHeight={2}/>
+
+                        <CustomButton size="medium" label={t('product.button_1')} disabled={getNft.loading}/>
+
+                    </Stack>
+                </Stack>
             </StyledStack>
         </PageWrapper>
     )
