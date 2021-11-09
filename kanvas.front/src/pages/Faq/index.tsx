@@ -20,7 +20,6 @@ const StyledAnchorLink = styled.a <{ theme?: Theme }>`
     font-family: 'Poppins Medium' !important;
     font-size: .8rem;
     font-weight: 700;
-    margin-bottom: 1rem;
 
     @media (max-width: 1100px) {
         height: 2rem;
@@ -33,8 +32,9 @@ const StyledAnchorLink = styled.a <{ theme?: Theme }>`
 
 const SlyledListItem = styled.li <{ theme?: Theme }>`
     padding-left: 1rem;
-    padding-bottom: .5rem;
-
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
 `
 
 const StyledStack = styled(Stack)`
@@ -54,7 +54,7 @@ const StickyNav = styled.nav`
     left: 0;
     bottom: -28.125rem;
 `
-// TODO: Add offset 
+// TODO: Add offset
 // Scroll to position
 //  const scrollToPosition = (el: any, offset?: any, left?: any, behavior?: any, block?: any) => {
 //     const elementPosition = el.offsetTop - offset;
@@ -62,7 +62,7 @@ const StickyNav = styled.nav`
 //     window.scroll({
 //       top: elementPosition,
 //       left,
-//       behavior,      
+//       behavior,
 //     });
 //   };
 // const scrollWithOffset = (el?: Element, offset?: any,) => {
@@ -188,7 +188,7 @@ const Faq: FC<FaqProps> = () => {
                     </Grid>
                 </Grid>
             </StyledStack>
-            
+
         </PageWrapper >
     )
 }
