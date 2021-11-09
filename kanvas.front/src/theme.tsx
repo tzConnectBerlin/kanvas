@@ -41,6 +41,9 @@ declare module '@mui/material/styles' {
         header: {
             background: string;
         },
+        footer: {
+            background: string;
+        },
         dropShadow: {
             default: string,
             hover: string
@@ -56,6 +59,9 @@ declare module '@mui/material/styles' {
         },
         header: {
             background: string;
+        },
+        footer: {
+          background: string;
         },
         dropShadow: {
             default: string,
@@ -231,6 +237,9 @@ export const lightTheme = createTheme({
     header: {
         background: 'rgba(255, 255, 255, 0.5)'
     },
+    footer: {
+      background: 'rgba(255, 255, 255, 1)'
+    },
     dropShadow: {
         default: 'drop-shadow(0px 0px 6px #5c5c5c2d)',
         hover: 'drop-shadow(0px 0px 6px #1f1f1f33)'
@@ -304,6 +313,9 @@ export const darkTheme = createTheme({
     },
     header: {
         background: 'rgba(22, 22, 22, 0.5)'
+    }, 
+    footer: {
+      background: 'rgba(0, 0, 0, 1)'
     },
     dropShadow: {
         default: 'drop-shadow(0px 0px 10px #18181886)',
