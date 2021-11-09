@@ -614,7 +614,8 @@ export const Menu: FC<MenuProps> = ({ user, selectedTheme, onLogout, onCreateAcc
                                         <Typography size="h1" weight='SemiBold' sx={{ justifyContent: 'center' }}> Sign in</Typography>
                                     </Animated>
                                     <FlexSpacer minHeight={1} />
-                                    <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ justifyContent: 'center' }}> Welcome to Kanvas ! Let’s begin by connecting your wallet.</Typography>
+                                    <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center',justifyContent: 'center' }}> Welcome to Kanvas !</Typography>
+                                    <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center',justifyContent: 'center' }}> Let’s begin by connecting your wallet.</Typography>
 
                                 </WrapperTitle>
 
