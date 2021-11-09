@@ -619,7 +619,7 @@ export const Menu: FC<MenuProps> = ({ user, selectedTheme, onLogout, onCreateAcc
 
                                 </WrapperTitle>
 
-                                <FlexSpacer minHeight={4} />
+                                <FlexSpacer minHeight={1} />
 
 
                                 <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} sx={{ alignItems: "center", justifyContent: 'center' }}>
@@ -632,6 +632,8 @@ export const Menu: FC<MenuProps> = ({ user, selectedTheme, onLogout, onCreateAcc
                                 <StyledExternalLink href="" target='_blank'>
                                     <Typography size="h4" weight='Light' color={'#15a0e1'} sx={{ justifyContent: 'center' }}> What's a wallet ? </Typography>
                                 </StyledExternalLink>
+                                <FlexSpacer minHeight={2} />
+
                             </StyledStack>
 
                         </Box>
