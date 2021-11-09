@@ -5,6 +5,6 @@ import { config } from 'dotenv'
 async function bootstrap() {
   config()
   const app = await NestFactory.create(AppModule, { cors: true })
-  await app.listen(3000)
+  await app.listen(process.env['KANVAS_API_PORT'] || 3000)
 }
 bootstrap()
