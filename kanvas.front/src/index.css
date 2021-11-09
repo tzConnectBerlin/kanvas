@@ -3,8 +3,7 @@ body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  position: relative;
-  overflow-y: auto;
+  position: relative;  
   padding: 0 !important;
 }
 
