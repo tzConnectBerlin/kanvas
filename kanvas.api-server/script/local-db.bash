@@ -1,13 +1,20 @@
 #!/bin/bash
+cd $(git rev-parse --show-toplevel)/kanvas.api-server
 
-[ -z $PGPORT ] && export PGPORT=5432
-[ -z $PGPASSWORD ] && export PGPASSWORD=dev_password
-[ -z $PGUSER ] && export PGUSER=dev_user
-[ -z $PGDATABASE ] && export PGDATABASE=dev_database
+[ -z $DB_PORT ] && export DB_PORT=5432
+[ -z $DB_PASSWORD ] && export DB_PASSWORD=dev_password
+[ -z $DB_USERNAME ] && export DB_USERNAME=dev_user
+[ -z $DB_DATABASE ] && export DB_DATABASE=dev_database
+
+BOOT_TIME=3s
+(
+    sleep $BOOT_TIME;
+    ./script/shmig -t postgresql -d postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_DATABASE up
+) &
 
 docker run \
-    -p $PGPORT:5432 \
-    -e POSTGRES_PASSWORD=$PGPASSWORD \
-    -e POSTGRES_USER=$PGUSER \
-    -e POSTGRES_DB=$PGDATABASE \
+    -p $DB_PORT:5432 \
+    -e POSTGRES_PASSWORD=$DB_PASSWORD \
+    -e POSTGRES_USER=$DB_USERNAME \
+    -e POSTGRES_DB=$DB_DATABASE \
     postgres "$@"

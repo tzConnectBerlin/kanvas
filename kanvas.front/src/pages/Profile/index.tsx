@@ -1,24 +1,17 @@
+import useAxios from 'axios-hooks';
 import styled from '@emotion/styled';
 import Tabs from '../../design-system/molecules/Tabs';
+import NftGrid from '../../design-system/organismes/NftGrid';
 import FlexSpacer from "../../design-system/atoms/FlexSpacer";
-import Typography from '../../design-system/atoms/Typography';
 import PageWrapper from '../../design-system/commons/PageWrapper';
 
-import { toast } from 'react-toastify';
+
+import { Stack } from '@mui/material';
+import { IUser } from '../../interfaces/user';
 import { Animated } from 'react-animated-css';
 import { FC, useEffect, useState } from 'react';
-import { Box, Stack, Theme } from '@mui/material';
-import { GET_USER } from '../../api/queries/user';
 import { useHistory, useParams } from 'react-router';
-import { useLazyQuery, useMutation } from "@apollo/client";
-import { CustomButton } from '../../design-system/atoms/Button';
-import { GET_USER_CREATIONS, GET_USER_GALLERY } from '../../api/queries/artwork';
-import { ArtworkCard } from '../../design-system/molecules/ArtworkCard/ArtworkCard';
 import { HeaderProfile } from '../../design-system/molecules/HeaderProfile/HeaderProfile';
-import { EDIT_USER_CREATION_LAYOUTS, EDIT_USER_GALLERY_LAYOUTS } from '../../api/mutations/user';
-import NftGrid from '../../design-system/organismes/NftGrid';
-import useAxios from 'axios-hooks';
-import { IUser } from '../../interfaces/user';
 
 interface ParamTypes {
     username: string;
@@ -53,7 +46,6 @@ const StyledDiv = styled.div`
         padding-top: 2rem;
     }
 `
-
 
 const mockUser : IUser = {
     profilePicture: '',

@@ -85,7 +85,8 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
   &:disabled {
     background-color: ${props => props.theme.palette.background.default};
     border-color: transparent;
-
+    outline: 1px solid #C4C4C4;
+    
     svg {
       color: #C4C4C4 !important;
     }

@@ -4,13 +4,15 @@ import { FC } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import {
+    Stack,
     Theme,
     useMediaQuery,
+    useTheme,
 } from '@mui/material';
 import Typography from '../../atoms/Typography';
 import { Copyright } from '../../atoms/Copyright';
 import { useTranslation } from 'react-i18next';
-import { darkTheme, lightTheme as theme } from '../../../theme';
+import { lightTheme as theme } from '../../../theme';
 
 export interface FooterProps {
     selectedTheme?: string;
@@ -86,12 +88,26 @@ const iconStyle = {
 const StyledLink = styled(Link) <{ theme?: Theme }>`
   color: ${props => props.theme.palette.text.primary};
   text-decoration: none;
+<<<<<<< HEAD
   font-family: 'Poppins Medium' !important;
   font-size: .8rem;
+=======
+
+>>>>>>> main
 
   @media (max-width: 1100px) {
       height: 2rem;
   }
+<<<<<<< HEAD
+=======
+
+  &.active {
+      p {
+          font-family: 'Poppins Medium' !important;
+          color: ${props => props.theme.palette.text.primary} !important;
+      }
+  }
+>>>>>>> main
 `  
 
 
