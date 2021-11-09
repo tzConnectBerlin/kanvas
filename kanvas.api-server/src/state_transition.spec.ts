@@ -1,5 +1,7 @@
-import { NftStateTransitionConfig } from './state_transition'
-
+import { NftEntity } from './nft/entity/nft.entity'
+import { NftStateTransitionConfig, transition } from './state_transition'
+import { UserEntity } from './user/entity/user.entity'
+import { assoc } from 'ramda'
 let exampleNftStateTransitionConfig: NftStateTransitionConfig = {
   states: {
     terminal: ['start', 'rejected'],
@@ -17,15 +19,41 @@ let exampleNftStateTransitionConfig: NftStateTransitionConfig = {
   ],
 }
 
-let exampleNftStateConfigSource = ```
-(states (:start :rejected) ;; terminal stages
-        (:uploaded :moderated :categorised :commericaltermsadded)) ;; others
+// let exampleNftStateConfigSource = ```
+// (states (:start :rejected) ;; terminal stages
+//         (:uploaded :moderated :categorised :commericaltermsadded)) ;; others
 
-(roles (:uploader :moderator :editor :god))
+// (roles (:uploader :moderator :editor :god))
 
-(transition (:start :uploaded)
-            (requires :uploader))
+// (transition (:start :uploaded)
+//             (requires :uploader))
 
-(transition (:uploaded :moderated)
-            (requires :moderator 3))
-```
+// (transition (:uploaded :moderated)
+//             (requires :moderator 3))
+// ```
+
+describe('NFT state transition', () => {
+  it('should allow state transitions when the user role is correct', () => {
+    let user: UserEntity = {
+      id: 1337,
+      name: 'Max Mustermann',
+      address: 'abc123',
+      signedPayload: 'signed',
+      roles: ['uploader', 'moderator'],
+    }
+    let nft: NftEntity = {
+      id: 7331,
+      name: 'cool nft',
+      ipfsHash: '12345',
+      metadata: {},
+      dataUri: 'protocol:user@host/resource',
+      contract: 'contract id',
+      tokenId: '1234567',
+      categories: [],
+      status: 'uploaded',
+    }
+    expect(
+      transition(exampleNftStateTransitionConfig, nft, user, 'moderated'),
+    ).toBe(assoc('status', 'moderated', nft))
+  })
+})
