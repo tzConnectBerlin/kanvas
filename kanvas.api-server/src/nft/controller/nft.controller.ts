@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Query, Param, Post } from '@nestjs/common'
+import {
+  HttpException,
+  HttpStatus,
+  Body,
+  Controller,
+  Get,
+  Query,
+  Param,
+  Post,
+} from '@nestjs/common'
 import { NftService } from '../service/nft.service'
 import { NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity'
 import { FilterParams, AllNftsParams } from '../params'
@@ -13,7 +22,16 @@ export class NftController {
   }
 
   @Get('/filter')
-  async filter(@Query() params: FilterParams) {
+  async filter(@Query() params: FilterParams): Promise<NftEntityPage> {
+    const filterCategories = params.categories.length > 0
+    const filterAddress = typeof params.address === 'string'
+    if (!filterCategories && !filterAddress) {
+      throw new HttpException(
+        'Neither categories nor address filter specified, need at least 1 set',
+        HttpStatus.BAD_REQUEST,
+      )
+    }
+
     return this.nftService.filter(params)
   }
 

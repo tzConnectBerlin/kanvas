@@ -13,6 +13,8 @@ export interface NftEntity {
 }
 
 export interface NftEntityPage {
-  firstId: number
-  data: NftEntity[]
+  firstRequestAt: number
+  nfts: NftEntity[]
+  currentPage: number
+  numberOfPages: number
 }

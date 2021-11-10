@@ -24,6 +24,10 @@ export class AllNftsParams {
   @IsString()
   @IsOptional()
   orderBy: string = defaultOrderBy
+
+  @IsInt()
+  @IsOptional()
+  firstRequestAt: number
 }
 
 export class FilterParams {
@@ -45,9 +49,18 @@ export class FilterParams {
   @IsOptional()
   orderBy: string = defaultOrderBy
 
+  @IsInt()
+  @IsOptional()
+  firstRequestAt: number
+
   @IsArray()
   @Transform(({ value }) => (value ? parseStringArray(value, ';') : undefined))
-  categories: string[]
+  @IsOptional()
+  categories: string[] = []
+
+  @IsString()
+  @IsOptional()
+  address: string
 }
 
 function parseStringArray(v: string | string[], sep: string): string[] {

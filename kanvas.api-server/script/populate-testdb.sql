@@ -1,8 +1,9 @@
 insert into kanvas_user (
-  address, signed_payload
+  id, address, signed_payload
 )
 values
-  ('addr', 'admin');
+  (1, 'addr', 'admin'),
+  (2, 'tz1', 'pass');
 
 
 insert into nft (
@@ -15,6 +16,15 @@ values
   (4, 'NFT4', 'ipfs://has-2-categories', '{}'),
   (5, 'Alps', 'ipfs://the-alps', '{}');
 
+insert into mtm_kanvas_user_nft (
+  kanvas_user_id, nft_id
+)
+values
+  (1, 1),
+  (1, 2),
+  (2, 3),
+  (2, 4),
+  (1, 5);
 
 insert into nft_category (
   id, category, description
@@ -29,7 +39,7 @@ insert into mtm_nft_category (
 )
 values
   (1, 1),
-  (1, 2),
+  (2, 2),
   (1, 4),
   (2, 4),
   (1, 5);
