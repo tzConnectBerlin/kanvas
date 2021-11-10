@@ -10,4 +10,5 @@ export class NftEntity {
   contract: string
   tokenId: string
   categories: CategoryEntity[]
+  status: string // corresponds to NftStateTransitionConfig
 }
