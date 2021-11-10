@@ -60,7 +60,7 @@ export const Header : FC<HeaderProps> = ({ user, selectedTheme, onLogout, onCrea
     const history = useHistory();
 
     // const loggedUser = {data: undefined, loading: false}
-    const [loggedUser] = useAxios({url: 'http://localhost:3000/auth/logged_user', headers: {
+    const [loggedUser] = useAxios({url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logged_user', headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Authorization': `Bearer ${localStorage.getItem('Kanvas - Bearer')}`

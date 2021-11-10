@@ -49,7 +49,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
             position: "relative",
           }}
         >
-          <CardActionArea onClick={() => handleRedirect(`/nft/${props.id}`)} sx={{width: 'auto'}}>
+          <CardActionArea onClick={() => handleRedirect(`/product/${props.id}`)} sx={{width: 'auto'}}>
             <CardMedia
               component="img"
               image="https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg"
@@ -72,14 +72,13 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
             >
               <StyledBioWrapper style={{ display: "block" }}>
                 <Typography weight="SemiBold" size="h4"
-                  color="#FFF"
                 >
                   {props.name}
                 </Typography>
-                <Typography weight="Light" size="body" color="#FFF">
+                <Typography weight="Light" size="body">
                   Artist name
                 </Typography>
-                <Typography weight="Light" size="body" color="#FFF">
+                <Typography weight="Light" size="body">
                   Remaining time
                 </Typography>
               </StyledBioWrapper>
@@ -91,11 +90,10 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     flexDirection: "column",
                     alignItems: "flex-end",
                   }}
-
-                  >
-                    <Typography weight="SemiBold" size="h3" color="#FFF">{props.price ? props.price : '- ' }tz</Typography>
-                  </div>
-                </CardActions>
+                >
+                  <Typography weight="SemiBold" size="h3" > {props.price ? props.price : '- ' }tz </Typography>
+                </div>
+              </CardActions>
 
             </CardContent>
           </CardActionArea>

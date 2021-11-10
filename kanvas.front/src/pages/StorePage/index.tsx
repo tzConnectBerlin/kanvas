@@ -62,8 +62,8 @@ const StorePage = () => {
     const page = new URLSearchParams(search).get('page')
 
     // Api calls for the categories and the nfts
-    const [nftsResponse, getNfts] = useAxios('http://localhost:3000/nfts', { manual: true })
-    // const [categoriesResponse, getCategories] = useAxios('http://localhost:3000/categories', { manual: true })
+    const [nftsResponse, getNfts] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts', { manual: true })
+    // const [categoriesResponse, getCategories] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/categories', { manual: true })
 
     // is filter open ?
     const [filterOpen, setFilterOpen] = useState(false);
