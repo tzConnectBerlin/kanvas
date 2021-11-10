@@ -1,8 +1,8 @@
 import { Ok, Err, Result } from 'ts-results'
 import { NftEntity } from './nft/entity/nft.entity'
 import { UserEntity } from './user/entity/user.entity'
-import { assert } from 'src/utils'
-import { assoc, filter, find, propEq, and } from 'ramda'
+import { findOne } from './utils'
+import { assoc, and } from 'ramda'
 type StateDeclaration = {
   [key: string]: Array<string>
 }
@@ -22,26 +22,35 @@ export type NftStateTransitionConfig = {
 export function transition(
   config: NftStateTransitionConfig,
   nft: NftEntity,
-  user: UserEntity,
+  usersWhoConfirm: UserEntity[],
   newStatus: string,
 ) {
-  let transitionDeclaration = config.transitions.filter(
-    (transitionDeclaration) =>
-      and(
+  // To transition the status of a NFT, the transition must be approved by a certain amount of users with the correct role.
+  // The number of confirming users with role is defined in the NftStateTransitionConfig
+  const transitionDeclaration: Result<TransitionDeclaration, string> = findOne(
+    (transitionDeclaration: TransitionDeclaration) => {
+      return and(
         transitionDeclaration.from == nft.status,
         transitionDeclaration.to == newStatus,
-      ),
-  )[0]
-
-  if (transitionDeclaration) {
-    let requiredRole: string = transitionDeclaration.requires[0]
-    let actualRoles = user.roles.filter((role) => role === requiredRole)
-    if (actualRoles.length === 0) {
-      return Err(
-        `User #{user.id} does not have the required role to change nft #{nft.id} from from ${nft.status} to ${newStatus}`,
       )
-    } else if (actualRoles[0] === requiredRole) {
+    },
+    config.transitions,
+  )
+  if (transitionDeclaration.ok) {
+    let requiredRole: string = transitionDeclaration.val.requires[0]
+    const confirmingUsersWithCorrectRole = usersWhoConfirm.filter(
+      (user) => findOne((role: string) => role == requiredRole, user.roles).ok,
+    )
+    const requiredConfirmations = transitionDeclaration.val.requires[1]
+    if (requiredConfirmations <= confirmingUsersWithCorrectRole.length) {
+      // if (actualRolesPerUser.length >= requiredConfirmations) {
       return Ok(assoc('status', newStatus, nft))
+    } else {
+      return Err(
+        `Given users does not have the required role to change nft #{nft.id} from from ${nft.status} to ${newStatus}`,
+      )
     }
+  } else {
+    return transitionDeclaration
   }
 }
