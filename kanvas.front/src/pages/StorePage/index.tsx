@@ -129,7 +129,7 @@ const StorePage = () => {
                 <Stack direction="row">
                     <IconExpansionTreeView open={filterOpen} filterFunction={getFilteredNfts} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters}/>
 
-                    <NftGrid open={filterOpen} nfts={selectedFilters.length === 0 ? nftsResponse.data?.data : nftsFilteredResponse.data} loading={nftsResponse.loading || nftsFilteredResponse.loading}/>
+                    <NftGrid open={filterOpen} nfts={selectedFilters.length === 0 ? nftsResponse.data?.data : nftsFilteredResponse.data?.data} loading={nftsResponse.loading || nftsFilteredResponse.loading}/>
                 </Stack>
 
                 <Stack direction="row">
