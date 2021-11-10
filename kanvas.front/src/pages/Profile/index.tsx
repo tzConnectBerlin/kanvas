@@ -134,7 +134,7 @@ const Profile : FC<ProfileProps> = () => {
     const [emptyMessage, setEmptyMessage] = useState(tab)
     const [emptyLink, setEmptyLink] = useState(tab)
 
-    const [user, getUser] = useAxios('http://localhost:3000/')
+    const [user, getUser] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/')
 
     // Getting user info and updating
     // const [getUser, user] = useLazyQuery(GET_USER)

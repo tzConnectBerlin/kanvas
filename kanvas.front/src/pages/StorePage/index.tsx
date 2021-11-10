@@ -13,6 +13,7 @@ import { CustomButton } from '../../design-system/atoms/Button';
 import { CustomSelect } from '../../design-system/atoms/Select';
 import { Typography } from "../../design-system/atoms/Typography";
 import { useLocation, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const StyledStack = styled(Stack)`
     overflow: hidden;
@@ -61,8 +62,8 @@ const StorePage = () => {
     const page = new URLSearchParams(search).get('page')
 
     // Api calls for the categories and the nfts
-    const [nftsResponse, getNfts] = useAxios('http://localhost:3000/nfts', { manual: true })
-    // const [categoriesResponse, getCategories] = useAxios('http://localhost:3000/categories', { manual: true })
+    const [nftsResponse, getNfts] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts', { manual: true })
+    // const [categoriesResponse, getCategories] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/categories', { manual: true })
 
     // is filter open ?
     const [filterOpen, setFilterOpen] = useState(false);
@@ -82,6 +83,12 @@ const StorePage = () => {
         console.log(sort)
         console.log(page)
     }, [])
+
+    useEffect(() => {
+        if (nftsResponse.error) {
+            toast.error('An error occured while fetching the store.')
+        }
+    }, [nftsResponse.error])
 
     useEffect(() => {
         // fetch initial data

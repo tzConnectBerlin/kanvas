@@ -36,7 +36,7 @@ const data : INft = {
 export const ProductPage : FC<ProductPageProps> = ({...props}) => {
     const { t } = useTranslation(['translation']);
 
-    const [getNft, refetch] = useAxios('http://localhost:3000/nfts')
+    const [getNft, refetch] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts')
 
     return (
         <PageWrapper>

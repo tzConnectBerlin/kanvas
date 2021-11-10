@@ -55,12 +55,13 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
     const [signInParams, setSignInParams] = useState<IUserParams>({address: null, signedPayload: null})
 
     // const [signUser, signUserResponse] = useLazyQuery(SIGN_USER)
-    const [signUserResponse, signUser] = useAxios({url: 'http://localhost:3000/auth/login', method: 'POST', headers: {
+    
+    const [signUserResponse, signUser] = useAxios({url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/login', method: 'POST', headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       }}, { manual: true})
 
-    const [registerUserResponse, registerUser] = useAxios({url: 'http://localhost:3000/auth/register', method: 'POST', headers: {
+    const [registerUserResponse, registerUser] = useAxios({url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/register', method: 'POST', headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       }}, { manual: true})
@@ -105,7 +106,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
 
         } else if (embedKukai && loginType === "embed") {
             try {
-                const signedPayload = await embedKukai.signExpr('0501000000' + payload.payload.slice(2), 'Kanvas - sign in', 'Allow user to sign an expression with there wallet in order to sign them in.')
+                const signedPayload = await embedKukai.signExpr('0501000000' + payload.payload.slice(2))
                 setSignInParams({ address: userAddress, signedPayload: signedPayload })
                 signUser({data: { address: userAddress, signedPayload: signedPayload }})
             } catch (error) {
@@ -183,8 +184,13 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
             setSocialLoading(false)
             setBeaconLoading(false)
 
+            if (!registerUserResponse.data.token) {
+                toast.error('Unable to connect to the serve. Please refresh and try again')
+            }
+
             localStorage.setItem('Kanvas - Bearer', registerUserResponse.data.token)
             localStorage.setItem('Kanvas - address', registerUserResponse.data.address)
+
 
             history.push(`/store`)
         }
@@ -196,7 +202,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
             setSocialLoading(false)
             setBeaconLoading(false)
 
-            if (signUserResponse.error?.response?.data.message === 'User not registered.') {
+            if (signUserResponse.error?.response?.data.message === 'User not registered') {
                 // Check if we have information from the user thanks to kukai
                 registerUser({data: signInParams})
 
