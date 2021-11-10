@@ -63,12 +63,11 @@ const StorePage = () => {
 
     // Api calls for the categories and the nfts
     const [nftsResponse, getNfts] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts', { manual: true })
+    const [nftsFilteredResponse, getFilteredNfts] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts/filter', { manual: true })
     // const [categoriesResponse, getCategories] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/categories', { manual: true })
 
     // is filter open ?
     const [filterOpen, setFilterOpen] = useState(false);
-
-    const [data, setData] = useState(true);
 
     const [selectedFilters, setSelectedFilters] = useState<any[]>([])
     const [selectedSort, setSelectedSort] = useState('')
@@ -82,7 +81,7 @@ const StorePage = () => {
         console.log(categories)
         console.log(sort)
         console.log(page)
-    }, [])
+    }, [nftsResponse.data])
 
     useEffect(() => {
         if (nftsResponse.error) {
@@ -92,9 +91,23 @@ const StorePage = () => {
 
     useEffect(() => {
         // fetch initial data
-        getNfts()
+        getNfts({
+            params: {
+                categories: selectedFilters.join(';')
+            }
+        })
         // getCategories()
     },[])
+
+    useEffect(() => {
+        if (selectedFilters.length > 0) {
+            getFilteredNfts({
+                params: {
+                    categories: selectedFilters.join(';')
+                }
+            })
+        }
+    }, [selectedFilters])
 
     return (
         <PageWrapper>
@@ -114,14 +127,14 @@ const StorePage = () => {
                 </Stack>
 
                 <Stack direction="row">
-                    <IconExpansionTreeView open={filterOpen} filterFunction={() => {}} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters}/>
+                    <IconExpansionTreeView open={filterOpen} filterFunction={getFilteredNfts} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters}/>
 
-                    <NftGrid open={filterOpen} nfts={nftsResponse.data} loading={nftsResponse.loading}/>
+                    <NftGrid open={filterOpen} nfts={selectedFilters.length === 0 ? nftsResponse.data?.data : nftsFilteredResponse.data} loading={nftsResponse.loading || nftsFilteredResponse.loading}/>
                 </Stack>
 
                 <Stack direction="row">
                     <FlexSpacer/>
-                    <StyledPagination count={10} onChange={handlePaginationChange} variant="outlined" shape="rounded" disabled={nftsResponse.loading}/>
+                    <StyledPagination count={10} onChange={handlePaginationChange} variant="outlined" shape="rounded" disabled={nftsResponse.loading || nftsFilteredResponse.loading}/>
                 </Stack>
 
                 <FlexSpacer minHeight={5} />
