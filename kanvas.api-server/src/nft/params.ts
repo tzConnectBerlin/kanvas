@@ -1,8 +1,10 @@
-import { IsInt, IsOptional, IsArray } from 'class-validator'
+import { IsString, IsInt, IsOptional, IsArray } from 'class-validator'
 import { Type, Transform } from 'class-transformer'
 
 const defaultPage = 1
 const defaultPageSize = 10
+const defaultOrder = 'asc'
+const defaultOrderBy = 'id'
 
 export class AllNftsParams {
   @IsInt()
@@ -14,6 +16,14 @@ export class AllNftsParams {
   @Type(() => Number)
   @IsOptional()
   pageSize: number = defaultPageSize
+
+  @IsString()
+  @IsOptional()
+  order: string = defaultOrder
+
+  @IsString()
+  @IsOptional()
+  orderBy: string = defaultOrderBy
 }
 
 export class FilterParams {
@@ -26,6 +36,14 @@ export class FilterParams {
   @Type(() => Number)
   @IsOptional()
   pageSize: number = defaultPageSize
+
+  @IsString()
+  @IsOptional()
+  order: string = defaultOrder
+
+  @IsString()
+  @IsOptional()
+  orderBy: string = defaultOrderBy
 
   @IsArray()
   @Transform(({ value }) => (value ? parseStringArray(value, ';') : undefined))

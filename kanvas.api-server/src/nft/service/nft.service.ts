@@ -5,7 +5,7 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common'
-import { NftEntity } from 'src/nft/entity/nft.entity'
+import { NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity'
 import { FilterParams, AllNftsParams } from '../params'
 import { PG_CONNECTION } from 'src/db.module'
 
@@ -28,6 +28,19 @@ export class NftService {
     if (params.page < 1 || params.pageSize < 1) {
       throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST)
     }
+    const orderByMapping = new Map([
+      ['id', 'id'],
+      ['price', 'price'],
+      ['name', 'nft_name'],
+    ])
+    if (!orderByMapping.has(params.orderBy)) {
+      throw new HttpException(
+        'Requested orderBy not supported',
+        HttpStatus.BAD_REQUEST,
+      )
+    }
+
+    const orderBy = orderByMapping.get(params.orderBy)
     const offset = (params.page - 1) * params.pageSize
     const limit = params.pageSize
 
@@ -41,7 +54,7 @@ JOIN mtm_nft_category AS mtm
 JOIN nft_category AS cat
   ON mtm.nft_category_id = cat.id
 WHERE cat.category IN (${params.categories})
-ORDER BY nft.id
+ORDER BY id
 OFFSET ${offset}
 LIMIT ${limit}
 `
@@ -63,29 +76,47 @@ LIMIT ${limit}
     }
   }
 
-  async findAll(params: AllNftsParams): Promise<NftEntity[]> {
+  async findAll(params: AllNftsParams): Promise<NftEntityPage> {
     if (params.page < 1 || params.pageSize < 1) {
       throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST)
     }
+    const orderByMapping = new Map([
+      ['id', 'id'],
+      ['price', 'price'],
+      ['name', 'nft_name'],
+    ])
+    if (!orderByMapping.has(params.orderBy)) {
+      throw new HttpException(
+        'Requested orderBy not supported',
+        HttpStatus.BAD_REQUEST,
+      )
+    }
+
+    const orderBy = orderByMapping.get(params.orderBy)
     const offset = (params.page - 1) * params.pageSize
     const limit = params.pageSize
 
     try {
       return await this.conn.begin(async (sqlTx) => {
         const nftIds = await sqlTx<number[]>`
-SELECT nft.id as nft_id
+SELECT id as nft_id
 FROM nft
+ORDER BY id
 OFFSET ${offset}
 LIMIT ${limit}
 `
         if (nftIds.length == 0) {
           return []
         }
-        console.log(nftIds)
-        return this.findByIds(
-          nftIds.map((row) => row.nft_id),
-          sqlTx,
-        )
+        const res = {
+          firstId: nftIds[0].nft_id,
+          data: await this.findByIds(
+            nftIds.map((row) => row.nft_id),
+            sqlTx,
+          ),
+        }
+        console.log(res)
+        return res
       })
     } catch (err) {
       Logger.error('Error on nft filtered query, err: ' + err)
@@ -112,7 +143,7 @@ LIMIT ${limit}
       const qryRes = await dbConnection`
 SELECT
   nft.id, nft_name, ipfs_hash, metadata, data_uri, contract, token_id,
-  ARRAY_AGG(ARRAY[cat.category, cat.description]) AS categories
+  ARRAY_AGG(ARRAY[category, cat.description]) AS categories
 FROM nft
 LEFT JOIN mtm_nft_category AS mtm
   ON mtm.nft_id = nft.id

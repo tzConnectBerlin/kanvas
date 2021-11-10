@@ -11,3 +11,8 @@ export interface NftEntity {
   tokenId: string
   categories: CategoryEntity[]
 }
+
+export interface NftEntityPage {
+  firstId: number
+  data: NftEntity[]
+}
