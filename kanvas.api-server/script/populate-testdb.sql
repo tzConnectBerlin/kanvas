@@ -12,7 +12,8 @@ values
   (1, 'SomeNFT', 'ipfs://somenft', '{"json": "encoded", "I": "guess?"}'),
   (2, 'NFT2', 'ipfs://somenft+', '{"json": "encoded", "I": "guess?"}'),
   (3, 'NFT3', 'ipfs://has-no-category', '{}'),
-  (4, 'NFT4', 'ipfs://has-2-categories', '{}');
+  (4, 'NFT4', 'ipfs://has-2-categories', '{}'),
+  (5, 'Alps', 'ipfs://the-alps', '{}');
 
 
 insert into nft_category (
@@ -30,4 +31,5 @@ values
   (1, 1),
   (1, 2),
   (1, 4),
-  (2, 4);
+  (2, 4),
+  (1, 5);
