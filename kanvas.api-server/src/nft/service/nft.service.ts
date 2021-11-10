@@ -61,13 +61,15 @@ LIMIT ${limit}
         if (nftIds.length == 0) {
           return []
         }
-        console.log(nftIds)
-        return this.findByIds(
-          nftIds.map((row) => row.nft_id),
-          orderBy,
-          params.order,
-          sqlTx,
-        )
+        return {
+          firstId: nftIds[0].nft_id,
+          data: await this.findByIds(
+            nftIds.map((row) => row.nft_id),
+            orderBy,
+            params.order,
+            sqlTx,
+          ),
+        }
       })
     } catch (err) {
       Logger.error('Error on nft filtered query, err: ' + err)
@@ -101,7 +103,7 @@ LIMIT ${limit}
     try {
       return await this.conn.begin(async (sqlTx) => {
         const nftIds = await sqlTx<number[]>`
-SELECT id as nft_id, name, price
+SELECT id as nft_id
 FROM nft
 ORDER BY ${sqlTx(orderBy)} ${sqlTx(params.order)}, nft.id
 OFFSET ${offset}
