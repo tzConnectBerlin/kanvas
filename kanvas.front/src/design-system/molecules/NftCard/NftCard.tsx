@@ -72,13 +72,14 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
             >
               <StyledBioWrapper style={{ display: "block" }}>
                 <Typography weight="SemiBold" size="h4"
+                color="#FFF"
                 >
                   {props.name}
                 </Typography>
-                <Typography weight="Light" size="body">
+                <Typography weight="Light" size="body" color="#FFF">
                   Artist name
                 </Typography>
-                <Typography weight="Light" size="body">
+                <Typography weight="Light" size="body" color="#FFF">
                   Remaining time
                 </Typography>
               </StyledBioWrapper>
@@ -91,7 +92,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     alignItems: "flex-end",
                   }}
                 >
-                  <Typography weight="SemiBold" size="h3" > {props.price ? props.price : '- ' }tz </Typography>
+                  <Typography weight="SemiBold" size="h3" color="#FFF" > {props.price ? props.price : '- ' }tz </Typography>
                 </div>
               </CardActions>
 

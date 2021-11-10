@@ -108,7 +108,6 @@ const IconExpansionTreeView : FC<TreeViewProps> = ({selectedFilters, setSelected
         } else {
             setSelectedFilters([...selectedFilters, nodesName])
         }
-        props.filterFunction(nodesName)
     }
 
     const renderTree = (nodes: any) => (
