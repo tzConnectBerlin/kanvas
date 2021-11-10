@@ -37,5 +37,16 @@
     "05_answer": "Aproximately 0.00269 tz per transaction.",
     "06_question": "What are the costs for minting an NFT?",
     "06_answer": "Aproximately 0.00269 tz per transaction."
+  },
+  "modal": {
+    "signIn": {
+      "headline": "Sign in",
+      "text_1": "Welcome to Kanvas !  ",
+      "text_2": "Let’s begin by connecting your wallet.", 
+      "text_3": "Or",
+      "text_4": "What's a wallet ?",
+      "button_1": "Connect wallet",
+      "button_2": "Social sign in"
+    }
   }
 }

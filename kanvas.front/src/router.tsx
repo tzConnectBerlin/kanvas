@@ -1,4 +1,3 @@
-import SignIn from './pages/SignIn';
 import styled from '@emotion/styled';
 import Account from './pages/Account';
 import Profile from './pages/Profile';
@@ -78,7 +77,6 @@ const Router = () => {
                 <Header switchTheme={handleSelectTheme} selectedTheme={selectedTheme} notifications={undefined} setSignedPayload={setSignedPayload} beaconWallet={beaconWallet} embedKukai={embedKukai} />
                 <Switch>
                     <Route exact path="/Store" component={StorePage} />
-                    {/* <Route path="/sign-in" render={props => <SignIn beaconWallet={beaconWallet} embedKukai={embedKukai} setSignedPayload={setSignedPayload} {...props} />} /> */}
                     <Route path="/profile/:username" component={Profile} />
                     <Route path="/product/:id" component={ProductPage} />
                     <Route path="/faq" component={Faq} />

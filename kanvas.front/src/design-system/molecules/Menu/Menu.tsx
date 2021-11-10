@@ -9,16 +9,13 @@ import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import { FC, useEffect, useState } from 'react';
 import { KukaiEmbed } from 'kukai-embed';
 import { NavLink, useHistory, useLocation } from 'react-router-dom';
-import { Modal, Stack, Theme } from '@mui/material';
+import { Stack, Theme } from '@mui/material';
 import { CustomBadge } from '../../atoms/Badge';
 import { CustomButton } from '../../atoms/Button';
 import { Typography } from '../../atoms/Typography';
 import { QuickSearch } from '../../molecules/QuickSearch';
-import { IUser } from '../../../interfaces/user'; 
+import { IUser } from '../../../interfaces/user';
 import { BeaconWallet } from "@taquito/beacon-wallet";
- 
-
-
 
 const StyledStack = styled(Stack)`
     width: 100%;
@@ -36,13 +33,6 @@ const WrapperTitle = styled.div`
         width: 100%;
     }
 `
-
-interface IUserParams {
-    address: string | null;
-    signedPayload?: string | null;
-}
-
-
 interface MenuProps {
     user?: IUser;
     loading?: boolean;
@@ -228,8 +218,6 @@ const DesktopMenuContent = styled(Stack)`
 `
 
 export const Menu: FC<MenuProps> = ({ user, selectedTheme, onLogout, onCreateAccount, switchTheme, beaconWallet, embedKukai, ...props }) => {
- 
- 
     const history = useHistory()
     const location = useLocation()
 
@@ -403,7 +391,6 @@ export const Menu: FC<MenuProps> = ({ user, selectedTheme, onLogout, onCreateAcc
                             <WbSunnyOutlinedIcon onClick={() => switchTheme('dark')} sx={{ cursor: 'pointer' }} />
                     }
                 </DesktopMenuContent>
-
             </StyledMenuStack>
 
             <ProfilePopover

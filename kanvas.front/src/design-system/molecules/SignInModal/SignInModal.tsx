@@ -17,6 +17,7 @@ import { CustomButton } from '../../atoms/Button';
 import { Typography } from "../../atoms/Typography";
 import { SigningType, RequestSignPayloadInput, NetworkType, PermissionResponseOutput, ErrorResponse } from "@airgap/beacon-sdk";
 import useAxios from 'axios-hooks';
+import { useTranslation } from 'react-i18next';
 
 interface SignInModalProps {
     theme?: Theme;
@@ -44,7 +45,7 @@ const style = {
     p: 4,
 };
 
- 
+
 const StyledStack = styled(Stack)`
     width: 100%;
     max-width: 100rem;
@@ -61,15 +62,13 @@ const WrapperTitle = styled.div`
         width: 100%;
     }
 `
- 
+
 
 export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ...props }) => {
     const [socialLoading, setSocialLoading] = useState(false)
     const [beaconLoading, setBeaconLoading] = useState(false)
     const [signInParams, setSignInParams] = useState<IUserParams>({ address: null, signedPayload: null })
-
-    const [open, setOpen] = useState(false);
-    const handleOpen = () => setOpen(true);
+    const { t } = useTranslation(['translation']);
 
     // const [signUser, signUserResponse] = useLazyQuery(SIGN_USER)
     const [signUserResponse, signUser] = useAxios({
@@ -237,18 +236,18 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
             aria-labelledby="keep-mounted-modal-title"
             aria-describedby="keep-mounted-modal-description"
         >
-            <Box sx={style}>        
+            <Box sx={style}>
                 <StyledStack direction="column" spacing={3}>
 
                     <FlexSpacer minHeight={1} />
 
                     <WrapperTitle>
                         <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
-                            <Typography size="h1" weight='SemiBold' sx={{ justifyContent: 'center' }}> Sign in</Typography>
+                            <Typography size="h1" weight='SemiBold' sx={{ justifyContent: 'center' }}>{t('modal.signIn.headline')} </Typography>
                         </Animated>
                         <FlexSpacer minHeight={1} />
-                        <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center', justifyContent: 'center' }}> Welcome to Kanvas !</Typography>
-                        <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center', justifyContent: 'center' }}> Let’s begin by connecting your wallet.</Typography>
+                        <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center', justifyContent: 'center' }}> </Typography>
+                        <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center', justifyContent: 'center' }}> {t('modal.signIn.text_2')}</Typography>
 
                     </WrapperTitle>
 
@@ -256,14 +255,14 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
 
 
                     <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} sx={{ alignItems: "center", justifyContent: 'center' }}>
-                        <CustomButton size="large" onClick={() => requestUserWalletPermission('beacon')} label="Connect wallet" loading={beaconLoading} />
-                        <Typography size="h4" weight='Light'> Or </Typography>
-                        <CustomButton size="large" onClick={() => requestUserWalletPermission('embed')} label="Social sign in" loading={socialLoading} />
+                        <CustomButton size="large" onClick={() => requestUserWalletPermission('beacon')} label={t('modal.signIn.button_1')} loading={beaconLoading} />
+                        <Typography size="h4" weight='Light'> {t('modal.signIn.text_3')} </Typography>
+                        <CustomButton size="large" onClick={() => requestUserWalletPermission('embed')} label={t('modal.signIn.button_2')} loading={socialLoading} />
                     </Stack>
 
 
                     <StyledExternalLink href="" target='_blank'>
-                        <Typography size="h4" weight='Light' color={'#15a0e1'} sx={{ justifyContent: 'center' }}> What's a wallet ? </Typography>
+                        <Typography size="h4" weight='Light' color={'#15a0e1'} sx={{ justifyContent: 'center' }}>{t('modal.signIn.text_4')} </Typography>
                     </StyledExternalLink>
                     <FlexSpacer minHeight={2} />
 

@@ -14,10 +14,6 @@ import { IUser } from '../../../interfaces/user';
 import useAxios from 'axios-hooks';
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { SignInModal } from '../../molecules/SignInModal';
-import Avatar from '../../atoms/Avatar';
-import { CustomBadge } from '../../atoms/Badge';
-import Brightness3Icon from '@mui/icons-material/Brightness3';
-import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 
 export interface HeaderProps {
     user?: { role: string };
@@ -68,34 +64,12 @@ const Spacer = styled.div<FlexSpacerProps>`
     transition: width 0.2s;
 `
 
-export const Header: FC<HeaderProps> = ({  user, selectedTheme, onLogout, onCreateAccount, switchTheme, notifications, beaconWallet, embedKukai, setSignedPayload, ...props }) => {
-    const [socialLoading, setSocialLoading] = useState(false)
-    const [beaconLoading, setBeaconLoading] = useState(false)
-    const [signInParams, setSignInParams] = useState<IUserParams>({ address: null, signedPayload: null })
-
+export const Header: FC<HeaderProps> = ({ user, selectedTheme, onLogout, onCreateAccount, switchTheme, notifications, beaconWallet, embedKukai, setSignedPayload, ...props }) => {
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
     const handleCloseModal = () => setOpen(false);
 
     const history = useHistory()
-    const location = useLocation()
-
-
-
-    const [avatarSrc, setAvatarSrc] = useState<string>('')
-
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [expandMenu, setExpandMenu] = useState(false)
-
-    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
-
 
     // const loggedUser = {data: undefined, loading: false}
     const [loggedUser] = useAxios({
@@ -140,16 +114,14 @@ export const Header: FC<HeaderProps> = ({  user, selectedTheme, onLogout, onCrea
                 onLogout={onLogout}
                 onCreateAccount={onCreateAccount}
             />
- 
+
             <SignInModal
                 beaconWallet={beaconWallet}
                 embedKukai={embedKukai}
                 setSignedPayload={setSignedPayload}
-                open={open}
                 handleCloseModal={handleCloseModal}
+                open={open}
             />
-             {/* const handleCloseModal = () => setOpen(false); */}
-
         </StyledBox>
     )
 }
