@@ -14,27 +14,11 @@ import { CustomBadge } from '../../atoms/Badge';
 import { CustomButton } from '../../atoms/Button';
 import { Typography } from '../../atoms/Typography';
 import { QuickSearch } from '../../molecules/QuickSearch';
-import { IUser } from '../../../interfaces/user';
-import { Box } from '@mui/system';
-import SignInPage from '../../../pages/SignIn';
-import { Animated } from "react-animated-css";
-import { cssTransition } from 'react-toastify';
+import { IUser } from '../../../interfaces/user'; 
 import { BeaconWallet } from "@taquito/beacon-wallet";
-import { setWalletProvider } from "../../../contracts/init";
-import { SigningType, RequestSignPayloadInput, NetworkType, PermissionResponseOutput, ErrorResponse } from "@airgap/beacon-sdk";
-import PageWrapper from "../../../design-system/commons/PageWrapper";
-import { SIGN_USER } from '../../../api/queries/user';
-import { char2Bytes } from "@taquito/utils";
-import { useLazyQuery } from "@apollo/client";
-import useAxios from 'axios-hooks';
-import { toast } from 'react-toastify';
+ 
 
-interface SignInPageProps {
-    theme?: Theme;
-    beaconWallet?: BeaconWallet;
-    embedKukai?: KukaiEmbed;
-    setSignedPayload?: Function;
-}
+
 
 const StyledStack = styled(Stack)`
     width: 100%;
@@ -62,6 +46,7 @@ interface IUserParams {
 interface MenuProps {
     user?: IUser;
     loading?: boolean;
+    setOpen: Function;
     embedKukai?: KukaiEmbed;
     selectedTheme: string;
     beaconWallet?: BeaconWallet;
@@ -75,18 +60,6 @@ interface MenuProps {
     onLogout?: () => void;
     onCreateAccount?: () => void;
 }
-
-const style = {
-    position: 'absolute' as 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: '30rem',
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
-};
 
 const StyledMenuStack = styled(Stack)`
     align-items: end !important;
@@ -255,10 +228,8 @@ const DesktopMenuContent = styled(Stack)`
 `
 
 export const Menu: FC<MenuProps> = ({ user, selectedTheme, onLogout, onCreateAccount, switchTheme, beaconWallet, embedKukai, ...props }) => {
-    const [open, setOpen] = useState(false);
-    const handleOpen = () => setOpen(true);
-    const handleCloseModal = () => setOpen(false);
-
+ 
+ 
     const history = useHistory()
     const location = useLocation()
 
@@ -284,169 +255,6 @@ export const Menu: FC<MenuProps> = ({ user, selectedTheme, onLogout, onCreateAcc
             setAvatarSrc(user.profilePicture)
         }
     }, [user])
-
-
-
-    const [socialLoading, setSocialLoading] = useState(false)
-    const [beaconLoading, setBeaconLoading] = useState(false)
-    const [signInParams, setSignInParams] = useState<IUserParams>({ address: null, signedPayload: null })
-
-    // const [signUser, signUserResponse] = useLazyQuery(SIGN_USER)
-    const [signUserResponse, signUser] = useAxios({
-        url: 'http://localhost:3000/auth/login', method: 'POST', headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-        }
-    }, { manual: true })
-
-    const [registerUserResponse, registerUser] = useAxios({
-        url: 'http://localhost:3000/auth/register', method: 'POST', headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-        }
-    }, { manual: true })
-
-
-    // Sign expression function to sign user in
-    const signExpression = async (userAddress: string, loginType: "embed" | "beacon") => {
-
-        // The data to format
-        const dappUrl = "d-art.io";
-        const input = `Welcome to Kanvas ${userAddress}`;
-
-        // The full string
-        const formattedInput: string = [
-            "Tezos Signed Message:",
-            dappUrl,
-            input
-        ]
-            .join(" ");
-
-        const bytes = "05" + char2Bytes(formattedInput);
-
-        const payload: RequestSignPayloadInput = {
-            signingType: SigningType.MICHELINE,
-            payload: bytes,
-            sourceAddress: userAddress,
-        }
-
-        // Beacon signExpression
-        if (beaconWallet && loginType === "beacon") {
-
-            try {
-                const signedPayload = await beaconWallet.client.requestSignPayload(payload)
-                setSignInParams({ address: userAddress, signedPayload: signedPayload.signature })
-                signUser({ data: { name: userAddress, address: userAddress, signedPayload: signedPayload.signature } })
-            } catch (error) {
-                console.log(error)
-                setBeaconLoading(false)
-            }
-
-
-        } else if (embedKukai && loginType === "embed") {
-            try {
-                const signedPayload = await embedKukai.signExpr('0501000000' + payload.payload.slice(2), 'Kanvas - sign in', 'Allow user to sign an expression with there wallet in order to sign them in.')
-                setSignInParams({ address: userAddress, signedPayload: signedPayload })
-                signUser({ data: { address: userAddress, signedPayload: signedPayload } })
-            } catch (error) {
-                setSocialLoading(false)
-                embedKukai.deinit()
-            }
-        }
-    }
-
-    const requestUserWalletPermission = async (loginType: 'embed' | 'beacon') => {
-        if (beaconWallet && loginType === 'beacon') {
-            setBeaconLoading(true)
-
-            beaconWallet.client.requestPermissions({ network: { type: NetworkType.FLORENCENET } })
-                .then(async (response: PermissionResponseOutput) => {
-                    signExpression(response.address, 'beacon')
-                })
-                .catch((permissionError: ErrorResponse) => {
-                    console.log(permissionError)
-                    setBeaconLoading(false)
-                })
-
-            setBeaconLoading(false)
-
-        } else if (embedKukai && loginType === 'embed') {
-            setSocialLoading(true)
-
-            if (!embedKukai.initialized) {
-                await embedKukai.init();
-            }
-
-            let userInfo: any = null;
-
-            if (!embedKukai.user) {
-                setSocialLoading(false)
-                userInfo = await embedKukai.login();
-            } else {
-                userInfo = embedKukai.user;
-            }
-
-            if (userInfo) {
-                signExpression(userInfo.pkh, 'embed')
-            }
-        }
-    }
-
-    useEffect(() => {
-        if (beaconWallet) {
-            setWalletProvider(beaconWallet);
-        }
-    }, [beaconWallet])
-
-    const fade = cssTransition({
-        enter: "animate__animated animate__fadeIn",
-        exit: "animate__animated animate__fadeOut"
-    });
-
-    useEffect(() => {
-        if (signUserResponse.data) {
-
-            setSocialLoading(false)
-            setBeaconLoading(false)
-
-            localStorage.setItem('Kanvas - Bearer', signUserResponse.data.token)
-            localStorage.setItem('Kanvas - address', signUserResponse.data.address)
-
-            history.push(`/store`)
-        }
-
-    }, [signUserResponse.data])
-
-    useEffect(() => {
-        if (registerUserResponse.data) {
-
-            setSocialLoading(false)
-            setBeaconLoading(false)
-
-            localStorage.setItem('Kanvas - Bearer', registerUserResponse.data.token)
-            localStorage.setItem('Kanvas - address', registerUserResponse.data.address)
-
-            history.push(`/store`)
-        }
-
-    }, [registerUserResponse.data])
-
-    useEffect(() => {
-        if (signUserResponse.error) {
-            setSocialLoading(false)
-            setBeaconLoading(false)
-
-            if (signUserResponse.error?.response?.data.message === 'User not registered.') {
-                // Check if we have information from the user thanks to kukai
-                registerUser({ data: signInParams })
-
-            } else {
-                toast.error(signUserResponse.error.message, { position: toast.POSITION.TOP_RIGHT, transition: fade })
-            }
-        }
-    }, [signUserResponse.error])
-
-
 
     return (
         <>
@@ -585,59 +393,9 @@ export const Menu: FC<MenuProps> = ({ user, selectedTheme, onLogout, onCreateAcc
                             location.pathname === '/sign-in' || location.pathname === '/account/create' || location.pathname === '/account/edit' ?
                                 undefined
                                 :
-                                <CustomButton size="medium" onClick={handleOpen} label="Sign in" loading={props.loading} />
-
-                        // <CustomButton size="medium" onClick={() => navigateTo('sign-in')} label="Sign in" loading={props.loading}/>
+                                <CustomButton size="medium" onClick={() => props.setOpen(true)} label="Sign in" loading={props.loading} />
                     }
 
-                    <Modal
-                        keepMounted
-                        open={open}
-                        onClose={handleCloseModal}
-                        aria-labelledby="keep-mounted-modal-title"
-                        aria-describedby="keep-mounted-modal-description"
-                    >
-                        <Box sx={style}>
-                            {/* <Typography id="keep-mounted-modal-title" size="h6" weight="SemiBold">
-                                Text in a modal
-                            </Typography>
-                            <Typography id="keep-mounted-modal-description" size="body" weight="Light" sx={{ mt: 2 }}>
-                                Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-                            </Typography> */}
-
-                            <StyledStack direction="column" spacing={3}>
-
-                                <FlexSpacer minHeight={1} />
-
-                                <WrapperTitle>
-                                    <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
-                                        <Typography size="h1" weight='SemiBold' sx={{ justifyContent: 'center' }}> Sign in</Typography>
-                                    </Animated>
-                                    <FlexSpacer minHeight={1} />
-                                    <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center',justifyContent: 'center' }}> Welcome to Kanvas !</Typography>
-                                    <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center',justifyContent: 'center' }}> Let’s begin by connecting your wallet.</Typography>
-
-                                </WrapperTitle>
-
-                                <FlexSpacer minHeight={1} />
-
-
-                                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} sx={{ alignItems: "center", justifyContent: 'center' }}>
-                                    <CustomButton size="large" onClick={() => requestUserWalletPermission('beacon')} label="Connect wallet" loading={beaconLoading} />
-                                    <Typography size="h4" weight='Light'> Or </Typography>
-                                    <CustomButton size="large" onClick={() => requestUserWalletPermission('embed')} label="Social sign in" loading={socialLoading} />
-                                </Stack>
-
-
-                                <StyledExternalLink href="" target='_blank'>
-                                    <Typography size="h4" weight='Light' color={'#15a0e1'} sx={{ justifyContent: 'center' }}> What's a wallet ? </Typography>
-                                </StyledExternalLink>
-                                <FlexSpacer minHeight={2} />
-
-                            </StyledStack>
-
-                        </Box>
-                    </Modal>
                     {
                         selectedTheme === 'dark' ?
                             <Brightness3Icon onClick={() => switchTheme('light')} sx={{ cursor: 'pointer' }} />

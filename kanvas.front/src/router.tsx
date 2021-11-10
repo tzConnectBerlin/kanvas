@@ -75,10 +75,10 @@ const Router = () => {
     return(
         <ThemeProvider theme={localStorage.getItem('Kanvas - theme') === 'dark' ? darkThemeResponsive : lightThemeResponsive } >
             <StyledBrowserRouter>
-                <Header embedKukai={embedKukai} switchTheme={handleSelectTheme} selectedTheme={selectedTheme} notifications={undefined}/>
+                <Header switchTheme={handleSelectTheme} selectedTheme={selectedTheme} notifications={undefined} setSignedPayload={setSignedPayload} beaconWallet={beaconWallet} embedKukai={embedKukai} />
                 <Switch>
                     <Route exact path="/Store" component={StorePage} />
-                    <Route path="/sign-in" render={props => <SignIn beaconWallet={beaconWallet} embedKukai={embedKukai} setSignedPayload={setSignedPayload} {...props} />} />
+                    {/* <Route path="/sign-in" render={props => <SignIn beaconWallet={beaconWallet} embedKukai={embedKukai} setSignedPayload={setSignedPayload} {...props} />} /> */}
                     <Route path="/profile/:username" component={Profile} />
                     <Route path="/product/:id" component={ProductPage} />
                     <Route path="/faq" component={Faq} />
