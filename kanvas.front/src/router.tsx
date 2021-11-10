@@ -41,7 +41,7 @@ const Router = () => {
     useEffect(() => {
         if (!embedKukai) {
             setEmbedKukai(new KukaiEmbed({
-                net: Networks.dev ,
+                net: Networks.granadanet ,
                 icon: false
             }))
         }
