@@ -28,9 +28,12 @@ export class AuthenticationService {
   public async login(userData: UserEntity): Promise<any | { status: number }> {
     const user = await this.validate(userData)
 
-    if (userData.signedPayload !== undefined) {
+    if (
+      user.signedPayload !== undefined &&
+      userData.signedPayload !== undefined
+    ) {
       // TODO should this not be user.signedPayload for one of them?
-      await this.verifyPassword(userData.signedPayload, userData.signedPayload)
+      await this.verifyPassword(user.signedPayload, userData.signedPayload)
 
       return this.getCookieWithJwtToken(
         {
