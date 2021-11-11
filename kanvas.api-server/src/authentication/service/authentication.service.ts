@@ -28,21 +28,24 @@ export class AuthenticationService {
   public async login(userData: UserEntity): Promise<any | { status: number }> {
     const user = await this.validate(userData)
 
-    await this.verifyPassword(userData.signedPayload, user.signedPayload)
+    if (userData.signedPayload !== undefined) {
+      // TODO should this not be user.signedPayload for one of them?
+      await this.verifyPassword(userData.signedPayload, userData.signedPayload)
 
-    return this.getCookieWithJwtToken(
-      {
-        id: user.id,
-        name: user.name,
-        address: user.address,
-        roles: user.roles,
-      },
-      user,
-    )
+      return this.getCookieWithJwtToken(
+        {
+          id: user.id,
+          name: user.name,
+          address: user.address,
+          roles: user.roles,
+        },
+        user,
+      )
+    }
   }
 
   public async getLoggedUser(address: string): Promise<UserEntity> {
-    const user = await this.userService.findByAddress(address)
+    const user: UserEntity = await this.userService.findByAddress(address)
     user.signedPayload = undefined
 
     return user
@@ -86,12 +89,16 @@ export class AuthenticationService {
     const payload: ITokenPayload = data
     const token = this.jwtService.sign(payload)
 
-    return {
-      token: token,
-      id: user.id,
-      name: user.name,
-      maxAge: process.env.JWT_EXPIRATION_TIME,
-      address: data.address,
+    if (typeof process.env.JWT_EXPIRATION_TIME == 'string') {
+      return {
+        token: token,
+        id: user.id,
+        name: user.name,
+        maxAge: process.env.JWT_EXPIRATION_TIME,
+        address: data.address,
+      }
+    } else {
+      throw new Error('process.env.JWT_EXPIRATION_TIME not set')
     }
   }
 }

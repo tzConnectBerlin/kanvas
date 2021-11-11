@@ -14,13 +14,13 @@ export function assert(condition: boolean, message: string): void {
 
 export function assertEnv(v: string): string {
   const res = process.env[v]
-
-  assert(
-    typeof res === 'string',
-    `Environment variable ${v} has to be set before starting this program`,
-  )
-
-  return res
+  if (typeof res === 'string') {
+    return res
+  } else {
+    throw new AssertionError(
+      `Environment variable ${v} has to be set before starting this program`,
+    )
+  }
 }
 
 // Like Array.prototype.filter. Invariant: only 1 result
