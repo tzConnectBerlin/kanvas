@@ -63,13 +63,16 @@ const StyledStack = styled(Stack)`
         padding: 0;
 
         .MuiTypography-root.MuiTypography-h2 {
-            font-size: 1rem;
+            font-size: .85rem;
             font-family: Poppins Light;
         }
 
         li {
-            padding-left: .8rem;
-            margin-bottom: .5rem;
+            padding-left: 1rem;
+            margin-bottom: .4rem;
+            min-height: 1.5rem;
+            display: flex;
+            align-items: center;
         }
 
         li + li {
@@ -87,7 +90,7 @@ margin-bottom: 4rem;
       
         &.sub {
             margin-bottom: 2rem;
-            font-size: 1.2rem;
+            font-size: 1rem;
             
             &:last-child {
                color: red;
@@ -107,7 +110,6 @@ const StickyNav = styled.nav`
 
 const Faq: FC<FaqProps> = () => {
     const { t } = useTranslation(['translation']);
-    const [activeSection, setActiveSection] = useState(false);
 
     // const faqItems = [
     //     {
@@ -148,7 +150,7 @@ const Faq: FC<FaqProps> = () => {
                 <FlexSpacer minHeight={10} />
 
                 <Grid container spacing={2} >
-                    <Grid item xs={12} md={4} sx={{ position: 'relative' }}>
+                    <Grid item xs={12} md={5} sx={{ position: 'relative' }}>
                         <StickyNav>
                             <Scrollspy
                                 ids={["one", "one_one", "one_two", "two", "three"]}
