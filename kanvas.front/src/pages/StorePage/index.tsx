@@ -77,7 +77,7 @@ const StorePage = () => {
     }
 
     useEffect(() => {
-        // chekc on the search for the used params
+        // check on the search for the used params
         console.log(categories)
         console.log(sort)
         console.log(page)
