@@ -6,7 +6,7 @@ import {
   Inject,
 } from '@nestjs/common'
 import { NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity'
-import { FilterParams, AllNftsParams } from '../params'
+import { FilterParams, PaginationParams } from '../params'
 import { PG_CONNECTION } from 'src/db.module'
 
 @Injectable()
@@ -22,6 +22,14 @@ export class NftService {
     throw new Error(
       "Not yet implemented - let's implement it when we need it rather than have a big generated code blob",
     )
+  }
+
+  async findAll(params: PaginationParams): Promise<NftEntityPage> {
+    return this.filter({
+      ...params,
+      categories: undefined,
+      address: undefined,
+    })
   }
 
   async filter(params: FilterParams): Promise<NftEntityPage> {
@@ -44,10 +52,8 @@ export class NftService {
     const offset = (params.page - 1) * params.pageSize
     const limit = params.pageSize
 
-    const client = await this.conn.connect()
     try {
-      await client.query('BEGIN')
-      const nftIds = await client.query(
+      const nftIds = await this.conn.query(
         `
 SELECT nft_id, total_nft_count
 FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7)`,
@@ -79,7 +85,6 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7)`,
         nftIds.rows.map((row) => row.nft_id),
         orderBy,
         params.order,
-        client,
       )
       return res
     } catch (err) {
@@ -91,16 +96,8 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7)`,
     }
   }
 
-  async findAll(params: AllNftsParams): Promise<NftEntityPage> {
-    return this.filter({
-      ...params,
-      categories: undefined,
-      address: undefined,
-    })
-  }
-
   async byId(id: number): Promise<NftEntity> {
-    const nfts = await this.findByIds([id], 'nft_id', 'asc', this.conn)
+    const nfts = await this.findByIds([id], 'nft_id', 'asc')
     if (nfts.length == 0) {
       throw new HttpException(
         'NFT with the requested id does not exist',
@@ -114,16 +111,14 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7)`,
     nftIds: number[],
     orderBy: string,
     orderDirection: string,
-    sql: any,
   ): Promise<NftEntity[]> {
     try {
-      const nftsQryRes = await sql.query(
+      const nftsQryRes = await this.conn.query(
         `
 SELECT nft_id, nft_name, ipfs_hash, metadata, data_uri, contract, token_id, categories
 FROM nfts_by_id($1, $2, $3)`,
         [nftIds, orderBy, orderDirection],
       )
-      console.log(nftsQryRes)
       return nftsQryRes.rows.map((nftRow) => {
         return {
           id: nftRow['nft_id'],
