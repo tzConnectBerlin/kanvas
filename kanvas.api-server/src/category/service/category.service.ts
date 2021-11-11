@@ -7,7 +7,6 @@ export class CategoryService {
     throw new Error('Not implemented yet')
   }
   async findAll(): Promise<CategoryEntity[]> {
-    // TODO
     throw new Error('Not implemented yet')
   }
 }

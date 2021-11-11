@@ -15,16 +15,18 @@ export class UserService {
   async create(user: UserEntity): Promise<UserEntity> {
     // note: this implementation ignores user.roles here.
     try {
-      const [qryRes] = await this.conn`
+      const qryRes = await this.conn.query(
+        `
 INSERT INTO kanvas_user(
   user_name, address, signed_payload
 )
-VALUES (${user.name}, ${user.address}, ${user.signedPayload})
-RETURNING id
-`
+VALUES ($1, $2, $3)
+RETURNING id`,
+        [user.name, user.address, user.signedPayload],
+      )
 
       const res = Object.assign({}, user)
-      res.id = qryRes['id']
+      res.id = qryRes.rows[0]['id']
       res.roles = []
       return res
     } catch (err) {
@@ -46,7 +48,8 @@ RETURNING id
   }
 
   async findByAddress(addr: string): Promise<UserEntity> {
-    const qryRes = await this.conn`
+    const qryRes = await this.conn.query(
+      `
 SELECT
   usr.id, usr.user_name, usr.address, usr.signed_payload, role.role_label
 FROM kanvas_user usr
@@ -54,22 +57,22 @@ LEFT JOIN mtm_kanvas_user_user_role mtm
   ON mtm.kanvas_user_id = usr.id
 LEFT JOIN user_role role
   ON mtm.user_role_id = role.id
-WHERE address = ${addr}
-`
-    if (!qryRes.length) {
+WHERE address = $1
+`,
+      [addr],
+    )
+    if (qryRes.rows.length === 0) {
       throw new HttpException('User not registered', HttpStatus.BAD_REQUEST)
     }
     const res = {
-      id: qryRes[0]['id'],
-      name: qryRes[0]['user_name'],
-      address: qryRes[0]['address'],
-      signedPayload: qryRes[0]['signed_payload'],
-      roles: qryRes
+      id: qryRes.rows[0]['id'],
+      name: qryRes.rows[0]['user_name'],
+      address: qryRes.rows[0]['address'],
+      signedPayload: qryRes.rows[0]['signed_payload'],
+      roles: qryRes.rows
         .map((row) => row['role_label'])
         .filter((row) => typeof row === 'string'),
     }
-
-    console.log('res => ' + JSON.stringify(res))
 
     return res
   }

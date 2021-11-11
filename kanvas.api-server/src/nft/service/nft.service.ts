@@ -55,7 +55,7 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7)`,
           params.order,
           offset,
           limit,
-          params.firstRequestAt,
+          undefined, // TODO: parse UNIX timestamp (params.firstRequestAt) and insert here
         ],
       )
 

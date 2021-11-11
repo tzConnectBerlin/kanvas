@@ -8,7 +8,7 @@ CREATE FUNCTION nft_ids_filtered(
     address TEXT, categories TEXT[],
     orderBy TEXT, orderDirection TEXT,
     "offset" INTEGER, "limit" INTEGER,
-    untilNftId INTEGER)
+    untilNftLastUpdated TIMESTAMP WITHOUT TIME ZONE)
   RETURNS TABLE(nft_id nft.id%TYPE, total_nft_count bigint)
 AS $$
 BEGIN
@@ -28,14 +28,14 @@ BEGIN
       ON mtm_kanvas_user_nft.nft_id = nft.id
     JOIN kanvas_user
       ON mtm_kanvas_user_nft.kanvas_user_id = kanvas_user.id
-    WHERE ($1 IS NULL OR nft.id <= $1)
+    WHERE ($1 IS NULL OR nft.updated_at <= $1)
       AND ($2 IS NULL OR address = $2)
       AND ($3 IS NULL OR category = ANY($3))
     GROUP BY nft.id
     ORDER BY ' || quote_ident(orderBy) || ' ' || orderDirection || '
     OFFSET $4
     LIMIT  $5'
-    USING untilNftId, address, categories, "offset", "limit";
+    USING untilNftLastUpdated, address, categories, "offset", "limit";
 END
 $$
 LANGUAGE plpgsql;
