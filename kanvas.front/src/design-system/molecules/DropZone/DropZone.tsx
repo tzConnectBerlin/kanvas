@@ -53,7 +53,6 @@ const StyledStack = styled(Stack)`
     button {
         width: 90%;
     }
-
 `
 
 const StyledAvataWrapper = styled.div`
