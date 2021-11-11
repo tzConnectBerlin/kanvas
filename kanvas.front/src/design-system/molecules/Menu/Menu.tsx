@@ -7,7 +7,6 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
-
 import { FC, useEffect, useState } from 'react';
 import { KukaiEmbed } from 'kukai-embed';
 import { NavLink, useHistory, useLocation } from 'react-router-dom';
@@ -17,17 +16,37 @@ import { CustomButton } from '../../atoms/Button';
 import { Typography } from '../../atoms/Typography';
 import { QuickSearch } from '../../molecules/QuickSearch';
 import { IUser } from '../../../interfaces/user';
+import { BeaconWallet } from "@taquito/beacon-wallet";
 
+const StyledStack = styled(Stack)`
+    width: 100%;
+    max-width: 100rem;
+`
 
+const StyledExternalLink = styled.a`
+    text-decoration: none;
+`
+
+const WrapperTitle = styled.div`
+    width: 100%;
+
+    @media (max-width: 1100px) {
+        width: 100%;
+    }
+`
 interface MenuProps {
     user?: IUser;
     loading?: boolean;
+    setOpen: Function;
     embedKukai?: KukaiEmbed;
     selectedTheme: string;
+    beaconWallet?: BeaconWallet;
     switchTheme: Function;
     notifications?: number;
     isSearchOpen: boolean;
     setSearchOpen: Function;
+    theme?: Theme;
+    setSignedPayload?: Function;
     history: any;
     onLogout?: () => void;
     onCreateAccount?: () => void;
@@ -55,7 +74,7 @@ interface SearchProps {
     isSearchOpen?: boolean;
 }
 
-const StyledLink = styled(NavLink)<SearchProps>`
+const StyledLink = styled(NavLink) <SearchProps>`
     color: ${props => props.theme.palette.text.primary};
     text-decoration: none;
 
@@ -86,7 +105,7 @@ const WrapperMenuIcon = styled.div<MenuIconProps>`
     height: 2.1rem;
     width: 2.1rem;
 
-    background-color: ${props => props.theme.palette.background.paper };
+    background-color: ${props => props.theme.palette.background.paper};
     outline: ${props => `solid 1px ${props.theme.palette.text.primary}`};
     transition: filter 0.2s;
 
@@ -143,7 +162,7 @@ const MenuBarWrapper = styled.div`
     display: inline-table;
 `
 
-const MobileStyledMenuHeader = styled(Stack)<SearchProps>`
+const MobileStyledMenuHeader = styled(Stack) <SearchProps>`
     display: none;
     margin-top: 0rem !important;
 
@@ -152,7 +171,7 @@ const MobileStyledMenuHeader = styled(Stack)<SearchProps>`
         align-items: center;
         height: 6rem;
         padding-right: 0.5rem;
-        width: ${props => props.isSearchOpen ? "100%" : "" };
+        width: ${props => props.isSearchOpen ? "100%" : ""};
     }
 
     @media (max-width: 730px) {
@@ -160,16 +179,16 @@ const MobileStyledMenuHeader = styled(Stack)<SearchProps>`
         align-items: center;
         padding-right: 0rem;
         height: 4rem;
-        width: ${props => props.isSearchOpen ? "100%" : "" };
+        width: ${props => props.isSearchOpen ? "100%" : ""};
     }
 `
 
-const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
+const MobileStyledMenuContent = styled(Stack) <MenuIconProps>`
    display: none;
 
    @media (max-width: 1100px) {
-        display: ${props => props.expandMenu ? 'flex': 'none'};
-        height: ${props => props.expandMenu ? 'auto': '0'};
+        display: ${props => props.expandMenu ? 'flex' : 'none'};
+        height: ${props => props.expandMenu ? 'auto' : '0'};
         opacity: ${props => props.expandMenu ? '1' : '0'};
         width: auto;
 
@@ -187,7 +206,7 @@ const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
 
         padding-top: 2rem !important;
         margin-top: 1rem !important;
-        background-color: ${props => props.theme.palette.background.default };
+        background-color: ${props => props.theme.palette.background.default};
     }
 
 `
@@ -204,7 +223,7 @@ const StyledShoppingCartRoundedIcon = styled(ShoppingCartRoundedIcon)`
     cursor: pointer;
 `
 
-export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAccount, switchTheme, ...props}) => {
+export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAccount, switchTheme, beaconWallet, embedKukai, ...props}) => {
 
     const history = useHistory()
     const location = useLocation()
@@ -239,7 +258,7 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
 
     return (
         <>
-            <StyledMenuStack direction={{xs: 'column', sm: 'column', md: 'row' }} spacing={4} sx={{display: 'flex', alignItems: 'center'}} >
+            <StyledMenuStack direction={{ xs: 'column', sm: 'column', md: 'row' }} spacing={4} sx={{ display: 'flex', alignItems: 'center' }} >
 
                 {/* Closer div for mobile menu */}
 
@@ -260,7 +279,7 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
 
                     <WrapperMenuIcon onClick={props.isSearchOpen ? () => props.setSearchOpen(false) : () => setExpandMenu(!expandMenu)}>
                         <MenuBarWrapper>
-                            <MenuBarUp expandMenu={props.isSearchOpen ? props.isSearchOpen : expandMenu } />
+                            <MenuBarUp expandMenu={props.isSearchOpen ? props.isSearchOpen : expandMenu} />
                             <MenuBarDown expandMenu={props.isSearchOpen ? props.isSearchOpen : expandMenu} />
                         </MenuBarWrapper>
                     </WrapperMenuIcon>
@@ -268,22 +287,22 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
                     <WrapperThemeIcon isSearchOpen={props.isSearchOpen}>
                         {
                             selectedTheme === 'dark' ?
-                                <Brightness3Icon onClick={() => switchTheme('light')} sx={{cursor: 'pointer', bottom: 0}}/>
-                            :
-                                <WbSunnyOutlinedIcon onClick={() => switchTheme('dark')} sx={{cursor: 'pointer',  bottom: 0}}/>
+                                <Brightness3Icon onClick={() => switchTheme('light')} sx={{ cursor: 'pointer', bottom: 0 }} />
+                                :
+                                <WbSunnyOutlinedIcon onClick={() => switchTheme('dark')} sx={{ cursor: 'pointer', bottom: 0 }} />
                         }
                     </WrapperThemeIcon>
                 </MobileStyledMenuHeader>
 
                 {/* Mobile Menu Content */}
 
-                <MobileStyledMenuContent expandMenu={expandMenu} direction="column" spacing={2} sx={{alignItems: 'beginning'}}>
+                <MobileStyledMenuContent expandMenu={expandMenu} direction="column" spacing={2} sx={{ alignItems: 'beginning' }}>
 
                     <StyledLink to='/store' >
-                        <Typography size="h2" weight="SemiBold" color='#9b9b9b' sx={{cursor: 'pointer'}}> Store </Typography>
+                        <Typography size="h2" weight="SemiBold" color='#9b9b9b' sx={{ cursor: 'pointer' }}> Store </Typography>
                     </StyledLink>
 
-                    <FlexSpacer borderBottom={false} minHeight={2}/>
+                    <FlexSpacer borderBottom={false} minHeight={2} />
 
                     {/* Call to action button: `Sign in` and `Add artwork` for curators and artists */}
 
@@ -292,21 +311,21 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
                         localStorage.getItem('Kanvas - address') === user?.address ?
                             user?.role === 'creator' ?
                                 <CustomButton size="medium" onClick={onLogout} label="Add artwork" />
-                            :
+                                :
                                 undefined
-                        :
+                            :
                             <CustomButton size="medium" onClick={() => navigateTo('sign-in')} label="Sign in" />
                     }
 
-                    <FlexSpacer borderBottom={true}/>
+                    <FlexSpacer borderBottom={true} />
 
                     {/* Sub menu to navigate to personnal pages such as notifications profile or simply to logout */}
 
                     {
                         localStorage.getItem('Kanvas - address') === user?.address ?
                             <>
-                                <Stack direction="row" sx={{alignItems: "center"}} spacing={3}>
-                                    <Avatar src={`${avatarSrc}?${Date.now()}`} sx={{cursor: 'pointer !important'}} />
+                                <Stack direction="row" sx={{ alignItems: "center" }} spacing={3}>
+                                    <Avatar src={`${avatarSrc}?${Date.now()}`} sx={{ cursor: 'pointer !important' }} />
                                     <Typography size="inherit" weight="Medium"> Go to profile </Typography>
                                 </Stack>
 
@@ -321,12 +340,12 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
 
                                 <Stack direction="row" spacing={3} onClick={onLogout}>
                                     <Avatar>
-                                        <LogoutRoundedIcon sx={{'&.MuiSvgIcon-root': { marginLeft: 0.5, height: '65%', width: '60%'}}} />
+                                        <LogoutRoundedIcon sx={{ '&.MuiSvgIcon-root': { marginLeft: 0.5, height: '65%', width: '60%' } }} />
                                     </Avatar>
                                     <Typography size="inherit" weight="Medium"> Sign out </Typography>
                                 </Stack>
                             </>
-                        :
+                            :
                             undefined
                     }
 
@@ -335,22 +354,22 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
 
                 {/* Desktop Menu */}
 
-                <DesktopMenuContent  direction={{xs: 'column', sm: 'column', md: 'row' }} spacing={4} sx={{display: 'flex', alignItems: 'center'}}>
+                <DesktopMenuContent direction={{ xs: 'column', sm: 'column', md: 'row' }} spacing={4} sx={{ display: 'flex', alignItems: 'center' }}>
 
                     {/* Link to general pages */}
 
                     {
                         location.pathname === '/sign-in' || location.pathname === '/account/create' ?
                             undefined
-                        :
+                            :
                             <>
                                 <StyledLink to='/store' isSearchOpen={props.isSearchOpen}>
-                                    <Typography size="inherit" weight="Light" color='#9b9b9b' sx={{cursor: 'pointer'}}> Store </Typography>
+                                    <Typography size="inherit" weight="Light" color='#9b9b9b' sx={{ cursor: 'pointer' }}> Store </Typography>
                                 </StyledLink>
 
                                 {/* Quick Search controlling the opacity and position of the links above */}
 
-                                <QuickSearch setSearchOpen={props.setSearchOpen}/>
+                                <QuickSearch setSearchOpen={props.setSearchOpen} />
                             </>
                     }
 
@@ -368,27 +387,26 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
                                 </>
                             :
                                 <>
-                                    <CustomButton size="medium" onClick={() => {history.push('/create-nft')}} label="Create NFT" />
+                                    <CustomButton size="medium" onClick={() => { history.push('/create-nft') }} label="Create NFT" />
                                     <CustomBadge color="error" badgeContent={props.notifications} max={99} profile={true}>
-                                        <Avatar src={`${avatarSrc}?${Date.now()}`} onClick={(e) => anchorEl === null ? handleClick(e) : handleClose()} sx={{cursor: 'pointer !important'}}/>
+                                        <Avatar src={`${avatarSrc}?${Date.now()}`} onClick={(e) => anchorEl === null ? handleClick(e) : handleClose()} sx={{ cursor: 'pointer !important' }} />
                                     </CustomBadge>
                                     <StyledShoppingCartRoundedIcon onClick={() => props.openOrCloseShoppingCart()}/>
                                 </>
-                        :
+                            :
                             location.pathname === '/sign-in' || location.pathname === '/account/create' || location.pathname === '/account/edit' ?
                                 undefined
-                            :
-                                <CustomButton size="medium" onClick={() => navigateTo('sign-in')} label="Sign in" loading={props.loading}/>
+                                :
+                                <CustomButton size="medium" onClick={() => props.setOpen(true)} label="Sign in" loading={props.loading} />
                     }
 
                     {
                         selectedTheme === 'dark' ?
-                            <Brightness3Icon onClick={() => switchTheme('light')} sx={{cursor: 'pointer'}}/>
-                        :
-                            <WbSunnyOutlinedIcon onClick={() => switchTheme('dark')} sx={{cursor: 'pointer'}}/>
+                            <Brightness3Icon onClick={() => switchTheme('light')} sx={{ cursor: 'pointer' }} />
+                            :
+                            <WbSunnyOutlinedIcon onClick={() => switchTheme('dark')} sx={{ cursor: 'pointer' }} />
                     }
                 </DesktopMenuContent>
-
             </StyledMenuStack>
 
             <ProfilePopover

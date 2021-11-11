@@ -1,23 +1,26 @@
 import styled from '@emotion/styled';
 import { FlexSpacerProps } from '../../atoms/FlexSpacer';
-
 import { Box } from '@mui/system';
 import { FC, useEffect, useState } from 'react';
 import { Theme } from '@mui/material';
 import { KukaiEmbed } from 'kukai-embed';
 import { StickyLogo } from '../../atoms/StickyLogo';
 import { Menu } from '../../molecules/Menu';
-import { useHistory } from 'react-router-dom';
-import { useQuery } from '@apollo/client';
-import { GET_LOGGED_USER } from '../../../api/queries/user';
+import { useHistory, useLocation } from 'react-router-dom';
 import { IUser } from '../../../interfaces/user';
 import useAxios from 'axios-hooks';
-import ShoppingCart from '../../organismes/ShoppingCart';
+import { BeaconWallet } from "@taquito/beacon-wallet";
+import { SignInModal } from '../../molecules/SignInModal';
 
 
 export interface HeaderProps {
     user?: { role: string };
+    theme?: Theme;
+    loading?: boolean;
+    beaconWallet?: BeaconWallet;
     embedKukai?: KukaiEmbed;
+    setSignedPayload?: Function;
+    handleCloseModal?: Function;
     selectedTheme: string;
     notifications?: number;
     switchTheme: Function;
@@ -27,7 +30,12 @@ export interface HeaderProps {
     setCartOpen: Function;
 }
 
-const StyledBox = styled(Box)<{theme?: Theme}>`
+interface IUserParams {
+    address: string | null;
+    signedPayload: string | null;
+}
+
+const StyledBox = styled(Box) <{ theme?: Theme }>`
     margin-bottom: -6rem;
     color: ${props => props.theme.palette.text.primary};
 
@@ -55,9 +63,12 @@ const Spacer = styled.div<FlexSpacerProps>`
     transition: width 0.2s;
 `
 
-export const Header : FC<HeaderProps> = ({ user, selectedTheme, onLogout, onCreateAccount, switchTheme, notifications, ...props}) => {
+export const Header: FC<HeaderProps> = ({ user, selectedTheme, onLogout, onCreateAccount, switchTheme, notifications, beaconWallet, embedKukai, setSignedPayload, ...props }) => {
+    const [open, setOpen] = useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleCloseModal = () => setOpen(false);
 
-    const history = useHistory();
+    const history = useHistory()
 
     // const loggedUser = {data: undefined, loading: false}
     const [loggedUser] = useAxios({url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logged_user', headers: {
@@ -89,20 +100,27 @@ export const Header : FC<HeaderProps> = ({ user, selectedTheme, onLogout, onCrea
             <Spacer display={!isSearchOpen} />
 
             <Menu
+                history={history}
                 loading={loggedUser.loading}
                 user={currentLoggedUser}
                 setSearchOpen={setIsSearchOpen}
                 isSearchOpen={isSearchOpen}
-                embedKukai={props.embedKukai}
                 notifications={notifications}
                 selectedTheme={selectedTheme}
                 switchTheme={switchTheme}
+                setOpen={setOpen}
                 onLogout={onLogout}
                 onCreateAccount={onCreateAccount}
-                history={history}
                 openOrCloseShoppingCart={() => props.setCartOpen(!props.cartOpen)}
             />
 
+            <SignInModal
+                beaconWallet={beaconWallet}
+                embedKukai={embedKukai}
+                setSignedPayload={setSignedPayload}
+                handleCloseModal={handleCloseModal}
+                open={open}
+            />
         </StyledBox>
     )
 }

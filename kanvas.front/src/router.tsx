@@ -1,4 +1,3 @@
-import SignIn from './pages/SignIn';
 import styled from '@emotion/styled';
 import Profile from './pages/Profile';
 import StorePage from './pages/StorePage';
@@ -79,16 +78,15 @@ const Router = () => {
     return(
         <ThemeProvider theme={localStorage.getItem('Kanvas - theme') === 'dark' ? darkThemeResponsive : lightThemeResponsive } >
             <StyledBrowserRouter>
-                <Header embedKukai={embedKukai} cartOpen={cartOpen} setCartOpen={setCartOpen} switchTheme={handleSelectTheme} selectedTheme={selectedTheme} notifications={undefined}/>
+                <Header beaconWallet={beaconWallet} setSignedPayload={setSignedPayload} embedKukai={embedKukai} cartOpen={cartOpen} setCartOpen={setCartOpen} switchTheme={handleSelectTheme} selectedTheme={selectedTheme} notifications={0}/>
                 <Switch>
-                    <Route exact path="/Store" component={StorePage} />
-                    <Route path="/sign-in" render={props => <SignIn beaconWallet={beaconWallet} embedKukai={embedKukai} setSignedPayload={setSignedPayload} {...props} />} />
+                    <Route exact path="/store" component={StorePage} />
                     <Route path="/profile/:username" component={Profile} />
                     <Route path="/product/:id" render={props => <ProductPage addToBasket={handleAddToBasket} {...props}/> }/>
                     <Route path="/faq" component={Faq} />
                     <Route path="/create-nft" render={props => <CreateNFT {...props} />}  />
                     <Route path="/nft/:id" render={props => <CreateNFT {...props} />}  />
-                    <Route path='/404' component={NotFound} exact={true} />
+                    <Route path='/404' component={NotFound} />
                     <Redirect from='*' to='/404' />
                 </Switch>
 

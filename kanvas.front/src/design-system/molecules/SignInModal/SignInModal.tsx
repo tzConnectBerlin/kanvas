@@ -1,33 +1,53 @@
 import styled from "@emotion/styled";
-import FlexSpacer from "../../design-system/atoms/FlexSpacer";
-import PageWrapper from "../../design-system/commons/PageWrapper";
-
+import FlexSpacer from "../../atoms/FlexSpacer";
+import { Box } from '@mui/system';
 import { toast } from 'react-toastify';
+import { Modal, Stack, Theme } from "@mui/material";
 import { KukaiEmbed } from "kukai-embed";
-import { SIGN_USER } from '../../api/queries/user';
+import { SIGN_USER } from '../../../api/queries/user';
 import { char2Bytes } from "@taquito/utils";
-import { Stack, Theme } from "@mui/material";
 import { useHistory } from "react-router-dom";
 import { useLazyQuery } from "@apollo/client";
 import { Animated } from "react-animated-css";
 import { cssTransition } from 'react-toastify';
 import { FC, useEffect, useState } from "react";
 import { BeaconWallet } from "@taquito/beacon-wallet";
-import { setWalletProvider } from "../../contracts/init";
-import { CustomButton } from '../../design-system/atoms/Button';
-import { Typography } from "../../design-system/atoms/Typography";
+import { setWalletProvider } from "../../../contracts/init";
+import { CustomButton } from '../../atoms/Button';
+import { Typography } from "../../atoms/Typography";
 import { SigningType, RequestSignPayloadInput, NetworkType, PermissionResponseOutput, ErrorResponse } from "@airgap/beacon-sdk";
 import useAxios from 'axios-hooks';
+import { useTranslation } from 'react-i18next';
 
-interface SignInPageProps {
+interface SignInModalProps {
     theme?: Theme;
     beaconWallet?: BeaconWallet;
     embedKukai?: KukaiEmbed;
-    setSignedPayload: Function;
+    handleCloseModal: Function;
+    open: boolean;
+    setSignedPayload?: Function;
 }
 
+interface IUserParams {
+    address: string | null;
+    signedPayload: string | null;
+}
+
+const style = {
+    position: 'absolute' as 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '30rem',
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+};
+
+
 const StyledStack = styled(Stack)`
-    width: 100vw;
+    width: 100%;
     max-width: 100rem;
 `
 
@@ -43,19 +63,15 @@ const WrapperTitle = styled.div`
     }
 `
 
-interface IUserParams {
-    address: string | null;
-    signedPayload: string | null;
-}
 
-const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props }) => {
-
+export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ...props }) => {
     const [socialLoading, setSocialLoading] = useState(false)
     const [beaconLoading, setBeaconLoading] = useState(false)
-    const [signInParams, setSignInParams] = useState<IUserParams>({address: null, signedPayload: null})
+    const [signInParams, setSignInParams] = useState<IUserParams>({ address: null, signedPayload: null })
+    const { t } = useTranslation(['translation']);
 
     // const [signUser, signUserResponse] = useLazyQuery(SIGN_USER)
-    
+
     const [signUserResponse, signUser] = useAxios({url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/login', method: 'POST', headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
@@ -75,13 +91,14 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
         const dappUrl = "d-art.io";
         const input = `Welcome to Kanvas ${userAddress}`;
 
+
         // The full string
         const formattedInput: string = [
             "Tezos Signed Message:",
             dappUrl,
             input
         ]
-        .join(" ");
+            .join(" ");
 
         const bytes = "05" + char2Bytes(formattedInput);
 
@@ -97,7 +114,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
             try {
                 const signedPayload = await beaconWallet.client.requestSignPayload(payload)
                 setSignInParams({ address: userAddress, signedPayload: signedPayload.signature })
-                signUser({data: { name: userAddress, address: userAddress, signedPayload: signedPayload.signature }})
+                signUser({ data: { name: userAddress, address: userAddress, signedPayload: signedPayload.signature } })
             } catch (error) {
                 console.log(error)
                 setBeaconLoading(false)
@@ -108,7 +125,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
             try {
                 const signedPayload = await embedKukai.signExpr('0501000000' + payload.payload.slice(2))
                 setSignInParams({ address: userAddress, signedPayload: signedPayload })
-                signUser({data: { address: userAddress, signedPayload: signedPayload }})
+                signUser({ data: { address: userAddress, signedPayload: signedPayload } })
             } catch (error) {
                 setSocialLoading(false)
                 embedKukai.deinit()
@@ -120,7 +137,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
         if (beaconWallet && loginType === 'beacon') {
             setBeaconLoading(true)
 
-            beaconWallet.client.requestPermissions({network: { type: NetworkType.FLORENCENET }})
+            beaconWallet.client.requestPermissions({ network: { type: NetworkType.FLORENCENET } })
                 .then(async (response: PermissionResponseOutput) => {
                     signExpression(response.address, 'beacon')
                 })
@@ -138,7 +155,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
                 await embedKukai.init();
             }
 
-            let userInfo : any = null;
+            let userInfo: any = null;
 
             if (!embedKukai.user) {
                 setSocialLoading(false)
@@ -153,7 +170,7 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
         }
     }
 
-    useEffect (() => {
+    useEffect(() => {
         if (beaconWallet) {
             setWalletProvider(beaconWallet);
         }
@@ -162,13 +179,15 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
     const fade = cssTransition({
         enter: "animate__animated animate__fadeIn",
         exit: "animate__animated animate__fadeOut"
-      });
+    });
 
     useEffect(() => {
         if (signUserResponse.data) {
 
             setSocialLoading(false)
             setBeaconLoading(false)
+
+            props.handleCloseModal();
 
             localStorage.setItem('Kanvas - Bearer', signUserResponse.data.token)
             localStorage.setItem('Kanvas - address', signUserResponse.data.address)
@@ -184,6 +203,8 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
             setSocialLoading(false)
             setBeaconLoading(false)
 
+            props.handleCloseModal();
+
             if (!registerUserResponse.data.token) {
                 toast.error('Unable to connect to the serve. Please refresh and try again')
             }
@@ -197,54 +218,62 @@ const SignInPage: FC<SignInPageProps> = ({ beaconWallet, embedKukai, ...props })
 
     }, [registerUserResponse.data])
 
-    useEffect( () => {
+    useEffect(() => {
         if (signUserResponse.error) {
             setSocialLoading(false)
             setBeaconLoading(false)
 
             if (signUserResponse.error?.response?.data.message === 'User not registered') {
                 // Check if we have information from the user thanks to kukai
-                registerUser({data: signInParams})
+                registerUser({ data: signInParams })
 
             } else {
-                toast.error(signUserResponse.error.message, {position: toast.POSITION.TOP_RIGHT, transition: fade})
+                toast.error(signUserResponse.error.message, { position: toast.POSITION.TOP_RIGHT, transition: fade })
             }
         }
     }, [signUserResponse.error])
 
+
     return (
-        <PageWrapper>
-            <StyledStack direction="column" spacing={3}>
+        <Modal
+            keepMounted
+            open={props.open}
+            onClose={() => props.handleCloseModal(true)}
+            aria-labelledby="keep-mounted-modal-title"
+            aria-describedby="keep-mounted-modal-description"
+        >
+            <Box sx={style}>
+                <StyledStack direction="column" spacing={3}>
 
-                <FlexSpacer minHeight={12} />
-
-                <WrapperTitle>
-                    <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
-                        <Typography size="h1" weight='SemiBold' sx={{justifyContent: 'center'}}> Sign in</Typography>
-                    </Animated>
                     <FlexSpacer minHeight={1} />
-                    <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{justifyContent: 'center'}}> Welcome to Kanvas ! Let’s begin by</Typography>
-                    <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{justifyContent: 'center'}}> connecting your wallet. </Typography>
 
-                </WrapperTitle>
+                    <WrapperTitle>
+                        <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
+                            <Typography size="h1" weight='SemiBold' sx={{ justifyContent: 'center' }}>{t('modal.signIn.headline')} </Typography>
+                        </Animated>
+                        <FlexSpacer minHeight={1} />
+                        <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center', justifyContent: 'center' }}>{t('modal.signIn.text_1')}</Typography>
+                        <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center', justifyContent: 'center' }}>{t('modal.signIn.text_2')}</Typography>
 
-                <FlexSpacer minHeight={4} />
+                    </WrapperTitle>
+
+                    <FlexSpacer minHeight={1} />
 
 
-                <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} sx={{ alignItems: "center", justifyContent: 'center' }}>
-                    <CustomButton size="large" onClick={() => requestUserWalletPermission('beacon')} label="Connect wallet" loading={beaconLoading} />
-                    <Typography size="h4" weight='Light'> Or </Typography>
-                    <CustomButton size="large" onClick={() => requestUserWalletPermission('embed')} label="Social sign in" loading={socialLoading} />
-                </Stack>
+                    <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} sx={{ alignItems: "center", justifyContent: 'center' }}>
+                        <CustomButton size="large" onClick={() => requestUserWalletPermission('beacon')} label={t('modal.signIn.button_1')} loading={beaconLoading} />
+                        <Typography size="h4" weight='Light'> {t('modal.signIn.text_3')} </Typography>
+                        <CustomButton size="large" onClick={() => requestUserWalletPermission('embed')} label={t('modal.signIn.button_2')} loading={socialLoading} />
+                    </Stack>
 
 
-                <StyledExternalLink href="" target='_blank'>
-                    <Typography size="h4" weight='Light' color={'#15a0e1'} sx={{justifyContent: 'center'}}> What's a wallet ? </Typography>
-                </StyledExternalLink>
-            </StyledStack>
+                    <StyledExternalLink href="" target='_blank'>
+                        <Typography size="h4" weight='Light' color={'#15a0e1'} sx={{ justifyContent: 'center' }}>{t('modal.signIn.text_4')} </Typography>
+                    </StyledExternalLink>
+                    <FlexSpacer minHeight={2} />
 
-        </PageWrapper>
+                </StyledStack>
+            </Box>
+        </Modal>
     )
 }
-
-export default SignInPage
