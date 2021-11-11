@@ -6,7 +6,7 @@ import Faq from './pages/Faq';
 import CreateNFT from './pages/CreateNFT';
 import { Redirect } from 'react-router'
 import { RPC_URL } from './global';
-import { Theme } from '@mui/material';
+import { Stack, Theme } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { darkTheme, lightTheme } from './theme';
 import { KukaiEmbed, Networks } from 'kukai-embed';
@@ -19,9 +19,13 @@ import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import ProductPage from './pages/Product';
 import NotFound from './pages/NotFound';
 import ShoppingCart from './design-system/organismes/ShoppingCart';
+import useAxios from 'axios-hooks';
+import { INft } from './interfaces/artwork';
 
 
 const StyledBrowserRouter = styled(BrowserRouter)<{theme?: Theme}>`
+    display: block;
+
     #root {
         background-color: ${props => props.theme.palette.background.default};
     }
@@ -38,6 +42,19 @@ const Router = () => {
     const darkThemeResponsive = responsiveFontSizes(darkTheme);
     const lightThemeResponsive = responsiveFontSizes(lightTheme);
 
+    const [nftsInCart, setNftsInCart] = useState<INft[]>([])
+    const [addToCartResponse, addToCart] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/user/cart/add/:id', {manual: true})
+    const [deleteFromCartResponse, deleteFromCart] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/cart/delete/:id', {manual: true})
+
+
+    const handleAddToBasket = (nftId: number) => {
+        console.log('Nft with id ' + nftId + ' has been added to the basket')
+    }
+
+    const handleDeleteFromBasket = (nftId: number) => {
+        console.log('Nft with id ' + nftId + ' has been deleted from the basket')
+    }
+
     useEffect(() => {
         if (!embedKukai) {
             setEmbedKukai(new KukaiEmbed({
@@ -51,18 +68,6 @@ const Router = () => {
         initTezos(RPC_URL)
         setBeaconWallet(initWallet())
     }, [])
-
-    useEffect(() => {
-        window.addEventListener("storage", () => {
-          // When storage changes refetch
-          const test = localStorage.getItem('Kanvas - Bearer')
-        });
-
-        return () => {
-          // When the component unmounts remove the event listener
-          window.removeEventListener("storage", () => {});
-        };
-    }, []);
 
     const handleSelectTheme = (themeName: 'dark' | 'light') => {
         setSelectedTheme(themeName)
@@ -79,15 +84,15 @@ const Router = () => {
                     <Route exact path="/Store" component={StorePage} />
                     <Route path="/sign-in" render={props => <SignIn beaconWallet={beaconWallet} embedKukai={embedKukai} setSignedPayload={setSignedPayload} {...props} />} />
                     <Route path="/profile/:username" component={Profile} />
-                    <Route path="/product/:id" component={ProductPage} />
+                    <Route path="/product/:id" render={props => <ProductPage addToBasket={handleAddToBasket} {...props}/> }/>
                     <Route path="/faq" component={Faq} />
                     <Route path="/create-nft" render={props => <CreateNFT {...props} />}  />
                     <Route path="/nft/:id" render={props => <CreateNFT {...props} />}  />
                     <Route path='/404' component={NotFound} exact={true} />
                     <Redirect from='*' to='/404' />
                 </Switch>
-                <ShoppingCart open={cartOpen} closeCart={() => setCartOpen(false)}/>
 
+                <ShoppingCart open={cartOpen} nftsInCart={nftsInCart} closeCart={() => setCartOpen(false)} deleteNftFromBasket={handleDeleteFromBasket}/>
                 <Footer />
             </StyledBrowserRouter>
         </ThemeProvider>

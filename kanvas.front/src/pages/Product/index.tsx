@@ -14,6 +14,7 @@ import { useParams } from 'react-router-dom';
 
 export interface ProductPageProps {
     theme?: Theme;
+    addToBasket: Function;
 }
 
 const StyledStack = styled(Stack)`
@@ -44,6 +45,12 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
     const { id } = useParams<IProductParam>()
 
     const [nftResponse, getNft] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/${id}`)
+
+    const handleAddToBasket = () => {
+        if (nftResponse.data) {
+            props.addToBasket(nftResponse.data.id)
+        }
+    }
 
     useEffect(() => {
         if (nftResponse.error) {
@@ -192,7 +199,7 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
 
                         <FlexSpacer minHeight={2}/>
 
-                        <CustomButton size="medium" label={t('product.button_1')} disabled={nftResponse.loading}/>
+                        <CustomButton size="medium" onClick={() => handleAddToBasket()} label={t('product.button_1')} disabled={nftResponse.loading}/>
 
                     </Stack>
                 </Stack>

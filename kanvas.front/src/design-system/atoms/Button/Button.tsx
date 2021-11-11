@@ -70,14 +70,14 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
 
   &:hover {
     outline: ${props => `solid 2px ${props.theme.palette.text.primary}`};
-    border: ${({ bordercolor }) => bordercolor !== '' ? "solid 1px #0088a7" : ''};
     box-shadow: none;
     background-color: ${props => props.verified ? props.theme.palette.text.primary : !props.primary ? 'transparent' : props.theme.button.background } ;
   }
 
   &:active {
-      outline: ${({ bordercolor }) => bordercolor !== '' ? '' : 'drop-shadow(0px 0px 6px #98989833)'};
-      border: ${({ bordercolor }) => bordercolor !== '' ? "solid 1px #ffb494" : `solid 1px black`};
+      outline: 2px solid #C4C4C4;
+      transition: outline 0.1s;
+
       box-shadow: none;
       background-color: ${props => props.verified ? props.theme.palette.text.primary : !props.primary ? 'transparent' : props.theme.button.background } ;
   }
@@ -86,7 +86,7 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
     background-color: ${props => props.theme.palette.background.default};
     border-color: transparent;
     outline: 1px solid #C4C4C4;
-    
+
     svg {
       color: #C4C4C4 !important;
     }
