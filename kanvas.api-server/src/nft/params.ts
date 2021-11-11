@@ -6,7 +6,7 @@ const defaultPageSize = 10
 const defaultOrder = 'asc'
 const defaultOrderBy = 'id'
 
-export class AllNftsParams {
+export class PaginationParams {
   @IsInt()
   @Type(() => Number)
   @IsOptional()
@@ -24,30 +24,22 @@ export class AllNftsParams {
   @IsString()
   @IsOptional()
   orderBy: string = defaultOrderBy
+
+  @IsInt()
+  @Type(() => Number)
+  @IsOptional()
+  firstRequestAt: number
 }
 
-export class FilterParams {
-  @IsInt()
-  @Type(() => Number)
-  @IsOptional()
-  page: number = defaultPage
-
-  @IsInt()
-  @Type(() => Number)
-  @IsOptional()
-  pageSize: number = defaultPageSize
-
-  @IsString()
-  @IsOptional()
-  order: string = defaultOrder
-
-  @IsString()
-  @IsOptional()
-  orderBy: string = defaultOrderBy
-
+export class FilterParams extends PaginationParams {
   @IsArray()
   @Transform(({ value }) => (value ? parseStringArray(value, ';') : undefined))
-  categories: string[]
+  @IsOptional()
+  categories: string[] | undefined = []
+
+  @IsString()
+  @IsOptional()
+  address: string | undefined
 }
 
 function parseStringArray(v: string | string[], sep: string): string[] {

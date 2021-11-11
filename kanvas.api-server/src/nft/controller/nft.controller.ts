@@ -1,7 +1,16 @@
-import { Body, Controller, Get, Query, Param, Post } from '@nestjs/common'
+import {
+  HttpException,
+  HttpStatus,
+  Body,
+  Controller,
+  Get,
+  Query,
+  Param,
+  Post,
+} from '@nestjs/common'
 import { NftService } from '../service/nft.service'
 import { NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity'
-import { FilterParams, AllNftsParams } from '../params'
+import { FilterParams, PaginationParams } from '../params'
 
 @Controller('nfts')
 export class NftController {
@@ -13,17 +22,46 @@ export class NftController {
   }
 
   @Get('/filter')
-  async filter(@Query() params: FilterParams) {
+  async filter(@Query() params: FilterParams): Promise<NftEntityPage> {
+    this.validateFilterParams(params)
     return this.nftService.filter(params)
   }
 
   @Get()
-  async findAll(@Query() params: AllNftsParams): Promise<NftEntityPage> {
+  async findAll(@Query() params: PaginationParams): Promise<NftEntityPage> {
+    this.validatePaginationParams(params)
     return this.nftService.findAll(params)
   }
 
   @Get('/:id')
-  async byId(@Param('id') id): Promise<NftEntity> {
+  async byId(@Param('id') id: number): Promise<NftEntity> {
     return this.nftService.byId(id)
+  }
+
+  validateFilterParams(params: FilterParams): void {
+    const filterCategories =
+      typeof params.categories === 'undefined' || params.categories.length > 0
+
+    const filterAddress = typeof params.address === 'string'
+    if (!filterCategories && !filterAddress) {
+      throw new HttpException(
+        'Neither categories nor address filter specified, need at least 1 set',
+        HttpStatus.BAD_REQUEST,
+      )
+    }
+
+    this.validatePaginationParams(params)
+  }
+
+  validatePaginationParams(params: PaginationParams): void {
+    if (params.page < 1 || params.pageSize < 1) {
+      throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST)
+    }
+    if (!['id', 'name', 'price'].some((elem) => elem === params.orderBy)) {
+      throw new HttpException(
+        'Requested orderBy not supported',
+        HttpStatus.BAD_REQUEST,
+      )
+    }
   }
 }
