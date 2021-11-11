@@ -35,11 +35,11 @@ export class FilterParams extends PaginationParams {
   @IsArray()
   @Transform(({ value }) => (value ? parseStringArray(value, ';') : undefined))
   @IsOptional()
-  categories: string[] = []
+  categories: string[] | undefined = []
 
   @IsString()
   @IsOptional()
-  address: string
+  address: string | undefined
 }
 
 function parseStringArray(v: string | string[], sep: string): string[] {

@@ -34,12 +34,14 @@ export class NftController {
   }
 
   @Get('/:id')
-  async byId(@Param('id') id): Promise<NftEntity> {
+  async byId(@Param('id') id: number): Promise<NftEntity> {
     return this.nftService.byId(id)
   }
 
   validateFilterParams(params: FilterParams): void {
-    const filterCategories = params.categories.length > 0
+    const filterCategories =
+      typeof params.categories === 'undefined' || params.categories.length > 0
+
     const filterAddress = typeof params.address === 'string'
     if (!filterCategories && !filterAddress) {
       throw new HttpException(
