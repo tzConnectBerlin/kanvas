@@ -10,6 +10,7 @@ export interface NftEntity {
   contract: string
   tokenId: string
   categories: CategoryEntity[]
+  status: string // corresponds to NftStateTransitionConfig
 }
 
 export interface NftEntityPage {
