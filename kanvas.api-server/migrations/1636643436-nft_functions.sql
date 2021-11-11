@@ -82,7 +82,7 @@ DROP FUNCTION nft_ids_filtered(
     TEXT, TEXT[],
     TEXT, TEXT,
     INTEGER, INTEGER,
-    INTEGER);
+    TIMESTAMP WITHOUT TIME ZONE);
 
 DROP FUNCTION nfts_by_id(INTEGER[], TEXT, TEXT);
 
