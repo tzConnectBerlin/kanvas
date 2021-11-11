@@ -32,7 +32,6 @@ export class AuthenticationService {
       user.signedPayload !== undefined &&
       userData.signedPayload !== undefined
     ) {
-      // TODO should this not be user.signedPayload for one of them?
       await this.verifyPassword(user.signedPayload, userData.signedPayload)
 
       return this.getCookieWithJwtToken(
