@@ -24,17 +24,14 @@ const StyledBox = styled(Box) <{ theme?: Theme }>`
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    min-height: 8rem;
+    min-height: 10rem;
     height: 100%;
     padding: 2rem 0 1rem;
     justify-content: space-between;
     margin-top: -.2rem;
     color: ${props => props.theme.palette.text.primary};
-    
-    background-color: ${props => props.theme.footer.background};
 
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    background-color: ${props => props.theme.footer.background};
 
     position: sticky;
     top: 0;
@@ -94,12 +91,12 @@ const StyledLink = styled(Link) <{ theme?: Theme }>`
   @media (max-width: 1100px) {
       height: 2rem;
   }
-`  
+`
 
 
 export const Footer: FC<FooterProps> = () => {
     const { t } = useTranslation(['translation']);
-     
+
 const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     return (

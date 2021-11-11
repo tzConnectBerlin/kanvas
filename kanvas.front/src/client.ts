@@ -8,10 +8,11 @@ import { RestLink } from "apollo-link-rest";
 const authLink = setContext((_, { headers }) => {
   // get the authentication token from local storage if it exists
   const token = localStorage.getItem('Kanvas - Bearer');
-  
+
   // return the headers to the context so httpLink can read them
   return {
     headers: {
+      
       ...headers,
       authorization: token ? `Bearer ${token}` : "",
       contentType: 'application/json'

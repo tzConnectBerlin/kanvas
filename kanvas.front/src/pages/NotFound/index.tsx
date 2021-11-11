@@ -48,13 +48,13 @@ const NotFound: FC<NotFoundProps> = () => {
                 <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
                     <Typography size="h1" weight='SemiBold' sx={{ justifyContent: 'center' }}> 404</Typography>
 
-                    <FlexSpacer minHeight={6} />
+                    {/* <FlexSpacer minHeight={2} /> */}
 
-                    <Typography size="h2" weight="Light" style={{ justifyContent: 'center' }}>Page not found</Typography>
+                    <Typography size="h2" weight="Light" color="#C4C4C4" style={{ justifyContent: 'center' }}>Page not found</Typography>
 
                     <FlexSpacer minHeight={1} />
 
-                    <Typography size="body" weight="Light" style={{ justifyContent: 'center' }}>Sorry, we cannot find the page {`you're `}looking for</Typography>
+                    <Typography size="body" weight="Light" color="#C4C4C4" style={{ justifyContent: 'center' }}>Sorry, we cannot find the page {`you're `}looking for</Typography>
 
                     <FlexSpacer minHeight={4} />
 

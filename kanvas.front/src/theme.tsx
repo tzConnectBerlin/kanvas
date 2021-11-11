@@ -313,7 +313,7 @@ export const darkTheme = createTheme({
     },
     header: {
         background: 'rgba(22, 22, 22, 0.5)'
-    }, 
+    },
     footer: {
       background: 'rgba(0, 0, 0, 1)'
     },

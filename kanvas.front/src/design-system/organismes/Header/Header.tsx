@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import { FlexSpacerProps } from '../../atoms/FlexSpacer';
-import { CustomButton } from '../../atoms/Button';
 import { Box } from '@mui/system';
 import { FC, useEffect, useState } from 'react';
 import { Theme } from '@mui/material';
@@ -8,12 +7,11 @@ import { KukaiEmbed } from 'kukai-embed';
 import { StickyLogo } from '../../atoms/StickyLogo';
 import { Menu } from '../../molecules/Menu';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useQuery } from '@apollo/client';
-import { GET_LOGGED_USER } from '../../../api/queries/user';
 import { IUser } from '../../../interfaces/user';
 import useAxios from 'axios-hooks';
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { SignInModal } from '../../molecules/SignInModal';
+
 
 export interface HeaderProps {
     user?: { role: string };
@@ -28,6 +26,8 @@ export interface HeaderProps {
     switchTheme: Function;
     onLogout?: () => void;
     onCreateAccount?: () => void;
+    cartOpen: boolean;
+    setCartOpen: Function;
 }
 
 interface IUserParams {
@@ -54,7 +54,6 @@ const StyledBox = styled(Box) <{ theme?: Theme }>`
         padding-right: 1rem !important;
         transition: padding-left 0.2s, padding-right 0.2s;
     }
-
 `
 
 const Spacer = styled.div<FlexSpacerProps>`
@@ -72,11 +71,10 @@ export const Header: FC<HeaderProps> = ({ user, selectedTheme, onLogout, onCreat
     const history = useHistory()
 
     // const loggedUser = {data: undefined, loading: false}
-    const [loggedUser] = useAxios({
-        url: 'http://localhost:3000/auth/logged_user', headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Authorization': `Bearer ${localStorage.getItem('Kanvas - Bearer')}`
+    const [loggedUser] = useAxios({url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logged_user', headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Authorization': `Bearer ${localStorage.getItem('Kanvas - Bearer')}`
         }
     })
 
@@ -113,6 +111,7 @@ export const Header: FC<HeaderProps> = ({ user, selectedTheme, onLogout, onCreat
                 setOpen={setOpen}
                 onLogout={onLogout}
                 onCreateAccount={onCreateAccount}
+                openOrCloseShoppingCart={() => props.setCartOpen(!props.cartOpen)}
             />
 
             <SignInModal

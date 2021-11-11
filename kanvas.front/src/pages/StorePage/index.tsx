@@ -13,6 +13,7 @@ import { CustomButton } from '../../design-system/atoms/Button';
 import { CustomSelect } from '../../design-system/atoms/Select';
 import { Typography } from "../../design-system/atoms/Typography";
 import { useLocation, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const StyledStack = styled(Stack)`
     overflow: hidden;
@@ -61,13 +62,12 @@ const StorePage = () => {
     const page = new URLSearchParams(search).get('page')
 
     // Api calls for the categories and the nfts
-    const [nftsResponse, getNfts] = useAxios('http://localhost:3000/nfts', { manual: true })
-    // const [categoriesResponse, getCategories] = useAxios('http://localhost:3000/categories', { manual: true })
+    const [nftsResponse, getNfts] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts', { manual: true })
+    const [nftsFilteredResponse, getFilteredNfts] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts/filter', { manual: true })
+    // const [categoriesResponse, getCategories] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/categories', { manual: true })
 
     // is filter open ?
     const [filterOpen, setFilterOpen] = useState(false);
-
-    const [data, setData] = useState(true);
 
     const [selectedFilters, setSelectedFilters] = useState<any[]>([])
     const [selectedSort, setSelectedSort] = useState('')
@@ -77,17 +77,37 @@ const StorePage = () => {
     }
 
     useEffect(() => {
-        // chekc on the search for the used params
+        // check on the search for the used params
         console.log(categories)
         console.log(sort)
         console.log(page)
-    }, [])
+    }, [nftsResponse.data])
+
+    useEffect(() => {
+        if (nftsResponse.error) {
+            toast.error('An error occured while fetching the store.')
+        }
+    }, [nftsResponse.error])
 
     useEffect(() => {
         // fetch initial data
-        getNfts()
+        getNfts({
+            params: {
+                categories: selectedFilters.join(';')
+            }
+        })
         // getCategories()
     },[])
+
+    useEffect(() => {
+        if (selectedFilters.length > 0) {
+            getFilteredNfts({
+                params: {
+                    categories: selectedFilters.join(';')
+                }
+            })
+        }
+    }, [selectedFilters])
 
     return (
         <PageWrapper>
@@ -107,14 +127,14 @@ const StorePage = () => {
                 </Stack>
 
                 <Stack direction="row">
-                    <IconExpansionTreeView open={filterOpen} filterFunction={() => {}} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters}/>
+                    <IconExpansionTreeView open={filterOpen} filterFunction={getFilteredNfts} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters}/>
 
-                    <NftGrid open={filterOpen} nfts={nftsResponse.data} loading={nftsResponse.loading}/>
+                    <NftGrid open={filterOpen} nfts={selectedFilters.length === 0 ? nftsResponse.data?.data : nftsFilteredResponse.data?.data} loading={nftsResponse.loading || nftsFilteredResponse.loading}/>
                 </Stack>
 
                 <Stack direction="row">
                     <FlexSpacer/>
-                    <StyledPagination count={10} onChange={handlePaginationChange} variant="outlined" shape="rounded" disabled={nftsResponse.loading}/>
+                    <StyledPagination count={10} onChange={handlePaginationChange} variant="outlined" shape="rounded" disabled={nftsResponse.loading || nftsFilteredResponse.loading}/>
                 </Stack>
 
                 <FlexSpacer minHeight={5} />

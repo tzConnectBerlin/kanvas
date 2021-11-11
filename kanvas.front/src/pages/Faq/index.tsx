@@ -25,22 +25,33 @@ const StyledAnchorLink = styled.a <{ theme?: Theme }>`
         height: 2rem;
     }
 
-    &: {
-        box-shadow: -2px 0 0 0 #003a54;
-    }
 `
 
 const SlyledListItem = styled.li <{ theme?: Theme }>`
-    padding-left: 1rem;
-    height: 1.5rem;
-    display: flex;
-    align-items: center;
+        padding-left: 1rem;
+        height: 1.5rem;
+        display: flex;
+        align-items: center;
 `
 
 const StyledStack = styled(Stack)`
-  max-width: 100rem;
-  width: 100%;
-  height: 100%;
+    max-width: 100rem;
+    width: 100%;
+    height: 100%;
+
+    .scrollspy {
+        padding-left: 0;
+    }
+
+    .isCurrent {
+        font-weight: 900;
+        box-shadow: -2px 0 0 0 #003a54;
+    }
+
+    .isCurrent a span {
+        font-weight: bold;
+    }
+
 `
 const StyledSection = styled.section`
     scroll-margin-top: 4.7em;

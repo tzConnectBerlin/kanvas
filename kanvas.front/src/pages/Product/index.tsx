@@ -3,16 +3,18 @@ import styled from "@emotion/styled";
 import FlexSpacer from "../../design-system/atoms/FlexSpacer";
 import PageWrapper from "../../design-system/commons/PageWrapper";
 
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 import { CardMedia, Skeleton, Stack, Theme } from '@mui/material';
 import { CustomButton } from '../../design-system/atoms/Button';
 import { Typography } from "../../design-system/atoms/Typography";
 import { INft } from '../../interfaces/artwork';
+import { useParams } from 'react-router-dom';
 
 
 export interface ProductPageProps {
     theme?: Theme;
+    addToBasket: Function;
 }
 
 const StyledStack = styled(Stack)`
@@ -33,10 +35,28 @@ const data : INft = {
     startDate: '12:12:43:00'
 }
 
+interface IProductParam {
+    id: string;
+}
+
 export const ProductPage : FC<ProductPageProps> = ({...props}) => {
     const { t } = useTranslation(['translation']);
 
-    const [getNft, refetch] = useAxios('http://localhost:3000/nfts')
+    const { id } = useParams<IProductParam>()
+
+    const [nftResponse, getNft] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/${id}`)
+
+    const handleAddToBasket = () => {
+        if (nftResponse.data) {
+            props.addToBasket(nftResponse.data.id)
+        }
+    }
+
+    useEffect(() => {
+        if (nftResponse.error) {
+            debugger
+        }
+    }, [nftResponse])
 
     return (
         <PageWrapper>
@@ -46,7 +66,7 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
 
                 <Stack direction={{ sm: 'column', md: 'row' }} spacing={5} sx={{width: '100%'}}>
                     {
-                        getNft.loading ?
+                        nftResponse.loading ?
                             <Skeleton height='40rem' width='40rem' sx={{transform: 'none'}}/>
                        :
                             <CardMedia
@@ -70,10 +90,10 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
                             size="h4"
                             weight="SemiBold"
                         >
-                            {   getNft.loading ?
+                            {   nftResponse.loading ?
                                     <Skeleton width='15rem' height='2rem'/>
                                 :
-                                    data.creator
+                                nftResponse.data?.creator
                             }
                         </Typography>
 
@@ -81,10 +101,10 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
                             size="h2"
                             weight="SemiBold"
                             >
-                            {   getNft.loading ?
+                            {   nftResponse.loading ?
                                     <Skeleton width='10rem' height='2rem'/>
                                 :
-                                    data.name
+                                nftResponse.data?.name
                             }
                         </Typography>
 
@@ -95,7 +115,7 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
                             weight="SemiBold"
                             sx={{ pt: 4}}
                         >
-                            {   getNft.loading ?
+                            {   nftResponse.loading ?
                                 <Skeleton width='10rem' height='2rem'/>
                             :
                                 t('product.description.part_1')
@@ -106,7 +126,7 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
                             weight="Light"
                             sx={{ pt: 2,  mb: 1 }}
                         >
-                            {   getNft.loading ?
+                            {   nftResponse.loading ?
                                 <Stack direction="column">
                                     <Skeleton width='40rem' height='1rem'/>
                                     <Skeleton width='40rem' height='1rem'/>
@@ -123,7 +143,7 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
                             weight="SemiBold"
                             sx={{ pt: 4 }}
                         >
-                            {   getNft.loading ?
+                            {   nftResponse.loading ?
                                 <Skeleton width='10rem' height='2rem'/>
                             :
                                 t('product.description.part_2')
@@ -134,7 +154,7 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
                             weight="Light"
                             sx={{ pt: 2,  mb: 1 }}
                         >
-                            {   getNft.loading ?
+                            {   nftResponse.loading ?
                                 <Stack direction="column">
                                     <Skeleton width='40rem' height='1rem'/>
                                     <Skeleton width='40rem' height='1rem'/>
@@ -150,7 +170,7 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
                             weight="SemiBold"
                             sx={{ pt: 4 }}
                         >
-                            {getNft.loading ? undefined : t('product.description.part_3')}
+                            {nftResponse.loading ? undefined : t('product.description.part_3')}
                         </Typography>
 
                         <Typography
@@ -158,7 +178,7 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
                             weight="Light"
                             sx={{ pt: 2,  mb: 1 }}
                         >
-                            {getNft.loading ? undefined : data.startDate}
+                            {nftResponse.loading ? undefined : data.startDate}
                         </Typography>
 
                         <Typography
@@ -166,7 +186,7 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
                             weight="SemiBold"
                             sx={{ pt: 4 }}
                         >
-                            {getNft.loading ? undefined : t('product.description.price')}
+                            {nftResponse.loading ? undefined : t('product.description.price')}
                         </Typography>
 
                         <Typography
@@ -174,12 +194,12 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
                             weight="Light"
                             sx={{ pt: 2,  mb: 1 }}
                         >
-                            {getNft.loading ? undefined : `${data.price} ꜩ`}
+                            {nftResponse.loading ? undefined : `${data.price} ꜩ`}
                         </Typography>
 
                         <FlexSpacer minHeight={2}/>
 
-                        <CustomButton size="medium" label={t('product.button_1')} disabled={getNft.loading}/>
+                        <CustomButton size="medium" onClick={() => handleAddToBasket()} label={t('product.button_1')} disabled={nftResponse.loading}/>
 
                     </Stack>
                 </Stack>

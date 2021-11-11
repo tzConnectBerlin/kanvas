@@ -11,28 +11,24 @@ import { Menu, MenuProps, MenuItem, Stack, Theme } from '@mui/material';
 
 interface ProfilePopoverProps extends MenuProps {
     avatarSrc?: string;
-    userName?: string;
+    address?: string;
     history: any;
     notifications?: number;
     logOut: () => void;
 }
-
 
 const StyledMenuItem = styled(MenuItem)`
     margin-left: 0.5em !important;
     margin-right: 0.5em !important;
     padding-left: 0.5em;
     border-radius: 0;
-
-    
 `
 
 const paperProps = {
     sx: {
-        borderRadius: '1.5em',
+        borderRadius: '0',
         overflow: 'visible',
         border: 'none',
-        filter: 'drop-shadow(0px 0px 6px #5c5c5c2d)',
         boxShadow: 'none',
         top: '6rem !important',
         left: 'initial !important',
@@ -59,7 +55,7 @@ const paperProps = {
 
 const StyledMenu = styled(Menu)<{theme?: Theme}>`
     .MuiPaper-root {
-        filter: ${props => props.theme.dropShadow.default};
+        border: 1px solid ${props => props.theme.palette.text.primary};
 
         background-color: ${props => props.theme.palette.background.paper} !important;
         background-image: none !important;
@@ -87,7 +83,7 @@ export const ProfilePopover : FC<ProfilePopoverProps> = ({...props}) => {
             }}
         >
             <Stack spacing={1}>
-                <StyledMenuItem onClick={() => navigateTo(`/profile/${props.userName}`)}>
+                <StyledMenuItem onClick={() => navigateTo(`/profile/${props.address}`)}>
                     <Avatar src={props.avatarSrc} />
                     <Typography size="inherit" weight="SemiBold"> Go to profile </Typography>
                 </StyledMenuItem>

@@ -108,7 +108,6 @@ const IconExpansionTreeView : FC<TreeViewProps> = ({selectedFilters, setSelected
         } else {
             setSelectedFilters([...selectedFilters, nodesName])
         }
-        props.filterFunction(nodesName)
     }
 
     const renderTree = (nodes: any) => (
@@ -142,6 +141,7 @@ const IconExpansionTreeView : FC<TreeViewProps> = ({selectedFilters, setSelected
             aria-label="multi-select"
             defaultCollapseIcon={<ExpandMoreIcon />}
             defaultExpandIcon={<ChevronRightIcon />}
+            defaultExpanded={['root']}
             multiSelect
             open={props.open}
             sx={{

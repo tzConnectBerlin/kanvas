@@ -5,6 +5,7 @@ import FlexSpacer from '../../atoms/FlexSpacer';
 import Brightness3Icon from '@mui/icons-material/Brightness3';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
+import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import { FC, useEffect, useState } from 'react';
 import { KukaiEmbed } from 'kukai-embed';
@@ -49,6 +50,7 @@ interface MenuProps {
     history: any;
     onLogout?: () => void;
     onCreateAccount?: () => void;
+    openOrCloseShoppingCart: Function
 }
 
 const StyledMenuStack = styled(Stack)`
@@ -217,7 +219,12 @@ const DesktopMenuContent = styled(Stack)`
     }
 `
 
-export const Menu: FC<MenuProps> = ({ user, selectedTheme, onLogout, onCreateAccount, switchTheme, beaconWallet, embedKukai, ...props }) => {
+const StyledShoppingCartRoundedIcon = styled(ShoppingCartRoundedIcon)`
+    cursor: pointer;
+`
+
+export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAccount, switchTheme, beaconWallet, embedKukai, ...props}) => {
+
     const history = useHistory()
     const location = useLocation()
 
@@ -237,6 +244,11 @@ export const Menu: FC<MenuProps> = ({ user, selectedTheme, onLogout, onCreateAcc
     const handleClose = () => {
         setAnchorEl(null);
     };
+
+    const logout = () => {
+        localStorage.removeItem('Kanvas - Bearer')
+        localStorage.removeItem('Kanvas - address')
+    }
 
     useEffect(() => {
         if (user) {
@@ -367,15 +379,19 @@ export const Menu: FC<MenuProps> = ({ user, selectedTheme, onLogout, onCreateAcc
                     {
                         localStorage.getItem('Kanvas - address') === user?.address ?
                             user?.role === 'collector' ?
-                                <CustomBadge color="error" badgeContent={props.notifications} max={99} profile={true}>
-                                    <Avatar src={`${avatarSrc}?${Date.now()}`} onClick={(e) => anchorEl === null ? handleClick(e) : handleClose()} sx={{ cursor: 'pointer !important' }} />
-                                </CustomBadge>
-                                :
+                                <>
+                                    <CustomBadge color="error" badgeContent={props.notifications} max={99} profile={true}>
+                                        <Avatar src={`${avatarSrc}?${Date.now()}`} onClick={(e) => anchorEl === null ? handleClick(e) : handleClose()} sx={{cursor: 'pointer !important'}}/>
+                                    </CustomBadge>
+                                    <StyledShoppingCartRoundedIcon onClick={() => props.openOrCloseShoppingCart()}/>
+                                </>
+                            :
                                 <>
                                     <CustomButton size="medium" onClick={() => { history.push('/create-nft') }} label="Create NFT" />
                                     <CustomBadge color="error" badgeContent={props.notifications} max={99} profile={true}>
                                         <Avatar src={`${avatarSrc}?${Date.now()}`} onClick={(e) => anchorEl === null ? handleClick(e) : handleClose()} sx={{ cursor: 'pointer !important' }} />
                                     </CustomBadge>
+                                    <StyledShoppingCartRoundedIcon onClick={() => props.openOrCloseShoppingCart()}/>
                                 </>
                             :
                             location.pathname === '/sign-in' || location.pathname === '/account/create' || location.pathname === '/account/edit' ?
@@ -396,10 +412,10 @@ export const Menu: FC<MenuProps> = ({ user, selectedTheme, onLogout, onCreateAcc
             <ProfilePopover
                 open={Boolean(anchorEl)}
                 avatarSrc={`${avatarSrc}?${Date.now()}`}
-                userName={user?.userName}
+                address={user?.address}
                 history={history}
                 notifications={props.notifications}
-                logOut={() => console.log('logging out')}
+                logOut={logout}
                 onClose={handleClose}
                 onClick={handleClose}
             />
