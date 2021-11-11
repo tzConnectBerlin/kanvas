@@ -97,8 +97,6 @@ const StyledLink = styled(Link) <{ theme?: Theme }>`
 export const Footer: FC<FooterProps> = () => {
     const { t } = useTranslation(['translation']);
 
-const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
     return (
         <StyledBox >
             <Grid item xs={12} md={4} lg={6} sx={{
@@ -148,7 +146,7 @@ const isMobile = useMediaQuery(theme.breakpoints.down('md'));
                     </Box>
                 </Grid>
 
-                <Grid item xs={6} md={3} sx={{ height: '7rem' }}>
+                <Grid item xs={6} md={3} sx={{ height: '7rem', marginTop: '1rem' }}>
                     <Typography weight="SemiBold" size="h5" gutterBottom>
                         {t('footer.headline_3')}
                     </Typography>
@@ -166,7 +164,7 @@ const isMobile = useMediaQuery(theme.breakpoints.down('md'));
                     </Box>
                 </Grid>
 
-                <Grid item xs={12} md={3}>
+                <Grid item xs={6} md={3} sx={{ marginTop: '1rem'}}>
                     <Typography weight="SemiBold" size="h5" gutterBottom>
                         {t('footer.headline_4')}
                     </Typography>
