@@ -30,11 +30,6 @@ export interface HeaderProps {
     setCartOpen: Function;
 }
 
-interface IUserParams {
-    address: string | null;
-    signedPayload: string | null;
-}
-
 const StyledBox = styled(Box) <{ theme?: Theme }>`
     margin-bottom: -6rem;
     color: ${props => props.theme.palette.text.primary};
@@ -117,7 +112,7 @@ export const Header: FC<HeaderProps> = ({ user, selectedTheme, onLogout, onCreat
             <SignInModal
                 beaconWallet={beaconWallet}
                 embedKukai={embedKukai}
-                setSignedPayload={setSignedPayload}
+                setCurrentLoggedUser={setCurrentLoggedUser}
                 handleCloseModal={handleCloseModal}
                 open={open}
             />

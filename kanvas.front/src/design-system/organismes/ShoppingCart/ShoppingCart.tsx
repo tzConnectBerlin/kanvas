@@ -32,7 +32,8 @@ const ContainerPopupStyled = styled.div<{open: boolean}>`
 `
 
 const WrapperCart = styled.div<{theme?: Theme, open: boolean}>`
-    width: ${props => props.open ? 25 : 0}rem;
+    max-width: ${props => props.open ? 25 : 0}rem;
+    width: ${props => props.open ? 35 : 0}%;
     height: 101vh;
     position: fixed;
     right: 0;
@@ -44,7 +45,6 @@ const WrapperCart = styled.div<{theme?: Theme, open: boolean}>`
 
     margin-top: 5rem;
 
-    padding: ${props => props.open ? 1 : 0}rem;
     padding-bottom: 2.5rem;
 
     background-color: ${props => props.theme.palette.background.paper};
@@ -55,7 +55,19 @@ const WrapperCart = styled.div<{theme?: Theme, open: boolean}>`
         transition: opacity 0.1s;
     }
 
-    transition: width 0.3s, padding 0.5s;
+    transition: max-width 0.3s, width 0.3s, padding 0.5s;
+
+    @media (max-width: 1100px) {
+        width: ${props => props.open ? 40 : 0}%;
+    }
+
+    @media (max-width: 730px) {
+        width: ${props => props.open ? 50 : 0}%;
+    }
+
+    @media (max-width: 650px) {
+        width: ${props => props.open ? 100 : 0}%;
+    }
 `
 
 const StyledDiv = styled.div<{theme?: Theme}>`
@@ -81,6 +93,7 @@ const StyledDiv = styled.div<{theme?: Theme}>`
 const StyledClearIcon = styled(ClearIcon)<{theme?: Theme}>`
     color: ${props => props.theme.palette.text.primary};
 `
+
 
 const mokeNft = [
     {
@@ -166,14 +179,14 @@ export const ShoppingCart : FC<ShoppingCartProps> = ({...props}) => {
 
             <WrapperCart open={props.open}>
                 <Stack direction="row">
-                    <Typography size="h2" weight="SemiBold"> Summary </Typography>
+                    <Typography size="h2" weight="SemiBold" sx={{marginTop: '1rem', marginLeft: '1rem'}}> Summary </Typography>
                     <FlexSpacer/>
-                    <Typography size="h5" weight="Medium"> {mokeNft.length} - items </Typography>
+                    <Typography size="h5" weight="Medium" sx={{marginTop: '1rem', marginRight: '1rem'}}> {mokeNft.length} - items </Typography>
                 </Stack>
 
                 <FlexSpacer minHeight={3}/>
 
-                <Stack direction="column" spacing={4}>
+                <Stack direction="column" spacing={4} sx={{paddingBottom: '20rem', marginLeft: '1rem', marginRight: '1rem'}}>
                     {
                         false ?
                             [{},{},{}].map( () =>
@@ -188,10 +201,10 @@ export const ShoppingCart : FC<ShoppingCartProps> = ({...props}) => {
                         :
                             mokeNft.map(nft =>
                                 <Stack direction="row" spacing={4} sx={{paddingLeft: '1rem', width: 'auto', alignItems: 'center', cursor: 'pointer'}}>
-                                    <Avatar src={nft.dataUrl}  height={65} width={65} borderRadius={0} />
-                                    <Stack direction="column" spacing={1} sx={{width: 'auto', minWidth: '63%'}}>
-                                        <Typography size="h4" weight="Medium" sx={{cursor: 'pointer'}}> { nft.name } </Typography>
-                                        <Typography size="body2" weight="Light" color="#C4C4C4" sx={{cursor: 'pointer'}}> { nft.ipfsHash } </Typography>
+                                    <Avatar src={nft.dataUrl}  height={62} width={62} borderRadius={0} responsive/>
+                                    <Stack direction="column" spacing={1} sx={{width: 'auto', minWidth: '60%'}}>
+                                        <Typography size="h4" weight="Medium" display='initial !important' noWrap sx={{cursor: 'pointer'}}> { nft.name } </Typography>
+                                        <Typography size="body2" weight="Light" display='initial !important' noWrap color="#C4C4C4" sx={{cursor: 'pointer'}}> { nft.ipfsHash } </Typography>
                                     </Stack>
                                     <StyledDiv onClick={() => props.deleteNftFromBasket(nft.id)}>
                                         <StyledClearIcon/>
@@ -204,7 +217,7 @@ export const ShoppingCart : FC<ShoppingCartProps> = ({...props}) => {
 
                     {
                         props.open ?
-                            <CustomButton size="medium" label='Checkout' disabled={mokeNft.length === 0} sx={{bottom: 0}}/>
+                            <CustomButton size="medium" label='Checkout' disabled={mokeNft.length === 0} sx={{bottom: 0, marginLeft: '1rem', marginRight: '1rem'}}/>
                         :
                             undefined
                     }

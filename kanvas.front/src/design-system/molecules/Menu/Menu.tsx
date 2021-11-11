@@ -18,22 +18,6 @@ import { QuickSearch } from '../../molecules/QuickSearch';
 import { IUser } from '../../../interfaces/user';
 import { BeaconWallet } from "@taquito/beacon-wallet";
 
-const StyledStack = styled(Stack)`
-    width: 100%;
-    max-width: 100rem;
-`
-
-const StyledExternalLink = styled.a`
-    text-decoration: none;
-`
-
-const WrapperTitle = styled.div`
-    width: 100%;
-
-    @media (max-width: 1100px) {
-        width: 100%;
-    }
-`
 interface MenuProps {
     user?: IUser;
     loading?: boolean;
@@ -56,7 +40,7 @@ interface MenuProps {
 const StyledMenuStack = styled(Stack)`
     align-items: end !important;
 
-    @media (max-width: 1100px) {
+    @media (max-width: 875px) {
         right: 0rem;
         padding-left: 0rem;
     }
@@ -80,7 +64,7 @@ const StyledLink = styled(NavLink) <SearchProps>`
 
     display: ${props => props.isSearchOpen ? 'none' : 'flex'};
 
-    @media (max-width: 1100px) {
+    @media (max-width: 875px) {
         height: 2rem;
     }
 
@@ -102,8 +86,10 @@ interface MenuIconProps {
 }
 
 const WrapperMenuIcon = styled.div<MenuIconProps>`
-    height: 2.1rem;
-    width: 2.1rem;
+    height: 2.5rem;
+    width: 2.5rem;
+
+    cursor: pointer;
 
     background-color: ${props => props.theme.palette.background.paper};
     outline: ${props => `solid 1px ${props.theme.palette.text.primary}`};
@@ -166,7 +152,7 @@ const MobileStyledMenuHeader = styled(Stack) <SearchProps>`
     display: none;
     margin-top: 0rem !important;
 
-    @media (max-width: 1099px) {
+    @media (max-width: 874px) {
         display: flex;
         align-items: center;
         height: 6rem;
@@ -186,7 +172,7 @@ const MobileStyledMenuHeader = styled(Stack) <SearchProps>`
 const MobileStyledMenuContent = styled(Stack) <MenuIconProps>`
    display: none;
 
-   @media (max-width: 1100px) {
+   @media (max-width: 874px) {
         display: ${props => props.expandMenu ? 'flex' : 'none'};
         height: ${props => props.expandMenu ? 'auto' : '0'};
         opacity: ${props => props.expandMenu ? '1' : '0'};
@@ -213,8 +199,9 @@ const MobileStyledMenuContent = styled(Stack) <MenuIconProps>`
 
 const DesktopMenuContent = styled(Stack)`
     display: none;
+    margin-top: 0 !important;
 
-    @media (min-width: 1100px) {
+    @media (min-width: 875px) {
         display: flex;
     }
 `
@@ -271,9 +258,9 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
 
                     {/* QuickSearch wrapper to close menu in case open */}
 
-                    <div onClick={() => setExpandMenu(false)}>
+                    {/* <div onClick={() => setExpandMenu(false)}>
                         <QuickSearch setSearchOpen={props.setSearchOpen} />
-                    </div>
+                    </div> */}
 
                     {/* Menu button, and closing button for search bar */}
 
@@ -283,6 +270,8 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
                             <MenuBarDown expandMenu={props.isSearchOpen ? props.isSearchOpen : expandMenu} />
                         </MenuBarWrapper>
                     </WrapperMenuIcon>
+
+                    <StyledShoppingCartRoundedIcon onClick={() => props.openOrCloseShoppingCart()}/>
 
                     <WrapperThemeIcon isSearchOpen={props.isSearchOpen}>
                         {
@@ -354,7 +343,7 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
 
                 {/* Desktop Menu */}
 
-                <DesktopMenuContent direction={{ xs: 'column', sm: 'column', md: 'row' }} spacing={4} sx={{ display: 'flex', alignItems: 'center' }}>
+                <DesktopMenuContent direction={{ xs: 'row' }} spacing={4} sx={{ display: 'flex', alignItems: 'center' }}>
 
                     {/* Link to general pages */}
 
@@ -387,7 +376,6 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
                                 </>
                             :
                                 <>
-                                    <CustomButton size="medium" onClick={() => { history.push('/create-nft') }} label="Create NFT" />
                                     <CustomBadge color="error" badgeContent={props.notifications} max={99} profile={true}>
                                         <Avatar src={`${avatarSrc}?${Date.now()}`} onClick={(e) => anchorEl === null ? handleClick(e) : handleClose()} sx={{ cursor: 'pointer !important' }} />
                                     </CustomBadge>

@@ -18,6 +18,7 @@ import { Typography } from "../../atoms/Typography";
 import { SigningType, RequestSignPayloadInput, NetworkType, PermissionResponseOutput, ErrorResponse } from "@airgap/beacon-sdk";
 import useAxios from 'axios-hooks';
 import { useTranslation } from 'react-i18next';
+import { IUser } from "../../../interfaces/user";
 
 interface SignInModalProps {
     theme?: Theme;
@@ -25,7 +26,7 @@ interface SignInModalProps {
     embedKukai?: KukaiEmbed;
     handleCloseModal: Function;
     open: boolean;
-    setSignedPayload?: Function;
+    setCurrentLoggedUser: Function;
 }
 
 interface IUserParams {
@@ -38,7 +39,7 @@ const style = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: '30rem',
+    width: '28rem',
     bgcolor: 'background.paper',
     border: '2px solid #000',
     boxShadow: 24,
@@ -68,6 +69,7 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
     const [socialLoading, setSocialLoading] = useState(false)
     const [beaconLoading, setBeaconLoading] = useState(false)
     const [signInParams, setSignInParams] = useState<IUserParams>({ address: null, signedPayload: null })
+
     const { t } = useTranslation(['translation']);
 
     // const [signUser, signUserResponse] = useLazyQuery(SIGN_USER)
@@ -189,6 +191,9 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
 
             props.handleCloseModal();
 
+            const user : IUser = signUserResponse.data
+            props.setCurrentLoggedUser(user)
+
             localStorage.setItem('Kanvas - Bearer', signUserResponse.data.token)
             localStorage.setItem('Kanvas - address', signUserResponse.data.address)
 
@@ -209,9 +214,11 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
                 toast.error('Unable to connect to the serve. Please refresh and try again')
             }
 
+            const user : IUser = registerUserResponse.data
+            props.setCurrentLoggedUser(user)
+
             localStorage.setItem('Kanvas - Bearer', registerUserResponse.data.token)
             localStorage.setItem('Kanvas - address', registerUserResponse.data.address)
-
 
             history.push(`/store`)
         }
@@ -236,7 +243,6 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
 
     return (
         <Modal
-            keepMounted
             open={props.open}
             onClose={() => props.handleCloseModal(true)}
             aria-labelledby="keep-mounted-modal-title"
@@ -249,28 +255,26 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
 
                     <WrapperTitle>
                         <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
-                            <Typography size="h1" weight='SemiBold' sx={{ justifyContent: 'center' }}>{t('modal.signIn.headline')} </Typography>
+                            <Typography size="3.5rem" weight='SemiBold' sx={{ justifyContent: 'center' }}>{t('modal.signIn.headline')} </Typography>
                         </Animated>
                         <FlexSpacer minHeight={1} />
-                        <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center', justifyContent: 'center' }}>{t('modal.signIn.text_1')}</Typography>
-                        <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center', justifyContent: 'center' }}>{t('modal.signIn.text_2')}</Typography>
+                        <Typography size="h3" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center', justifyContent: 'center' }}>{t('modal.signIn.text_1')} {t('modal.signIn.text_2')}</Typography>
 
                     </WrapperTitle>
 
-                    <FlexSpacer minHeight={1} />
-
+                    <FlexSpacer minHeight={2.5} />
 
                     <Stack direction={{ xs: 'row', sm: 'row' }} spacing={3} sx={{ alignItems: "center", justifyContent: 'center' }}>
-                        <CustomButton size="large" onClick={() => requestUserWalletPermission('beacon')} label={t('modal.signIn.button_1')} loading={beaconLoading} />
-                        <Typography size="h4" weight='Light'> {t('modal.signIn.text_3')} </Typography>
-                        <CustomButton size="large" onClick={() => requestUserWalletPermission('embed')} label={t('modal.signIn.button_2')} loading={socialLoading} />
+                        <CustomButton size="medium" onClick={() => requestUserWalletPermission('beacon')} label={t('modal.signIn.button_1')} loading={beaconLoading} />
+                        <Typography size="h5" weight='Light'> {t('modal.signIn.text_3')} </Typography>
+                        <CustomButton size="medium" onClick={() => requestUserWalletPermission('embed')} label={t('modal.signIn.button_2')} loading={socialLoading} />
                     </Stack>
 
-
                     <StyledExternalLink href="" target='_blank'>
-                        <Typography size="h4" weight='Light' color={'#15a0e1'} sx={{ justifyContent: 'center' }}>{t('modal.signIn.text_4')} </Typography>
+                        <Typography size="h5" weight='Light' color={'#15a0e1'} sx={{ justifyContent: 'center' }}>{t('modal.signIn.text_4')} </Typography>
                     </StyledExternalLink>
-                    <FlexSpacer minHeight={2} />
+
+                    <FlexSpacer minHeight={1} />
 
                 </StyledStack>
             </Box>
