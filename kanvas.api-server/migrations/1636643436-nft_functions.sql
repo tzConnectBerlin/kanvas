@@ -1,4 +1,10 @@
-CREATE OR REPLACE FUNCTION nft_ids_filtered(
+-- Migration: nft_functions
+-- Created at: 2021-11-11 16:10:36
+-- ====  UP  ====
+
+BEGIN;
+
+CREATE FUNCTION nft_ids_filtered(
     address TEXT, categories TEXT[],
     orderBy TEXT, orderDirection TEXT,
     "offset" INTEGER, "limit" INTEGER,
@@ -34,11 +40,7 @@ END
 $$
 LANGUAGE plpgsql;
 
-
-CREATE OR REPLACE FUNCTION nfts_by_id(
-    ids INTEGER[], orderBy TEXT, orderDirection TEXT)
-    --  OUT nft_id INTEGER, OUT nft_name TEXT, OUT ipfs_hash TEXT, OUT metadata jsonb, OUT data_uri TEXT, OUT contract TEXT, OUT token_id TEXT, OUT categories TEXT[][])
-    --RETURNS setof record
+CREATE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT)
   RETURNS TABLE(
     nft_id INTEGER, nft_name TEXT, ipfs_hash TEXT, metadata jsonb, data_uri TEXT, contract TEXT, token_id TEXT, categories TEXT[][])
 AS $$
@@ -69,3 +71,19 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
+
+COMMIT;
+
+-- ==== DOWN ====
+
+BEGIN;
+
+DROP FUNCTION nft_ids_filtered(
+    TEXT, TEXT[],
+    TEXT, TEXT,
+    INTEGER, INTEGER,
+    INTEGER);
+
+DROP FUNCTION nfts_by_id(INTEGER[], TEXT, TEXT);
+
+COMMIT;
