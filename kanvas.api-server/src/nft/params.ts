@@ -33,9 +33,13 @@ export class PaginationParams {
 
 export class FilterParams extends PaginationParams {
   @IsArray()
-  @Transform(({ value }) => (value ? parseStringArray(value, ';') : undefined))
+  @Transform(({ value }) =>
+    value
+      ? parseStringArray(value, ',').map((v: string) => Number(v))
+      : undefined,
+  )
   @IsOptional()
-  categories: string[] | undefined = []
+  categories: number[] | undefined
 
   @IsString()
   @IsOptional()

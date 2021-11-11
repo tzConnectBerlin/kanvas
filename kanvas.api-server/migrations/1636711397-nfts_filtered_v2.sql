@@ -1,11 +1,14 @@
--- Migration: nft_functions
--- Created at: 2021-11-11 16:10:36
+-- Migration: nfts_filtered_v2
+-- Created at: 2021-11-12 11:03:17
 -- ====  UP  ====
 
 BEGIN;
 
+-- Diff between previous and this version:
+--   categories was TEXT[] (names), is now INTEGER[] (ids)
+ALTER FUNCTION nft_ids_filtered RENAME TO __nft_ids_filtered_v1;
 CREATE FUNCTION nft_ids_filtered(
-    address TEXT, categories TEXT[],
+    address TEXT, categories INTEGER[],
     orderBy TEXT, orderDirection TEXT,
     "offset" INTEGER, "limit" INTEGER,
     untilNftLastUpdated TIMESTAMP WITHOUT TIME ZONE)
@@ -22,15 +25,13 @@ BEGIN
     FROM nft
     LEFT JOIN mtm_nft_category
       ON mtm_nft_category.nft_id = nft.id
-    LEFT JOIN nft_category AS cat
-      ON mtm_nft_category.nft_category_id = cat.id
     JOIN mtm_kanvas_user_nft
       ON mtm_kanvas_user_nft.nft_id = nft.id
     JOIN kanvas_user
       ON mtm_kanvas_user_nft.kanvas_user_id = kanvas_user.id
     WHERE ($1 IS NULL OR nft.updated_at <= $1)
-      AND ($2 IS NULL OR address = $2)
-      AND ($3 IS NULL OR category = ANY($3))
+      AND ($2 IS NULL OR kanvas_user.address = $2)
+      AND ($3 IS NULL OR nft_category_id = ANY($3))
     GROUP BY nft.id
     ORDER BY ' || quote_ident(orderBy) || ' ' || orderDirection || '
     OFFSET $4
@@ -40,6 +41,18 @@ END
 $$
 LANGUAGE plpgsql;
 
+
+-- Diff between previous and this version:
+--   when an nft has 0 categories associated, the previous function would
+--   return '[[NULL, NULL]]', now it returns '[]'
+--
+-- Exact diff:
+--   - ARRAY_AGG(ARRAY[category, cat.description] WHERE count(1) > 0) AS categories
+--   + CASE WHEN count(category) = 0
+--   +   THEN ARRAY[]::text[][]
+--   +   ELSE ARRAY_AGG(ARRAY[category, cat.description])
+--   + END AS categories
+ALTER FUNCTION nfts_by_id RENAME TO __nfts_by_id_v1;
 CREATE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT)
   RETURNS TABLE(
     nft_id INTEGER, nft_name TEXT, ipfs_hash TEXT, metadata jsonb, data_uri TEXT, contract TEXT, token_id TEXT, categories TEXT[][])
@@ -57,7 +70,10 @@ BEGIN
       data_uri,
       contract,
       token_id,
-      ARRAY_AGG(ARRAY[category, cat.description] WHERE count(1) > 0) AS categories
+      CASE WHEN count(category) = 0
+        THEN ARRAY[]::text[][]
+        ELSE ARRAY_AGG(ARRAY[category, cat.description])
+      END AS categories
     FROM nft
     LEFT JOIN mtm_nft_category AS mtm
       ON mtm.nft_id = nft.id
@@ -79,11 +95,13 @@ COMMIT;
 BEGIN;
 
 DROP FUNCTION nft_ids_filtered(
-    TEXT, TEXT[],
+    TEXT, INTEGER[],
     TEXT, TEXT,
     INTEGER, INTEGER,
     TIMESTAMP WITHOUT TIME ZONE);
+ALTER FUNCTION __nft_ids_filtered_v1 RENAME TO nft_ids_filtered;
 
 DROP FUNCTION nfts_by_id(INTEGER[], TEXT, TEXT);
+ALTER FUNCTION __nfts_by_id_v1 RENAME TO nfts_by_id;
 
 COMMIT;

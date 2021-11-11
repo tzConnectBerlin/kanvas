@@ -1,9 +1,17 @@
 import { Module } from '@nestjs/common'
 import { assertEnv } from 'src/utils'
-import { Pool } from 'pg'
+import { Pool, types } from 'pg'
 
 export const PG_CONNECTION = 'PG_CONNECTION'
 export const PG_UNIQUE_VIOLATION_ERRCODE = '23505'
+
+// Read postgres TIMESTAMP WITHOUT TIME ZONE values as UTC+0 Date
+types.setTypeParser(
+  1114 /* TIMESTAMP WITHOUT TIME ZONE type */,
+  function (stringValue) {
+    return new Date(stringValue + '+0000')
+  },
+)
 
 const dbProvider = {
   provide: PG_CONNECTION,

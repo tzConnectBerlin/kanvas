@@ -55,6 +55,13 @@ export class NftService {
     const offset = (params.page - 1) * params.pageSize
     const limit = params.pageSize
 
+    let untilNft: string | undefined = undefined
+    if (typeof params.firstRequestAt === 'number') {
+      untilNft = new Date(params.firstRequestAt * 1000).toISOString()
+    }
+
+    console.log(params.categories)
+
     try {
       const nftIds = await this.conn.query(
         `
@@ -67,7 +74,7 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7)`,
           params.order,
           offset,
           limit,
-          undefined, // TODO: parse UNIX timestamp (params.firstRequestAt) and insert here
+          untilNft,
         ],
       )
 
@@ -123,6 +130,7 @@ FROM nfts_by_id($1, $2, $3)`,
         [nftIds, orderBy, orderDirection],
       )
       return nftsQryRes.rows.map((nftRow: any) => {
+        console.log('nft row: ', nftRow)
         return <NftEntity>{
           id: nftRow['nft_id'],
           name: nftRow['nft_name'],
