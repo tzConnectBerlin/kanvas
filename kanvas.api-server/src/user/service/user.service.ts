@@ -65,7 +65,7 @@ WHERE address = ${addr}
       address: qryRes[0]['address'],
       signedPayload: qryRes[0]['signed_payload'],
       roles: qryRes
-        .map((row: any[]) => row['role_label'])
+        .map((row: any) => row['role_label'])
         .filter((roleLabels: any[]) => typeof roleLabels === 'string'),
     }
 
