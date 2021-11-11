@@ -49,14 +49,21 @@ const StyledStack = styled(Stack)`
     padding-top: 2rem;
     height: 100%;
     position: relative;
+    width: 100%;
 
     button {
         width: 90%;
     }
+
 `
 
 const StyledAvataWrapper = styled.div`
     position: relative;
+    max-width: 90%;
+
+    img {
+        max-width: 100%;
+    }
 `
 
 const ClearContentWrapper =  styled.div<{theme?: Theme}>`

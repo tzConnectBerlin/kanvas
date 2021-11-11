@@ -57,4 +57,3 @@ export const EditProfile : FC<EditProfileProps> = () => {
         </PageWrapper>
     )
 }
-

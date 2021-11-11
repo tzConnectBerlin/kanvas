@@ -9,12 +9,10 @@ import FlexSpacer from '../../atoms/FlexSpacer';
 import CustomCircularProgress from '../../atoms/CircularProgress';
 
 import { useFormik } from 'formik';
-import { useLazyQuery } from '@apollo/client';
 import { FC, useEffect, useState } from "react";
 import { ClearRounded } from '@mui/icons-material';
 import { DropZone } from '../../molecules/DropZone';
-import { FormHelperText, Theme } from '@mui/material';
-import { CHECK_IF_USERNAME_VALID } from '../../../api/search';
+import { Theme } from '@mui/material';
 import { Box, TextField, InputAdornment, Stack } from '@mui/material';
 
 interface ProfileFormProps {
@@ -22,7 +20,6 @@ interface ProfileFormProps {
     submit: Function;
     loading: boolean;
 }
-
 
 const StyledStack = styled(Stack)`
     width: 55%;
