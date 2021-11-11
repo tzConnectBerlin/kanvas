@@ -187,6 +187,8 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
             setSocialLoading(false)
             setBeaconLoading(false)
 
+            props.handleCloseModal();
+
             localStorage.setItem('Kanvas - Bearer', signUserResponse.data.token)
             localStorage.setItem('Kanvas - address', signUserResponse.data.address)
 
@@ -200,6 +202,8 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
 
             setSocialLoading(false)
             setBeaconLoading(false)
+
+            props.handleCloseModal();
 
             if (!registerUserResponse.data.token) {
                 toast.error('Unable to connect to the serve. Please refresh and try again')
