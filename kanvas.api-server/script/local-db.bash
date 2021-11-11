@@ -19,7 +19,7 @@ BOOT_TIME=3s
         psql < script/populate-testdb.sql
 ) &
 
-docker run \
+docker run -ti \
     -p $DB_PORT:5432 \
     -e POSTGRES_PASSWORD=$DB_PASSWORD \
     -e POSTGRES_USER=$DB_USERNAME \

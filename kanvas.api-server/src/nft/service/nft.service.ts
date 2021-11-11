@@ -8,7 +8,7 @@ import {
 import { NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity'
 import { CategoryEntity } from 'src/category/entity/category.entity'
 import { FilterParams, PaginationParams } from '../params'
-import { PG_CONNECTION } from 'src/db.module'
+import { PG_CONNECTION } from '../../db.module'
 
 @Injectable()
 export class NftService {
