@@ -252,8 +252,8 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
                             <Typography size="h1" weight='SemiBold' sx={{ justifyContent: 'center' }}>{t('modal.signIn.headline')} </Typography>
                         </Animated>
                         <FlexSpacer minHeight={1} />
-                        <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center', justifyContent: 'center' }}> </Typography>
-                        <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center', justifyContent: 'center' }}> {t('modal.signIn.text_2')}</Typography>
+                        <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center', justifyContent: 'center' }}>{t('modal.signIn.text_1')}</Typography>
+                        <Typography size="h2" weight='Light' color={'#C4C4C4'} sx={{ textAlign: 'center', justifyContent: 'center' }}>{t('modal.signIn.text_2')}</Typography>
 
                     </WrapperTitle>
 
