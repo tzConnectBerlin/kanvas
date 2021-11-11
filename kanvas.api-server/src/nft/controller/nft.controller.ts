@@ -23,6 +23,22 @@ export class NftController {
 
   @Get('/filter')
   async filter(@Query() params: FilterParams): Promise<NftEntityPage> {
+    this.validateFilterParams(params)
+    return this.nftService.filter(params)
+  }
+
+  @Get()
+  async findAll(@Query() params: PaginationParams): Promise<NftEntityPage> {
+    this.validatePaginationParams(params)
+    return this.nftService.findAll(params)
+  }
+
+  @Get('/:id')
+  async byId(@Param('id') id): Promise<NftEntity> {
+    return this.nftService.byId(id)
+  }
+
+  validateFilterParams(params: FilterParams): void {
     const filterCategories = params.categories.length > 0
     const filterAddress = typeof params.address === 'string'
     if (!filterCategories && !filterAddress) {
@@ -32,16 +48,18 @@ export class NftController {
       )
     }
 
-    return this.nftService.filter(params)
+    this.validatePaginationParams(params)
   }
 
-  @Get()
-  async findAll(@Query() params: PaginationParams): Promise<NftEntityPage> {
-    return this.nftService.findAll(params)
-  }
-
-  @Get('/:id')
-  async byId(@Param('id') id): Promise<NftEntity> {
-    return this.nftService.byId(id)
+  validatePaginationParams(params: PaginationParams): void {
+    if (params.page < 1 || params.pageSize < 1) {
+      throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST)
+    }
+    if (!['id', 'name', 'price'].some((elem) => elem === params.orderBy)) {
+      throw new HttpException(
+        'Requested orderBy not supported',
+        HttpStatus.BAD_REQUEST,
+      )
+    }
   }
 }

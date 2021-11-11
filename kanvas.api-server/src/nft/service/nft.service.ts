@@ -33,20 +33,11 @@ export class NftService {
   }
 
   async filter(params: FilterParams): Promise<NftEntityPage> {
-    if (params.page < 1 || params.pageSize < 1) {
-      throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST)
-    }
     const orderByMapping = new Map([
       ['id', 'nft_id'],
       ['name', 'nft_name'],
       ['price', 'price'],
     ])
-    if (!orderByMapping.has(params.orderBy)) {
-      throw new HttpException(
-        'Requested orderBy not supported',
-        HttpStatus.BAD_REQUEST,
-      )
-    }
 
     const orderBy = orderByMapping.get(params.orderBy)
     const offset = (params.page - 1) * params.pageSize
@@ -74,7 +65,7 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7)`,
         firstRequestAt: params.firstRequestAt,
         nfts: [],
       }
-      if (nftIds.rows.length == 0) {
+      if (nftIds.rows.length === 0) {
         return res
       }
 
@@ -98,7 +89,7 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7)`,
 
   async byId(id: number): Promise<NftEntity> {
     const nfts = await this.findByIds([id], 'nft_id', 'asc')
-    if (nfts.length == 0) {
+    if (nfts.length === 0) {
       throw new HttpException(
         'NFT with the requested id does not exist',
         HttpStatus.BAD_REQUEST,
