@@ -8,11 +8,11 @@ import IconExpansionTreeView from '../../design-system/molecules/TreeView/TreeVi
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 
 import { useEffect, useState } from 'react';
-import { Grid, Stack, Paper, Theme, Pagination } from "@mui/material";
+import { Stack, Theme, Pagination } from "@mui/material";
 import { CustomButton } from '../../design-system/atoms/Button';
 import { CustomSelect } from '../../design-system/atoms/Select';
 import { Typography } from "../../design-system/atoms/Typography";
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const StyledStack = styled(Stack)`

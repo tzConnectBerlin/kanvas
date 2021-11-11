@@ -1,10 +1,9 @@
 import styled from '@emotion/styled';
+import CustomCircularProgress from '../CircularProgress';
 
-import React, { FC, useState } from 'react';
+import { FC } from 'react';
 import { Typography } from '../Typography';
 import { Button as MButton, ButtonProps as MButtonProps, Theme } from '@mui/material';
-import CustomCircularProgress from '../CircularProgress';
-import { ClearRounded } from '@mui/icons-material';
 
 export interface CustomButtonProps extends MButtonProps {
   /**
@@ -42,12 +41,6 @@ interface StyledButtonProps {
   theme?: Theme;
   primary: boolean
 }
-
-const StyledClearContent = styled(ClearRounded)<{theme?: Theme}>`
-    color: ${props => props.theme.palette.background.default};
-    padding-right: 0.5rem;
-    transition: all 0.2s;
-`
 
 const StyledButton = styled(MButton)<StyledButtonProps>`
   border-radius: 0;
@@ -130,8 +123,6 @@ export const CustomButton : FC<CustomButtonProps> = ({
   ...props
 }) => {
 
-  const [isHover, setIsHover] = useState(false)
-
   return (
     <StyledButton
       variant={variant}
@@ -148,7 +139,7 @@ export const CustomButton : FC<CustomButtonProps> = ({
                 <CustomCircularProgress height={1} />
             :
                 (
-                    <StyledContainer onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
+                    <StyledContainer>
                         {
                           props.icon
                         }

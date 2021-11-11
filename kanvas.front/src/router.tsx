@@ -5,7 +5,7 @@ import Faq from './pages/Faq';
 import CreateNFT from './pages/CreateNFT';
 import { Redirect } from 'react-router'
 import { RPC_URL } from './global';
-import { Stack, Theme } from '@mui/material';
+import { Theme } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { darkTheme, lightTheme } from './theme';
 import { KukaiEmbed, Networks } from 'kukai-embed';
@@ -34,7 +34,6 @@ const Router = () => {
 
     const [embedKukai, setEmbedKukai] = useState<KukaiEmbed>();
     const [beaconWallet, setBeaconWallet] = useState<BeaconWallet>()
-    const[ signedPayload, setSignedPayload] = useState('')
 
     const [selectedTheme, setSelectedTheme] = useState<'light' | 'dark'>(localStorage.getItem('Kanvas - theme') as "light" | "dark")
 
@@ -78,7 +77,7 @@ const Router = () => {
     return(
         <ThemeProvider theme={localStorage.getItem('Kanvas - theme') === 'dark' ? darkThemeResponsive : lightThemeResponsive } >
             <StyledBrowserRouter>
-                <Header beaconWallet={beaconWallet} setSignedPayload={setSignedPayload} embedKukai={embedKukai} cartOpen={cartOpen} setCartOpen={setCartOpen} switchTheme={handleSelectTheme} selectedTheme={selectedTheme} notifications={0}/>
+                <Header beaconWallet={beaconWallet} embedKukai={embedKukai} cartOpen={cartOpen} setCartOpen={setCartOpen} switchTheme={handleSelectTheme} selectedTheme={selectedTheme} notifications={0}/>
                 <Switch>
                     <Route exact path="/store" component={StorePage} />
                     <Route path="/profile/:username" component={Profile} />
