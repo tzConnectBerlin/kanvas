@@ -168,10 +168,14 @@ const Profile : FC<ProfileProps> = () => {
 
     // Edit profile section
     const editProfile = () => {
-        if (user.data?.getUser) {
-            const currentUser = user.data?.getUser
+        debugger
+        if (user.data) {
+            const currentUser = {
+                userName: 'Tristan',
+                profilePicture: ''
+            }
             history.push({
-                pathname: '/account/edit',
+                pathname: '/profile/edit',
                 state: { currentUser }
             })
         }
