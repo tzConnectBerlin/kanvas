@@ -49,7 +49,6 @@ const StyledStack = styled(Stack)`
     padding-top: 2rem;
     height: 100%;
     position: relative;
-    width: 100%;
 
     button {
         width: 90%;
