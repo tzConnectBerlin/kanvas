@@ -1,4 +1,4 @@
-import { Children, FC, useState } from 'react';
+import { FC } from 'react';
 import styled from "@emotion/styled";
 import PageWrapper from "../../design-system/commons/PageWrapper";
 import FlexSpacer from "../../design-system/atoms/FlexSpacer";
@@ -6,7 +6,6 @@ import { Grid, Stack, Theme } from "@mui/material";
 import { Typography } from "../../design-system/atoms/Typography";
 import { useTranslation } from 'react-i18next';
 import Scrollspy from "react-scrollspy-ez";
-
 
 export interface FaqProps {
     selectedTheme?: string;
@@ -33,7 +32,7 @@ const SlyledListItem = styled.li <{ theme?: Theme }>`
         align-items: center;
 `
 
-const StyledStack = styled(Stack)`
+const StyledStack = styled(Stack) <{theme?: Theme}>`
     max-width: 100rem;
     width: 100%;
     height: 100%;
@@ -44,7 +43,7 @@ const StyledStack = styled(Stack)`
 
     .isCurrent {
         font-weight: 900;
-        box-shadow: -2px 0 0 0 #003a54;
+        box-shadow: -2px 0 0 0 ${props => props.theme.palette.text.primary};
 
         &:li + li {
             box-shadow: -2px 0 0 0 #003a54;
