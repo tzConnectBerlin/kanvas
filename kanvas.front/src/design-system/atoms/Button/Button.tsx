@@ -70,7 +70,6 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
 
   &:hover {
     outline: ${props => `solid 2px ${props.theme.palette.text.primary}`};
-    border: ${({ bordercolor }) => bordercolor !== '' ? "solid 1px #0088a7" : ''};
     box-shadow: none;
     background-color: ${props => props.verified ? props.theme.palette.text.primary : !props.primary ? 'transparent' : props.theme.button.background } ;
   }
@@ -79,7 +78,6 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
       outline: 2px solid #C4C4C4;
       transition: outline 0.1s;
 
-      border: ${({ bordercolor }) => bordercolor !== '' ? "solid 1px #ffb494" : `solid 1px black`};
       box-shadow: none;
       background-color: ${props => props.verified ? props.theme.palette.text.primary : !props.primary ? 'transparent' : props.theme.button.background } ;
   }

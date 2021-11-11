@@ -43,8 +43,8 @@ const Router = () => {
     const lightThemeResponsive = responsiveFontSizes(lightTheme);
 
     const [nftsInCart, setNftsInCart] = useState<INft[]>([])
-    const [addToCartResponse, addToCart] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/cart/add', {manual: true})
-    const [deleteFromCartResponse, deleteFromCart] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/cart/add', {manual: true})
+    const [addToCartResponse, addToCart] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/user/cart/add/:id', {manual: true})
+    const [deleteFromCartResponse, deleteFromCart] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/cart/delete/:id', {manual: true})
 
 
     const handleAddToBasket = (nftId: number) => {
