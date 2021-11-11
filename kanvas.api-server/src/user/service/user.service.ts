@@ -29,7 +29,7 @@ RETURNING id`,
       res.id = qryRes.rows[0]['id']
       res.roles = []
       return res
-    } catch (err) {
+    } catch (err: any) {
       if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
         throw new HttpException(
           'User with these credentials already exists',
@@ -70,8 +70,8 @@ WHERE address = $1
       address: qryRes.rows[0]['address'],
       signedPayload: qryRes.rows[0]['signed_payload'],
       roles: qryRes.rows
-        .map((row) => row['role_label'])
-        .filter((row) => typeof row === 'string'),
+        .map((row: any) => row['role_label'])
+        .filter((roleLabels: any[]) => typeof roleLabels === 'string'),
     }
 
     return res
