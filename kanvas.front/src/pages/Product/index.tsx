@@ -64,7 +64,7 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
 
                 <FlexSpacer minHeight={8} />
 
-                <Stack direction={{ sm: 'column', md: 'row' }} spacing={5} sx={{width: '100%'}}>
+                <Stack direction={{ xs: 'column', md: 'row' }} spacing={5} sx={{width: '100%'}}>
                     {
                         nftResponse.loading ?
                             <Skeleton height='40rem' width='40rem' sx={{transform: 'none'}}/>

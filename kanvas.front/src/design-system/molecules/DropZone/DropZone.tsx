@@ -57,6 +57,11 @@ const StyledStack = styled(Stack)`
 
 const StyledAvataWrapper = styled.div`
     position: relative;
+    max-width: 90%;
+
+    img {
+        max-width: 100%;
+    }
 `
 
 const ClearContentWrapper =  styled.div<{theme?: Theme}>`
@@ -81,11 +86,11 @@ const ClearContentWrapper =  styled.div<{theme?: Theme}>`
 
     :hover {
         transition: filter 0.2s;
-        outline: ${props => `solid 2px ${props.theme.palette.text.primary}`};
+        outline: ${props => `solid 1px ${props.theme.palette.text.primary}`};
     }
 
     :active {
-        filter: drop-shadow(0px 0px 6px #98989833);
+        outline: solid 1px #C4C4C4;
     }
 `
 
@@ -164,7 +169,7 @@ export const DropZone : FC<DropZoneProps> = ({setFileUrl, setDropZoneErrorMessag
                 {
                     props.fileUrl ?
                         <StyledAvataWrapper>
-                            <ClearContentWrapper onClick={() => setFileUrl('')}>
+                            <ClearContentWrapper onClick={(event) => {event?.preventDefault(); setFileUrl(''); sessionStorage.removeItem(`${props.inputId}`) }}>
                                 <StyledClearContent />
                             </ClearContentWrapper>
                             <img src={props.fileUrl}/>
@@ -173,7 +178,7 @@ export const DropZone : FC<DropZoneProps> = ({setFileUrl, setDropZoneErrorMessag
                         <Typography size="h5" weight='Light' color="#C4C4C4" align="center" sx={{marginTop: '1rem'}}> Drag and Drop an image here </Typography>
                 }
 
-                <CustomButton size="medium" onClick={getInputProps} label={props.fileUrl === '' ? 'Choose file' : 'Edit file' } />
+                <CustomButton size="medium" onClick={() => getInputProps()} label={props.fileUrl === '' ? 'Choose file' : 'Edit file' } />
             </StyledStack>
         </StyledZone>
     )
