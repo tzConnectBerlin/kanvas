@@ -57,7 +57,7 @@ BEGIN
       data_uri,
       contract,
       token_id,
-      ARRAY_AGG(ARRAY[category, cat.description] WHERE count(1) > 0) AS categories
+      ARRAY_AGG(ARRAY[category, cat.description]) AS categories
     FROM nft
     LEFT JOIN mtm_nft_category AS mtm
       ON mtm.nft_id = nft.id
