@@ -3,6 +3,12 @@ import Profile from './pages/Profile';
 import StorePage from './pages/StorePage';
 import Faq from './pages/Faq';
 import CreateNFT from './pages/CreateNFT';
+import EditProfile from './pages/EditProfile';
+import ProductPage from './pages/Product';
+import NotFound from './pages/NotFound';
+import ShoppingCart from './design-system/organismes/ShoppingCart';
+import useAxios from 'axios-hooks';
+
 import { Redirect } from 'react-router'
 import { RPC_URL } from './global';
 import { Theme } from '@mui/material';
@@ -15,10 +21,6 @@ import { Header } from './design-system/organismes/Header';
 import { Footer } from './design-system/organismes/Footer';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
-import ProductPage from './pages/Product';
-import NotFound from './pages/NotFound';
-import ShoppingCart from './design-system/organismes/ShoppingCart';
-import useAxios from 'axios-hooks';
 import { INft } from './interfaces/artwork';
 
 
@@ -80,6 +82,7 @@ const Router = () => {
                 <Header beaconWallet={beaconWallet} embedKukai={embedKukai} cartOpen={cartOpen} setCartOpen={setCartOpen} switchTheme={handleSelectTheme} selectedTheme={selectedTheme} notifications={0}/>
                 <Switch>
                     <Route exact path="/store" component={StorePage} />
+                    <Route path="/profile/edit" component={EditProfile} />
                     <Route path="/profile/:username" component={Profile} />
                     <Route path="/product/:id" render={props => <ProductPage addToBasket={handleAddToBasket} {...props}/> }/>
                     <Route path="/faq" component={Faq} />

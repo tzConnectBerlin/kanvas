@@ -17,9 +17,9 @@ const Search = styled.div<{ theme?: Theme}>`
     cursor: pointer;
 
     background: ${props => props.theme.button.background } ;
-    transition: filter 0.2s, width 0.3s;
+    transition: width 0.3s;
 
-    max-width: 35rem;
+    width: 15rem;
     min-width: 15rem;
     height: 2.5rem !important;
     transition: width 0.3s;
@@ -29,15 +29,14 @@ const Search = styled.div<{ theme?: Theme}>`
 
     border-radius: 0;
 
-
     &:active {
-        transition: filter 0.2s, border 0.2s;
+        transition: width 0.2s;
         filter: drop-shadow(0px 0px 6px #98989833);
     }
 
     &:focus-within {
-        transition: width 0.3s;
         width: 35rem;
+        transition: width 0.2s;
 
         @media (max-width: 730px) {
             width: 100%;
@@ -91,6 +90,7 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
             width: 40rem;
             height: 100rem;
             opacity: 1;
+            transition: width 0.2s, opacity 0.2s;
         }
     }
 `
