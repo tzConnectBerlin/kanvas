@@ -33,6 +33,13 @@ values
   ('mountains', 'steep hills that go heigh'),
   ('water', 'its not actually blue');
 
+insert into nft_category (
+  category, description, parent
+)
+values
+  ('rock', 'its part of a mountain', 1),
+  ('nirvana', 'pretty good', 3);
+
 
 insert into mtm_nft_category (
   nft_category_id, nft_id
