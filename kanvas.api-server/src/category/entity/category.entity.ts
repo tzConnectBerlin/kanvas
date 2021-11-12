@@ -1,6 +1,6 @@
-export class CategoryEntity {
+export interface CategoryEntity {
   id: number
   name: string
   description: string
-  parent: number // parent category
+  subCategories: CategoryEntity[]
 }

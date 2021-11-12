@@ -38,7 +38,7 @@ insert into nft_category (
 )
 values
   ('rock', 'its part of a mountain', 1),
-  ('nirvana', 'pretty good', 3);
+  ('nirvana', 'its part of rock', 3);
 
 
 insert into mtm_nft_category (
