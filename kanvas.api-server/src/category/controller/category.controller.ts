@@ -1,9 +1,7 @@
-import { Logger, UseGuards, Body, Controller, Get, Post } from '@nestjs/common'
-import { CategoryEntity } from 'src/category/entity/category.entity'
+import { Body, Controller, Get, Post } from '@nestjs/common'
+import { CategoryEntity } from '../../category/entity/category.entity'
 import { CategoryService } from '../service/category.service'
-import { JwtAuthGuard } from '../../authentication/guards/jwt-auth.guard'
-import { Roles, RolesGuard } from 'src/authentication/guards/roles.guard'
-import { Reflector } from '@nestjs/core'
+require('dotenv').config()
 
 @Controller('categories')
 export class CategoryController {

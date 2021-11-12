@@ -25,15 +25,15 @@ const CreateNFT : FC<CreateNFTProps> = () => {
         <PageWrapper>
             <StyledStack direction="column" spacing={3}>
 
-            <FlexSpacer minHeight={12} />
+                <FlexSpacer minHeight={12} />
 
-            <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
-                <Typography size="h1" weight='SemiBold' sx={{justifyContent: 'center'}}> Create an NFT</Typography>
-            </Animated>
+                <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
+                    <Typography size="h1" weight='SemiBold' sx={{justifyContent: 'center'}}> Create an NFT</Typography>
+                </Animated>
 
-            <FlexSpacer minHeight={2} />
+                <FlexSpacer minHeight={2} />
 
-            <CreatNFTForm/>
+                <CreatNFTForm/>
             </StyledStack>
         </PageWrapper>
     )

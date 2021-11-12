@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { assertEnv } from 'src/utils'
+import { assertEnv } from './utils'
 import { Pool, types } from 'pg'
 
 export const PG_CONNECTION = 'PG_CONNECTION'

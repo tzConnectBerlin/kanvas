@@ -51,6 +51,8 @@ const MobileWrapperStack = styled(Stack)`
     display: none;
 
     padding-bottom: 2rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
 
     @media (max-width: 650px) {
         display: flex;

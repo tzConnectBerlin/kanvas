@@ -17,6 +17,7 @@ export function assertEnv(v: string): string {
   if (typeof res === 'string') {
     return res
   } else {
+    console.debug(process.env)
     throw new AssertionError(
       `Environment variable ${v} has to be set before starting this program`,
     )
