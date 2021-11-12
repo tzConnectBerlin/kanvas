@@ -60,8 +60,6 @@ export class NftService {
       untilNft = new Date(params.firstRequestAt * 1000).toISOString()
     }
 
-    console.log(params.categories)
-
     try {
       const nftIds = await this.conn.query(
         `
@@ -130,7 +128,6 @@ FROM nfts_by_id($1, $2, $3)`,
         [nftIds, orderBy, orderDirection],
       )
       return nftsQryRes.rows.map((nftRow: any) => {
-        console.log('nft row: ', nftRow)
         return <NftEntity>{
           id: nftRow['nft_id'],
           name: nftRow['nft_name'],
