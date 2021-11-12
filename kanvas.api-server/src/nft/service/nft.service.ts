@@ -8,7 +8,7 @@ import {
 import { NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity'
 import { CategoryEntity } from 'src/category/entity/category.entity'
 import { FilterParams, PaginationParams } from '../params'
-import { PG_CONNECTION } from '../../db.module'
+import { PG_CONNECTION } from '../../constants'
 
 @Injectable()
 export class NftService {
@@ -55,6 +55,11 @@ export class NftService {
     const offset = (params.page - 1) * params.pageSize
     const limit = params.pageSize
 
+    let untilNft: string | undefined = undefined
+    if (typeof params.firstRequestAt === 'number') {
+      untilNft = new Date(params.firstRequestAt * 1000).toISOString()
+    }
+
     try {
       const nftIds = await this.conn.query(
         `
@@ -67,7 +72,7 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7)`,
           params.order,
           offset,
           limit,
-          undefined, // TODO: parse UNIX timestamp (params.firstRequestAt) and insert here
+          untilNft,
         ],
       )
 

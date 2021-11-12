@@ -32,7 +32,7 @@ export class AuthenticationService {
       user.signedPayload !== undefined &&
       userData.signedPayload !== undefined
     ) {
-      await this.verifyPassword(user.signedPayload, userData.signedPayload)
+      await this.verifyPassword(userData.signedPayload, user.signedPayload)
 
       return this.getCookieWithJwtToken(
         {

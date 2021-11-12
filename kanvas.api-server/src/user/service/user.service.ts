@@ -6,7 +6,7 @@ import {
   Inject,
 } from '@nestjs/common'
 import { UserEntity } from '../entity/user.entity'
-import { PG_CONNECTION, PG_UNIQUE_VIOLATION_ERRCODE } from '../../db.module'
+import { PG_CONNECTION, PG_UNIQUE_VIOLATION_ERRCODE } from '../../constants'
 
 @Injectable()
 export class UserService {

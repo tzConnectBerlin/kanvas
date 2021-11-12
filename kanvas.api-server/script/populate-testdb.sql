@@ -1,20 +1,20 @@
 insert into kanvas_user (
-  id, address, signed_payload
+  address, signed_payload
 )
 values
-  (1, 'addr', 'admin'),
-  (2, 'tz1', 'pass');
+  ('addr', '$2b$10$f/hk.7Hnsqltgzm0JqDJZudecFpUtKP9gPGTrm7BiPaqLGlfJcjXS'), -- pwd: admin
+  ('tz1', '$2b$10$CKbxQQPEN0uNfazzv89hZ.DXju23yey1XMKzRCca70Z8djcggUpQi'); -- pwd: test
 
 
 insert into nft (
-  id, nft_name, ipfs_hash, metadata
+  nft_name, ipfs_hash, metadata
 )
 values
-  (1, 'SomeNFT', 'ipfs://somenft', '{"json": "encoded", "I": "guess?"}'),
-  (2, 'NFT2', 'ipfs://somenft+', '{"json": "encoded", "I": "guess?"}'),
-  (3, 'NFT3', 'ipfs://has-no-category', '{}'),
-  (4, 'NFT4', 'ipfs://has-2-categories', '{}'),
-  (5, 'Alps', 'ipfs://the-alps', '{}');
+  ('SomeNFT', 'ipfs://somenft', '{"json": "encoded", "I": "guess?"}'),
+  ('NFT2', 'ipfs://somenft+', '{"json": "encoded", "I": "guess?"}'),
+  ('NFT3', 'ipfs://has-no-category', '{}'),
+  ('NFT4', 'ipfs://has-2-categories', '{}'),
+  ('Alps', 'ipfs://the-alps', '{}');
 
 insert into mtm_kanvas_user_nft (
   kanvas_user_id, nft_id
@@ -27,11 +27,11 @@ values
   (1, 5);
 
 insert into nft_category (
-  id, category, description
+  category, description
 )
 values
-  (1, 'mountains', 'steep hills that go heigh'),
-  (2, 'water', 'its not actually blue');
+  ('mountains', 'steep hills that go heigh'),
+  ('water', 'its not actually blue');
 
 
 insert into mtm_nft_category (
