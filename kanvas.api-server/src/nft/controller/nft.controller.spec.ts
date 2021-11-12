@@ -1,15 +1,16 @@
+require('dotenv').config()
 import { Test, TestingModule } from '@nestjs/testing'
-import { ControllerController } from './nft.controller'
+import { NftController } from './nft.controller'
 
-describe('ControllerController', () => {
-  let controller: ControllerController
+describe('NftController', () => {
+  let controller: NftController
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [ControllerController],
+      controllers: [NftController],
     }).compile()
 
-    controller = module.get<ControllerController>(ControllerController)
+    controller = module.get<NftController>(NftController)
   })
 
   it('should be defined', () => {
