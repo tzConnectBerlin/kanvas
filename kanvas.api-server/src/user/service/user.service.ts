@@ -79,6 +79,37 @@ WHERE address = $1
     }
   }
 
+  async checkoutCart(user: UserEntity) {
+    const cartMeta = await this.getCartMeta(user)
+    if (typeof cartMeta === 'undefined') {
+      return {
+        nfts: [],
+        expires_at: undefined,
+      }
+    }
+
+    const nftIds = await this.getCartNftIds(cartMeta.id)
+    const tx = await this.conn.connect()
+    tx.query(`BEGIN`)
+    await tx.query(
+      `
+INSERT INTO mtm_kanvas_user_nft (
+  kanvas_user_id, nft_id
+)
+SELECT $1, nft.id
+FROM nft
+WHERE nft.id = ANY($2)`,
+      [user.id, nftIds],
+    )
+    await tx.query(
+      `
+DELETE FROM user_cart
+WHERE user_id = $1`,
+      [user.id],
+    )
+    tx.query(`COMMIT`)
+  }
+
   async getCartNftIds(cartId: number): Promise<number[]> {
     const qryRes = await this.conn.query(
       `
@@ -90,9 +121,11 @@ WHERE user_cart_id = $1`,
     return qryRes.rows.map((row: any) => row['nft_id'])
   }
 
-  async cartAdd(user: UserEntity, nftId: number) {
+  async cartAdd(user: UserEntity, nftId: number): Promise<boolean> {
     const cartMeta = await this.touchCart(user)
-    await this.conn.query(
+    const tx = await this.conn.connect()
+    tx.query('BEGIN')
+    await tx.query(
       `
 INSERT INTO mtm_user_cart_nft(
   user_cart_id, nft_id
@@ -101,7 +134,26 @@ VALUES ($1, $2)`,
       [cartMeta.id, nftId],
     )
 
+    const qryRes = await tx.query(
+      `
+SELECT
+  (SELECT count(1) FROM mtm_user_cart_nft WHERE nft_id = $1)
+    + (SELECT count(1) FROM mtm_kanvas_user_nft WHERE nft_id = $1)
+    AS editions_reserved,
+  (SELECT nft.editions_size FROM nft WHERE id = $1) AS editions_total
+      `,
+      [nftId],
+    )
+    if (
+      qryRes.rows[0]['editions_reserved'] > qryRes.rows[0]['editions_total']
+    ) {
+      tx.query('ROLLBACK')
+      return false
+    }
+    tx.query('COMMIT')
+
     await this.resetCartExpiration(cartMeta.id)
+    return true
   }
 
   async cartRemove(user: UserEntity, nftId: number): Promise<boolean> {

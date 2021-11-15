@@ -46,27 +46,36 @@ export class UserController {
     @CurrentUser() user: UserEntity,
     @Param('nftId') nftId: number,
   ) {
-    return await this.userService.cartAdd(user, nftId).catch((err: any) => {
-      if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
-        throw new HttpException(
-          'This nft is already in the cart',
-          HttpStatus.BAD_REQUEST,
-        )
-      }
+    const added = await this.userService
+      .cartAdd(user, nftId)
+      .catch((err: any) => {
+        if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
+          throw new HttpException(
+            'This nft is already in the cart',
+            HttpStatus.BAD_REQUEST,
+          )
+        }
 
-      Logger.error(
-        'Error on adding nft to cart. user_id=' +
-          user.id +
-          ', nft_id=' +
-          nftId +
-          ', err: ' +
-          err,
-      )
+        Logger.error(
+          'Error on adding nft to cart. user_id=' +
+            user.id +
+            ', nft_id=' +
+            nftId +
+            ', err: ' +
+            err,
+        )
+        throw new HttpException(
+          'Something went wrong',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        )
+      })
+
+    if (!added) {
       throw new HttpException(
-        'Something went wrong',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        'All editions of this nft have been reserved/bought',
+        HttpStatus.BAD_REQUEST,
       )
-    })
+    }
   }
 
   @Post('cart/remove/:nftId')
@@ -86,9 +95,15 @@ export class UserController {
     throw new HttpException('', HttpStatus.NO_CONTENT)
   }
 
-  @Get('cart')
+  @Get('cart/list')
   @UseGuards(JwtAuthGuard)
   async getCart(@CurrentUser() user: UserEntity) {
     return await this.userService.getCart(user)
+  }
+
+  @Post('cart/checkout')
+  @UseGuards(JwtAuthGuard)
+  async getCheckout(@CurrentUser() user: UserEntity) {
+    return await this.userService.checkoutCart(user)
   }
 }

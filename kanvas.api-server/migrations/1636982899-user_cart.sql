@@ -23,6 +23,10 @@ CREATE TABLE mtm_user_cart_nft(
   PRIMARY KEY (user_cart_id, nft_id)
 );
 
+ALTER TABLE nft ALTER COLUMN editions_size SET DEFAULT 1;
+UPDATE nft SET editions_size = COALESCE(editions_size, 1);
+ALTER TABLE nft ALTER COLUMN editions_size SET NOT NULL;
+
 COMMIT;
 
 -- ==== DOWN ====
@@ -34,5 +38,8 @@ ALTER TABLE nft_category ADD CONSTRAINT fk_nft FOREIGN KEY (parent) REFERENCES n
 
 DROP TABLE user_cart;
 DROP TABLE mtm_user_cart_nft;
+
+ALTER TABLE nft ALTER COLUMN editions_size DROP NOT NULL;
+ALTER TABLE nft ALTER COLUMN editions_size DROP DEFAULT;
 
 COMMIT;
