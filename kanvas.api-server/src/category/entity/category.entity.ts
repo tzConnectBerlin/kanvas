@@ -1,9 +1,6 @@
-import { NftEntity } from 'src/nft/entity/nft.entity'
-
-export class CategoryEntity {
+export interface CategoryEntity {
   id: number
   name: string
   description: string
-  parent: CategoryEntity
-  nfts: NftEntity[]
+  subCategories: CategoryEntity[]
 }
