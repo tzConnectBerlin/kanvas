@@ -42,19 +42,25 @@ ORDER BY COALESCE(parent, 0) DESC, id`,
     }
   }
 
+  // Note: this function expects inputs to be sorted on:
+  //  parent DESC (and with parent == undefined last), id ASC
   categoriesQryRespToEntities(
-    qryResp: CategoryQueryResponse[],
+    categoryRows: CategoryQueryResponse[],
   ): CategoryEntity[] {
+    if (categoryRows.length === 0) {
+      return []
+    }
+
     const m = new Map()
-    for (const row of qryResp) {
+    for (const row of categoryRows) {
       const entity = <CategoryEntity>{
         id: row.id,
         name: row.category,
         description: row.description,
-        subCategories: m.has(row.id) ? m.get(row.id) : [],
+        subCategories: [],
       }
       if (m.has(row.id)) {
-        // just an optimization. not really necessary.
+        entity.subCategories = m.get(row.id)
         m.delete(row.id)
       }
 
