@@ -1,50 +1,36 @@
-import {
-  Logger,
-  HttpException,
-  HttpStatus,
-  Injectable,
-  Inject,
-} from '@nestjs/common'
-import { UserEntity } from '../entity/user.entity'
-import { PG_CONNECTION, PG_UNIQUE_VIOLATION_ERRCODE } from '../../constants'
+import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common'
+import { UserEntity, UserCart } from '../entity/user.entity'
+import { NftService } from 'src/nft/service/nft.service'
+import { PG_CONNECTION } from '../../constants'
+
+interface CartMeta {
+  id: number
+  expires_at: number
+}
 
 @Injectable()
 export class UserService {
-  constructor(@Inject(PG_CONNECTION) private conn: any) {}
+  constructor(
+    @Inject(PG_CONNECTION) private conn: any,
+    private readonly nftService: NftService,
+  ) {}
 
   async create(user: UserEntity): Promise<UserEntity> {
     // note: this implementation ignores user.roles here.
-    try {
-      const qryRes = await this.conn.query(
-        `
+    const qryRes = await this.conn.query(
+      `
 INSERT INTO kanvas_user(
   user_name, address, signed_payload
 )
 VALUES ($1, $2, $3)
 RETURNING id`,
-        [user.name, user.address, user.signedPayload],
-      )
+      [user.name, user.address, user.signedPayload],
+    )
 
-      const res = Object.assign({}, user)
-      res.id = qryRes.rows[0]['id']
-      res.roles = []
-      return res
-    } catch (err: any) {
-      if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
-        throw new HttpException(
-          'User with these credentials already exists',
-          HttpStatus.BAD_REQUEST,
-        )
-      }
-
-      Logger.error(
-        'Error on creating user=' + JSON.stringify(user) + ', err: ' + err,
-      )
-      throw new HttpException(
-        'Something went wrong',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      )
-    }
+    const res = Object.assign({}, user)
+    res.id = qryRes.rows[0]['id']
+    res.roles = []
+    return res
   }
 
   async findByAddress(addr: string): Promise<UserEntity> {
@@ -75,5 +61,121 @@ WHERE address = $1
     }
 
     return res
+  }
+
+  async getCart(user: UserEntity): Promise<UserCart> {
+    const cartMeta = await this.getCartMeta(user)
+    if (typeof cartMeta === 'undefined') {
+      return {
+        nfts: [],
+        expires_at: undefined,
+      }
+    }
+
+    const nftIds = await this.getCartNftIds(cartMeta.id)
+    return {
+      nfts: await this.nftService.findByIds(nftIds, 'nft_id', 'asc'),
+      expires_at: cartMeta.expires_at,
+    }
+  }
+
+  async getCartNftIds(cartId: number): Promise<number[]> {
+    const qryRes = await this.conn.query(
+      `
+SELECT nft_id
+FROM mtm_user_cart_nft
+WHERE user_cart_id = $1`,
+      [cartId],
+    )
+    return qryRes.rows.map((row: any) => row['nft_id'])
+  }
+
+  async cartAdd(user: UserEntity, nftId: number) {
+    const cartMeta = await this.touchCart(user)
+    await this.conn.query(
+      `
+INSERT INTO mtm_user_cart_nft(
+  user_cart_id, nft_id
+)
+VALUES ($1, $2)`,
+      [cartMeta.id, nftId],
+    )
+
+    await this.resetCartExpiration(cartMeta.id)
+  }
+
+  async cartRemove(user: UserEntity, nftId: number): Promise<boolean> {
+    const cartMeta = await this.touchCart(user)
+    const qryRes = await this.conn.query(
+      `
+DELETE FROM mtm_user_cart_nft
+WHERE user_cart_id = $1
+  AND nft_id = $2`,
+      [cartMeta.id, nftId],
+    )
+    if (qryRes.rowCount === 0) {
+      return false
+    }
+
+    await this.resetCartExpiration(cartMeta.id)
+    return true
+  }
+
+  async resetCartExpiration(cartId: number) {
+    await this.conn.query(
+      `
+UPDATE user_cart
+SET expires_at = now() + interval '1 hour'
+WHERE id = $1
+  `,
+      [cartId],
+    )
+  }
+
+  async touchCart(user: UserEntity): Promise<CartMeta> {
+    const cartMeta = await this.getCartMeta(user)
+    if (typeof cartMeta !== 'undefined') {
+      return cartMeta
+    }
+
+    await this.conn.query(
+      `
+DELETE FROM user_cart
+WHERE user_id = $1`,
+      [user.id],
+    )
+
+    const qryRes = await this.conn.query(
+      `
+INSERT INTO user_cart (
+  user_id
+)
+VALUES ($1)
+RETURNING id, expires_at`,
+      [user.id],
+    )
+    return {
+      id: qryRes.rows[0]['id'],
+      expires_at: qryRes.rows[0]['expires_at'],
+    }
+  }
+
+  async getCartMeta(user: UserEntity): Promise<CartMeta | undefined> {
+    const qryRes = await this.conn.query(
+      `
+SELECT id, expires_at
+FROM user_cart
+WHERE user_id = $1
+  AND expires_at > now()
+      `,
+      [user.id],
+    )
+    if (qryRes.rows.length === 0) {
+      return undefined
+    }
+    return <CartMeta>{
+      id: qryRes.rows[0]['id'],
+      expires_at: qryRes.rows[0]['expires_at'],
+    }
   }
 }
