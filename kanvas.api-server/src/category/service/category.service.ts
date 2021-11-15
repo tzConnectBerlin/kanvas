@@ -57,10 +57,10 @@ ORDER BY COALESCE(parent, 0) DESC, id`,
         id: row.id,
         name: row.category,
         description: row.description,
-        subCategories: [],
+        children: [],
       }
       if (m.has(row.id)) {
-        entity.subCategories = m.get(row.id)
+        entity.children = m.get(row.id)
         m.delete(row.id)
       }
 
