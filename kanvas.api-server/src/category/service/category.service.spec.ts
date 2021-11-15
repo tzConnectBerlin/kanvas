@@ -45,13 +45,13 @@ describe('CategoryService', () => {
           id: 1,
           name: 'dust',
           description: '...',
-          subCategories: [],
+          children: [],
         },
         {
           id: 2,
           name: 'light',
           description: 'bright',
-          subCategories: [],
+          children: [],
         },
       ],
     },
@@ -76,12 +76,12 @@ describe('CategoryService', () => {
           id: 1,
           name: 'dust',
           description: '...',
-          subCategories: [
+          children: [
             {
               id: 2,
               name: 'light',
               description: 'bright',
-              subCategories: [],
+              children: [],
             },
           ],
         },
@@ -114,17 +114,17 @@ describe('CategoryService', () => {
           id: 1,
           name: 'dust',
           description: '...',
-          subCategories: [
+          children: [
             {
               id: 2,
               name: 'light',
               description: 'bright',
-              subCategories: [
+              children: [
                 {
                   id: 3,
                   name: 'material',
                   description: 'matter',
-                  subCategories: [],
+                  children: [],
                 },
               ],
             },
@@ -171,23 +171,23 @@ describe('CategoryService', () => {
           id: 1,
           name: 'dust',
           description: '...',
-          subCategories: [
+          children: [
             {
               id: 2,
               name: 'light',
               description: 'bright',
-              subCategories: [
+              children: [
                 {
                   id: 3,
                   name: 'material',
                   description: 'matter',
-                  subCategories: [],
+                  children: [],
                 },
                 {
                   id: 5,
                   name: 'anti material',
                   description: 'nonmatter',
-                  subCategories: [],
+                  children: [],
                 },
               ],
             },
@@ -195,7 +195,7 @@ describe('CategoryService', () => {
               id: 4,
               name: 'anti light',
               description: 'dark',
-              subCategories: [],
+              children: [],
             },
           ],
         },
