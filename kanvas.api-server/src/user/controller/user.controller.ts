@@ -1,5 +1,6 @@
 require('dotenv').config()
 import {
+  Session,
   HttpException,
   HttpStatus,
   Param,
@@ -13,7 +14,10 @@ import {
 import { UserEntity } from '../entity/user.entity'
 import { UserService } from '../service/user.service'
 import { CurrentUser } from 'src/decoraters/user.decorator'
-import { JwtAuthGuard } from 'src/authentication/guards/jwt-auth.guard'
+import {
+  JwtAuthGuard,
+  JwtFailableAuthGuard,
+} from 'src/authentication/guards/jwt-auth.guard'
 import { PG_UNIQUE_VIOLATION_ERRCODE } from '../../constants'
 
 @Controller('users')
@@ -41,13 +45,15 @@ export class UserController {
   }
 
   @Post('cart/add/:nftId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtFailableAuthGuard)
   async cartAdd(
-    @CurrentUser() user: UserEntity,
+    @Session() session: any,
+    @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
+    const cart_session = this.get_cart_session(session, user)
     const added = await this.userService
-      .cartAdd(user, nftId)
+      .cartAdd(cart_session, nftId)
       .catch((err: any) => {
         if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
           throw new HttpException(
@@ -57,8 +63,8 @@ export class UserController {
         }
 
         Logger.error(
-          'Error on adding nft to cart. user_id=' +
-            user.id +
+          'Error on adding nft to cart. cart_session=' +
+            cart_session +
             ', nft_id=' +
             nftId +
             ', err: ' +
@@ -79,12 +85,14 @@ export class UserController {
   }
 
   @Post('cart/remove/:nftId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtFailableAuthGuard)
   async cartRemove(
-    @CurrentUser() user: UserEntity,
+    @Session() session: any,
+    @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    const removed = await this.userService.cartRemove(user, nftId)
+    const cart_session = this.get_cart_session(session, user)
+    const removed = await this.userService.cartRemove(cart_session, nftId)
     if (!removed) {
       throw new HttpException(
         'This nft was not in the cart',
@@ -96,14 +104,25 @@ export class UserController {
   }
 
   @Get('cart/list')
-  @UseGuards(JwtAuthGuard)
-  async getCart(@CurrentUser() user: UserEntity) {
-    return await this.userService.getCart(user)
+  @UseGuards(JwtFailableAuthGuard)
+  async cartList(
+    @Session() session: any,
+    @CurrentUser() user: UserEntity | undefined,
+  ) {
+    const cart_session = this.get_cart_session(session, user)
+    return await this.userService.cartList(cart_session)
   }
 
   @Post('cart/checkout')
   @UseGuards(JwtAuthGuard)
-  async getCheckout(@CurrentUser() user: UserEntity) {
-    return await this.userService.checkoutCart(user)
+  async cartCheckout(@CurrentUser() user: UserEntity) {
+    return await this.userService.cartCheckout(user)
+  }
+
+  get_cart_session(session: any, user: UserEntity | undefined): string {
+    if (typeof user === 'undefined') {
+      return session.uuid
+    }
+    return String(user.id)
   }
 }

@@ -63,8 +63,8 @@ WHERE address = $1
     return res
   }
 
-  async getCart(user: UserEntity): Promise<UserCart> {
-    const cartMeta = await this.getCartMeta(user)
+  async cartList(cart_session: string): Promise<UserCart> {
+    const cartMeta = await this.getCartMeta(cart_session)
     if (typeof cartMeta === 'undefined') {
       return {
         nfts: [],
@@ -79,8 +79,9 @@ WHERE address = $1
     }
   }
 
-  async checkoutCart(user: UserEntity) {
-    const cartMeta = await this.getCartMeta(user)
+  async cartCheckout(user: UserEntity) {
+    const cart_session = String(user.id)
+    const cartMeta = await this.getCartMeta(cart_session)
     if (typeof cartMeta === 'undefined') {
       return {
         nfts: [],
@@ -103,9 +104,9 @@ WHERE nft.id = ANY($2)`,
     )
     await tx.query(
       `
-DELETE FROM user_cart
-WHERE user_id = $1`,
-      [user.id],
+DELETE FROM cart_session
+WHERE session_id = $1`,
+      [cart_session],
     )
     tx.query(`COMMIT`)
   }
@@ -114,21 +115,21 @@ WHERE user_id = $1`,
     const qryRes = await this.conn.query(
       `
 SELECT nft_id
-FROM mtm_user_cart_nft
-WHERE user_cart_id = $1`,
+FROM mtm_cart_session_nft
+WHERE cart_session_id = $1`,
       [cartId],
     )
     return qryRes.rows.map((row: any) => row['nft_id'])
   }
 
-  async cartAdd(user: UserEntity, nftId: number): Promise<boolean> {
-    const cartMeta = await this.touchCart(user)
+  async cartAdd(session: string, nftId: number): Promise<boolean> {
+    const cartMeta = await this.touchCart(session)
     const tx = await this.conn.connect()
     tx.query('BEGIN')
     await tx.query(
       `
-INSERT INTO mtm_user_cart_nft(
-  user_cart_id, nft_id
+INSERT INTO mtm_cart_session_nft(
+  cart_session_id, nft_id
 )
 VALUES ($1, $2)`,
       [cartMeta.id, nftId],
@@ -137,7 +138,7 @@ VALUES ($1, $2)`,
     const qryRes = await tx.query(
       `
 SELECT
-  (SELECT count(1) FROM mtm_user_cart_nft WHERE nft_id = $1)
+  (SELECT count(1) FROM mtm_cart_session_nft WHERE nft_id = $1)
     + (SELECT count(1) FROM mtm_kanvas_user_nft WHERE nft_id = $1)
     AS editions_reserved,
   (SELECT nft.editions_size FROM nft WHERE id = $1) AS editions_total
@@ -156,12 +157,12 @@ SELECT
     return true
   }
 
-  async cartRemove(user: UserEntity, nftId: number): Promise<boolean> {
-    const cartMeta = await this.touchCart(user)
+  async cartRemove(cart_session: string, nftId: number): Promise<boolean> {
+    const cartMeta = await this.touchCart(cart_session)
     const qryRes = await this.conn.query(
       `
-DELETE FROM mtm_user_cart_nft
-WHERE user_cart_id = $1
+DELETE FROM mtm_cart_session_nft
+WHERE cart_session_id = $1
   AND nft_id = $2`,
       [cartMeta.id, nftId],
     )
@@ -176,7 +177,7 @@ WHERE user_cart_id = $1
   async resetCartExpiration(cartId: number) {
     await this.conn.query(
       `
-UPDATE user_cart
+UPDATE cart_session
 SET expires_at = now() + interval '1 hour'
 WHERE id = $1
   `,
@@ -184,27 +185,27 @@ WHERE id = $1
     )
   }
 
-  async touchCart(user: UserEntity): Promise<CartMeta> {
-    const cartMeta = await this.getCartMeta(user)
+  async touchCart(cart_session: string): Promise<CartMeta> {
+    const cartMeta = await this.getCartMeta(cart_session)
     if (typeof cartMeta !== 'undefined') {
       return cartMeta
     }
 
     await this.conn.query(
       `
-DELETE FROM user_cart
-WHERE user_id = $1`,
-      [user.id],
+DELETE FROM cart_session
+WHERE session_id = $1`,
+      [cart_session],
     )
 
     const qryRes = await this.conn.query(
       `
-INSERT INTO user_cart (
-  user_id
+INSERT INTO cart_session (
+  session_id
 )
 VALUES ($1)
 RETURNING id, expires_at`,
-      [user.id],
+      [cart_session],
     )
     return {
       id: qryRes.rows[0]['id'],
@@ -212,15 +213,15 @@ RETURNING id, expires_at`,
     }
   }
 
-  async getCartMeta(user: UserEntity): Promise<CartMeta | undefined> {
+  async getCartMeta(cart_session: string): Promise<CartMeta | undefined> {
     const qryRes = await this.conn.query(
       `
 SELECT id, expires_at
-FROM user_cart
-WHERE user_id = $1
+FROM cart_session
+WHERE session_id = $1
   AND expires_at > now()
       `,
-      [user.id],
+      [cart_session],
     )
     if (qryRes.rows.length === 0) {
       return undefined
