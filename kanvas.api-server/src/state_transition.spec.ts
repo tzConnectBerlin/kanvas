@@ -1,36 +1,47 @@
 import { NftEntity } from './nft/entity/nft.entity'
-import { NftStateTransitionConfig, transition } from './state_transition'
+import { NftStateTransitionConfig, transition, parse } from './state_transition'
 import { UserEntity } from './user/entity/user.entity'
 import { assoc } from 'ramda'
+import * as SExp from './s_expression'
 let exampleNftStateTransitionConfig: NftStateTransitionConfig = {
   states: {
-    terminal: ['start', 'rejected'],
+    terminal: [':start', ':rejected'],
     nonterminal: [
-      'uploaded',
-      'moderated',
-      'categorised',
-      'commercial-terms-added',
+      ':uploaded',
+      ':moderated',
+      ':categorised',
+      ':commercial-terms-added',
     ],
   },
-  roles: ['uploader', 'moderator', 'editor', 'god'],
+  roles: [':uploader', ':moderator', ':editor', ':god'],
   transitions: [
-    { from: 'start', to: 'uploaded', requires: ['uploader', 2] },
-    { from: 'uploaded', to: 'moderated', requires: ['moderator', 1] },
+    {
+      fromRole: ':start',
+      toRole: ':uploaded',
+      requiresRole: ':uploader',
+      requiresConfirmations: 2,
+    },
+    {
+      fromRole: ':uploaded',
+      toRole: ':moderated',
+      requiresRole: ':moderator',
+      requiresConfirmations: 1,
+    },
   ],
 }
 
-// let exampleNftStateConfigSource = ```
-// (states (:start :rejected) ;; terminal stages
-//         (:uploaded :moderated :categorised :commericaltermsadded)) ;; others
+export const exampleNftStateConfigSource = `
+(states (:start :rejected) ;; terminal stages
+        (:uploaded :moderated :categorised :commercial-terms-added)) ;; others
 
-// (roles (:uploader :moderator :editor :god))
+(roles (:uploader :moderator :editor :god))
 
-// (transition (:start :uploaded)
-//             (requires :uploader))
+(transition (:start :uploaded)
+            (requires :uploader 2))
 
-// (transition (:uploaded :moderated)
-//             (requires :moderator 3))
-// ```
+(transition (:uploaded :moderated)
+            (requires :moderator 1))
+`
 
 describe('NFT state transition', () => {
   let users: UserEntity[] = [
@@ -39,14 +50,14 @@ describe('NFT state transition', () => {
       name: 'Antonio Vivaldi',
       address: 'abc123',
       signedPayload: 'nruxmkoszopqnrhu',
-      roles: ['uploader', 'moderator'],
+      roles: [':uploader', ':moderator'],
     },
     {
       id: 777,
       name: 'Bob the Builder',
       address: 'abc123',
       signedPayload: 'aihcogimoriuehafhiou',
-      roles: ['moderator', 'editor'],
+      roles: [':moderator', ':editor'],
     },
   ]
   var nft: NftEntity = {
@@ -58,16 +69,16 @@ describe('NFT state transition', () => {
     contract: 'contract id',
     tokenId: '1234567',
     categories: [],
-    status: 'uploaded',
+    status: ':uploaded',
   }
   it('should allow state transitions when the user role is correct', () => {
     let actual = transition(
       exampleNftStateTransitionConfig,
       nft,
       users,
-      'moderated',
+      ':moderated',
     ).val
-    let expected = assoc('status', 'moderated', nft)
+    let expected = assoc('status', ':moderated', nft)
     expect(actual).toStrictEqual(expected)
   })
   it('should disallow state transitions when insufficient amount of users have confirmed', () => {
@@ -76,9 +87,17 @@ describe('NFT state transition', () => {
       exampleNftStateTransitionConfig,
       nft,
       users,
-      'uploaded',
+      ':uploaded',
     )
-    let expected = assoc('status', 'uploaded', nft)
+    let expected = assoc('status', ':uploaded', nft)
     expect(actual).not.toStrictEqual(expected)
+  })
+})
+describe('parsing state transition configs', () => {
+  it('should parse correctly', () => {
+    expect(
+      parse(SExp.parse(SExp.stripJunk('(' + exampleNftStateConfigSource + ')')))
+        .val,
+    ).toStrictEqual(exampleNftStateTransitionConfig)
   })
 })

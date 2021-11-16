@@ -192,7 +192,9 @@ export function stripPrecedingWhitespace(source: string) {
 }
 
 export function stripJunk(source: string) {
-  return stripPrecedingWhitespace(source.replace(/;.*\n/, '\n'))
+  return stripPrecedingWhitespace(
+    source.replace(/;.*\n/gm, '\n').replace(/\s*$/gm, ''),
+  )
 }
 
 export function parse(source: string) {
