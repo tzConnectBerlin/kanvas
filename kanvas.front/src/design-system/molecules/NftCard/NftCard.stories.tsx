@@ -2,7 +2,7 @@ import { NftCard } from '.';
 import { Story, Meta } from '@storybook/react';
 
 export default {
-  title: 'organismes/NftCard',
+  title: 'Molecules/NftCard',
   component: NftCard,
 } as Meta;
 

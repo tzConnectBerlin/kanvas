@@ -3,7 +3,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { SignInModal } from './SignInModal';
 
 export default {
-  title: 'molecules/SignInModal',
+  title: 'Molecules/SignInModal',
   component: SignInModal,
   argTypes: {
     backgroundColor: { control: 'color' },

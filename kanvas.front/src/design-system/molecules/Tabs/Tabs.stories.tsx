@@ -3,7 +3,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Tabs } from './Tabs';
 
 export default {
-  title: 'molecules/Tabs',
+  title: 'Molecules/Tabs',
   component: Tabs,
   argTypes: {
     backgroundColor: { control: 'color' },

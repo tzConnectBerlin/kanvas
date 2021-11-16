@@ -5,7 +5,7 @@ import { Story, Meta } from '@storybook/react/types-6-0';
 import { QuickSearch } from './QuickSearch';
 
 export default {
-  title: 'Atom/Typography',
+  title: 'Molecules/Typography',
   component: QuickSearch,
   argTypes: {},
 } as Meta;

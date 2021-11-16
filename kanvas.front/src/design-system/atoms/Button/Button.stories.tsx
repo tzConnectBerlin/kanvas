@@ -4,7 +4,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { CustomButton } from './Button';
 
 export default {
-  title: 'atom/Button',
+  title: 'Atoms/Button',
   component: CustomButton,
   argTypes: {
     backgroundColor: { control: 'color' },

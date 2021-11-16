@@ -5,7 +5,7 @@ import { Story, Meta } from '@storybook/react/types-6-0';
 import { Typography, TypographyProps } from './Typography';
 
 export default {
-  title: 'Atom/Typography',
+  title: 'Atoms/Typography',
   component: Typography,
   argTypes: {},
 } as Meta;

@@ -4,7 +4,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { ProfilePopover } from './ProfilePopover';
 
 export default {
-  title: 'molecule/ProfilePopover',
+  title: 'Molecules/ProfilePopover',
   component: ProfilePopover,
 } as ComponentMeta<typeof ProfilePopover>;
 

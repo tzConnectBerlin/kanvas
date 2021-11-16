@@ -3,7 +3,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { HeaderProfile } from './HeaderProfile';
 
 export default {
-  title: 'molecules/HeaderProfile',
+  title: 'Molecules/HeaderProfile',
   component: HeaderProfile,
   argTypes: {
     backgroundColor: { control: 'color' },
