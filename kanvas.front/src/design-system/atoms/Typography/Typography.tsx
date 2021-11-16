@@ -42,7 +42,7 @@ const StyledTypography = styled(MTypography)<IStyledTypography>`
 
     display: ${props => props.display ? 'block' : 'flex'};
     align-items: center;
-    color: ${props => props.color? props.color : props.theme.palette.text.primary ?? 'black'} !important;
+    color: ${props => props.color? (props.color === 'contrastText' ? props.theme.palette.primary.contrastText : props.color) : props.theme.palette.text.primary ?? 'black'} !important;
 
     &.truncate {
         overflow: hidden;
@@ -58,7 +58,7 @@ const StyledTypography = styled(MTypography)<IStyledTypography>`
 `
 
 export const Typography : FC<TypographyProps> = ({size, weight, children, truncate, lines, ...props}, ref) => {
-  
+
     const fontSize = size && (size.includes('em') || size.includes('px')) ? size : undefined;
     const variant = (size && !fontSize ? size : 'body1') as MTypographyProps['variant'];
 

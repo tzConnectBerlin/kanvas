@@ -1,158 +1,135 @@
-import TreeView from '@mui/lab/TreeView';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import TreeItem from '@mui/lab/TreeItem';
-import Typography from '../../atoms/Typography';
 import styled from  "@emotion/styled";
+import Typography from '../../atoms/Typography';
+import FlexSpacer from '../../atoms/FlexSpacer';
+
 import { Checkbox, Stack, Theme } from '@mui/material';
 import { FC, useState } from 'react';
 
 interface StyledTreeViewProps {
     open?: boolean;
     theme?: Theme;
-    asChildren?: boolean;
 }
 
 interface TreeViewProps extends StyledTreeViewProps {
-    nodes?: any;
-    selectedFilters: any[];
+    nodes?: any[];
+    loading: boolean;
+    selectedFilters: number[];
     setSelectedFilters: Function;
     filterFunction: Function;
+    collapsed: boolean;
 }
 
-
-const StyledTreeItem = styled(TreeItem)<StyledTreeViewProps>`
-    font-size: 2rem !important;
-
-    .MuiTreeItem-iconContainer {
-        width: ${props => props.asChildren ? 'auto' : 0};
-    }
-
-    .MuiTreeItem-content {
-        :hover {
-            background-color: ${props => props.theme.palette.background.default} !important;
-        }
-    }
-
-    path {
-        color: ${props => props.theme.palette.text.primary};
-    }
-
-    color: ${props => props.color? props.color : props.theme.palette.text.primary ?? 'black'} !important;
-
-    display: ${props => props.open ? '' : 'none'} !important;
-
-    background-color: ${props => props.theme.palette.background.default} !important;
-
-    .Mui-selected {
-        background-color: ${props => props.theme.palette.background.default} !important;
-    }
-`
-
-const StyledStack = styled(Stack)`
-    height: 2rem;
-    cursor: pointer;
-`
 
 const StyledDiv = styled.div<StyledTreeViewProps>`
-    align-items: center;
-    padding-top: 1rem;
-    min-height: 2rem;
-    cursor: pointer;
-    width: ${props => props.open ? '' : 0} ;
-
-`
-
-const StyledTreeView = styled(TreeView)<StyledTreeViewProps>`
-    width: ${props => props.open ? '15rem' : 0} ;
+    padding-left: 0.5rem;
+    width : ${props => props.open ? 'auto' : '0'};
+    height: 100%;
     transition: width 0.2s;
-    flex-grow: 0;
-
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
 `
 
-const data = {
-    id: 'root',
-    name: 'Categories',
-    children: [
-      {
-        id: '1',
-        name: 'Footballers',
-      },
-      {
-        id: '2',
-        name: 'Goals',
-      },
-      {
-        id: '3',
-        name: 'Child - 3',
-        children: [
-          {
-            id: '4',
-            name: 'Child - 4',
-          },
-        ],
-      },
-    ],
-  };
+const StyledLi = styled.li<StyledTreeViewProps>`
+    cursor: pointer;
+    display : ${props => props.open ? 'flex' : 'none'};
+    transition: width 0.2s;
+    align-items: center;
 
-const IconExpansionTreeView : FC<TreeViewProps> = ({selectedFilters, setSelectedFilters, ...props}) => {
+    height: 3rem;
+    transition: width 0.2s, height 0.2s;
+`
 
-    const handleMultiSelect = (nodesName: string) => {
-        if (selectedFilters.indexOf(nodesName) !== -1) {
-            setSelectedFilters(selectedFilters.filter(filterName => filterName !== nodesName))
+const StyledCheckBox = styled(Checkbox)<{theme?: Theme}>`
+    &.Mui-checked {
+        color: ${props => props.theme.palette.text.primary} !important;
+    }
+`
+
+const TreeView : FC<TreeViewProps> = ({selectedFilters, setSelectedFilters, ...props}) => {
+
+    const selectChildren = (node: any, newSelectedFilters : any[] = []) => {
+        if (node.children?.length > 0) {
+            for (let child of node.children) {
+                if (selectedFilters.indexOf(child.id) === -1) {
+                    newSelectedFilters.push(child.id)
+                }
+                selectChildren(child, newSelectedFilters)
+            }
+        }
+        return newSelectedFilters
+    }
+
+    const unSelectParent = (node: any, unSelectedParents : any[] = []) => {
+        if (node.parent) {
+            unSelectedParents.push(node.parent.id)
+            unSelectParent(node.parent, unSelectedParents)
+        }
+        return unSelectedParents
+    }
+
+    const handleMultiSelect = (node: any) => {
+        if (selectedFilters.indexOf(node.id) !== -1) {
+            // Getting the parents of the nodes to unselect them
+            const unSelectedParents = unSelectParent(node)
+            // Adding the current node to the unselection
+            unSelectedParents.push(node.id)
+            setSelectedFilters(selectedFilters.filter(filterId => unSelectedParents.indexOf(filterId) === -1 ))
         } else {
-            setSelectedFilters([...selectedFilters, nodesName])
+            // Getting the children of the parent to select them
+            const newSelectedChildren = selectChildren(node)
+            setSelectedFilters([...selectedFilters, ...newSelectedChildren, node.id])
         }
     }
 
-    const renderTree = (nodes: any) => (
-        !nodes.children ?
-            <StyledStack key={nodes.id} onClick={() => handleMultiSelect(nodes.name)} direction="row" sx={{paddingTop: '1rem', alignItems: 'center' }}>
-                <Checkbox
-                    checked={selectedFilters.indexOf(nodes.name) !== -1}
-                    onChange={() => {}}
-                    inputProps={{ 'aria-label': 'controlled' }}
-                    disableRipple
-                />
-                <StyledTreeItem asChildren={nodes.children} open={props.open} key={nodes.id} nodeId={nodes.id} label={nodes.name}>
+    const handleListItemClick = (concernedRef: any) => {
+        if (activeRef.indexOf(concernedRef) !== -1) {
+            setActiveRef(activeRef.filter(ref => ref !== concernedRef))
+        } else {
+            setActiveRef([...activeRef, concernedRef])
+        }
+    };
 
-                    {Array.isArray(nodes.children)
-                        ? nodes.children.map((node: any) => renderTree(node))
-                        : null}
-                </StyledTreeItem>
-            </StyledStack>
-        :
-            <StyledDiv key={nodes.id} open={props.open}>
-                <StyledTreeItem asChildren={nodes.children} open={props.open} key={nodes.id} nodeId={nodes.id} label={nodes.name}>
-                    {Array.isArray(nodes.children)
-                        ? nodes.children.map((node: any) => renderTree(node))
-                        : null}
-                </StyledTreeItem>
-            </StyledDiv>
-      );
+    const [activeRef, setActiveRef] = useState<any[]>([])
 
-    return (
-        <StyledTreeView
-            aria-label="multi-select"
-            defaultCollapseIcon={<ExpandMoreIcon />}
-            defaultExpandIcon={<ChevronRightIcon />}
-            defaultExpanded={['root']}
-            multiSelect
-            open={props.open}
-            sx={{
-                paddingTop: '1rem',
-                flexGrow: 1,
-                maxWidth: 400
-            }}
-        >
-            {renderTree(data)}
-        </StyledTreeView>
-    );
+    const renderTree : any = (parentNode: any, children: any, checked: boolean) => {
+
+        return children?.map((node: any) => {
+            node.parent = parentNode
+
+            return (
+                <StyledDiv open={props.open} >
+                    <StyledLi open={props.open} key={`${node.name}-${node.id}`} >
+                        <Stack direction="row" sx={{alignItems: 'center', width: '100%'}}>
+                            <StyledCheckBox
+                                checked={selectedFilters.indexOf(node.id) !== -1}
+                                onClick={() => handleMultiSelect(node)}
+                                inputProps={{ 'aria-label': 'controlled' }}
+                                disableRipple
+                            />
+                            <Stack direction="row" onClick={() => handleListItemClick(`${node.name}-${node.id}`)} sx={{width: '100%'}}>
+                                <Typography size="h5" weight='Light' >{node.name}</Typography>
+
+                                <FlexSpacer />
+
+                                { node.children?.length && node.children?.length > 0 ?
+                                    activeRef.indexOf(`${node.name}-${node.id}`) !== -1 ?
+                                        <Typography size="h5" weight='Light'>-</Typography>
+                                    :
+                                        <Typography size="h5" weight='Light'>+</Typography>
+                                :
+                                    undefined
+                                }
+                            </Stack>
+                        </Stack>
+                    </StyledLi>
+                    {activeRef.indexOf(`${node.name}-${node.id}`) !== -1 ?
+                        renderTree(node, node.children, selectedFilters.indexOf(node.id) !== -1 || checked)
+                    :
+                        undefined}
+                </StyledDiv>
+            )}
+        )
+    }
+
+    return ( props.nodes && !props.collapsed ? renderTree(props.nodes[0], props.nodes[0].children) : <></> )
 }
 
-export default IconExpansionTreeView;
+export default TreeView;

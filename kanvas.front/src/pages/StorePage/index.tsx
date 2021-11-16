@@ -4,15 +4,15 @@ import ListIcon from '@mui/icons-material/List';
 import NftGrid from '../../design-system/organismes/NftGrid';
 import FlexSpacer from "../../design-system/atoms/FlexSpacer";
 import PageWrapper from "../../design-system/commons/PageWrapper";
-import IconExpansionTreeView from '../../design-system/molecules/TreeView/TreeView';
-import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
+import TreeView from '../../design-system/molecules/TreeView/TreeView';
+import StoreFilters from '../../design-system/organismes/StoreFilters';
 
 import { useEffect, useState } from 'react';
 import { Stack, Theme, Pagination } from "@mui/material";
 import { CustomButton } from '../../design-system/atoms/Button';
 import { CustomSelect } from '../../design-system/atoms/Select';
 import { Typography } from "../../design-system/atoms/Typography";
-import { useLocation } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const StyledStack = styled(Stack)`
@@ -25,12 +25,6 @@ const StyledStack = styled(Stack)`
 const StyledListIcon = styled(ListIcon)<{theme?: Theme}>`
     color: ${props => props.theme.palette.text.primary};
     padding-right: 1rem;
-`
-
-const StyledKeyboardArrowDownOutlinedIcon = styled(KeyboardArrowDownOutlinedIcon)<{theme?: Theme}>`
-    color: ${props => props.theme.palette.text.primary};
-    margin-left: -0.5rem;
-    padding-right: 0.5rem;
 `
 
 const StyledPagination = styled(Pagination)<{theme?: Theme}>`
@@ -56,6 +50,7 @@ const StyledPagination = styled(Pagination)<{theme?: Theme}>`
 const StorePage = () => {
 
     const search = useLocation().search
+    const history = useHistory()
 
     const categories = new URLSearchParams(search).get('categories')
     const sort = new URLSearchParams(search).get('sort')
@@ -64,24 +59,32 @@ const StorePage = () => {
     // Api calls for the categories and the nfts
     const [nftsResponse, getNfts] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts', { manual: true })
     const [nftsFilteredResponse, getFilteredNfts] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts/filter', { manual: true })
-    // const [categoriesResponse, getCategories] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/categories', { manual: true })
+    const [categoriesResponse, getCategories] = useAxios(process.env.REACT_APP_API_SERVER_BASE_URL + '/categories', { manual: true })
 
     // is filter open ?
-    const [filterOpen, setFilterOpen] = useState(false);
+    const [filterOpen, setFilterOpen] = useState(true);
 
     const [selectedFilters, setSelectedFilters] = useState<any[]>([])
     const [selectedSort, setSelectedSort] = useState('')
 
-    const handlePaginationChange = () => {
-        // Call endpoint with correcponding variables
-    }
+    const [availableFilters, setAvailableFilters] = useState<any>()
 
-    useEffect(() => {
-        // check on the search for the used params
-        console.log(categories)
-        console.log(sort)
-        console.log(page)
-    }, [nftsResponse.data])
+    const handlePaginationChange = (event: any, page: number) => {
+        if (selectedFilters.length === 0) {
+            let newPageParam = new URLSearchParams()
+            newPageParam.append('page', page.toString())
+            history.push({search: newPageParam.toString()})
+
+            getNfts({
+                params: {
+                    page: page,
+                    pageSize: 12,
+                    categories: selectedFilters.join(','),
+                    sort: selectedSort
+                }
+            })
+        }
+    }
 
     useEffect(() => {
         if (nftsResponse.error) {
@@ -90,20 +93,33 @@ const StorePage = () => {
     }, [nftsResponse.error])
 
     useEffect(() => {
+        if (categoriesResponse.data) {
+            setAvailableFilters([{
+                id: 'root',
+                name: 'Categories',
+                children: categoriesResponse.data,
+            }])
+        }
+    }, [categoriesResponse.data])
+
+    useEffect(() => {
         // fetch initial data
         getNfts({
             params: {
-                categories: selectedFilters.join(';')
+                pageSize: 12,
+                page: page,
+                categories: categories,
+                sort: sort
             }
         })
-        // getCategories()
+        getCategories()
     },[])
 
     useEffect(() => {
         if (selectedFilters.length > 0) {
             getFilteredNfts({
                 params: {
-                    categories: selectedFilters.join(';')
+                    categories: selectedFilters.join(',')
                 }
             })
         }
@@ -127,14 +143,21 @@ const StorePage = () => {
                 </Stack>
 
                 <Stack direction="row">
-                    <IconExpansionTreeView open={filterOpen} filterFunction={getFilteredNfts} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters}/>
+                    <StoreFilters
+                        availableFilters={availableFilters}
+                        openFilters={filterOpen}
+                        filterFunction={getFilteredNfts}
+                        selectedFilters={selectedFilters}
+                        setSelectedFilters={setSelectedFilters}
+                        loading={categoriesResponse.loading}
+                    />
 
-                    <NftGrid open={filterOpen} nfts={selectedFilters.length === 0 ? nftsResponse.data?.data : nftsFilteredResponse.data?.data} loading={nftsResponse.loading || nftsFilteredResponse.loading}/>
+                    <NftGrid open={filterOpen} nfts={selectedFilters.length === 0 ? nftsResponse.data?.nfts : nftsFilteredResponse.data?.nfts} loading={nftsResponse.loading || nftsFilteredResponse.loading}/>
                 </Stack>
 
                 <Stack direction="row">
                     <FlexSpacer/>
-                    <StyledPagination count={10} onChange={handlePaginationChange} variant="outlined" shape="rounded" disabled={nftsResponse.loading || nftsFilteredResponse.loading}/>
+                    <StyledPagination defaultPage={page ? Number(page) : 1} count={selectedFilters.length === 0 ? nftsResponse.data?.numberOfPages : nftsFilteredResponse.data?.numberOfPages} onChange={handlePaginationChange} variant="outlined" shape="rounded" disabled={nftsResponse.loading || nftsFilteredResponse.loading}/>
                 </Stack>
 
                 <FlexSpacer minHeight={5} />
