@@ -129,6 +129,8 @@ const TreeView : FC<TreeViewProps> = ({selectedFilters, setSelectedFilters, ...p
         )
     }
 
+    // TODO: highlights parents when children are selected, add count next to the filters preselected + responsive
+
     return ( props.nodes && !props.collapsed ? renderTree(props.nodes[0], props.nodes[0].children) : <></> )
 }
 

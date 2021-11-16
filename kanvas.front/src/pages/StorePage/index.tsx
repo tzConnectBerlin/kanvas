@@ -143,6 +143,7 @@ const StorePage = () => {
                 </Stack>
 
                 <Stack direction="row">
+                    {/* TODO: find a better structure to pass the different filters */}
                     <StoreFilters
                         availableFilters={availableFilters}
                         openFilters={filterOpen}

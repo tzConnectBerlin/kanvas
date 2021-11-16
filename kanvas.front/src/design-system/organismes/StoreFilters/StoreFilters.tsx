@@ -28,7 +28,7 @@ const Filter : FC<FilterProps> = ({...props}) => {
 
             {
                 props.collapsed ?
-                   <Typography size="h5" weight='Light'>+</Typography>
+                    <Typography size="h5" weight='Light'>+</Typography>
                 :
                     <Typography size="h5" weight='Light'>-</Typography>
             }
@@ -85,7 +85,7 @@ export const StoreFilters : FC<StoreFiltersProps> = ({children, ...props}) => {
 
     return (
         <StyledUl openFilters={props.openFilters}>
-
+            {/* TODO: map over list of filters taken from the backend - Need to check with the backend team */}
             <StyledLi openFilters={props.openFilters} collapsed={activeRef.indexOf('Categories') !== -1}>
                 <Filter name="Categories" collapsed={activeRef.indexOf('Categories') !== -1} setCollapsed={handleListItemClick}/>
                 <TreeView
@@ -101,6 +101,12 @@ export const StoreFilters : FC<StoreFiltersProps> = ({children, ...props}) => {
             <StyledLi openFilters={props.openFilters}>
                 <Filter name="Price" collapsed={activeRef.indexOf('Price') !== -1} setCollapsed={handleListItemClick}/>
                 {/* TODO */}
+                {
+                    activeRef.indexOf('Price') === -1 ?
+                        <Typography size="h5" weight='Light' color='red'>Not implemented</Typography>
+                    :
+                        undefined
+                }
             </StyledLi>
         </StyledUl>
     )
