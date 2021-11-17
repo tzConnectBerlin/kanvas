@@ -23,11 +23,11 @@ BEGIN
       nft.id as nft_id,
       COUNT(1) OVER () AS total_nft_count
     FROM nft
-    JOIN mtm_nft_category
+    LEFT JOIN mtm_nft_category
       ON mtm_nft_category.nft_id = nft.id
-    LEFT JOIN mtm_kanvas_user_nft
+    JOIN mtm_kanvas_user_nft
       ON mtm_kanvas_user_nft.nft_id = nft.id
-    LEFT JOIN kanvas_user
+    JOIN kanvas_user
       ON mtm_kanvas_user_nft.kanvas_user_id = kanvas_user.id
     WHERE ($1 IS NULL OR nft.updated_at <= $1)
       AND ($2 IS NULL OR kanvas_user.address = $2)
