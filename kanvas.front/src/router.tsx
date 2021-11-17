@@ -91,7 +91,7 @@ const Router = () => {
                         <Route path="/create-nft" render={props => <CreateNFT {...props} />}  />
                         <Route path="/nft/:id" render={props => <CreateNFT {...props} />}  />
                         <Route path='/404' component={NotFound} />
-                        <Redirect from='*' to='/404' />
+                        <Redirect from='*' to='/store' />
                     </Switch>
                 </ScrollToTop>
                 <ShoppingCart open={cartOpen} nftsInCart={nftsInCart} closeCart={() => setCartOpen(false)} deleteNftFromBasket={handleDeleteFromBasket}/>
