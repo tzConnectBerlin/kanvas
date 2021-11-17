@@ -29,10 +29,7 @@ RETURNING id`,
       [user.name, user.address, user.signedPayload],
     )
 
-    const res = Object.assign({}, user)
-    res.id = qryRes.rows[0]['id']
-    res.roles = []
-    return res
+    return { ...user, id: qryRes.rows[0]['id'] }
   }
 
   async findByAddress(addr: string): Promise<UserEntity> {
