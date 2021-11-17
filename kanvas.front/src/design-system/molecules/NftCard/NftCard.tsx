@@ -24,6 +24,7 @@ export interface NftCardProps {
   price?: number;
   height?: number;
   ipfsHash?: string;
+  dataUri?: string;
 }
 
 const StyledBioWrapper = styled.div<{theme?: Theme}>`
@@ -52,7 +53,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
           <CardActionArea onClick={() => handleRedirect(`/product/${props.id}`)} sx={{width: 'auto'}}>
             <CardMedia
               component="img"
-              image="https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg"
+              image={props.dataUri}
               alt="random"
             />
             <CardContent
