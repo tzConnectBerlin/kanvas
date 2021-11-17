@@ -138,7 +138,6 @@ FROM nfts_by_id($1, $2, $3)`,
           tokenId: nftRow['token_id'],
           categories: nftRow['categories'].map((categoryRow: any) => {
             return <CategoryEntity>{
-              // TODO: return id as well
               name: categoryRow[0],
               description: categoryRow[1],
             }

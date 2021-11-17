@@ -5,13 +5,14 @@ import cookieSession = require('cookie-session')
 import { NestFactory } from '@nestjs/core'
 import { ValidationPipe } from '@nestjs/common'
 import { AppModule } from './app.module'
+import { assertEnv } from './utils'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true })
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }))
   app.use(
     cookieSession({
-      secret: 'very-secret',
+      secret: assertEnv('JWT_SECRET'),
 
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     }),
