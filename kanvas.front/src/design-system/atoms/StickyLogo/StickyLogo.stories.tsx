@@ -5,7 +5,7 @@ import { ApolloProvider } from '@apollo/client';
 import { Story, Meta } from '@storybook/react';
 
 export default {
-  title: 'atoms/StickyLogo',
+  title: 'Atoms/StickyLogo',
   component: StickyLogo,
 } as Meta;
 

@@ -5,7 +5,7 @@ import { QuickSearchResult } from './QuickSearchResult';
 import { ApolloError, LazyQueryResult } from '@apollo/client';
 
 export default {
-  title: 'molecules/QuickSearchResult',
+  title: 'Molecules/QuickSearchResult',
   component: QuickSearchResult,
 } as ComponentMeta<typeof QuickSearchResult>;
 

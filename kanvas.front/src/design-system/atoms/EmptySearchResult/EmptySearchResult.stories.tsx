@@ -4,7 +4,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { EmptySearchResult } from './EmptySearchResult';
 
 export default {
-  title: 'atoms/EmptySearchResult',
+  title: 'Atoms/EmptySearchResult',
   component: EmptySearchResult,
 } as ComponentMeta<typeof EmptySearchResult>;
 

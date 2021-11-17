@@ -2,7 +2,7 @@ import { NftGrid } from './NftGrid';
 import { Story, Meta } from '@storybook/react';
 
 export default {
-  title: 'organismes/NftGrid',
+  title: 'Organismes/NftGrid',
   component: NftGrid,
 } as Meta;
 
