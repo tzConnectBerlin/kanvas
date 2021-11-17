@@ -51,7 +51,7 @@ export class UserController {
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    const cart_session = this.get_cart_session(session, user)
+    const cart_session = await this.get_cart_session(session, user)
     const added = await this.userService
       .cartAdd(cart_session, nftId)
       .catch((err: any) => {
@@ -91,7 +91,7 @@ export class UserController {
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    const cart_session = this.get_cart_session(session, user)
+    const cart_session = await this.get_cart_session(session, user)
     const removed = await this.userService.cartRemove(cart_session, nftId)
     if (!removed) {
       throw new HttpException(
@@ -109,7 +109,7 @@ export class UserController {
     @Session() session: any,
     @CurrentUser() user: UserEntity | undefined,
   ) {
-    const cart_session = this.get_cart_session(session, user)
+    const cart_session = await this.get_cart_session(session, user)
     return await this.userService.cartList(cart_session)
   }
 
@@ -119,10 +119,14 @@ export class UserController {
     return await this.userService.cartCheckout(user)
   }
 
-  get_cart_session(session: any, user: UserEntity | undefined): string {
+  async get_cart_session(
+    session: any,
+    user: UserEntity | undefined,
+  ): Promise<string> {
+    console.log(session.uuid, ' ', JSON.stringify(user))
     if (typeof user === 'undefined') {
       return session.uuid
     }
-    return String(user.id)
+    return await this.userService.ensureUserCartSession(user.id, session.uuid)
   }
 }

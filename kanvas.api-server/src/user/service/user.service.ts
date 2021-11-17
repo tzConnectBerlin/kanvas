@@ -63,8 +63,36 @@ WHERE address = $1
     return res
   }
 
-  async cartList(cart_session: string): Promise<UserCart> {
-    const cartMeta = await this.getCartMeta(cart_session)
+  async getUserCartSession(user_id: number): Promise<string | undefined> {
+    const qryRes = await this.conn.query(
+      `
+SELECT cart_session
+FROM kanvas_user
+WHERE id = $1`,
+      [user_id],
+    )
+    return qryRes.rows[0]['cart_session']
+  }
+
+  async ensureUserCartSession(
+    user_id: number,
+    session: string,
+  ): Promise<string> {
+    await this.touchCart(session)
+
+    const qryRes = await this.conn.query(
+      `
+UPDATE kanvas_user
+SET cart_session = coalesce(cart_session, $2)
+WHERE id = $1
+RETURNING cart_session`,
+      [user_id, session],
+    )
+    return qryRes.rows[0]['cart_session']
+  }
+
+  async cartList(session: string): Promise<UserCart> {
+    const cartMeta = await this.getCartMeta(session)
     if (typeof cartMeta === 'undefined') {
       return {
         nfts: [],
@@ -79,14 +107,14 @@ WHERE address = $1
     }
   }
 
-  async cartCheckout(user: UserEntity) {
-    const cart_session = String(user.id)
-    const cartMeta = await this.getCartMeta(cart_session)
+  async cartCheckout(user: UserEntity): Promise<boolean> {
+    const session = await this.getUserCartSession(user.id)
+    if (typeof session === 'undefined') {
+      return false
+    }
+    const cartMeta = await this.getCartMeta(session)
     if (typeof cartMeta === 'undefined') {
-      return {
-        nfts: [],
-        expires_at: undefined,
-      }
+      return false
     }
 
     const nftIds = await this.getCartNftIds(cartMeta.id)
@@ -106,9 +134,10 @@ WHERE nft.id = ANY($2)`,
       `
 DELETE FROM cart_session
 WHERE session_id = $1`,
-      [cart_session],
+      [session],
     )
     tx.query(`COMMIT`)
+    return true
   }
 
   async getCartNftIds(cartId: number): Promise<number[]> {
@@ -157,8 +186,8 @@ SELECT
     return true
   }
 
-  async cartRemove(cart_session: string, nftId: number): Promise<boolean> {
-    const cartMeta = await this.touchCart(cart_session)
+  async cartRemove(session: string, nftId: number): Promise<boolean> {
+    const cartMeta = await this.touchCart(session)
     const qryRes = await this.conn.query(
       `
 DELETE FROM mtm_cart_session_nft
@@ -185,8 +214,8 @@ WHERE id = $1
     )
   }
 
-  async touchCart(cart_session: string): Promise<CartMeta> {
-    const cartMeta = await this.getCartMeta(cart_session)
+  async touchCart(session: string): Promise<CartMeta> {
+    const cartMeta = await this.getCartMeta(session)
     if (typeof cartMeta !== 'undefined') {
       return cartMeta
     }
@@ -195,7 +224,7 @@ WHERE id = $1
       `
 DELETE FROM cart_session
 WHERE session_id = $1`,
-      [cart_session],
+      [session],
     )
 
     const qryRes = await this.conn.query(
@@ -205,7 +234,7 @@ INSERT INTO cart_session (
 )
 VALUES ($1)
 RETURNING id, expires_at`,
-      [cart_session],
+      [session],
     )
     return {
       id: qryRes.rows[0]['id'],
@@ -213,7 +242,7 @@ RETURNING id, expires_at`,
     }
   }
 
-  async getCartMeta(cart_session: string): Promise<CartMeta | undefined> {
+  async getCartMeta(session: string): Promise<CartMeta | undefined> {
     const qryRes = await this.conn.query(
       `
 SELECT id, expires_at
@@ -221,7 +250,7 @@ FROM cart_session
 WHERE session_id = $1
   AND expires_at > now()
       `,
-      [cart_session],
+      [session],
     )
     if (qryRes.rows.length === 0) {
       return undefined

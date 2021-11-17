@@ -5,6 +5,7 @@ export interface UserEntity {
   name: string
   address: string
   signedPayload?: string
+  cartSession?: string
   roles: string[]
 }
 

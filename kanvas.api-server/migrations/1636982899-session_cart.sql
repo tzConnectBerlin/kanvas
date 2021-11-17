@@ -12,9 +12,11 @@ ALTER TABLE nft_category ADD CONSTRAINT fk_parent FOREIGN KEY (parent) REFERENCE
 
 CREATE TABLE cart_session(
   id SERIAL PRIMARY KEY,
-  session_id TEXT NOT NULL,
+  session_id UUID NOT NULL UNIQUE,
   expires_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now()+interval '1 hour'
 );
+
+ALTER TABLE kanvas_user ADD COLUMN cart_session UUID REFERENCES cart_session(session_id) ON DELETE SET NULL;
 
 create table mtm_cart_session_nft(
   cart_session_id int not null references cart_session(id) on delete cascade,

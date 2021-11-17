@@ -3,4 +3,5 @@ export interface ITokenPayload {
   name: string
   address: string
   roles: string[]
+  cartSession?: string
 }
