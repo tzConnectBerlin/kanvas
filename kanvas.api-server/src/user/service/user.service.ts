@@ -10,6 +10,8 @@ interface CartMeta {
 
 @Injectable()
 export class UserService {
+  private cartExpirationMilliSecs: number = 30 * 60 * 1000 // 30 minutes
+
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
     private readonly nftService: NftService,
@@ -202,13 +204,14 @@ WHERE cart_session_id = $1
   }
 
   async resetCartExpiration(cartId: number) {
+    const expires_at = this.newCartExpiration()
     await this.conn.query(
       `
 UPDATE cart_session
-SET expires_at = now() + interval '1 hour'
+SET expires_at = $2
 WHERE id = $1
   `,
-      [cartId],
+      [cartId, expires_at.toISOString()],
     )
   }
 
@@ -218,14 +221,15 @@ WHERE id = $1
       return cartMeta
     }
 
+    const expires_at = this.newCartExpiration()
     const qryRes = await this.conn.query(
       `
 INSERT INTO cart_session (
-  session_id
+  session_id, expires_at
 )
-VALUES ($1)
+VALUES ($1, $2)
 RETURNING id, expires_at`,
-      [session],
+      [session, expires_at.toISOString()],
     )
     return {
       id: qryRes.rows[0]['id'],
@@ -262,5 +266,11 @@ WHERE session_id = $1
 DELETE FROM cart_session
 WHERE expires_at < now()`,
     )
+  }
+
+  newCartExpiration(): Date {
+    const expires_at = new Date()
+    expires_at.setTime(expires_at.getTime() + this.cartExpirationMilliSecs)
+    return expires_at
   }
 }
