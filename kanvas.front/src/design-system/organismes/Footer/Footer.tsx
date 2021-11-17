@@ -118,7 +118,7 @@ export const Footer: FC<FooterProps> = () => {
                 marginLeft: 'auto',
             }}>
                 <Grid item xs={6} md={3}>
-                    <Typography size="h5" weight="SemiBold" gutterBottom>
+                    <Typography size="h5" weight="SemiBold" gutterBottom sx={{marginTop: '1rem'}}>
                         {t('footer.headline_1')}
                     </Typography>
 
@@ -132,7 +132,7 @@ export const Footer: FC<FooterProps> = () => {
                     </Box>
                 </Grid>
                 <Grid item xs={6} md={3}>
-                    <Typography size="h5" weight="SemiBold" gutterBottom>
+                    <Typography size="h5" weight="SemiBold" gutterBottom sx={{marginTop: '1rem'}}>
                         {t('footer.headline_2')}
                     </Typography>
 

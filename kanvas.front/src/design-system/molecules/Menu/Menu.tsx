@@ -372,22 +372,21 @@ export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAcc
                                     <CustomBadge color="error" badgeContent={props.notifications} max={99} profile={true}>
                                         <Avatar src={`${avatarSrc}?${Date.now()}`} onClick={(e) => anchorEl === null ? handleClick(e) : handleClose()} sx={{cursor: 'pointer !important'}}/>
                                     </CustomBadge>
-                                    <StyledShoppingCartRoundedIcon onClick={() => props.openOrCloseShoppingCart()}/>
                                 </>
                             :
                                 <>
                                     <CustomBadge color="error" badgeContent={props.notifications} max={99} profile={true}>
                                         <Avatar src={`${avatarSrc}?${Date.now()}`} onClick={(e) => anchorEl === null ? handleClick(e) : handleClose()} sx={{ cursor: 'pointer !important' }} />
                                     </CustomBadge>
-                                    <StyledShoppingCartRoundedIcon onClick={() => props.openOrCloseShoppingCart()}/>
                                 </>
                             :
                             location.pathname === '/sign-in' || location.pathname === '/account/create' || location.pathname === '/account/edit' ?
-                                undefined
-                                :
-                                <CustomButton size="medium" onClick={() => props.setOpen(true)} label="Sign in" loading={props.loading} />
-                    }
+                            undefined
+                            :
+                            <CustomButton size="medium" onClick={() => props.setOpen(true)} label="Sign in" loading={props.loading} />
+                        }
 
+                    <StyledShoppingCartRoundedIcon onClick={() => props.openOrCloseShoppingCart()}/>
                     {
                         selectedTheme === 'dark' ?
                             <Brightness3Icon onClick={() => switchTheme('light')} sx={{ cursor: 'pointer' }} />
