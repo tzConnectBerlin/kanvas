@@ -48,11 +48,11 @@ const Router = () => {
 
 
     const handleAddToBasket = (nftId: number) => {
-        console.log('Nft with id ' + nftId + ' has been added to the basket')
+        alert('Nft with id ' + nftId + ' has been added to the basket')
     }
 
     const handleDeleteFromBasket = (nftId: number) => {
-        console.log('Nft with id ' + nftId + ' has been deleted from the basket')
+        alert('Nft with id ' + nftId + ' has been deleted from the basket')
     }
 
     useEffect(() => {
