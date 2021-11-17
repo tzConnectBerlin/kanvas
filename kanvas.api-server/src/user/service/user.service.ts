@@ -107,17 +107,15 @@ RETURNING cart_session`,
     }
   }
 
-  async cartCheckout(user: UserEntity): Promise<boolean> {
-    const session = await this.getUserCartSession(user.id)
-    if (typeof session === 'undefined') {
-      return false
-    }
+  async cartCheckout(user_id: number, session: string): Promise<boolean> {
     const cartMeta = await this.getCartMeta(session)
     if (typeof cartMeta === 'undefined') {
       return false
     }
-
     const nftIds = await this.getCartNftIds(cartMeta.id)
+    if (nftIds.length === 0) {
+      return false
+    }
     const tx = await this.conn.connect()
     tx.query(`BEGIN`)
     await tx.query(
@@ -128,7 +126,7 @@ INSERT INTO mtm_kanvas_user_nft (
 SELECT $1, nft.id
 FROM nft
 WHERE nft.id = ANY($2)`,
-      [user.id, nftIds],
+      [user_id, nftIds],
     )
     await tx.query(
       `
@@ -220,13 +218,6 @@ WHERE id = $1
       return cartMeta
     }
 
-    await this.conn.query(
-      `
-DELETE FROM cart_session
-WHERE session_id = $1`,
-      [session],
-    )
-
     const qryRes = await this.conn.query(
       `
 INSERT INTO cart_session (
@@ -243,12 +234,16 @@ RETURNING id, expires_at`,
   }
 
   async getCartMeta(session: string): Promise<CartMeta | undefined> {
+    // TODO: might want to do this deleteExpiredCarts() in a garbage collector
+    // (at eg an interval of 30 seconds), instead of at every cart access
+    // because it might result in excessive database load
+    this.deleteExpiredCarts()
+
     const qryRes = await this.conn.query(
       `
 SELECT id, expires_at
 FROM cart_session
 WHERE session_id = $1
-  AND expires_at > now()
       `,
       [session],
     )
@@ -259,5 +254,13 @@ WHERE session_id = $1
       id: qryRes.rows[0]['id'],
       expires_at: qryRes.rows[0]['expires_at'],
     }
+  }
+
+  async deleteExpiredCarts() {
+    await this.conn.query(
+      `
+DELETE FROM cart_session
+WHERE expires_at < now()`,
+    )
   }
 }

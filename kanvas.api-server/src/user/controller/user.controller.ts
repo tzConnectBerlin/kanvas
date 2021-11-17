@@ -47,11 +47,11 @@ export class UserController {
   @Post('cart/add/:nftId')
   @UseGuards(JwtFailableAuthGuard)
   async cartAdd(
-    @Session() session: any,
+    @Session() cookie_session: any,
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    const cart_session = await this.get_cart_session(session, user)
+    const cart_session = await this.get_cart_session(cookie_session, user)
     const added = await this.userService
       .cartAdd(cart_session, nftId)
       .catch((err: any) => {
@@ -87,11 +87,11 @@ export class UserController {
   @Post('cart/remove/:nftId')
   @UseGuards(JwtFailableAuthGuard)
   async cartRemove(
-    @Session() session: any,
+    @Session() cookie_session: any,
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    const cart_session = await this.get_cart_session(session, user)
+    const cart_session = await this.get_cart_session(cookie_session, user)
     const removed = await this.userService.cartRemove(cart_session, nftId)
     if (!removed) {
       throw new HttpException(
@@ -106,27 +106,41 @@ export class UserController {
   @Get('cart/list')
   @UseGuards(JwtFailableAuthGuard)
   async cartList(
-    @Session() session: any,
+    @Session() cookie_session: any,
     @CurrentUser() user: UserEntity | undefined,
   ) {
-    const cart_session = await this.get_cart_session(session, user)
+    const cart_session = await this.get_cart_session(cookie_session, user)
     return await this.userService.cartList(cart_session)
   }
 
   @Post('cart/checkout')
   @UseGuards(JwtAuthGuard)
   async cartCheckout(@CurrentUser() user: UserEntity) {
-    return await this.userService.cartCheckout(user)
+    const cart_session = await this.userService.getUserCartSession(user.id)
+    if (typeof cart_session === 'undefined') {
+      throw new HttpException('User has no active cart', HttpStatus.BAD_REQUEST)
+    }
+    const success = await this.userService.cartCheckout(user.id, cart_session)
+    if (!success) {
+      throw new HttpException(
+        'Empty cart cannot be checked out',
+        HttpStatus.BAD_REQUEST,
+      )
+    }
+    // return 204 (applied, returning nothing)
+    throw new HttpException('', HttpStatus.NO_CONTENT)
   }
 
   async get_cart_session(
-    session: any,
+    cookie_session: any,
     user: UserEntity | undefined,
   ): Promise<string> {
-    console.log(session.uuid, ' ', JSON.stringify(user))
     if (typeof user === 'undefined') {
-      return session.uuid
+      return cookie_session.uuid
     }
-    return await this.userService.ensureUserCartSession(user.id, session.uuid)
+    return await this.userService.ensureUserCartSession(
+      user.id,
+      cookie_session.uuid,
+    )
   }
 }

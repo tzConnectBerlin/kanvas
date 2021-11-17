@@ -1,5 +1,5 @@
--- Migration: cart_session
--- Created at: 2021-11-15 14:28:19
+-- Migration: session_cart
+-- Created at: 2021-11-17 17:22:13
 -- ====  UP  ====
 
 BEGIN;
@@ -15,6 +15,7 @@ CREATE TABLE cart_session(
   session_id UUID NOT NULL UNIQUE,
   expires_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now()+interval '1 hour'
 );
+CREATE INDEX ON cart_session(expires_at);
 
 ALTER TABLE kanvas_user ADD COLUMN cart_session UUID REFERENCES cart_session(session_id) ON DELETE SET NULL;
 
