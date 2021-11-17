@@ -116,7 +116,9 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
             try {
                 const signedPayload = await beaconWallet.client.requestSignPayload(payload)
                 setSignInParams({ address: userAddress, signedPayload: signedPayload.signature })
-                signUser({ data: { name: userAddress, address: userAddress, signedPayload: signedPayload.signature } })
+                signUser({ data: { name: userAddress, address: userAddress, signedPayload: signedPayload.signature } }).catch(err => {
+                    console.log(err)
+                })
             } catch (error) {
                 console.log(error)
                 setBeaconLoading(false)
@@ -127,7 +129,8 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
             try {
                 const signedPayload = await embedKukai.signExpr('0501000000' + payload.payload.slice(2))
                 setSignInParams({ address: userAddress, signedPayload: signedPayload })
-                signUser({ data: { address: userAddress, signedPayload: signedPayload } })
+                signUser({ data: { address: userAddress, signedPayload: signedPayload } }).catch(err => {
+                    console.log(err)})
             } catch (error) {
                 setSocialLoading(false)
                 embedKukai.deinit()
@@ -185,7 +188,7 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
 
     useEffect(() => {
         if (signUserResponse.data) {
-
+            debugger
             setSocialLoading(false)
             setBeaconLoading(false)
 
@@ -211,7 +214,9 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
             props.handleCloseModal();
 
             if (!registerUserResponse.data.token) {
-                toast.error('Unable to connect to the serve. Please refresh and try again')
+                signUser({ data: signInParams }).catch(err => {
+                    console.log(err)})
+                // toast.error('Unable to connect to the serve. Please refresh and try again')
             }
 
             const user : IUser = registerUserResponse.data
@@ -229,6 +234,7 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
         if (signUserResponse.error) {
             setSocialLoading(false)
             setBeaconLoading(false)
+            debugger
 
             if (signUserResponse.error?.response?.data.message === 'User not registered') {
                 // Check if we have information from the user thanks to kukai

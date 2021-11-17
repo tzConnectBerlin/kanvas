@@ -32,6 +32,7 @@ const data : INft = {
     creator: 'Aurélia Durand',
     ipfsHash: 'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
     price: 20,
+    dataUri: 'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
     startDate: '12:12:43:00'
 }
 
@@ -71,7 +72,7 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
                        :
                             <CardMedia
                                 component="img"
-                                image="https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg"
+                                image={nftResponse.data.dataUri}
                                 alt="random"
                                 sx={{
                                     height: '75vh',

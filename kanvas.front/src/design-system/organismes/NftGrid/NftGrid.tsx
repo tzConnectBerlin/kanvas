@@ -28,6 +28,7 @@ const StyledGrid = styled(Grid)`
     flex-basis: 100% !important;
     margin: 0;
     padding: -1.5rem;
+    min-height: 60vh;
 `
 
 const StyledGridItem = styled(Grid)`
@@ -60,6 +61,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                                 id={nft.id.toString()}
                                 name={nft.name}
                                 ipfsHash={nft.ipfsHash}
+                                dataUri={nft.dataUri}
                                 price={nft.price}
                                 loading={props.loading}
                             />
@@ -92,14 +94,12 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                     </StyledGrid>
                 :
                     <StyledGrid>
-                        <FlexSpacer minHeight={5} />
                         <Typography
-                            size="h3"
+                            size="h2"
                             weight="Light"
                             align="center"
                             color="#C4C4C4"
-                            sx={{ display: 'flex', justifyContent: 'center'}}
-                            gutterBottom
+                            sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}
                         >
                          {
                             props.emptyMessage ?
@@ -114,7 +114,6 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                             align="center"
                             color="#0088a7"
                             sx={{ display: 'flex', justifyContent: 'center'}}
-                            gutterBottom
                         >
                          {
                             props.emptyLink ?

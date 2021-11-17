@@ -16,6 +16,7 @@ interface QuickSearResultProps {
     searchString: string | unknown;
     open?: boolean;
     closeResult: Function;
+    loading?: boolean;
 }
 
 interface BoxProps extends MBoxProps {
@@ -107,13 +108,15 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
             <StyledPaper >
                 {/* Check if we only got errors and it is not loading from the api in which case we display the empty content */}
                 {
-                    props.profilesSearchResult.error && !props.profilesSearchResult.loading && props.artworksSearchResult.error && !props.artworksSearchResult.loading && props.tagsSearchResult.error && !props.tagsSearchResult.loading ?
+                    // props.profilesSearchResult.error && !props.profilesSearchResult.loading && props.artworksSearchResult.error && !props.artworksSearchResult.loading && props.tagsSearchResult.error && !props.tagsSearchResult.loading ?
+                    !props.loading ?
                         <EmptySearchResult searchString={props.searchString}/>
                     :
                         undefined
                 }
-                {
-                    props.profilesSearchResult.loading ?
+                {/* {
+                    // props.profilesSearchResult.loading ?
+                    props.loading?
                         <>
                             <StyledHeaderStack direction='row'>
                                 <Typography size="h4" weight="SemiBold"> Profiles </Typography>
@@ -153,12 +156,13 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                                     }
                                 </StyledContentStack>
                             </>
-                }
+                } */}
                 {
-                    props.artworksSearchResult.loading ?
+                    // props.artworksSearchResult.loading ?
+                    props.loading ?
                         <>
                             <StyledHeaderStack direction='row'>
-                                <Typography size="h4" weight="SemiBold"> Artworks </Typography>
+                                <Typography size="h4" weight="SemiBold"> Nfts </Typography>
                             </StyledHeaderStack>
                             <StyledContentStack spacing={1}>
                                 {
@@ -177,7 +181,7 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                         :
                             <>
                                 <StyledHeaderStack direction='row'>
-                                    <Typography size="h4" weight="SemiBold"> Artworks </Typography>
+                                    <Typography size="h4" weight="SemiBold"> Nfts </Typography>
                                     <FlexSpacer/>
                                     <Typography size="inherit" weight="Light" color="#0088a7 !important" sx={{cursor: 'pointer'}}> See all </Typography>
                                 </StyledHeaderStack>
@@ -195,10 +199,11 @@ export const QuickSearchResult : FC<QuickSearResultProps> = ({...props}) => {
                             </>
                 }
                 {
-                    props.tagsSearchResult.loading ?
+                    // props.tagsSearchResult.loading ?
+                    props.loading ?
                         <>
                             <StyledHeaderStack direction='row'>
-                                <Typography size="h4" weight="SemiBold"> Tags </Typography>
+                                <Typography size="h4" weight="SemiBold"> Categories </Typography>
                             </StyledHeaderStack>
                             <StyledContentStack sx={{marginLeft: '1em'}}>
                                 <StyledGrid container spacing={2}>

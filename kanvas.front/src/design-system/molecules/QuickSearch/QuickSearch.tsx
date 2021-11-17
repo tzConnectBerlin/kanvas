@@ -36,7 +36,7 @@ export const QuickSearch : FC<QuickSearchProps> = ({...props}) => {
     const [openSearchResult, setOpenSearchresult] = useState(false)
 
     // const [getTagsSuggestions, tagsSuggestionResult] = useLazyQuery(GET_TAGS_SUGGESTIONS,  { fetchPolicy: 'cache-and-network' })
-
+    const [loading, setLoading] = useState(false)
     const [inputValue, setInputValue] = useState('')
 
     // const [getProfilesSearch, profilesSearchResult] = useLazyQuery(GET_PROFILES_SEARCH,  { fetchPolicy: 'cache-and-network' })
@@ -47,14 +47,16 @@ export const QuickSearch : FC<QuickSearchProps> = ({...props}) => {
         if (inputValue.length >= 2) {
 
             const delaySearch = setTimeout(() => {
+                setLoading(false)
                 // getTagsSearch({variables: { searchString: `#${inputValue}` }})
                 // getProfilesSearch({variables: { searchString: inputValue }})
                 // getArtworksSearch({variables: { searchString: inputValue }})
             }, 800)
 
-            return () => { clearTimeout(delaySearch) }
+            return () => { clearTimeout(delaySearch);}
 
         } else {
+            setLoading(false)
             // profilesSearchResult.loading = false
             // artworksSearchResult.loading = false
             // tagsSearchResult.loading = false
@@ -72,6 +74,7 @@ export const QuickSearch : FC<QuickSearchProps> = ({...props}) => {
         setInputValue(inputRef.current?.value as string)
 
         if (inputValue.length >= 1 ) {
+            setLoading(true)
             //  profilesSearchResult.loading = true
             //  artworksSearchResult.loading = true
             //  tagsSearchResult.loading = true
@@ -97,8 +100,8 @@ export const QuickSearch : FC<QuickSearchProps> = ({...props}) => {
         <>
             <StyledBackground open={openSearchResult} onClick={() => handleCloseInput()}></StyledBackground>
             <QuickSearchWrapper direction='column' onClick={() => {console.log('click'); props.setSearchOpen(true);  }} >
-                <SearchInput open={openSearchResult} ref={inputRef} onChange={handleChange} onFocus={() => {inputRef?.current?.focus(); setOpenSearchresult(true); props.setSearchOpen(true); }} />
-                {/* <QuickSearchResult open={openSearchResult} closeResult={handleCloseInput} profilesSearchResult={inputValue.length < 2 ? () => { profilesSearchResult.called = false; return profilesSearchResult } : profilesSearchResult} artworksSearchResult={inputValue.length < 2 ? () => { artworksSearchResult.called = false; return artworksSearchResult } : artworksSearchResult} tagsSearchResult={inputValue === '' || inputValue.length < 2 ? tagsSuggestionResult : tagsSearchResult } searchString={inputRef.current?.value} /> */}
+                <SearchInput open={openSearchResult} ref={inputRef} onChange={handleChange} onBlur={() => handleCloseInput()} onFocus={() => {inputRef?.current?.focus(); setOpenSearchresult(true); props.setSearchOpen(true); }} />
+                <QuickSearchResult loading={loading} open={openSearchResult} closeResult={handleCloseInput} profilesSearchResult={[]} artworksSearchResult={[]} tagsSearchResult={[]} searchString={inputRef.current?.value} />
             </QuickSearchWrapper>
         </>
     )
