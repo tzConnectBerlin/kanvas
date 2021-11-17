@@ -53,7 +53,7 @@ const SearchIconWrapper = styled.div<{theme?: Theme}>`
     display: flex;
     align-items: center;
     justify-content: center;
-
+    z-index: 30;
 `
 
 const StyledSearchRounded = styled(SearchRounded)`
@@ -66,6 +66,8 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
     height: 100%;
     width: 100%;
     cursor: pointer;
+
+    background-color: ${props => props.theme.palette.background.default};
 
     outline: ${props => `solid 1px ${props.theme.palette.text.primary}`};
 
