@@ -8,6 +8,7 @@ import ProductPage from './pages/Product';
 import NotFound from './pages/NotFound';
 import ShoppingCart from './design-system/organismes/ShoppingCart';
 import useAxios from 'axios-hooks';
+import ScrollToTop from './ScrollToTop';
 
 import { Redirect } from 'react-router'
 import { RPC_URL } from './global';
@@ -80,18 +81,19 @@ const Router = () => {
         <ThemeProvider theme={localStorage.getItem('Kanvas - theme') === 'dark' ? darkThemeResponsive : lightThemeResponsive } >
             <StyledBrowserRouter>
                 <Header beaconWallet={beaconWallet} embedKukai={embedKukai} cartOpen={cartOpen} setCartOpen={setCartOpen} switchTheme={handleSelectTheme} selectedTheme={selectedTheme} notifications={0}/>
-                <Switch>
-                    <Route exact path="/store" component={StorePage} />
-                    <Route path="/profile/edit" component={EditProfile} />
-                    <Route path="/profile/:username" component={Profile} />
-                    <Route path="/product/:id" render={props => <ProductPage addToBasket={handleAddToBasket} {...props}/> }/>
-                    <Route path="/faq" component={Faq} />
-                    <Route path="/create-nft" render={props => <CreateNFT {...props} />}  />
-                    <Route path="/nft/:id" render={props => <CreateNFT {...props} />}  />
-                    <Route path='/404' component={NotFound} />
-                    <Redirect from='*' to='/404' />
-                </Switch>
-
+                <ScrollToTop>
+                    <Switch>
+                        <Route exact path="/store" component={StorePage} />
+                        <Route path="/profile/edit" component={EditProfile} />
+                        <Route path="/profile/:username" component={Profile} />
+                        <Route path="/product/:id" render={props => <ProductPage addToBasket={handleAddToBasket} {...props}/> }/>
+                        <Route path="/faq" component={Faq} />
+                        <Route path="/create-nft" render={props => <CreateNFT {...props} />}  />
+                        <Route path="/nft/:id" render={props => <CreateNFT {...props} />}  />
+                        <Route path='/404' component={NotFound} />
+                        <Redirect from='*' to='/404' />
+                    </Switch>
+                </ScrollToTop>
                 <ShoppingCart open={cartOpen} nftsInCart={nftsInCart} closeCart={() => setCartOpen(false)} deleteNftFromBasket={handleDeleteFromBasket}/>
                 <Footer />
             </StyledBrowserRouter>
