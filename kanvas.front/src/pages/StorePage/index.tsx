@@ -70,12 +70,32 @@ const StorePage = () => {
     const [availableFilters, setAvailableFilters] = useState<any>()
 
     const handlePaginationChange = (event: any, page: number) => {
+        let newPageParam = new URLSearchParams()
+        newPageParam.append('page', page.toString())
+
         if (selectedFilters.length === 0) {
-            let newPageParam = new URLSearchParams()
-            newPageParam.append('page', page.toString())
-            history.push({search: newPageParam.toString()})
+            history.push({search: search + '&' + newPageParam.toString()})
 
             getNfts({
+                params: {
+                    page: page,
+                    pageSize: 12,
+                    categories: selectedFilters.join(','),
+                    sort: selectedSort
+                }
+            })
+        } else {
+
+            debugger
+            if (search.indexOf('page') === -1 || search === "") {
+                history.push({search: newPageParam.toString()})
+            } else if (search !== "" && search.indexOf('page') === -1) {
+                history.push({search: '&' + newPageParam.toString()})
+            } else if (search !== "" && search.indexOf('page') !== -1) {
+                history.push({search: '&' + newPageParam.toString()})
+            }
+
+            getFilteredNfts({
                 params: {
                     page: page,
                     pageSize: 12,
@@ -103,7 +123,6 @@ const StorePage = () => {
     }, [categoriesResponse.data])
 
     useEffect(() => {
-        // fetch initial data
         getNfts({
             params: {
                 pageSize: 12,
@@ -117,9 +136,25 @@ const StorePage = () => {
 
     useEffect(() => {
         if (selectedFilters.length > 0) {
+            let newFilterParam = new URLSearchParams()
+            newFilterParam.append('categories', selectedFilters.join(','))
+
+            debugger
+            if (search.indexOf('categories') === -1 || search === "") {
+                history.push({search: newFilterParam.toString()})
+            } else if (search !== "" && search.indexOf('categories') === -1) {
+                history.push({search: '&' + newFilterParam.toString()})
+            } else if (search !== "" && search.indexOf('categories') !== -1) {
+                search.slice(search.indexOf('categories') - 1, search.indexOf('&'))
+                history.push({search: '&' + newFilterParam.toString()})
+            }
+
             getFilteredNfts({
                 params: {
-                    categories: selectedFilters.join(',')
+                    page: page,
+                    pageSize: 12,
+                    categories: selectedFilters.join(','),
+                    sort: selectedSort
                 }
             })
         }

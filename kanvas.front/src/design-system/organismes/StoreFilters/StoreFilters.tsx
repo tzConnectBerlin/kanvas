@@ -103,7 +103,7 @@ export const StoreFilters : FC<StoreFiltersProps> = ({children, ...props}) => {
                 {/* TODO */}
                 {
                     activeRef.indexOf('Price') === -1 ?
-                        <Typography size="h5" weight='Light' color='red'>Not implemented</Typography>
+                        <Typography size="h5" weight='Light' color='red'> Not implemented </Typography>
                     :
                         undefined
                 }
