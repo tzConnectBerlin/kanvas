@@ -61,6 +61,7 @@ const mokeNft = [
         "name": "first_nft",
         "ipfsHash": '',
         "price": 10,
+        "dataUri": "https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg",
         "metadata": {
           "key2": "value1",
           "test": "hey"
@@ -73,6 +74,7 @@ const mokeNft = [
         "id": 3,
         "name": "second_nft",
         "ipfsHash": '',
+        "dataUri": "https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg",
         "price": 12,
         "metadata": {
           "key2": "value1",
@@ -86,6 +88,7 @@ const mokeNft = [
         "id": 4,
         "name": "third_nft",
         "ipfsHash": '',
+        "dataUri": "https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg",
         "price": 10,
         "metadata": {
           "key2": "value1",
@@ -99,6 +102,7 @@ const mokeNft = [
         "id": 3,
         "name": "fourth_nft",
         "ipfsHash": '',
+        "dataUri": "https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg",
         "price": 12,
         "metadata": {
           "key2": "value1",
@@ -112,6 +116,7 @@ const mokeNft = [
         "id": 3,
         "name": "fourth_nft",
         "ipfsHash": '',
+        "dataUri": "https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg",
         "price": 12,
         "metadata": {
           "key2": "value1",
