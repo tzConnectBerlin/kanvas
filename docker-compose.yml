@@ -1,0 +1,28 @@
+# Kanvas is a distributed system with multiple databases, servers, and web browser clients
+# For development, we can spin everything up via docker-compose
+
+services:
+  api-server-db:
+    image: postgres
+    ports:
+      - 54320:5432
+  api-server:
+    build: ./kanvas.api-server
+    ports:
+      - 3000:3000
+    links:
+      - api-server-db
+  store_frontend:
+    build: ./kanvas.front
+    ports:
+      - 3010:3000
+  admin-api-server-db:
+    image: postgres
+    ports:
+      - 54321:5433
+  admin-api-server:
+    build: ./kanvas.admin-api-server
+    ports:
+      - 3001:3000
+    links:
+      - admin-api-server-db
