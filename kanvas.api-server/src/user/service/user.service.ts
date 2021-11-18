@@ -1,50 +1,35 @@
-import {
-  Logger,
-  HttpException,
-  HttpStatus,
-  Injectable,
-  Inject,
-} from '@nestjs/common'
-import { UserEntity } from '../entity/user.entity'
-import { PG_CONNECTION, PG_UNIQUE_VIOLATION_ERRCODE } from '../../constants'
+import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common'
+import { UserEntity, UserCart } from '../entity/user.entity'
+import { NftService } from 'src/nft/service/nft.service'
+import { PG_CONNECTION } from '../../constants'
+
+interface CartMeta {
+  id: number
+  expiresAt: number
+}
 
 @Injectable()
 export class UserService {
-  constructor(@Inject(PG_CONNECTION) private conn: any) {}
+  private cartExpirationMilliSecs: number = 30 * 60 * 1000 // 30 minutes
+
+  constructor(
+    @Inject(PG_CONNECTION) private conn: any,
+    private readonly nftService: NftService,
+  ) {}
 
   async create(user: UserEntity): Promise<UserEntity> {
     // note: this implementation ignores user.roles here.
-    try {
-      const qryRes = await this.conn.query(
-        `
+    const qryRes = await this.conn.query(
+      `
 INSERT INTO kanvas_user(
   user_name, address, signed_payload
 )
 VALUES ($1, $2, $3)
 RETURNING id`,
-        [user.name, user.address, user.signedPayload],
-      )
+      [user.name, user.address, user.signedPayload],
+    )
 
-      const res = Object.assign({}, user)
-      res.id = qryRes.rows[0]['id']
-      res.roles = []
-      return res
-    } catch (err: any) {
-      if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
-        throw new HttpException(
-          'User with these credentials already exists',
-          HttpStatus.BAD_REQUEST,
-        )
-      }
-
-      Logger.error(
-        'Error on creating user=' + JSON.stringify(user) + ', err: ' + err,
-      )
-      throw new HttpException(
-        'Something went wrong',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      )
-    }
+    return { ...user, id: qryRes.rows[0]['id'] }
   }
 
   async findByAddress(addr: string): Promise<UserEntity> {
@@ -75,5 +60,214 @@ WHERE address = $1
     }
 
     return res
+  }
+
+  async getUserCartSession(userId: number): Promise<string | undefined> {
+    const qryRes = await this.conn.query(
+      `
+SELECT cart_session
+FROM kanvas_user
+WHERE id = $1`,
+      [userId],
+    )
+    return qryRes.rows[0]['cart_session']
+  }
+
+  async ensureUserCartSession(
+    userId: number,
+    session: string,
+  ): Promise<string> {
+    await this.touchCart(session)
+
+    const qryRes = await this.conn.query(
+      `
+UPDATE kanvas_user
+SET cart_session = coalesce(cart_session, $2)
+WHERE id = $1
+RETURNING cart_session`,
+      [userId, session],
+    )
+    return qryRes.rows[0]['cart_session']
+  }
+
+  async cartList(session: string): Promise<UserCart> {
+    const cartMeta = await this.getCartMeta(session)
+    if (typeof cartMeta === 'undefined') {
+      return {
+        nfts: [],
+        expiresAt: undefined,
+      }
+    }
+
+    const nftIds = await this.getCartNftIds(cartMeta.id)
+    return {
+      nfts: await this.nftService.findByIds(nftIds, 'nft_id', 'asc'),
+      expiresAt: cartMeta.expiresAt,
+    }
+  }
+
+  async cartCheckout(userId: number, session: string): Promise<boolean> {
+    const cartMeta = await this.getCartMeta(session)
+    if (typeof cartMeta === 'undefined') {
+      return false
+    }
+    const nftIds = await this.getCartNftIds(cartMeta.id)
+    if (nftIds.length === 0) {
+      return false
+    }
+    const tx = await this.conn.connect()
+    tx.query(`BEGIN`)
+    await tx.query(
+      `
+INSERT INTO mtm_kanvas_user_nft (
+  kanvas_user_id, nft_id
+)
+SELECT $1, nft.id
+FROM nft
+WHERE nft.id = ANY($2)`,
+      [userId, nftIds],
+    )
+    await tx.query(
+      `
+DELETE FROM cart_session
+WHERE session_id = $1`,
+      [session],
+    )
+    tx.query(`COMMIT`)
+    return true
+  }
+
+  async getCartNftIds(cartId: number): Promise<number[]> {
+    const qryRes = await this.conn.query(
+      `
+SELECT nft_id
+FROM mtm_cart_session_nft
+WHERE cart_session_id = $1`,
+      [cartId],
+    )
+    return qryRes.rows.map((row: any) => row['nft_id'])
+  }
+
+  async cartAdd(session: string, nftId: number): Promise<boolean> {
+    const cartMeta = await this.touchCart(session)
+    const tx = await this.conn.connect()
+    tx.query('BEGIN')
+    await tx.query(
+      `
+INSERT INTO mtm_cart_session_nft(
+  cart_session_id, nft_id
+)
+VALUES ($1, $2)`,
+      [cartMeta.id, nftId],
+    )
+
+    const qryRes = await tx.query(
+      `
+SELECT
+  (SELECT count(1) FROM mtm_cart_session_nft WHERE nft_id = $1)
+    + (SELECT count(1) FROM mtm_kanvas_user_nft WHERE nft_id = $1)
+    AS editions_reserved,
+  (SELECT nft.editions_size FROM nft WHERE id = $1) AS editions_total
+      `,
+      [nftId],
+    )
+    if (
+      qryRes.rows[0]['editions_reserved'] > qryRes.rows[0]['editions_total']
+    ) {
+      tx.query('ROLLBACK')
+      return false
+    }
+    tx.query('COMMIT')
+
+    await this.resetCartExpiration(cartMeta.id)
+    return true
+  }
+
+  async cartRemove(session: string, nftId: number): Promise<boolean> {
+    const cartMeta = await this.touchCart(session)
+    const qryRes = await this.conn.query(
+      `
+DELETE FROM mtm_cart_session_nft
+WHERE cart_session_id = $1
+  AND nft_id = $2`,
+      [cartMeta.id, nftId],
+    )
+    if (qryRes.rowCount === 0) {
+      return false
+    }
+
+    await this.resetCartExpiration(cartMeta.id)
+    return true
+  }
+
+  async resetCartExpiration(cartId: number) {
+    const expiresAt = this.newCartExpiration()
+    await this.conn.query(
+      `
+UPDATE cart_session
+SET expires_at = $2
+WHERE id = $1
+  `,
+      [cartId, expiresAt.toISOString()],
+    )
+  }
+
+  async touchCart(session: string): Promise<CartMeta> {
+    const cartMeta = await this.getCartMeta(session)
+    if (typeof cartMeta !== 'undefined') {
+      return cartMeta
+    }
+
+    const expiresAt = this.newCartExpiration()
+    const qryRes = await this.conn.query(
+      `
+INSERT INTO cart_session (
+  session_id, expires_at
+)
+VALUES ($1, $2)
+RETURNING id, expires_at`,
+      [session, expiresAt.toISOString()],
+    )
+    return {
+      id: qryRes.rows[0]['id'],
+      expiresAt: qryRes.rows[0]['expires_at'],
+    }
+  }
+
+  async getCartMeta(session: string): Promise<CartMeta | undefined> {
+    // TODO: might want to do this deleteExpiredCarts() in a garbage collector
+    // (at eg an interval of 30 seconds), instead of at every cart access
+    // because it might result in excessive database load
+    this.deleteExpiredCarts()
+
+    const qryRes = await this.conn.query(
+      `
+SELECT id, expires_at
+FROM cart_session
+WHERE session_id = $1
+      `,
+      [session],
+    )
+    if (qryRes.rows.length === 0) {
+      return undefined
+    }
+    return <CartMeta>{
+      id: qryRes.rows[0]['id'],
+      expiresAt: qryRes.rows[0]['expires_at'],
+    }
+  }
+
+  async deleteExpiredCarts() {
+    await this.conn.query(
+      `
+DELETE FROM cart_session
+WHERE expires_at < now()`,
+    )
+  }
+
+  newCartExpiration(): Date {
+    const expiresAt = new Date()
+    expiresAt.setTime(expiresAt.getTime() + this.cartExpirationMilliSecs)
+    return expiresAt
   }
 }
