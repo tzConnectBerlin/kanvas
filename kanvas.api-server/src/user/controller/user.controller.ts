@@ -4,7 +4,6 @@ import {
   HttpException,
   HttpStatus,
   Param,
-  Body,
   Controller,
   Post,
   Get,
@@ -23,26 +22,6 @@ import { PG_UNIQUE_VIOLATION_ERRCODE } from '../../constants'
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
-
-  @Post()
-  async create(@Body() user: UserEntity): Promise<UserEntity> {
-    return await this.userService.create(user).catch((err: any) => {
-      if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
-        throw new HttpException(
-          'User with these credentials already exists',
-          HttpStatus.BAD_REQUEST,
-        )
-      }
-
-      Logger.error(
-        `Error on creating user=${JSON.stringify(user)}, err: ${err}`,
-      )
-      throw new HttpException(
-        'Something went wrong',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      )
-    })
-  }
 
   @Post('cart/add/:nftId')
   @UseGuards(JwtFailableAuthGuard)
