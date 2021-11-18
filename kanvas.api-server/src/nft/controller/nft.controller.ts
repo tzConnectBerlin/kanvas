@@ -40,7 +40,7 @@ export class NftController {
 
   validateFilterParams(params: FilterParams): void {
     const filterCategories =
-      typeof params.categories === 'undefined' || params.categories.length > 0
+      typeof params.categories !== 'undefined' && params.categories.length > 0
 
     const filterAddress = typeof params.address === 'string'
     if (!filterCategories && !filterAddress) {
