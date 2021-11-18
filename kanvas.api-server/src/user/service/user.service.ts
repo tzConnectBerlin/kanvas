@@ -5,7 +5,7 @@ import { PG_CONNECTION } from '../../constants'
 
 interface CartMeta {
   id: number
-  expires_at: number
+  expiresAt: number
 }
 
 @Injectable()
@@ -62,19 +62,19 @@ WHERE address = $1
     return res
   }
 
-  async getUserCartSession(user_id: number): Promise<string | undefined> {
+  async getUserCartSession(userId: number): Promise<string | undefined> {
     const qryRes = await this.conn.query(
       `
 SELECT cart_session
 FROM kanvas_user
 WHERE id = $1`,
-      [user_id],
+      [userId],
     )
     return qryRes.rows[0]['cart_session']
   }
 
   async ensureUserCartSession(
-    user_id: number,
+    userId: number,
     session: string,
   ): Promise<string> {
     await this.touchCart(session)
@@ -85,7 +85,7 @@ UPDATE kanvas_user
 SET cart_session = coalesce(cart_session, $2)
 WHERE id = $1
 RETURNING cart_session`,
-      [user_id, session],
+      [userId, session],
     )
     return qryRes.rows[0]['cart_session']
   }
@@ -95,18 +95,18 @@ RETURNING cart_session`,
     if (typeof cartMeta === 'undefined') {
       return {
         nfts: [],
-        expires_at: undefined,
+        expiresAt: undefined,
       }
     }
 
     const nftIds = await this.getCartNftIds(cartMeta.id)
     return {
       nfts: await this.nftService.findByIds(nftIds, 'nft_id', 'asc'),
-      expires_at: cartMeta.expires_at,
+      expiresAt: cartMeta.expiresAt,
     }
   }
 
-  async cartCheckout(user_id: number, session: string): Promise<boolean> {
+  async cartCheckout(userId: number, session: string): Promise<boolean> {
     const cartMeta = await this.getCartMeta(session)
     if (typeof cartMeta === 'undefined') {
       return false
@@ -125,7 +125,7 @@ INSERT INTO mtm_kanvas_user_nft (
 SELECT $1, nft.id
 FROM nft
 WHERE nft.id = ANY($2)`,
-      [user_id, nftIds],
+      [userId, nftIds],
     )
     await tx.query(
       `
@@ -201,14 +201,14 @@ WHERE cart_session_id = $1
   }
 
   async resetCartExpiration(cartId: number) {
-    const expires_at = this.newCartExpiration()
+    const expiresAt = this.newCartExpiration()
     await this.conn.query(
       `
 UPDATE cart_session
 SET expires_at = $2
 WHERE id = $1
   `,
-      [cartId, expires_at.toISOString()],
+      [cartId, expiresAt.toISOString()],
     )
   }
 
@@ -218,7 +218,7 @@ WHERE id = $1
       return cartMeta
     }
 
-    const expires_at = this.newCartExpiration()
+    const expiresAt = this.newCartExpiration()
     const qryRes = await this.conn.query(
       `
 INSERT INTO cart_session (
@@ -226,11 +226,11 @@ INSERT INTO cart_session (
 )
 VALUES ($1, $2)
 RETURNING id, expires_at`,
-      [session, expires_at.toISOString()],
+      [session, expiresAt.toISOString()],
     )
     return {
       id: qryRes.rows[0]['id'],
-      expires_at: qryRes.rows[0]['expires_at'],
+      expiresAt: qryRes.rows[0]['expires_at'],
     }
   }
 
@@ -253,7 +253,7 @@ WHERE session_id = $1
     }
     return <CartMeta>{
       id: qryRes.rows[0]['id'],
-      expires_at: qryRes.rows[0]['expires_at'],
+      expiresAt: qryRes.rows[0]['expires_at'],
     }
   }
 
@@ -266,8 +266,8 @@ WHERE expires_at < now()`,
   }
 
   newCartExpiration(): Date {
-    const expires_at = new Date()
-    expires_at.setTime(expires_at.getTime() + this.cartExpirationMilliSecs)
-    return expires_at
+    const expiresAt = new Date()
+    expiresAt.setTime(expiresAt.getTime() + this.cartExpirationMilliSecs)
+    return expiresAt
   }
 }

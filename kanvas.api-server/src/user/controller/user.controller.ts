@@ -35,7 +35,7 @@ export class UserController {
       }
 
       Logger.error(
-        'Error on creating user=' + JSON.stringify(user) + ', err: ' + err,
+        `Error on creating user=${JSON.stringify(user)}, err: ${err}`,
       )
       throw new HttpException(
         'Something went wrong',
@@ -47,13 +47,13 @@ export class UserController {
   @Post('cart/add/:nftId')
   @UseGuards(JwtFailableAuthGuard)
   async cartAdd(
-    @Session() cookie_session: any,
+    @Session() cookieSession: any,
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    const cart_session = await this.get_cart_session(cookie_session, user)
+    const cartSession = await this.getCartSession(cookieSession, user)
     const added = await this.userService
-      .cartAdd(cart_session, nftId)
+      .cartAdd(cartSession, nftId)
       .catch((err: any) => {
         if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
           throw new HttpException(
@@ -63,12 +63,7 @@ export class UserController {
         }
 
         Logger.error(
-          'Error on adding nft to cart. cart_session=' +
-            cart_session +
-            ', nft_id=' +
-            nftId +
-            ', err: ' +
-            err,
+          `Error on adding nft to cart. cartSession=${cartSession}, nftId=${nftId}, err: ${err}`,
         )
         throw new HttpException(
           'Something went wrong',
@@ -87,12 +82,12 @@ export class UserController {
   @Post('cart/remove/:nftId')
   @UseGuards(JwtFailableAuthGuard)
   async cartRemove(
-    @Session() cookie_session: any,
+    @Session() cookieSession: any,
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    const cart_session = await this.get_cart_session(cookie_session, user)
-    const removed = await this.userService.cartRemove(cart_session, nftId)
+    const cartSession = await this.getCartSession(cookieSession, user)
+    const removed = await this.userService.cartRemove(cartSession, nftId)
     if (!removed) {
       throw new HttpException(
         'This nft was not in the cart',
@@ -106,21 +101,21 @@ export class UserController {
   @Get('cart/list')
   @UseGuards(JwtFailableAuthGuard)
   async cartList(
-    @Session() cookie_session: any,
+    @Session() cookieSession: any,
     @CurrentUser() user: UserEntity | undefined,
   ) {
-    const cart_session = await this.get_cart_session(cookie_session, user)
-    return await this.userService.cartList(cart_session)
+    const cartSession = await this.getCartSession(cookieSession, user)
+    return await this.userService.cartList(cartSession)
   }
 
   @Post('cart/checkout')
   @UseGuards(JwtAuthGuard)
   async cartCheckout(@CurrentUser() user: UserEntity) {
-    const cart_session = await this.userService.getUserCartSession(user.id)
-    if (typeof cart_session === 'undefined') {
+    const cartSession = await this.userService.getUserCartSession(user.id)
+    if (typeof cartSession === 'undefined') {
       throw new HttpException('User has no active cart', HttpStatus.BAD_REQUEST)
     }
-    const success = await this.userService.cartCheckout(user.id, cart_session)
+    const success = await this.userService.cartCheckout(user.id, cartSession)
     if (!success) {
       throw new HttpException(
         'Empty cart cannot be checked out',
@@ -131,16 +126,16 @@ export class UserController {
     throw new HttpException('', HttpStatus.NO_CONTENT)
   }
 
-  async get_cart_session(
-    cookie_session: any,
+  async getCartSession(
+    cookieSession: any,
     user: UserEntity | undefined,
   ): Promise<string> {
     if (typeof user === 'undefined') {
-      return cookie_session.uuid
+      return cookieSession.uuid
     }
     return await this.userService.ensureUserCartSession(
       user.id,
-      cookie_session.uuid,
+      cookieSession.uuid,
     )
   }
 }

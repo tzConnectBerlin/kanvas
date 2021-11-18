@@ -10,6 +10,6 @@ export interface UserEntity {
 }
 
 export interface UserCart {
-  expires_at: number | undefined
+  expiresAt: number | undefined
   nfts: NftEntity[]
 }
