@@ -1,1 +1,1 @@
-export { QuickSearchResult } from './QuickSearchResult';
+export { QuickSearchResult } from './QuickSearchResult'

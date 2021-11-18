@@ -1,7 +1,7 @@
-import React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import React from 'react'
+import { ComponentStory, ComponentMeta } from '@storybook/react'
 
-import { Avatar } from './Avatar';
+import { Avatar } from './Avatar'
 
 export default {
   title: 'Atoms/Avatar',
@@ -9,6 +9,6 @@ export default {
   argTypes: {
     backgroundColor: { control: 'color' },
   },
-} as ComponentMeta<typeof Avatar>;
+} as ComponentMeta<typeof Avatar>
 
-const Template: ComponentStory<typeof Avatar> = (args) => <Avatar {...args} />;
+const Template: ComponentStory<typeof Avatar> = (args) => <Avatar {...args} />

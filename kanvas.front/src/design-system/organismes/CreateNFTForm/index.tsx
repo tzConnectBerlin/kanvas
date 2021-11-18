@@ -1,1 +1,1 @@
-export { CreatNFTForm } from './CreateNFTForm';
+export { CreatNFTForm } from './CreateNFTForm'
