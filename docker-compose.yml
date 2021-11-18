@@ -12,10 +12,10 @@ services:
       - 3000:3000
     links:
       - api-server-db
-  store_frontend:
-    build: ./kanvas.front
-    ports:
-      - 3010:3000
+  # store_frontend:
+  #   build: ./kanvas.front
+  #   ports:
+  #     - 3010:3000
   admin-api-server-db:
     image: postgres
     ports:
