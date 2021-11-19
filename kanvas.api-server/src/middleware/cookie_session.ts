@@ -14,8 +14,8 @@ export class CookieSessionMiddleware implements NestMiddleware {
     cookieSession(this.options)(req, resp, () => {
       if (typeof req.session.uuid === 'undefined') {
         req.session.uuid = uuidv4()
-        next()
       }
+      next()
     })
   }
 }
