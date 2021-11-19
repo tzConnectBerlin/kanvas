@@ -10,7 +10,7 @@ import NotFound from './pages/NotFound'
 import ShoppingCart from './design-system/organismes/ShoppingCart'
 import useAxios from 'axios-hooks'
 import ScrollToTop from './ScrollToTop'
-
+import Cookies from './design-system/organismes/Cookies'
 import { Redirect } from 'react-router'
 import { RPC_URL } from './global'
 import { Theme } from '@mui/material'
@@ -136,7 +136,8 @@ const Router = () => {
           nftsInCart={nftsInCart}
           closeCart={() => setCartOpen(false)}
           deleteNftFromBasket={handleDeleteFromBasket}
-        />
+        />        
+        <Cookies />
         <Footer />
       </StyledBrowserRouter>
     </ThemeProvider>
