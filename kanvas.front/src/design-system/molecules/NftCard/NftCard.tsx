@@ -1,11 +1,4 @@
-import {
-  CardActionArea,
-  CardActions,
-  Grid,
-  IconButton,
-  Skeleton,
-  Stack,
-} from '@mui/material'
+import { CardActionArea, Skeleton, Stack } from '@mui/material'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import CardMedia from '@mui/material/CardMedia'
@@ -15,6 +8,8 @@ import { useHistory } from 'react-router-dom'
 
 import styled from '@emotion/styled'
 import { Theme } from '@mui/material'
+import { Box } from '@mui/system'
+import { CurrencyEnum } from '../../../interfaces/notification'
 
 export interface NftCardProps {
   loading?: boolean
@@ -42,6 +37,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
 
   return !loading ? (
     <Card
+      onClick={() => handleRedirect(`/product/${props.id}`)}
       sx={{
         borderRadius: 0,
         height: props.height,
@@ -50,10 +46,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
         position: 'relative',
       }}
     >
-      <CardActionArea
-        onClick={() => handleRedirect(`/product/${props.id}`)}
-        sx={{ width: 'auto' }}
-      >
+      <CardActionArea>
         <CardMedia component="img" image={props.dataUri} alt="random" />
         <CardContent
           sx={{
@@ -82,20 +75,12 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
             </Typography>
           </StyledBioWrapper>
 
-          <CardActions disableSpacing>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-              }}
-            >
-              <Typography weight="SemiBold" size="h3" color="#FFF">
-                {' '}
-                {props.price ? props.price : '- '}tz{' '}
-              </Typography>
-            </div>
-          </CardActions>
+          <Box display="flex" flexDirection="column" alignSelf="self-end">
+            <Typography weight="SemiBold" size="h3" color="#FFF">
+              {' '}
+              {props.price ? props.price : '- '} {CurrencyEnum.TEZ}{' '}
+            </Typography>
+          </Box>
         </CardContent>
       </CardActionArea>
     </Card>

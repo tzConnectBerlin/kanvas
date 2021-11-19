@@ -17,6 +17,7 @@ import { Typography } from '../../atoms/Typography'
 import { QuickSearch } from '../../molecules/QuickSearch'
 import { IUser } from '../../../interfaces/user'
 import { BeaconWallet } from '@taquito/beacon-wallet'
+import { useTranslation } from 'react-i18next'
 
 interface MenuProps {
   user?: IUser
@@ -223,6 +224,8 @@ export const Menu: FC<MenuProps> = ({
   embedKukai,
   ...props
 }) => {
+  const { t } = useTranslation(['translation'])
+
   const history = useHistory()
   const location = useLocation()
 
@@ -247,12 +250,6 @@ export const Menu: FC<MenuProps> = ({
     localStorage.removeItem('Kanvas - Bearer')
     localStorage.removeItem('Kanvas - address')
   }
-
-  useEffect(() => {
-    if (user) {
-      setAvatarSrc(user.profilePicture)
-    }
-  }, [user])
 
   return (
     <>
@@ -331,6 +328,17 @@ export const Menu: FC<MenuProps> = ({
           spacing={2}
           sx={{ alignItems: 'beginning' }}
         >
+          <StyledLink to="/">
+            <Typography
+              size="h2"
+              weight="SemiBold"
+              color="#9b9b9b"
+              sx={{ cursor: 'pointer' }}
+            >
+              {t('menu.home')}
+            </Typography>
+          </StyledLink>
+
           <StyledLink to="/store">
             <Typography
               size="h2"
@@ -338,8 +346,7 @@ export const Menu: FC<MenuProps> = ({
               color="#9b9b9b"
               sx={{ cursor: 'pointer' }}
             >
-              {' '}
-              Store{' '}
+              {t('menu.store')}
             </Typography>
           </StyledLink>
 
@@ -433,6 +440,17 @@ export const Menu: FC<MenuProps> = ({
           {location.pathname === '/sign-in' ||
           location.pathname === '/account/create' ? undefined : (
             <>
+              <StyledLink to="/home" isSearchOpen={props.isSearchOpen}>
+                <Typography
+                  size="inherit"
+                  weight="Light"
+                  color="#9b9b9b"
+                  sx={{ cursor: 'pointer' }}
+                >
+                  {t('menu.home')}
+                </Typography>
+              </StyledLink>
+
               <StyledLink to="/store" isSearchOpen={props.isSearchOpen}>
                 <Typography
                   size="inherit"
@@ -440,8 +458,7 @@ export const Menu: FC<MenuProps> = ({
                   color="#9b9b9b"
                   sx={{ cursor: 'pointer' }}
                 >
-                  {' '}
-                  Store{' '}
+                  {t('menu.store')}
                 </Typography>
               </StyledLink>
 

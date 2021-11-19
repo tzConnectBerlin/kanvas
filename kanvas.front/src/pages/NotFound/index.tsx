@@ -79,7 +79,7 @@ const NotFound: FC<NotFoundProps> = () => {
             <CustomButton
               size="large"
               label={t('common.button.backToHome')}
-              href="/"
+              href="/home"
               sx={{ mx: 'auto', maxWidth: '20rem' }}
             />
           </StyledGrid>

@@ -1,6 +1,7 @@
 import styled from '@emotion/styled'
 import Profile from './pages/Profile'
 import StorePage from './pages/StorePage'
+import HomePage from './pages/HomePage'
 import Faq from './pages/Faq'
 import CreateNFT from './pages/CreateNFT'
 import EditProfile from './pages/EditProfile'
@@ -104,7 +105,11 @@ const Router = () => {
         />
         <ScrollToTop>
           <Switch>
-            <Route exact path="/store" component={StorePage} />
+            <Route exact path="/">
+              <Redirect to="/home" />
+            </Route>
+            <Route path="/home" component={HomePage} />
+            <Route path="/store" component={StorePage} />
             <Route path="/profile/edit" component={EditProfile} />
             <Route path="/profile/:username" component={Profile} />
             <Route
@@ -123,7 +128,7 @@ const Router = () => {
               render={(props) => <CreateNFT {...props} />}
             />
             <Route path="/404" component={NotFound} />
-            <Redirect from="*" to="/store" />
+            <Redirect from="*" to="/404" />
           </Switch>
         </ScrollToTop>
         <ShoppingCart

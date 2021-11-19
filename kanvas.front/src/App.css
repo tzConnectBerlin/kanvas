@@ -159,3 +159,8 @@ li b {
 ul {
   list-style: none;
 }
+
+
+.Carousel-indicators-2 {
+  margin-top: -2rem !important;
+}

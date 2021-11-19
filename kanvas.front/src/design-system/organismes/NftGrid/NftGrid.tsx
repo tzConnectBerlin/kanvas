@@ -1,11 +1,8 @@
 import styled from '@emotion/styled'
-import FlexSpacer from '../../atoms/FlexSpacer'
 import Typography from '../../atoms/Typography'
-
 import { FC } from 'react'
 import { Grid } from '@mui/material'
 import { Layouts } from 'react-grid-layout'
-
 import { NftCard } from '../../molecules/NftCard'
 import { INft } from '../../../interfaces/artwork'
 
@@ -19,6 +16,7 @@ export interface NftGridProps {
   loading?: boolean
   open?: boolean
   nfts?: INft[]
+  sx?: any
 }
 
 const StyledGrid = styled(Grid)`
@@ -27,31 +25,23 @@ const StyledGrid = styled(Grid)`
   max-width: none !important;
   flex-basis: 100% !important;
   margin: 0;
-  padding: -1.5rem;
-  min-height: 60vh;
-`
-
-const StyledGridItem = styled(Grid)`
-  padding: 1.5rem;
-
-  @media (max-width: 650px) {
-    padding-left: 0;
-    padding-right: 0;
-  }
+  padding: 0;
+  max-height: 60%;
 `
 
 export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
   return (
     <>
       {props.nfts && props.nfts.length > 0 ? (
-        <StyledGrid container lg={props.open ? 12 : 9} md={props.open ? 9 : 6}>
+        <StyledGrid
+          container
+          md={props.open ? 9 : 6}
+          lg={props.open ? 12 : 9}
+          rowSpacing={5}
+          columnSpacing={{ xs: 1, sm: 2, md: 5 }}
+        >
           {props.nfts.map((nft) => (
-            <StyledGridItem
-              item
-              lg={props.open ? 4 : 3}
-              md={props.open ? 6 : 4}
-              xs={12}
-            >
+            <Grid item lg={props.open ? 4 : 3} md={props.open ? 6 : 4} xs={12}>
               <NftCard
                 id={nft.id.toString()}
                 name={nft.name}
@@ -60,22 +50,23 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                 price={nft.price}
                 loading={props.loading}
               />
-            </StyledGridItem>
+            </Grid>
           ))}
         </StyledGrid>
       ) : props.loading ? (
-        <StyledGrid container lg={props.open ? 12 : 9} md={props.open ? 9 : 6}>
-          {[0, 0, 0, 0, 0, 0, 0, 0, 0].map((nft) => (
-            <StyledGridItem
-              item
-              lg={props.open ? 4 : 3}
-              md={props.open ? 6 : 4}
-              xs={12}
-            >
+        <Grid
+          container
+          md={props.open ? 9 : 6}
+          lg={props.open ? 12 : 9}
+          rowSpacing={5}
+          columnSpacing={{ xs: 1, sm: 2, md: 5 }}
+        >
+          {[...new Array(9)].map((nft) => (
+            <Grid item lg={props.open ? 4 : 3} md={props.open ? 6 : 4} xs={12}>
               <NftCard name={''} ipfsHash={''} price={0} loading={true} />
-            </StyledGridItem>
+            </Grid>
           ))}
-        </StyledGrid>
+        </Grid>
       ) : (
         <StyledGrid>
           <Typography

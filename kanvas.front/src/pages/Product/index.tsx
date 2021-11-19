@@ -58,7 +58,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
 
   useEffect(() => {
     if (nftResponse.error) {
-      debugger
+      // debugger
     }
   }, [nftResponse])
 
@@ -77,7 +77,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
           ) : (
             <CardMedia
               component="img"
-              image={nftResponse.data.dataUri}
+              image={data.dataUri}
+              // image={nftResponse.data.dataUri}
               alt="random"
               sx={{
                 height: '75vh',
