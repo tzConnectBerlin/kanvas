@@ -6,7 +6,7 @@ import { Pool, types } from 'pg'
 // Read postgres TIMESTAMP WITHOUT TIME ZONE values as UTC+0 Date
 types.setTypeParser(
   1114 /* TIMESTAMP WITHOUT TIME ZONE type */,
-  function (stringValue) {
+  function (stringValue: string) {
     return new Date(stringValue + '+0000')
   },
 )

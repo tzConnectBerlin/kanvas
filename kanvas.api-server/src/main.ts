@@ -17,7 +17,7 @@ async function bootstrap() {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     }),
   )
-  app.use(function (req: any, res: any, next: any) {
+  app.use(function (req: any, _res: any, next: any) {
     if (typeof req.session.uuid === 'undefined') {
       req.session.uuid = uuidv4()
     }
