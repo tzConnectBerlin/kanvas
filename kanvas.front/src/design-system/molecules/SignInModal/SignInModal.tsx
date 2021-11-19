@@ -188,7 +188,7 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
 
     useEffect(() => {
         if (signUserResponse.data) {
-            debugger
+
             setSocialLoading(false)
             setBeaconLoading(false)
 
@@ -234,7 +234,7 @@ export const SignInModal: FC<SignInModalProps> = ({ beaconWallet, embedKukai, ..
         if (signUserResponse.error) {
             setSocialLoading(false)
             setBeaconLoading(false)
-            debugger
+
 
             if (signUserResponse.error?.response?.data.message === 'User not registered') {
                 // Check if we have information from the user thanks to kukai

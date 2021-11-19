@@ -3,7 +3,7 @@ import Typography from '../../atoms/Typography';
 import FlexSpacer from '../../atoms/FlexSpacer';
 
 import { Checkbox, Stack, Theme } from '@mui/material';
-import { FC, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 
 interface StyledTreeViewProps {
     open?: boolean;
@@ -21,7 +21,7 @@ interface TreeViewProps extends StyledTreeViewProps {
 
 
 const StyledDiv = styled.div<StyledTreeViewProps>`
-    padding-left: 0.5rem;
+    padding-left: 1.5rem;
     width : ${props => props.open ? 'auto' : '0'};
     height: 100%;
     transition: width 0.2s;
@@ -45,40 +45,98 @@ const StyledCheckBox = styled(Checkbox)<{theme?: Theme}>`
 
 const TreeView : FC<TreeViewProps> = ({selectedFilters, setSelectedFilters, ...props}) => {
 
-    const selectChildren = (node: any, newSelectedFilters : any[] = []) => {
+    const [highlightedParentsState, setHighlightedParents] = useState<number[]>([])
+
+
+    // handleMultiSelect function should:
+    //  - Select all the children and add them to filters + select all the parents and add them to highlight if node has children and node is not selected
+    //  - Select all the parents and delete them from filters + select all the childrens and delete if node has parents and node is selected
+
+    interface recurseRes {
+        selectLeafs: number[];
+
+        highlightParents: number[][];
+    }
+
+    const recurseChildrens = (node: any ): recurseRes => {
         if (node.children?.length > 0) {
-            for (let child of node.children) {
-                if (selectedFilters.indexOf(child.id) === -1) {
-                    newSelectedFilters.push(child.id)
-                }
-                selectChildren(child, newSelectedFilters)
+            let res: recurseRes = {
+                selectLeafs: [],
+                highlightParents: [],
+            }
+            for (const child of node.children) {
+                const childRes = recurseChildrens(child)
+                res.selectLeafs = [...res.selectLeafs, ...childRes.selectLeafs]
+                res.highlightParents = [...res.highlightParents, ...childRes.highlightParents]
+            }
+            res.highlightParents.push([node.id, res.selectLeafs.length])
+            return res
+        } else {
+            return {
+                selectLeafs: [node.id],
+                highlightParents: [],
             }
         }
-        return newSelectedFilters
     }
 
-    const unSelectParent = (node: any, unSelectedParents : any[] = []) => {
-        if (node.parent) {
-            unSelectedParents.push(node.parent.id)
-            unSelectParent(node.parent, unSelectedParents)
+    const select = (node: any) => {
+        const recRes = recurseChildrens(node)
+
+        let childParents: any[] = []
+        let highlightedParents : any[] = []
+
+        for (const [childParent, highlightCount] of recRes.highlightParents) {
+            childParents.push(childParent)
+            highlightedParents = [...highlightedParents, ...Array(highlightCount).fill(childParent)]
         }
-        return unSelectedParents
-    }
 
-    const handleMultiSelect = (node: any) => {
-        if (selectedFilters.indexOf(node.id) !== -1) {
-            // Getting the parents of the nodes to unselect them
-            const unSelectedParents = unSelectParent(node)
-            // Adding the current node to the unselection
-            unSelectedParents.push(node.id)
-            setSelectedFilters(selectedFilters.filter(filterId => unSelectedParents.indexOf(filterId) === -1 ))
+        let selectedNodes = [...recRes.selectLeafs, ...childParents]
+        let incrAboveHighlightCount = recRes.selectLeafs.length
+
+        if (selectedFilters.indexOf(node.id) === -1) {
+            incrAboveHighlightCount -= [...selectedFilters].filter(id => id != node.id && recRes.selectLeafs.indexOf(id) !== -1).length
+        }
+
+        for (const parent of getParents(node)) {
+            if (selectedFilters.indexOf(node.id) > -1) {
+                selectedNodes.push(parent)
+            }
+            highlightedParents = [...highlightedParents, ...Array(incrAboveHighlightCount).fill(parent)]
+        }
+
+        if (selectedFilters.indexOf(node.id) > -1) {
+            setSelectedFilters(selectedFilters.filter(filterId => selectedNodes.indexOf(filterId) === -1 ))
+            setHighlightedParents(listDifference(highlightedParentsState, highlightedParents))
         } else {
-            // Getting the children of the parent to select them
-            const newSelectedChildren = selectChildren(node)
-            setSelectedFilters([...selectedFilters, ...newSelectedChildren, node.id])
+            setSelectedFilters([...selectedFilters.filter(id => selectedNodes.indexOf(id) === -1), ...selectedNodes])
+            setHighlightedParents([...highlightedParentsState.filter(id => childParents.indexOf(id) === -1), ...highlightedParents])
         }
+
     }
 
+    const listDifference = (dadList: any[], babyList: any[]): any[] => {
+        const dadListCopy = [...dadList]
+        babyList.forEach( parent => {
+            const index = dadListCopy.indexOf(parent)
+
+            if (index > -1) {
+                dadListCopy.splice(index, 1)
+            }
+        })
+
+        return dadListCopy
+    }
+
+    // Add recursively all the parents to an array and return the array
+    const getParents = (node: any, parents: any[] = []) => {
+        if (node.parent) {
+            parents.push(node.parent.id)
+            getParents(node.parent, parents)
+        }
+        return parents
+    }
+
+    // Open or close childrens
     const handleListItemClick = (concernedRef: any) => {
         if (activeRef.indexOf(concernedRef) !== -1) {
             setActiveRef(activeRef.filter(ref => ref !== concernedRef))
@@ -87,25 +145,40 @@ const TreeView : FC<TreeViewProps> = ({selectedFilters, setSelectedFilters, ...p
         }
     };
 
+    // Debugger function
+    const countElInArr = (element: number, arr: any[]) => {
+        const count : any = {}
+        for (const element of arr) {
+            if (count[element]) {
+                count[element] += 1;
+            } else {
+                count[element] = 1;
+            }
+        }
+        return count[element]
+    }
+
     const [activeRef, setActiveRef] = useState<any[]>([])
 
-    const renderTree : any = (parentNode: any, children: any, checked: boolean) => {
+    const renderTree : any = (parentNode: any, children: any) => {
 
         return children?.map((node: any) => {
             node.parent = parentNode
 
             return (
-                <StyledDiv open={props.open} >
+                <StyledDiv open={props.open} style={{paddingLeft: node.parent.id === 'root' ? '0' : '' }}>
                     <StyledLi open={props.open} key={`${node.name}-${node.id}`} >
                         <Stack direction="row" sx={{alignItems: 'center', width: '100%'}}>
+
                             <StyledCheckBox
                                 checked={selectedFilters.indexOf(node.id) !== -1}
-                                onClick={() => handleMultiSelect(node)}
+                                onClick={() => select(node)}
                                 inputProps={{ 'aria-label': 'controlled' }}
                                 disableRipple
                             />
+
                             <Stack direction="row" onClick={() => handleListItemClick(`${node.name}-${node.id}`)} sx={{width: '100%'}}>
-                                <Typography size="h5" weight='Light' >{node.name}</Typography>
+                                <Typography size="h5" weight='Light' color={highlightedParentsState.indexOf(node.id) !== -1 && selectedFilters.indexOf(node.id) === -1 ? 'contrastText' : ''} >{node.name} - {countElInArr(node.id, highlightedParentsState)}</Typography>
 
                                 <FlexSpacer />
 
@@ -121,7 +194,7 @@ const TreeView : FC<TreeViewProps> = ({selectedFilters, setSelectedFilters, ...p
                         </Stack>
                     </StyledLi>
                     {activeRef.indexOf(`${node.name}-${node.id}`) !== -1 ?
-                        renderTree(node, node.children, selectedFilters.indexOf(node.id) !== -1 || checked)
+                        renderTree(node, node.children)
                     :
                         undefined}
                 </StyledDiv>

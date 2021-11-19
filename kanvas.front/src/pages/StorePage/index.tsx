@@ -64,7 +64,7 @@ const StorePage = () => {
     // is filter open ?
     const [filterOpen, setFilterOpen] = useState(true);
 
-    const [selectedFilters, setSelectedFilters] = useState<any[]>([])
+    const [selectedFilters, setSelectedFilters] = useState<number[]>([])
     const [selectedSort, setSelectedSort] = useState('')
 
     const [availableFilters, setAvailableFilters] = useState<any>()
@@ -86,7 +86,7 @@ const StorePage = () => {
             })
         } else {
 
-            debugger
+
             if (search.indexOf('page') === -1 || search === "") {
                 history.push({search: newPageParam.toString()})
             } else if (search !== "" && search.indexOf('page') === -1) {
@@ -139,7 +139,7 @@ const StorePage = () => {
             let newFilterParam = new URLSearchParams()
             newFilterParam.append('categories', selectedFilters.join(','))
 
-            debugger
+
             if (search.indexOf('categories') === -1 || search === "") {
                 history.push({search: newFilterParam.toString()})
             } else if (search !== "" && search.indexOf('categories') === -1) {

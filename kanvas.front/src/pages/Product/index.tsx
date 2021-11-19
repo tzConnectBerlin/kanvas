@@ -55,7 +55,7 @@ export const ProductPage : FC<ProductPageProps> = ({...props}) => {
 
     useEffect(() => {
         if (nftResponse.error) {
-            debugger
+
         }
     }, [nftResponse])
 
