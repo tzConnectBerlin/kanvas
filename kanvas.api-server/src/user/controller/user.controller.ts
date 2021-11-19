@@ -6,6 +6,7 @@ import {
   Param,
   Controller,
   Post,
+  Query,
   Get,
   UseGuards,
   Logger,
@@ -22,6 +23,37 @@ import { PG_UNIQUE_VIOLATION_ERRCODE } from '../../constants'
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
+
+  @Get()
+  @UseGuards(JwtFailableAuthGuard)
+  async getProfile(
+    @CurrentUser() user?: UserEntity,
+    @Query('userAddress') userAddress?: string,
+  ) {
+    const address =
+      userAddress || (typeof user !== 'undefined' ? user.address : undefined)
+    if (typeof address === 'undefined') {
+      throw new HttpException(
+        'Define userAddress parameter or access this endpoint logged in',
+        HttpStatus.BAD_REQUEST,
+      )
+    }
+
+    const profile = await this.userService.getProfile(address)
+    if (typeof profile === 'undefined') {
+      if (typeof userAddress === 'undefined') {
+        throw new HttpException(
+          'Failed to find user associated to JWT',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        )
+      }
+      throw new HttpException(
+        'No user registered with requested userAddress',
+        HttpStatus.BAD_REQUEST,
+      )
+    }
+    return profile
+  }
 
   @Post('cart/add/:nftId')
   @UseGuards(JwtFailableAuthGuard)

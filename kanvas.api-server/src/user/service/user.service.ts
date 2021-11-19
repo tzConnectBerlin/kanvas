@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common'
-import { UserEntity, UserCart } from '../entity/user.entity'
+import { UserEntity, ProfileEntity, UserCart } from '../entity/user.entity'
 import { NftService } from 'src/nft/service/nft.service'
 import { PG_CONNECTION } from '../../constants'
 
@@ -14,7 +14,7 @@ export class UserService {
 
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
-    private readonly nftService: NftService,
+    public readonly nftService: NftService,
   ) {}
 
   async create(user: UserEntity): Promise<UserEntity> {
@@ -32,7 +32,7 @@ RETURNING id`,
     return { ...user, id: qryRes.rows[0]['id'] }
   }
 
-  async findByAddress(addr: string): Promise<UserEntity> {
+  async findByAddress(addr: string): Promise<UserEntity | undefined> {
     const qryRes = await this.conn.query(
       `
 SELECT
@@ -47,7 +47,7 @@ WHERE address = $1
       [addr],
     )
     if (qryRes.rows.length === 0) {
-      throw new HttpException('User not registered', HttpStatus.BAD_REQUEST)
+      return undefined
     }
     const res = {
       id: qryRes.rows[0]['id'],
@@ -60,6 +60,29 @@ WHERE address = $1
     }
 
     return res
+  }
+
+  async getProfile(address: string): Promise<ProfileEntity | undefined> {
+    const user = await this.findByAddress(address)
+    if (typeof user === 'undefined') {
+      return undefined
+    }
+    delete user.signedPayload
+
+    const userNfts = await this.nftService.filter({
+      page: 1,
+      pageSize: 1,
+      orderBy: 'id',
+      order: 'asc',
+      firstRequestAt: undefined,
+      categories: undefined,
+      address: address,
+    })
+
+    return {
+      user: user,
+      nftCount: userNfts.numberOfPages,
+    }
   }
 
   async getUserCartSession(userId: number): Promise<string | undefined> {

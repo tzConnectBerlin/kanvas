@@ -21,12 +21,17 @@ export class AuthenticationService {
     private readonly jwtService: JwtService,
   ) {}
 
-  private async validate(userData: UserEntity): Promise<UserEntity> {
+  private async validate(
+    userData: UserEntity,
+  ): Promise<UserEntity | undefined> {
     return await this.userService.findByAddress(userData.address)
   }
 
   public async login(userData: UserEntity): Promise<any | { status: number }> {
     const user = await this.validate(userData)
+    if (typeof user === 'undefined') {
+      throw new HttpException('User not registerd', HttpStatus.BAD_REQUEST)
+    }
 
     if (
       user.signedPayload !== undefined &&
@@ -46,9 +51,11 @@ export class AuthenticationService {
     }
   }
 
-  public async getLoggedUser(address: string): Promise<UserEntity> {
-    const user: UserEntity = await this.userService.findByAddress(address)
-    user.signedPayload = undefined
+  public async getLoggedUser(address: string): Promise<UserEntity | undefined> {
+    const user = await this.userService.findByAddress(address)
+    if (typeof user !== 'undefined') {
+      delete user.signedPayload
+    }
 
     return user
   }

@@ -28,7 +28,7 @@ export class PaginationParams {
   @IsInt()
   @Type(() => Number)
   @IsOptional()
-  firstRequestAt: number
+  firstRequestAt: number | undefined
 }
 
 export class FilterParams extends PaginationParams {
