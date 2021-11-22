@@ -7,7 +7,7 @@ import { SearchInput } from '../../atoms/SearchInput'
 import { QuickSearchResult } from '../../molecules/QuickSearchResult'
 
 interface QuickSearchProps {
-	setSearchOpen: Function
+  setSearchOpen: Function
 }
 
 const QuickSearchWrapper = styled(Stack)`
@@ -30,103 +30,103 @@ const StyledBackground = styled.div<{ open: boolean }>`
 `
 
 export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
-	const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-	const [openSearchResult, setOpenSearchresult] = useState(false)
+  const [openSearchResult, setOpenSearchresult] = useState(false)
 
-	// const [getTagsSuggestions, tagsSuggestionResult] = useLazyQuery(GET_TAGS_SUGGESTIONS,  { fetchPolicy: 'cache-and-network' })
-	const [loading, setLoading] = useState(false)
-	const [inputValue, setInputValue] = useState('')
+  // const [getTagsSuggestions, tagsSuggestionResult] = useLazyQuery(GET_TAGS_SUGGESTIONS,  { fetchPolicy: 'cache-and-network' })
+  const [loading, setLoading] = useState(false)
+  const [inputValue, setInputValue] = useState('')
 
-	// const [getProfilesSearch, profilesSearchResult] = useLazyQuery(GET_PROFILES_SEARCH,  { fetchPolicy: 'cache-and-network' })
-	// const [getArtworksSearch, artworksSearchResult] = useLazyQuery(GET_ARTWORKS_SEARCH,  { fetchPolicy: 'cache-and-network' })
-	// const [getTagsSearch, tagsSearchResult] = useLazyQuery(GET_TAGS_SEARCH,  { fetchPolicy: 'cache-and-network' })
+  // const [getProfilesSearch, profilesSearchResult] = useLazyQuery(GET_PROFILES_SEARCH,  { fetchPolicy: 'cache-and-network' })
+  // const [getArtworksSearch, artworksSearchResult] = useLazyQuery(GET_ARTWORKS_SEARCH,  { fetchPolicy: 'cache-and-network' })
+  // const [getTagsSearch, tagsSearchResult] = useLazyQuery(GET_TAGS_SEARCH,  { fetchPolicy: 'cache-and-network' })
 
-	useEffect(() => {
-		if (inputValue.length >= 2) {
-			const delaySearch = setTimeout(() => {
-				setLoading(false)
-				// getTagsSearch({variables: { searchString: `#${inputValue}` }})
-				// getProfilesSearch({variables: { searchString: inputValue }})
-				// getArtworksSearch({variables: { searchString: inputValue }})
-			}, 800)
+  useEffect(() => {
+    if (inputValue.length >= 2) {
+      const delaySearch = setTimeout(() => {
+        setLoading(false)
+        // getTagsSearch({variables: { searchString: `#${inputValue}` }})
+        // getProfilesSearch({variables: { searchString: inputValue }})
+        // getArtworksSearch({variables: { searchString: inputValue }})
+      }, 800)
 
-			return () => {
-				clearTimeout(delaySearch)
-			}
-		} else {
-			setLoading(false)
-			// profilesSearchResult.loading = false
-			// artworksSearchResult.loading = false
-			// tagsSearchResult.loading = false
+      return () => {
+        clearTimeout(delaySearch)
+      }
+    } else {
+      setLoading(false)
+      // profilesSearchResult.loading = false
+      // artworksSearchResult.loading = false
+      // tagsSearchResult.loading = false
 
-			// profilesSearchResult.data = undefined
-			// artworksSearchResult.data = undefined
+      // profilesSearchResult.data = undefined
+      // artworksSearchResult.data = undefined
 
-			// profilesSearchResult.called = false
-			// artworksSearchResult.called = false
-		}
-	}, [inputValue])
+      // profilesSearchResult.called = false
+      // artworksSearchResult.called = false
+    }
+  }, [inputValue])
 
-	const handleChange = () => {
-		setInputValue(inputRef.current?.value as string)
+  const handleChange = () => {
+    setInputValue(inputRef.current?.value as string)
 
-		if (inputValue.length >= 1) {
-			setLoading(true)
-			//  profilesSearchResult.loading = true
-			//  artworksSearchResult.loading = true
-			//  tagsSearchResult.loading = true
-		}
-	}
+    if (inputValue.length >= 1) {
+      setLoading(true)
+      //  profilesSearchResult.loading = true
+      //  artworksSearchResult.loading = true
+      //  tagsSearchResult.loading = true
+    }
+  }
 
-	const handleCloseInput = () => {
-		setOpenSearchresult(false)
+  const handleCloseInput = () => {
+    setOpenSearchresult(false)
 
-		if (inputRef.current?.value) {
-			inputRef.current.value = ''
-		}
-		inputRef?.current?.blur()
+    if (inputRef.current?.value) {
+      inputRef.current.value = ''
+    }
+    inputRef?.current?.blur()
 
-		setTimeout(() => {
-			props.setSearchOpen(false)
-		}, 300)
-		setInputValue('')
-	}
+    setTimeout(() => {
+      props.setSearchOpen(false)
+    }, 300)
+    setInputValue('')
+  }
 
-	return (
-		<>
-			<StyledBackground
-				open={openSearchResult}
-				onClick={() => handleCloseInput()}
-			></StyledBackground>
-			<QuickSearchWrapper
-				direction="column"
-				onClick={() => {
-					console.log('click')
-					props.setSearchOpen(true)
-				}}
-			>
-				<SearchInput
-					open={openSearchResult}
-					ref={inputRef}
-					onChange={handleChange}
-					onBlur={() => handleCloseInput()}
-					onFocus={() => {
-						inputRef?.current?.focus()
-						setOpenSearchresult(true)
-						props.setSearchOpen(true)
-					}}
-				/>
-				<QuickSearchResult
-					loading={loading}
-					open={openSearchResult}
-					closeResult={handleCloseInput}
-					profilesSearchResult={[]}
-					artworksSearchResult={[]}
-					tagsSearchResult={[]}
-					searchString={inputRef.current?.value}
-				/>
-			</QuickSearchWrapper>
-		</>
-	)
+  return (
+    <>
+      <StyledBackground
+        open={openSearchResult}
+        onClick={() => handleCloseInput()}
+      ></StyledBackground>
+      <QuickSearchWrapper
+        direction="column"
+        onClick={() => {
+          console.log('click')
+          props.setSearchOpen(true)
+        }}
+      >
+        <SearchInput
+          open={openSearchResult}
+          ref={inputRef}
+          onChange={handleChange}
+          onBlur={() => handleCloseInput()}
+          onFocus={() => {
+            inputRef?.current?.focus()
+            setOpenSearchresult(true)
+            props.setSearchOpen(true)
+          }}
+        />
+        <QuickSearchResult
+          loading={loading}
+          open={openSearchResult}
+          closeResult={handleCloseInput}
+          profilesSearchResult={[]}
+          artworksSearchResult={[]}
+          tagsSearchResult={[]}
+          searchString={inputRef.current?.value}
+        />
+      </QuickSearchWrapper>
+    </>
+  )
 }

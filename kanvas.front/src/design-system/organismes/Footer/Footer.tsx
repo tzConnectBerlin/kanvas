@@ -194,7 +194,11 @@ export const Footer: FC<FooterProps> = () => {
 
           <Box
             component="ul"
-            sx={{ display: 'flex', paddingLeft: '0', margin: '.5rem 0 1.5rem' }}
+            sx={{
+              display: 'flex',
+              paddingLeft: '0',
+              margin: '.5rem 0 1.5rem',
+            }}
           >
             <Box
               component="a"

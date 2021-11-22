@@ -30,7 +30,7 @@ export interface HeaderProps {
   nftsInCartNumber: number
 }
 
-const StyledBox = styled(Box) <{ theme?: Theme }>`
+const StyledBox = styled(Box)<{ theme?: Theme }>`
   margin-bottom: -6rem;
   color: ${(props) => props.theme.palette.text.primary};
 

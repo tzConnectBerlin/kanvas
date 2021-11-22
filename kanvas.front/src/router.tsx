@@ -26,7 +26,7 @@ import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles'
 import { INft } from './interfaces/artwork'
 import { toast } from 'react-toastify'
 
-const StyledBrowserRouter = styled(BrowserRouter) <{ theme?: Theme }>`
+const StyledBrowserRouter = styled(BrowserRouter)<{ theme?: Theme }>`
   display: block;
 
   #root {
@@ -35,121 +35,126 @@ const StyledBrowserRouter = styled(BrowserRouter) <{ theme?: Theme }>`
 `
 
 const Router = () => {
-	const [embedKukai, setEmbedKukai] = useState<KukaiEmbed>()
-	const [beaconWallet, setBeaconWallet] = useState<BeaconWallet>()
+  const [embedKukai, setEmbedKukai] = useState<KukaiEmbed>()
+  const [beaconWallet, setBeaconWallet] = useState<BeaconWallet>()
 
-	const [selectedTheme, setSelectedTheme] = useState<'light' | 'dark'>(
-		localStorage.getItem('Kanvas - theme') as 'light' | 'dark',
-	)
+  const [selectedTheme, setSelectedTheme] = useState<'light' | 'dark'>(
+    localStorage.getItem('Kanvas - theme') as 'light' | 'dark',
+  )
 
-	const darkThemeResponsive = responsiveFontSizes(darkTheme)
-	const lightThemeResponsive = responsiveFontSizes(lightTheme)
+  const darkThemeResponsive = responsiveFontSizes(darkTheme)
+  const lightThemeResponsive = responsiveFontSizes(lightTheme)
 
-	const [nftsInCart, setNftsInCart] = useState<INft[]>([])
+  const [nftsInCart, setNftsInCart] = useState<INft[]>([])
 
-	const [listCartResponse, listCart] = useAxios({
-		url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/cart/list`,
-		withCredentials: true,
-		headers: {
-			'content-type': 'application/json',
-			'Access-Control-Allow-Origin': 'http://localhost:3000'
-		}
-	},
-	{ manual: true },
-	)
+  const [listCartResponse, listCart] = useAxios(
+    {
+      url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/cart/list`,
+      withCredentials: true,
+      headers: {
+        'content-type': 'application/json',
+        'Access-Control-Allow-Origin': 'http://localhost:3000',
+      },
+    },
+    { manual: true },
+  )
 
-	// Getting list of nfts in the cart
-	useEffect(() => {
-		listCart().catch(err => toast.error(err))
-	}, [])
+  // Getting list of nfts in the cart
+  useEffect(() => {
+    listCart().catch((err) => toast.error(err))
+  }, [])
 
-	useEffect(() => {
-		if (listCartResponse.data) {
-			setNftsInCart(listCartResponse.data.nfts)
-		}
-	}, [listCartResponse])
+  useEffect(() => {
+    if (listCartResponse.data) {
+      setNftsInCart(listCartResponse.data.nfts)
+    }
+  }, [listCartResponse])
 
-	useEffect(() => {
-		if (!embedKukai) {
-			setEmbedKukai(
-				new KukaiEmbed({
-					net: Networks.granadanet,
-					icon: false,
-				}),
-			)
-		}
-	}, [])
+  useEffect(() => {
+    if (!embedKukai) {
+      setEmbedKukai(
+        new KukaiEmbed({
+          net: Networks.granadanet,
+          icon: false,
+        }),
+      )
+    }
+  }, [])
 
-	useEffect(() => {
-		initTezos(RPC_URL)
-		setBeaconWallet(initWallet())
-	}, [])
+  useEffect(() => {
+    initTezos(RPC_URL)
+    setBeaconWallet(initWallet())
+  }, [])
 
-	const handleSelectTheme = (themeName: 'dark' | 'light') => {
-		setSelectedTheme(themeName)
-		localStorage.setItem('Kanvas - theme', themeName)
-	}
+  const handleSelectTheme = (themeName: 'dark' | 'light') => {
+    setSelectedTheme(themeName)
+    localStorage.setItem('Kanvas - theme', themeName)
+  }
 
-	const [cartOpen, setCartOpen] = useState(false)
+  const [cartOpen, setCartOpen] = useState(false)
 
-	return (
-		<ThemeProvider
-			theme={
-				localStorage.getItem('Kanvas - theme') === 'dark'
-					? darkThemeResponsive
-					: lightThemeResponsive
-			}
-		>
-			<StyledBrowserRouter>
-				<Header
-					beaconWallet={beaconWallet}
-					embedKukai={embedKukai}
-					cartOpen={cartOpen}
-					setCartOpen={setCartOpen}
-					switchTheme={handleSelectTheme}
-					selectedTheme={selectedTheme}
-					nftsInCartNumber={nftsInCart.length}
-					notifications={0}
-				/>
-				<ScrollToTop>
-					<Switch>
-						<Route exact path="/">
-							<Redirect to="/home" />
-						</Route>
-						<Route path="/home" component={HomePage} />
-						<Route path="/store" component={StorePage} />
-						<Route path="/profile/edit" component={EditProfile} />
-						<Route path="/profile/:username" component={Profile} />
-						<Route
-							path="/product/:id"
-							render={(props) => (
-								<ProductPage nftsInCart={nftsInCart} setNftsInCart={setNftsInCart} {...props} />
-							)}
-						/>
-						<Route path="/faq" component={Faq} />
-						<Route
-							path="/create-nft"
-							render={(props) => <CreateNFT {...props} />}
-						/>
-						<Route
-							path="/nft/:id"
-							render={(props) => <CreateNFT {...props} />}
-						/>
-						<Route path="/404" component={NotFound} />
-						<Redirect from="*" to="/404" />
-					</Switch>
-				</ScrollToTop>
-				<ShoppingCart
-					open={cartOpen}
-					nftsInCart={nftsInCart}
-					setNftsInCart={setNftsInCart}
-					closeCart={() => setCartOpen(false)}
-					loading={listCartResponse.loading}
-				/>
-				<Footer />
-			</StyledBrowserRouter>
-		</ThemeProvider>
-	)
+  return (
+    <ThemeProvider
+      theme={
+        localStorage.getItem('Kanvas - theme') === 'dark'
+          ? darkThemeResponsive
+          : lightThemeResponsive
+      }
+    >
+      <StyledBrowserRouter>
+        <Header
+          beaconWallet={beaconWallet}
+          embedKukai={embedKukai}
+          cartOpen={cartOpen}
+          setCartOpen={setCartOpen}
+          switchTheme={handleSelectTheme}
+          selectedTheme={selectedTheme}
+          nftsInCartNumber={nftsInCart.length}
+          notifications={0}
+        />
+        <ScrollToTop>
+          <Switch>
+            <Route exact path="/">
+              <Redirect to="/home" />
+            </Route>
+            <Route path="/home" component={HomePage} />
+            <Route path="/store" component={StorePage} />
+            <Route path="/profile/edit" component={EditProfile} />
+            <Route path="/profile/:username" component={Profile} />
+            <Route
+              path="/product/:id"
+              render={(props) => (
+                <ProductPage
+                  nftsInCart={nftsInCart}
+                  setNftsInCart={setNftsInCart}
+                  {...props}
+                />
+              )}
+            />
+            <Route path="/faq" component={Faq} />
+            <Route
+              path="/create-nft"
+              render={(props) => <CreateNFT {...props} />}
+            />
+            <Route
+              path="/nft/:id"
+              render={(props) => <CreateNFT {...props} />}
+            />
+            <Route path="/404" component={NotFound} />
+            <Redirect from="*" to="/404" />
+          </Switch>
+        </ScrollToTop>
+        <ShoppingCart
+          open={cartOpen}
+          nftsInCart={nftsInCart}
+          setNftsInCart={setNftsInCart}
+          closeCart={() => setCartOpen(false)}
+          loading={listCartResponse.loading}
+        />
+        <Footer />
+      </StyledBrowserRouter>
+    </ThemeProvider>
+  )
 }
 
 export default Router

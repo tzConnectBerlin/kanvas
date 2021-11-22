@@ -139,7 +139,9 @@ export const DropZone: FC<DropZoneProps> = ({
           let buffer = event.target.result
 
           // We have to convert the buffer to a blob:
-          let blob = new Blob([new Uint8Array(buffer)], { type: 'video/mp4' })
+          let blob = new Blob([new Uint8Array(buffer)], {
+            type: 'video/mp4',
+          })
 
           // The blob gives us a URL to the video file:
           let url = window.URL.createObjectURL(blob)
@@ -166,7 +168,9 @@ export const DropZone: FC<DropZoneProps> = ({
     }
   }, [])
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+  })
 
   return (
     <StyledZone {...getRootProps()} error={props.error}>

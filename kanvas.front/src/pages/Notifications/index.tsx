@@ -159,7 +159,10 @@ const Notifications: FC<NotificationsProps> = ({ ...props }) => {
             <Typography
               size="h4"
               weight="Light"
-              sx={{ cursor: 'pointer', display: 'block !important' }}
+              sx={{
+                cursor: 'pointer',
+                display: 'block !important',
+              }}
             >
               <StyledLightSpan> Your artwork </StyledLightSpan>
               <StyledMediumSpan>

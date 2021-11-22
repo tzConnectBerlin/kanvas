@@ -31,11 +31,11 @@ interface BoxProps extends MBoxProps {
   open?: boolean
 }
 
-const StyledBox = styled(Box) <BoxProps>`
+const StyledBox = styled(Box)<BoxProps>`
   display: ${(props) => (props.open ? 'flex' : 'none')};
 `
 
-const StyledPaper = styled(Paper) <{ theme?: Theme }>`
+const StyledPaper = styled(Paper)<{ theme?: Theme }>`
   box-shadow: none;
   border-radius: 0;
 
@@ -61,7 +61,7 @@ const StyledContentStack = styled(Stack)`
   padding-bottom: 0.5em;
 `
 
-const ProfileResultWrapper = styled(Stack) <{ theme?: Theme }>`
+const ProfileResultWrapper = styled(Stack)<{ theme?: Theme }>`
   display: flex;
   align-items: center;
   padding-left: 0.875em;
@@ -254,7 +254,10 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                         animation="wave"
                         height={40}
                         width={140}
-                        sx={{ transform: 'scale(1)', borderRadius: 5 }}
+                        sx={{
+                          transform: 'scale(1)',
+                          borderRadius: 5,
+                        }}
                       />
                     </Grid>
                   ))}
@@ -284,29 +287,29 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                 <StyledGrid container spacing={2}>
                   {props.tagsSearchResult.data?.getTagsSearch
                     ? props.tagsSearchResult.data?.getTagsSearch.map(
-                      (tag: any) => (
-                        <Grid item>
-                          <CustomButton
-                            size="medium"
-                            textSize="Light"
-                            primary={false}
-                            label={tag.name}
-                          />
-                        </Grid>
-                      ),
-                    )
+                        (tag: any) => (
+                          <Grid item>
+                            <CustomButton
+                              size="medium"
+                              textSize="Light"
+                              primary={false}
+                              label={tag.name}
+                            />
+                          </Grid>
+                        ),
+                      )
                     : props.tagsSearchResult.data?.getTagsSuggestions.map(
-                      (tag: any) => (
-                        <Grid item>
-                          <CustomButton
-                            size="medium"
-                            textSize="Light"
-                            primary={false}
-                            label={tag.name}
-                          />
-                        </Grid>
-                      ),
-                    )}
+                        (tag: any) => (
+                          <Grid item>
+                            <CustomButton
+                              size="medium"
+                              textSize="Light"
+                              primary={false}
+                              label={tag.name}
+                            />
+                          </Grid>
+                        ),
+                      )}
                 </StyledGrid>
               </StyledContentStack>
             </>

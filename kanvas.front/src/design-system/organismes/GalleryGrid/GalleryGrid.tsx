@@ -65,7 +65,11 @@ export const GalleryGrid: FC<GalleryGridProps> = ({ ...props }) => {
       {props.loading ? (
         <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
           <Box
-            sx={{ justifyContent: 'center', width: '100%', marginTop: '5rem' }}
+            sx={{
+              justifyContent: 'center',
+              width: '100%',
+              marginTop: '5rem',
+            }}
           >
             <Stack direction="column" sx={{ alignItems: 'center' }}>
               <Typography
@@ -103,7 +107,11 @@ export const GalleryGrid: FC<GalleryGridProps> = ({ ...props }) => {
       ) : (
         <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
           <Box
-            sx={{ justifyContent: 'center', width: '100%', marginTop: '5rem' }}
+            sx={{
+              justifyContent: 'center',
+              width: '100%',
+              marginTop: '5rem',
+            }}
           >
             <Stack direction="column" sx={{ alignItems: 'center' }}>
               <Typography

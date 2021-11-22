@@ -277,7 +277,11 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
 
         <Stack
           direction="column"
-          sx={{ width: '100%', alignItems: 'start', marginTop: '1rem' }}
+          sx={{
+            width: '100%',
+            alignItems: 'start',
+            marginTop: '1rem',
+          }}
         >
           <Typography
             fontSize={'1.8rem'}

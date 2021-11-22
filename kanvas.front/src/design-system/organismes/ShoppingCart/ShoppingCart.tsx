@@ -4,7 +4,7 @@ import Typography from '../../atoms/Typography'
 import FlexSpacer from '../../atoms/FlexSpacer'
 import Avatar from '../../atoms/Avatar'
 import CustomButton from '../../atoms/Button'
-import ImageNotSupportedOutlinedIcon from '@mui/icons-material/ImageNotSupportedOutlined';
+import ImageNotSupportedOutlinedIcon from '@mui/icons-material/ImageNotSupportedOutlined'
 
 import { FC, useEffect } from 'react'
 import { Skeleton, Stack, Theme } from '@mui/material'
@@ -92,12 +92,11 @@ const StyledDiv = styled.div<{ theme?: Theme }>`
   }
 `
 
-const StyledClearIcon = styled(ClearIcon) <{ theme?: Theme }>`
+const StyledClearIcon = styled(ClearIcon)<{ theme?: Theme }>`
   color: ${(props) => props.theme.palette.text.primary};
 `
 
 export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
-
   const [deleteFromCartResponse, deleteFromCart] = useAxios(
     process.env.REACT_APP_API_SERVER_BASE_URL + '/cart/delete/:id',
     { manual: true },
@@ -105,21 +104,29 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
 
   const handleDeleteFromBasket = (nftId: number) => {
     deleteFromCart({
-      url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/cart/remove/` + nftId.toString(),
+      url:
+        process.env.REACT_APP_API_SERVER_BASE_URL +
+        `/users/cart/remove/` +
+        nftId.toString(),
       withCredentials: true,
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        'Access-Control-Allow-Origin': process.env.REACT_APP_API_SERVER_BASE_URL?? 'http://localhost:3000'
-      }
-    }).then(res => {
-      debugger
-      if (res.status === 204) {
-        props.setNftsInCart(props.nftsInCart.filter(nfts => nfts.id !== nftId))
-      }
-    }).catch(err => {
-      toast.error(err.message)
+        'Access-Control-Allow-Origin':
+          process.env.REACT_APP_API_SERVER_BASE_URL ?? 'http://localhost:3000',
+      },
     })
+      .then((res) => {
+        debugger
+        if (res.status === 204) {
+          props.setNftsInCart(
+            props.nftsInCart.filter((nfts) => nfts.id !== nftId),
+          )
+        }
+      })
+      .catch((err) => {
+        toast.error(err.message)
+      })
   }
 
   useEffect(() => {
@@ -154,12 +161,9 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
             sx={{ marginTop: '1rem', marginRight: '1rem' }}
           >
             {' '}
-            {
-              props.nftsInCart.length ?
-                <>{props.nftsInCart.length} - items{' '}</>
-                :
-                undefined
-            }
+            {props.nftsInCart.length ? (
+              <>{props.nftsInCart.length} - items </>
+            ) : undefined}
           </Typography>
         </Stack>
 
@@ -174,8 +178,8 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
             marginRight: '1rem',
           }}
         >
-          {props.loading
-            ? [...new Array(3)].map(() => (
+          {props.loading ? (
+            [...new Array(3)].map(() => (
               <Stack
                 direction="row"
                 spacing={4}
@@ -211,72 +215,72 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                 </Stack>
               </Stack>
             ))
-            : props.nftsInCart.length > 0 ?
-              props.nftsInCart.map((nft) => (
-                <Stack
-                  direction="row"
-                  spacing={4}
-                  sx={{
-                    paddingLeft: '1rem',
-                    width: 'auto',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <Avatar
-                    src={nft.dataUri ? nft.dataUri : undefined}
-                    height={62}
-                    width={62}
-                    borderRadius={0}
-                    responsive
-                  >
-                    <ImageNotSupportedOutlinedIcon />
-                  </Avatar>
-                  <Stack
-                    direction="column"
-                    spacing={1}
-                    sx={{ width: 'auto', minWidth: '60%' }}
-                  >
-                    <Typography
-                      size="h4"
-                      weight="Medium"
-                      display="initial !important"
-                      noWrap
-                      sx={{ cursor: 'pointer' }}
-                    >
-                      {' '}
-                      {nft.name}{' '}
-                    </Typography>
-                    <Typography
-                      size="body2"
-                      weight="Light"
-                      display="initial !important"
-                      noWrap
-                      color="#C4C4C4"
-                      sx={{ cursor: 'pointer' }}
-                    >
-                      {' '}
-                      {nft.ipfsHash}{' '}
-                    </Typography>
-                  </Stack>
-                  <StyledDiv onClick={() => handleDeleteFromBasket(nft.id)}>
-                    <StyledClearIcon />
-                  </StyledDiv>
-                </Stack>
-              ))
-              :
-              <Typography
-                size="h5"
-                weight="Medium"
-                display="initial !important"
-                noWrap
-                align="center"
-                color="#C4C4C4"
-                sx={{ cursor: 'pointer' }}
+          ) : props.nftsInCart.length > 0 ? (
+            props.nftsInCart.map((nft) => (
+              <Stack
+                direction="row"
+                spacing={4}
+                sx={{
+                  paddingLeft: '1rem',
+                  width: 'auto',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                }}
               >
-                {'Empty Shopping Cart..'}
-              </Typography>
-          }
+                <Avatar
+                  src={nft.dataUri ? nft.dataUri : undefined}
+                  height={62}
+                  width={62}
+                  borderRadius={0}
+                  responsive
+                >
+                  <ImageNotSupportedOutlinedIcon />
+                </Avatar>
+                <Stack
+                  direction="column"
+                  spacing={1}
+                  sx={{ width: 'auto', minWidth: '60%' }}
+                >
+                  <Typography
+                    size="h4"
+                    weight="Medium"
+                    display="initial !important"
+                    noWrap
+                    sx={{ cursor: 'pointer' }}
+                  >
+                    {' '}
+                    {nft.name}{' '}
+                  </Typography>
+                  <Typography
+                    size="body2"
+                    weight="Light"
+                    display="initial !important"
+                    noWrap
+                    color="#C4C4C4"
+                    sx={{ cursor: 'pointer' }}
+                  >
+                    {' '}
+                    {nft.ipfsHash}{' '}
+                  </Typography>
+                </Stack>
+                <StyledDiv onClick={() => handleDeleteFromBasket(nft.id)}>
+                  <StyledClearIcon />
+                </StyledDiv>
+              </Stack>
+            ))
+          ) : (
+            <Typography
+              size="h5"
+              weight="Medium"
+              display="initial !important"
+              noWrap
+              align="center"
+              color="#C4C4C4"
+              sx={{ cursor: 'pointer' }}
+            >
+              {'Empty Shopping Cart..'}
+            </Typography>
+          )}
 
           <FlexSpacer />
 
@@ -285,7 +289,11 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
               size="medium"
               label="Checkout"
               disabled={props.nftsInCart.length === 0}
-              sx={{ bottom: 0, marginLeft: '1rem', marginRight: '1rem' }}
+              sx={{
+                bottom: 0,
+                marginLeft: '1rem',
+                marginRight: '1rem',
+              }}
             />
           ) : undefined}
         </Stack>

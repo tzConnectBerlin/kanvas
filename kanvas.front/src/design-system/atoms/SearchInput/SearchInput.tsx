@@ -4,16 +4,16 @@ import SearchRounded from '@mui/icons-material/SearchRounded'
 import { forwardRef } from 'react'
 import { Theme } from '@mui/material'
 import {
-	InputBase as MInputBase,
-	InputBaseProps as MInputBaseProps,
+  InputBase as MInputBase,
+  InputBaseProps as MInputBaseProps,
 } from '@mui/material'
 
 interface InputBaseProps extends MInputBaseProps {
-	open: boolean
+  open: boolean
 }
 
 interface MInputBasePropsStyled {
-	theme?: Theme
+  theme?: Theme
 }
 
 const Search = styled.div<{ theme?: Theme }>`
@@ -63,7 +63,7 @@ const StyledSearchRounded = styled(SearchRounded)`
   color: #c4c4c4 !important;
 `
 
-const StyledInputBase = styled(MInputBase) <MInputBasePropsStyled>`
+const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
   color: inherit;
   padding-left: 40px;
   height: 100%;
@@ -101,20 +101,20 @@ const StyledInputBase = styled(MInputBase) <MInputBasePropsStyled>`
 `
 
 export const SearchInput = forwardRef<HTMLInputElement, InputBaseProps>(
-	({ ...props }, ref) => {
-		return (
-			<Search>
-				<SearchIconWrapper>
-					<StyledSearchRounded fontSize="small" />
-				</SearchIconWrapper>
-				<StyledInputBase
-					inputRef={ref}
-					inputProps={{ 'aria-label': 'search' }}
-					onChange={props.onChange}
-					onFocus={props.onFocus}
-					onBlur={props.onBlur}
-				/>
-			</Search>
-		)
-	},
+  ({ ...props }, ref) => {
+    return (
+      <Search>
+        <SearchIconWrapper>
+          <StyledSearchRounded fontSize="small" />
+        </SearchIconWrapper>
+        <StyledInputBase
+          inputRef={ref}
+          inputProps={{ 'aria-label': 'search' }}
+          onChange={props.onChange}
+          onFocus={props.onFocus}
+          onBlur={props.onBlur}
+        />
+      </Search>
+    )
+  },
 )
