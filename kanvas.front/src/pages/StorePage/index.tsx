@@ -8,12 +8,13 @@ import TreeView from '../../design-system/molecules/TreeView/TreeView'
 import StoreFilters from '../../design-system/organismes/StoreFilters'
 
 import { useEffect, useState } from 'react'
-import { Stack, Theme, Pagination } from '@mui/material'
+import { Stack, Theme, Pagination, Container } from '@mui/material'
 import { CustomButton } from '../../design-system/atoms/Button'
 import { CustomSelect } from '../../design-system/atoms/Select'
 import { Typography } from '../../design-system/atoms/Typography'
 import { useLocation, useHistory } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import mockNft from '../../_mocks/mockNft'
 
 const StyledStack = styled(Stack)`
   overflow: hidden;
@@ -21,15 +22,19 @@ const StyledStack = styled(Stack)`
   width: 100%;
   height: 100%;
 `
+const StyledContentStack = styled(Stack)`
+  flex-direction: row;
 
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`
 const StyledListIcon = styled(ListIcon)<{ theme?: Theme }>`
   color: ${(props) => props.theme.palette.text.primary};
   padding-right: 1rem;
 `
 
 const StyledPagination = styled(Pagination)<{ theme?: Theme }>`
-  margin-right: 1.4rem;
-
   .MuiPaginationItem-root {
     border-radius: 0;
 
@@ -172,7 +177,7 @@ const StorePage = () => {
 
   return (
     <PageWrapper>
-      <StyledStack direction="column" spacing={3}>
+      <Container maxWidth="xl">
         <FlexSpacer minHeight={10} />
 
         <Typography
@@ -196,10 +201,11 @@ const StorePage = () => {
             label={`Filters ${
               selectedFilters.length > 0 ? `  - ${selectedFilters.length}` : ''
             }`}
-            sx={{ marginLeft: '1.5rem !important' }}
             disabled={nftsResponse.loading}
           />
+
           <FlexSpacer />
+
           <CustomSelect
             id="Sort filter - store page"
             selectedOption={selectedSort}
@@ -208,7 +214,7 @@ const StorePage = () => {
           />
         </Stack>
 
-        <Stack direction="row">
+        <StyledContentStack>
           {/* TODO: find a better structure to pass the different filters */}
           <StoreFilters
             availableFilters={availableFilters}
@@ -219,7 +225,7 @@ const StorePage = () => {
             loading={categoriesResponse.loading}
           />
 
-          <NftGrid
+          {/* <NftGrid
             open={filterOpen}
             nfts={
               selectedFilters.length === 0
@@ -227,8 +233,15 @@ const StorePage = () => {
                 : nftsFilteredResponse.data?.nfts
             }
             loading={nftsResponse.loading || nftsFilteredResponse.loading}
+          /> */}
+
+          <NftGrid
+            nfts={mockNft}
+            open={filterOpen}
+            emptyMessage={'No Nfts in collection yet'}
+            emptyLink={'Click here to buy some in the store.'}
           />
-        </Stack>
+        </StyledContentStack>
 
         <Stack direction="row">
           <FlexSpacer />
@@ -247,7 +260,7 @@ const StorePage = () => {
         </Stack>
 
         <FlexSpacer minHeight={5} />
-      </StyledStack>
+      </Container>
     </PageWrapper>
   )
 }

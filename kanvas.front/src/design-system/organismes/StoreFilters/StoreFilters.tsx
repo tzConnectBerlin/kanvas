@@ -54,12 +54,14 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
 }
 
 const StyledUl = styled.ul<StyledStoreFiltersProps>`
-  width: ${(props) => (props.openFilters ? '15rem' : '0rem')};
-
-  padding-top: 0.5rem;
-  padding-left: ${(props) => (props.openFilters ? '1.5rem' : '0rem')};
-
+  width: 100%;
+  padding: 1.5rem 0;
   transition: width 0.2s;
+
+  @media (min-width: 768px) {
+    width: ${(props) => (props.openFilters ? '15rem' : '0')};
+    margin-right: 1.5rem;
+  }
 `
 
 const StyledLi = styled.li<StyledStoreFiltersProps>`

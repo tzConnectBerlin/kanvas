@@ -19,7 +19,6 @@ interface SelectedProps extends MuiSelectProps {
 
 const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
   margin: 0;
-  margin-right: 1.4rem;
 
   .MuiOutlinedInput-root.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-formControl:after {
     border: none;
