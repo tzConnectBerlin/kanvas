@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from '@apollo/client'
 
 export const GET_TAGS_SUGGESTIONS = gql`
   query GetTagsSuggestions {
@@ -9,7 +9,7 @@ export const GET_TAGS_SUGGESTIONS = gql`
 `
 
 export const GET_TAGS_SEARCH = gql`
-  query GetTagsSearch ($searchString: String!) {
+  query GetTagsSearch($searchString: String!) {
     getTagsSearch(searchString: $searchString) {
       name
     }
@@ -17,27 +17,27 @@ export const GET_TAGS_SEARCH = gql`
 `
 
 export const GET_PROFILES_SEARCH = gql`
-  query GetProfilesSearch ($searchString: String!) {
+  query GetProfilesSearch($searchString: String!) {
     getUsersSearch(searchString: $searchString) {
-      firstName,
-      lastName,
-      userName,
+      firstName
+      lastName
+      userName
       profilePicture
     }
   }
 `
 
 export const GET_ARTWORKS_SEARCH = gql`
-  query GetArtworksSearch ($searchString: String!) {
+  query GetArtworksSearch($searchString: String!) {
     getArtworksSearch(searchString: $searchString) {
-      title,
+      title
       url
     }
   }
 `
 
 export const CHECK_IF_USERNAME_VALID = gql`
-  query CheckIfUsernameValid ($userName: String!) {
-    checkIfUsernameValid (userName: $userName)
+  query CheckIfUsernameValid($userName: String!) {
+    checkIfUsernameValid(userName: $userName)
   }
 `

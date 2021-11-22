@@ -6,7 +6,6 @@ import TreeView from '../../molecules/TreeView/TreeView';
 import { Stack } from '@mui/material';
 import { FC, useState } from 'react';
 
-
 interface FilterProps {
     name: string;
     collapsed: boolean;

@@ -1,2 +1,2 @@
-export { NftCard } from './NftCard';
-export type { NftCardProps } from './NftCard';
+export { NftCard } from './NftCard'
+export type { NftCardProps } from './NftCard'

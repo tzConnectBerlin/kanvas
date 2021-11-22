@@ -1,2 +1,1 @@
-export { CustomCircularProgress as default } from './CircularProgress'; 
-
+export { CustomCircularProgress as default } from './CircularProgress'

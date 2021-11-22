@@ -6,6 +6,8 @@ Built with [Nest](https://github.com/nestjs/nest) framework.
 
 Please note that you must use Yarn, not NPM to install dependencies.
 
+Usage of the API is documented here: https://tzconnectberlin.github.io/slate
+
 ## Installation
 
 ```bash
