@@ -158,6 +158,12 @@ const TreeView : FC<TreeViewProps> = ({selectedFilters, setSelectedFilters, ...p
         return count[element]
     }
 
+    useEffect(() => {
+        if (selectedFilters.length === 0) {
+            setHighlightedParents([])
+        }
+    }, [selectedFilters])
+
     const [activeRef, setActiveRef] = useState<any[]>([])
 
     const renderTree : any = (parentNode: any, children: any) => {
