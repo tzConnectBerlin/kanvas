@@ -3,7 +3,7 @@ import Typography from '../../atoms/Typography'
 import FlexSpacer from '../../atoms/FlexSpacer'
 
 import { Checkbox, Stack, Theme } from '@mui/material';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 
 interface StyledTreeViewProps {
 	open?: boolean
