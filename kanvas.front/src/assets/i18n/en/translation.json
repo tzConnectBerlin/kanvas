@@ -71,5 +71,10 @@
       "headline": "Latest NFTs",
       "link": "See all"
     }
+  },
+  "cookies": {
+    "text": "By continuing to use this site you agree to the use of cookies. Learn more in our ",
+    "button": "Agree and Close",
+    "link": "Privacy Policy"
   }
 }

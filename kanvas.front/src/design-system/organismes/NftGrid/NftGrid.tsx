@@ -22,18 +22,19 @@ export interface NftGridProps {
 }
 
 const StyledGrid = styled(Grid)`
+  flex-direction: row;
+  flex-wrap: wrap;
   transition: all 0.2s;
   width: 100%;
   max-width: none !important;
   flex-basis: 100% !important;
-  margin: 0;
+  margin: 0 -2rem 2rem 0;
   padding: 0;
   max-height: 60%;
 `
 
 export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
   const theme = useTheme()
- 
 
   return (
     <>
@@ -46,7 +47,13 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
           columnSpacing={{ xs: 1, sm: 2, md: 5 }}
         >
           {props.nfts.map((nft) => (
-            <Grid item lg={props.open ? 4 : 3} md={props.open ? 6 : 4} sm={6} xs={12}>
+            <Grid
+              item
+              lg={props.open ? 4 : 3}
+              md={props.open ? 6 : 4}
+              sm={6}
+              xs={12}
+            >
               <NftCard
                 id={nft.id.toString()}
                 name={nft.name}
@@ -67,8 +74,20 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
           columnSpacing={{ xs: 1, sm: 2, md: 5 }}
         >
           {[...new Array(9)].map((nft) => (
-            <Grid item lg={props.open ? 4 : 3} md={props.open ? 6 : 4} sm={6} xs={12}>
-              <NftCard name={''} ipfsHash={''} price={0} openFilters={props.openFilters} loading={true} />
+            <Grid
+              item
+              lg={props.open ? 4 : 3}
+              md={props.open ? 6 : 4}
+              sm={6}
+              xs={12}
+            >
+              <NftCard
+                name={''}
+                ipfsHash={''}
+                price={0}
+                openFilters={props.openFilters}
+                loading={true}
+              />
             </Grid>
           ))}
         </Grid>

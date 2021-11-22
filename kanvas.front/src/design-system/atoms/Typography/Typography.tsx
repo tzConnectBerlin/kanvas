@@ -8,7 +8,7 @@ import {
 } from '@mui/material'
 
 export interface TypographyProps extends Omit<MTypographyProps, 'variant'> {
-  weight: 'SemiBold' | 'Medium' | 'Light'
+  weight: 'SemiBold' | 'Medium' | 'Light' | 'Currency'
   size?:
     | 'body1'
     | 'body2'

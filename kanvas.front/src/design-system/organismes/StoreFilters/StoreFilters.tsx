@@ -60,7 +60,7 @@ const StyledUl = styled.ul<StyledStoreFiltersProps>`
 
   @media (min-width: 768px) {
     width: ${(props) => (props.openFilters ? '15rem' : '0')};
-    margin-right: 1.5rem;
+    margin-right: ${(props) => (props.openFilters ? '1.5rem' : '0')};
   }
 `
 

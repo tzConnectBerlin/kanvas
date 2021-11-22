@@ -34,6 +34,10 @@ const StyledImgWrapper = styled.div<{ theme?: Theme }>`
   overflow: hidden;
   min-height: 90vw;
 
+  @media (min-width: 600px) {
+    min-height: 40vw;
+  }
+
   @media (min-width: 650px) {
     min-height: 35vw;
   }
@@ -43,11 +47,12 @@ const StyledImgWrapper = styled.div<{ theme?: Theme }>`
   }
 
   @media (min-width: 1200px) {
-    min-height: 17.5vw;
+    min-height: 17vw;
   }
 
-  @media (min-width: 1400px) {    
-    max-height: 340px;
+  @media (min-width: 1440px) {
+    min-height: 330px;    
+    max-height: 370px;    
   }
 `
 const StyledImg = styled.img<{ theme?: Theme }>`
@@ -79,12 +84,13 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
         flexDirection: 'column',
         width: '100%',
         minHeight: '100%',
+        cursor: 'pointer'
       }}
     >
-      <CardActionArea>
-        <StyledImgWrapper>
+         <StyledImgWrapper>
           <StyledImg data-object-fit="cover" src={props.dataUri} alt="random" />
         </StyledImgWrapper>
+
         <CardContent
           sx={{
             display: 'flex',
@@ -98,9 +104,12 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
             <Typography weight="SemiBold" size="h4">
               {props.name}
             </Typography>
-            <Typography weight="Light" size="body">
-              Artist name
-            </Typography>
+
+            <Box flexGrow="1">
+              <Typography weight="Light" size="body">
+                Long Artist name here
+              </Typography>
+            </Box>
           </StyledBioWrapper>
 
           <Box
@@ -112,14 +121,20 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
             <Typography weight="Light" size="body">
               Remaining time
             </Typography>
-            <Typography weight="SemiBold" size="h3" marginLeft="auto">
-              {' '}
-              {props.price ? props.price : '- '} {CurrencyEnum.TEZ}{' '}
-            </Typography>
+
+            <Box display="flex" flexDirection="row" marginLeft="auto">
+              <Typography weight="SemiBold" size="h3" marginLeft="auto">
+                {' '}
+                {props.price ? props.price : '- '}
+              </Typography>
+
+              <Typography weight="Currency" size="h3" marginLeft="auto">
+                {CurrencyEnum.TEZ}{' '}
+              </Typography>
+            </Box>
           </Box>
         </CardContent>
-      </CardActionArea>
-    </Card>
+     </Card>
   ) : (
     <Stack spacing={1}>
       <Skeleton variant="rectangular" width={'100%'} height={302} />

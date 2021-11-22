@@ -27,3 +27,12 @@
     src: 
         url('Poppins-Light.woff2') format('woff2');    
 }
+
+
+/* Currency */
+
+@font-face {
+    font-family: 'currency';
+    src: 
+        url('Junicode-Bold.woff2') format('woff2');    
+}
