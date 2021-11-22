@@ -7,6 +7,7 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined'
 import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded'
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded'
+
 import { FC, useEffect, useState } from 'react'
 import { KukaiEmbed } from 'kukai-embed'
 import { NavLink, useHistory, useLocation } from 'react-router-dom'
