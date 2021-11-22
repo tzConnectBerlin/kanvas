@@ -232,7 +232,6 @@ export const SignInModal: FC<SignInModalProps> = ({
 
   useEffect(() => {
     if (signUserResponse.data) {
-      debugger
       setSocialLoading(false)
       setBeaconLoading(false)
 
@@ -279,7 +278,6 @@ export const SignInModal: FC<SignInModalProps> = ({
     if (signUserResponse.error) {
       setSocialLoading(false)
       setBeaconLoading(false)
-      debugger
 
       if (
         signUserResponse.error?.response?.data.message === 'User not registered'

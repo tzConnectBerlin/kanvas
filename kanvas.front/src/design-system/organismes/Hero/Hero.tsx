@@ -47,7 +47,7 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
 
   useEffect(() => {
     if (nftResponse.error) {
-      console.log(nftResponse, 'debugger')
+      console.log(nftResponse, '')
     }
   }, [nftResponse])
 

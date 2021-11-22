@@ -6,7 +6,6 @@ import { Theme } from '@mui/material'
 import { KukaiEmbed } from 'kukai-embed'
 import { StickyLogo } from '../../atoms/StickyLogo'
 import { Menu } from '../../molecules/Menu'
-import { useHistory } from 'react-router-dom'
 import { IUser } from '../../../interfaces/user'
 import useAxios from 'axios-hooks'
 import { BeaconWallet } from '@taquito/beacon-wallet'
@@ -74,8 +73,6 @@ export const Header: FC<HeaderProps> = ({
   const handleOpen = () => setOpen(true)
   const handleCloseModal = () => setOpen(false)
 
-  const history = useHistory()
-
   // const loggedUser = {data: undefined, loading: false}
   const [loggedUser] = useAxios({
     url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logged_user',
@@ -111,17 +108,14 @@ export const Header: FC<HeaderProps> = ({
       <Spacer display={!isSearchOpen} />
 
       <Menu
-        history={history}
         loading={loggedUser.loading}
         user={currentLoggedUser}
         setSearchOpen={setIsSearchOpen}
         isSearchOpen={isSearchOpen}
-        notifications={notifications}
         selectedTheme={selectedTheme}
         switchTheme={switchTheme}
         setOpen={setOpen}
         onLogout={onLogout}
-        onCreateAccount={onCreateAccount}
         openOrCloseShoppingCart={() => props.setCartOpen(!props.cartOpen)}
         nftsInCartNumber={props.nftsInCartNumber}
       />

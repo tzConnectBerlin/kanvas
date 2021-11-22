@@ -172,7 +172,7 @@ const TreeView: FC<TreeViewProps> = ({
     }
   }
 
-  // Debugger function
+  //  function
   const countElInArr = (element: number, arr: any[]) => {
     const count: any = {}
     for (const element of arr) {

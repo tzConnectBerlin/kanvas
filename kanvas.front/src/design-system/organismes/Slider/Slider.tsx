@@ -55,7 +55,7 @@ export const Slider: FC<SliderProps> = ({ ...props }) => {
   const [nftResponse, getNft] = useAxios(DART_REDIRECT_URI + `/nfts/${id}`)
   useEffect(() => {
     if (nftResponse.error) {
-      console.log(nftResponse, 'debugger')
+      console.log(nftResponse, '')
     }
   }, [nftResponse])
 

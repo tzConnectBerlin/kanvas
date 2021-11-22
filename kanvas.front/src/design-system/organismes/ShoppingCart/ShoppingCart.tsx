@@ -1,16 +1,14 @@
 import styled from '@emotion/styled'
-import ClearIcon from '@mui/icons-material/Clear'
 import Typography from '../../atoms/Typography'
 import FlexSpacer from '../../atoms/FlexSpacer'
-import Avatar from '../../atoms/Avatar'
 import CustomButton from '../../atoms/Button'
-import ImageNotSupportedOutlinedIcon from '@mui/icons-material/ImageNotSupportedOutlined'
+import ShoppingCartItem from '../../molecules/ShoppingCartItem'
+import useAxios from 'axios-hooks'
 
 import { FC, useEffect } from 'react'
-import { Skeleton, Stack, Theme } from '@mui/material'
-import { INft } from '../../../interfaces/artwork'
-import useAxios from 'axios-hooks'
 import { toast } from 'react-toastify'
+import { Stack, Theme } from '@mui/material'
+import { INft } from '../../../interfaces/artwork'
 
 interface ShoppingCartProps {
   nftsInCart: INft[]
@@ -72,52 +70,26 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
   }
 `
 
-const StyledDiv = styled.div<{ theme?: Theme }>`
-  height: 1.5rem;
-  width: 1.5rem;
-  margin: 0 !important;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 1px solid ${(props) => props.theme.palette.text.primary};
-
-  :hover {
-    outline: 1px solid ${(props) => props.theme.palette.text.primary};
-    transition: outline 0.1s;
-  }
-
-  :active {
-    outline: 1px solid #c4c4c4;
-    transition: outline 0.1s;
-  }
-`
-
-const StyledClearIcon = styled(ClearIcon)<{ theme?: Theme }>`
-  color: ${(props) => props.theme.palette.text.primary};
-`
-
 export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
-  const [deleteFromCartResponse, deleteFromCart] = useAxios(
-    process.env.REACT_APP_API_SERVER_BASE_URL + '/cart/delete/:id',
-    { manual: true },
-  )
+  const [deleteFromCartResponse, deleteFromCart] = useAxios('', {
+    manual: true,
+  })
 
   const handleDeleteFromBasket = (nftId: number) => {
-    deleteFromCart({
-      url:
-        process.env.REACT_APP_API_SERVER_BASE_URL +
-        `/users/cart/remove/` +
-        nftId.toString(),
-      withCredentials: true,
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'Access-Control-Allow-Origin':
-          process.env.REACT_APP_API_SERVER_BASE_URL ?? 'http://localhost:3000',
+    deleteFromCart(
+      {
+        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/users/cart/remove/' + nftId,
+        withCredentials: true,
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'Access-Control-Allow-Origin':
+            process.env.REACT_APP_API_SERVER_BASE_URL ??
+            'http://localhost:3000',
+        },
       },
-    })
+    )
       .then((res) => {
-        debugger
         if (res.status === 204) {
           props.setNftsInCart(
             props.nftsInCart.filter((nfts) => nfts.id !== nftId),
@@ -161,9 +133,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
             sx={{ marginTop: '1rem', marginRight: '1rem' }}
           >
             {' '}
-            {props.nftsInCart.length ? (
-              <>{props.nftsInCart.length} - items </>
-            ) : undefined}
+            {props.nftsInCart.length && <>{props.nftsInCart.length} - items </>}
           </Typography>
         </Stack>
 
@@ -178,113 +148,29 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
             marginRight: '1rem',
           }}
         >
-          {props.loading ? (
+          {props.loading ?
             [...new Array(3)].map(() => (
-              <Stack
-                direction="row"
-                spacing={4}
-                sx={{ width: 'auto', alignItems: 'center' }}
-              >
-                <Skeleton
-                  animation="pulse"
-                  width={65}
-                  height={65}
-                  sx={{
-                    borderRadius: 0,
-                    transform: 'none',
-                    transformOrigin: 'none',
-                  }}
-                />
-                <Stack
-                  direction="column"
-                  spacing={1}
-                  sx={{ width: 'auto', minWidth: '60%' }}
-                >
-                  <Skeleton
-                    animation="pulse"
-                    height={14}
-                    width="60%"
-                    sx={{ borderRadius: 0 }}
-                  />
-                  <Skeleton
-                    animation="pulse"
-                    height={14}
-                    width="40%"
-                    sx={{ borderRadius: 0 }}
-                  />
-                </Stack>
-              </Stack>
+              <ShoppingCartItem loading={true} removeNft={() => { }} />
             ))
-          ) : props.nftsInCart.length > 0 ? (
-            props.nftsInCart.map((nft) => (
-              <Stack
-                direction="row"
-                spacing={4}
-                sx={{
-                  paddingLeft: '1rem',
-                  width: 'auto',
-                  alignItems: 'center',
-                  cursor: 'pointer',
-                }}
-              >
-                <Avatar
-                  src={nft.dataUri ? nft.dataUri : undefined}
-                  height={62}
-                  width={62}
-                  borderRadius={0}
-                  responsive
+            : props.nftsInCart.length > 0 ?
+              props.nftsInCart.map((nft) => (
+                <ShoppingCartItem loading={false} nft={nft} removeNft={handleDeleteFromBasket} />
+              ))
+              : (
+                <Typography
+                  size="h5"
+                  weight="Medium"
+                  display="initial !important"
+                  align="center"
+                  color="#C4C4C4"
                 >
-                  <ImageNotSupportedOutlinedIcon />
-                </Avatar>
-                <Stack
-                  direction="column"
-                  spacing={1}
-                  sx={{ width: 'auto', minWidth: '60%' }}
-                >
-                  <Typography
-                    size="h4"
-                    weight="Medium"
-                    display="initial !important"
-                    noWrap
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    {' '}
-                    {nft.name}{' '}
-                  </Typography>
-                  <Typography
-                    size="body2"
-                    weight="Light"
-                    display="initial !important"
-                    noWrap
-                    color="#C4C4C4"
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    {' '}
-                    {nft.ipfsHash}{' '}
-                  </Typography>
-                </Stack>
-                <StyledDiv onClick={() => handleDeleteFromBasket(nft.id)}>
-                  <StyledClearIcon />
-                </StyledDiv>
-              </Stack>
-            ))
-          ) : (
-            <Typography
-              size="h5"
-              weight="Medium"
-              display="initial !important"
-              noWrap
-              align="center"
-              color="#C4C4C4"
-              sx={{ cursor: 'pointer' }}
-            >
-              {'Empty Shopping Cart..'}
-            </Typography>
-          )}
+                  {'Empty Shopping Cart..'}
+                </Typography>
+              )}
 
           <FlexSpacer />
 
-          {props.open ? (
+          {props.open &&
             <CustomButton
               size="medium"
               label="Checkout"
@@ -295,7 +181,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                 marginRight: '1rem',
               }}
             />
-          ) : undefined}
+          }
         </Stack>
       </WrapperCart>
     </>

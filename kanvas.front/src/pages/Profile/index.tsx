@@ -176,7 +176,6 @@ const Profile: FC<ProfileProps> = () => {
 
   // Edit profile section
   const editProfile = () => {
-    debugger
     if (user.data) {
       const currentUser = {
         userName: 'Tristan',
