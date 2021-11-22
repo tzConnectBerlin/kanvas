@@ -61,7 +61,7 @@ const StyledGrid = styled(Grid)<{ isMobile: boolean }>`
     &:not(:last-child) {
       margin-right: ${({ isMobile }) => (isMobile ? 'initial' : '2rem')};
     }
-    
+
     &:not(:first-child) {
       margin-bottom: ${({ isMobile }) => (isMobile ? '1.5rem' : 'initial')};
     }
@@ -92,6 +92,7 @@ export const CookiesBanner: React.FC<CookiesBannerProps> = ({
 
   const { primary } = theme.palette
   const isMobile = useMediaQuery('(max-width:600px)')
+  const isDesktop = useMediaQuery('(min-width:1300px)')
   const [cookie, setCookie] = React.useState(standard)
   const addCookie = (cookies: { [name: string]: boolean }) => {
     document.cookie = `user=${JSON.stringify(cookies)}; max-age=8640000;}`
@@ -107,41 +108,25 @@ export const CookiesBanner: React.FC<CookiesBannerProps> = ({
       <Grid container direction="row" width="100%">
         <Grid
           item
+          xs={12}
           container
-          paddingLeft={isMobile ? '1.5rem' : '3rem'}
-          paddingTop="1rem"
-          direction="row"
+          direction={isMobile ? 'column' : 'row'}
+          padding={isMobile ? '3rem' : '3rem 3rem 2rem'}
+          flexGrow={1}
         >
-          <Grid
-            item
-            xs={10}
-            container
-            direction="row"
-            paddingTop={isMobile ? '.5rem' : '2rem'}
-            paddingRight={isMobile ? '1.5rem' : '3rem'}
-            flexGrow={1}
+          <Typography
+            size="h3"
+            weight="Light"
+            display="inline"
+            style={{
+              marginBottom: !isDesktop ? '2rem' : 0,
+            }}
           >
-            <Typography size="h2" weight="Light" display="inline">
-              {t('cookies.text')}
-              <StyledLink to="/privacy">{t('cookies.link')}</StyledLink>
-              {' .'}
-            </Typography>
+            {t('cookies.text')}
+            <StyledLink to="/privacy">{t('cookies.link')}</StyledLink>
+            {' .'}
+          </Typography>
 
-            <FlexSpacer minHeight={2} />
-          </Grid>
-        </Grid>
-      </Grid>
-
-      <Grid
-        item
-        container
-        direction="column"
-        paddingTop="1rem"
-        paddingLeft={isMobile ? '1.5rem' : '3rem'}
-        paddingBottom={isMobile ? '1.5rem' : '3rem'}
-        paddingRight={isMobile ? '1.5rem' : '3rem'}
-      >
-        <StyledGrid isMobile={isMobile} container>
           <CustomButton
             fullWidth={!!isMobile}
             variant="text"
@@ -152,9 +137,10 @@ export const CookiesBanner: React.FC<CookiesBannerProps> = ({
             style={{
               order: isMobile ? 99 : 0,
               color: theme.palette.primary.main,
+              marginLeft: isDesktop ? 'auto' : '0',
             }}
           ></CustomButton>
-        </StyledGrid>
+        </Grid>
       </Grid>
     </StyledPaper>
   )
