@@ -4,16 +4,19 @@ import Typography from '../../atoms/Typography'
 import FlexSpacer from '../../atoms/FlexSpacer'
 import Avatar from '../../atoms/Avatar'
 import CustomButton from '../../atoms/Button'
-import PageWrapper from '../../commons/PageWrapper'
+import ImageNotSupportedOutlinedIcon from '@mui/icons-material/ImageNotSupportedOutlined';
 
 import { FC, useEffect } from 'react'
 import { Skeleton, Stack, Theme } from '@mui/material'
 import { INft } from '../../../interfaces/artwork'
+import useAxios from 'axios-hooks'
+import { toast } from 'react-toastify'
 
 interface ShoppingCartProps {
   nftsInCart: INft[]
+  setNftsInCart: Function
   closeCart: Function
-  deleteNftFromBasket: Function
+  loading: boolean
   open: boolean
 }
 
@@ -89,79 +92,36 @@ const StyledDiv = styled.div<{ theme?: Theme }>`
   }
 `
 
-const StyledClearIcon = styled(ClearIcon)<{ theme?: Theme }>`
+const StyledClearIcon = styled(ClearIcon) <{ theme?: Theme }>`
   color: ${(props) => props.theme.palette.text.primary};
 `
 
-const mokeNft = [
-  {
-    id: 4,
-    name: 'first_nft',
-    ipfsHash: 'htrfxhdrhrtdhrsdt',
-    price: 10,
-    metadata: {
-      key2: 'value1',
-      test: 'hey',
-    },
-    dataUrl: 'heyyy',
-    contract: 'contract_address',
-    tokenId: 'teojteojt',
-  },
-  {
-    id: 3,
-    name: 'second_nft',
-    ipfsHash: 'thdrxh6thxfgbn',
-    price: 12,
-    metadata: {
-      key2: 'value1',
-      test: 'hey',
-    },
-    dataUrl: 'heyyy',
-    contract: 'contract_address',
-    tokenId: 'teojteojt',
-  },
-  {
-    id: 4,
-    name: 'third_nft',
-    ipfsHash: 'htrdthdrthrddhxr',
-    price: 10,
-    metadata: {
-      key2: 'value1',
-      test: 'hey',
-    },
-    dataUrl: 'heyyy',
-    contract: 'contract_address',
-    tokenId: 'teojteojt',
-  },
-  {
-    id: 3,
-    name: 'fourth_nft',
-    ipfsHash: 'hthtyutjmnxdrfdthrdy',
-    price: 12,
-    metadata: {
-      key2: 'value1',
-      test: 'hey',
-    },
-    dataUrl: 'heyyy',
-    contract: 'contract_address',
-    tokenId: 'teojteojt',
-  },
-  {
-    id: 3,
-    name: 'fourth_nft',
-    ipfsHash: 'frewfreghewhtyerty',
-    price: 12,
-    metadata: {
-      key2: 'value1',
-      test: 'hey',
-    },
-    dataUrl: 'heyyy',
-    contract: 'contract_address',
-    tokenId: 'teojteojt',
-  },
-]
-
 export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
+
+  const [deleteFromCartResponse, deleteFromCart] = useAxios(
+    process.env.REACT_APP_API_SERVER_BASE_URL + '/cart/delete/:id',
+    { manual: true },
+  )
+
+  const handleDeleteFromBasket = (nftId: number) => {
+    deleteFromCart({
+      url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/cart/remove/` + nftId.toString(),
+      withCredentials: true,
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'Access-Control-Allow-Origin': process.env.REACT_APP_API_SERVER_BASE_URL?? 'http://localhost:3000'
+      }
+    }).then(res => {
+      debugger
+      if (res.status === 204) {
+        props.setNftsInCart(props.nftsInCart.filter(nfts => nfts.id !== nftId))
+      }
+    }).catch(err => {
+      toast.error(err.message)
+    })
+  }
+
   useEffect(() => {
     if (props.open) {
       document.body.style.overflow = 'hidden'
@@ -194,7 +154,12 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
             sx={{ marginTop: '1rem', marginRight: '1rem' }}
           >
             {' '}
-            {mokeNft.length} - items{' '}
+            {
+              props.nftsInCart.length ?
+                <>{props.nftsInCart.length} - items{' '}</>
+                :
+                undefined
+            }
           </Typography>
         </Stack>
 
@@ -209,44 +174,45 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
             marginRight: '1rem',
           }}
         >
-          {false
-            ? [{}, {}, {}].map(() => (
+          {props.loading
+            ? [...new Array(3)].map(() => (
+              <Stack
+                direction="row"
+                spacing={4}
+                sx={{ width: 'auto', alignItems: 'center' }}
+              >
+                <Skeleton
+                  animation="pulse"
+                  width={65}
+                  height={65}
+                  sx={{
+                    borderRadius: 0,
+                    transform: 'none',
+                    transformOrigin: 'none',
+                  }}
+                />
                 <Stack
-                  direction="row"
-                  spacing={4}
-                  sx={{ width: 'auto', alignItems: 'center' }}
+                  direction="column"
+                  spacing={1}
+                  sx={{ width: 'auto', minWidth: '60%' }}
                 >
                   <Skeleton
                     animation="pulse"
-                    width={65}
-                    height={65}
-                    sx={{
-                      borderRadius: 0,
-                      transform: 'none',
-                      transformOrigin: 'none',
-                    }}
+                    height={14}
+                    width="60%"
+                    sx={{ borderRadius: 0 }}
                   />
-                  <Stack
-                    direction="column"
-                    spacing={1}
-                    sx={{ width: 'auto', minWidth: '60%' }}
-                  >
-                    <Skeleton
-                      animation="pulse"
-                      height={14}
-                      width="60%"
-                      sx={{ borderRadius: 0 }}
-                    />
-                    <Skeleton
-                      animation="pulse"
-                      height={14}
-                      width="40%"
-                      sx={{ borderRadius: 0 }}
-                    />
-                  </Stack>
+                  <Skeleton
+                    animation="pulse"
+                    height={14}
+                    width="40%"
+                    sx={{ borderRadius: 0 }}
+                  />
                 </Stack>
-              ))
-            : mokeNft.map((nft) => (
+              </Stack>
+            ))
+            : props.nftsInCart.length > 0 ?
+              props.nftsInCart.map((nft) => (
                 <Stack
                   direction="row"
                   spacing={4}
@@ -258,12 +224,14 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                   }}
                 >
                   <Avatar
-                    src={nft.dataUrl}
+                    src={nft.dataUri ? nft.dataUri : undefined}
                     height={62}
                     width={62}
                     borderRadius={0}
                     responsive
-                  />
+                  >
+                    <ImageNotSupportedOutlinedIcon />
+                  </Avatar>
                   <Stack
                     direction="column"
                     spacing={1}
@@ -291,11 +259,24 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                       {nft.ipfsHash}{' '}
                     </Typography>
                   </Stack>
-                  <StyledDiv onClick={() => props.deleteNftFromBasket(nft.id)}>
+                  <StyledDiv onClick={() => handleDeleteFromBasket(nft.id)}>
                     <StyledClearIcon />
                   </StyledDiv>
                 </Stack>
-              ))}
+              ))
+              :
+              <Typography
+                size="h5"
+                weight="Medium"
+                display="initial !important"
+                noWrap
+                align="center"
+                color="#C4C4C4"
+                sx={{ cursor: 'pointer' }}
+              >
+                {'Empty Shopping Cart..'}
+              </Typography>
+          }
 
           <FlexSpacer />
 
@@ -303,7 +284,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
             <CustomButton
               size="medium"
               label="Checkout"
-              disabled={mokeNft.length === 0}
+              disabled={props.nftsInCart.length === 0}
               sx={{ bottom: 0, marginLeft: '1rem', marginRight: '1rem' }}
             />
           ) : undefined}

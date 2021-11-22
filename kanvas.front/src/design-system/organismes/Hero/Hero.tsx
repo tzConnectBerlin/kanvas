@@ -22,7 +22,13 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
     const { t } = useTranslation(['translation']);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
     const history = useHistory()
+    const navigateTo = (componentURL: string) => {
+        debugger
+        history.push(`/${componentURL}`)
+    }
+
     const [imgToVideoToggler, setImgToVideoToggler] = useState(true);
 
     const { id } = useParams<IProductParam>()
@@ -61,14 +67,14 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
                     size="h5"
                     weight="Light"
                     sx={{ pt: 2, mb: 1 }}
-                >                    
+                >
                     {t('home.hero.description_2')}
                 </Typography>
 
                 <FlexSpacer minHeight={3} />
 
                 <Stack direction="row">
-                    <CustomButton size="medium" label={t('home.hero.button_1')} href="/store" />
+                    <CustomButton size="medium" label={t('home.hero.button_1')} onClick={() => navigateTo('store')} />
                 </Stack>
             </Grid>
 
@@ -78,7 +84,7 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
                 { //Render Skeleton if image not loading
                     nftResponse.loading ?
                         <Skeleton height='40rem' width='40rem' sx={{ transform: 'none', maxWidth: isMobile ? '100%' : 480, marginLeft: 'auto' }} />
-                        
+
                         // Render Slider
                         : imgToVideoToggler ? (<Slider />)
 
@@ -86,7 +92,7 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
                             : (
                                 <Card sx={{ borderRadius: 0, marginLeft: 'auto', maxWidth: 750 }}>
                                     <CardActionArea>
-                                        <ButtonBase href="/product/1">
+                                        <ButtonBase onClick={() => navigateTo('sign-in')}>
                                             <CardMedia
                                                 component="img"
                                                 image="https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg"

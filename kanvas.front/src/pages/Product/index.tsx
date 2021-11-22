@@ -10,10 +10,12 @@ import { CustomButton } from '../../design-system/atoms/Button'
 import { Typography } from '../../design-system/atoms/Typography'
 import { INft } from '../../interfaces/artwork'
 import { useParams } from 'react-router-dom'
+import { toast } from 'react-toastify'
 
 export interface ProductPageProps {
 	theme?: Theme
-	addToBasket: Function
+	nftsInCart: INft[]
+	setNftsInCart: Function
 }
 
 const StyledStack = styled(Stack)`
@@ -50,11 +52,31 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
 		process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/${id}`,
 	)
 
+	const [addToCartResponse, addToCart] = useAxios(
+		process.env.REACT_APP_API_SERVER_BASE_URL + `/user/cart/add/`,
+		{ manual: true },
+	)
+
 	const handleAddToBasket = () => {
 		if (nftResponse.data) {
-			props.addToBasket(nftResponse.data.id)
+			addToCart({
+				url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/cart/add/` + nftResponse.data.id.toString(),
+				withCredentials: true,
+				method: 'POST',
+				headers: {
+					'content-type': 'application/json',
+					'Access-Control-Allow-Origin': process.env.REACT_APP_API_SERVER_BASE_URL?? 'http://localhost:3000'
+				}
+			}).then(res => {
+				if (res.status === 201) {
+					props.setNftsInCart([...props.nftsInCart, nftResponse.data])
+				}
+			}).catch(err => {
+				toast.error(err.message)
+			})
 		}
 	}
+
 
 	useEffect(() => {
 		if (nftResponse.error) {

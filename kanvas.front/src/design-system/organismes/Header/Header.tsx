@@ -27,9 +27,10 @@ export interface HeaderProps {
   onCreateAccount?: () => void
   cartOpen: boolean
   setCartOpen: Function
+  nftsInCartNumber: number
 }
 
-const StyledBox = styled(Box)<{ theme?: Theme }>`
+const StyledBox = styled(Box) <{ theme?: Theme }>`
   margin-bottom: -6rem;
   color: ${(props) => props.theme.palette.text.primary};
 
@@ -122,6 +123,7 @@ export const Header: FC<HeaderProps> = ({
         onLogout={onLogout}
         onCreateAccount={onCreateAccount}
         openOrCloseShoppingCart={() => props.setCartOpen(!props.cartOpen)}
+        nftsInCartNumber={props.nftsInCartNumber}
       />
 
       <SignInModal

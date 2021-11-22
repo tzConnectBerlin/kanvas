@@ -77,7 +77,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
 						md={props.open ? 9 : 6}
 
 					>
-						{[0, 0, 0, 0, 0, 0, 0, 0, 0].map((nft) => (
+						{[...new Array(9)].map((nft) => (
 							<StyledGridItem item
 								lg={props.open ? 4 : 3}
 								md={props.open ? 6 : 4}

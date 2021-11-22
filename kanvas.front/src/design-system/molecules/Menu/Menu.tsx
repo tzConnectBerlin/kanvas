@@ -10,7 +10,7 @@ import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded'
 import { FC, useEffect, useState } from 'react'
 import { KukaiEmbed } from 'kukai-embed'
 import { NavLink, useHistory, useLocation } from 'react-router-dom'
-import { Stack, Theme } from '@mui/material'
+import { Badge, Stack, Theme } from '@mui/material'
 import { CustomBadge } from '../../atoms/Badge'
 import { CustomButton } from '../../atoms/Button'
 import { Typography } from '../../atoms/Typography'
@@ -20,22 +20,23 @@ import { BeaconWallet } from '@taquito/beacon-wallet'
 import { useTranslation } from 'react-i18next'
 
 interface MenuProps {
-  user?: IUser
-  loading?: boolean
-  setOpen: Function
-  embedKukai?: KukaiEmbed
-  selectedTheme: string
-  beaconWallet?: BeaconWallet
-  switchTheme: Function
-  notifications?: number
-  isSearchOpen: boolean
-  setSearchOpen: Function
-  theme?: Theme
-  setSignedPayload?: Function
-  history: any
-  onLogout?: () => void
-  onCreateAccount?: () => void
-  openOrCloseShoppingCart: Function
+	user?: IUser
+	loading?: boolean
+	setOpen: Function
+	embedKukai?: KukaiEmbed
+	selectedTheme: string
+	beaconWallet?: BeaconWallet
+	switchTheme: Function
+	notifications?: number
+	isSearchOpen: boolean
+	setSearchOpen: Function
+	theme?: Theme
+	setSignedPayload?: Function
+	history: any
+	onLogout?: () => void
+	onCreateAccount?: () => void
+	openOrCloseShoppingCart: Function
+	nftsInCartNumber: number
 }
 
 const StyledMenuStack = styled(Stack)`
@@ -55,11 +56,11 @@ const StyledMenuStack = styled(Stack)`
 `
 
 interface SearchProps {
-  theme?: Theme
-  isSearchOpen?: boolean
+	theme?: Theme
+	isSearchOpen?: boolean
 }
 
-const StyledLink = styled(NavLink)<SearchProps>`
+const StyledLink = styled(NavLink) <SearchProps>`
   color: ${(props) => props.theme.palette.text.primary};
   text-decoration: none;
 
@@ -82,8 +83,8 @@ const WrapperThemeIcon = styled.div<SearchProps>`
 `
 
 interface MenuIconProps {
-  expandMenu?: boolean
-  theme?: Theme
+	expandMenu?: boolean
+	theme?: Theme
 }
 
 const WrapperMenuIcon = styled.div<MenuIconProps>`
@@ -129,7 +130,7 @@ const MenuBarUp = styled.div<MenuIconProps>`
   transition: transform 500ms cubic-bezier(0, 0.61, 0.28, 0.92);
   width: 22px;
   transform: ${(props) =>
-    props.expandMenu ? 'rotate(45deg) translateY(-4.8px)' : undefined};
+		props.expandMenu ? 'rotate(45deg) translateY(-4.8px)' : undefined};
 `
 
 const MenuBarDown = styled.div<MenuIconProps>`
@@ -141,9 +142,9 @@ const MenuBarDown = styled.div<MenuIconProps>`
   transition: transform 500ms cubic-bezier(0, 0.61, 0.28, 0.92);
   width: 22px;
   transform: ${(props) =>
-    props.expandMenu
-      ? 'rotate(-45deg) translateY(-4.5px) translateX(4.5px)'
-      : undefined};
+		props.expandMenu
+			? 'rotate(-45deg) translateY(-4.5px) translateX(4.5px)'
+			: undefined};
   margin-top: 8px;
   transform-origin: center;
 `
@@ -153,7 +154,7 @@ const MenuBarWrapper = styled.div`
   display: inline-table;
 `
 
-const MobileStyledMenuHeader = styled(Stack)<SearchProps>`
+const MobileStyledMenuHeader = styled(Stack) <SearchProps>`
   display: none;
   margin-top: 0rem !important;
 
@@ -174,7 +175,7 @@ const MobileStyledMenuHeader = styled(Stack)<SearchProps>`
   }
 `
 
-const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
+const MobileStyledMenuContent = styled(Stack) <MenuIconProps>`
   display: none;
 
   @media (max-width: 874px) {
@@ -215,335 +216,341 @@ const StyledShoppingCartRoundedIcon = styled(ShoppingCartRoundedIcon)`
 `
 
 export const Menu: FC<MenuProps> = ({
-  user,
-  selectedTheme,
-  onLogout,
-  onCreateAccount,
-  switchTheme,
-  beaconWallet,
-  embedKukai,
-  ...props
+	user,
+	selectedTheme,
+	onLogout,
+	onCreateAccount,
+	switchTheme,
+	beaconWallet,
+	embedKukai,
+	...props
 }) => {
-  const { t } = useTranslation(['translation'])
+	const { t } = useTranslation(['translation'])
 
-  const history = useHistory()
-  const location = useLocation()
+	const history = useHistory()
+	const location = useLocation()
 
-  const navigateTo = (componentURL: string) => {
-    props.history.push(`/${componentURL}`)
-  }
+	const navigateTo = (componentURL: string) => {
+		props.history.push(`/${componentURL}`)
+	}
 
-  const [avatarSrc, setAvatarSrc] = useState<string>('')
+	const [avatarSrc, setAvatarSrc] = useState<string>('')
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const [expandMenu, setExpandMenu] = useState(false)
+	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+	const [expandMenu, setExpandMenu] = useState(false)
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
+	const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+		setAnchorEl(event.currentTarget)
+	}
 
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
+	const handleClose = () => {
+		setAnchorEl(null)
+	}
 
-  const logout = () => {
-    localStorage.removeItem('Kanvas - Bearer')
-    localStorage.removeItem('Kanvas - address')
-  }
+	const logout = () => {
+		localStorage.removeItem('Kanvas - Bearer')
+		localStorage.removeItem('Kanvas - address')
+	}
 
-  return (
-    <>
-      <StyledMenuStack
-        direction={{ xs: 'column', sm: 'column', md: 'row' }}
-        spacing={4}
-        sx={{ display: 'flex', alignItems: 'center' }}
-      >
-        {/* Closer div for mobile menu */}
+	return (
+		<>
+			<StyledMenuStack
+				direction={{ xs: 'column', sm: 'column', md: 'row' }}
+				spacing={4}
+				sx={{ display: 'flex', alignItems: 'center' }}
+			>
+				{/* Closer div for mobile menu */}
 
-        <StyledMenuCloser
-          onClick={() => setExpandMenu(false)}
-          expandMenu={expandMenu}
-        ></StyledMenuCloser>
+				<StyledMenuCloser
+					onClick={() => setExpandMenu(false)}
+					expandMenu={expandMenu}
+				></StyledMenuCloser>
 
-        {/* Mobile Menu Header */}
+				{/* Mobile Menu Header */}
 
-        <MobileStyledMenuHeader
-          direction={'row'}
-          spacing={2}
-          isSearchOpen={props.isSearchOpen}
-        >
-          {/* QuickSearch wrapper to close menu in case open */}
+				<MobileStyledMenuHeader
+					direction={'row'}
+					spacing={2}
+					isSearchOpen={props.isSearchOpen}
+				>
+					{/* QuickSearch wrapper to close menu in case open */}
 
-          {/* <div onClick={() => setExpandMenu(false)}>
+					{/* <div onClick={() => setExpandMenu(false)}>
                         <QuickSearch setSearchOpen={props.setSearchOpen} />
                     </div> */}
 
-          {/* Menu button, and closing button for search bar */}
+					{/* Menu button, and closing button for search bar */}
 
-          <WrapperMenuIcon
-            onClick={
-              props.isSearchOpen
-                ? () => props.setSearchOpen(false)
-                : () => setExpandMenu(!expandMenu)
-            }
-          >
-            <MenuBarWrapper>
-              <MenuBarUp
-                expandMenu={
-                  props.isSearchOpen ? props.isSearchOpen : expandMenu
-                }
-              />
-              <MenuBarDown
-                expandMenu={
-                  props.isSearchOpen ? props.isSearchOpen : expandMenu
-                }
-              />
-            </MenuBarWrapper>
-          </WrapperMenuIcon>
+					<WrapperMenuIcon
+						onClick={
+							props.isSearchOpen
+								? () => props.setSearchOpen(false)
+								: () => setExpandMenu(!expandMenu)
+						}
+					>
+						<MenuBarWrapper>
+							<MenuBarUp
+								expandMenu={
+									props.isSearchOpen ? props.isSearchOpen : expandMenu
+								}
+							/>
+							<MenuBarDown
+								expandMenu={
+									props.isSearchOpen ? props.isSearchOpen : expandMenu
+								}
+							/>
+						</MenuBarWrapper>
+					</WrapperMenuIcon>
 
-          <StyledShoppingCartRoundedIcon
-            onClick={() => props.openOrCloseShoppingCart()}
-          />
+					<StyledShoppingCartRoundedIcon
+						onClick={() => props.openOrCloseShoppingCart()}
+					/>
 
-          <WrapperThemeIcon isSearchOpen={props.isSearchOpen}>
-            {selectedTheme === 'dark' ? (
-              <Brightness3Icon
-                onClick={() => switchTheme('light')}
-                sx={{ cursor: 'pointer', bottom: 0 }}
-              />
-            ) : (
-              <WbSunnyOutlinedIcon
-                onClick={() => switchTheme('dark')}
-                sx={{ cursor: 'pointer', bottom: 0 }}
-              />
-            )}
-          </WrapperThemeIcon>
-        </MobileStyledMenuHeader>
+					<WrapperThemeIcon isSearchOpen={props.isSearchOpen}>
+						{selectedTheme === 'dark' ? (
+							<Brightness3Icon
+								onClick={() => switchTheme('light')}
+								sx={{ cursor: 'pointer', bottom: 0 }}
+							/>
+						) : (
+							<WbSunnyOutlinedIcon
+								onClick={() => switchTheme('dark')}
+								sx={{ cursor: 'pointer', bottom: 0 }}
+							/>
+						)}
+					</WrapperThemeIcon>
+				</MobileStyledMenuHeader>
 
-        {/* Mobile Menu Content */}
+				{/* Mobile Menu Content */}
 
-        <MobileStyledMenuContent
-          expandMenu={expandMenu}
-          direction="column"
-          spacing={2}
-          sx={{ alignItems: 'beginning' }}
-        >
-          <StyledLink to="/">
-            <Typography
-              size="h2"
-              weight="SemiBold"
-              color="#9b9b9b"
-              sx={{ cursor: 'pointer' }}
-            >
-              {t('menu.home')}
-            </Typography>
-          </StyledLink>
+				<MobileStyledMenuContent
+					expandMenu={expandMenu}
+					direction="column"
+					spacing={2}
+					sx={{ alignItems: 'beginning' }}
+				>
+					<StyledLink to="/">
+						<Typography
+							size="h2"
+							weight="SemiBold"
+							color="#9b9b9b"
+							sx={{ cursor: 'pointer' }}
+						>
+							{t('menu.home')}
+						</Typography>
+					</StyledLink>
 
-          <StyledLink to="/store">
-            <Typography
-              size="h2"
-              weight="SemiBold"
-              color="#9b9b9b"
-              sx={{ cursor: 'pointer' }}
-            >
-              {t('menu.store')}
-            </Typography>
-          </StyledLink>
+					<StyledLink to="/store">
+						<Typography
+							size="h2"
+							weight="SemiBold"
+							color="#9b9b9b"
+							sx={{ cursor: 'pointer' }}
+						>
+							{t('menu.store')}
+						</Typography>
+					</StyledLink>
 
-          <FlexSpacer borderBottom={false} minHeight={2} />
+					<FlexSpacer borderBottom={false} minHeight={2} />
 
-          {/* Call to action button: `Sign in` and `Add artwork` for curators and artists */}
+					{/* Call to action button: `Sign in` and `Add artwork` for curators and artists */}
 
-          {
-            // add localStorage.getItem in a useState hook to get the state after signning in.
-            localStorage.getItem('Kanvas - address') === user?.address ? (
-              user?.role === 'creator' ? (
-                <CustomButton
-                  size="medium"
-                  onClick={onLogout}
-                  label="Add artwork"
-                />
-              ) : undefined
-            ) : (
-              <CustomButton
-                size="medium"
-                onClick={() => navigateTo('sign-in')}
-                label="Sign in"
-              />
-            )
-          }
+					{
+						// add localStorage.getItem in a useState hook to get the state after signning in.
+						localStorage.getItem('Kanvas - address') === user?.address ? (
+							user?.role === 'creator' ? (
+								<CustomButton
+									size="medium"
+									onClick={onLogout}
+									label="Add artwork"
+								/>
+							) : undefined
+						) : (
+							<CustomButton
+								size="medium"
+								onClick={() => navigateTo('sign-in')}
+								label="Sign in"
+							/>
+						)
+					}
 
-          <FlexSpacer borderBottom={true} />
+					<FlexSpacer borderBottom={true} />
 
-          {/* Sub menu to navigate to personnal pages such as notifications profile or simply to logout */}
+					{/* Sub menu to navigate to personnal pages such as notifications profile or simply to logout */}
 
-          {localStorage.getItem('Kanvas - address') === user?.address ? (
-            <>
-              <Stack direction="row" sx={{ alignItems: 'center' }} spacing={3}>
-                <Avatar
-                  src={`${avatarSrc}?${Date.now()}`}
-                  sx={{ cursor: 'pointer !important' }}
-                />
-                <Typography size="inherit" weight="Medium">
-                  {' '}
-                  Go to profile{' '}
-                </Typography>
-              </Stack>
+					{localStorage.getItem('Kanvas - address') === user?.address ? (
+						<>
+							<Stack direction="row" sx={{ alignItems: 'center' }} spacing={3}>
+								<Avatar
+									src={`${avatarSrc}?${Date.now()}`}
+									sx={{ cursor: 'pointer !important' }}
+								/>
+								<Typography size="inherit" weight="Medium">
+									{' '}
+									Go to profile{' '}
+								</Typography>
+							</Stack>
 
-              <Stack direction="row" spacing={3}>
-                <CustomBadge
-                  color="error"
-                  badgeContent={props.notifications}
-                  max={99}
-                  profile={true}
-                >
-                  <Avatar>
-                    <NotificationsRoundedIcon />
-                  </Avatar>
-                </CustomBadge>
-                <Typography size="inherit" weight="Medium">
-                  {' '}
-                  Notifications{' '}
-                </Typography>
-              </Stack>
+							<Stack direction="row" spacing={3}>
+								<CustomBadge
+									color="error"
+									badgeContent={props.notifications}
+									max={99}
+									profile={true}
+								>
+									<Avatar>
+										<NotificationsRoundedIcon />
+									</Avatar>
+								</CustomBadge>
+								<Typography size="inherit" weight="Medium">
+									{' '}
+									Notifications{' '}
+								</Typography>
+							</Stack>
 
-              <Stack direction="row" spacing={3} onClick={onLogout}>
-                <Avatar>
-                  <LogoutRoundedIcon
-                    sx={{
-                      '&.MuiSvgIcon-root': {
-                        marginLeft: 0.5,
-                        height: '65%',
-                        width: '60%',
-                      },
-                    }}
-                  />
-                </Avatar>
-                <Typography size="inherit" weight="Medium">
-                  {' '}
-                  Sign out{' '}
-                </Typography>
-              </Stack>
-            </>
-          ) : undefined}
-        </MobileStyledMenuContent>
+							<Stack direction="row" spacing={3} onClick={onLogout}>
+								<Avatar>
+									<LogoutRoundedIcon
+										sx={{
+											'&.MuiSvgIcon-root': {
+												marginLeft: 0.5,
+												height: '65%',
+												width: '60%',
+											},
+										}}
+									/>
+								</Avatar>
+								<Typography size="inherit" weight="Medium">
+									{' '}
+									Sign out{' '}
+								</Typography>
+							</Stack>
+						</>
+					) : undefined}
+				</MobileStyledMenuContent>
 
-        {/* Desktop Menu */}
+				{/* Desktop Menu */}
 
-        <DesktopMenuContent
-          direction={{ xs: 'row' }}
-          spacing={4}
-          sx={{ display: 'flex', alignItems: 'center' }}
-        >
-          {/* Link to general pages */}
+				<DesktopMenuContent
+					direction={{ xs: 'row' }}
+					spacing={4}
+					sx={{ display: 'flex', alignItems: 'center' }}
+				>
+					{/* Link to general pages */}
 
-          {location.pathname === '/sign-in' ||
-          location.pathname === '/account/create' ? undefined : (
-            <>
-              <StyledLink to="/home" isSearchOpen={props.isSearchOpen}>
-                <Typography
-                  size="inherit"
-                  weight="Light"
-                  color="#9b9b9b"
-                  sx={{ cursor: 'pointer' }}
-                >
-                  {t('menu.home')}
-                </Typography>
-              </StyledLink>
+					{location.pathname === '/sign-in' ||
+						location.pathname === '/account/create' ? undefined : (
+						<>
+							<StyledLink to="/home" isSearchOpen={props.isSearchOpen}>
+								<Typography
+									size="inherit"
+									weight="Light"
+									color="#9b9b9b"
+									sx={{ cursor: 'pointer' }}
+								>
+									{t('menu.home')}
+								</Typography>
+							</StyledLink>
 
-              <StyledLink to="/store" isSearchOpen={props.isSearchOpen}>
-                <Typography
-                  size="inherit"
-                  weight="Light"
-                  color="#9b9b9b"
-                  sx={{ cursor: 'pointer' }}
-                >
-                  {t('menu.store')}
-                </Typography>
-              </StyledLink>
+							<StyledLink to="/store" isSearchOpen={props.isSearchOpen}>
+								<Typography
+									size="inherit"
+									weight="Light"
+									color="#9b9b9b"
+									sx={{ cursor: 'pointer' }}
+								>
+									{t('menu.store')}
+								</Typography>
+							</StyledLink>
 
-              {/* Quick Search controlling the opacity and position of the links above */}
+							{/* Quick Search controlling the opacity and position of the links above */}
 
-              <QuickSearch setSearchOpen={props.setSearchOpen} />
-            </>
-          )}
+							<QuickSearch setSearchOpen={props.setSearchOpen} />
+						</>
+					)}
 
-          {/* Call to action button: `Sign in`, `Add artwork` for curators and artists, and profile avatar to display the submenu */}
+					{/* Call to action button: `Sign in`, `Add artwork` for curators and artists, and profile avatar to display the submenu */}
 
-          {localStorage.getItem('Kanvas - address') === user?.address ? (
-            user?.role === 'collector' ? (
-              <>
-                <CustomBadge
-                  color="error"
-                  badgeContent={props.notifications}
-                  max={99}
-                  profile={true}
-                >
-                  <Avatar
-                    src={`${avatarSrc}?${Date.now()}`}
-                    onClick={(e) =>
-                      anchorEl === null ? handleClick(e) : handleClose()
-                    }
-                    sx={{ cursor: 'pointer !important' }}
-                  />
-                </CustomBadge>
-              </>
-            ) : (
-              <>
-                <CustomBadge
-                  color="error"
-                  badgeContent={props.notifications}
-                  max={99}
-                  profile={true}
-                >
-                  <Avatar
-                    src={`${avatarSrc}?${Date.now()}`}
-                    onClick={(e) =>
-                      anchorEl === null ? handleClick(e) : handleClose()
-                    }
-                    sx={{ cursor: 'pointer !important' }}
-                  />
-                </CustomBadge>
-              </>
-            )
-          ) : location.pathname === '/sign-in' ||
-            location.pathname === '/account/create' ||
-            location.pathname === '/account/edit' ? undefined : (
-            <CustomButton
-              size="medium"
-              onClick={() => props.setOpen(true)}
-              label="Sign in"
-              loading={props.loading}
-            />
-          )}
+					{localStorage.getItem('Kanvas - address') === user?.address ? (
+						user?.role === 'collector' ? (
+							<>
+								<CustomBadge
+									color="error"
+									badgeContent={props.notifications}
+									max={99}
+									profile={true}
+								>
+									<Avatar
+										src={`${avatarSrc}?${Date.now()}`}
+										onClick={(e) =>
+											anchorEl === null ? handleClick(e) : handleClose()
+										}
+										sx={{ cursor: 'pointer !important' }}
+									/>
+								</CustomBadge>
+							</>
+						) : (
+							<>
+								<CustomBadge
+									color="error"
+									badgeContent={props.notifications}
+									max={99}
+									profile={true}
+								>
+									<Avatar
+										src={`${avatarSrc}?${Date.now()}`}
+										onClick={(e) =>
+											anchorEl === null ? handleClick(e) : handleClose()
+										}
+										sx={{ cursor: 'pointer !important' }}
+									/>
+								</CustomBadge>
+							</>
+						)
+					) : location.pathname === '/sign-in' ||
+						location.pathname === '/account/create' ||
+						location.pathname === '/account/edit' ? undefined : (
+						<CustomButton
+							size="medium"
+							onClick={() => props.setOpen(true)}
+							label="Sign in"
+							loading={props.loading}
+						/>
+					)}
 
-          <StyledShoppingCartRoundedIcon
-            onClick={() => props.openOrCloseShoppingCart()}
-          />
-          {selectedTheme === 'dark' ? (
-            <Brightness3Icon
-              onClick={() => switchTheme('light')}
-              sx={{ cursor: 'pointer' }}
-            />
-          ) : (
-            <WbSunnyOutlinedIcon
-              onClick={() => switchTheme('dark')}
-              sx={{ cursor: 'pointer' }}
-            />
-          )}
-        </DesktopMenuContent>
-      </StyledMenuStack>
+					<Badge
+						color="error"
+						badgeContent={props.nftsInCartNumber}
 
-      <ProfilePopover
-        open={Boolean(anchorEl)}
-        avatarSrc={`${avatarSrc}?${Date.now()}`}
-        address={user?.address}
-        history={history}
-        notifications={props.notifications}
-        logOut={logout}
-        onClose={handleClose}
-        onClick={handleClose}
-      />
-    </>
-  )
+					>
+						<StyledShoppingCartRoundedIcon
+							onClick={() => props.openOrCloseShoppingCart()}
+						/>
+					</Badge>
+					{selectedTheme === 'dark' ? (
+						<Brightness3Icon
+							onClick={() => switchTheme('light')}
+							sx={{ cursor: 'pointer' }}
+						/>
+					) : (
+						<WbSunnyOutlinedIcon
+							onClick={() => switchTheme('dark')}
+							sx={{ cursor: 'pointer' }}
+						/>
+					)}
+				</DesktopMenuContent>
+			</StyledMenuStack>
+
+			<ProfilePopover
+				open={Boolean(anchorEl)}
+				avatarSrc={`${avatarSrc}?${Date.now()}`}
+				address={user?.address}
+				history={history}
+				notifications={props.notifications}
+				logOut={logout}
+				onClose={handleClose}
+				onClick={handleClose}
+			/>
+		</>
+	)
 }
