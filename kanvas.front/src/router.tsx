@@ -10,7 +10,7 @@ import NotFound from './pages/NotFound'
 import ShoppingCart from './design-system/organismes/ShoppingCart'
 import useAxios from 'axios-hooks'
 import ScrollToTop from './ScrollToTop'
-
+import CookieBanner from './design-system/molecules/CookiesBanner'
 import { Redirect } from 'react-router'
 import { RPC_URL } from './global'
 import { Theme } from '@mui/material'
@@ -34,6 +34,9 @@ const StyledBrowserRouter = styled(BrowserRouter)<{ theme?: Theme }>`
 `
 
 const Router = () => {
+  const hasCookie = document.cookie.match(/^(.*;)?\s*user\s*=\s*[^;]+(.*)?$/)
+  const [cookie, setCookie] = useState(false)
+
   const [embedKukai, setEmbedKukai] = useState<KukaiEmbed>()
   const [beaconWallet, setBeaconWallet] = useState<BeaconWallet>()
 
@@ -103,6 +106,7 @@ const Router = () => {
           selectedTheme={selectedTheme}
           notifications={0}
         />
+
         <ScrollToTop>
           <Switch>
             <Route exact path="/">
@@ -131,12 +135,16 @@ const Router = () => {
             <Redirect from="*" to="/404" />
           </Switch>
         </ScrollToTop>
+
         <ShoppingCart
           open={cartOpen}
           nftsInCart={nftsInCart}
           closeCart={() => setCartOpen(false)}
           deleteNftFromBasket={handleDeleteFromBasket}
         />
+        
+        {!hasCookie && <CookieBanner handleClose={() => setCookie(!cookie)} />}
+
         <Footer />
       </StyledBrowserRouter>
     </ThemeProvider>

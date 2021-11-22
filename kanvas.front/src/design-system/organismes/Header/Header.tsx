@@ -1,16 +1,17 @@
-import styled from '@emotion/styled'
-import { FlexSpacerProps } from '../../atoms/FlexSpacer'
-import { Box } from '@mui/system'
-import { FC, useEffect, useState } from 'react'
-import { Theme } from '@mui/material'
-import { KukaiEmbed } from 'kukai-embed'
-import { StickyLogo } from '../../atoms/StickyLogo'
-import { Menu } from '../../molecules/Menu'
-import { useHistory } from 'react-router-dom'
-import { IUser } from '../../../interfaces/user'
-import useAxios from 'axios-hooks'
-import { BeaconWallet } from '@taquito/beacon-wallet'
-import { SignInModal } from '../../molecules/SignInModal'
+import styled from '@emotion/styled';
+import { FlexSpacerProps } from '../../atoms/FlexSpacer';
+import { Box } from '@mui/system';
+import { FC, useEffect, useState } from 'react';
+import { Theme } from '@mui/material';
+import { KukaiEmbed } from 'kukai-embed';
+import { StickyLogo } from '../../atoms/StickyLogo';
+import { Menu } from '../../molecules/Menu';
+import { useHistory } from 'react-router-dom';
+import { IUser } from '../../../interfaces/user';
+import useAxios from 'axios-hooks';
+import { BeaconWallet } from "@taquito/beacon-wallet";
+import { SignInModal } from '../../molecules/SignInModal';
+
 
 export interface HeaderProps {
   user?: { role: string }
