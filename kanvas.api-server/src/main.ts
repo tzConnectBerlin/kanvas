@@ -1,11 +1,8 @@
 require('dotenv').config()
 
-import { v4 as uuidv4 } from 'uuid'
-import cookieSession = require('cookie-session')
 import { NestFactory } from '@nestjs/core'
 import { ValidationPipe } from '@nestjs/common'
 import { AppModule } from './app.module'
-import { assertEnv } from './utils'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true })

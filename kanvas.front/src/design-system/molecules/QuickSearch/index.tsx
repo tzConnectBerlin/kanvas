@@ -1,1 +1,1 @@
-export { QuickSearch } from './QuickSearch';
+export { QuickSearch } from './QuickSearch'

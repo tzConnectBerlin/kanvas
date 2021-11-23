@@ -1,2 +1,2 @@
-export { NftGrid as default } from './NftGrid';
-export type { NftGridProps } from './NftGrid';
+export { NftGrid as default } from './NftGrid'
+export type { NftGridProps } from './NftGrid'

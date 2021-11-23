@@ -1,411 +1,549 @@
-import styled from '@emotion/styled';
-import Avatar from '../../atoms/Avatar';
-import ProfilePopover from '../ProfilePopover';
-import FlexSpacer from '../../atoms/FlexSpacer';
-import Brightness3Icon from '@mui/icons-material/Brightness3';
-import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
-import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
-import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded';
-import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
-import { FC, useEffect, useState } from 'react';
-import { KukaiEmbed } from 'kukai-embed';
-import { NavLink, useHistory, useLocation } from 'react-router-dom';
-import { Stack, Theme } from '@mui/material';
-import { CustomBadge } from '../../atoms/Badge';
-import { CustomButton } from '../../atoms/Button';
-import { Typography } from '../../atoms/Typography';
-import { QuickSearch } from '../../molecules/QuickSearch';
-import { IUser } from '../../../interfaces/user';
-import { BeaconWallet } from "@taquito/beacon-wallet";
+import styled from '@emotion/styled'
+import Avatar from '../../atoms/Avatar'
+import ProfilePopover from '../ProfilePopover'
+import FlexSpacer from '../../atoms/FlexSpacer'
+import Brightness3Icon from '@mui/icons-material/Brightness3'
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
+import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined'
+import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded'
+import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded'
+import { FC, useEffect, useState } from 'react'
+import { KukaiEmbed } from 'kukai-embed'
+import { NavLink, useHistory, useLocation } from 'react-router-dom'
+import { Stack, Theme } from '@mui/material'
+import { CustomBadge } from '../../atoms/Badge'
+import { CustomButton } from '../../atoms/Button'
+import { Typography } from '../../atoms/Typography'
+import { QuickSearch } from '../../molecules/QuickSearch'
+import { IUser } from '../../../interfaces/user'
+import { BeaconWallet } from '@taquito/beacon-wallet'
+import { useTranslation } from 'react-i18next'
 
 interface MenuProps {
-    user?: IUser;
-    loading?: boolean;
-    setOpen: Function;
-    embedKukai?: KukaiEmbed;
-    selectedTheme: string;
-    beaconWallet?: BeaconWallet;
-    switchTheme: Function;
-    notifications?: number;
-    isSearchOpen: boolean;
-    setSearchOpen: Function;
-    theme?: Theme;
-    setSignedPayload?: Function;
-    history: any;
-    onLogout?: () => void;
-    onCreateAccount?: () => void;
-    openOrCloseShoppingCart: Function
+  user?: IUser
+  loading?: boolean
+  setOpen: Function
+  embedKukai?: KukaiEmbed
+  selectedTheme: string
+  beaconWallet?: BeaconWallet
+  switchTheme: Function
+  notifications?: number
+  isSearchOpen: boolean
+  setSearchOpen: Function
+  theme?: Theme
+  setSignedPayload?: Function
+  history: any
+  onLogout?: () => void
+  onCreateAccount?: () => void
+  openOrCloseShoppingCart: Function
 }
 
 const StyledMenuStack = styled(Stack)`
-    align-items: end !important;
+  align-items: end !important;
 
-    @media (max-width: 875px) {
-        right: 0rem;
-        padding-left: 0rem;
-    }
+  @media (max-width: 875px) {
+    right: 0rem;
+    padding-left: 0rem;
+  }
 
-    @media (max-width: 730px) {
-        height: 3rem;
-        padding-left: 0rem;
-        transition: padding-left 0.2s;
-        width: 100%;
-    }
+  @media (max-width: 730px) {
+    height: 3rem;
+    padding-left: 0rem;
+    transition: padding-left 0.2s;
+    width: 100%;
+  }
 `
 
 interface SearchProps {
-    theme?: Theme
-    isSearchOpen?: boolean;
+  theme?: Theme
+  isSearchOpen?: boolean
 }
 
-const StyledLink = styled(NavLink) <SearchProps>`
-    color: ${props => props.theme.palette.text.primary};
-    text-decoration: none;
+const StyledLink = styled(NavLink)<SearchProps>`
+  color: ${(props) => props.theme.palette.text.primary};
+  text-decoration: none;
 
-    display: ${props => props.isSearchOpen ? 'none' : 'flex'};
+  display: ${(props) => (props.isSearchOpen ? 'none' : 'flex')};
 
-    @media (max-width: 875px) {
-        height: 2rem;
+  @media (max-width: 875px) {
+    height: 2rem;
+  }
+
+  &.active {
+    p {
+      font-family: 'Poppins Medium' !important;
+      color: ${(props) => props.theme.palette.text.primary} !important;
     }
-
-    &.active {
-        p {
-            font-family: 'Poppins Medium' !important;
-            color: ${props => props.theme.palette.text.primary} !important;
-        }
-    }
+  }
 `
 
 const WrapperThemeIcon = styled.div<SearchProps>`
-    display: ${props => props.isSearchOpen ? 'none' : 'flex'};
+  display: ${(props) => (props.isSearchOpen ? 'none' : 'flex')};
 `
 
 interface MenuIconProps {
-    expandMenu?: boolean;
-    theme?: Theme;
+  expandMenu?: boolean
+  theme?: Theme
 }
 
 const WrapperMenuIcon = styled.div<MenuIconProps>`
-    height: 2.5rem;
-    width: 2.5rem;
+  height: 2.5rem;
+  width: 2.5rem;
 
+  cursor: pointer;
+
+  background-color: ${(props) => props.theme.palette.background.paper};
+  outline: ${(props) => `solid 1px ${props.theme.palette.text.primary}`};
+  transition: filter 0.2s;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: all 500ms cubic-bezier(0, 0.61, 0.28, 0.92);
+  transition-property: all;
+  transition-property: opacity, transform, visibility, filter;
+
+  &:hover {
     cursor: pointer;
-
-    background-color: ${props => props.theme.palette.background.paper};
-    outline: ${props => `solid 1px ${props.theme.palette.text.primary}`};
+    outline: ${(props) => `solid 2px ${props.theme.palette.text.primary}`};
     transition: filter 0.2s;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    transition: all 500ms cubic-bezier(0, .61, .28, .92);
-    transition-property: all;
-    transition-property: opacity, transform, visibility, filter;
-
-    &:hover {
-        cursor: pointer;
-        outline: ${props => `solid 2px ${props.theme.palette.text.primary}`};
-        transition: filter 0.2s;
-    }
+  }
 `
 
 const StyledMenuCloser = styled.div<MenuIconProps>`
-    display: ${props => props.expandMenu ? 'flex' : 'none'};
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 100vw;
+  display: ${(props) => (props.expandMenu ? 'flex' : 'none')};
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
 `
 
 const MenuBarUp = styled.div<MenuIconProps>`
-    background: ${props => props.theme.palette.text.primary};
-    border-radius: 3px;
-    height: 3px;
-    transform: none;
-    transform-origin: left;
-    transition: transform 500ms cubic-bezier(0, .61, .28, .92);
-    width: 22px;
-    transform: ${props => props.expandMenu ? 'rotate(45deg) translateY(-4.8px)' : undefined};
+  background: ${(props) => props.theme.palette.text.primary};
+  border-radius: 3px;
+  height: 3px;
+  transform: none;
+  transform-origin: left;
+  transition: transform 500ms cubic-bezier(0, 0.61, 0.28, 0.92);
+  width: 22px;
+  transform: ${(props) =>
+    props.expandMenu ? 'rotate(45deg) translateY(-4.8px)' : undefined};
 `
 
 const MenuBarDown = styled.div<MenuIconProps>`
-    background: ${props => props.theme.palette.text.primary};
-    border-radius: 3px;
-    height: 3px;
-    transform: none;
-    transform-origin: left;
-    transition: transform 500ms cubic-bezier(0, .61, .28, .92);
-    width: 22px;
-    transform: ${props => props.expandMenu ? 'rotate(-45deg) translateY(-4.5px) translateX(4.5px)' : undefined};
-    margin-top: 8px;
-    transform-origin: center;
+  background: ${(props) => props.theme.palette.text.primary};
+  border-radius: 3px;
+  height: 3px;
+  transform: none;
+  transform-origin: left;
+  transition: transform 500ms cubic-bezier(0, 0.61, 0.28, 0.92);
+  width: 22px;
+  transform: ${(props) =>
+    props.expandMenu
+      ? 'rotate(-45deg) translateY(-4.5px) translateX(4.5px)'
+      : undefined};
+  margin-top: 8px;
+  transform-origin: center;
 `
 
 const MenuBarWrapper = styled.div`
-    height: auto;
-    display: inline-table;
+  height: auto;
+  display: inline-table;
 `
 
-const MobileStyledMenuHeader = styled(Stack) <SearchProps>`
-    display: none;
-    margin-top: 0rem !important;
+const MobileStyledMenuHeader = styled(Stack)<SearchProps>`
+  display: none;
+  margin-top: 0rem !important;
 
-    @media (max-width: 874px) {
-        display: flex;
-        align-items: center;
-        height: 6rem;
-        padding-right: 0.5rem;
-        width: ${props => props.isSearchOpen ? "100%" : ""};
-    }
+  @media (max-width: 874px) {
+    display: flex;
+    align-items: center;
+    height: 6rem;
+    padding-right: 0.5rem;
+    width: ${(props) => (props.isSearchOpen ? '100%' : '')};
+  }
 
-    @media (max-width: 730px) {
-        display: flex;
-        align-items: center;
-        padding-right: 0rem;
-        height: 4rem;
-        width: ${props => props.isSearchOpen ? "100%" : ""};
-    }
+  @media (max-width: 730px) {
+    display: flex;
+    align-items: center;
+    padding-right: 0rem;
+    height: 4rem;
+    width: ${(props) => (props.isSearchOpen ? '100%' : '')};
+  }
 `
 
-const MobileStyledMenuContent = styled(Stack) <MenuIconProps>`
-   display: none;
+const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
+  display: none;
 
-   @media (max-width: 874px) {
-        display: ${props => props.expandMenu ? 'flex' : 'none'};
-        height: ${props => props.expandMenu ? 'auto' : '0'};
-        opacity: ${props => props.expandMenu ? '1' : '0'};
-        width: auto;
+  @media (max-width: 874px) {
+    display: ${(props) => (props.expandMenu ? 'flex' : 'none')};
+    height: ${(props) => (props.expandMenu ? 'auto' : '0')};
+    opacity: ${(props) => (props.expandMenu ? '1' : '0')};
+    width: auto;
 
-        position: fixed;
-        top: 5em;
-        left: 0;
-        right: 0;
+    position: fixed;
+    top: 5em;
+    left: 0;
+    right: 0;
 
-        z-index: 5;
-        transition: 0.3s;
+    z-index: 5;
+    transition: 0.3s;
 
-        padding-right: 2rem;
-        padding-left: 2rem;
-        padding-bottom: 1rem;
+    padding-right: 2rem;
+    padding-left: 2rem;
+    padding-bottom: 1rem;
 
-        padding-top: 2rem !important;
-        margin-top: 1rem !important;
-        background-color: ${props => props.theme.palette.background.default};
-    }
-
+    padding-top: 2rem !important;
+    margin-top: 1rem !important;
+    background-color: ${(props) => props.theme.palette.background.default};
+  }
 `
 
 const DesktopMenuContent = styled(Stack)`
-    display: none;
-    margin-top: 0 !important;
+  display: none;
+  margin-top: 0 !important;
 
-    @media (min-width: 875px) {
-        display: flex;
-    }
+  @media (min-width: 875px) {
+    display: flex;
+  }
 `
 
 const StyledShoppingCartRoundedIcon = styled(ShoppingCartRoundedIcon)`
-    cursor: pointer;
+  cursor: pointer;
 `
 
-export const Menu : FC<MenuProps> = ({user, selectedTheme, onLogout, onCreateAccount, switchTheme, beaconWallet, embedKukai, ...props}) => {
+export const Menu: FC<MenuProps> = ({
+  user,
+  selectedTheme,
+  onLogout,
+  onCreateAccount,
+  switchTheme,
+  beaconWallet,
+  embedKukai,
+  ...props
+}) => {
+  const { t } = useTranslation(['translation'])
 
-    const history = useHistory()
-    const location = useLocation()
+  const history = useHistory()
+  const location = useLocation()
 
-    const navigateTo = (componentURL: string) => {
-        props.history.push(`/${componentURL}`)
-    }
+  const navigateTo = (componentURL: string) => {
+    props.history.push(`/${componentURL}`)
+  }
 
-    const [avatarSrc, setAvatarSrc] = useState<string>('')
+  const [avatarSrc, setAvatarSrc] = useState<string>('')
 
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [expandMenu, setExpandMenu] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [expandMenu, setExpandMenu] = useState(false)
 
-    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
 
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
 
-    const logout = () => {
-        localStorage.removeItem('Kanvas - Bearer')
-        localStorage.removeItem('Kanvas - address')
-    }
+  const logout = () => {
+    localStorage.removeItem('Kanvas - Bearer')
+    localStorage.removeItem('Kanvas - address')
+  }
 
-    useEffect(() => {
-        if (user) {
-            setAvatarSrc(user.profilePicture)
-        }
-    }, [user])
+  return (
+    <>
+      <StyledMenuStack
+        direction={{ xs: 'column', sm: 'column', md: 'row' }}
+        spacing={4}
+        sx={{ display: 'flex', alignItems: 'center' }}
+      >
+        {/* Closer div for mobile menu */}
 
-    return (
-        <>
-            <StyledMenuStack direction={{ xs: 'column', sm: 'column', md: 'row' }} spacing={4} sx={{ display: 'flex', alignItems: 'center' }} >
+        <StyledMenuCloser
+          onClick={() => setExpandMenu(false)}
+          expandMenu={expandMenu}
+        ></StyledMenuCloser>
 
-                {/* Closer div for mobile menu */}
+        {/* Mobile Menu Header */}
 
-                <StyledMenuCloser onClick={() => setExpandMenu(false)} expandMenu={expandMenu}>
-                </StyledMenuCloser>
+        <MobileStyledMenuHeader
+          direction={'row'}
+          spacing={2}
+          isSearchOpen={props.isSearchOpen}
+        >
+          {/* QuickSearch wrapper to close menu in case open */}
 
-                {/* Mobile Menu Header */}
-
-                <MobileStyledMenuHeader direction={'row'} spacing={2} isSearchOpen={props.isSearchOpen}>
-
-                    {/* QuickSearch wrapper to close menu in case open */}
-
-                    {/* <div onClick={() => setExpandMenu(false)}>
+          {/* <div onClick={() => setExpandMenu(false)}>
                         <QuickSearch setSearchOpen={props.setSearchOpen} />
                     </div> */}
 
-                    {/* Menu button, and closing button for search bar */}
+          {/* Menu button, and closing button for search bar */}
 
-                    <WrapperMenuIcon onClick={props.isSearchOpen ? () => props.setSearchOpen(false) : () => setExpandMenu(!expandMenu)}>
-                        <MenuBarWrapper>
-                            <MenuBarUp expandMenu={props.isSearchOpen ? props.isSearchOpen : expandMenu} />
-                            <MenuBarDown expandMenu={props.isSearchOpen ? props.isSearchOpen : expandMenu} />
-                        </MenuBarWrapper>
-                    </WrapperMenuIcon>
+          <WrapperMenuIcon
+            onClick={
+              props.isSearchOpen
+                ? () => props.setSearchOpen(false)
+                : () => setExpandMenu(!expandMenu)
+            }
+          >
+            <MenuBarWrapper>
+              <MenuBarUp
+                expandMenu={
+                  props.isSearchOpen ? props.isSearchOpen : expandMenu
+                }
+              />
+              <MenuBarDown
+                expandMenu={
+                  props.isSearchOpen ? props.isSearchOpen : expandMenu
+                }
+              />
+            </MenuBarWrapper>
+          </WrapperMenuIcon>
 
-                    <StyledShoppingCartRoundedIcon onClick={() => props.openOrCloseShoppingCart()}/>
+          <StyledShoppingCartRoundedIcon
+            onClick={() => props.openOrCloseShoppingCart()}
+          />
 
-                    <WrapperThemeIcon isSearchOpen={props.isSearchOpen}>
-                        {
-                            selectedTheme === 'dark' ?
-                                <Brightness3Icon onClick={() => switchTheme('light')} sx={{ cursor: 'pointer', bottom: 0 }} />
-                                :
-                                <WbSunnyOutlinedIcon onClick={() => switchTheme('dark')} sx={{ cursor: 'pointer', bottom: 0 }} />
-                        }
-                    </WrapperThemeIcon>
-                </MobileStyledMenuHeader>
+          <WrapperThemeIcon isSearchOpen={props.isSearchOpen}>
+            {selectedTheme === 'dark' ? (
+              <Brightness3Icon
+                onClick={() => switchTheme('light')}
+                sx={{ cursor: 'pointer', bottom: 0 }}
+              />
+            ) : (
+              <WbSunnyOutlinedIcon
+                onClick={() => switchTheme('dark')}
+                sx={{ cursor: 'pointer', bottom: 0 }}
+              />
+            )}
+          </WrapperThemeIcon>
+        </MobileStyledMenuHeader>
 
-                {/* Mobile Menu Content */}
+        {/* Mobile Menu Content */}
 
-                <MobileStyledMenuContent expandMenu={expandMenu} direction="column" spacing={2} sx={{ alignItems: 'beginning' }}>
+        <MobileStyledMenuContent
+          expandMenu={expandMenu}
+          direction="column"
+          spacing={2}
+          sx={{ alignItems: 'beginning' }}
+        >
+          <StyledLink to="/">
+            <Typography
+              size="h2"
+              weight="SemiBold"
+              color="#9b9b9b"
+              sx={{ cursor: 'pointer' }}
+            >
+              {t('menu.home')}
+            </Typography>
+          </StyledLink>
 
-                    <StyledLink to='/store' >
-                        <Typography size="h2" weight="SemiBold" color='#9b9b9b' sx={{ cursor: 'pointer' }}> Store </Typography>
-                    </StyledLink>
+          <StyledLink to="/store">
+            <Typography
+              size="h2"
+              weight="SemiBold"
+              color="#9b9b9b"
+              sx={{ cursor: 'pointer' }}
+            >
+              {t('menu.store')}
+            </Typography>
+          </StyledLink>
 
-                    <FlexSpacer borderBottom={false} minHeight={2} />
+          <FlexSpacer borderBottom={false} minHeight={2} />
 
-                    {/* Call to action button: `Sign in` and `Add artwork` for curators and artists */}
+          {/* Call to action button: `Sign in` and `Add artwork` for curators and artists */}
 
-                    {
-                        // add localStorage.getItem in a useState hook to get the state after signning in.
-                        localStorage.getItem('Kanvas - address') === user?.address ?
-                            user?.role === 'creator' ?
-                                <CustomButton size="medium" onClick={onLogout} label="Add artwork" />
-                                :
-                                undefined
-                            :
-                            <CustomButton size="medium" onClick={() => navigateTo('sign-in')} label="Sign in" />
+          {
+            // add localStorage.getItem in a useState hook to get the state after signning in.
+            localStorage.getItem('Kanvas - address') === user?.address ? (
+              user?.role === 'creator' ? (
+                <CustomButton
+                  size="medium"
+                  onClick={onLogout}
+                  label="Add artwork"
+                />
+              ) : undefined
+            ) : (
+              <CustomButton
+                size="medium"
+                onClick={() => navigateTo('sign-in')}
+                label="Sign in"
+              />
+            )
+          }
+
+          <FlexSpacer borderBottom={true} />
+
+          {/* Sub menu to navigate to personnal pages such as notifications profile or simply to logout */}
+
+          {localStorage.getItem('Kanvas - address') === user?.address ? (
+            <>
+              <Stack direction="row" sx={{ alignItems: 'center' }} spacing={3}>
+                <Avatar
+                  src={`${avatarSrc}?${Date.now()}`}
+                  sx={{ cursor: 'pointer !important' }}
+                />
+                <Typography size="inherit" weight="Medium">
+                  {' '}
+                  Go to profile{' '}
+                </Typography>
+              </Stack>
+
+              <Stack direction="row" spacing={3}>
+                <CustomBadge
+                  color="error"
+                  badgeContent={props.notifications}
+                  max={99}
+                  profile={true}
+                >
+                  <Avatar>
+                    <NotificationsRoundedIcon />
+                  </Avatar>
+                </CustomBadge>
+                <Typography size="inherit" weight="Medium">
+                  {' '}
+                  Notifications{' '}
+                </Typography>
+              </Stack>
+
+              <Stack direction="row" spacing={3} onClick={onLogout}>
+                <Avatar>
+                  <LogoutRoundedIcon
+                    sx={{
+                      '&.MuiSvgIcon-root': {
+                        marginLeft: 0.5,
+                        height: '65%',
+                        width: '60%',
+                      },
+                    }}
+                  />
+                </Avatar>
+                <Typography size="inherit" weight="Medium">
+                  {' '}
+                  Sign out{' '}
+                </Typography>
+              </Stack>
+            </>
+          ) : undefined}
+        </MobileStyledMenuContent>
+
+        {/* Desktop Menu */}
+
+        <DesktopMenuContent
+          direction={{ xs: 'row' }}
+          spacing={4}
+          sx={{ display: 'flex', alignItems: 'center' }}
+        >
+          {/* Link to general pages */}
+
+          {location.pathname === '/sign-in' ||
+          location.pathname === '/account/create' ? undefined : (
+            <>
+              <StyledLink to="/home" isSearchOpen={props.isSearchOpen}>
+                <Typography
+                  size="inherit"
+                  weight="Light"
+                  color="#9b9b9b"
+                  sx={{ cursor: 'pointer' }}
+                >
+                  {t('menu.home')}
+                </Typography>
+              </StyledLink>
+
+              <StyledLink to="/store" isSearchOpen={props.isSearchOpen}>
+                <Typography
+                  size="inherit"
+                  weight="Light"
+                  color="#9b9b9b"
+                  sx={{ cursor: 'pointer' }}
+                >
+                  {t('menu.store')}
+                </Typography>
+              </StyledLink>
+
+              {/* Quick Search controlling the opacity and position of the links above */}
+
+              <QuickSearch setSearchOpen={props.setSearchOpen} />
+            </>
+          )}
+
+          {/* Call to action button: `Sign in`, `Add artwork` for curators and artists, and profile avatar to display the submenu */}
+
+          {localStorage.getItem('Kanvas - address') === user?.address ? (
+            user?.role === 'collector' ? (
+              <>
+                <CustomBadge
+                  color="error"
+                  badgeContent={props.notifications}
+                  max={99}
+                  profile={true}
+                >
+                  <Avatar
+                    src={`${avatarSrc}?${Date.now()}`}
+                    onClick={(e) =>
+                      anchorEl === null ? handleClick(e) : handleClose()
                     }
-
-                    <FlexSpacer borderBottom={true} />
-
-                    {/* Sub menu to navigate to personnal pages such as notifications profile or simply to logout */}
-
-                    {
-                        localStorage.getItem('Kanvas - address') === user?.address ?
-                            <>
-                                <Stack direction="row" sx={{ alignItems: "center" }} spacing={3}>
-                                    <Avatar src={`${avatarSrc}?${Date.now()}`} sx={{ cursor: 'pointer !important' }} />
-                                    <Typography size="inherit" weight="Medium"> Go to profile </Typography>
-                                </Stack>
-
-                                <Stack direction="row" spacing={3}>
-                                    <CustomBadge color="error" badgeContent={props.notifications} max={99} profile={true}>
-                                        <Avatar>
-                                            <NotificationsRoundedIcon />
-                                        </Avatar>
-                                    </CustomBadge>
-                                    <Typography size="inherit" weight="Medium"> Notifications </Typography>
-                                </Stack>
-
-                                <Stack direction="row" spacing={3} onClick={onLogout}>
-                                    <Avatar>
-                                        <LogoutRoundedIcon sx={{ '&.MuiSvgIcon-root': { marginLeft: 0.5, height: '65%', width: '60%' } }} />
-                                    </Avatar>
-                                    <Typography size="inherit" weight="Medium"> Sign out </Typography>
-                                </Stack>
-                            </>
-                            :
-                            undefined
+                    sx={{ cursor: 'pointer !important' }}
+                  />
+                </CustomBadge>
+              </>
+            ) : (
+              <>
+                <CustomBadge
+                  color="error"
+                  badgeContent={props.notifications}
+                  max={99}
+                  profile={true}
+                >
+                  <Avatar
+                    src={`${avatarSrc}?${Date.now()}`}
+                    onClick={(e) =>
+                      anchorEl === null ? handleClick(e) : handleClose()
                     }
-
-
-                </MobileStyledMenuContent>
-
-                {/* Desktop Menu */}
-
-                <DesktopMenuContent direction={{ xs: 'row' }} spacing={4} sx={{ display: 'flex', alignItems: 'center' }}>
-
-                    {/* Link to general pages */}
-
-                    {
-                        location.pathname === '/sign-in' || location.pathname === '/account/create' ?
-                            undefined
-                            :
-                            <>
-                                <StyledLink to='/store' isSearchOpen={props.isSearchOpen}>
-                                    <Typography size="inherit" weight="Light" color='#9b9b9b' sx={{ cursor: 'pointer' }}> Store </Typography>
-                                </StyledLink>
-
-                                {/* Quick Search controlling the opacity and position of the links above */}
-
-                                <QuickSearch setSearchOpen={props.setSearchOpen} />
-                            </>
-                    }
-
-
-                    {/* Call to action button: `Sign in`, `Add artwork` for curators and artists, and profile avatar to display the submenu */}
-
-                    {
-                        localStorage.getItem('Kanvas - address') === user?.address ?
-                            user?.role === 'collector' ?
-                                <>
-                                    <CustomBadge color="error" badgeContent={props.notifications} max={99} profile={true}>
-                                        <Avatar src={`${avatarSrc}?${Date.now()}`} onClick={(e) => anchorEl === null ? handleClick(e) : handleClose()} sx={{cursor: 'pointer !important'}}/>
-                                    </CustomBadge>
-                                </>
-                            :
-                                <>
-                                    <CustomBadge color="error" badgeContent={props.notifications} max={99} profile={true}>
-                                        <Avatar src={`${avatarSrc}?${Date.now()}`} onClick={(e) => anchorEl === null ? handleClick(e) : handleClose()} sx={{ cursor: 'pointer !important' }} />
-                                    </CustomBadge>
-                                </>
-                            :
-                            location.pathname === '/sign-in' || location.pathname === '/account/create' || location.pathname === '/account/edit' ?
-                            undefined
-                            :
-                            <CustomButton size="medium" onClick={() => props.setOpen(true)} label="Sign in" loading={props.loading} />
-                        }
-
-                    <StyledShoppingCartRoundedIcon onClick={() => props.openOrCloseShoppingCart()}/>
-                    {
-                        selectedTheme === 'dark' ?
-                            <Brightness3Icon onClick={() => switchTheme('light')} sx={{ cursor: 'pointer' }} />
-                            :
-                            <WbSunnyOutlinedIcon onClick={() => switchTheme('dark')} sx={{ cursor: 'pointer' }} />
-                    }
-                </DesktopMenuContent>
-            </StyledMenuStack>
-
-            <ProfilePopover
-                open={Boolean(anchorEl)}
-                avatarSrc={`${avatarSrc}?${Date.now()}`}
-                address={user?.address}
-                history={history}
-                notifications={props.notifications}
-                logOut={logout}
-                onClose={handleClose}
-                onClick={handleClose}
+                    sx={{ cursor: 'pointer !important' }}
+                  />
+                </CustomBadge>
+              </>
+            )
+          ) : location.pathname === '/sign-in' ||
+            location.pathname === '/account/create' ||
+            location.pathname === '/account/edit' ? undefined : (
+            <CustomButton
+              size="medium"
+              onClick={() => props.setOpen(true)}
+              label="Sign in"
+              loading={props.loading}
             />
-        </>
-    )
+          )}
+
+          <StyledShoppingCartRoundedIcon
+            onClick={() => props.openOrCloseShoppingCart()}
+          />
+          {selectedTheme === 'dark' ? (
+            <Brightness3Icon
+              onClick={() => switchTheme('light')}
+              sx={{ cursor: 'pointer' }}
+            />
+          ) : (
+            <WbSunnyOutlinedIcon
+              onClick={() => switchTheme('dark')}
+              sx={{ cursor: 'pointer' }}
+            />
+          )}
+        </DesktopMenuContent>
+      </StyledMenuStack>
+
+      <ProfilePopover
+        open={Boolean(anchorEl)}
+        avatarSrc={`${avatarSrc}?${Date.now()}`}
+        address={user?.address}
+        history={history}
+        notifications={props.notifications}
+        logOut={logout}
+        onClose={handleClose}
+        onClick={handleClose}
+      />
+    </>
+  )
 }

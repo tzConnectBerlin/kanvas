@@ -1,1 +1,1 @@
-export { StoreFilters as default } from './StoreFilters';
+export { StoreFilters as default } from './StoreFilters'
