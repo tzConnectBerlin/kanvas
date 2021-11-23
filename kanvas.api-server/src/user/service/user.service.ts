@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common'
 import { UserEntity, ProfileEntity, UserCart } from '../entity/user.entity'
-import { NftService } from 'src/nft/service/nft.service'
+import { NftService } from '../../nft/service/nft.service'
 import { PG_CONNECTION } from '../../constants'
 
 interface CartMeta {

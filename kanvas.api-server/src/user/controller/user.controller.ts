@@ -13,11 +13,11 @@ import {
 } from '@nestjs/common'
 import { UserEntity } from '../entity/user.entity'
 import { UserService } from '../service/user.service'
-import { CurrentUser } from 'src/decoraters/user.decorator'
+import { CurrentUser } from '../../decoraters/user.decorator'
 import {
   JwtAuthGuard,
   JwtFailableAuthGuard,
-} from 'src/authentication/guards/jwt-auth.guard'
+} from '../../authentication/guards/jwt-auth.guard'
 import { PG_UNIQUE_VIOLATION_ERRCODE } from '../../constants'
 
 @Controller('users')
@@ -54,6 +54,9 @@ export class UserController {
     }
     return profile
   }
+
+  // @Get('/edit/check')
+  // async checkAllowedEdit() {}
 
   @Post('cart/add/:nftId')
   @UseGuards(JwtFailableAuthGuard)
