@@ -61,8 +61,9 @@ const StyledImg = styled.img<{ theme?: Theme }>`
     height: -webkit-fill-available;
     object-position: center center;
     object-fit: cover;
-}
+    height: 100%;
 `
+
 export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
     const history = useHistory()
     const theme = useTheme()
