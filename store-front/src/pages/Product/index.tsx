@@ -27,18 +27,6 @@ const StyledStack = styled(Stack)`
     margin-bottom: 4rem;
 `
 
-const data: INft = {
-    id: 1,
-    name: 'AD # 8210',
-    creator: 'Aurélia Durand',
-    ipfsHash:
-        'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
-    price: 20,
-    dataUri:
-        'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
-    startDate: '12:12:43:00',
-}
-
 interface IProductParam {
     id: string
 }
@@ -212,7 +200,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             weight="Light"
                             sx={{ pt: 2, mb: 1 }}
                         >
-                            {nftResponse.loading ? undefined : data.startDate}
+                            {nftResponse.loading ? undefined : nftResponse.data?.startDate}
                         </Typography>
 
                         <Typography
@@ -232,7 +220,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                         >
                             {nftResponse.loading
                                 ? undefined
-                                : `${data.price} ꜩ`}
+                                : `${nftResponse.data?.price} ꜩ`}
                         </Typography>
 
                         <FlexSpacer minHeight={2} />
