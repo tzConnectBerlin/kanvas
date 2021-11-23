@@ -21,7 +21,16 @@ export class AuthenticationController {
   @Get('logged_user')
   @UseGuards(JwtAuthGuard)
   async loggedUser(@CurrentUser() currentUser: UserEntity): Promise<any> {
-    return this.authService.getLoggedUser(currentUser.address)
+    const loggedInUserRes = await this.authService.getLoggedUser(
+      currentUser.address,
+    )
+    if (!loggedInUserRes.ok) {
+      throw new HttpException(
+        'Failed to find user associated to JWT',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      )
+    }
+    return loggedInUserRes.val
   }
 
   @Post('login')

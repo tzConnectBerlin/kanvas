@@ -6,22 +6,57 @@ import {
   Param,
   Controller,
   Post,
+  Query,
   Get,
   UseGuards,
   Logger,
 } from '@nestjs/common'
 import { UserEntity } from '../entity/user.entity'
 import { UserService } from '../service/user.service'
-import { CurrentUser } from 'src/decoraters/user.decorator'
+import { CurrentUser } from '../../decoraters/user.decorator'
 import {
   JwtAuthGuard,
   JwtFailableAuthGuard,
-} from 'src/authentication/guards/jwt-auth.guard'
+} from '../../authentication/guards/jwt-auth.guard'
 import { PG_UNIQUE_VIOLATION_ERRCODE } from '../../constants'
 
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
+
+  @Get()
+  @UseGuards(JwtFailableAuthGuard)
+  async getProfile(
+    @CurrentUser() user?: UserEntity,
+    @Query('userAddress') userAddress?: string,
+  ) {
+    const address =
+      userAddress || (typeof user !== 'undefined' ? user.address : undefined)
+    if (typeof address === 'undefined') {
+      throw new HttpException(
+        'Define userAddress parameter or access this endpoint logged in',
+        HttpStatus.BAD_REQUEST,
+      )
+    }
+
+    const profile_res = await this.userService.getProfile(address)
+    if (!profile_res.ok) {
+      if (typeof userAddress === 'undefined') {
+        throw new HttpException(
+          'Failed to find user associated to JWT',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        )
+      }
+      throw new HttpException(
+        'No user registered with requested userAddress',
+        HttpStatus.BAD_REQUEST,
+      )
+    }
+    return profile_res.val
+  }
+
+  // @Get('/edit/check')
+  // async checkAllowedEdit() {}
 
   @Post('cart/add/:nftId')
   @UseGuards(JwtFailableAuthGuard)

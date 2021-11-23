@@ -26,14 +26,14 @@ export class NftService {
   }
 
   async findAll(params: PaginationParams): Promise<NftEntityPage> {
-    return this.filter({
+    return this.findNftsWithFilter({
       ...params,
       categories: undefined,
       address: undefined,
     })
   }
 
-  async filter(params: FilterParams): Promise<NftEntityPage> {
+  async findNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {
     const orderByMapping = new Map([
       ['id', 'nft_id'],
       ['name', 'nft_name'],
