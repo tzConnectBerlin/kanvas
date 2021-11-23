@@ -1,5 +1,5 @@
 #!/bin/bash
-cd $(git rev-parse --show-toplevel)/kanvas.api-server
+cd $(git rev-parse --show-toplevel)/store-api-server
 
 export DB_PORT=5432
 export DB_HOST=localhost
