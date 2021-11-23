@@ -30,7 +30,7 @@ export interface CustomButtonProps extends MButtonProps {
    * Optional click handler
    */
   textSize?: 'Light' | 'Medium' | 'SemiBold'
-  onClick?: () => void
+  onClick?: (e?:any) => void;
 
   loading?: boolean
 
