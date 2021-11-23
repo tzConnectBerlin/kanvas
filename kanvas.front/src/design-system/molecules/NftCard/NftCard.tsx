@@ -56,13 +56,12 @@ const StyledImgWrapper = styled.div<{ theme?: Theme }>`
     }
 `
 const StyledImg = styled.img<{ theme?: Theme }>`
-    object-fit: cover;
-    object-position: center;
-    width: 100%;
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    transform: translateZ(-50%);
+    width: 100%;
+    height: -webkit-fill-available;
+    object-position: center center;
+    object-fit: cover;
+}
 `
 export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
     const history = useHistory()
