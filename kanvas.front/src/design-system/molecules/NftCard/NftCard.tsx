@@ -108,7 +108,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                         {props.name}
                     </Typography>
 
-                    <Box flexGrow="1">
+                    <Box flexGrow="1" marginBottom=".5rem">
                         <Typography weight="Light" size="body">
                             Long Artist name here
                         </Typography>
