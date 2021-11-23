@@ -11,6 +11,7 @@ export interface NftEntity {
   tokenId: string
   categories: CategoryEntity[]
   status: string // corresponds to NftStateTransitionConfig
+  editionsAvailable: number
 }
 
 export interface NftEntityPage {
