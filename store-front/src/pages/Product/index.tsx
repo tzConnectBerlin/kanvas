@@ -68,7 +68,6 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                     }
                 })
                 .catch((err) => {
-                    debugger
                     toast.error(err.response?.data?.message)
                 })
         }
