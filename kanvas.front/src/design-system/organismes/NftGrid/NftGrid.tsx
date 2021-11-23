@@ -41,10 +41,12 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
       {props.nfts && props.nfts.length > 0 ? (
         <StyledGrid
           container
+          direction="row" width="100%"
           md={props.open ? 9 : 6}
           lg={props.open ? 12 : 9}
-          rowSpacing={5}
-          columnSpacing={{ xs: 1, sm: 2, md: 5 }}
+          rowSpacing={4}
+          spacing={24}
+          columnSpacing={{ xs: 3, sm: 4, md: 2 }}
         >
           {props.nfts.map((nft) => (
             <Grid

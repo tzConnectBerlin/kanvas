@@ -12,9 +12,13 @@ import { Stack, Theme, Pagination, Container } from '@mui/material'
 import { CustomButton } from '../../design-system/atoms/Button'
 import { CustomSelect } from '../../design-system/atoms/Select'
 import { Typography } from '../../design-system/atoms/Typography'
-import { useLocation, useHistory } from 'react-router-dom'
+import { useLocation, useHistory, useParams } from 'react-router'
 import { toast } from 'react-toastify'
 import mockNft from '../../_mocks/mockNft'
+
+interface ParamTypes {
+  width?: any
+}
 
 const StyledStack = styled(Stack)`
   overflow: hidden;
@@ -22,10 +26,11 @@ const StyledStack = styled(Stack)`
   width: 100%;
   height: 100%;
 `
-const StyledContentStack = styled(Stack)`
+const StyledContentStack = styled(Stack)<ParamTypes>`
   flex-direction: row;
+  width: 100%;
 
-  @media (max-width: 768px) {
+  @media (max-width: 900px) {
     flex-direction: column;
   }
 `
@@ -56,6 +61,7 @@ const StyledPagination = styled(Pagination)<{ theme?: Theme }>`
 const StorePage = () => {
   const search = useLocation().search
   const history = useHistory()
+  let { width } = useParams<ParamTypes>()
 
   const categories = new URLSearchParams(search).get('categories')
   const sort = new URLSearchParams(search).get('sort')
@@ -214,7 +220,9 @@ const StorePage = () => {
           />
         </Stack>
 
-        <StyledContentStack>
+        <StyledContentStack 
+          // width={filterOpen ? '97.5%' : '103%'}
+        >
           {/* TODO: find a better structure to pass the different filters */}
           <StoreFilters
             availableFilters={availableFilters}

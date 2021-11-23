@@ -39,7 +39,7 @@ const StyledImgWrapper = styled.div<{ theme?: Theme }>`
   }
 
   @media (min-width: 650px) {
-    min-height: 35vw;
+    min-height: 25vw;
   }
 
   @media (min-width: 900px) {
