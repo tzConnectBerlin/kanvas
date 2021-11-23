@@ -21,24 +21,24 @@ interface HomePageProps {
     setSignedPayload?: Function
 }
 
-const LinkStyled = styled(CustomButton) <{ theme?: Theme }>`
-  outline: none;
-  background: transparent;
-  padding: 0;
-  min-width: 0;
-  font-size: 1.15rem;
-  color: ${(props) => props.theme.palette.text.primary};
-
-  &:hover {
-    outline: none !important;
+const LinkStyled = styled(CustomButton)<{ theme?: Theme }>`
+    outline: none;
     background: transparent;
-    text-decoration: underline;
-    text-decoration-color: currentcolor;
     padding: 0;
     min-width: 0;
-    font-family: 'Poppins SemiBold';
-    font-weight: 400;
-  }
+    font-size: 1.15rem;
+    color: ${(props) => props.theme.palette.text.primary};
+
+    &:hover {
+        outline: none !important;
+        background: transparent;
+        text-decoration: underline;
+        text-decoration-color: currentcolor;
+        padding: 0;
+        min-width: 0;
+        font-family: 'Poppins SemiBold';
+        font-weight: 400;
+    }
 `
 
 const HomePage: FC<HomePageProps> = () => {
@@ -49,13 +49,24 @@ const HomePage: FC<HomePageProps> = () => {
             <Container maxWidth="xl">
                 <FlexSpacer minHeight={12} />
 
-                <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
+                <Animated
+                    animationIn="fadeIn"
+                    animationOut="fadeOut"
+                    isVisible={true}
+                >
                     <Hero />
 
                     <FlexSpacer minHeight={7} />
 
-                    <Stack direction="row" sx={{ alignItems: 'end' }}>
-                        <Typography size="h2" weight="SemiBold" sx={{ pt: 2, mb: 1 }}>
+                    <Stack
+                        direction="row"
+                        sx={{ alignItems: 'end', marginBottom: '1.5rem' }}
+                    >
+                        <Typography
+                            size="h2"
+                            weight="SemiBold"
+                            sx={{ pt: 2, mb: 1 }}
+                        >
                             {t('home.nfts.headline')}
                         </Typography>
 

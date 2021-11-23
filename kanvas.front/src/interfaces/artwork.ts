@@ -6,6 +6,7 @@ export interface IArtwork {
 export interface INft {
   id: number
   name: string
+  artistName?: string
   ipfsHash: string
   dataUri: string
   price: number

@@ -1,92 +1,154 @@
-import { CardActionArea, Skeleton, Stack } from '@mui/material'
+import {
+    CardActionArea,
+    Skeleton,
+    Stack,
+    useMediaQuery,
+    Theme,
+    useTheme,
+} from '@mui/material'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import CardMedia from '@mui/material/CardMedia'
 import Typography from '../../atoms/Typography'
-
 import { useHistory } from 'react-router-dom'
-
 import styled from '@emotion/styled'
-import { Theme } from '@mui/material'
 import { Box } from '@mui/system'
 import { CurrencyEnum } from '../../../interfaces/notification'
 
 export interface NftCardProps {
-  loading?: boolean
-  id?: string
-  name?: string
-  price?: number
-  height?: number
-  ipfsHash?: string
-  dataUri?: string
+    loading?: boolean
+    id?: string
+    name?: string
+    price?: number
+    height?: number
+    ipfsHash?: string
+    openFilters?: boolean
+    dataUri?: string
 }
 
 const StyledBioWrapper = styled.div<{ theme?: Theme }>`
-  color: ${(props) =>
-    props.color
-      ? props.color
-      : props.theme.palette.text.primary ?? 'black'} !important;
+    align-self: flex-start;
 `
+const StyledImgWrapper = styled.div<{ theme?: Theme }>`
+    position: relative;
+    overflow: hidden;
+    min-height: 90vw;
 
+    @media (min-width: 600px) {
+        min-height: 40vw;
+    }
+
+    @media (min-width: 650px) {
+        min-height: 25vw;
+    }
+
+    @media (min-width: 900px) {
+        min-height: 23.5vw;
+    }
+
+    @media (min-width: 1200px) {
+        min-height: 17vw;
+    }
+
+    @media (min-width: 1440px) {
+        min-height: 330px;
+        max-height: 370px;
+    }
+`
+const StyledImg = styled.img<{ theme?: Theme }>`
+    position: absolute;
+    width: 100%;
+    height: -webkit-fill-available;
+    object-position: center center;
+    object-fit: cover;
+}
+`
 export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
-  const history = useHistory()
+    const history = useHistory()
+    const theme = useTheme()
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-  const handleRedirect = (path: string) => {
-    history.push(path)
-  }
+    const handleRedirect = (path: string) => {
+        history.push(path)
+    }
 
-  return !loading ? (
-    <Card
-      onClick={() => handleRedirect(`/product/${props.id}`)}
-      sx={{
-        borderRadius: 0,
-        height: props.height,
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'relative',
-      }}
-    >
-      <CardActionArea>
-        <CardMedia component="img" image={props.dataUri} alt="random" />
-        <CardContent
-          sx={{
-            flexGrow: 1,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            position: 'absolute',
-            bottom: '0',
-            right: '0',
-            left: '0',
-            backgroundColor: 'rgba( 0, 0, 0, 0.35)',
-            backdropFilter:
-              'blur(10px) saturate(100%) contrast(45%) brightness(130%)',
-          }}
+    return !loading ? (
+        <Card
+            onClick={() => handleRedirect(`/product/${props.id}`)}
+            sx={{
+                borderRadius: 0,
+                height: props.height,
+                display: 'flex',
+                position: 'relative',
+                flexDirection: 'column',
+                width: '100%',
+                minHeight: '100%',
+                cursor: 'pointer',
+            }}
         >
-          <StyledBioWrapper style={{ display: 'block' }}>
-            <Typography weight="SemiBold" size="h4" color="#FFF">
-              {props.name}
-            </Typography>
-            <Typography weight="Light" size="body" color="#FFF">
-              Artist name
-            </Typography>
-            <Typography weight="Light" size="body" color="#FFF">
-              Remaining time
-            </Typography>
-          </StyledBioWrapper>
+            <StyledImgWrapper>
+                <StyledImg
+                    data-object-fit="cover"
+                    src={props.dataUri}
+                    alt="random"
+                />
+            </StyledImgWrapper>
 
-          <Box display="flex" flexDirection="column" alignSelf="self-end">
-            <Typography weight="SemiBold" size="h3" color="#FFF">
-              {' '}
-              {props.price ? props.price : '- '} {CurrencyEnum.TEZ}{' '}
-            </Typography>
-          </Box>
-        </CardContent>
-      </CardActionArea>
-    </Card>
-  ) : (
-    <Stack spacing={1}>
-      <Skeleton variant="rectangular" width={'100%'} height={302} />
-    </Stack>
-  )
+            <CardContent
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexDirection: 'column',
+                    flexGrow: 1,
+                }}
+            >
+                <StyledBioWrapper>
+                    <Typography weight="SemiBold" size="h4">
+                        {props.name}
+                    </Typography>
+
+                    <Box flexGrow="1" marginBottom=".5rem">
+                        <Typography weight="Light" size="body">
+                            Long Artist name here
+                        </Typography>
+                    </Box>
+                </StyledBioWrapper>
+
+                <Box
+                    display="flex"
+                    flexDirection="row"
+                    alignSelf="self-start"
+                    width="100%"
+                >
+                    <Typography weight="Light" size="body">
+                        Remaining time
+                    </Typography>
+
+                    <Box display="flex" flexDirection="row" marginLeft="auto">
+                        <Typography
+                            weight="SemiBold"
+                            size="h3"
+                            marginLeft="auto"
+                        >
+                            {' '}
+                            {props.price ? props.price : '- '}
+                        </Typography>
+
+                        <Typography
+                            weight="Currency"
+                            size="h3"
+                            marginLeft="auto"
+                        >
+                            {CurrencyEnum.TEZ}{' '}
+                        </Typography>
+                    </Box>
+                </Box>
+            </CardContent>
+        </Card>
+    ) : (
+        <Stack spacing={1}>
+            <Skeleton variant="rectangular" width={'100%'} height={302} />
+        </Stack>
+    )
 }
