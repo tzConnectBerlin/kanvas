@@ -5,12 +5,12 @@ import { Pool, types } from 'pg'
 
 // Read postgres TIMESTAMP WITHOUT TIME ZONE values as UTC+0 Date
 types.setTypeParser(
-  1114 /* TIMESTAMP WITHOUT TIME ZONE type */,
+  1114 /* TIMESTAMP without time zone type */,
   function (stringValue: string) {
     return new Date(stringValue + '+0000')
   },
 )
-
+console.debug('PORT IS', Number(assertEnv('DB_PORT')))
 const dbProvider = {
   provide: PG_CONNECTION,
   useValue: new Pool({

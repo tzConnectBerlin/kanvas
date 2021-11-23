@@ -11,6 +11,10 @@ CREATE TABLE kanvas_user (
        address TEXT UNIQUE NOT NULL,
        signed_payload TEXT
 );
+CREATE TABLE user_role (
+       id SERIAL PRIMARY KEY,
+       role_label TEXT UNIQUE NOT NULL
+);
 CREATE TABLE mtm_kanvas_user_user_role (
        kanvas_user_id INT REFERENCES kanvas_user(id) ON UPDATE CASCADE ON DELETE CASCADE,
        user_role_id INT REFERENCES user_role(id) ON UPDATE CASCADE ON DELETE CASCADE
