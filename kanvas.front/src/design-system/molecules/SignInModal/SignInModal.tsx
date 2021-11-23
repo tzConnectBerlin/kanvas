@@ -181,7 +181,7 @@ export const SignInModal: FC<SignInModalProps> = ({
       setBeaconLoading(true)
 
       beaconWallet.client
-        .requestPermissions({ network: { type: NetworkType.FLORENCENET } })
+        .requestPermissions({ network: { type: NetworkType.HANGZHOUNET } })
         .then(async (response: PermissionResponseOutput) => {
           signExpression(response.address, 'beacon')
         })
