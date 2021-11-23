@@ -56,9 +56,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                 method: 'POST',
                 headers: {
                     'content-type': 'application/json',
-                    'Access-Control-Allow-Origin':
-                        process.env.REACT_APP_API_SERVER_BASE_URL ??
-                        'http://localhost:3000',
+                    'Access-Control-Allow-Origin': '*'
                 },
             })
                 .then((res) => {
