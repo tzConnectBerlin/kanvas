@@ -54,7 +54,7 @@ const HomePage: FC<HomePageProps> = () => {
 
           <FlexSpacer minHeight={7} />
 
-          <Stack direction="row" sx={{ alignItems: 'end' }}>
+          <Stack direction="row" sx={{ alignItems: 'end', marginBottom: '1.5rem' }}>
             <Typography size="h2" weight="SemiBold" sx={{ pt: 2, mb: 1 }}>
               {t('home.nfts.headline')}
             </Typography>

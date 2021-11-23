@@ -42,7 +42,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                     lg={props.open ? 12 : 9}
                     rowSpacing={4}
                     spacing={24}
-                    columnSpacing={{ xs: 3, sm: 4, md: 2 }}
+                    columnSpacing={{ xs: 3, sm: 4 }}
                 >
                     {props.nfts.map((nft) => (
                         <Grid
