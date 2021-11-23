@@ -11,179 +11,189 @@ import { Stack, Theme } from '@mui/material'
 import { INft } from '../../../interfaces/artwork'
 
 interface ShoppingCartProps {
-  nftsInCart: INft[]
-  setNftsInCart: Function
-  closeCart: Function
-  loading: boolean
-  open: boolean
+    nftsInCart: INft[]
+    setNftsInCart: Function
+    closeCart: Function
+    loading: boolean
+    open: boolean
 }
 
 const ContainerPopupStyled = styled.div<{ open: boolean }>`
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100vh;
-  z-index: 3;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    z-index: 3;
 
-  visibility: ${(props) => (props.open ? 'visible' : 'hidden')}!important;
-  opacity: ${(props) => (props.open ? 1 : 0)} !important;
+    visibility: ${(props) => (props.open ? 'visible' : 'hidden')}!important;
+    opacity: ${(props) => (props.open ? 1 : 0)} !important;
 `
 
 const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
-  max-width: ${(props) => (props.open ? 25 : 0)}rem;
-  width: ${(props) => (props.open ? 35 : 0)}%;
-  height: 101vh;
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  z-index: 5;
-  top: 0;
+    max-width: ${(props) => (props.open ? 25 : 0)}rem;
+    width: ${(props) => (props.open ? 35 : 0)}%;
+    height: 101vh;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    top: 0;
 
-  overflow: auto;
+    overflow: auto;
 
-  margin-top: 5rem;
+    margin-top: 5rem;
 
-  padding-bottom: 2.5rem;
+    padding-bottom: 2.5rem;
 
-  background-color: ${(props) => props.theme.palette.background.paper};
-  opacity: 1;
+    background-color: ${(props) => props.theme.palette.background.paper};
+    opacity: 1;
 
-  p {
-    opacity: ${(props) => (props.open ? 1 : 0)} !important;
-    transition: opacity 0.1s;
-  }
+    p {
+        opacity: ${(props) => (props.open ? 1 : 0)} !important;
+        transition: opacity 0.1s;
+    }
 
-  transition: max-width 0.3s, width 0.3s, padding 0.5s;
+    transition: max-width 0.3s, width 0.3s, padding 0.5s;
 
-  @media (max-width: 1100px) {
-    width: ${(props) => (props.open ? 40 : 0)}%;
-  }
+    @media (max-width: 1100px) {
+        width: ${(props) => (props.open ? 40 : 0)}%;
+    }
 
-  @media (max-width: 730px) {
-    width: ${(props) => (props.open ? 50 : 0)}%;
-  }
+    @media (max-width: 730px) {
+        width: ${(props) => (props.open ? 50 : 0)}%;
+    }
 
-  @media (max-width: 650px) {
-    width: ${(props) => (props.open ? 100 : 0)}%;
-  }
+    @media (max-width: 650px) {
+        width: ${(props) => (props.open ? 100 : 0)}%;
+    }
 `
 
 export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
-  const [deleteFromCartResponse, deleteFromCart] = useAxios('', {
-    manual: true,
-  })
+    const [deleteFromCartResponse, deleteFromCart] = useAxios('', {
+        manual: true,
+    })
 
-  const handleDeleteFromBasket = (nftId: number) => {
-    deleteFromCart(
-      {
-        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/users/cart/remove/' + nftId,
-        withCredentials: true,
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'Access-Control-Allow-Origin':
-            process.env.REACT_APP_API_SERVER_BASE_URL ??
-            'http://localhost:3000',
-        },
-      },
-    )
-      .then((res) => {
-        if (res.status === 204) {
-          props.setNftsInCart(
-            props.nftsInCart.filter((nfts) => nfts.id !== nftId),
-          )
-        }
-      })
-      .catch((err) => {
-        toast.error(err.message)
-      })
-  }
-
-  useEffect(() => {
-    if (props.open) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'auto'
+    const handleDeleteFromBasket = (nftId: number) => {
+        deleteFromCart({
+            url:
+                process.env.REACT_APP_API_SERVER_BASE_URL +
+                '/users/cart/remove/' +
+                nftId,
+            withCredentials: true,
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json',
+                'Access-Control-Allow-Origin':
+                    process.env.REACT_APP_API_SERVER_BASE_URL ??
+                    'http://localhost:3000',
+            },
+        })
+            .then((res) => {
+                if (res.status === 204) {
+                    props.setNftsInCart(
+                        props.nftsInCart.filter((nfts) => nfts.id !== nftId),
+                    )
+                }
+            })
+            .catch((err) => {
+                toast.error(err.message)
+            })
     }
-  }, [props.open])
 
-  return (
-    <>
-      <ContainerPopupStyled
-        open={props.open}
-        onClick={() => props.closeCart()}
-      ></ContainerPopupStyled>
+    useEffect(() => {
+        if (props.open) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = 'auto'
+        }
+    }, [props.open])
 
-      <WrapperCart open={props.open}>
-        <Stack direction="row">
-          <Typography
-            size="h2"
-            weight="SemiBold"
-            sx={{ marginTop: '1rem', marginLeft: '1rem' }}
-          >
-            {' '}
-            Summary{' '}
-          </Typography>
-          <FlexSpacer />
-          <Typography
-            size="h5"
-            weight="Medium"
-            sx={{ marginTop: '1rem', marginRight: '1rem' }}
-          >
-            {' '}
-            {props.nftsInCart.length && <>{props.nftsInCart.length} - items </>}
-          </Typography>
-        </Stack>
+    return (
+        <>
+            <ContainerPopupStyled
+                open={props.open}
+                onClick={() => props.closeCart()}
+            ></ContainerPopupStyled>
 
-        <FlexSpacer minHeight={3} />
+            <WrapperCart open={props.open}>
+                <Stack direction="row">
+                    <Typography
+                        size="h2"
+                        weight="SemiBold"
+                        sx={{ marginTop: '1rem', marginLeft: '1rem' }}
+                    >
+                        {' '}
+                        Summary{' '}
+                    </Typography>
+                    <FlexSpacer />
+                    <Typography
+                        size="h5"
+                        weight="Medium"
+                        sx={{ marginTop: '1rem', marginRight: '1rem' }}
+                    >
+                        {' '}
+                        {props.nftsInCart.length && (
+                            <>{props.nftsInCart.length} - items </>
+                        )}
+                    </Typography>
+                </Stack>
 
-        <Stack
-          direction="column"
-          spacing={4}
-          sx={{
-            paddingBottom: '20rem',
-            marginLeft: '1rem',
-            marginRight: '1rem',
-          }}
-        >
-          {props.loading ?
-            [...new Array(3)].map(() => (
-              <ShoppingCartItem loading={true} removeNft={() => { }} />
-            ))
-            : props.nftsInCart.length > 0 ?
-              props.nftsInCart.map((nft) => (
-                <ShoppingCartItem loading={false} nft={nft} removeNft={handleDeleteFromBasket} />
-              ))
-              : (
-                <Typography
-                  size="h5"
-                  weight="Medium"
-                  display="initial !important"
-                  align="center"
-                  color="#C4C4C4"
+                <FlexSpacer minHeight={3} />
+
+                <Stack
+                    direction="column"
+                    spacing={4}
+                    sx={{
+                        paddingBottom: '20rem',
+                        marginLeft: '1rem',
+                        marginRight: '1rem',
+                    }}
                 >
-                  {'Empty Shopping Cart..'}
-                </Typography>
-              )}
+                    {props.loading ? (
+                        [...new Array(3)].map(() => (
+                            <ShoppingCartItem
+                                loading={true}
+                                removeNft={() => {}}
+                            />
+                        ))
+                    ) : props.nftsInCart.length > 0 ? (
+                        props.nftsInCart.map((nft) => (
+                            <ShoppingCartItem
+                                loading={false}
+                                nft={nft}
+                                removeNft={handleDeleteFromBasket}
+                            />
+                        ))
+                    ) : (
+                        <Typography
+                            size="h5"
+                            weight="Medium"
+                            display="initial !important"
+                            align="center"
+                            color="#C4C4C4"
+                        >
+                            {'Empty Shopping Cart..'}
+                        </Typography>
+                    )}
 
-          <FlexSpacer />
+                    <FlexSpacer />
 
-          {props.open &&
-            <CustomButton
-              size="medium"
-              label="Checkout"
-              disabled={props.nftsInCart.length === 0}
-              sx={{
-                bottom: 0,
-                marginLeft: '1rem',
-                marginRight: '1rem',
-              }}
-            />
-          }
-        </Stack>
-      </WrapperCart>
-    </>
-  )
+                    {props.open && (
+                        <CustomButton
+                            size="medium"
+                            label="Checkout"
+                            disabled={props.nftsInCart.length === 0}
+                            sx={{
+                                bottom: 0,
+                                marginLeft: '1rem',
+                                marginRight: '1rem',
+                            }}
+                        />
+                    )}
+                </Stack>
+            </WrapperCart>
+        </>
+    )
 }

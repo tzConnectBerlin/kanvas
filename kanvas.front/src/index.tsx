@@ -8,12 +8,12 @@ import { IntlProvider } from 'react-intl'
 const locale = 'en'
 
 const setupAndRender = async () => {
-  ReactDOM.render(
-    <IntlProvider locale={locale} defaultLocale="en">
-      <App />
-    </IntlProvider>,
-    document.getElementById('root'),
-  )
+    ReactDOM.render(
+        <IntlProvider locale={locale} defaultLocale="en">
+            <App />
+        </IntlProvider>,
+        document.getElementById('root'),
+    )
 }
 
 setupAndRender()

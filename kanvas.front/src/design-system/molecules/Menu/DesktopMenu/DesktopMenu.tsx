@@ -4,7 +4,7 @@ import Brightness3Icon from '@mui/icons-material/Brightness3'
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined'
 import ProfilePopover from '../../ProfilePopover'
 
-import { Badge } from '@mui/material';
+import { Badge } from '@mui/material'
 import { QuickSearch } from '../../../molecules/QuickSearch'
 import { FC, useState } from 'react'
 import { Stack } from '@mui/material'
@@ -15,23 +15,22 @@ import { useTranslation } from 'react-i18next'
 import { useHistory, useLocation } from 'react-router-dom'
 
 const DesktopMenuContent = styled(Stack)`
-  display: none;
-  margin-top: 0 !important;
+    display: none;
+    margin-top: 0 !important;
 
-  @media (min-width: 875px) {
-    display: flex;
-  }
+    @media (min-width: 875px) {
+        display: flex;
+    }
 `
 
 export const DesktopMenu: FC<MenuProps> = ({ user, ...props }) => {
-
     const history = useHistory()
     const location = useLocation()
 
     const logout = () => {
         localStorage.removeItem('Kanvas - Bearer')
         localStorage.removeItem('Kanvas - address')
-      }
+    }
 
     const { t } = useTranslation(['translation'])
 
@@ -57,9 +56,12 @@ export const DesktopMenu: FC<MenuProps> = ({ user, ...props }) => {
                 {/* Link to general pages */}
 
                 {location.pathname === '/sign-in' ||
-                    location.pathname === '/account/create' ? undefined : (
+                location.pathname === '/account/create' ? undefined : (
                     <>
-                        <StyledLink to="/home" isSearchOpen={props.isSearchOpen}>
+                        <StyledLink
+                            to="/home"
+                            isSearchOpen={props.isSearchOpen}
+                        >
                             <Typography
                                 size="inherit"
                                 weight="Light"
@@ -70,7 +72,10 @@ export const DesktopMenu: FC<MenuProps> = ({ user, ...props }) => {
                             </Typography>
                         </StyledLink>
 
-                        <StyledLink to="/store" isSearchOpen={props.isSearchOpen}>
+                        <StyledLink
+                            to="/store"
+                            isSearchOpen={props.isSearchOpen}
+                        >
                             <Typography
                                 size="inherit"
                                 weight="Light"
@@ -89,7 +94,7 @@ export const DesktopMenu: FC<MenuProps> = ({ user, ...props }) => {
 
                 {/* Call to action button: `Sign in`, `Add artwork` for curators and artists, and profile avatar to display the submenu */}
 
-                {localStorage.getItem('Kanvas - address') === user?.address ?
+                {localStorage.getItem('Kanvas - address') === user?.address ? (
                     <Avatar
                         src={`${avatarSrc}?${Date.now()}`}
                         onClick={(e) =>
@@ -97,17 +102,16 @@ export const DesktopMenu: FC<MenuProps> = ({ user, ...props }) => {
                         }
                         sx={{ cursor: 'pointer !important' }}
                     />
-                    :
-                    location.pathname === '/sign-in' ||
-                        location.pathname === '/account/create' ||
-                        location.pathname === '/account/edit' ? undefined : (
-                        <CustomButton
-                            size="medium"
-                            onClick={() => props.setOpen(true)}
-                            label="Sign in"
-                            loading={props.loading}
-                        />
-                    )}
+                ) : location.pathname === '/sign-in' ||
+                  location.pathname === '/account/create' ||
+                  location.pathname === '/account/edit' ? undefined : (
+                    <CustomButton
+                        size="medium"
+                        onClick={() => props.setOpen(true)}
+                        label="Sign in"
+                        loading={props.loading}
+                    />
+                )}
 
                 <Badge color="error" badgeContent={props.nftsInCartNumber}>
                     <StyledShoppingCartRoundedIcon

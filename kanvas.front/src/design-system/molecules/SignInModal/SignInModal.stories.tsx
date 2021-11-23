@@ -3,15 +3,15 @@ import { ComponentStory, ComponentMeta } from '@storybook/react'
 import { SignInModal } from './SignInModal'
 
 export default {
-  title: 'Molecules/SignInModal',
-  component: SignInModal,
-  argTypes: {
-    backgroundColor: { control: 'color' },
-  },
+    title: 'Molecules/SignInModal',
+    component: SignInModal,
+    argTypes: {
+        backgroundColor: { control: 'color' },
+    },
 } as ComponentMeta<typeof SignInModal>
 
 const Template: ComponentStory<typeof SignInModal> = (args) => (
-  <SignInModal {...args} />
+    <SignInModal {...args} />
 )
 
 export const Default = Template.bind({})

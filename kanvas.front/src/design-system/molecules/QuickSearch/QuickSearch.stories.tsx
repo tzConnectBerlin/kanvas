@@ -4,9 +4,9 @@ import { Story, Meta } from '@storybook/react/types-6-0'
 import { QuickSearch } from './QuickSearch'
 
 export default {
-  title: 'Molecules/Typography',
-  component: QuickSearch,
-  argTypes: {},
+    title: 'Molecules/Typography',
+    component: QuickSearch,
+    argTypes: {},
 } as Meta
 
 const Template: Story = (args: any) => <QuickSearch {...args} />

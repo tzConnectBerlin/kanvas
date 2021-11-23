@@ -1,21 +1,21 @@
 interface IBackground {
-  color: string
+    color: string
 }
 
 interface ILogo {
-  filter: string
+    filter: string
 }
 
 interface IColor {
-  primary: string
+    primary: string
 }
 
 interface ITypography {
-  color: IColor
+    color: IColor
 }
 
 export interface ITheme {
-  background: IBackground
-  logo: ILogo
-  typography: ITypography
+    background: IBackground
+    logo: ILogo
+    typography: ITypography
 }
