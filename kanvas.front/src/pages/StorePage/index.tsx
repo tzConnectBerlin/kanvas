@@ -4,7 +4,7 @@ import ListIcon from '@mui/icons-material/List'
 import NftGrid from '../../design-system/organismes/NftGrid'
 import FlexSpacer from '../../design-system/atoms/FlexSpacer'
 import PageWrapper from '../../design-system/commons/PageWrapper'
-import TreeView from '../../design-system/molecules/TreeView/TreeView'
+// import TreeView from '../../design-system/molecules/TreeView/TreeView'
 import StoreFilters from '../../design-system/organismes/StoreFilters'
 
 import { useEffect, useState } from 'react'
@@ -14,7 +14,7 @@ import { CustomSelect } from '../../design-system/atoms/Select'
 import { Typography } from '../../design-system/atoms/Typography'
 import { useLocation, useHistory, useParams } from 'react-router'
 import { toast } from 'react-toastify'
-import mockNft from '../../_mocks/mockNft'
+// import mockNft from '../../_mocks/mockNft'
 
 interface ParamTypes {
     width?: any
@@ -239,22 +239,24 @@ const StorePage = () => {
                         loading={categoriesResponse.loading}
                     />
 
-                    {/* <NftGrid
-            open={filterOpen}
-            nfts={
-              selectedFilters.length === 0
-                ? nftsResponse.data?.nfts
-                : nftsFilteredResponse.data?.nfts
-            }
-            loading={nftsResponse.loading || nftsFilteredResponse.loading}
-          /> */}
-
                     <NftGrid
+                        open={filterOpen}
+                        nfts={
+                            selectedFilters.length === 0
+                                ? nftsResponse.data?.nfts
+                                : nftsFilteredResponse.data?.nfts
+                        }
+                        loading={
+                            nftsResponse.loading || nftsFilteredResponse.loading
+                        }
+                    />
+
+                    {/* <NftGrid
                         nfts={mockNft}
                         open={filterOpen}
                         emptyMessage={'No Nfts in collection yet'}
                         emptyLink={'Click here to buy some in the store.'}
-                    />
+                    /> */}
                 </StyledContentStack>
 
                 <Stack direction="row">
