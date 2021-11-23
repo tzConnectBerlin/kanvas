@@ -15,6 +15,6 @@ export interface ProfileEntity {
 }
 
 export interface UserCart {
-  expiresAt: number | undefined
+  expiresAt?: number
   nfts: NftEntity[]
 }

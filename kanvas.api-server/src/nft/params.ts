@@ -28,7 +28,7 @@ export class PaginationParams {
   @IsInt()
   @Type(() => Number)
   @IsOptional()
-  firstRequestAt: number | undefined
+  firstRequestAt?: number
 }
 
 export class FilterParams extends PaginationParams {
@@ -39,11 +39,11 @@ export class FilterParams extends PaginationParams {
       : undefined,
   )
   @IsOptional()
-  categories: number[] | undefined
+  categories?: number[]
 
   @IsString()
   @IsOptional()
-  address: string | undefined
+  address?: string
 }
 
 function parseStringArray(v: string | string[], sep: string): string[] {
