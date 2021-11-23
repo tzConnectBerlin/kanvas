@@ -9,7 +9,7 @@ import {
   Post,
 } from '@nestjs/common'
 import { NftService } from '../service/nft.service'
-import { NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity'
+import { NftEntity, NftEntityPage } from '../entity/nft.entity'
 import { FilterParams, PaginationParams } from '../params'
 
 @Controller('nfts')
@@ -24,7 +24,7 @@ export class NftController {
   @Get('/filter')
   async filter(@Query() params: FilterParams): Promise<NftEntityPage> {
     this.validateFilterParams(params)
-    return this.nftService.filter(params)
+    return this.nftService.findNftsWithFilter(params)
   }
 
   @Get()

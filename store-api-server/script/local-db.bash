@@ -1,5 +1,5 @@
 #!/bin/bash
-cd $(git rev-parse --show-toplevel)/kanvas.api-server
+cd $(git rev-parse --show-toplevel)/store-api-server
 
 [ -z $DB_PORT ] && export DB_PORT=5432
 [ -z $DB_PASSWORD ] && export DB_PASSWORD=dev_password

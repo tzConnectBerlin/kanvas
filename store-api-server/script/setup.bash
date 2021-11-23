@@ -1,10 +1,10 @@
 #!/bin/bash
-cd $(git rev-parse --show-toplevel)/kanvas.api-server
+cd $(git rev-parse --show-toplevel)/store-api-server
 
 function keypress {
 	# used in case of manual actions pending automation
 	# (do-nothing scripting style)
-	read -p "press any key to continue (or ^C to quit)... " -n1 -s	
+	read -p "press any key to continue (or ^C to quit)... " -n1 -s
 	echo
 }
 

@@ -9,7 +9,12 @@ export interface UserEntity {
   roles: string[]
 }
 
+export interface ProfileEntity {
+  user: UserEntity
+  nftCount: number
+}
+
 export interface UserCart {
-  expiresAt: number | undefined
+  expiresAt?: number
   nfts: NftEntity[]
 }
