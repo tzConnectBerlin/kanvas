@@ -71,7 +71,7 @@ WHERE address = $1
     const user = userRes.val
     delete user.signedPayload
 
-    const userNfts = await this.nftService.filter({
+    const userNfts = await this.nftService.findNftsWithFilter({
       page: 1,
       pageSize: 1,
       orderBy: 'id',

@@ -24,7 +24,7 @@ export class NftController {
   @Get('/filter')
   async filter(@Query() params: FilterParams): Promise<NftEntityPage> {
     this.validateFilterParams(params)
-    return this.nftService.filter(params)
+    return this.nftService.findNftsWithFilter(params)
   }
 
   @Get()
