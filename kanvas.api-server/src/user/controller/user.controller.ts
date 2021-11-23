@@ -39,8 +39,8 @@ export class UserController {
       )
     }
 
-    const profile = await this.userService.getProfile(address)
-    if (typeof profile === 'undefined') {
+    const profile_res = await this.userService.getProfile(address)
+    if (!profile_res.ok) {
       if (typeof userAddress === 'undefined') {
         throw new HttpException(
           'Failed to find user associated to JWT',
@@ -52,7 +52,7 @@ export class UserController {
         HttpStatus.BAD_REQUEST,
       )
     }
-    return profile
+    return profile_res.val
   }
 
   // @Get('/edit/check')

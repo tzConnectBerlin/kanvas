@@ -3,6 +3,7 @@ import { UserEntity } from 'src/user/entity/user.entity'
 import { UserService } from 'src/user/service/user.service'
 import { ITokenPayload } from 'src/interfaces/token.interface'
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import { Result } from 'ts-results'
 
 const bcrypt = require('bcrypt')
 
@@ -23,15 +24,16 @@ export class AuthenticationService {
 
   private async validate(
     userData: UserEntity,
-  ): Promise<UserEntity | undefined> {
+  ): Promise<Result<UserEntity, string>> {
     return await this.userService.findByAddress(userData.address)
   }
 
   public async login(userData: UserEntity): Promise<any | { status: number }> {
-    const user = await this.validate(userData)
-    if (typeof user === 'undefined') {
-      throw new HttpException('User not registerd', HttpStatus.BAD_REQUEST)
+    const userRes = await this.validate(userData)
+    if (!userRes.ok) {
+      throw new HttpException('User not registered', HttpStatus.BAD_REQUEST)
     }
+    const user = userRes.val
 
     if (
       user.signedPayload !== undefined &&
@@ -51,13 +53,15 @@ export class AuthenticationService {
     }
   }
 
-  public async getLoggedUser(address: string): Promise<UserEntity | undefined> {
-    const user = await this.userService.findByAddress(address)
-    if (typeof user !== 'undefined') {
-      delete user.signedPayload
+  public async getLoggedUser(
+    address: string,
+  ): Promise<Result<UserEntity, string>> {
+    const userRes = await this.userService.findByAddress(address)
+    if (userRes.ok) {
+      delete userRes.val.signedPayload
     }
 
-    return user
+    return userRes
   }
 
   public async register(user: UserEntity): Promise<any> {

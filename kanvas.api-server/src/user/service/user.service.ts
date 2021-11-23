@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common'
 import { UserEntity, ProfileEntity, UserCart } from '../entity/user.entity'
 import { NftService } from '../../nft/service/nft.service'
 import { PG_CONNECTION } from '../../constants'
+import { Result, Err, Ok } from 'ts-results'
 
 interface CartMeta {
   id: number
@@ -32,7 +33,7 @@ RETURNING id`,
     return { ...user, id: qryRes.rows[0]['id'] }
   }
 
-  async findByAddress(addr: string): Promise<UserEntity | undefined> {
+  async findByAddress(addr: string): Promise<Result<UserEntity, string>> {
     const qryRes = await this.conn.query(
       `
 SELECT
@@ -47,7 +48,7 @@ WHERE address = $1
       [addr],
     )
     if (qryRes.rows.length === 0) {
-      return undefined
+      return new Err(`no user found with address=${addr}`)
     }
     const res = {
       id: qryRes.rows[0]['id'],
@@ -59,14 +60,15 @@ WHERE address = $1
         .filter((roleLabels: any[]) => typeof roleLabels === 'string'),
     }
 
-    return res
+    return Ok(res)
   }
 
-  async getProfile(address: string): Promise<ProfileEntity | undefined> {
-    const user = await this.findByAddress(address)
-    if (typeof user === 'undefined') {
-      return undefined
+  async getProfile(address: string): Promise<Result<ProfileEntity, string>> {
+    const userRes = await this.findByAddress(address)
+    if (!userRes.ok) {
+      return userRes
     }
+    const user = userRes.val
     delete user.signedPayload
 
     const userNfts = await this.nftService.filter({
@@ -79,10 +81,10 @@ WHERE address = $1
       address: address,
     })
 
-    return {
+    return new Ok({
       user: user,
       nftCount: userNfts.numberOfPages,
-    }
+    })
   }
 
   async getUserCartSession(userId: number): Promise<string | undefined> {
