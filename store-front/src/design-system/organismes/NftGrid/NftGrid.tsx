@@ -1,8 +1,11 @@
 import styled from '@emotion/styled'
+import FlexSpacer from '../../atoms/FlexSpacer'
 import Typography from '../../atoms/Typography'
+
 import { FC } from 'react'
 import { Grid, useMediaQuery, useTheme } from '@mui/material'
 import { Layouts } from 'react-grid-layout'
+
 import { NftCard } from '../../molecules/NftCard'
 import { INft } from '../../../interfaces/artwork'
 

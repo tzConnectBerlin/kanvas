@@ -24,16 +24,16 @@ export interface FaqProps {
 }
 
 const StyledIconButton = styled(CustomButton)`
-  padding: 0;
-  min-width: 1.5rem;
-  height: 1.5rem !important;
+    padding: 0;
+    min-width: 1.5rem;
+    height: 1.5rem !important;
 
-  &:hover {
-    background-color: rgba(0, 0, 0, 0);
-  }
+    &:hover {
+        background-color: rgba(0, 0, 0, 0);
+    }
 `
 
-const StyledStack = styled(Stack) <{ theme?: Theme }>`
+const StyledStack = styled(Stack)<{ theme?: Theme }>`
   max-width: 100rem;
   width: 100%;
   height: 100%;
@@ -109,37 +109,37 @@ const StyledStack = styled(Stack) <{ theme?: Theme }>`
   }
 `
 const StyledSection = styled.section`
-  margin-bottom: 4rem;
+    margin-bottom: 4rem;
 
-  h2 {
-    scroll-margin-top: 4.7em;
-    margin-bottom: 3rem;
+    h2 {
+        scroll-margin-top: 4.7em;
+        margin-bottom: 3rem;
 
-    &.sub {
-      margin-bottom: 2rem;
-      font-size: 1rem;
+        &.sub {
+            margin-bottom: 2rem;
+            font-size: 1rem;
 
-      &:last-child {
-        color: red;
-      }
+            &:last-child {
+                color: red;
+            }
+        }
     }
-  }
-  .MuiTypography-body2 {
-    margin-bottom: 1rem;
-  }
+    .MuiTypography-body2 {
+        margin-bottom: 1rem;
+    }
 `
 
 const StickyNav = styled.nav`
-  position: sticky;
-  top: 10rem;
-  left: 0;
-  bottom: -28.125rem;
+    position: sticky;
+    top: 10rem;
+    left: 0;
+    bottom: -28.125rem;
 `
 
-const StyledDrawer = styled(Drawer) <{ theme?: Theme }>`
-  .MuiDrawer-paper {
-    padding: 1.9rem 1.9rem 0 1.9rem;
-  }
+const StyledDrawer = styled(Drawer)<{ theme?: Theme }>`
+    .MuiDrawer-paper {
+        padding: 1.9rem 1.9rem 0 1.9rem;
+    }
 `
 
 const Faq: FC<FaqProps> = () => {
@@ -195,14 +195,16 @@ const Faq: FC<FaqProps> = () => {
         <PageWrapper>
             <StyledStack direction="column">
                 <FlexSpacer minHeight={10} />
-                <Grid 
-                    container 
-                    className="faq-nav" 
+                <Grid
+                    container
+                    className="faq-nav"
                     onClick={() => setOpen(false)}
                 >
                     {isMobile ? (
                         <>
-                            <OutsideClickHandler onOutsideClick={() => setOpen(false)}>
+                            <OutsideClickHandler
+                                onOutsideClick={() => setOpen(false)}
+                            >
                                 <StyledDrawer
                                     anchor="bottom"
                                     open={open}
@@ -218,7 +220,9 @@ const Faq: FC<FaqProps> = () => {
                                         containerElement={
                                             <ul
                                                 onClick={() => setOpen(false)}
-                                                style={{ paddingBottom: '2rem' }}
+                                                style={{
+                                                    paddingBottom: '2rem',
+                                                }}
                                             />
                                         }
                                         itemElement={
@@ -235,7 +239,14 @@ const Faq: FC<FaqProps> = () => {
                                             event.stopPropagation()
                                             onClickToggler()
                                         }}
-                                        icon={<ListIcon sx={{ color: 'black', width: '.99rem' }} />}
+                                        icon={
+                                            <ListIcon
+                                                sx={{
+                                                    color: 'black',
+                                                    width: '.99rem',
+                                                }}
+                                            />
+                                        }
                                         color="primary"
                                         aria-label="show hide"
                                         sx={{
@@ -251,7 +262,13 @@ const Faq: FC<FaqProps> = () => {
                             </OutsideClickHandler>
                         </>
                     ) : (
-                        <Grid item xs={12} md={5} lg={4} sx={{ position: 'relative' }}>
+                        <Grid
+                            item
+                            xs={12}
+                            md={5}
+                            lg={4}
+                            sx={{ position: 'relative' }}
+                        >
                             <StickyNav>
                                 <Scrollspy
                                     ids={faqItems.map((item) => item.id)}

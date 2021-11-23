@@ -5,12 +5,12 @@ import { ApolloProvider } from '@apollo/client'
 import { Story, Meta } from '@storybook/react'
 
 export default {
-  title: 'Atoms/StickyLogo',
-  component: StickyLogo,
+    title: 'Atoms/StickyLogo',
+    component: StickyLogo,
 } as Meta
 
 const Template: Story<typeof StickyLogo> = (args) => (
-  <StickyLogo display={true} />
+    <StickyLogo display={true} />
 )
 export const LoggedIn = Template.bind({})
 LoggedIn.args = {}

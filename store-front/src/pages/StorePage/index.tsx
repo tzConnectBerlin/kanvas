@@ -4,7 +4,6 @@ import ListIcon from '@mui/icons-material/List'
 import NftGrid from '../../design-system/organismes/NftGrid'
 import FlexSpacer from '../../design-system/atoms/FlexSpacer'
 import PageWrapper from '../../design-system/commons/PageWrapper'
-// import TreeView from '../../design-system/molecules/TreeView/TreeView'
 import StoreFilters from '../../design-system/organismes/StoreFilters'
 
 import { useEffect, useState } from 'react'

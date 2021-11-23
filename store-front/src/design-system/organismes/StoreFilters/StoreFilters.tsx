@@ -10,6 +10,7 @@ interface FilterProps {
     name: string
     collapsed: boolean
     setCollapsed: Function
+    active: boolean
 }
 
 const StyledStack = styled(Stack)`
@@ -24,7 +25,11 @@ const Filter: FC<FilterProps> = ({ ...props }) => {
             direction="row"
             onClick={() => props.setCollapsed(props.name)}
         >
-            <Typography size="h5" weight="Light">
+            <Typography
+                size="h5"
+                weight={props.active ? 'SemiBold' : 'Light'}
+                color={props.active ? 'contrastText' : ''}
+            >
                 {props.name}
             </Typography>
 
@@ -94,7 +99,27 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
 
     return (
         <StyledUl openFilters={props.openFilters}>
-            {/* TODO: map over list of filters taken from the backend - Need to check with the backend team */}
+            <Stack
+                direction="row"
+                sx={{ display: `${props.openFilters ? 'flex' : 'none'}` }}
+            >
+                <FlexSpacer />
+                <Typography
+                    onClick={() => props.setSelectedFilters([])}
+                    size="subtitle2"
+                    weight={
+                        props.selectedFilters.length > 0 ? 'Medium' : 'Light'
+                    }
+                    color={
+                        props.selectedFilters.length > 0
+                            ? 'contrastText'
+                            : '#C4C4C4'
+                    }
+                    sx={{ paddingBottom: '0.5rem' }}
+                >
+                    Clear All
+                </Typography>
+            </Stack>
             <StyledLi
                 openFilters={props.openFilters}
                 collapsed={activeRef.indexOf('Categories') !== -1}
@@ -102,6 +127,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                 <Filter
                     name="Categories"
                     collapsed={activeRef.indexOf('Categories') !== -1}
+                    active={props.selectedFilters.length > 0}
                     setCollapsed={handleListItemClick}
                 />
                 <TreeView
@@ -117,6 +143,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
             <StyledLi openFilters={props.openFilters}>
                 <Filter
                     name="Price"
+                    active={false}
                     collapsed={activeRef.indexOf('Price') !== -1}
                     setCollapsed={handleListItemClick}
                 />

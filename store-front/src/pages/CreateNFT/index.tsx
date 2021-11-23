@@ -11,33 +11,37 @@ import { CreatNFTForm } from '../../design-system/organismes/CreateNFTForm'
 interface CreateNFTProps {}
 
 const StyledStack = styled(Stack)`
-  width: 100vw;
-  max-width: 100rem;
+    width: 100vw;
+    max-width: 100rem;
 `
 
 const CreateNFT: FC<CreateNFTProps> = () => {
-  return (
-    <PageWrapper>
-      <StyledStack direction="column" spacing={3}>
-        <FlexSpacer minHeight={12} />
+    return (
+        <PageWrapper>
+            <StyledStack direction="column" spacing={3}>
+                <FlexSpacer minHeight={12} />
 
-        <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={true}>
-          <Typography
-            size="h1"
-            weight="SemiBold"
-            sx={{ justifyContent: 'center' }}
-          >
-            {' '}
-            Create an NFT
-          </Typography>
-        </Animated>
+                <Animated
+                    animationIn="fadeIn"
+                    animationOut="fadeOut"
+                    isVisible={true}
+                >
+                    <Typography
+                        size="h1"
+                        weight="SemiBold"
+                        sx={{ justifyContent: 'center' }}
+                    >
+                        {' '}
+                        Create an NFT
+                    </Typography>
+                </Animated>
 
-        <FlexSpacer minHeight={2} />
+                <FlexSpacer minHeight={2} />
 
-        <CreatNFTForm />
-      </StyledStack>
-    </PageWrapper>
-  )
+                <CreatNFTForm />
+            </StyledStack>
+        </PageWrapper>
+    )
 }
 
 export default CreateNFT
