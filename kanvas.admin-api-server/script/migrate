@@ -1,0 +1,18 @@
+#!/bin/sh
+
+echo migrate.sh
+
+set -ex
+echo Running migrations on DB $DB_DATABASE at port $DB_PORT
+
+[ -z $DB_PORT ] && export DB_PORT=5433
+[ -z $DB_PASSWORD ] && export DB_PASSWORD=dev_password
+[ -z $DB_PASSWORD ] && export PASSWORD=dev_password
+[ -z $DB_USERNAME ] && export DB_USERNAME=dev_user
+[ -z $DB_DATABASE ] && export DB_DATABASE=dev_database
+
+export PGDATABASE=$DB_DATABASE
+export PGHOST=$DB_HOST
+export PGUSER=$DB_USERNAME
+export PGPASSWORD=$DB_PASSWORD
+./script/shmig -t postgresql -d postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_DATABASE $@ || exit 1

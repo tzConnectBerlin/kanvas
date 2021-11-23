@@ -274,7 +274,10 @@ EOF
 postgresql_cli(){
   export PGOPTIONS="-c client_min_messages=WARNING"
   local args="-q -X -v VERBOSITY=terse -v ON_ERROR_STOP=1 -A -t -w -d $DATABASE $ARGS"
-
+  LOGIN=$DB_USERNAME
+  HOST=localhost
+  PORT=$DB_PORT
+  PASSWORD=$DB_PASSWORD
   [[ -n $LOGIN    ]] && args="-U $LOGIN    $args"
   [[ -n $HOST     ]] && args="-h $HOST     $args"
   [[ -n $PORT     ]] && args="-p $PORT     $args"
