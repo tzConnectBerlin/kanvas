@@ -10,8 +10,8 @@ export interface NftEntity {
   contract: string
   tokenId: string
   categories: CategoryEntity[]
+  editionsAvailable?: number
   status: string // corresponds to NftStateTransitionConfig
-  editionsAvailable: number
 }
 
 export interface NftEntityPage {

@@ -1,4 +1,4 @@
--- Migration: nfts_filtered_v4
+-- Migration: nft_functions_v4
 -- Created at: 2021-11-23 17:38:29
 -- ====  UP  ====
 
@@ -65,5 +65,10 @@ DROP FUNCTION nfts_by_id(INTEGER[], TEXT, TEXT);
 ALTER FUNCTION __nfts_by_id_v3 RENAME TO nfts_by_id;
 
 DROP FUNCTION nft_editions_locked(INTEGER);
+
+DROP INDEX mtm_kanvas_user_nft_kanvas_user_id_idx;
+DROP INDEX mtm_kanvas_user_nft_nft_id_idx;
+DROP INDEX mtm_nft_category_nft_category_id_idx;
+DROP INDEX mtm_nft_category_nft_id_idx;
 
 COMMIT;

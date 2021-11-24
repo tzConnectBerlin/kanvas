@@ -189,16 +189,13 @@ VALUES ($1, $2)`,
     const qryRes = await tx.query(
       `
 SELECT
-  (SELECT count(1) FROM mtm_cart_session_nft WHERE nft_id = $1)
-    + (SELECT count(1) FROM mtm_kanvas_user_nft WHERE nft_id = $1)
-    AS editions_reserved,
-  (SELECT nft.editions_size FROM nft WHERE id = $1) AS editions_total
-      `,
+  (SELECT reserved + owned FROM nft_editions_locked($1)) AS editions_locked,
+  nft.editions_size
+FROM nft
+WHERE nft.id = $1`,
       [nftId],
     )
-    if (
-      qryRes.rows[0]['editions_reserved'] > qryRes.rows[0]['editions_total']
-    ) {
+    if (qryRes.rows[0]['editions_locked'] > qryRes.rows[0]['editions_size']) {
       tx.query('ROLLBACK')
       return false
     }
