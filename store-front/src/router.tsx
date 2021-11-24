@@ -12,7 +12,7 @@ import useAxios from 'axios-hooks'
 import ScrollToTop from './ScrollToTop'
 import CookieBanner from './design-system/molecules/CookiesBanner'
 import { Redirect } from 'react-router'
-import { RPC_URL } from './global'
+import { KUKAI_NETWORK, RPC_URL } from './global'
 import { Theme } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { darkTheme, lightTheme } from './theme'
@@ -53,7 +53,7 @@ const Router = () => {
     const [listCartResponse, listCart] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/cart/list`,
-            withCredentials: true
+            withCredentials: true,
         },
         { manual: true },
     )
@@ -73,7 +73,7 @@ const Router = () => {
         if (!embedKukai) {
             setEmbedKukai(
                 new KukaiEmbed({
-                    net: Networks.granadanet,
+                    net: Networks[KUKAI_NETWORK],
                     icon: false,
                 }),
             )

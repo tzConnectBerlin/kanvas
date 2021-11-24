@@ -23,6 +23,7 @@ import {
 import useAxios from 'axios-hooks'
 import { useTranslation } from 'react-i18next'
 import { IUser } from '../../../interfaces/user'
+import { NETWORK } from '../../../global'
 
 interface SignInModalProps {
     theme?: Theme
@@ -86,7 +87,7 @@ export const SignInModal: FC<SignInModalProps> = ({
     const [signUserResponse, signUser] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/login',
-            method: 'POST'
+            method: 'POST',
         },
         { manual: true },
     )
@@ -94,7 +95,7 @@ export const SignInModal: FC<SignInModalProps> = ({
     const [registerUserResponse, registerUser] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/register',
-            method: 'POST'
+            method: 'POST',
         },
         { manual: true },
     )
@@ -179,7 +180,9 @@ export const SignInModal: FC<SignInModalProps> = ({
 
             beaconWallet.client
                 .requestPermissions({
-                    network: { type: NetworkType.HANGZHOUNET },
+                    network: {
+                        type: NetworkType[NETWORK],
+                    },
                 })
                 .then(async (response: PermissionResponseOutput) => {
                     signExpression(response.address, 'beacon')
