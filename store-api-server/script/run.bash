@@ -13,4 +13,4 @@ export JWT_SECRET='wPK-TfcjDSjztKrb4SUnfRPQ1YIovrooYQaX4h-EnU4'
 export KANVAS_API_PORT=4000
 
 script/shmig -t postgresql -d postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_DATABASE up || exit 1
-yarn run start:dev
+yarn run start
