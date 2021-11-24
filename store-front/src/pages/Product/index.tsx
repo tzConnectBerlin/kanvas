@@ -16,6 +16,7 @@ export interface ProductPageProps {
     theme?: Theme
     nftsInCart: INft[]
     setNftsInCart: Function
+    listCart: Function
 }
 
 const StyledStack = styled(Stack)`
@@ -57,10 +58,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
             })
                 .then((res) => {
                     if (res.status === 201) {
-                        props.setNftsInCart([
-                            ...props.nftsInCart,
-                            nftResponse.data,
-                        ])
+                        props.listCart()
                     }
                 })
                 .catch((err) => {
@@ -223,7 +221,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             size="medium"
                             onClick={() => handleAddToBasket()}
                             label={t('product.button_1')}
-                            disabled={nftResponse.loading}
+                            disabled={nftResponse.loading || props.nftsInCart.filter(nft => Number(nft.id) === nftResponse.data.id).length > 0 || Number(nftResponse.data.editionsAvailable) === 0}
                         />
                     </Stack>
                 </Stack>

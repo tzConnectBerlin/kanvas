@@ -58,14 +58,17 @@ const Router = () => {
         { manual: true },
     )
 
+    const [listCalled, setListCalled] = useState(false)
+
     // Getting list of nfts in the cart
     useEffect(() => {
-        listCart().catch((err) => toast.error(err))
+        listCart().then(res => setListCalled(true) ).catch((err) => {setListCalled(true);toast.error(err)})
+
     }, [])
 
     useEffect(() => {
         if (listCartResponse.data) {
-            setNftsInCart(listCartResponse.data.nfts)
+            setNftsInCart([...listCartResponse.data.nfts])
         }
     }, [listCartResponse])
 
@@ -127,6 +130,7 @@ const Router = () => {
                                 <ProductPage
                                     nftsInCart={nftsInCart}
                                     setNftsInCart={setNftsInCart}
+                                    listCart={listCart}
                                     {...props}
                                 />
                             )}
@@ -149,8 +153,10 @@ const Router = () => {
                     open={cartOpen}
                     nftsInCart={nftsInCart}
                     setNftsInCart={setNftsInCart}
+                    listCart={listCart}
                     closeCart={() => setCartOpen(false)}
-                    loading={listCartResponse.loading}
+                    expiresAt={ listCartResponse.data?.expiresAt}
+                    loading={listCartResponse.loading && !listCalled}
                 />
 
                 {!hasCookie && (
