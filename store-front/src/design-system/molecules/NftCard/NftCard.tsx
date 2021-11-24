@@ -121,7 +121,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                 }}
             >
                 <AvailabilityWrapper inStock={(props.editionsAvailable ?? 0)  > 0 }>
-                    <Typography weight="SemiBold" size="body2">
+                    <Typography weight="SemiBold" size="body2" color="white">
                         {(props.editionsAvailable ?? 0) > 0 ? 'In stock' : 'Sold out'}
                     </Typography>
                 </AvailabilityWrapper>
