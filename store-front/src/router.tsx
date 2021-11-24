@@ -3,6 +3,7 @@ import Profile from './pages/Profile'
 import StorePage from './pages/StorePage'
 import HomePage from './pages/HomePage'
 import Faq from './pages/Faq'
+import Privacy from './pages/Privacy'
 import CreateNFT from './pages/CreateNFT'
 import EditProfile from './pages/EditProfile'
 import ProductPage from './pages/Product'
@@ -131,7 +132,7 @@ const Router = () => {
                                 />
                             )}
                         />
-                        <Route path="/faq" component={Faq} />
+                        <Route path="/faq" component={Faq} />                        <Route path="/privacy" component={Privacy} />
                         <Route
                             path="/create-nft"
                             render={(props) => <CreateNFT {...props} />}
