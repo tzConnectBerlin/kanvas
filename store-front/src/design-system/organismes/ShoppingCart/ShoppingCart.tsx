@@ -92,7 +92,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                 }
             })
             .catch((err) => {
-                toast.error(err.message)
+                toast.error(err.response?.data?.message ?? 'An error occured')
             })
     }
 
@@ -149,7 +149,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         [...new Array(3)].map(() => (
                             <ShoppingCartItem
                                 loading={true}
-                                removeNft={() => {}}
+                                removeNft={() => { }}
                             />
                         ))
                     ) : props.nftsInCart.length > 0 ? (
