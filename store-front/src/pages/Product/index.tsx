@@ -65,13 +65,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                     `/users/cart/add/` +
                     nftResponse.data.id.toString(),
                 withCredentials: true,
-                method: 'POST',
-                headers: {
-                    'content-type': 'application/json',
-                    'Access-Control-Allow-Origin':
-                        process.env.REACT_APP_API_SERVER_BASE_URL ??
-                        'http://localhost:3000',
-                },
+                method: 'POST'
             })
                 .then((res) => {
                     if (res.status === 201) {
@@ -82,7 +76,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                     }
                 })
                 .catch((err) => {
-                    toast.error(err.message)
+
+                    toast.error(err.response.data.message)
                 })
         }
     }

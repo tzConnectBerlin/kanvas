@@ -82,13 +82,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                 '/users/cart/remove/' +
                 nftId,
             withCredentials: true,
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json',
-                'Access-Control-Allow-Origin':
-                    process.env.REACT_APP_API_SERVER_BASE_URL ??
-                    'http://localhost:3000',
-            },
+            method: 'POST'
         })
             .then((res) => {
                 if (res.status === 204) {
