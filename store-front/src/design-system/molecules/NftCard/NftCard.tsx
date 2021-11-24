@@ -24,6 +24,7 @@ export interface NftCardProps {
     ipfsHash?: string
     openFilters?: boolean
     dataUri?: string
+    editionsAvailable?: number;
 }
 
 const StyledBioWrapper = styled.div<{ theme?: Theme }>`
@@ -62,6 +63,21 @@ const StyledImg = styled.img<{ theme?: Theme }>`
     object-position: center center;
     object-fit: cover;
     height: 100%;
+`
+
+const AvailabilityWrapper = styled.div<{inStock: boolean}>`
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+
+    background-color: ${props => props.inStock ? 'red' : '#00ca00'};
+
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+
+    border-radius: 0.2rem;
 `
 
 export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
@@ -104,6 +120,11 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     flexGrow: 1,
                 }}
             >
+                <AvailabilityWrapper inStock={(props.editionsAvailable ?? 0)  > 0 }>
+                    <Typography weight="SemiBold" size="body2">
+                        {(props.editionsAvailable ?? 0) > 0 ? 'In stock' : 'Sold out'}
+                    </Typography>
+                </AvailabilityWrapper>
                 <StyledBioWrapper>
                     <Typography weight="SemiBold" size="h4">
                         {props.name}

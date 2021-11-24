@@ -62,6 +62,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                                 dataUri={nft.dataUri}
                                 price={nft.price}
                                 loading={props.loading}
+                                editionsAvailable={Number(nft.editionsAvailable)}
                             />
                         </Grid>
                     ))}
