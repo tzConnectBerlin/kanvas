@@ -70,7 +70,7 @@ const AvailabilityWrapper = styled.div<{inStock: boolean}>`
     top: 1rem;
     right: 1rem;
 
-    background-color: ${props => props.inStock ? 'red' : '#00ca00'};
+    background-color: ${props => props.inStock ? '#00ca00' : 'red'};
 
     padding-left: 0.5rem;
     padding-right: 0.5rem;
