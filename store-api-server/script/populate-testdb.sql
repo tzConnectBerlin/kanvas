@@ -47,6 +47,7 @@ insert into mtm_nft_category (
 values
   (1, 1),
   (2, 2),
+  (2, 3),
   (1, 4),
   (2, 4),
   (1, 5);

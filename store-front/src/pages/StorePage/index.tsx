@@ -107,7 +107,6 @@ const StorePage = () => {
                 },
             })
         } else {
-
             if (search.indexOf('page') === -1 || search === '') {
                 history.push({ search: newPageParam.toString() })
             } else if (search !== '' && search.indexOf('page') === -1) {
@@ -161,7 +160,6 @@ const StorePage = () => {
         if (selectedFilters.length > 0) {
             let newFilterParam = new URLSearchParams()
             newFilterParam.append('categories', selectedFilters.join(','))
-
 
             if (search.indexOf('categories') === -1 || search === '') {
                 history.push({ search: newFilterParam.toString() })

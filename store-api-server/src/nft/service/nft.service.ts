@@ -123,7 +123,7 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7)`,
     try {
       const nftsQryRes = await this.conn.query(
         `
-SELECT nft_id, nft_name, ipfs_hash, metadata, data_uri, contract, token_id, categories
+SELECT nft_id, nft_name, ipfs_hash, metadata, data_uri, contract, token_id, categories, editions_available
 FROM nfts_by_id($1, $2, $3)`,
         [nftIds, orderBy, orderDirection],
       )
@@ -136,6 +136,7 @@ FROM nfts_by_id($1, $2, $3)`,
           dataUri: nftRow['data_uri'],
           contract: nftRow['contract'],
           tokenId: nftRow['token_id'],
+          editionsAvailable: nftRow['editions_available'],
           categories: nftRow['categories'].map((categoryRow: any) => {
             return <CategoryEntity>{
               name: categoryRow[0],
