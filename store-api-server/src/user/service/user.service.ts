@@ -141,24 +141,32 @@ RETURNING cart_session`,
       return false
     }
     const tx = await this.conn.connect()
-    tx.query(`BEGIN`)
-    await tx.query(
-      `
+    try {
+      tx.query(`BEGIN`)
+      await tx.query(
+        `
 INSERT INTO mtm_kanvas_user_nft (
   kanvas_user_id, nft_id
 )
 SELECT $1, nft.id
 FROM nft
 WHERE nft.id = ANY($2)`,
-      [userId, nftIds],
-    )
-    await tx.query(
-      `
+        [userId, nftIds],
+      )
+      await tx.query(
+        `
 DELETE FROM cart_session
 WHERE session_id = $1`,
-      [session],
-    )
-    tx.query(`COMMIT`)
+        [session],
+      )
+      tx.query(`COMMIT`)
+    } catch (err: any) {
+      tx.query(`ROLLBACK`)
+      throw err
+    } finally {
+      tx.cleanup()
+    }
+
     return true
   }
 
@@ -176,30 +184,37 @@ WHERE cart_session_id = $1`,
   async cartAdd(session: string, nftId: number): Promise<boolean> {
     const cartMeta = await this.touchCart(session)
     const tx = await this.conn.connect()
-    tx.query('BEGIN')
-    await tx.query(
-      `
+    try {
+      tx.query('BEGIN')
+      await tx.query(
+        `
 INSERT INTO mtm_cart_session_nft(
   cart_session_id, nft_id
 )
 VALUES ($1, $2)`,
-      [cartMeta.id, nftId],
-    )
+        [cartMeta.id, nftId],
+      )
 
-    const qryRes = await tx.query(
-      `
+      const qryRes = await tx.query(
+        `
 SELECT
   (SELECT reserved + owned FROM nft_editions_locked($1)) AS editions_locked,
   nft.editions_size
 FROM nft
 WHERE nft.id = $1`,
-      [nftId],
-    )
-    if (qryRes.rows[0]['editions_locked'] > qryRes.rows[0]['editions_size']) {
+        [nftId],
+      )
+      if (qryRes.rows[0]['editions_locked'] > qryRes.rows[0]['editions_size']) {
+        tx.query('ROLLBACK')
+        return false
+      }
+      tx.query('COMMIT')
+    } catch (err) {
       tx.query('ROLLBACK')
-      return false
+      throw err
+    } finally {
+      tx.release()
     }
-    tx.query('COMMIT')
 
     await this.resetCartExpiration(cartMeta.id)
     return true
