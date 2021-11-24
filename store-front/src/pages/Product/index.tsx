@@ -59,6 +59,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
 
     const handleAddToBasket = () => {
         if (nftResponse.data) {
+            debugger
             addToCart({
                 url:
                     process.env.REACT_APP_API_SERVER_BASE_URL +
@@ -68,13 +69,12 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                 method: 'POST',
                 headers: {
                     'content-type': 'application/json',
-                    'Access-Control-Allow-Origin':
-                        process.env.REACT_APP_API_SERVER_BASE_URL ??
-                        'http://localhost:3000',
+                    'Access-Control-Allow-Origin': '*'
                 },
             })
                 .then((res) => {
-                    if (res.status === 201) {
+                    debugger
+                    if (res.status === 204) {
                         props.setNftsInCart([
                             ...props.nftsInCart,
                             nftResponse.data,
@@ -82,7 +82,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                     }
                 })
                 .catch((err) => {
-                    toast.error(err.message)
+                    debugger
+                    toast.error(err.response?.data?.message)
                 })
         }
     }
@@ -240,8 +241,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                         <CustomButton
                             size="medium"
                             onClick={() => handleAddToBasket()}
-                            label={t('product.button_1')}
-                            disabled={nftResponse.loading}
+                            label={nftResponse.data?.editionsAvailable === 0 ? 'Sold out' : t('product.button_1')}
+                            disabled={nftResponse.loading || nftResponse.data.editionsAvailable === 0}
                         />
                     </Stack>
                 </Stack>

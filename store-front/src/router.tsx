@@ -56,7 +56,7 @@ const Router = () => {
             withCredentials: true,
             headers: {
                 'content-type': 'application/json',
-                'Access-Control-Allow-Origin': 'http://localhost:3000',
+                'Access-Control-Allow-Origin': '*',
             },
         },
         { manual: true },

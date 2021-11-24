@@ -68,7 +68,7 @@ const StorePage = () => {
     const sort = new URLSearchParams(search).get('sort')
     const page = new URLSearchParams(search).get('page')
 
-    const [selectedPage, setSelectedPage] = useState(Number(page))
+    const [selectedPage, setSelectedPage] = useState(page ? Number(page) : 1)
 
     // Api calls for the categories and the nfts
     const [nftsResponse, getNfts] = useAxios(
