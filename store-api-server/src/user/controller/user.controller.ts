@@ -18,7 +18,10 @@ import {
   JwtAuthGuard,
   JwtFailableAuthGuard,
 } from '../../authentication/guards/jwt-auth.guard'
-import { PG_UNIQUE_VIOLATION_ERRCODE } from '../../constants'
+import {
+  PG_UNIQUE_VIOLATION_ERRCODE,
+  PG_FOREIGN_KEY_VIOLATION_ERRCODE,
+} from '../../constants'
 
 @Controller('users')
 export class UserController {
@@ -69,6 +72,12 @@ export class UserController {
     const added = await this.userService
       .cartAdd(cartSession, nftId)
       .catch((err: any) => {
+        if (err?.code === PG_FOREIGN_KEY_VIOLATION_ERRCODE) {
+          throw new HttpException(
+            'This nft does not exist',
+            HttpStatus.BAD_REQUEST,
+          )
+        }
         if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
           throw new HttpException(
             'This nft is already in the cart',
