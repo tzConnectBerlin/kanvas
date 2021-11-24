@@ -10,7 +10,7 @@ export interface NftEntity {
   contract: string
   tokenId: string
   categories: CategoryEntity[]
-  editionsAvailable?: number
+  editionsAvailable?: number // note: for now it's optional because it only applies to the store, not to the admin part
   status: string // corresponds to NftStateTransitionConfig
 }
 
