@@ -82,12 +82,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                 '/users/cart/remove/' +
                 nftId,
             withCredentials: true,
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json',
-                'Access-Control-Allow-Origin':
-                 '*'
-            },
+            method: 'POST'
         })
             .then((res) => {
                 if (res.status === 204) {
@@ -154,7 +149,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         [...new Array(3)].map(() => (
                             <ShoppingCartItem
                                 loading={true}
-                                removeNft={() => {}}
+                                removeNft={() => { }}
                             />
                         ))
                     ) : props.nftsInCart.length > 0 ? (

@@ -53,11 +53,7 @@ const Router = () => {
     const [listCartResponse, listCart] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/cart/list`,
-            withCredentials: true,
-            headers: {
-                'content-type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-            },
+            withCredentials: true
         },
         { manual: true },
     )

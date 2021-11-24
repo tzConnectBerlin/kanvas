@@ -53,11 +53,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                     `/users/cart/add/` +
                     nftResponse.data.id.toString(),
                 withCredentials: true,
-                method: 'POST',
-                headers: {
-                    'content-type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
+                method: 'POST'
             })
                 .then((res) => {
                     if (res.status === 201) {
@@ -75,7 +71,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
 
     useEffect(() => {
         if (nftResponse.error) {
-            
+
         }
     }, [nftResponse])
 
