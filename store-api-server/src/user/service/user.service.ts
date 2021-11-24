@@ -245,7 +245,7 @@ UPDATE cart_session
 SET expires_at = $2
 WHERE id = $1
   `,
-      [cartId, expiresAt.toISOString()],
+      [cartId, expiresAt.toUTCString()],
     )
   }
 
@@ -263,7 +263,7 @@ INSERT INTO cart_session (
 )
 VALUES ($1, $2)
 RETURNING id, expires_at`,
-      [session, expiresAt.toISOString()],
+      [session, expiresAt.toUTCString()],
     )
     return {
       id: qryRes.rows[0]['id'],
@@ -298,7 +298,7 @@ WHERE session_id = $1
     await this.conn.query(
       `
 DELETE FROM cart_session
-WHERE expires_at < now()`,
+WHERE expires_at < now() AT TIME ZONE 'UTC'`,
     )
   }
 
