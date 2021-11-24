@@ -63,11 +63,12 @@ const StyledPagination = styled(Pagination)<{ theme?: Theme }>`
 const StorePage = () => {
     const search = useLocation().search
     const history = useHistory()
-    let { width } = useParams<ParamTypes>()
 
     const categories = new URLSearchParams(search).get('categories')
     const sort = new URLSearchParams(search).get('sort')
     const page = new URLSearchParams(search).get('page')
+
+    const [selectedPage, setSelectedPage] = useState(Number(page))
 
     // Api calls for the categories and the nfts
     const [nftsResponse, getNfts] = useAxios(
@@ -92,12 +93,18 @@ const StorePage = () => {
     const [availableFilters, setAvailableFilters] = useState<any>()
 
     const handlePaginationChange = (event: any, page: number) => {
-        let newPageParam = new URLSearchParams()
-        newPageParam.append('page', page.toString())
+        const pageParam = new URLSearchParams(search)
+        setSelectedPage(page)
+
+        if (pageParam.get('page')) {
+            pageParam.set('page', page.toString())
+        } else {
+            pageParam.append('page', page.toString())
+        }
+
+        history.push({search: pageParam.toString()})
 
         if (selectedFilters.length === 0) {
-            history.push({ search: search + '&' + newPageParam.toString() })
-
             getNfts({
                 params: {
                     page: page,
@@ -107,15 +114,6 @@ const StorePage = () => {
                 },
             })
         } else {
-            debugger
-            if (search.indexOf('page') === -1 || search === '') {
-                history.push({ search: newPageParam.toString() })
-            } else if (search !== '' && search.indexOf('page') === -1) {
-                history.push({ search: '&' + newPageParam.toString() })
-            } else if (search !== '' && search.indexOf('page') !== -1) {
-                history.push({ search: '&' + newPageParam.toString() })
-            }
-
             getFilteredNfts({
                 params: {
                     page: page,
@@ -146,41 +144,56 @@ const StorePage = () => {
     }, [categoriesResponse.data])
 
     useEffect(() => {
-        getNfts({
-            params: {
-                pageSize: 12,
-                page: page,
-                categories: categories,
-                sort: sort,
-            },
-        })
         getCategories()
+        let pageParam = new URLSearchParams(search)
+
+        if (!page) {
+            setSelectedPage(1)
+            pageParam.delete('page')
+        } else {
+            setSelectedPage(Number(page))
+        }
+
+        if (categories) {
+            setSelectedFilters(categories.split(',').map(categoryId => Number(categoryId)))
+        } else {
+            history.push({ search: pageParam.toString() })
+        }
     }, [])
 
     useEffect(() => {
         if (selectedFilters.length > 0) {
-            let newFilterParam = new URLSearchParams()
-            newFilterParam.append('categories', selectedFilters.join(','))
+            let pageParam = new URLSearchParams(search)
 
-            debugger
-            if (search.indexOf('categories') === -1 || search === '') {
-                history.push({ search: newFilterParam.toString() })
-            } else if (search !== '' && search.indexOf('categories') === -1) {
-                history.push({ search: '&' + newFilterParam.toString() })
-            } else if (search !== '' && search.indexOf('categories') !== -1) {
-                search.slice(
-                    search.indexOf('categories') - 1,
-                    search.indexOf('&'),
-                )
-                history.push({ search: '&' + newFilterParam.toString() })
+            // Deleting page param when changing the filters and setting selected page to one
+
+            if (pageParam.get('categories')) {
+                pageParam.set('categories', selectedFilters.join(','))
+            } else {
+                pageParam.append('categories', selectedFilters.join(','))
             }
+
+            history.push({ search: pageParam.toString() })
 
             getFilteredNfts({
                 params: {
-                    page: page,
+                    page: 1,
                     pageSize: 12,
                     categories: selectedFilters.join(','),
                     sort: selectedSort,
+                },
+            })
+        } else {
+            let pageParam = new URLSearchParams(search)
+            pageParam.delete('categories')
+            let pageReset = 0;
+
+            history.push({search: pageParam.toString() })
+            getNfts({
+                params: {
+                    pageSize: 12,
+                    page: pageReset !== 0 ? pageReset : selectedPage,
+                    sort: sort,
                 },
             })
         }
@@ -261,7 +274,7 @@ const StorePage = () => {
                 <Stack direction="row">
                     <FlexSpacer />
                     <StyledPagination
-                        defaultPage={page ? Number(page) : 1}
+                        page={selectedPage}
                         count={
                             selectedFilters.length === 0
                                 ? nftsResponse.data?.numberOfPages

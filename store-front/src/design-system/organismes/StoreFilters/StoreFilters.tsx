@@ -3,7 +3,7 @@ import FlexSpacer from '../../atoms/FlexSpacer'
 import Typography from '../../atoms/Typography'
 import TreeView from '../../molecules/TreeView/TreeView'
 
-import { Stack } from '@mui/material'
+import { Stack, Slider, Box, TextField } from '@mui/material'
 import { FC, useState } from 'react'
 
 interface FilterProps {
@@ -86,6 +86,14 @@ const StyledLi = styled.li<StyledStoreFiltersProps>`
 
 export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
     const [activeRef, setActiveRef] = useState<string[]>([])
+    const [range, setRange] = useState<[number, number]>([0, 20])
+
+    const changeLowerBond = (bond: number) =>
+        setRange((bonds) => [bond, bonds[1]])
+
+    const changUpperBond = (bond: number) =>
+        setRange((bonds) => [bonds[0], bond])
+
 
     const handleListItemClick = (concernedRef: string) => {
         if (activeRef.indexOf(concernedRef) !== -1) {
@@ -148,13 +156,23 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                     setCollapsed={handleListItemClick}
                 />
                 {/* TODO */}
-                {activeRef.indexOf('Price') === -1 ? (
-                    <Typography size="h5" weight="Light" color="red">
-                        {' '}
-                        Not implemented{' '}
-                    </Typography>
-                ) : undefined}
+                {activeRef.indexOf('Price') === -1 && (
+                    <Stack sx={{ width: '100%' }} spacing={2}>
+                        <Stack direction="row" spacing={3}>
+                            <TextField type="number" onChange={(e) => changeLowerBond(Number(e.target.value))} value={range[0]} />
+                            <TextField type="number" onChange={(e) => changUpperBond(Number(e.target.value))} value={range[1]} />
+                        </Stack>
+
+                        <Slider
+                            getAriaLabel={() => 'Price range filter'}
+                            value={range}
+                            onChange={(_, newValues) => setRange(newValues as [number, number])}
+                            valueLabelDisplay="auto"
+                            getAriaValueText={() => "valuetext"}
+                        />
+                    </Stack>
+                )}
             </StyledLi>
-        </StyledUl>
+        </StyledUl >
     )
 }
