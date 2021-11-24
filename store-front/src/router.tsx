@@ -68,7 +68,7 @@ const Router = () => {
 
     useEffect(() => {
         if (listCartResponse.data) {
-            setNftsInCart([...listCartResponse.data.nfts])
+            setNftsInCart(listCartResponse.data.nfts)
         }
     }, [listCartResponse])
 
