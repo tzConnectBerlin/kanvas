@@ -68,7 +68,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                     }
                 })
                 .catch((err) => {
-                    toast.error(err.response?.data?.message)
+                    toast.error(err.response?.data?.message ?? 'An error occured')
                 })
         }
     }

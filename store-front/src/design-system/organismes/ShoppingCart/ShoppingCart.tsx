@@ -86,8 +86,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
             headers: {
                 'content-type': 'application/json',
                 'Access-Control-Allow-Origin':
-                    process.env.REACT_APP_API_SERVER_BASE_URL ??
-                    'http://localhost:3000',
+                 '*'
             },
         })
             .then((res) => {
@@ -98,7 +97,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                 }
             })
             .catch((err) => {
-                toast.error(err.response?.data?.message)
+                toast.error(err.response?.data?.message ?? 'An error occured')
             })
     }
 
