@@ -9,6 +9,7 @@ export interface NftEntity {
   dataUri: string
   contract: string
   tokenId: string
+  price: number
   categories: CategoryEntity[]
   editionsAvailable: number
 }
