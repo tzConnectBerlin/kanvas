@@ -52,12 +52,13 @@ export const Slider: FC<SliderProps> = ({ ...props }) => {
     const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
     const { id } = useParams<IProductParam>()
-    const [nftResponse, getNft] = useAxios(DART_REDIRECT_URI + `/nfts/${id}`)
-    useEffect(() => {
-        if (nftResponse.error) {
-            console.log(nftResponse, '')
-        }
-    }, [nftResponse])
+    // const [nftResponse, getNft] = useAxios(DART_REDIRECT_URI + `/nfts/${id}`)
+
+    // useEffect(() => {
+    //     if (nftResponse.error) {
+    //         console.log(nftResponse, '')
+    //     }
+    // }, [nftResponse])
 
     return (
         <>

@@ -43,13 +43,13 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
     const [imgToVideoToggler, setImgToVideoToggler] = useState(true)
 
     const { id } = useParams<IProductParam>()
-    const [nftResponse, getNft] = useAxios(DART_REDIRECT_URI + `/nfts/${id}`)
+    // const [nftResponse, getNft] = useAxios(DART_REDIRECT_URI + `/nfts/${id}`)
 
-    useEffect(() => {
-        if (nftResponse.error) {
-            console.log(nftResponse, '')
-        }
-    }, [nftResponse])
+    // useEffect(() => {
+    //     if (nftResponse.error) {
+    //         console.log(nftResponse, '')
+    //     }
+    // }, [nftResponse])
 
     return (
         <Grid container>
