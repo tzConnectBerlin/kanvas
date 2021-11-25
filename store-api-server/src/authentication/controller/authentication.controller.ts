@@ -34,7 +34,7 @@ export class AuthenticationController {
     return loggedInUserRes.val
   }
 
-  @Get('logout')
+  @Post('logout')
   @UseGuards(JwtAuthGuard)
   async logout(@CurrentUser() currentUser: UserEntity, @Request() req: any) {
     const resetCookieSessionRes =
