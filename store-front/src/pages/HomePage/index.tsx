@@ -57,6 +57,10 @@ const LinkStyled = styled(CustomButton)<{ theme?: Theme }>`
     }
 `
 
+const StyledAnimated = styled(Animated)`
+    width: 100%;
+`
+
 const HomePage: FC<HomePageProps> = () => {
     const { t } = useTranslation(['translation'])
 
@@ -93,7 +97,7 @@ const HomePage: FC<HomePageProps> = () => {
             <StyledStack>
                 <FlexSpacer minHeight={12} />
 
-                <Animated
+                <StyledAnimated
                     animationIn="fadeIn"
                     animationOut="fadeOut"
                     isVisible={true}
@@ -130,7 +134,7 @@ const HomePage: FC<HomePageProps> = () => {
                         emptyMessage={'No Featured NFTs yet'}
                         emptyLink={'See entire collection.'}
                     />
-                </Animated>
+                </StyledAnimated>
 
                 <FlexSpacer minHeight={2} />
             </StyledStack>

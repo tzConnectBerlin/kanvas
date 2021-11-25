@@ -13,8 +13,8 @@ import { useHistory, useParams } from 'react-router'
 import { HeaderProfile } from '../../design-system/molecules/HeaderProfile/HeaderProfile'
 
 interface ParamTypes {
-    username: string
-    tab: string
+    userAddress: string
+    tab?: string
 }
 
 interface ProfileProps {}
@@ -131,55 +131,41 @@ const mokeNft = [
 ]
 
 const Profile: FC<ProfileProps> = () => {
-    let { username } = useParams<ParamTypes>()
-    let { tab } = useParams<ParamTypes>()
+    let { userAddress } = useParams<ParamTypes>()
 
     const history = useHistory()
 
-    const [selectedTab, setSelectedTab] = useState('Gallery')
-    const [emptyMessage, setEmptyMessage] = useState(tab)
-    const [emptyLink, setEmptyLink] = useState(tab)
+    // Using the useState hook in case adding more tabs in the future
+    const [selectedTab, setSelectedTab] = useState('Collection')
 
-    const [user, getUser] = useAxios({
-        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/',
+    const [userResponse, getUser] = useAxios({
+        url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users?userAddress=${userAddress}`,
         withCredentials: true,
     })
 
-    // Getting user info and updating
-    // const [getUser, user] = useLazyQuery(GET_USER)
-    // const [getUserGallery1, gallery] = useLazyQuery(GET_USER_GALLERY)
-
-    useEffect(() => {
-        if (username) {
-            getUser({
-                params: {
-                    userName: username,
-                },
-            })
-        }
-    }, [username])
-
     const handleSwitchTab = (newValue: number) => {
         switch (newValue) {
-            // Gallery
+            // Collection
             case 1:
                 setSelectedTab('Collection')
                 break
-            // Activity might only be personnal - no one else would see that than log user
-            // case 2:
-            //     setSelectedTab('Activity')
-            //     break;
             default:
                 setSelectedTab('Collection')
                 break
         }
     }
 
+    useEffect(() => {
+        if (userResponse.error?.code === '404') {
+            history.push('/404')
+        }
+    }, [userResponse])
+
     // Edit profile section
     const editProfile = () => {
-        if (user.data) {
+        if (userResponse.data?.user) {
             const currentUser = {
-                userName: 'Tristan',
+                userName: '',
                 profilePicture: '',
             }
             history.push({
@@ -201,8 +187,8 @@ const Profile: FC<ProfileProps> = () => {
                         isVisible={true}
                     >
                         <HeaderProfile
-                            user={mockUser}
-                            loading={user.loading}
+                            user={userResponse.data?.user}
+                            loading={userResponse.loading}
                             editProfile={editProfile}
                         />
 
@@ -226,7 +212,7 @@ const Profile: FC<ProfileProps> = () => {
                     nfts={mokeNft}
                     emptyMessage={'No Nfts in collection yet'}
                     emptyLink={'Click here to buy some in the store.'}
-                    loading={user.loading}
+                    loading={userResponse.loading}
                 />
             </StyledStack>
         </PageWrapper>

@@ -86,13 +86,13 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
             <Grid item xs={12} md={7} px={0} sx={{ display: 'flex' }}>
                 {
                     //Render Skeleton if image not loading
-                    false ? (
+                    props.sliderLoading ? (
                         <Skeleton
                             height="40rem"
                             width="40rem"
                             sx={{
                                 transform: 'none',
-                                maxWidth: isMobile ? '100%' : 480,
+                                maxWidth: isMobile ? '100%' : '80%',
                                 marginLeft: 'auto',
                             }}
                         />

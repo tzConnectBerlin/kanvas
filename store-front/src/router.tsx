@@ -137,7 +137,7 @@ const Router = () => {
                         <Route path="/home" component={HomePage} />
                         <Route path="/store" component={StorePage} />
                         <Route path="/profile/edit" component={EditProfile} />
-                        <Route path="/profile/:username" component={Profile} />
+                        <Route path="/profile/:userAddress" component={Profile} />
                         <Route
                             path="/product/:id"
                             render={(props) => (
