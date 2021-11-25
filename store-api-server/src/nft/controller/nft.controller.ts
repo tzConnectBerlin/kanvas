@@ -33,7 +33,7 @@ export class NftController {
     return this.nftService.findAll(params)
   }
 
-  @Get('/:id')
+  @Post('/:id')
   async byId(@Param('id') id: number): Promise<NftEntity> {
     return this.nftService.byId(id)
   }
