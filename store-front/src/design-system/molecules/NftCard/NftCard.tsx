@@ -1,19 +1,11 @@
-import {
-    CardActionArea,
-    Skeleton,
-    Stack,
-    useMediaQuery,
-    Theme,
-    useTheme,
-} from '@mui/material'
+import { Skeleton, Stack, useMediaQuery, Theme, useTheme } from '@mui/material'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
-import CardMedia from '@mui/material/CardMedia'
 import Typography from '../../atoms/Typography'
 import { useHistory } from 'react-router-dom'
 import styled from '@emotion/styled'
 import { Box } from '@mui/system'
-import { CurrencyEnum } from '../../../interfaces/notification'
+import TezosLogo from '../../atoms/TezosLogo/TezosLogo'
 
 export interface NftCardProps {
     loading?: boolean
@@ -141,7 +133,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                             size="h3"
                             marginLeft="auto"
                         >
-                            {CurrencyEnum.TEZ}{' '}
+                            <TezosLogo  width="18px" margin="0 0.2rem" />
                         </Typography>
                     </Box>
                 </Box>

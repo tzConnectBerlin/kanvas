@@ -11,6 +11,7 @@ import { Typography } from '../../design-system/atoms/Typography'
 import { INft } from '../../interfaces/artwork'
 import { useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import TezosLogo from '../../design-system/atoms/TezosLogo/TezosLogo'
 
 export interface ProductPageProps {
     theme?: Theme
@@ -53,7 +54,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                     `/users/cart/add/` +
                     nftResponse.data.id.toString(),
                 withCredentials: true,
-                method: 'POST'
+                method: 'POST',
             })
                 .then((res) => {
                     if (res.status === 201) {
@@ -64,14 +65,15 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                     }
                 })
                 .catch((err) => {
-                    toast.error(err.response?.data?.message ?? 'An error occured')
+                    toast.error(
+                        err.response?.data?.message ?? 'An error occured',
+                    )
                 })
         }
     }
 
     useEffect(() => {
         if (nftResponse.error) {
-
         }
     }, [nftResponse])
 
@@ -194,7 +196,9 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             weight="Light"
                             sx={{ pt: 2, mb: 1 }}
                         >
-                            {nftResponse.loading ? undefined : nftResponse.data?.startDate}
+                            {nftResponse.loading
+                                ? undefined
+                                : nftResponse.data?.startDate}
                         </Typography>
 
                         <Typography
@@ -214,7 +218,11 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                         >
                             {nftResponse.loading
                                 ? undefined
-                                : `${nftResponse.data?.price} ꜩ`}
+                                :   <>
+                                        {nftResponse.data?.price} 
+                                        <TezosLogo width="18px" margin="0 0.2rem" />
+                                    </>
+                                }
                         </Typography>
 
                         <FlexSpacer minHeight={2} />
