@@ -111,6 +111,7 @@ const MobileStyledMenuHeader = styled(Stack)<SearchProps>`
         align-items: center;
         padding-right: 0rem;
         height: 4rem;
+        margin-left: auto;
         width: ${(props) => (props.isSearchOpen ? '100%' : '')};
     }
 `
@@ -165,7 +166,6 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                 direction={'row'}
                 spacing={2}
                 isSearchOpen={props.isSearchOpen}
-                sx={{marginLeft: 'auto'}}
             >
                 {/* QuickSearch wrapper to close menu in case open */}
 
