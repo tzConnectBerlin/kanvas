@@ -85,7 +85,6 @@ const StyledLi = styled.li<StyledStoreFiltersProps>`
     height: auto;
 `
 
-
 export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
     const [activeRef, setActiveRef] = useState<string[]>([])
     const [range, setRange] = useState<[number, number]>([0, 20])
@@ -152,12 +151,9 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                 />
 
                 {activeRef.indexOf('Price') === -1 && (
-                    <PriceFilter
-                        range={range}
-                        setRange={setRange}
-                    />
+                    <PriceFilter range={range} setRange={setRange} />
                 )}
             </StyledLi>
-        </StyledUl >
+        </StyledUl>
     )
 }

@@ -78,14 +78,14 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
     })
 
     const [checkoutResponse, checkout] = useAxios(
-        process.env.REACT_APP_API_SERVER_BASE_URL +
-        '/users/cart/checkout', {
-        manual: true
-    })
+        process.env.REACT_APP_API_SERVER_BASE_URL + '/users/cart/checkout',
+        {
+            manual: true,
+        },
+    )
 
     useEffect(() => {
         if (checkoutResponse.data) {
-
         } else if (checkoutResponse.error) {
             toast.error('Unable to checkout')
         }
@@ -98,7 +98,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                 '/users/cart/remove/' +
                 nftId,
             withCredentials: true,
-            method: 'POST'
+            method: 'POST',
         })
             .then((res) => {
                 if (res.status === 204) {
@@ -163,7 +163,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         [...new Array(3)].map(() => (
                             <ShoppingCartItem
                                 loading={true}
-                                removeNft={() => { }}
+                                removeNft={() => {}}
                             />
                         ))
                     ) : props.nftsInCart.length > 0 ? (
@@ -187,8 +187,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                     )}
 
                     <FlexSpacer />
-                    {
-                        props.nftsInCart.length !== 0 &&
+                    {props.nftsInCart.length !== 0 && (
                         <Typography
                             size="subtitle2"
                             weight="Medium"
@@ -196,14 +195,17 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             align="left"
                             color="#C4C4C4"
                         >
-                            {
-                                new Date((new Date(props.expiresAt).getTime() - new Date().getDate())).getTime() > 0 ?
-                                    (`*Your cart will expire in ${new Date((new Date(props.expiresAt).getTime() - new Date().getTime())).getMinutes()} minutes.`)
-                                    :
-                                    'Cart expired'
-                            }
+                            {new Date(
+                                new Date(props.expiresAt).getTime() -
+                                    new Date().getDate(),
+                            ).getTime() > 0
+                                ? `*Your cart will expire in ${new Date(
+                                      new Date(props.expiresAt).getTime() -
+                                          new Date().getTime(),
+                                  ).getMinutes()} minutes.`
+                                : 'Cart expired'}
                         </Typography>
-                    }
+                    )}
                     {props.open && (
                         <CustomButton
                             size="medium"
@@ -215,7 +217,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 bottom: 0,
                                 marginLeft: '1rem',
                                 marginRight: '1rem',
-                                marginTop: '1rem !important'
+                                marginTop: '1rem !important',
                             }}
                         />
                     )}

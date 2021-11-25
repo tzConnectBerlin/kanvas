@@ -36,7 +36,7 @@ const StyledLi = styled.li<StyledTreeViewProps>`
     transition: width 0.2s, height 0.2s;
 `
 
-const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`
+const StyledCheckBox = styled(Checkbox)<{ theme?: Theme }>`
     &.Mui-checked {
         color: ${(props) => props.theme.palette.text.primary} !important;
     }
@@ -211,9 +211,7 @@ const TreeView: FC<TreeViewProps> = ({
 
                             <Stack
                                 direction="row"
-                                onClick={() =>
-                                    handleListItemClick(node.id)
-                                }
+                                onClick={() => handleListItemClick(node.id)}
                                 sx={{ width: '100%' }}
                             >
                                 <Typography
@@ -223,7 +221,7 @@ const TreeView: FC<TreeViewProps> = ({
                                         highlightedParentsState.indexOf(
                                             node.id,
                                         ) !== -1 &&
-                                            selectedFilters.indexOf(node.id) === -1
+                                        selectedFilters.indexOf(node.id) === -1
                                             ? 'contrastText'
                                             : ''
                                     }
@@ -234,7 +232,7 @@ const TreeView: FC<TreeViewProps> = ({
                                 <FlexSpacer />
 
                                 {node.children?.length &&
-                                    node.children?.length > 0 ? (
+                                node.children?.length > 0 ? (
                                     activeRef.indexOf(node.id) !== -1 ? (
                                         <Typography size="h5" weight="Light">
                                             -

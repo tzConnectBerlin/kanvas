@@ -17,7 +17,7 @@ const mockNft = [
             'https://ipfs.io/ipfs/QmbpTK79f1DcuGj1eg7YhUErF5jXSDmVaJj2N8UhyBVZC8',
         contract: 'contract_address',
         tokenId: 'teojteojt',
-        editionsAvailable: '1'
+        editionsAvailable: '1',
     },
     {
         id: 2,
@@ -34,7 +34,7 @@ const mockNft = [
         dataUrl: 'heyyy',
         contract: 'contract_address',
         tokenId: 'teojteojt',
-        editionsAvailable: '0'
+        editionsAvailable: '0',
     },
     {
         id: 3,
@@ -51,7 +51,7 @@ const mockNft = [
         dataUrl: 'heyyy',
         contract: 'contract_address',
         tokenId: 'teojteojt',
-        editionsAvailable: '0'
+        editionsAvailable: '0',
     },
     {
         id: 3,
@@ -68,7 +68,7 @@ const mockNft = [
         dataUrl: 'heyyy',
         contract: 'contract_address',
         tokenId: 'teojteojt',
-        editionsAvailable: '4'
+        editionsAvailable: '4',
     },
     {
         id: 4,
@@ -85,7 +85,7 @@ const mockNft = [
         dataUrl: 'heyyy',
         contract: 'contract_address',
         tokenId: 'teojteojt',
-        editionsAvailable: '0'
+        editionsAvailable: '0',
     },
     {
         id: 5,
@@ -102,7 +102,7 @@ const mockNft = [
         dataUrl: 'heyyy',
         contract: 'contract_address',
         tokenId: 'teojteojt',
-        editionsAvailable: '0'
+        editionsAvailable: '0',
     },
     {
         id: 6,
@@ -119,7 +119,7 @@ const mockNft = [
         dataUrl: 'heyyy',
         contract: 'contract_address',
         tokenId: 'teojteojt',
-        editionsAvailable: '0'
+        editionsAvailable: '0',
     },
     {
         id: 7,
@@ -136,7 +136,7 @@ const mockNft = [
         dataUrl: 'heyyy',
         contract: 'contract_address',
         tokenId: 'teojteojt',
-        editionsAvailable: '0'
+        editionsAvailable: '0',
     },
 ]
 

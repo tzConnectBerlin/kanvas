@@ -102,7 +102,7 @@ const StorePage = () => {
             pageParam.append('page', page.toString())
         }
 
-        history.push({search: pageParam.toString()})
+        history.push({ search: pageParam.toString() })
 
         if (selectedFilters.length === 0) {
             getNfts({
@@ -155,7 +155,9 @@ const StorePage = () => {
         }
 
         if (categories) {
-            setSelectedFilters(categories.split(',').map(categoryId => Number(categoryId)))
+            setSelectedFilters(
+                categories.split(',').map((categoryId) => Number(categoryId)),
+            )
         } else {
             history.push({ search: pageParam.toString() })
         }
@@ -186,9 +188,9 @@ const StorePage = () => {
         } else {
             let pageParam = new URLSearchParams(search)
             pageParam.delete('categories')
-            let pageReset = 0;
+            let pageReset = 0
 
-            history.push({search: pageParam.toString() })
+            history.push({ search: pageParam.toString() })
             getNfts({
                 params: {
                     pageSize: 12,
@@ -241,14 +243,12 @@ const StorePage = () => {
                 </Stack>
 
                 <StyledContentStack>
-
                     <StoreFilters
                         availableFilters={availableFilters}
                         openFilters={filterOpen}
                         filterFunction={getFilteredNfts}
                         selectedFilters={selectedFilters}
                         setSelectedFilters={setSelectedFilters}
-                        
                         loading={categoriesResponse.loading}
                     />
 
@@ -263,7 +263,6 @@ const StorePage = () => {
                             nftsResponse.loading || nftsFilteredResponse.loading
                         }
                     />
-
                 </StyledContentStack>
 
                 <Stack direction="row">

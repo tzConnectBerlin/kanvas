@@ -53,7 +53,7 @@ const Router = () => {
     const [listCartResponse, listCart] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/cart/list`,
-            withCredentials: true
+            withCredentials: true,
         },
         { manual: true },
     )
@@ -62,8 +62,12 @@ const Router = () => {
 
     // Getting list of nfts in the cart
     useEffect(() => {
-        listCart().then(res => setListCalled(true) ).catch((err) => {setListCalled(true);toast.error(err)})
-
+        listCart()
+            .then((res) => setListCalled(true))
+            .catch((err) => {
+                setListCalled(true)
+                toast.error(err)
+            })
     }, [])
 
     useEffect(() => {
@@ -155,7 +159,7 @@ const Router = () => {
                     setNftsInCart={setNftsInCart}
                     listCart={listCart}
                     closeCart={() => setCartOpen(false)}
-                    expiresAt={ listCartResponse.data?.expiresAt}
+                    expiresAt={listCartResponse.data?.expiresAt}
                     loading={listCartResponse.loading && !listCalled}
                 />
 

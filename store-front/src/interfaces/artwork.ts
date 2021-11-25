@@ -12,5 +12,5 @@ export interface INft {
     price: number
     creator?: string
     startDate?: string
-    editionsAvailable?: string 
+    editionsAvailable?: string
 }
