@@ -40,6 +40,7 @@ export class NftService {
       ['id', 'nft_id'],
       ['name', 'nft_name'],
       ['price', 'price'],
+      ['views', 'view_count'],
     ])
 
     const orderBy = orderByMapping.get(params.orderBy)
@@ -117,7 +118,19 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
         HttpStatus.BAD_REQUEST,
       )
     }
+    this.incrementNftViewCount(id)
     return nfts[0]
+  }
+
+  async incrementNftViewCount(id: number) {
+    this.conn.query(
+      `
+UPDATE nft
+SET view_count = view_count + 1
+WHERE id = $1
+`,
+      [id],
+    )
   }
 
   async findByIds(

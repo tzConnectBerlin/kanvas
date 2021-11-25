@@ -57,7 +57,9 @@ export class NftController {
     if (params.page < 1 || params.pageSize < 1) {
       throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST)
     }
-    if (!['id', 'name', 'price'].some((elem) => elem === params.orderBy)) {
+    if (
+      !['id', 'name', 'price', 'views'].some((elem) => elem === params.orderBy)
+    ) {
       throw new HttpException(
         `Requested orderBy ('${params.orderBy}') not supported`,
         HttpStatus.BAD_REQUEST,
