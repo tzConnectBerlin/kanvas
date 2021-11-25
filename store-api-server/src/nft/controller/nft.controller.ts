@@ -41,13 +41,13 @@ export class NftController {
   validateFilterParams(params: FilterParams): void {
     const filterCategories =
       typeof params.categories !== 'undefined' && params.categories.length > 0
-
     const filterAddress = typeof params.address === 'string'
-    if (!filterCategories && !filterAddress) {
-      throw new HttpException(
-        'Neither categories nor address filter specified, need at least 1 set',
-        HttpStatus.BAD_REQUEST,
-      )
+    const filterPrice =
+      typeof params.priceAtLeast === 'number' ||
+      typeof params.priceAtMost === 'number'
+
+    if (!filterCategories && !filterAddress && !filterPrice) {
+      throw new HttpException('No filters specified', HttpStatus.BAD_REQUEST)
     }
 
     this.validatePaginationParams(params)
@@ -59,7 +59,7 @@ export class NftController {
     }
     if (!['id', 'name', 'price'].some((elem) => elem === params.orderBy)) {
       throw new HttpException(
-        'Requested orderBy not supported',
+        `Requested orderBy ('${params.orderBy}') not supported`,
         HttpStatus.BAD_REQUEST,
       )
     }

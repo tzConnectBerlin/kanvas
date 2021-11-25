@@ -112,13 +112,14 @@ export const Footer: FC<FooterProps> = () => {
                     size="body"
                     weight="Light"
                     sx={{
-                        marginTop: '1rem',
+                        marginTop: '1.5rem',
                         fontSize: '.7rem',
                         alignSelf: 'start',
                         marginBottom: '1rem',
+                        maxWidth: '11rem'
                     }}
                 >
-                    TODO: Some text here
+                   {t('home.hero.description_1')}
                 </Typography>
             </Grid>
 

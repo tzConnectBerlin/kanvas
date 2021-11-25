@@ -3,6 +3,7 @@ import Profile from './pages/Profile'
 import StorePage from './pages/StorePage'
 import HomePage from './pages/HomePage'
 import Faq from './pages/Faq'
+import Privacy from './pages/Privacy'
 import CreateNFT from './pages/CreateNFT'
 import EditProfile from './pages/EditProfile'
 import ProductPage from './pages/Product'
@@ -12,7 +13,7 @@ import useAxios from 'axios-hooks'
 import ScrollToTop from './ScrollToTop'
 import CookieBanner from './design-system/molecules/CookiesBanner'
 import { Redirect } from 'react-router'
-import { RPC_URL } from './global'
+import { KUKAI_NETWORK, RPC_URL } from './global'
 import { Theme } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { darkTheme, lightTheme } from './theme'
@@ -80,7 +81,7 @@ const Router = () => {
         if (!embedKukai) {
             setEmbedKukai(
                 new KukaiEmbed({
-                    net: Networks.granadanet,
+                    net: Networks[KUKAI_NETWORK],
                     icon: false,
                 }),
             )
@@ -139,7 +140,8 @@ const Router = () => {
                                 />
                             )}
                         />
-                        <Route path="/faq" component={Faq} />
+                        <Route path="/faq" component={Faq} />{' '}
+                        <Route path="/privacy" component={Privacy} />
                         <Route
                             path="/create-nft"
                             render={(props) => <CreateNFT {...props} />}

@@ -23,6 +23,7 @@ import {
 import useAxios from 'axios-hooks'
 import { useTranslation } from 'react-i18next'
 import { IUser } from '../../../interfaces/user'
+import { NETWORK } from '../../../global'
 
 interface SignInModalProps {
     theme?: Theme
@@ -179,7 +180,9 @@ export const SignInModal: FC<SignInModalProps> = ({
 
             beaconWallet.client
                 .requestPermissions({
-                    network: { type: NetworkType.HANGZHOUNET },
+                    network: {
+                        type: NetworkType[NETWORK],
+                    },
                 })
                 .then(async (response: PermissionResponseOutput) => {
                     signExpression(response.address, 'beacon')

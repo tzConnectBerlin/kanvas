@@ -16,7 +16,7 @@ import { Typography } from '../../design-system/atoms/Typography'
 import { useTranslation } from 'react-i18next'
 import Scrollspy from 'react-scrollspy-ez'
 import ListIcon from '@mui/icons-material/List'
-import OutsideClickHandler from 'react-outside-click-handler'
+import ClickAwayListener from '@mui/material/ClickAwayListener'
 
 export interface FaqProps {
     selectedTheme?: string
@@ -195,16 +195,15 @@ const Faq: FC<FaqProps> = () => {
         <PageWrapper>
             <StyledStack direction="column">
                 <FlexSpacer minHeight={10} />
+                
                 <Grid
                     container
                     className="faq-nav"
                     onClick={() => setOpen(false)}
                 >
                     {isMobile ? (
-                        <>
-                            <OutsideClickHandler
-                                onOutsideClick={() => setOpen(false)}
-                            >
+                        <ClickAwayListener onClickAway={() => setOpen(false)}>
+                            <>
                                 <StyledDrawer
                                     anchor="bottom"
                                     open={open}
@@ -259,8 +258,8 @@ const Faq: FC<FaqProps> = () => {
                                         }}
                                     />
                                 </Tooltip>
-                            </OutsideClickHandler>
-                        </>
+                            </>
+                        </ClickAwayListener>
                     ) : (
                         <Grid
                             item
