@@ -41,7 +41,6 @@ const StyledLink = styled(Link)<{ theme?: Theme }>`
 `
 const StyledPaper = styled(Paper)<StyledPaperProps>`
     background-color: #ccc;
-    padding: 0 1rem 1rem 1rem;
     border-radius: 0.25rem;
     color: #fff;
     position: sticky;
@@ -93,7 +92,7 @@ export const CookiesBanner: React.FC<CookiesBannerProps> = ({
 
     const { primary } = theme.palette
     const isMobile = useMediaQuery('(max-width:600px)')
-    const isDesktop = useMediaQuery('(min-width:1300px)')
+    const isDesktop = useMediaQuery('(min-width:1150px)')
     const [cookie, setCookie] = React.useState(standard)
     const addCookie = (cookies: { [name: string]: boolean }) => {
         document.cookie = `user=${JSON.stringify(cookies)}; max-age=8640000;}`
@@ -112,15 +111,17 @@ export const CookiesBanner: React.FC<CookiesBannerProps> = ({
                     xs={12}
                     container
                     direction={isMobile ? 'column' : 'row'}
-                    padding={isMobile ? '3rem' : '3rem 3rem 2rem'}
+                    padding={isMobile ? '1rem' : '3rem 3rem 2rem'}
                     flexGrow={1}
                 >
                     <Typography
-                        size="h3"
+                        size={isMobile ? 'body' :'h4'}
                         weight="Light"
                         display="inline"
                         style={{
+                            alignSelf: 'center',
                             marginBottom: !isDesktop ? '2rem' : 0,
+                            marginRight: isDesktop ? 'auto' : '2rem',
                         }}
                     >
                         {t('cookies.text')}
@@ -139,8 +140,7 @@ export const CookiesBanner: React.FC<CookiesBannerProps> = ({
                         label={t('cookies.button')}
                         style={{
                             order: isMobile ? 99 : 0,
-                            color: theme.palette.primary.main,
-                            marginLeft: isDesktop ? 'auto' : '0',
+                            color: theme.palette.primary.main,                            
                         }}
                     ></CustomButton>
                 </Grid>

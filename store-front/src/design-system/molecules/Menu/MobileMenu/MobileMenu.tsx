@@ -156,8 +156,8 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
         <>
             <StyledMenuCloser
                 onClick={() => setExpandMenu(false)}
-                expandMenu={expandMenu}
-            ></StyledMenuCloser>
+                expandMenu={expandMenu}              
+            />
 
             {/* Mobile Menu Header */}
 
@@ -165,6 +165,7 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                 direction={'row'}
                 spacing={2}
                 isSearchOpen={props.isSearchOpen}
+                sx={{marginLeft: 'auto'}}
             >
                 {/* QuickSearch wrapper to close menu in case open */}
 

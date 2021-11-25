@@ -20,6 +20,19 @@ interface HomePageProps {
     embedKukai?: KukaiEmbed
     setSignedPayload?: Function
 }
+const StyledStack = styled(Stack)`
+    overflow: hidden;
+    width: 100vw;
+    max-width: 100rem;
+    height: 100%;
+    align-items: center;
+    margin-bottom: 4rem;
+    max-width: 1536px;
+
+    @media (max-width: 650px) {
+        padding: 0 1.5rem 1rem;
+    }
+`
 
 const LinkStyled = styled(CustomButton)<{ theme?: Theme }>`
     outline: none;
@@ -46,7 +59,7 @@ const HomePage: FC<HomePageProps> = () => {
 
     return (
         <PageWrapper>
-            <Container maxWidth="xl">
+            <StyledStack>
                 <FlexSpacer minHeight={12} />
 
                 <Animated
@@ -88,7 +101,7 @@ const HomePage: FC<HomePageProps> = () => {
                 </Animated>
 
                 <FlexSpacer minHeight={2} />
-            </Container>
+            </StyledStack>
         </PageWrapper>
     )
 }

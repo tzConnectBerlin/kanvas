@@ -54,7 +54,7 @@ const Router = () => {
     const [listCartResponse, listCart] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/cart/list`,
-            withCredentials: true
+            withCredentials: true,
         },
         { manual: true },
     )
@@ -132,7 +132,8 @@ const Router = () => {
                                 />
                             )}
                         />
-                        <Route path="/faq" component={Faq} />                        <Route path="/privacy" component={Privacy} />
+                        <Route path="/faq" component={Faq} />{' '}
+                        <Route path="/privacy" component={Privacy} />
                         <Route
                             path="/create-nft"
                             render={(props) => <CreateNFT {...props} />}
