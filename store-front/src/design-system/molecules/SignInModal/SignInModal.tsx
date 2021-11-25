@@ -86,11 +86,7 @@ export const SignInModal: FC<SignInModalProps> = ({
     const [signUserResponse, signUser] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/login',
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-            },
+            method: 'POST'
         },
         { manual: true },
     )
@@ -98,11 +94,7 @@ export const SignInModal: FC<SignInModalProps> = ({
     const [registerUserResponse, registerUser] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/register',
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-            },
+            method: 'POST'
         },
         { manual: true },
     )

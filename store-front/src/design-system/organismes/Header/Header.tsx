@@ -75,12 +75,7 @@ export const Header: FC<HeaderProps> = ({
 
     // const loggedUser = {data: undefined, loading: false}
     const [loggedUser] = useAxios({
-        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logged_user',
-        headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,
-        },
+        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logged_user'
     })
 
     const [isSearchOpen, setIsSearchOpen] = useState(false)

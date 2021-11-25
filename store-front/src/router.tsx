@@ -53,18 +53,17 @@ const Router = () => {
     const [listCartResponse, listCart] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/cart/list`,
-            withCredentials: true,
-            headers: {
-                'content-type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-            },
+            withCredentials: true
         },
         { manual: true },
     )
 
+    const [listCalled, setListCalled] = useState(false)
+
     // Getting list of nfts in the cart
     useEffect(() => {
-        listCart().catch((err) => toast.error(err))
+        listCart().then(res => setListCalled(true) ).catch((err) => {setListCalled(true);toast.error(err)})
+
     }, [])
 
     useEffect(() => {
@@ -131,6 +130,7 @@ const Router = () => {
                                 <ProductPage
                                     nftsInCart={nftsInCart}
                                     setNftsInCart={setNftsInCart}
+                                    listCart={listCart}
                                     {...props}
                                 />
                             )}
@@ -153,8 +153,10 @@ const Router = () => {
                     open={cartOpen}
                     nftsInCart={nftsInCart}
                     setNftsInCart={setNftsInCart}
+                    listCart={listCart}
                     closeCart={() => setCartOpen(false)}
-                    loading={listCartResponse.loading}
+                    expiresAt={ listCartResponse.data?.expiresAt}
+                    loading={listCartResponse.loading && !listCalled}
                 />
 
                 {!hasCookie && (

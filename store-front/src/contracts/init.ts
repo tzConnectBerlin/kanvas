@@ -14,7 +14,7 @@ export const initWallet = (): BeaconWallet => {
     const options: DAppClientOptions = {
         name: 'D /a:rt/',
         iconUrl: 'https://tezostaquito.io/img/favicon.png',
-        preferredNetwork: 'florencenet' as NetworkType,
+        preferredNetwork: NetworkType.HANGZHOUNET,
         eventHandlers: {
             PERMISSION_REQUEST_SUCCESS: {
                 handler: async (data: any) => {

@@ -16,6 +16,8 @@ interface ShoppingCartProps {
     closeCart: Function
     loading: boolean
     open: boolean
+    listCart: Function
+    expiresAt: string
 }
 
 const ContainerPopupStyled = styled.div<{ open: boolean }>`
@@ -82,23 +84,15 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                 '/users/cart/remove/' +
                 nftId,
             withCredentials: true,
-            method: 'POST',
-            headers: {
-                'content-type': 'application/json',
-                'Access-Control-Allow-Origin':
-                    process.env.REACT_APP_API_SERVER_BASE_URL ??
-                    'http://localhost:3000',
-            },
+            method: 'POST'
         })
             .then((res) => {
                 if (res.status === 204) {
-                    props.setNftsInCart(
-                        props.nftsInCart.filter((nfts) => nfts.id !== nftId),
-                    )
+                    props.listCart()
                 }
             })
             .catch((err) => {
-                toast.error(err.message)
+                toast.error(err.response?.data?.message ?? 'An error occured')
             })
     }
 
@@ -134,7 +128,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         sx={{ marginTop: '1rem', marginRight: '1rem' }}
                     >
                         {' '}
-                        {props.nftsInCart.length && (
+                        {props.nftsInCart.length > 0 && (
                             <>{props.nftsInCart.length} - items </>
                         )}
                     </Typography>
@@ -155,7 +149,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         [...new Array(3)].map(() => (
                             <ShoppingCartItem
                                 loading={true}
-                                removeNft={() => {}}
+                                removeNft={() => { }}
                             />
                         ))
                     ) : props.nftsInCart.length > 0 ? (
@@ -168,7 +162,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         ))
                     ) : (
                         <Typography
-                            size="h5"
+                            size="Subtitle1"
                             weight="Medium"
                             display="initial !important"
                             align="center"
@@ -179,7 +173,23 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                     )}
 
                     <FlexSpacer />
-
+                    {
+                        props.nftsInCart.length !== 0 &&
+                        <Typography
+                            size="subtitle2"
+                            weight="Medium"
+                            display="initial !important"
+                            align="left"
+                            color="#C4C4C4"
+                        >
+                            {
+                                new Date((new Date(props.expiresAt).getTime() - new Date().getDate())).getTime() > 0 ?
+                                    (`*Your cart will expire in ${new Date((new Date(props.expiresAt).getTime() - new Date().getTime())).getMinutes()} minutes.`)
+                                    :
+                                    'Cart expired'
+                            }
+                        </Typography>
+                    }
                     {props.open && (
                         <CustomButton
                             size="medium"
@@ -189,6 +199,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 bottom: 0,
                                 marginLeft: '1rem',
                                 marginRight: '1rem',
+                                marginTop: '1rem !important'
                             }}
                         />
                     )}

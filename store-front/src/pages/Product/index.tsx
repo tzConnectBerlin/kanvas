@@ -16,6 +16,7 @@ export interface ProductPageProps {
     theme?: Theme
     nftsInCart: INft[]
     setNftsInCart: Function
+    listCart: Function
 }
 
 const StyledStack = styled(Stack)`
@@ -26,18 +27,6 @@ const StyledStack = styled(Stack)`
     align-items: center;
     margin-bottom: 4rem;
 `
-
-const data: INft = {
-    id: 1,
-    name: 'AD # 8210',
-    creator: 'Aurélia Durand',
-    ipfsHash:
-        'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
-    price: 20,
-    dataUri:
-        'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
-    startDate: '12:12:43:00',
-}
 
 interface IProductParam {
     id: string
@@ -66,31 +55,22 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                     `/users/cart/add/` +
                     nftResponse.data.id.toString(),
                 withCredentials: true,
-                method: 'POST',
-                headers: {
-                    'content-type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
+                method: 'POST'
             })
                 .then((res) => {
-                    debugger
-                    if (res.status === 204) {
-                        props.setNftsInCart([
-                            ...props.nftsInCart,
-                            nftResponse.data,
-                        ])
+                    if (res.status === 201) {
+                        props.listCart()
                     }
                 })
                 .catch((err) => {
-                    debugger
-                    toast.error(err.response?.data?.message)
+                    toast.error(err.response?.data?.message ?? 'An error occured')
                 })
         }
     }
 
     useEffect(() => {
         if (nftResponse.error) {
-            //
+
         }
     }, [nftResponse])
 
@@ -213,7 +193,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             weight="Light"
                             sx={{ pt: 2, mb: 1 }}
                         >
-                            {nftResponse.loading ? undefined : data.startDate}
+                            {nftResponse.loading ? undefined : nftResponse.data?.startDate}
                         </Typography>
 
                         <Typography
@@ -233,7 +213,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                         >
                             {nftResponse.loading
                                 ? undefined
-                                : `${data.price} ꜩ`}
+                                : `${nftResponse.data?.price} ꜩ`}
                         </Typography>
 
                         <FlexSpacer minHeight={2} />
@@ -241,8 +221,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                         <CustomButton
                             size="medium"
                             onClick={() => handleAddToBasket()}
-                            label={nftResponse.data?.editionsAvailable === 0 ? 'Sold out' : t('product.button_1')}
-                            disabled={nftResponse.loading || nftResponse.data.editionsAvailable === 0}
+                            label={props.nftsInCart.filter(nft => Number(nft.id) === nftResponse.data.id).length > 0 ? 'Already in cart' : t('product.button_1')}
+                            disabled={nftResponse.loading || props.nftsInCart.filter(nft => Number(nft.id) === nftResponse.data.id).length > 0 || Number(nftResponse.data.editionsAvailable) === 0}
                         />
                     </Stack>
                 </Stack>
