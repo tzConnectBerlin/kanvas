@@ -1,11 +1,10 @@
-import { FC, useState } from 'react'
+import { FC } from 'react'
 import styled from '@emotion/styled'
 import PageWrapper from '../../design-system/commons/PageWrapper'
 import FlexSpacer from '../../design-system/atoms/FlexSpacer'
 import CustomButton from '../../design-system/atoms/Button'
 import {
     Grid,
-    Tooltip,
     Stack,
     useMediaQuery,
     Theme,
@@ -14,24 +13,11 @@ import {
 } from '@mui/material'
 import { Typography } from '../../design-system/atoms/Typography'
 import { useTranslation } from 'react-i18next'
-import Scrollspy from 'react-scrollspy-ez'
-import ListIcon from '@mui/icons-material/List'
-import OutsideClickHandler from 'react-outside-click-handler'
 
 export interface PrivacyProps {
     selectedTheme?: string
     theme?: Theme
 }
-
-const StyledIconButton = styled(CustomButton)`
-    padding: 0;
-    min-width: 1.5rem;
-    height: 1.5rem !important;
-
-    &:hover {
-        background-color: rgba(0, 0, 0, 0);
-    }
-`
 
 const StyledStack = styled(Stack)<{ theme?: Theme }>`
   max-width: 100rem;
@@ -103,11 +89,12 @@ const StyledStack = styled(Stack)<{ theme?: Theme }>`
 
     .Privacy-content {
         @media (max-width:400px) {
-            padding: 0 2.2rem;
+            padding: 0 1.5rem;
         }                  
     }
   }
 `
+
 const StyledSection = styled.section`
     margin-bottom: 4rem;
 
@@ -126,19 +113,6 @@ const StyledSection = styled.section`
     }
     .MuiTypography-body2 {
         margin-bottom: 1rem;
-    }
-`
-
-const StickyNav = styled.nav`
-    position: sticky;
-    top: 10rem;
-    left: 0;
-    bottom: -28.125rem;
-`
-
-const StyledDrawer = styled(Drawer)<{ theme?: Theme }>`
-    .MuiDrawer-paper {
-        padding: 1.9rem 1.9rem 0 1.9rem;
     }
 `
 
@@ -189,18 +163,18 @@ const Privacy: FC<PrivacyProps> = () => {
     return (
         <PageWrapper>
             <StyledStack direction="column" maxWidth="md">
-                <FlexSpacer minHeight={10} />
+                <FlexSpacer minHeight={12} />
                 <Grid container className="privacy-nav">
                     <Grid
                         item
                         xs={12}
-                        px={isMobile ? 5 : 12}
+                        px={isMobile ? 3 : 12}
                         className="privacy-content"
                     >
                         <Typography
                             size="h1"
                             weight="SemiBold"
-                            justifyContent="center"
+                            justifyContent={isMobile ? 'left' : 'center'}
                         >
                             {t('privacy.headline')}
                         </Typography>

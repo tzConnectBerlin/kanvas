@@ -25,7 +25,7 @@ const StyledStack = styled(Stack)`
     height: 100%;
 
     @media (max-width: 650px) {
-        padding: 0 2rem 1rem;
+        padding: 0 1.5rem 1rem;
     }
 `
 const StyledContentStack = styled(Stack)<ParamTypes>`

@@ -140,7 +140,8 @@ const Router = () => {
                                 />
                             )}
                         />
-                        <Route path="/faq" component={Faq} />                        <Route path="/privacy" component={Privacy} />
+                        <Route path="/faq" component={Faq} />{' '}
+                        <Route path="/privacy" component={Privacy} />
                         <Route
                             path="/create-nft"
                             render={(props) => <CreateNFT {...props} />}
