@@ -5,6 +5,7 @@ import TreeView from '../../molecules/TreeView/TreeView'
 
 import { Stack } from '@mui/material'
 import { FC, useState } from 'react'
+import PriceFilter from '../../molecules/PriceFilter'
 
 interface FilterProps {
     name: string
@@ -27,7 +28,7 @@ const Filter: FC<FilterProps> = ({ ...props }) => {
         >
             <Typography
                 size="h5"
-                weight={props.active ? 'SemiBold' : 'Light'}
+                weight={props.active ? 'SemiBold' : 'Medium'}
                 color={props.active ? 'contrastText' : ''}
             >
                 {props.name}
@@ -63,12 +64,12 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
 
 const StyledUl = styled.ul<StyledStoreFiltersProps>`
     width: 100%;
-    padding: 1.5rem 0;
+    padding: 0 0;
     transition: width 0.2s;
 
     @media (min-width: 900px) {
-        width: ${(props) => (props.openFilters ? '15rem' : '0')};
-        margin-right: ${(props) => (props.openFilters ? '1.5rem' : '0')};
+        width: ${(props) => (props.openFilters ? '25rem' : '0')};
+        margin-right: ${(props) => (props.openFilters ? '2.5rem' : '0')};
     }
 `
 
@@ -86,6 +87,7 @@ const StyledLi = styled.li<StyledStoreFiltersProps>`
 
 export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
     const [activeRef, setActiveRef] = useState<string[]>([])
+    const [range, setRange] = useState<[number, number]>([0, 20])
 
     const handleListItemClick = (concernedRef: string) => {
         if (activeRef.indexOf(concernedRef) !== -1) {
@@ -147,13 +149,10 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                     collapsed={activeRef.indexOf('Price') !== -1}
                     setCollapsed={handleListItemClick}
                 />
-                {/* TODO */}
-                {activeRef.indexOf('Price') === -1 ? (
-                    <Typography size="h5" weight="Light" color="red">
-                        {' '}
-                        Not implemented{' '}
-                    </Typography>
-                ) : undefined}
+
+                {activeRef.indexOf('Price') === -1 && (
+                    <PriceFilter range={range} setRange={setRange} />
+                )}
             </StyledLi>
         </StyledUl>
     )

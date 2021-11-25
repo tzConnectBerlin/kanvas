@@ -42,6 +42,12 @@ const StyledCheckBox = styled(Checkbox)<{ theme?: Theme }>`
     }
 `
 
+interface recurseRes {
+    selectLeafs: number[]
+
+    highlightParents: number[][]
+}
+
 const TreeView: FC<TreeViewProps> = ({
     selectedFilters,
     setSelectedFilters,
@@ -50,16 +56,6 @@ const TreeView: FC<TreeViewProps> = ({
     const [highlightedParentsState, setHighlightedParents] = useState<number[]>(
         [],
     )
-
-    // handleMultiSelect function should:
-    //  - Select all the children and add them to filters + select all the parents and add them to highlight if node has children and node is not selected
-    //  - Select all the parents and delete them from filters + select all the childrens and delete if node has parents and node is selected
-
-    interface recurseRes {
-        selectLeafs: number[]
-
-        highlightParents: number[][]
-    }
 
     const recurseChildrens = (node: any): recurseRes => {
         if (node.children?.length > 0) {
@@ -180,6 +176,12 @@ const TreeView: FC<TreeViewProps> = ({
         }
     }, [selectedFilters])
 
+    useEffect(() => {
+        if (selectedFilters) {
+            setActiveRef([...selectedFilters])
+        }
+    }, [])
+
     const [activeRef, setActiveRef] = useState<any[]>([])
 
     const renderTree: any = (parentNode: any, children: any) => {
@@ -193,7 +195,7 @@ const TreeView: FC<TreeViewProps> = ({
                         paddingLeft: node.parent.id === 'root' ? '0' : '',
                     }}
                 >
-                    <StyledLi open={props.open} key={`${node.name}-${node.id}`}>
+                    <StyledLi open={props.open} key={node.id}>
                         <Stack
                             direction="row"
                             sx={{ alignItems: 'center', width: '100%' }}
@@ -209,11 +211,7 @@ const TreeView: FC<TreeViewProps> = ({
 
                             <Stack
                                 direction="row"
-                                onClick={() =>
-                                    handleListItemClick(
-                                        `${node.name}-${node.id}`,
-                                    )
-                                }
+                                onClick={() => handleListItemClick(node.id)}
                                 sx={{ width: '100%' }}
                             >
                                 <Typography
@@ -235,9 +233,7 @@ const TreeView: FC<TreeViewProps> = ({
 
                                 {node.children?.length &&
                                 node.children?.length > 0 ? (
-                                    activeRef.indexOf(
-                                        `${node.name}-${node.id}`,
-                                    ) !== -1 ? (
+                                    activeRef.indexOf(node.id) !== -1 ? (
                                         <Typography size="h5" weight="Light">
                                             -
                                         </Typography>
@@ -250,7 +246,7 @@ const TreeView: FC<TreeViewProps> = ({
                             </Stack>
                         </Stack>
                     </StyledLi>
-                    {activeRef.indexOf(`${node.name}-${node.id}`) !== -1
+                    {activeRef.indexOf(node.id) !== -1
                         ? renderTree(node, node.children)
                         : undefined}
                 </StyledDiv>

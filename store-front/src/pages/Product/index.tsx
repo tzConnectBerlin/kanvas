@@ -16,6 +16,7 @@ export interface ProductPageProps {
     theme?: Theme
     nftsInCart: INft[]
     setNftsInCart: Function
+    listCart: Function
 }
 
 const StyledStack = styled(Stack)`
@@ -53,25 +54,23 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                     `/users/cart/add/` +
                     nftResponse.data.id.toString(),
                 withCredentials: true,
-                method: 'POST'
+                method: 'POST',
             })
                 .then((res) => {
                     if (res.status === 201) {
-                        props.setNftsInCart([
-                            ...props.nftsInCart,
-                            nftResponse.data,
-                        ])
+                        props.listCart()
                     }
                 })
                 .catch((err) => {
-                    toast.error(err.response?.data?.message ?? 'An error occured')
+                    toast.error(
+                        err.response?.data?.message ?? 'An error occured',
+                    )
                 })
         }
     }
 
     useEffect(() => {
         if (nftResponse.error) {
-
         }
     }, [nftResponse])
 
@@ -194,7 +193,9 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             weight="Light"
                             sx={{ pt: 2, mb: 1 }}
                         >
-                            {nftResponse.loading ? undefined : nftResponse.data?.startDate}
+                            {nftResponse.loading
+                                ? undefined
+                                : nftResponse.data?.startDate}
                         </Typography>
 
                         <Typography
@@ -222,8 +223,22 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                         <CustomButton
                             size="medium"
                             onClick={() => handleAddToBasket()}
-                            label={t('product.button_1')}
-                            disabled={nftResponse.loading}
+                            label={
+                                props.nftsInCart.filter(
+                                    (nft) =>
+                                        Number(nft.id) === nftResponse.data?.id,
+                                ).length > 0
+                                    ? 'Already in cart'
+                                    : t('product.button_1')
+                            }
+                            disabled={
+                                nftResponse.loading ||
+                                props.nftsInCart.filter(
+                                    (nft) =>
+                                        Number(nft.id) === nftResponse.data?.id,
+                                ).length > 0 ||
+                                Number(nftResponse.data.editionsAvailable) === 0
+                            }
                         />
                     </Stack>
                 </Stack>

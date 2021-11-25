@@ -86,7 +86,7 @@ export const SignInModal: FC<SignInModalProps> = ({
     const [signUserResponse, signUser] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/login',
-            method: 'POST'
+            method: 'POST',
         },
         { manual: true },
     )
@@ -94,7 +94,7 @@ export const SignInModal: FC<SignInModalProps> = ({
     const [registerUserResponse, registerUser] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/register',
-            method: 'POST'
+            method: 'POST',
         },
         { manual: true },
     )

@@ -75,7 +75,7 @@ export const Header: FC<HeaderProps> = ({
 
     // const loggedUser = {data: undefined, loading: false}
     const [loggedUser] = useAxios({
-        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logged_user'
+        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logged_user',
     })
 
     const [isSearchOpen, setIsSearchOpen] = useState(false)
