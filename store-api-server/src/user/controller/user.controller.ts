@@ -134,10 +134,18 @@ export class UserController {
   @Post('cart/checkout')
   @UseGuards(JwtAuthGuard)
   async cartCheckout(@CurrentUser() user: UserEntity) {
-    const cartSession = await this.userService.getUserCartSession(user.id)
+    const cartSessionRes = await this.userService.getUserCartSession(user.id)
+    if (!cartSessionRes.ok) {
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      )
+    }
+    const cartSession: string | undefined = cartSessionRes.val
     if (typeof cartSession === 'undefined') {
       throw new HttpException('User has no active cart', HttpStatus.BAD_REQUEST)
     }
+
     const success = await this.userService.cartCheckout(user.id, cartSession)
     if (!success) {
       throw new HttpException(

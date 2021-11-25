@@ -3,7 +3,7 @@ import { UserEntity } from 'src/user/entity/user.entity'
 import { UserService } from 'src/user/service/user.service'
 import { ITokenPayload } from 'src/interfaces/token.interface'
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
-import { Result } from 'ts-results'
+import { Result, Ok } from 'ts-results'
 
 const bcrypt = require('bcrypt')
 
@@ -62,6 +62,23 @@ export class AuthenticationService {
     }
 
     return userRes
+  }
+
+  public async isUserAttachedToCookieSession(
+    userId: number,
+    cookieSession: string,
+  ): Promise<Result<boolean, string>> {
+    let isAttached = false
+
+    const cartSessionRes = await this.userService.getUserCartSession(userId)
+    if (!cartSessionRes.ok) {
+      return cartSessionRes
+    }
+    if (cartSessionRes.ok) {
+      isAttached ||= cartSessionRes.val === cookieSession
+    }
+
+    return Ok(isAttached)
   }
 
   public async register(user: UserEntity): Promise<any> {
