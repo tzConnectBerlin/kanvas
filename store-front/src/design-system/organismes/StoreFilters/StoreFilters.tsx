@@ -3,8 +3,9 @@ import FlexSpacer from '../../atoms/FlexSpacer'
 import Typography from '../../atoms/Typography'
 import TreeView from '../../molecules/TreeView/TreeView'
 
-import { Stack, Slider, Box, TextField } from '@mui/material'
+import { Stack } from '@mui/material'
 import { FC, useState } from 'react'
+import PriceFilter from '../../molecules/PriceFilter'
 
 interface FilterProps {
     name: string
@@ -27,7 +28,7 @@ const Filter: FC<FilterProps> = ({ ...props }) => {
         >
             <Typography
                 size="h5"
-                weight={props.active ? 'SemiBold' : 'Light'}
+                weight={props.active ? 'SemiBold' : 'Medium'}
                 color={props.active ? 'contrastText' : ''}
             >
                 {props.name}
@@ -63,12 +64,12 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
 
 const StyledUl = styled.ul<StyledStoreFiltersProps>`
     width: 100%;
-    padding: 1.5rem 0;
+    padding: 0 0;
     transition: width 0.2s;
 
     @media (min-width: 900px) {
-        width: ${(props) => (props.openFilters ? '15rem' : '0')};
-        margin-right: ${(props) => (props.openFilters ? '1.5rem' : '0')};
+        width: ${(props) => (props.openFilters ? '25rem' : '0')};
+        margin-right: ${(props) => (props.openFilters ? '2.5rem' : '0')};
     }
 `
 
@@ -84,16 +85,10 @@ const StyledLi = styled.li<StyledStoreFiltersProps>`
     height: auto;
 `
 
+
 export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
     const [activeRef, setActiveRef] = useState<string[]>([])
     const [range, setRange] = useState<[number, number]>([0, 20])
-
-    const changeLowerBond = (bond: number) =>
-        setRange((bonds) => [bond, bonds[1]])
-
-    const changUpperBond = (bond: number) =>
-        setRange((bonds) => [bonds[0], bond])
-
 
     const handleListItemClick = (concernedRef: string) => {
         if (activeRef.indexOf(concernedRef) !== -1) {
@@ -155,22 +150,12 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                     collapsed={activeRef.indexOf('Price') !== -1}
                     setCollapsed={handleListItemClick}
                 />
-                {/* TODO */}
-                {activeRef.indexOf('Price') === -1 && (
-                    <Stack sx={{ width: '100%' }} spacing={2}>
-                        <Stack direction="row" spacing={3}>
-                            <TextField type="number" onChange={(e) => changeLowerBond(Number(e.target.value))} value={range[0]} />
-                            <TextField type="number" onChange={(e) => changUpperBond(Number(e.target.value))} value={range[1]} />
-                        </Stack>
 
-                        <Slider
-                            getAriaLabel={() => 'Price range filter'}
-                            value={range}
-                            onChange={(_, newValues) => setRange(newValues as [number, number])}
-                            valueLabelDisplay="auto"
-                            getAriaValueText={() => "valuetext"}
-                        />
-                    </Stack>
+                {activeRef.indexOf('Price') === -1 && (
+                    <PriceFilter
+                        range={range}
+                        setRange={setRange}
+                    />
                 )}
             </StyledLi>
         </StyledUl >

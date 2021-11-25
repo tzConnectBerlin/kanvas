@@ -77,6 +77,20 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         manual: true,
     })
 
+    const [checkoutResponse, checkout] = useAxios(
+        process.env.REACT_APP_API_SERVER_BASE_URL +
+        '/users/cart/checkout', {
+        manual: true
+    })
+
+    useEffect(() => {
+        if (checkoutResponse.data) {
+
+        } else if (checkoutResponse.error) {
+            toast.error('Unable to checkout')
+        }
+    }, [checkoutResponse])
+
     const handleDeleteFromBasket = (nftId: number) => {
         deleteFromCart({
             url:
@@ -194,7 +208,9 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         <CustomButton
                             size="medium"
                             label="Checkout"
+                            onClick={() => checkout()}
                             disabled={props.nftsInCart.length === 0}
+                            loading={checkoutResponse.loading}
                             sx={{
                                 bottom: 0,
                                 marginLeft: '1rem',

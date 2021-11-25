@@ -241,13 +241,14 @@ const StorePage = () => {
                 </Stack>
 
                 <StyledContentStack>
-                    {/* TODO: find a better structure to pass the different filters */}
+
                     <StoreFilters
                         availableFilters={availableFilters}
                         openFilters={filterOpen}
                         filterFunction={getFilteredNfts}
                         selectedFilters={selectedFilters}
                         setSelectedFilters={setSelectedFilters}
+                        
                         loading={categoriesResponse.loading}
                     />
 
@@ -263,12 +264,6 @@ const StorePage = () => {
                         }
                     />
 
-                    {/* <NftGrid
-                        nfts={mockNft}
-                        open={filterOpen}
-                        emptyMessage={'No Nfts in collection yet'}
-                        emptyLink={'Click here to buy some in the store.'}
-                    /> */}
                 </StyledContentStack>
 
                 <Stack direction="row">
