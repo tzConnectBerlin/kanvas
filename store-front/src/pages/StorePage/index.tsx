@@ -107,6 +107,7 @@ const StorePage = () => {
 
         if (selectedFilters.length === 0) {
             getNfts({
+                withCredentials: true,
                 params: {
                     page: page,
                     pageSize: 12,
@@ -116,6 +117,7 @@ const StorePage = () => {
             })
         } else {
             getFilteredNfts({
+                withCredentials: true,
                 params: {
                     page: page,
                     pageSize: 12,
@@ -179,6 +181,7 @@ const StorePage = () => {
             history.push({ search: pageParam.toString() })
 
             getFilteredNfts({
+                withCredentials: true,
                 params: {
                     page: 1,
                     pageSize: 12,
@@ -193,6 +196,7 @@ const StorePage = () => {
 
             history.push({ search: pageParam.toString() })
             getNfts({
+                withCredentials: true,
                 params: {
                     pageSize: 12,
                     page: pageReset !== 0 ? pageReset : selectedPage,

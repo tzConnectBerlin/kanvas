@@ -32,6 +32,7 @@ interface SignInModalProps {
     handleCloseModal: Function
     open: boolean
     setCurrentLoggedUser: Function
+    listCart: Function
 }
 
 interface IUserParams {
@@ -71,6 +72,7 @@ const WrapperTitle = styled.div`
 export const SignInModal: FC<SignInModalProps> = ({
     beaconWallet,
     embedKukai,
+    listCart,
     ...props
 }) => {
     const [socialLoading, setSocialLoading] = useState(false)
@@ -88,6 +90,7 @@ export const SignInModal: FC<SignInModalProps> = ({
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/login',
             method: 'POST',
+            withCredentials: true,
         },
         { manual: true },
     )
@@ -96,6 +99,7 @@ export const SignInModal: FC<SignInModalProps> = ({
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/register',
             method: 'POST',
+            withCredentials: true
         },
         { manual: true },
     )
@@ -235,6 +239,13 @@ export const SignInModal: FC<SignInModalProps> = ({
 
             const user: IUser = signUserResponse.data
             props.setCurrentLoggedUser(user)
+
+            listCart({
+                headers: {
+                    Authorization: `Bearer ${signUserResponse.data.token}`
+                },
+                withCredentials: true,
+            })
 
             localStorage.setItem('Kanvas - Bearer', signUserResponse.data.token)
             localStorage.setItem(

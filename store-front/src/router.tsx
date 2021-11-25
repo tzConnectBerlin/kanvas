@@ -27,7 +27,7 @@ import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles'
 import { INft } from './interfaces/artwork'
 import { toast } from 'react-toastify'
 
-const StyledBrowserRouter = styled(BrowserRouter)<{ theme?: Theme }>`
+const StyledBrowserRouter = styled(BrowserRouter) <{ theme?: Theme }>`
     display: block;
 
     #root {
@@ -54,7 +54,8 @@ const Router = () => {
     const [listCartResponse, listCart] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/cart/list`,
-            withCredentials: true,
+            method: 'POST',
+            withCredentials: true
         },
         { manual: true },
     )
@@ -63,12 +64,18 @@ const Router = () => {
 
     // Getting list of nfts in the cart
     useEffect(() => {
-        listCart()
+        listCart({
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`
+            },
+            withCredentials: true
+        })
             .then((res) => setListCalled(true))
             .catch((err) => {
                 setListCalled(true)
                 toast.error(err)
             })
+
     }, [])
 
     useEffect(() => {
@@ -118,6 +125,7 @@ const Router = () => {
                     selectedTheme={selectedTheme}
                     nftsInCartNumber={nftsInCart.length}
                     notifications={0}
+                    listCart={listCart}
                 />
 
                 <ScrollToTop>

@@ -77,8 +77,14 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         manual: true,
     })
 
-    const [checkoutResponse, checkout] = useAxios(
-        process.env.REACT_APP_API_SERVER_BASE_URL + '/users/cart/checkout',
+    const [checkoutResponse, checkout] = useAxios({
+        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/users/cart/checkout',
+        method: 'POST',
+        withCredentials: true,
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`
+        }
+    },
         {
             manual: true,
         },
@@ -97,8 +103,11 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                 process.env.REACT_APP_API_SERVER_BASE_URL +
                 '/users/cart/remove/' +
                 nftId,
-            withCredentials: true,
             method: 'POST',
+            withCredentials: true,
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`
+            }
         })
             .then((res) => {
                 if (res.status === 204) {
@@ -108,6 +117,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
             .catch((err) => {
                 toast.error(err.response?.data?.message ?? 'An error occured')
             })
+
     }
 
     useEffect(() => {
@@ -163,7 +173,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         [...new Array(3)].map(() => (
                             <ShoppingCartItem
                                 loading={true}
-                                removeNft={() => {}}
+                                removeNft={() => { }}
                             />
                         ))
                     ) : props.nftsInCart.length > 0 ? (
@@ -197,12 +207,12 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         >
                             {new Date(
                                 new Date(props.expiresAt).getTime() -
-                                    new Date().getDate(),
+                                new Date().getDate(),
                             ).getTime() > 0
                                 ? `*Your cart will expire in ${new Date(
-                                      new Date(props.expiresAt).getTime() -
-                                          new Date().getTime(),
-                                  ).getMinutes()} minutes.`
+                                    new Date(props.expiresAt).getTime() -
+                                    new Date().getTime(),
+                                ).getMinutes()} minutes.`
                                 : 'Cart expired'}
                         </Typography>
                     )}

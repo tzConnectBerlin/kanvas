@@ -17,7 +17,7 @@ interface ParamTypes {
     tab: string
 }
 
-interface ProfileProps {}
+interface ProfileProps { }
 
 const StyledStack = styled(Stack)`
     width: 100vw;
@@ -140,9 +140,10 @@ const Profile: FC<ProfileProps> = () => {
     const [emptyMessage, setEmptyMessage] = useState(tab)
     const [emptyLink, setEmptyLink] = useState(tab)
 
-    const [user, getUser] = useAxios(
-        process.env.REACT_APP_API_SERVER_BASE_URL + '/',
-    )
+    const [user, getUser] = useAxios({
+        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/',
+        withCredentials: true
+    })
 
     // Getting user info and updating
     // const [getUser, user] = useLazyQuery(GET_USER)
