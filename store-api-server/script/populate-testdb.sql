@@ -7,14 +7,14 @@ values
 
 
 insert into nft (
-  editions_size, nft_name, ipfs_hash, metadata
+  editions_size, price, nft_name, ipfs_hash, metadata
 )
 values
-  (1, 'SomeNFT', 'ipfs://somenft', '{"json": "encoded", "I": "guess?"}'),
-  (1, 'NFT2', 'ipfs://somenft+', '{"json": "encoded", "I": "guess?"}'),
-  (2, 'NFT3', 'ipfs://has-no-category', '{}'),
-  (3, 'NFT4', 'ipfs://has-2-categories', '{}'),
-  (2, 'Alps', 'ipfs://the-alps', '{}');
+  (1, 1, 'SomeNFT', 'ipfs://somenft', '{"json": "encoded", "I": "guess?"}'),
+  (1, 104, 'NFT2', 'ipfs://somenft+', '{"json": "encoded", "I": "guess?"}'),
+  (2, 54, 'NFT3', 'ipfs://has-no-category', '{}'),
+  (3, 11, 'NFT4', 'ipfs://has-2-categories', '{}'),
+  (2, 3, 'Alps', 'ipfs://the-alps', '{}');
 
 insert into mtm_kanvas_user_nft (
   kanvas_user_id, nft_id

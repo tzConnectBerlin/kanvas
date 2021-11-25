@@ -30,6 +30,8 @@ export class NftService {
       ...params,
       categories: undefined,
       address: undefined,
+      priceAtLeast: undefined,
+      priceAtMost: undefined,
     })
   }
 
@@ -54,6 +56,7 @@ export class NftService {
 
     const offset = (params.page - 1) * params.pageSize
     const limit = params.pageSize
+    console.log(`offset: ${offset}, limit: ${limit}`)
 
     let untilNft: string | undefined = undefined
     if (typeof params.firstRequestAt === 'number') {
@@ -64,10 +67,12 @@ export class NftService {
       const nftIds = await this.conn.query(
         `
 SELECT nft_id, total_nft_count
-FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7)`,
+FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
         [
           params.address,
           params.categories,
+          params.priceAtLeast,
+          params.priceAtMost,
           orderBy,
           params.order,
           offset,
@@ -123,7 +128,17 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7)`,
     try {
       const nftsQryRes = await this.conn.query(
         `
-SELECT nft_id, nft_name, ipfs_hash, metadata, data_uri, contract, token_id, categories, editions_available
+SELECT
+  nft_id,
+  nft_name,
+  ipfs_hash,
+  metadata,
+  data_uri,
+  price,
+  contract,
+  token_id,
+  categories,
+  editions_available
 FROM nfts_by_id($1, $2, $3)`,
         [nftIds, orderBy, orderDirection],
       )
@@ -134,6 +149,7 @@ FROM nfts_by_id($1, $2, $3)`,
           ipfsHash: nftRow['ipfs_hash'],
           metadata: nftRow['metadata'],
           dataUri: nftRow['data_uri'],
+          price: Number(nftRow['price']),
           contract: nftRow['contract'],
           tokenId: nftRow['token_id'],
           editionsAvailable: nftRow['editions_available'],

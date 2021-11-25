@@ -1,29 +1,24 @@
-import { IsString, IsInt, IsOptional, IsArray } from 'class-validator'
+import { IsString, IsInt, IsNumber, IsOptional, IsArray } from 'class-validator'
 import { Type, Transform } from 'class-transformer'
-
-const defaultPage = 1
-const defaultPageSize = 10
-const defaultOrder = 'asc'
-const defaultOrderBy = 'id'
 
 export class PaginationParams {
   @IsInt()
   @Type(() => Number)
   @IsOptional()
-  page: number = defaultPage
+  page: number = 1
 
   @IsInt()
   @Type(() => Number)
   @IsOptional()
-  pageSize: number = defaultPageSize
+  pageSize: number = 10
 
   @IsString()
   @IsOptional()
-  order: string = defaultOrder
+  order: string = 'asc'
 
   @IsString()
   @IsOptional()
-  orderBy: string = defaultOrderBy
+  orderBy: string = 'id'
 
   @IsInt()
   @Type(() => Number)
@@ -44,6 +39,16 @@ export class FilterParams extends PaginationParams {
   @IsString()
   @IsOptional()
   address?: string
+
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  priceAtLeast?: number
+
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  priceAtMost?: number
 }
 
 function parseStringArray(v: string | string[], sep: string): string[] {
