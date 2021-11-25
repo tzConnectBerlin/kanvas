@@ -221,8 +221,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                         <CustomButton
                             size="medium"
                             onClick={() => handleAddToBasket()}
-                            label={props.nftsInCart.filter(nft => Number(nft.id) === nftResponse.data.id).length > 0 ? 'Already in cart' : t('product.button_1')}
-                            disabled={nftResponse.loading || props.nftsInCart.filter(nft => Number(nft.id) === nftResponse.data.id).length > 0 || Number(nftResponse.data.editionsAvailable) === 0}
+                            label={props.nftsInCart.filter(nft => Number(nft.id) === nftResponse.data?.id).length > 0 ? 'Already in cart' : t('product.button_1')}
+                            disabled={nftResponse.loading || props.nftsInCart.filter(nft => Number(nft.id) === nftResponse.data?.id).length > 0 || Number(nftResponse.data.editionsAvailable) === 0}
                         />
                     </Stack>
                 </Stack>
