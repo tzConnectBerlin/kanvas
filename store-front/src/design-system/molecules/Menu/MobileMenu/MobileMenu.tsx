@@ -5,7 +5,7 @@ import Brightness3Icon from '@mui/icons-material/Brightness3'
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined'
 
-import { FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { Stack, Theme } from '@mui/material'
 import { CustomButton } from '../../../atoms/Button'
 import { Typography } from '../../../atoms/Typography'
@@ -130,6 +130,7 @@ const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
         bottom: 0;
         z-index: 999999;
         top: 5rem;
+        pointer-events: auto;
 
         overflow: auto;
 
@@ -145,6 +146,7 @@ const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
         a {
             opacity: ${(props) => (props.expandMenu ? 1 : 0)} !important;
             transition: opacity 0.3s;
+            margin-bottom: .7rem;
         }
 
         transition: max-width 0.3s, width 0.3s, padding 0.5s;
@@ -168,7 +170,7 @@ const StyledBox = styled.div`
         display: flex;
         flex-direction: column;
         padding: 0 1.5rem;
-        height: 70%;
+        height: 100%;
     }
 `
 
@@ -178,9 +180,17 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
 
     const [expandMenu, setExpandMenu] = useState(false)
 
-    const navigateTo = (componentURL: string) => {
-        history.push(`/${componentURL}`)
-    }
+    // const navigateTo = (componentURL: string) => {
+    //     history.push(`/${componentURL}`)
+    // }
+
+    useEffect(() => {
+        if (expandMenu) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = 'auto'
+        }
+    }, [expandMenu])
 
     return (
         <>
