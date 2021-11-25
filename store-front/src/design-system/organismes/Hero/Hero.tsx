@@ -18,14 +18,16 @@ import { CustomButton } from '../../atoms/Button'
 import { Typography } from '../../../design-system/atoms/Typography'
 import { useTranslation } from 'react-i18next'
 import { useParams, useHistory } from 'react-router-dom'
-import useAxios from 'axios-hooks'
-import { DART_REDIRECT_URI } from '../../../global'
+import { INft } from '../../../interfaces/artwork'
 
 export interface HeroProps {
     loading?: boolean
     selectedTheme?: string
     theme?: Theme
+    sliderLoading?: boolean
+    sliderNfts: INft[]
 }
+
 interface IProductParam {
     id: string
 }
@@ -84,7 +86,7 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
             <Grid item xs={12} md={7} px={0} sx={{ display: 'flex' }}>
                 {
                     //Render Skeleton if image not loading
-                    nftResponse.loading ? (
+                    false ? (
                         <Skeleton
                             height="40rem"
                             width="40rem"
@@ -96,7 +98,7 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
                         />
                     ) : // Render Slider
                     imgToVideoToggler ? (
-                        <Slider />
+                        <Slider loading={props.sliderLoading} sliderNfts={props.sliderNfts} />
                     ) : (
                         //Render Single image
                         <Card
