@@ -136,7 +136,7 @@ FROM nfts_by_id($1, $2, $3)`,
           dataUri: nftRow['data_uri'],
           contract: nftRow['contract'],
           tokenId: nftRow['token_id'],
-          editionsAvailable: nftRow['editions_available'],
+          editionsAvailable: Number(nftRow['editions_available']),
           categories: nftRow['categories'].map((categoryRow: any) => {
             return <CategoryEntity>{
               name: categoryRow[0],
