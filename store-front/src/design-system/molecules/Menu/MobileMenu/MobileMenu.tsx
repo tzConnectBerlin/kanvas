@@ -157,7 +157,7 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
         <>
             <StyledMenuCloser
                 onClick={() => setExpandMenu(false)}
-                expandMenu={expandMenu}              
+                expandMenu={expandMenu}
             />
 
             {/* Mobile Menu Header */}

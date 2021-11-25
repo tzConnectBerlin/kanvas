@@ -99,7 +99,7 @@ export const SignInModal: FC<SignInModalProps> = ({
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/register',
             method: 'POST',
-            withCredentials: true
+            withCredentials: true,
         },
         { manual: true },
     )
@@ -242,7 +242,7 @@ export const SignInModal: FC<SignInModalProps> = ({
 
             listCart({
                 headers: {
-                    Authorization: `Bearer ${signUserResponse.data.token}`
+                    Authorization: `Bearer ${signUserResponse.data.token}`,
                 },
                 withCredentials: true,
             })

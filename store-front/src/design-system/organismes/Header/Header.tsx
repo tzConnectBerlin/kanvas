@@ -29,7 +29,7 @@ export interface HeaderProps {
     listCart: Function
 }
 
-const StyledBox = styled(Box) <{ theme?: Theme }>`
+const StyledBox = styled(Box)<{ theme?: Theme }>`
     margin-bottom: -6rem;
     color: ${(props) => props.theme.palette.text.primary};
 
@@ -77,34 +77,42 @@ export const Header: FC<HeaderProps> = ({
         url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logged_user',
         withCredentials: true,
         headers: {
-            Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`
-        }
+            Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,
+        },
     })
 
-    const [logoutUserResponse, logoutUser] = useAxios({
-        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logout',
-        method: 'POST',
-        withCredentials: true,
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`
-        }
-    }
-        , { manual: true })
+    const [logoutUserResponse, logoutUser] = useAxios(
+        {
+            url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logout',
+            method: 'POST',
+            withCredentials: true,
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem(
+                    'Kanvas - Bearer',
+                )}`,
+            },
+        },
+        { manual: true },
+    )
 
     const handleLogout = () => {
-        logoutUser().then(res => {
-            localStorage.removeItem('Kanvas - Bearer')
-            localStorage.removeItem('Kanvas - address')
+        logoutUser()
+            .then((res) => {
+                localStorage.removeItem('Kanvas - Bearer')
+                localStorage.removeItem('Kanvas - address')
 
-            listCart({
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`
-                },
-                withCredentials: true
+                listCart({
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem(
+                            'Kanvas - Bearer',
+                        )}`,
+                    },
+                    withCredentials: true,
+                })
             })
-        }).catch(err => {
-            debugger
-        })
+            .catch((err) => {
+                debugger
+            })
     }
 
     const [isSearchOpen, setIsSearchOpen] = useState(false)

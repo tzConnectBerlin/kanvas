@@ -17,7 +17,7 @@ interface ParamTypes {
     tab: string
 }
 
-interface ProfileProps { }
+interface ProfileProps {}
 
 const StyledStack = styled(Stack)`
     width: 100vw;
@@ -142,7 +142,7 @@ const Profile: FC<ProfileProps> = () => {
 
     const [user, getUser] = useAxios({
         url: process.env.REACT_APP_API_SERVER_BASE_URL + '/',
-        withCredentials: true
+        withCredentials: true,
     })
 
     // Getting user info and updating

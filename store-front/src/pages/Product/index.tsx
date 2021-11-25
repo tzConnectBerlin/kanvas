@@ -40,9 +40,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
 
     const [nftResponse, getNft] = useAxios({
         url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/${id}`,
-        method: 'POST'
-    }
-    )
+        method: 'POST',
+    })
 
     const [addToCartResponse, addToCart] = useAxios(
         process.env.REACT_APP_API_SERVER_BASE_URL + `/user/cart/add/`,
@@ -59,8 +58,10 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                 method: 'POST',
                 withCredentials: true,
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`
-                }
+                    Authorization: `Bearer ${localStorage.getItem(
+                        'Kanvas - Bearer',
+                    )}`,
+                },
             })
                 .then((res) => {
                     if (res.status === 201) {
@@ -72,7 +73,6 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                         err.response?.data?.message ?? 'An error occured',
                     )
                 })
-
         }
     }
 
@@ -220,13 +220,12 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             weight="Light"
                             sx={{ pt: 2, mb: 1 }}
                         >
-                            {nftResponse.loading
-                                ? undefined
-                                : <>
+                            {nftResponse.loading ? undefined : (
+                                <>
                                     {nftResponse.data?.price}
                                     <TezosLogo width="18px" margin="0 0.2rem" />
                                 </>
-                            }
+                            )}
                         </Typography>
 
                         <FlexSpacer minHeight={2} />
@@ -248,7 +247,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     (nft) =>
                                         Number(nft.id) === nftResponse.data?.id,
                                 ).length > 0 ||
-                                Number(nftResponse.data?.editionsAvailable) === 0
+                                Number(nftResponse.data?.editionsAvailable) ===
+                                    0
                             }
                         />
                     </Stack>

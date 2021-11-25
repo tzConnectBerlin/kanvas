@@ -195,7 +195,7 @@ const Faq: FC<FaqProps> = () => {
         <PageWrapper>
             <StyledStack direction="column">
                 <FlexSpacer minHeight={10} />
-                
+
                 <Grid
                     container
                     className="faq-nav"

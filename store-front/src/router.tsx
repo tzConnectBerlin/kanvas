@@ -27,7 +27,7 @@ import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles'
 import { INft } from './interfaces/artwork'
 import { toast } from 'react-toastify'
 
-const StyledBrowserRouter = styled(BrowserRouter) <{ theme?: Theme }>`
+const StyledBrowserRouter = styled(BrowserRouter)<{ theme?: Theme }>`
     display: block;
 
     #root {
@@ -55,7 +55,7 @@ const Router = () => {
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/cart/list`,
             method: 'POST',
-            withCredentials: true
+            withCredentials: true,
         },
         { manual: true },
     )
@@ -66,16 +66,17 @@ const Router = () => {
     useEffect(() => {
         listCart({
             headers: {
-                Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`
+                Authorization: `Bearer ${localStorage.getItem(
+                    'Kanvas - Bearer',
+                )}`,
             },
-            withCredentials: true
+            withCredentials: true,
         })
             .then((res) => setListCalled(true))
             .catch((err) => {
                 setListCalled(true)
                 toast.error(err)
             })
-
     }, [])
 
     useEffect(() => {
