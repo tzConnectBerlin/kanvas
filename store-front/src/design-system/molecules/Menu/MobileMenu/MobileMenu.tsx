@@ -5,7 +5,7 @@ import Brightness3Icon from '@mui/icons-material/Brightness3'
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined'
 
-import { FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { Stack, Theme } from '@mui/material'
 import { CustomButton } from '../../../atoms/Button'
 import { Typography } from '../../../atoms/Typography'
@@ -17,6 +17,7 @@ import {
 } from '../Menu'
 import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
+import { Box } from '@mui/system'
 
 const WrapperThemeIcon = styled.div<SearchProps>`
     display: ${(props) => (props.isSearchOpen ? 'none' : 'flex')};
@@ -111,8 +112,8 @@ const MobileStyledMenuHeader = styled(Stack)<SearchProps>`
         align-items: center;
         padding-right: 0rem;
         height: 4rem;
-        margin-left: auto;
         width: ${(props) => (props.isSearchOpen ? '100%' : '')};
+        margin-left: auto !important;
     }
 `
 
@@ -120,26 +121,55 @@ const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
     display: none;
 
     @media (max-width: 874px) {
-        display: ${(props) => (props.expandMenu ? 'flex' : 'none')};
-        height: ${(props) => (props.expandMenu ? 'auto' : '0')};
-        opacity: ${(props) => (props.expandMenu ? '1' : '0')};
-        width: auto;
-
+        max-width: ${(props) => (props.expandMenu ? 25 : 0)}rem;
+        width: ${(props) => (props.expandMenu ? 35 : 0)}%;
+        display: flex;
+        height: 100vh;
         position: fixed;
-        top: 5em;
         left: 0;
-        right: 0;
+        bottom: 0;
+        z-index: 999999;
+        top: 5rem;
 
-        z-index: 5;
-        transition: 0.3s;
+        overflow: auto;
 
-        padding-right: 2rem;
-        padding-left: 2rem;
-        padding-bottom: 1rem;
+        margin-top: 0 !important;
+        padding-top: 1.5rem !important;
 
-        padding-top: 2rem !important;
-        margin-top: 1rem !important;
-        background-color: ${(props) => props.theme.palette.background.default};
+        padding-bottom: 2.5rem;
+
+        background-color: ${(props) => props.theme.palette.background.paper};
+        opacity: 1;
+
+        p,
+        a {
+            opacity: ${(props) => (props.expandMenu ? 1 : 0)} !important;
+            transition: opacity 0.3s;
+            margin-bottom: .7rem;
+        }
+
+        transition: max-width 0.3s, width 0.3s, padding 0.5s;
+    }
+
+    @media (max-width: 1100px) {
+        width: ${(props) => (props.expandMenu ? 40 : 0)}%;
+    }
+
+    @media (max-width: 730px) {
+        width: ${(props) => (props.expandMenu ? 50 : 0)}%;
+    }
+
+    @media (max-width: 650px) {
+        width: ${(props) => (props.expandMenu ? 100 : 0)}%;
+    }
+`
+
+const StyledBox = styled.div`
+    @media (max-width: 874px) {
+        display: flex;
+        flex-direction: column;
+        padding: 0 1.5rem;
+        height: 100%;
     }
 `
 
@@ -149,15 +179,23 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
 
     const [expandMenu, setExpandMenu] = useState(false)
 
-    const navigateTo = (componentURL: string) => {
-        history.push(`/${componentURL}`)
-    }
+    // const navigateTo = (componentURL: string) => {
+    //     history.push(`/${componentURL}`)
+    // }
+
+    useEffect(() => {
+        if (expandMenu) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = 'auto'
+        }
+    }, [expandMenu])
 
     return (
         <>
             <StyledMenuCloser
                 onClick={() => setExpandMenu(false)}
-                expandMenu={expandMenu}              
+                expandMenu={expandMenu}
             />
 
             {/* Mobile Menu Header */}
@@ -226,53 +264,55 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                 direction="column"
                 spacing={2}
                 sx={{ alignItems: 'beginning' }}
+                onClick={() => setExpandMenu(!expandMenu)}
             >
-                <StyledLink to="/">
-                    <Typography
-                        size="h2"
-                        weight="SemiBold"
-                        color="#9b9b9b"
-                        sx={{ cursor: 'pointer' }}
-                    >
-                        {t('menu.home')}
-                    </Typography>
-                </StyledLink>
+                <StyledBox>
+                    <StyledLink to="/">
+                        <Typography
+                            size="h2"
+                            weight="SemiBold"
+                            color="#9b9b9b"
+                            sx={{ cursor: 'pointer' }}
+                        >
+                            {t('menu.home')}
+                        </Typography>
+                    </StyledLink>
 
-                <StyledLink to="/store">
-                    <Typography
-                        size="h2"
-                        weight="SemiBold"
-                        color="#9b9b9b"
-                        sx={{ cursor: 'pointer' }}
-                    >
-                        {t('menu.store')}
-                    </Typography>
-                </StyledLink>
+                    <StyledLink to="/store">
+                        <Typography
+                            size="h2"
+                            weight="SemiBold"
+                            color="#9b9b9b"
+                            sx={{ cursor: 'pointer' }}
+                        >
+                            {t('menu.store')}
+                        </Typography>
+                    </StyledLink>
 
-                <FlexSpacer borderBottom={false} minHeight={2} />
+                    <FlexSpacer borderBottom={false} minHeight={2} />
 
-                {/* Call to action button: `Sign in` and `Add artwork` for curators and artists */}
+                    {/* Call to action button: `Sign in` and `Add artwork` for curators and artists */}
 
-                {
-                    // add localStorage.getItem in a useState hook to get the state after signning in.
-                    localStorage.getItem('Kanvas - address') ===
-                    props.user?.address ? (
-                        props.user?.role === 'creator' ? (
+                    {
+                        // add localStorage.getItem in a useState hook to get the state after signning in.
+                        localStorage.getItem('Kanvas - address') ===
+                        props.user?.address ? (
+                            props.user?.role === 'creator' ? (
+                                <CustomButton
+                                    size="medium"
+                                    onClick={props.onLogout}
+                                    label="Add artwork"
+                                />
+                            ) : undefined
+                        ) : (
                             <CustomButton
                                 size="medium"
-                                onClick={props.onLogout}
-                                label="Add artwork"
+                                onClick={() => props.setOpen(true)}
+                                label="Sign in"
                             />
-                        ) : undefined
-                    ) : (
-                        <CustomButton
-                            size="medium"
-                            onClick={() => navigateTo('sign-in')}
-                            label="Sign in"
-                        />
-                    )
-                }
-
+                        )
+                    }
+                </StyledBox>
                 <FlexSpacer borderBottom={true} />
 
                 {/* Sub menu to navigate to personnal pages such as notifications profile or simply to logout */}
