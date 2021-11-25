@@ -40,7 +40,6 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
 
     const [nftResponse, getNft] = useAxios({
         url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/${id}`,
-        method: 'POST',
     })
 
     const [addToCartResponse, addToCart] = useAxios(
