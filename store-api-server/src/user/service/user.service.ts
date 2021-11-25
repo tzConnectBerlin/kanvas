@@ -87,7 +87,9 @@ WHERE address = $1
     })
   }
 
-  async getUserCartSession(userId: number): Promise<string | undefined> {
+  async getUserCartSession(
+    userId: number,
+  ): Promise<Result<string | undefined, string>> {
     const qryRes = await this.conn.query(
       `
 SELECT cart_session
@@ -95,7 +97,12 @@ FROM kanvas_user
 WHERE id = $1`,
       [userId],
     )
-    return qryRes.rows[0]['cart_session']
+    if (qryRes.rowCount === 0) {
+      return Err(
+        `getUserCartSession err: user with id ${userId} does not exist`,
+      )
+    }
+    return Ok(qryRes.rows[0]['cart_session'])
   }
 
   async ensureUserCartSession(

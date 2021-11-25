@@ -2,6 +2,7 @@ import {
   HttpStatus,
   HttpException,
   Logger,
+  Request,
   Body,
   Controller,
   Get,
@@ -31,6 +32,22 @@ export class AuthenticationController {
       )
     }
     return loggedInUserRes.val
+  }
+
+  @Get('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@CurrentUser() currentUser: UserEntity, @Request() req: any) {
+    const resetCookieSessionRes =
+      await this.authService.isUserAttachedToCookieSession(
+        currentUser.id,
+        req.session.uuid,
+      )
+    if (resetCookieSessionRes.ok && resetCookieSessionRes.val) {
+      // Detach session. User that is logging out is attached in some way to the
+      // current session, don't want to stay attached to this on the active
+      // device.
+      req.session = null
+    }
   }
 
   @Post('login')
