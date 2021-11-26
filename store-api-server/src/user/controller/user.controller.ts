@@ -3,6 +3,7 @@ import {
   Session,
   HttpException,
   HttpStatus,
+  Body,
   Param,
   Controller,
   Post,
@@ -26,6 +27,10 @@ import {
   PG_FOREIGN_KEY_VIOLATION_ERRCODE,
   PROFILE_PICTURE_MAX_BYTES,
 } from '../../constants'
+
+interface EditProfile {
+  userName?: string
+}
 
 @Controller('users')
 export class UserController {
@@ -71,10 +76,10 @@ export class UserController {
   )
   async editProfile(
     @CurrentUser() currentUser: UserEntity,
-    @Query('userName') name: string | undefined,
+    @Body() editFields: EditProfile,
     @UploadedFile() picture: any,
   ) {
-    this.userService.edit(currentUser.id, name, picture)
+    this.userService.edit(currentUser.id, editFields?.userName, picture)
   }
 
   // @Get('/edit/check')
