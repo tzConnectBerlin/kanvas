@@ -1,8 +1,8 @@
 import styled from '@emotion/styled'
 import FlexSpacer from '../../atoms/FlexSpacer'
-import { Box } from '@mui/system'
+import { Box, useTheme } from '@mui/system'
 import { toast } from 'react-toastify'
-import { Modal, Stack, Theme } from '@mui/material'
+import { Modal, Stack, Theme, useMediaQuery } from '@mui/material'
 import { KukaiEmbed } from 'kukai-embed'
 import { char2Bytes } from '@taquito/utils'
 import { useHistory } from 'react-router-dom'
@@ -40,17 +40,15 @@ interface IUserParams {
     signedPayload: string | null
 }
 
-const style = {
-    position: 'absolute' as 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: '28rem',
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
-}
+const StyledBox = styled(Stack)<{ theme?: Theme }>`
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid #000;
+    box-shadow: 24px;
+    padding: 1.5rem;
+`
 
 const StyledStack = styled(Stack)`
     width: 100%;
@@ -83,6 +81,8 @@ export const SignInModal: FC<SignInModalProps> = ({
     })
 
     const { t } = useTranslation(['translation'])
+    const theme = useTheme()
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
     // const [signUser, signUserResponse] = useLazyQuery(SIGN_USER)
 
@@ -314,7 +314,10 @@ export const SignInModal: FC<SignInModalProps> = ({
             aria-labelledby="keep-mounted-modal-title"
             aria-describedby="keep-mounted-modal-description"
         >
-            <Box sx={style}>
+            <StyledBox
+                bgcolor="background.paper"
+                minWidth={isMobile ? '17rem' : '28rem'}
+            >
                 <StyledStack direction="column" spacing={3}>
                     <FlexSpacer minHeight={1} />
 
@@ -350,7 +353,7 @@ export const SignInModal: FC<SignInModalProps> = ({
                     <FlexSpacer minHeight={2.5} />
 
                     <Stack
-                        direction={{ xs: 'row', sm: 'row' }}
+                        direction={{ xs: 'column', md: 'row' }}
                         spacing={3}
                         sx={{ alignItems: 'center', justifyContent: 'center' }}
                     >
@@ -387,7 +390,7 @@ export const SignInModal: FC<SignInModalProps> = ({
 
                     <FlexSpacer minHeight={1} />
                 </StyledStack>
-            </Box>
+            </StyledBox>
         </Modal>
     )
 }

@@ -76,7 +76,7 @@ export const Menu: FC<MenuProps> = ({
         <StyledMenuStack
             direction={{ xs: 'column', sm: 'column', md: 'row' }}
             spacing={4}
-            sx={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}
+            sx={{ display: 'flex', alignItems: 'center'}}
         >
             <MobileMenu
                 user={user}

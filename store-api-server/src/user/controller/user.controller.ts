@@ -121,7 +121,7 @@ export class UserController {
     throw new HttpException('', HttpStatus.NO_CONTENT)
   }
 
-  @Get('cart/list')
+  @Post('cart/list')
   @UseGuards(JwtFailableAuthGuard)
   async cartList(
     @Session() cookieSession: any,
