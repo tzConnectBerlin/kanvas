@@ -124,6 +124,8 @@ export const Header: FC<HeaderProps> = ({
         if (loggedUser.data) {
             setCurrentLoggedUser(loggedUser.data)
         } else if (loggedUser.error) {
+            localStorage.removeItem('Kanvas - Bearer')
+            localStorage.removeItem('Kanvas - address')
         }
     }, [loggedUser])
 

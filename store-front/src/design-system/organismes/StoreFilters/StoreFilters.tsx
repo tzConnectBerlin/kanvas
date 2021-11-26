@@ -62,6 +62,8 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
     loading: boolean
     priceFilterRange: [number, number]
     setPriceFilterRange: Function
+    minRange: number
+    maxRange: number
 }
 
 const StyledUl = styled.ul<StyledStoreFiltersProps>`
@@ -89,7 +91,6 @@ const StyledLi = styled.li<StyledStoreFiltersProps>`
 
 export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
     const [activeRef, setActiveRef] = useState<string[]>([])
-    const [range, setRange] = useState<[number, number]>([0, 20])
 
     const handleListItemClick = (concernedRef: string) => {
         if (activeRef.indexOf(concernedRef) !== -1) {
@@ -153,7 +154,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                 />
 
                 {activeRef.indexOf('Price') === -1 && (
-                    <PriceFilter range={range} setRange={setRange} />
+                    <PriceFilter minRange={props.minRange} maxRange={props.maxRange} range={props.priceFilterRange} setRange={props.setPriceFilterRange} />
                 )}
             </StyledLi>
         </StyledUl>
