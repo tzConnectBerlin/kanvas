@@ -19,4 +19,6 @@ export interface NftEntityPage {
   nfts: NftEntity[]
   currentPage: number
   numberOfPages: number
+  lowerPriceBound: number
+  upperPriceBound: number
 }
