@@ -22,11 +22,11 @@ export interface HeaderProps {
     selectedTheme: string
     notifications?: number
     switchTheme: Function
-    onLogout?: () => void
     onCreateAccount?: () => void
     cartOpen: boolean
     setCartOpen: Function
     nftsInCartNumber: number
+    listCart: Function
 }
 
 const StyledBox = styled(Box)<{ theme?: Theme }>`
@@ -60,23 +60,60 @@ const Spacer = styled.div<FlexSpacerProps>`
 export const Header: FC<HeaderProps> = ({
     user,
     selectedTheme,
-    onLogout,
     onCreateAccount,
     switchTheme,
     notifications,
     beaconWallet,
     embedKukai,
     setSignedPayload,
+    listCart,
     ...props
 }) => {
     const [open, setOpen] = useState(false)
-    const handleOpen = () => setOpen(true)
     const handleCloseModal = () => setOpen(false)
 
     // const loggedUser = {data: undefined, loading: false}
     const [loggedUser] = useAxios({
         url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logged_user',
+        withCredentials: true,
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,
+        },
     })
+
+    const [logoutUserResponse, logoutUser] = useAxios(
+        {
+            url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logout',
+            method: 'POST',
+            withCredentials: true,
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem(
+                    'Kanvas - Bearer',
+                )}`,
+            },
+        },
+        { manual: true },
+    )
+
+    const handleLogout = () => {
+        logoutUser()
+            .then((res) => {
+                localStorage.removeItem('Kanvas - Bearer')
+                localStorage.removeItem('Kanvas - address')
+
+                listCart({
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem(
+                            'Kanvas - Bearer',
+                        )}`,
+                    },
+                    withCredentials: true,
+                })
+            })
+            .catch((err) => {
+                debugger
+            })
+    }
 
     const [isSearchOpen, setIsSearchOpen] = useState(false)
     const [currentLoggedUser, setCurrentLoggedUser] = useState<
@@ -110,7 +147,7 @@ export const Header: FC<HeaderProps> = ({
                 selectedTheme={selectedTheme}
                 switchTheme={switchTheme}
                 setOpen={setOpen}
-                onLogout={onLogout}
+                onLogout={handleLogout}
                 openOrCloseShoppingCart={() =>
                     props.setCartOpen(!props.cartOpen)
                 }
@@ -123,6 +160,7 @@ export const Header: FC<HeaderProps> = ({
                 setCurrentLoggedUser={setCurrentLoggedUser}
                 handleCloseModal={handleCloseModal}
                 open={open}
+                listCart={listCart}
             />
         </StyledBox>
     )

@@ -116,10 +116,10 @@ export const Footer: FC<FooterProps> = () => {
                         fontSize: '.7rem',
                         alignSelf: 'start',
                         marginBottom: '1rem',
-                        maxWidth: '11rem'
+                        maxWidth: '11rem',
                     }}
                 >
-                   {t('home.hero.description_1')}
+                    {t('home.hero.description_1')}
                 </Typography>
             </Grid>
 

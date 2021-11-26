@@ -33,11 +33,14 @@ const StyledGrid = styled(Grid)`
     flex-basis: 102% !important;
 `
 
+const StyledDiv = styled.div`
+    width: 100%;
+`
+
 export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
-    const theme = useTheme()
 
     return (
-        <>
+        <StyledDiv>
             {props.nfts && props.nfts.length > 0 ? (
                 <StyledGrid
                     container
@@ -70,14 +73,14 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                     ))}
                 </StyledGrid>
             ) : props.loading ? (
-                <Grid
+                <StyledGrid
                     container
                     md={props.open ? 9 : 6}
                     lg={props.open ? 12 : 9}
                     rowSpacing={5}
                     columnSpacing={{ xs: 1, sm: 2, md: 5 }}
                 >
-                    {[...new Array(9)].map((nft) => (
+                    {[...new Array(8)].map((nft) => (
                         <Grid
                             item
                             lg={props.open ? 4 : 3}
@@ -94,7 +97,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                             />
                         </Grid>
                     ))}
-                </Grid>
+                </StyledGrid>
             ) : (
                 <StyledGrid>
                     <Typography
@@ -122,6 +125,6 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                     </Typography>
                 </StyledGrid>
             )}
-        </>
+        </StyledDiv>
     )
 }

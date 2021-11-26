@@ -60,6 +60,8 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
     availableFilters: any[]
     filterFunction: Function
     loading: boolean
+    priceFilterRange: [number, number]
+    setPriceFilterRange: Function
 }
 
 const StyledUl = styled.ul<StyledStoreFiltersProps>`

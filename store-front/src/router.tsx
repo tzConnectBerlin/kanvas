@@ -54,6 +54,7 @@ const Router = () => {
     const [listCartResponse, listCart] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/cart/list`,
+            method: 'POST',
             withCredentials: true,
         },
         { manual: true },
@@ -63,7 +64,14 @@ const Router = () => {
 
     // Getting list of nfts in the cart
     useEffect(() => {
-        listCart()
+        listCart({
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem(
+                    'Kanvas - Bearer',
+                )}`,
+            },
+            withCredentials: true,
+        })
             .then((res) => setListCalled(true))
             .catch((err) => {
                 setListCalled(true)
@@ -118,6 +126,7 @@ const Router = () => {
                     selectedTheme={selectedTheme}
                     nftsInCartNumber={nftsInCart.length}
                     notifications={0}
+                    listCart={listCart}
                 />
 
                 <ScrollToTop>
@@ -128,7 +137,7 @@ const Router = () => {
                         <Route path="/home" component={HomePage} />
                         <Route path="/store" component={StorePage} />
                         <Route path="/profile/edit" component={EditProfile} />
-                        <Route path="/profile/:username" component={Profile} />
+                        <Route path="/profile/:userAddress" component={Profile} />
                         <Route
                             path="/product/:id"
                             render={(props) => (

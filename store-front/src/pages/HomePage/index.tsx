@@ -3,7 +3,7 @@ import FlexSpacer from '../../design-system/atoms/FlexSpacer'
 import PageWrapper from '../../design-system/commons/PageWrapper'
 import { FC } from 'react'
 import { Animated } from 'react-animated-css'
-import { Container, Stack, Theme } from '@mui/material'
+import { Stack, Theme } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Typography } from '../../design-system/atoms/Typography'
 import NftGrid from '../../design-system/organismes/NftGrid'
@@ -12,6 +12,9 @@ import mockNft from '../../_mocks/mockNft'
 import { KukaiEmbed } from 'kukai-embed'
 import { BeaconWallet } from '@taquito/beacon-wallet'
 import { CustomButton } from '../../design-system/atoms/Button'
+import useAxios from 'axios-hooks'
+
+import { useHistory } from 'react-router'
 
 interface HomePageProps {
     theme?: Theme
@@ -54,20 +57,52 @@ const LinkStyled = styled(CustomButton)<{ theme?: Theme }>`
     }
 `
 
+const StyledAnimated = styled(Animated)`
+    width: 100%;
+`
+
 const HomePage: FC<HomePageProps> = () => {
     const { t } = useTranslation(['translation'])
+
+    const history = useHistory()
+
+    const [sliderNftResponse] = useAxios({
+        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts?',
+        withCredentials: true,
+        params: {
+            pageSize: 4,
+            orderBy: 'id',
+            order: 'desc'
+        },
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,
+        },
+    })
+
+    const [FeaturedNftsResponse] = useAxios({
+        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts?',
+        withCredentials: true,
+        params: {
+            pageSize: 8,
+            orderBy: 'views',
+            order: 'asc'
+        },
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,
+        },
+    })
 
     return (
         <PageWrapper>
             <StyledStack>
                 <FlexSpacer minHeight={12} />
 
-                <Animated
+                <StyledAnimated
                     animationIn="fadeIn"
                     animationOut="fadeOut"
                     isVisible={true}
                 >
-                    <Hero />
+                    <Hero sliderLoading={sliderNftResponse.loading} sliderNfts={sliderNftResponse.data?.nfts ?? []} />
 
                     <FlexSpacer minHeight={7} />
 
@@ -89,16 +124,17 @@ const HomePage: FC<HomePageProps> = () => {
                             size="small"
                             textSize="Light"
                             label={t('home.nfts.link')}
-                            href="/store"
+                            onClick={() => history.push(`/store`)}
                         />
                     </Stack>
 
                     <NftGrid
-                        nfts={mockNft}
-                        emptyMessage={'No Nfts in collection yet'}
-                        emptyLink={'Click here to buy some in the store.'}
+                        nfts={FeaturedNftsResponse.data?.nfts}
+                        loading={FeaturedNftsResponse.loading}
+                        emptyMessage={'No Featured NFTs yet'}
+                        emptyLink={'See entire collection.'}
                     />
-                </Animated>
+                </StyledAnimated>
 
                 <FlexSpacer minHeight={2} />
             </StyledStack>

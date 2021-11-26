@@ -23,14 +23,9 @@ const DesktopMenuContent = styled(Stack)`
     }
 `
 
-export const DesktopMenu: FC<MenuProps> = ({ user, ...props }) => {
+export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
     const history = useHistory()
     const location = useLocation()
-
-    const logout = () => {
-        localStorage.removeItem('Kanvas - Bearer')
-        localStorage.removeItem('Kanvas - address')
-    }
 
     const { t } = useTranslation(['translation'])
 
@@ -136,7 +131,7 @@ export const DesktopMenu: FC<MenuProps> = ({ user, ...props }) => {
                 avatarSrc={`${avatarSrc}?${Date.now()}`}
                 address={user?.address}
                 history={history}
-                logOut={logout}
+                logOut={onLogout}
                 onClose={handleClose}
                 onClick={handleClose}
             />

@@ -115,7 +115,7 @@ export const CookiesBanner: React.FC<CookiesBannerProps> = ({
                     flexGrow={1}
                 >
                     <Typography
-                        size={isMobile ? 'body' :'h4'}
+                        size={isMobile ? 'body' : 'h4'}
                         weight="Light"
                         display="inline"
                         style={{
@@ -140,7 +140,7 @@ export const CookiesBanner: React.FC<CookiesBannerProps> = ({
                         label={t('cookies.button')}
                         style={{
                             order: isMobile ? 99 : 0,
-                            color: theme.palette.primary.main,                            
+                            color: theme.palette.primary.main,
                         }}
                     ></CustomButton>
                 </Grid>

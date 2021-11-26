@@ -17,7 +17,7 @@ export interface MenuProps {
     switchTheme: Function
     isSearchOpen: boolean
     setSearchOpen: Function
-    onLogout?: () => void
+    onLogout: () => void
     openOrCloseShoppingCart: Function
     nftsInCartNumber: number
 }
@@ -76,7 +76,7 @@ export const Menu: FC<MenuProps> = ({
         <StyledMenuStack
             direction={{ xs: 'column', sm: 'column', md: 'row' }}
             spacing={4}
-            sx={{ display: 'flex', alignItems: 'center'}}           
+            sx={{ display: 'flex', alignItems: 'center'}}
         >
             <MobileMenu
                 user={user}

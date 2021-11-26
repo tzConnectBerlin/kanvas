@@ -158,7 +158,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                             size="h3"
                             marginLeft="auto"
                         >
-                            <TezosLogo  width="18px" margin="0 0.2rem" />
+                            <TezosLogo width="18px" margin="0 0.2rem" />
                         </Typography>
                     </Box>
                 </Box>

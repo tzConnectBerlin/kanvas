@@ -69,6 +69,9 @@ const StorePage = () => {
     const page = new URLSearchParams(search).get('page')
 
     const [selectedPage, setSelectedPage] = useState(page ? Number(page) : 1)
+    const [priceFilterRange, setPriceFilterRange] = useState<[number, number]>([
+        0, 100,
+    ])
 
     // Api calls for the categories and the nfts
     const [nftsResponse, getNfts] = useAxios(
@@ -106,6 +109,7 @@ const StorePage = () => {
 
         if (selectedFilters.length === 0) {
             getNfts({
+                withCredentials: true,
                 params: {
                     page: page,
                     pageSize: 12,
@@ -115,6 +119,7 @@ const StorePage = () => {
             })
         } else {
             getFilteredNfts({
+                withCredentials: true,
                 params: {
                     page: page,
                     pageSize: 12,
@@ -178,6 +183,7 @@ const StorePage = () => {
             history.push({ search: pageParam.toString() })
 
             getFilteredNfts({
+                withCredentials: true,
                 params: {
                     page: 1,
                     pageSize: 12,
@@ -192,6 +198,7 @@ const StorePage = () => {
 
             history.push({ search: pageParam.toString() })
             getNfts({
+                withCredentials: true,
                 params: {
                     pageSize: 12,
                     page: pageReset !== 0 ? pageReset : selectedPage,
@@ -249,6 +256,8 @@ const StorePage = () => {
                         filterFunction={getFilteredNfts}
                         selectedFilters={selectedFilters}
                         setSelectedFilters={setSelectedFilters}
+                        priceFilterRange={priceFilterRange}
+                        setPriceFilterRange={setPriceFilterRange}
                         loading={categoriesResponse.loading}
                     />
 

@@ -78,7 +78,18 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
     })
 
     const [checkoutResponse, checkout] = useAxios(
-        process.env.REACT_APP_API_SERVER_BASE_URL + '/users/cart/checkout',
+        {
+            url:
+                process.env.REACT_APP_API_SERVER_BASE_URL +
+                '/users/cart/checkout',
+            method: 'POST',
+            withCredentials: true,
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem(
+                    'Kanvas - Bearer',
+                )}`,
+            },
+        },
         {
             manual: true,
         },
@@ -97,8 +108,13 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                 process.env.REACT_APP_API_SERVER_BASE_URL +
                 '/users/cart/remove/' +
                 nftId,
-            withCredentials: true,
             method: 'POST',
+            withCredentials: true,
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem(
+                    'Kanvas - Bearer',
+                )}`,
+            },
         })
             .then((res) => {
                 if (res.status === 204) {

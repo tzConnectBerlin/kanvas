@@ -18,14 +18,16 @@ import { CustomButton } from '../../atoms/Button'
 import { Typography } from '../../../design-system/atoms/Typography'
 import { useTranslation } from 'react-i18next'
 import { useParams, useHistory } from 'react-router-dom'
-import useAxios from 'axios-hooks'
-import { DART_REDIRECT_URI } from '../../../global'
+import { INft } from '../../../interfaces/artwork'
 
 export interface HeroProps {
     loading?: boolean
     selectedTheme?: string
     theme?: Theme
+    sliderLoading?: boolean
+    sliderNfts: INft[]
 }
+
 interface IProductParam {
     id: string
 }
@@ -43,13 +45,13 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
     const [imgToVideoToggler, setImgToVideoToggler] = useState(true)
 
     const { id } = useParams<IProductParam>()
-    const [nftResponse, getNft] = useAxios(DART_REDIRECT_URI + `/nfts/${id}`)
+    // const [nftResponse, getNft] = useAxios(DART_REDIRECT_URI + `/nfts/${id}`)
 
-    useEffect(() => {
-        if (nftResponse.error) {
-            console.log(nftResponse, '')
-        }
-    }, [nftResponse])
+    // useEffect(() => {
+    //     if (nftResponse.error) {
+    //         console.log(nftResponse, '')
+    //     }
+    // }, [nftResponse])
 
     return (
         <Grid container>
@@ -84,19 +86,19 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
             <Grid item xs={12} md={7} px={0} sx={{ display: 'flex' }}>
                 {
                     //Render Skeleton if image not loading
-                    nftResponse.loading ? (
+                    props.sliderLoading ? (
                         <Skeleton
                             height="40rem"
                             width="40rem"
                             sx={{
                                 transform: 'none',
-                                maxWidth: isMobile ? '100%' : 480,
+                                maxWidth: isMobile ? '100%' : '80%',
                                 marginLeft: 'auto',
                             }}
                         />
                     ) : // Render Slider
                     imgToVideoToggler ? (
-                        <Slider />
+                        <Slider loading={props.sliderLoading} sliderNfts={props.sliderNfts} />
                     ) : (
                         //Render Single image
                         <Card

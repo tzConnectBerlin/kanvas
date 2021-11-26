@@ -38,9 +38,10 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
 
     const { id } = useParams<IProductParam>()
 
-    const [nftResponse, getNft] = useAxios(
-        process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/${id}`,
-    )
+    const [nftResponse, getNft] = useAxios({
+        url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/${id}`,
+        method: 'POST',
+    })
 
     const [addToCartResponse, addToCart] = useAxios(
         process.env.REACT_APP_API_SERVER_BASE_URL + `/user/cart/add/`,
@@ -54,8 +55,13 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                     process.env.REACT_APP_API_SERVER_BASE_URL +
                     `/users/cart/add/` +
                     nftResponse.data.id.toString(),
-                withCredentials: true,
                 method: 'POST',
+                withCredentials: true,
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem(
+                        'Kanvas - Bearer',
+                    )}`,
+                },
             })
                 .then((res) => {
                     if (res.status === 201) {
@@ -94,7 +100,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                     ) : (
                         <CardMedia
                             component="img"
-                            image={nftResponse.data.dataUri}
+                            image={nftResponse.data?.dataUri}
                             alt="random"
                             sx={{
                                 height: '75vh',
@@ -214,13 +220,12 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             weight="Light"
                             sx={{ pt: 2, mb: 1 }}
                         >
-                            {nftResponse.loading
-                                ? undefined
-                                :   <>
-                                        {nftResponse.data?.price} 
-                                        <TezosLogo width="18px" margin="0 0.2rem" />
-                                    </>
-                                }
+                            {nftResponse.loading ? undefined : (
+                                <>
+                                    {nftResponse.data?.price}
+                                    <TezosLogo width="18px" margin="0 0.2rem" />
+                                </>
+                            )}
                         </Typography>
 
                         <FlexSpacer minHeight={2} />
@@ -242,7 +247,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     (nft) =>
                                         Number(nft.id) === nftResponse.data?.id,
                                 ).length > 0 ||
-                                Number(nftResponse.data.editionsAvailable) === 0
+                                Number(nftResponse.data?.editionsAvailable) ===
+                                    0
                             }
                         />
                     </Stack>
