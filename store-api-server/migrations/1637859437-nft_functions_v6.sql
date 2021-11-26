@@ -1,4 +1,4 @@
--- Migration: nfts_filtered_v6
+-- Migration: nft_functions_v6
 -- Created at: 2021-11-25 17:57:17
 -- ====  UP  ====
 
