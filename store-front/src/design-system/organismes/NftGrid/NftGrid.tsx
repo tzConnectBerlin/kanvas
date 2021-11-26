@@ -3,7 +3,7 @@ import FlexSpacer from '../../atoms/FlexSpacer'
 import Typography from '../../atoms/Typography'
 
 import { FC } from 'react'
-import { Grid, useMediaQuery, useTheme } from '@mui/material'
+import { Grid, Stack, useMediaQuery, useTheme } from '@mui/material'
 import { Layouts } from 'react-grid-layout'
 
 import { NftCard } from '../../molecules/NftCard'
@@ -100,29 +100,30 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                 </StyledGrid>
             ) : (
                 <StyledGrid>
-                    <Typography
-                        size="h2"
-                        weight="Light"
-                        align="center"
-                        color="#C4C4C4"
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            height: '100%',
-                        }}
-                    >
-                        {props.emptyMessage ? props.emptyMessage : 'No Data'}
-                    </Typography>
-                    <Typography
-                        size="subtitle2"
-                        weight="Light"
-                        align="center"
-                        color="#0088a7"
-                        sx={{ display: 'flex', justifyContent: 'center' }}
-                    >
-                        {props.emptyLink ? props.emptyLink : undefined}
-                    </Typography>
+                    <Stack direction='column' sx={{minHeight: '20vh', justifyContent: 'center'}}>
+                        <Typography
+                            size="h2"
+                            weight="Light"
+                            align="center"
+                            color="#C4C4C4"
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
+                        >
+                            {props.emptyMessage ? props.emptyMessage : 'No Data'}
+                        </Typography>
+                        <Typography
+                            size="subtitle2"
+                            weight="Light"
+                            align="center"
+                            color="#0088a7"
+                            sx={{ display: 'flex', justifyContent: 'center' }}
+                        >
+                            {props.emptyLink ? props.emptyLink : undefined}
+                        </Typography>
+                    </Stack>
                 </StyledGrid>
             )}
         </StyledDiv>

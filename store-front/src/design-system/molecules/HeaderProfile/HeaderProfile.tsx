@@ -2,9 +2,6 @@ import styled from '@emotion/styled'
 import Avatar from '../../atoms/Avatar'
 import Typography from '../../atoms/Typography'
 import FlexSpacer from '../../atoms/FlexSpacer'
-import TwitterIcon from '@mui/icons-material/Twitter'
-import LanguageIcon from '@mui/icons-material/Language'
-import InstagramIcon from '@mui/icons-material/Instagram'
 
 import { FC, useState } from 'react'
 import { FiCopy } from 'react-icons/fi'
@@ -17,6 +14,7 @@ interface HeaderProfileProps {
     user: IUser
     loading: boolean
     theme?: Theme
+    nftsCount: number
     editProfile: Function
 }
 
@@ -219,7 +217,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                                     height="12px"
                                 />
                             ) : (
-                                0
+                                props.nftsCount
                             )}{' '}
                         </Typography>
                         <Typography
@@ -255,11 +253,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                         {props.loading ? (
                             <Skeleton animation="pulse" width="5rem" />
                         ) : (
-                            `Joined in ${new Intl.DateTimeFormat('en-US', {
-                                month: 'long',
-                            }).format(
-                                props.user?.createdAt,
-                            )} , ${props.user?.createdAt?.getFullYear()}`
+                            `Joined in ${props.user?.createdAt?.toLocaleString('default', { month: 'long' })} , ${props.user?.createdAt?.getFullYear()}`
                         )}
                     </StyledTypography>
                 </Stack>

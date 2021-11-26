@@ -7,13 +7,12 @@ import PageWrapper from '../../design-system/commons/PageWrapper'
 import StoreFilters from '../../design-system/organismes/StoreFilters'
 
 import { useEffect, useState } from 'react'
-import { Stack, Theme, Pagination, Container } from '@mui/material'
+import { Stack, Theme, Pagination } from '@mui/material'
 import { CustomButton } from '../../design-system/atoms/Button'
 import { CustomSelect } from '../../design-system/atoms/Select'
 import { Typography } from '../../design-system/atoms/Typography'
-import { useLocation, useHistory, useParams } from 'react-router'
+import { useLocation, useHistory } from 'react-router'
 import { toast } from 'react-toastify'
-// import mockNft from '../../_mocks/mockNft'
 
 interface ParamTypes {
     width?: any

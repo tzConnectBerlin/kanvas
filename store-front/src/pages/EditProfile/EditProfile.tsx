@@ -18,23 +18,23 @@ const StyledStack = styled(Stack)`
 `
 
 const getInitialValues = () => ({
-    userName: sessionStorage.getItem('userName') ?? '',
+    name: sessionStorage.getItem('name') ?? '',
     profilePicture: sessionStorage.getItem('profilePicture') ?? '',
 })
 
 export const EditProfile: FC<EditProfileProps> = () => {
     const [initialValues, setInitialValues] = useState<{
-        userName: string
+        name: string
         profilePicture: string
     }>({
-        userName: '',
+        name: '',
         profilePicture: '',
     })
     const location = useLocation<{ currentUser: IUser }>()
 
     useEffect(() => {
         setInitialValues({
-            userName: location.state?.currentUser?.userName ?? '',
+            name: location.state?.currentUser?.name ?? '',
             profilePicture: location.state?.currentUser?.profilePicture ?? '',
         })
     }, [])

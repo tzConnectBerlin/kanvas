@@ -85,7 +85,7 @@ const HomePage: FC<HomePageProps> = () => {
         params: {
             pageSize: 8,
             orderBy: 'views',
-            order: 'asc'
+            order: 'desc'
         },
         headers: {
             Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,
