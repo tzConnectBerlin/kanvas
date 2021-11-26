@@ -5,10 +5,11 @@ import CustomButton from '../../atoms/Button'
 import ShoppingCartItem from '../../molecules/ShoppingCartItem'
 import useAxios from 'axios-hooks'
 
-import { FC, useEffect } from 'react'
+import { FC, useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Stack, Theme } from '@mui/material'
 import { INft } from '../../../interfaces/artwork'
+import { Box } from '@mui/system'
 
 interface ShoppingCartProps {
     nftsInCart: INft[]
@@ -134,6 +135,29 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         }
     }, [props.open])
 
+    const [timeLeft, setTimeLeft] = useState<any | null>(null)
+
+    useEffect(() => {
+        if (timeLeft === 0) {
+            console.log('TIME LEFT IS 0')
+            setTimeLeft(null)
+        }
+
+        // exit early when we reach 0
+        if (!timeLeft) return
+
+        // save intervalId to clear the interval when the
+        // component re-renders
+        const intervalId = setInterval(() => {
+            setTimeLeft(timeLeft - 1)
+        }, 1000)
+
+        // clear interval on re-render to avoid memory leaks
+        return () => clearInterval(intervalId)
+        // add timeLeft as a dependency to re-rerun the effect
+        // when we update it
+    }, [timeLeft])
+
     return (
         <>
             <ContainerPopupStyled
@@ -184,11 +208,34 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         ))
                     ) : props.nftsInCart.length > 0 ? (
                         props.nftsInCart.map((nft) => (
-                            <ShoppingCartItem
-                                loading={false}
-                                nft={nft}
-                                removeNft={handleDeleteFromBasket}
-                            />
+                            <>
+                                <ShoppingCartItem
+                                    loading={false}
+                                    nft={nft}
+                                    removeNft={handleDeleteFromBasket}
+                                />
+
+                                <FlexSpacer />
+
+                                <Typography
+                                    size="subtitle2"
+                                    weight="Medium"
+                                    display="initial !important"
+                                    align="left"
+                                    color="#C4C4C4"
+                                >
+                                    {timeLeft
+                                        ? `Your cart will expire in ${new Date(
+                                              timeLeft * 1000,
+                                          )
+                                              .toISOString()
+                                              .substr(14, 5)} minutes.`
+                                        : 'Cart expired'}
+                                </Typography>
+                                <button onClick={() => setTimeLeft(300)}>
+                                    restart setTimeLeft(300){' '}
+                                </button>
+                            </>
                         ))
                     ) : (
                         <Typography
@@ -203,7 +250,8 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                     )}
 
                     <FlexSpacer />
-                    {props.nftsInCart.length !== 0 && (
+
+                    {props.nftsInCart.length === 0 && (
                         <Typography
                             size="subtitle2"
                             weight="Medium"
@@ -222,6 +270,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 : 'Cart expired'}
                         </Typography>
                     )}
+
                     {props.open && (
                         <CustomButton
                             size="medium"
