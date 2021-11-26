@@ -67,7 +67,7 @@ export class NftService {
     try {
       const nftIds = await this.conn.query(
         `
-SELECT nft_id, total_nft_count
+SELECT nft_id, total_nft_count, lower_price_bound, upper_price_bound
 FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
         [
           params.address,
@@ -87,6 +87,8 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
         numberOfPages: 0,
         firstRequestAt: params.firstRequestAt,
         nfts: [],
+        lowerPriceBound: 0,
+        upperPriceBound: 0,
       }
       if (nftIds.rows.length === 0) {
         return res
@@ -95,6 +97,9 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       res.numberOfPages = Math.ceil(
         nftIds.rows[0].total_nft_count / params.pageSize,
       )
+      res.lowerPriceBound = Number(nftIds.rows[0].lower_price_bound)
+      res.upperPriceBound = Number(nftIds.rows[0].upper_price_bound)
+
       res.nfts = await this.findByIds(
         nftIds.rows.map((row: any) => row.nft_id),
         orderBy,

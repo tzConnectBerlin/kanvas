@@ -111,15 +111,40 @@ WHERE id = $1`,
   ): Promise<string> {
     await this.touchCart(session)
 
+    // set user cart session to cookie session if:
+    // - cookie session has a non-empty cart
+    // - or, the user has no active cart session
     const qryRes = await this.conn.query(
       `
-UPDATE kanvas_user
-SET cart_session = coalesce(cart_session, $2)
-WHERE id = $1
-RETURNING cart_session`,
+UPDATE kanvas_user AS update
+SET cart_session = coalesce((
+    SELECT session_id
+    FROM cart_session AS cart
+    JOIN mtm_cart_session_nft AS mtm
+      on mtm.cart_session_id = cart.id
+    WHERE session_id = $2
+    LIMIT 1
+  ), original.cart_session, $2)
+FROM kanvas_user AS original
+WHERE update.id = $1
+  AND original.id = update.id
+RETURNING 
+  update.cart_session AS new_session,
+  original.cart_session AS old_session`,
       [userId, session],
     )
-    return qryRes.rows[0]['cart_session']
+    const oldSession = qryRes.rows[0]['old_session']
+    const newSession = qryRes.rows[0]['new_session']
+    if (oldSession !== newSession) {
+      this.conn.query(
+        `
+DELETE FROM cart_session
+WHERE session_id = $1
+`,
+        [oldSession],
+      )
+    }
+    return newSession
   }
 
   async cartList(session: string): Promise<UserCart> {
