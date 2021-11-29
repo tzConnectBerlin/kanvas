@@ -57,7 +57,6 @@ export class NftService {
 
     const offset = (params.page - 1) * params.pageSize
     const limit = params.pageSize
-    console.log(`offset: ${offset}, limit: ${limit}`)
 
     let untilNft: string | undefined = undefined
     if (typeof params.firstRequestAt === 'number') {

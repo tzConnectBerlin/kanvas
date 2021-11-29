@@ -67,7 +67,7 @@ export class UserController {
     return profile_res.val
   }
 
-  @Post()
+  @Post('/edit')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileInterceptor('profilePicture', {
@@ -97,8 +97,14 @@ export class UserController {
     }
   }
 
-  // @Get('/edit/check')
-  // async checkAllowedEdit() {}
+  @Get('/edit/check')
+  async checkAllowedEdit(@Query('userName') userName: string) {
+    const available = await this.userService.isNameAvailable(userName)
+    return {
+      userName: userName,
+      available: available,
+    }
+  }
 
   @Post('cart/add/:nftId')
   @UseGuards(JwtFailableAuthGuard)
