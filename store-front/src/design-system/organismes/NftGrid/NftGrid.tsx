@@ -38,7 +38,6 @@ const StyledDiv = styled.div`
 `
 
 export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
-
     return (
         <StyledDiv>
             {props.nfts && props.nfts.length > 0 ? (

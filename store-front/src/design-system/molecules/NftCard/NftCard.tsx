@@ -191,16 +191,22 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
             </CardContent>
         </Card>
     ) : (
-        <Card sx={{
-            borderRadius: 0,
-            height: props.height,
-            display: 'flex',
-            position: 'relative',
-            flexDirection: 'column',
-            width: '100%',
-            minHeight: '100%',
-        }}>
-            <StyledSkeleton variant="rectangular" width={'100%'} height={'120%'} />
+        <Card
+            sx={{
+                borderRadius: 0,
+                height: props.height,
+                display: 'flex',
+                position: 'relative',
+                flexDirection: 'column',
+                width: '100%',
+                minHeight: '100%',
+            }}
+        >
+            <StyledSkeleton
+                variant="rectangular"
+                width={'100%'}
+                height={'120%'}
+            />
 
             <CardContent
                 sx={{

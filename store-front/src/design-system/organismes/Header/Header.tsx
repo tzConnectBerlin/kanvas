@@ -110,9 +110,7 @@ export const Header: FC<HeaderProps> = ({
                     withCredentials: true,
                 })
             })
-            .catch((err) => {
-
-            })
+            .catch((err) => {})
     }
 
     const [isSearchOpen, setIsSearchOpen] = useState(false)

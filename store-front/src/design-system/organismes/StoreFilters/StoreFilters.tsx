@@ -154,7 +154,12 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                 />
 
                 {activeRef.indexOf('Price') === -1 && (
-                    <PriceFilter minRange={props.minRange} maxRange={props.maxRange} range={props.priceFilterRange} setRange={props.setPriceFilterRange} />
+                    <PriceFilter
+                        minRange={props.minRange}
+                        maxRange={props.maxRange}
+                        range={props.priceFilterRange}
+                        setRange={props.setPriceFilterRange}
+                    />
                 )}
             </StyledLi>
         </StyledUl>
