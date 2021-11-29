@@ -76,11 +76,12 @@ const StorePage = () => {
 
     // Price states
     const [priceFilterRange, setPriceFilterRange] = useState<[number, number]>([
-        0, 0,
+        0, 100,
     ])
     const [maxPriceFilterRange, setMaxPriceFilterRange] = useState<[number, number]>([
         0, 100,
     ])
+    const [firstCallMade, setFirstCallMade] = useState<boolean>(false)
 
     // Api calls for the categories and the nfts
     const [nftsResponse, getNfts] = useAxios(
@@ -105,10 +106,20 @@ const StorePage = () => {
     const [availableFilters, setAvailableFilters] = useState<any>()
 
     useEffect(() => {
+        let pageParam = new URLSearchParams(search)
+
         if (nftsResponse.data?.lowerPriceBound && selectedFilters.length === 0) {
             setMaxPriceFilterRange([nftsResponse.data?.lowerPriceBound, nftsResponse.data?.upperPriceBound])
+            if (!firstCallMade) {
+                setPriceFilterRange([nftsResponse.data?.lowerPriceBound, nftsResponse.data?.upperPriceBound])
+                setFirstCallMade(true)
+            }
         } else if (nftsFilteredResponse.data?.lowerPriceBound && selectedFilters.length !== 0) {
             setMaxPriceFilterRange([nftsFilteredResponse.data?.lowerPriceBound, nftsFilteredResponse.data?.upperPriceBound])
+            if (!firstCallMade && pageParam.get('priceAtLeast') === null ) {
+                setPriceFilterRange([nftsFilteredResponse.data?.lowerPriceBound, nftsFilteredResponse.data?.upperPriceBound])
+                setFirstCallMade(true)
+            }
         }
         if (nftsResponse.error || nftsFilteredResponse.error) {
             toast.error('An error occured while fetching the store.')
@@ -118,18 +129,8 @@ const StorePage = () => {
     // Call price filter request with delay to prevent flooding API
     useEffect(() => {
         const delayedSearch = setTimeout(() => {
-            if (selectedFilters.length === 0) {
-                getNfts({
-                    withCredentials: true,
-                    params: {
-                        page: 1,
-                        pageSize: 12,
-                        sort: selectedSort,
-                        priceAtLeast: priceFilterRange[0] ?? maxPriceFilterRange[0],
-                        priceAtMost: priceFilterRange[1] ?? maxPriceFilterRange[1],
-                    }
-                })
-            } else {
+            if (JSON.stringify(maxPriceFilterRange) !== JSON.stringify(priceFilterRange) && firstCallMade) {
+
                 getFilteredNfts({
                     withCredentials: true,
                     params: {
@@ -141,22 +142,22 @@ const StorePage = () => {
                         priceAtMost: priceFilterRange[1] ?? maxPriceFilterRange[1],
                     }
                 })
-            }
 
-            const pageParam = new URLSearchParams(search)
+                const pageParam = new URLSearchParams(search)
 
-            if (pageParam.get('priceAtLeast')) {
-                pageParam.set('priceAtLeast', priceFilterRange[0].toString())
-            } else {
-                pageParam.append('priceAtLeast', priceFilterRange[0].toString())
-            }
-            if (pageParam.get('priceAtMost')) {
-                pageParam.set('priceAtMost', priceFilterRange[1].toString())
-            } else {
-                pageParam.append('priceAtMost', priceFilterRange[1].toString())
-            }
+                if (pageParam.get('priceAtLeast')) {
+                    pageParam.set('priceAtLeast', priceFilterRange[0].toString())
+                } else {
+                    pageParam.append('priceAtLeast', priceFilterRange[0].toString())
+                }
+                if (pageParam.get('priceAtMost')) {
+                    pageParam.set('priceAtMost', priceFilterRange[1].toString())
+                } else {
+                    pageParam.append('priceAtMost', priceFilterRange[1].toString())
+                }
 
-            history.push({search: pageParam.toString()})
+                history.push({ search: pageParam.toString() })
+            }
         }, 400)
 
         return () => {
@@ -220,6 +221,7 @@ const StorePage = () => {
         getCategories()
         let pageParam = new URLSearchParams(search)
 
+        // page
         if (!page) {
             setSelectedPage(1)
             pageParam.delete('page')
@@ -227,10 +229,13 @@ const StorePage = () => {
             setSelectedPage(Number(page))
         }
 
+        // prices
         if (priceAtLeast || priceAtMost) {
+            setFirstCallMade(true)
             setPriceFilterRange([Number(priceAtLeast), Number(priceAtMost)])
         }
 
+        // categories
         if (categories) {
             setSelectedFilters(
                 categories.split(',').map((categoryId) => Number(categoryId)),
@@ -242,7 +247,6 @@ const StorePage = () => {
 
     useEffect(() => {
         if (selectedFilters.length > 0) {
-
             let pageParam = new URLSearchParams(search)
 
             if (pageParam.get('categories')) {
@@ -251,8 +255,10 @@ const StorePage = () => {
                 pageParam.append('categories', selectedFilters.join(','))
             }
 
-            pageParam.delete('priceAtMost')
-            pageParam.delete('priceAtLeast')
+            if (firstCallMade) {
+                pageParam.delete('priceAtMost')
+                pageParam.delete('priceAtLeast')
+            }
 
             history.push({ search: pageParam.toString() })
 
@@ -263,15 +269,19 @@ const StorePage = () => {
                     pageSize: 12,
                     categories: selectedFilters.join(','),
                     sort: selectedSort,
-                    priceAtLeast: priceFilterRange[0] ?? maxPriceFilterRange[0],
-                    priceAtMost: priceFilterRange[1] ?? maxPriceFilterRange[1],
+                    priceAtLeast: priceFilterRange[0] ?? Number(priceAtLeast) ?? maxPriceFilterRange[0],
+                    priceAtMost: priceFilterRange[1] ?? Number(priceAtMost) ?? maxPriceFilterRange[1],
                 },
             })
         } else {
             let pageParam = new URLSearchParams(search)
             pageParam.delete('categories')
-            pageParam.delete('priceAtMost')
-            pageParam.delete('priceAtLeast')
+
+            if (firstCallMade) {
+                pageParam.delete('priceAtMost')
+                pageParam.delete('priceAtLeast')
+            }
+
             let pageReset = 0
 
             history.push({ search: pageParam.toString() })
@@ -338,14 +348,14 @@ const StorePage = () => {
                         priceFilterRange={priceFilterRange}
                         setPriceFilterRange={setPriceFilterRange}
                         loading={categoriesResponse.loading}
-                        minRange={maxPriceFilterRange[0]}
-                        maxRange={maxPriceFilterRange[1]}
+                        minRange={Number(maxPriceFilterRange[0])}
+                        maxRange={Number(maxPriceFilterRange[1])}
                     />
 
                     <NftGrid
                         open={filterOpen}
                         nfts={
-                            selectedFilters.length === 0
+                            selectedFilters.length === 0 && JSON.stringify(maxPriceFilterRange) === JSON.stringify(priceFilterRange)
                                 ? nftsResponse.data?.nfts
                                 : nftsFilteredResponse.data?.nfts
                         }
@@ -361,7 +371,7 @@ const StorePage = () => {
                         display={nftsResponse.data?.numberOfPages > 1}
                         page={selectedPage}
                         count={
-                            selectedFilters.length === 0
+                            selectedFilters.length === 0 && JSON.stringify(maxPriceFilterRange) === JSON.stringify(priceFilterRange)
                                 ? nftsResponse.data?.numberOfPages
                                 : nftsFilteredResponse.data?.numberOfPages
                         }

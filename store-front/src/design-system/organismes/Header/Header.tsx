@@ -111,7 +111,7 @@ export const Header: FC<HeaderProps> = ({
                 })
             })
             .catch((err) => {
-                debugger
+
             })
     }
 
