@@ -15,7 +15,7 @@ export interface NftEntity {
 }
 
 export interface NftEntityPage {
-  firstRequestAt: number
+  firstRequestAt: number // in UTC UNIX
   nfts: NftEntity[]
   currentPage: number
   numberOfPages: number
