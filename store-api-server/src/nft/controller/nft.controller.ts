@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common'
 import { NftService } from '../service/nft.service'
 import { NftEntity, NftEntityPage, SearchResult } from '../entity/nft.entity'
-import { FilterParams, PaginationParams } from '../params'
+import { FilterParams, PaginationParams, SearchParam } from '../params'
 
 @Controller('nfts')
 export class NftController {
@@ -33,9 +33,9 @@ export class NftController {
     return this.nftService.findAll(params)
   }
 
-  @Get('/search/:searchString')
-  async search(@Param('searchString') str: string): Promise<SearchResult> {
-    return await this.nftService.search(str)
+  @Get('/search')
+  async search(@Query() params: SearchParam): Promise<SearchResult> {
+    return await this.nftService.search(params.searchString)
   }
 
   @Post('/:id')
