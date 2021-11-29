@@ -57,7 +57,6 @@ export class NftService {
 
     const offset = (params.page - 1) * params.pageSize
     const limit = params.pageSize
-    console.log(`offset: ${offset}, limit: ${limit}`)
 
     let untilNft: string | undefined = undefined
     if (typeof params.firstRequestAt === 'number') {
@@ -93,8 +92,8 @@ FROM price_bounds($1, $2, $3)`,
         numberOfPages: 0,
         firstRequestAt: params.firstRequestAt,
         nfts: [],
-        lowerPriceBound: priceBounds.rows[0].min_price,
-        upperPriceBound: priceBounds.rows[0].max_price,
+        lowerPriceBound: Number(priceBounds.rows[0].min_price),
+        upperPriceBound: Number(priceBounds.rows[0].max_price),
       }
       if (nftIds.rows.length === 0) {
         return res

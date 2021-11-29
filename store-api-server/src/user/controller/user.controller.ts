@@ -67,7 +67,7 @@ export class UserController {
     return profile_res.val
   }
 
-  @Post()
+  @Post('/edit')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileInterceptor('profilePicture', {
@@ -79,11 +79,32 @@ export class UserController {
     @Body() editFields: EditProfile,
     @UploadedFile() picture: any,
   ) {
-    this.userService.edit(currentUser.id, editFields?.userName, picture)
+    try {
+      await this.userService.edit(currentUser.id, editFields?.userName, picture)
+    } catch (err: any) {
+      if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
+        throw new HttpException(
+          'This username is already taken',
+          HttpStatus.BAD_REQUEST,
+        )
+      }
+
+      Logger.warn(err)
+      throw new HttpException(
+        'Failed to edit profile',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      )
+    }
   }
 
-  // @Get('/edit/check')
-  // async checkAllowedEdit() {}
+  @Get('/edit/check')
+  async checkAllowedEdit(@Query('userName') userName: string) {
+    const available = await this.userService.isNameAvailable(userName)
+    return {
+      userName: userName,
+      available: available,
+    }
+  }
 
   @Post('cart/add/:nftId')
   @UseGuards(JwtFailableAuthGuard)
