@@ -12,7 +12,12 @@ import {
 } from 'src/nft/entity/nft.entity'
 import { CategoryEntity } from 'src/category/entity/category.entity'
 import { FilterParams, PaginationParams } from '../params'
-import { PG_CONNECTION } from '../../constants'
+import {
+  PG_CONNECTION,
+  SEARCH_MAX_NFTS,
+  SEARCH_MAX_CATEGORIES,
+  SEARCH_SIMILARITY_LIMIT,
+} from '../../constants'
 
 @Injectable()
 export class NftService {
@@ -40,10 +45,6 @@ export class NftService {
   }
 
   async search(str: string): Promise<SearchResult> {
-    const MAX_NFTS = 3
-    const MAX_CATEGORIES = 3
-    const SIMILARITY_LIMIT = 0.4
-
     const nftIds = await this.conn.query(
       `
 SELECT id AS nft_id, word_similarity($1, nft.nft_name) AS similarity
@@ -52,7 +53,7 @@ WHERE word_similarity($1, nft.nft_name) >= $2
 ORDER BY similarity DESC, view_count DESC
 LIMIT $3
     `,
-      [str, SIMILARITY_LIMIT, MAX_NFTS],
+      [str, SEARCH_SIMILARITY_LIMIT, SEARCH_MAX_NFTS],
     )
 
     const categoryIds = await this.conn.query(
@@ -63,7 +64,7 @@ WHERE word_similarity($1, category) >= $2
 ORDER BY similarity DESC
 LIMIT $3
     `,
-      [str, SIMILARITY_LIMIT, MAX_CATEGORIES],
+      [str, SEARCH_SIMILARITY_LIMIT, SEARCH_MAX_CATEGORIES],
     )
 
     const nfts = await this.findByIds(
