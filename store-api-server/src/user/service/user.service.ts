@@ -1,8 +1,9 @@
-import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common'
+import { Injectable, Inject } from '@nestjs/common'
 import { UserEntity, ProfileEntity, UserCart } from '../entity/user.entity'
 import { NftService } from '../../nft/service/nft.service'
-import { PG_CONNECTION } from '../../constants'
+import { PG_CONNECTION, CART_EXPIRATION_MILLI_SECS } from '../../constants'
 import { Result, Err, Ok } from 'ts-results'
+import { S3Service } from '../../s3.service'
 
 interface CartMeta {
   id: number
@@ -11,10 +12,9 @@ interface CartMeta {
 
 @Injectable()
 export class UserService {
-  private cartExpirationMilliSecs: number = 30 * 60 * 1000 // 30 minutes
-
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
+    private readonly s3Service: S3Service,
     public readonly nftService: NftService,
   ) {}
 
@@ -33,11 +33,55 @@ RETURNING id`,
     return { ...user, id: qryRes.rows[0]['id'] }
   }
 
+  async isNameAvailable(name: string): Promise<boolean> {
+    const qryRes = await this.conn.query(
+      `
+SELECT 1
+FROM kanvas_user
+WHERE user_name = $1
+    `,
+      [name],
+    )
+    return qryRes.rowCount === 0
+  }
+
+  async edit(
+    userId: number,
+    name: string | undefined,
+    picture: string | undefined,
+  ) {
+    let pictureURL: string | undefined
+    if (typeof picture !== 'undefined') {
+      const fileName = `profilePicture_${userId}`
+      const s3PathRes = await this.s3Service.uploadFile(picture, fileName)
+      if (!s3PathRes.ok) {
+        throw s3PathRes.val
+      }
+      pictureURL = s3PathRes.val
+    }
+    await this.conn.query(
+      `
+UPDATE kanvas_user
+SET
+  user_name = coalesce($2, user_name),
+  picture_url = coalesce($3, picture_url)
+WHERE id = $1
+`,
+      [userId, name, pictureURL],
+    )
+  }
+
   async findByAddress(addr: string): Promise<Result<UserEntity, string>> {
     const qryRes = await this.conn.query(
       `
 SELECT
-  usr.id, usr.user_name, usr.address, usr.signed_payload, role.role_label
+  usr.id,
+  usr.user_name,
+  usr.address,
+  usr.picture_url,
+  usr.signed_payload,
+  created_at,
+  role.role_label
 FROM kanvas_user usr
 LEFT JOIN mtm_kanvas_user_user_role mtm
   ON mtm.kanvas_user_id = usr.id
@@ -54,6 +98,8 @@ WHERE address = $1
       id: qryRes.rows[0]['id'],
       name: qryRes.rows[0]['user_name'],
       address: qryRes.rows[0]['address'],
+      createdAt: Math.floor(qryRes.rows[0]['created_at'].getTime() / 1000),
+      pictureURL: qryRes.rows[0]['picture_url'],
       signedPayload: qryRes.rows[0]['signed_payload'],
       roles: qryRes.rows
         .map((row: any) => row['role_label'])
@@ -128,7 +174,7 @@ SET cart_session = coalesce((
 FROM kanvas_user AS original
 WHERE update.id = $1
   AND original.id = update.id
-RETURNING 
+RETURNING
   update.cart_session AS new_session,
   original.cart_session AS old_session`,
       [userId, session],
@@ -336,7 +382,7 @@ WHERE expires_at < now() AT TIME ZONE 'UTC'`,
 
   newCartExpiration(): Date {
     const expiresAt = new Date()
-    expiresAt.setTime(expiresAt.getTime() + this.cartExpirationMilliSecs)
+    expiresAt.setTime(expiresAt.getTime() + CART_EXPIRATION_MILLI_SECS)
     return expiresAt
   }
 }

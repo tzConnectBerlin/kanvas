@@ -5,10 +5,19 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common'
-import { NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity'
+import {
+  NftEntity,
+  NftEntityPage,
+  SearchResult,
+} from 'src/nft/entity/nft.entity'
 import { CategoryEntity } from 'src/category/entity/category.entity'
 import { FilterParams, PaginationParams } from '../params'
-import { PG_CONNECTION } from '../../constants'
+import {
+  PG_CONNECTION,
+  SEARCH_MAX_NFTS,
+  SEARCH_MAX_CATEGORIES,
+  SEARCH_SIMILARITY_LIMIT,
+} from '../../constants'
 
 @Injectable()
 export class NftService {
@@ -35,6 +44,43 @@ export class NftService {
     })
   }
 
+  async search(str: string): Promise<SearchResult> {
+    const nftIds = await this.conn.query(
+      `
+SELECT id AS nft_id, word_similarity($1, nft.nft_name) AS similarity
+FROM nft
+WHERE word_similarity($1, nft.nft_name) >= $2
+ORDER BY similarity DESC, view_count DESC
+LIMIT $3
+    `,
+      [str, SEARCH_SIMILARITY_LIMIT, SEARCH_MAX_NFTS],
+    )
+
+    const categoryIds = await this.conn.query(
+      `
+SELECT id AS category_id, word_similarity($1, category) AS similarity
+FROM nft_category
+WHERE word_similarity($1, category) >= $2
+ORDER BY similarity DESC
+LIMIT $3
+    `,
+      [str, SEARCH_SIMILARITY_LIMIT, SEARCH_MAX_CATEGORIES],
+    )
+
+    const nfts = await this.findByIds(
+      nftIds.rows.map((row: any) => row.nft_id),
+      'nft_id',
+      'asc',
+    )
+
+    return {
+      nfts: nftIds.rows.map((row: any) =>
+        nfts.find((nft) => nft.id === row.nft_id),
+      ),
+      categories: categoryIds.rows.map((row: any) => row.category_id),
+    }
+  }
+
   async findNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {
     const orderByMapping = new Map([
       ['id', 'nft_id'],
@@ -57,7 +103,6 @@ export class NftService {
 
     const offset = (params.page - 1) * params.pageSize
     const limit = params.pageSize
-    console.log(`offset: ${offset}, limit: ${limit}`)
 
     let untilNft: string | undefined = undefined
     if (typeof params.firstRequestAt === 'number') {
@@ -67,7 +112,7 @@ export class NftService {
     try {
       const nftIds = await this.conn.query(
         `
-SELECT nft_id, total_nft_count, lower_price_bound, upper_price_bound
+SELECT nft_id, total_nft_count
 FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
         [
           params.address,
@@ -81,14 +126,20 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
           untilNft,
         ],
       )
+      const priceBounds = await this.conn.query(
+        `
+SELECT min_price, max_price
+FROM price_bounds($1, $2, $3)`,
+        [params.address, params.categories, untilNft],
+      )
 
       const res = <NftEntityPage>{
         currentPage: params.page,
         numberOfPages: 0,
         firstRequestAt: params.firstRequestAt,
         nfts: [],
-        lowerPriceBound: 0,
-        upperPriceBound: 0,
+        lowerPriceBound: Number(priceBounds.rows[0].min_price),
+        upperPriceBound: Number(priceBounds.rows[0].max_price),
       }
       if (nftIds.rows.length === 0) {
         return res
@@ -97,9 +148,6 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       res.numberOfPages = Math.ceil(
         nftIds.rows[0].total_nft_count / params.pageSize,
       )
-      res.lowerPriceBound = Number(nftIds.rows[0].lower_price_bound)
-      res.upperPriceBound = Number(nftIds.rows[0].upper_price_bound)
-
       res.nfts = await this.findByIds(
         nftIds.rows.map((row: any) => row.nft_id),
         orderBy,

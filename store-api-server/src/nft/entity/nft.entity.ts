@@ -15,10 +15,15 @@ export interface NftEntity {
 }
 
 export interface NftEntityPage {
-  firstRequestAt: number
+  firstRequestAt: number // in UTC UNIX
   nfts: NftEntity[]
   currentPage: number
   numberOfPages: number
   lowerPriceBound: number
   upperPriceBound: number
+}
+
+export interface SearchResult {
+  nfts: NftEntity[]
+  categories: number[]
 }

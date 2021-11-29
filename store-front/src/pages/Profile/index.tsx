@@ -139,7 +139,9 @@ const Profile: FC<ProfileProps> = () => {
     const [selectedTab, setSelectedTab] = useState('Collection')
 
     const [userResponse, getUser] = useAxios({
-        url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users?userAddress=${userAddress}`,
+        url:
+            process.env.REACT_APP_API_SERVER_BASE_URL +
+            `/users?userAddress=${userAddress}`,
         withCredentials: true,
     })
 

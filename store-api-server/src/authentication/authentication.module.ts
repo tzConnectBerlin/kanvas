@@ -6,6 +6,7 @@ import { AuthenticationService } from './service/authentication.service'
 import { AuthenticationController } from 'src/authentication/controller/authentication.controller'
 import { JwtStrategy } from './strategy/jwt-auth.strategy'
 import { DbModule } from 'src/db.module'
+import { S3Service } from 'src/s3.service'
 
 @Module({
   imports: [
@@ -15,7 +16,13 @@ import { DbModule } from 'src/db.module'
     DbModule,
   ],
   controllers: [AuthenticationController],
-  providers: [NftService, UserService, AuthenticationService, JwtStrategy],
+  providers: [
+    NftService,
+    UserService,
+    AuthenticationService,
+    JwtStrategy,
+    S3Service,
+  ],
   exports: [AuthenticationService, JwtStrategy],
 })
 export class AuthenticationModule {}

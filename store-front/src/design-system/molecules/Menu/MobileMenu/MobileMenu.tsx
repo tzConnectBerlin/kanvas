@@ -145,7 +145,7 @@ const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
         a {
             opacity: ${(props) => (props.expandMenu ? 1 : 0)} !important;
             transition: opacity 0.3s;
-            margin-bottom: .7rem;
+            margin-bottom: 0.7rem;
         }
 
         transition: max-width 0.3s, width 0.3s, padding 0.5s;
