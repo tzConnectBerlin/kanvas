@@ -212,7 +212,10 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
 
                             return (
                                 <>
-                                    <ShoppingCartItem
+                                {timeLeft &&
+                                 ( 
+                                     <>
+                                        <ShoppingCartItem
                                         loading={false}
                                         nft={nft}
                                         removeNft={handleDeleteFromBasket}
@@ -220,7 +223,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
 
                                     <FlexSpacer />
 
-                                    {timeLeft && (
+                                    
                                         <Typography
                                             size="subtitle2"
                                             weight="Medium"
@@ -233,9 +236,9 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                                 .toISOString()
                                                 .substr(14, 5)}{' '}
                                             minutes.
-                                        </Typography>
-                                    )}
-                                    <button onClick={() => setTimeLeft(300)}>
+                                        </Typography></>
+                                    ) }
+                                    <button onClick={() => setTimeLeft(10)}>
                                         restart setTimeLeft(300){' '}
                                     </button>
                                 </>
