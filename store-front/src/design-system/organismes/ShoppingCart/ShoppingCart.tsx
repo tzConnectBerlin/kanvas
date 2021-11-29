@@ -156,7 +156,6 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         return () => clearInterval(intervalId)
         // add timeLeft as a dependency to re-rerun the effect
         // when we update it
-
     }, [timeLeft])
 
     return (
@@ -173,8 +172,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         weight="SemiBold"
                         sx={{ marginTop: '1rem', marginLeft: '1rem' }}
                     >
-                        {' '}
-                        Summary{' '}
+                        Summary
                     </Typography>
                     <FlexSpacer />
                     <Typography
@@ -182,7 +180,6 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         weight="Medium"
                         sx={{ marginTop: '1rem', marginRight: '1rem' }}
                     >
-                        {' '}
                         {props.nftsInCart.length > 0 && (
                             <>{props.nftsInCart.length} - items </>
                         )}
@@ -229,33 +226,32 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 color="#C4C4C4"
                             >
                                 {'Empty Shopping Cart..'}
-                            </Typography>                         
+                            </Typography>
                         </>
                     )}
 
                     <FlexSpacer />
 
-                     {props.nftsInCart.length > 0 && (
-                         <>
-                                <Typography
-                                    size="subtitle2"
-                                    weight="Medium"
-                                    display="initial !important"
-                                    align="center"
-                                    color="#C4C4C4"
-                                >
-                                    Your cart will expire in{' '}
-                                    {new Date(timeLeft * 1000)
-                                        .toISOString()
-                                        .substr(14, 5)}{' '}
-                                    minutes.
-                                </Typography>
-                          
-                        {/* <button onClick={() => setTimeLeft(10)}>
-                            start countdown
-                        </button> */}
+                    {props.nftsInCart.length > 0 && (
+                        <>
+                            <Typography
+                                size="subtitle2"
+                                weight="Medium"
+                                display="initial !important"
+                                align="center"
+                                color="#C4C4C4"
+                            >
+                                {timeLeft
+                                    ? `Your cart will expire in${' '}
+                                ${new Date(timeLeft * 1000)
+                                    .toISOString()
+                                    .substr(14, 5)}${' '}
+                                minutes.`
+                                    : 'Cart Expired'
+                                }
+                            </Typography>
                         </>
-                    )} 
+                    )}
 
                     {props.open && (
                         <CustomButton
