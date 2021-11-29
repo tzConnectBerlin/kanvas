@@ -135,7 +135,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         }
     }, [props.open])
 
-    const [timeLeft, setTimeLeft] = useState<any | null>(null)
+    const [timeLeft, setTimeLeft] = useState<any | null>(300)
 
     useEffect(() => {
         if (timeLeft === 0) {
@@ -156,6 +156,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         return () => clearInterval(intervalId)
         // add timeLeft as a dependency to re-rerun the effect
         // when we update it
+
     }, [timeLeft])
 
     return (
@@ -207,54 +208,17 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             />
                         ))
                     ) : props.nftsInCart.length > 0 ? (
-                        props.nftsInCart.map((nft) => {
-                            // props.nftsInCart.length > 0 && setTimeLeft(300)
+                        props.nftsInCart.map((nft) => (
+                            <>
+                                <ShoppingCartItem
+                                    loading={false}
+                                    nft={nft}
+                                    removeNft={handleDeleteFromBasket}
+                                />
 
-                            return (
-                                <>
-                                    {timeLeft ? (
-                                        <>
-                                            <ShoppingCartItem
-                                                loading={false}
-                                                nft={nft}
-                                                removeNft={
-                                                    handleDeleteFromBasket
-                                                }
-                                            />
-
-                                            <FlexSpacer />
-
-                                            <Typography
-                                                size="subtitle2"
-                                                weight="Medium"
-                                                display="initial !important"
-                                                align="center"
-                                                color="#C4C4C4"
-                                            >
-                                                Your cart will expire in{' '}
-                                                {new Date(timeLeft * 1000)
-                                                    .toISOString()
-                                                    .substr(14, 5)}{' '}
-                                                minutes.
-                                            </Typography>
-                                        </>
-                                    ) : (
-                                        <Typography
-                                            size="Subtitle1"
-                                            weight="Medium"
-                                            display="initial !important"
-                                            align="center"
-                                            color="#C4C4C4"
-                                        >
-                                            Cart expired
-                                        </Typography>
-                                    )}
-                                    <button onClick={() => setTimeLeft(10)}>
-                                        Show the nft on cart and start timer
-                                    </button>
-                                </>
-                            )
-                        })
+                                <FlexSpacer />
+                            </>
+                        ))
                     ) : (
                         <>
                             <Typography
@@ -265,31 +229,33 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 color="#C4C4C4"
                             >
                                 {'Empty Shopping Cart..'}
-                            </Typography>
+                            </Typography>                         
                         </>
                     )}
 
                     <FlexSpacer />
 
-                    {/* {props.nftsInCart.length === 0 && (
-                        <Typography
-                            size="subtitle2"
-                            weight="Medium"
-                            display="initial !important"
-                            align="left"
-                            color="#C4C4C4"
-                        >
-                          {new Date(
-                                new Date(props.expiresAt).getTime() -
-                                    new Date().getDate(),
-                            ).getTime() > 0
-                                ? `*Your cart will expire in ${new Date(
-                                      new Date(props.expiresAt).getTime() -
-                                          new Date().getTime(),
-                                  ).getMinutes()} minutes.`
-                                : 'Cart expired'} 
-                        </Typography>
-                    )} */}
+                     {props.nftsInCart.length > 0 && (
+                         <>
+                                <Typography
+                                    size="subtitle2"
+                                    weight="Medium"
+                                    display="initial !important"
+                                    align="center"
+                                    color="#C4C4C4"
+                                >
+                                    Your cart will expire in{' '}
+                                    {new Date(timeLeft * 1000)
+                                        .toISOString()
+                                        .substr(14, 5)}{' '}
+                                    minutes.
+                                </Typography>
+                          
+                        {/* <button onClick={() => setTimeLeft(10)}>
+                            start countdown
+                        </button> */}
+                        </>
+                    )} 
 
                     {props.open && (
                         <CustomButton
