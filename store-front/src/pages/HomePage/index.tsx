@@ -72,7 +72,7 @@ const HomePage: FC<HomePageProps> = () => {
         params: {
             pageSize: 4,
             orderBy: 'id',
-            order: 'desc'
+            order: 'desc',
         },
         headers: {
             Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,
@@ -85,7 +85,7 @@ const HomePage: FC<HomePageProps> = () => {
         params: {
             pageSize: 8,
             orderBy: 'views',
-            order: 'asc'
+            order: 'asc',
         },
         headers: {
             Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,
@@ -102,7 +102,10 @@ const HomePage: FC<HomePageProps> = () => {
                     animationOut="fadeOut"
                     isVisible={true}
                 >
-                    <Hero sliderLoading={sliderNftResponse.loading} sliderNfts={sliderNftResponse.data?.nfts ?? []} />
+                    <Hero
+                        sliderLoading={sliderNftResponse.loading}
+                        sliderNfts={sliderNftResponse.data?.nfts ?? []}
+                    />
 
                     <FlexSpacer minHeight={7} />
 

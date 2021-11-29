@@ -147,8 +147,8 @@ const Faq: FC<FaqProps> = () => {
     const theme = useTheme()
     const isMobile = useMediaQuery(theme.breakpoints.down('md'))
     const [open, setOpen] = useState(true)
-    
-    window.scrollBy({ top: -100, left: 0 });
+
+    window.scrollBy({ top: -100, left: 0 })
 
     const onClickToggler = () => {
         setOpen(!open)
