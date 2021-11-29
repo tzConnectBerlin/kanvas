@@ -1,4 +1,4 @@
-import { Logger, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { Result, Err, Ok } from 'ts-results'
 import { S3 } from 'aws-sdk'
 
@@ -13,8 +13,7 @@ export class S3Service {
 
   async uploadFile(file: any, name: string): Promise<Result<string, string>> {
     if (typeof AWS_S3_BUCKET === 'undefined') {
-      Logger.warn('failed to upload file to AWS, AWS_S3_BUCKET env var not set')
-      return Err('failed to upload file to AWS')
+      return Err('failed to upload file to AWS, AWS_S3_BUCKET env var not set')
     }
 
     const params = {
@@ -32,9 +31,8 @@ export class S3Service {
     try {
       const resp = await this.s3.upload(params).promise()
       return Ok(resp.Location)
-    } catch (e) {
-      Logger.warn(`failed to upload file to AWS, err: ${e}`)
-      return Err('failed to upload file to AWS')
+    } catch (err: any) {
+      return Err(`failed to upload file to AWS, err: ${err}`)
     }
   }
 }

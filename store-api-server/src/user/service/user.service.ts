@@ -33,6 +33,18 @@ RETURNING id`,
     return { ...user, id: qryRes.rows[0]['id'] }
   }
 
+  async isNameAvailable(name: string): Promise<boolean> {
+    const qryRes = await this.conn.query(
+      `
+SELECT 1
+FROM kanvas_user
+WHERE user_name = $1
+    `,
+      [name],
+    )
+    return qryRes.rowCount === 0
+  }
+
   async edit(
     userId: number,
     name: string | undefined,
