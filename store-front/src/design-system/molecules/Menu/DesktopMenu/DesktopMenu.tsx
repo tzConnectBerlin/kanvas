@@ -91,7 +91,7 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
 
                 {localStorage.getItem('Kanvas - address') === user?.address ? (
                     <Avatar
-                        src={`${avatarSrc}?${Date.now()}`}
+                        src={`${user?.profilePicture}?${Date.now()}`}
                         onClick={(e) =>
                             anchorEl === null ? handleClick(e) : handleClose()
                         }
@@ -128,7 +128,7 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
 
             <ProfilePopover
                 open={Boolean(anchorEl)}
-                avatarSrc={`${avatarSrc}?${Date.now()}`}
+                avatarSrc={`${user?.profilePicture}?${Date.now()}`}
                 address={user?.address}
                 history={history}
                 logOut={onLogout}

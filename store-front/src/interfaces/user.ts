@@ -1,6 +1,6 @@
 export interface IUser {
     profilePicture: string
-    name?: string
+    userName?: string
     address: string
     createdAt?: number
 }

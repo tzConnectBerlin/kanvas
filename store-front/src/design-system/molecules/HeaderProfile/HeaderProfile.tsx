@@ -132,7 +132,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                             {props.loading ? (
                                 <Skeleton width="15rem" />
                             ) : (
-                                props.user?.name
+                                props.user?.userName
                             )}{' '}
                         </Typography>
 
@@ -301,7 +301,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                         {props.loading ? (
                             <Skeleton width="15rem" />
                         ) : (
-                            props.user?.name
+                            props.user?.userName
                         )}{' '}
                     </Typography>
 

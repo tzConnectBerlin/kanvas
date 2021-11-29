@@ -13,11 +13,14 @@ import { ClearRounded } from '@mui/icons-material'
 import { DropZone } from '../../molecules/DropZone'
 import { Theme } from '@mui/material'
 import { Box, TextField, InputAdornment, Stack } from '@mui/material'
+import { ResponseValues } from 'axios-hooks'
 
 interface ProfileFormProps {
     initialValues: any
     submit: Function
     loading: boolean
+    checkIfUserNameValid: Function
+    checkIfUsernameValidResponse:  ResponseValues<any, boolean, any>
 }
 
 const StyledStack = styled(Stack)`
@@ -120,12 +123,12 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
     const [profilePicture, setProfilePicture] = useState('')
     const [profilePictureFile, setProfilePictureFile] =
         useState<unknown>(undefined)
+
+    const [comfortLoader, setComfortLoader ] = useState(false)
     const [isUserNameValid, setIsUserNameValid] = useState(true)
     const [dropZoneErrorMessage, setDropZoneErrorMessage] = useState<
         string | null
     >(null)
-
-    // const [checkIfUsernameValid, userNameCheckResponse] = useLazyQuery(CHECK_IF_USERNAME_VALID)
 
     const dataURLtoFile = (dataurl: any, filename: any) => {
         var arr = dataurl.split(','),
@@ -147,14 +150,12 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
         enableReinitialize: true,
         onSubmit: async (values) => {
             props.submit({
-                variables: {
                     ...values,
                     profilePicture: dataURLtoFile(
                         JSON.parse(sessionStorage.getItem('profilePicture')!)
                             .blob,
                         'profilePicture',
                     ),
-                },
             })
         },
     })
@@ -187,22 +188,28 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
 
     // useEffect for username verification
     useEffect(() => {
-        // if (formik.values.userName.length >= 3) {
-        //     userNameCheckResponse.loading = true
-        //     const delayUserNameAvailabilitySearch = setTimeout(() => {
-        //         checkIfUsernameValid({ variables: { userName: formik.values.userName}})
-        //     }, 800)
-        //     return () => { clearTimeout(delayUserNameAvailabilitySearch) }
-        // }
+
+        if (formik.values.userName.length >= 3 && formik.values.userName !== props.initialValues.userName) {
+            setComfortLoader(true)
+            const delayUserNameAvailabilitySearch = setTimeout(() => {
+                props.checkIfUserNameValid({
+                    params: {
+                        userName: formik.values.userName
+                    }
+                })
+                setComfortLoader(false)
+            }, 800)
+            return () => { clearTimeout(delayUserNameAvailabilitySearch) }
+        }
     }, [formik.values.userName])
 
-    // useEffect(() => {
+    useEffect(() => {
+        if (props.checkIfUsernameValidResponse.data) {
+            setComfortLoader(false)
+            setIsUserNameValid(props.checkIfUsernameValidResponse.data.available)
+        }
 
-    //     if (userNameCheckResponse.data) {
-    //         setIsUserNameValid(userNameCheckResponse.data.checkIfUsernameValid)
-    //     }
-
-    // }, [userNameCheckResponse.data])
+    }, [props.checkIfUsernameValidResponse.data])
 
     return (
         <Box component="form" autoComplete="off">
@@ -219,25 +226,6 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
                         onFocus={() => scrollTo('profilePicture')}
                     >
                         <Stack direction="row" spacing={8}>
-                            {formik.values.profilePicture ? (
-                                <StyledAvataWrapper>
-                                    <ClearContentWrapper
-                                        onClick={() =>
-                                            formik.setFieldValue(
-                                                'profilePicture',
-                                                '',
-                                            )
-                                        }
-                                    >
-                                        <StyledClearContent />
-                                    </ClearContentWrapper>
-                                    <Avatar
-                                        src={formik.values.profilePicture}
-                                        height={176}
-                                        width={176}
-                                    />
-                                </StyledAvataWrapper>
-                            ) : undefined}
                             <DropZone
                                 inputId="profilePicture"
                                 fileUrl={profilePicture}
@@ -280,15 +268,14 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
                             }}
                             variant="standard"
                             InputProps={{
-                                // userNameCheckResponse.loading
                                 endAdornment: (
                                     <InputAdornment position="start">
                                         {' '}
-                                        {false ? (
+                                        {comfortLoader || props.checkIfUsernameValidResponse.loading ? (
                                             <CustomCircularProgress
                                                 height={1}
                                             />
-                                        ) : null}{' '}
+                                        ): null}{' '}
                                     </InputAdornment>
                                 ),
                             }}
