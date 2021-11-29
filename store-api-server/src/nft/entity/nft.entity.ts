@@ -22,3 +22,8 @@ export interface NftEntityPage {
   lowerPriceBound: number
   upperPriceBound: number
 }
+
+export interface SearchResult {
+  nfts: NftEntity[]
+  categories: number[]
+}

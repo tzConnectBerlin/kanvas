@@ -5,10 +5,19 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common'
-import { NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity'
+import {
+  NftEntity,
+  NftEntityPage,
+  SearchResult,
+} from 'src/nft/entity/nft.entity'
 import { CategoryEntity } from 'src/category/entity/category.entity'
 import { FilterParams, PaginationParams } from '../params'
-import { PG_CONNECTION } from '../../constants'
+import {
+  PG_CONNECTION,
+  SEARCH_MAX_NFTS,
+  SEARCH_MAX_CATEGORIES,
+  SEARCH_SIMILARITY_LIMIT,
+} from '../../constants'
 
 @Injectable()
 export class NftService {
@@ -33,6 +42,43 @@ export class NftService {
       priceAtLeast: undefined,
       priceAtMost: undefined,
     })
+  }
+
+  async search(str: string): Promise<SearchResult> {
+    const nftIds = await this.conn.query(
+      `
+SELECT id AS nft_id, word_similarity($1, nft.nft_name) AS similarity
+FROM nft
+WHERE word_similarity($1, nft.nft_name) >= $2
+ORDER BY similarity DESC, view_count DESC
+LIMIT $3
+    `,
+      [str, SEARCH_SIMILARITY_LIMIT, SEARCH_MAX_NFTS],
+    )
+
+    const categoryIds = await this.conn.query(
+      `
+SELECT id AS category_id, word_similarity($1, category) AS similarity
+FROM nft_category
+WHERE word_similarity($1, category) >= $2
+ORDER BY similarity DESC
+LIMIT $3
+    `,
+      [str, SEARCH_SIMILARITY_LIMIT, SEARCH_MAX_CATEGORIES],
+    )
+
+    const nfts = await this.findByIds(
+      nftIds.rows.map((row: any) => row.nft_id),
+      'nft_id',
+      'asc',
+    )
+
+    return {
+      nfts: nftIds.rows.map((row: any) =>
+        nfts.find((nft) => nft.id === row.nft_id),
+      ),
+      categories: categoryIds.rows.map((row: any) => row.category_id),
+    }
   }
 
   async findNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {
