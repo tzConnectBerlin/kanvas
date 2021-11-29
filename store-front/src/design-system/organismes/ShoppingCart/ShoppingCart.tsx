@@ -239,7 +239,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                         </Typography></>
                                     ) }
                                     <button onClick={() => setTimeLeft(10)}>
-                                        restart setTimeLeft(300){' '}
+                                       Show the nft on cart and start timer
                                     </button>
                                 </>
                             )
