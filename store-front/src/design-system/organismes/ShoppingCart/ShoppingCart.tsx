@@ -207,35 +207,40 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             />
                         ))
                     ) : props.nftsInCart.length > 0 ? (
-                        props.nftsInCart.map((nft) => (
-                            <>
-                                <ShoppingCartItem
-                                    loading={false}
-                                    nft={nft}
-                                    removeNft={handleDeleteFromBasket}
-                                />
+                        props.nftsInCart.map((nft) => {
+                            // props.nftsInCart.length > 0 && setTimeLeft(300)
 
-                                <FlexSpacer />
+                            return (
+                                <>
+                                    <ShoppingCartItem
+                                        loading={false}
+                                        nft={nft}
+                                        removeNft={handleDeleteFromBasket}
+                                    />
 
-                                <Typography
-                                    size="subtitle2"
-                                    weight="Medium"
-                                    display="initial !important"
-                                    align="left"
-                                    color="#C4C4C4"
-                                >
-                                    {timeLeft &&
-                                        `Your cart will expire in ${new Date(
-                                            timeLeft * 1000,
-                                        )
-                                            .toISOString()
-                                            .substr(14, 5)} minutes.`}
-                                </Typography>
-                                <button onClick={() => setTimeLeft(300)}>
-                                    restart setTimeLeft(300){' '}
-                                </button>
-                            </>
-                        ))
+                                    <FlexSpacer />
+
+                                    {timeLeft && (
+                                        <Typography
+                                            size="subtitle2"
+                                            weight="Medium"
+                                            display="initial !important"
+                                            align="center"
+                                            color="#C4C4C4"
+                                        >
+                                            Your cart will expire in{' '}
+                                            {new Date(timeLeft * 1000)
+                                                .toISOString()
+                                                .substr(14, 5)}{' '}
+                                            minutes.
+                                        </Typography>
+                                    )}
+                                    <button onClick={() => setTimeLeft(300)}>
+                                        restart setTimeLeft(300){' '}
+                                    </button>
+                                </>
+                            )
+                        })
                     ) : (
                         <>
                             <Typography
@@ -247,7 +252,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             >
                                 {'Empty Shopping Cart..'}
                             </Typography>
-                            
+
                             {!timeLeft && (
                                 <Typography
                                     size="Subtitle1"
