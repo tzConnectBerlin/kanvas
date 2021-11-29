@@ -212,34 +212,45 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
 
                             return (
                                 <>
-                                {timeLeft &&
-                                 ( 
-                                     <>
-                                        <ShoppingCartItem
-                                        loading={false}
-                                        nft={nft}
-                                        removeNft={handleDeleteFromBasket}
-                                    />
+                                    {timeLeft ? (
+                                        <>
+                                            <ShoppingCartItem
+                                                loading={false}
+                                                nft={nft}
+                                                removeNft={
+                                                    handleDeleteFromBasket
+                                                }
+                                            />
 
-                                    <FlexSpacer />
+                                            <FlexSpacer />
 
-                                    
+                                            <Typography
+                                                size="subtitle2"
+                                                weight="Medium"
+                                                display="initial !important"
+                                                align="center"
+                                                color="#C4C4C4"
+                                            >
+                                                Your cart will expire in{' '}
+                                                {new Date(timeLeft * 1000)
+                                                    .toISOString()
+                                                    .substr(14, 5)}{' '}
+                                                minutes.
+                                            </Typography>
+                                        </>
+                                    ) : (
                                         <Typography
-                                            size="subtitle2"
+                                            size="Subtitle1"
                                             weight="Medium"
                                             display="initial !important"
                                             align="center"
                                             color="#C4C4C4"
                                         >
-                                            Your cart will expire in{' '}
-                                            {new Date(timeLeft * 1000)
-                                                .toISOString()
-                                                .substr(14, 5)}{' '}
-                                            minutes.
-                                        </Typography></>
-                                    ) }
+                                            Cart expired
+                                        </Typography>
+                                    )}
                                     <button onClick={() => setTimeLeft(10)}>
-                                       Show the nft on cart and start timer
+                                        Show the nft on cart and start timer
                                     </button>
                                 </>
                             )
@@ -255,18 +266,6 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             >
                                 {'Empty Shopping Cart..'}
                             </Typography>
-
-                            {!timeLeft && (
-                                <Typography
-                                    size="Subtitle1"
-                                    weight="Medium"
-                                    display="initial !important"
-                                    align="center"
-                                    color="#C4C4C4"
-                                >
-                                    Cart expired
-                                </Typography>
-                            )}
                         </>
                     )}
 
