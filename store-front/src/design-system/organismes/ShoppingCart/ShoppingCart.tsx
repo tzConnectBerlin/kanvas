@@ -264,7 +264,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
 
                     <FlexSpacer />
 
-                    {props.nftsInCart.length === 0 && (
+                    {/* {props.nftsInCart.length === 0 && (
                         <Typography
                             size="subtitle2"
                             weight="Medium"
@@ -272,7 +272,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             align="left"
                             color="#C4C4C4"
                         >
-                            {/* {new Date(
+                          {new Date(
                                 new Date(props.expiresAt).getTime() -
                                     new Date().getDate(),
                             ).getTime() > 0
@@ -280,9 +280,9 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                       new Date(props.expiresAt).getTime() -
                                           new Date().getTime(),
                                   ).getMinutes()} minutes.`
-                                : 'Cart expired'} */}
+                                : 'Cart expired'} 
                         </Typography>
-                    )}
+                    )} */}
 
                     {props.open && (
                         <CustomButton
