@@ -252,11 +252,11 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                         {' '}
                         {props.loading ? (
                             <Skeleton animation="pulse" width="5rem" />
-                        ) : (
-                            `Joined in ${props.user?.createdAt?.toLocaleString(
+                        ) : props.user?.createdAt && (
+                            `Joined in ${new Date(props.user?.createdAt*1000).toLocaleString(
                                 'default',
                                 { month: 'long' },
-                            )} , ${props.user?.createdAt?.getFullYear()}`
+                            )} , ${new Date(props.user?.createdAt*1000).getFullYear()}`
                         )}
                     </StyledTypography>
                 </Stack>

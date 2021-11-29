@@ -54,8 +54,12 @@ const Profile: FC<ProfileProps> = () => {
         {
             url:
                 process.env.REACT_APP_API_SERVER_BASE_URL +
-                `/users?userAddress=${userAddress}`,
+                `/users`,
             withCredentials: true,
+            method: 'GET',
+            headers: {
+                ContentType: 'application/json'
+            }
         },
         { manual: true },
     )
@@ -64,6 +68,10 @@ const Profile: FC<ProfileProps> = () => {
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/filter`,
             withCredentials: true,
+            method: 'GET',
+            headers: {
+                ContentType: 'application/json'
+            }
         },
         { manual: true },
     )
@@ -80,7 +88,7 @@ const Profile: FC<ProfileProps> = () => {
         })
         getUserNfts({
             params: {
-                userAddress: userAddress,
+                address: userAddress,
                 pagesize: 12,
             },
         })
@@ -108,7 +116,7 @@ const Profile: FC<ProfileProps> = () => {
     const editProfile = () => {
         if (userResponse.data?.user) {
             const currentUser = {
-                userName: '',
+                name: '',
                 profilePicture: '',
             }
             history.push({
