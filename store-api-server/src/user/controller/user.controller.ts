@@ -3,14 +3,18 @@ import {
   Session,
   HttpException,
   HttpStatus,
+  Body,
   Param,
   Controller,
   Post,
+  UseInterceptors,
+  UploadedFile,
   Query,
   Get,
   UseGuards,
   Logger,
 } from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
 import { UserEntity } from '../entity/user.entity'
 import { UserService } from '../service/user.service'
 import { CurrentUser } from '../../decoraters/user.decorator'
@@ -21,7 +25,12 @@ import {
 import {
   PG_UNIQUE_VIOLATION_ERRCODE,
   PG_FOREIGN_KEY_VIOLATION_ERRCODE,
+  PROFILE_PICTURE_MAX_BYTES,
 } from '../../constants'
+
+interface EditProfile {
+  userName?: string
+}
 
 @Controller('users')
 export class UserController {
@@ -56,6 +65,21 @@ export class UserController {
       )
     }
     return profile_res.val
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('profilePicture', {
+      limits: { fileSize: PROFILE_PICTURE_MAX_BYTES },
+    }),
+  )
+  async editProfile(
+    @CurrentUser() currentUser: UserEntity,
+    @Body() editFields: EditProfile,
+    @UploadedFile() picture: any,
+  ) {
+    this.userService.edit(currentUser.id, editFields?.userName, picture)
   }
 
   // @Get('/edit/check')

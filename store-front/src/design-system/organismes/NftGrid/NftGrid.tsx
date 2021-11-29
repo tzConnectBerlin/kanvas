@@ -38,7 +38,6 @@ const StyledDiv = styled.div`
 `
 
 export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
-
     return (
         <StyledDiv>
             {props.nfts && props.nfts.length > 0 ? (
@@ -100,7 +99,10 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                 </StyledGrid>
             ) : (
                 <StyledGrid>
-                    <Stack direction='column' sx={{minHeight: '20vh', justifyContent: 'center'}}>
+                    <Stack
+                        direction="column"
+                        sx={{ minHeight: '20vh', justifyContent: 'center' }}
+                    >
                         <Typography
                             size="h2"
                             weight="Light"
@@ -112,7 +114,9 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                                 alignItems: 'center',
                             }}
                         >
-                            {props.emptyMessage ? props.emptyMessage : 'No Data'}
+                            {props.emptyMessage
+                                ? props.emptyMessage
+                                : 'No Data'}
                         </Typography>
                         <Typography
                             size="subtitle2"

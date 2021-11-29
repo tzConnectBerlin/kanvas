@@ -253,7 +253,10 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                         {props.loading ? (
                             <Skeleton animation="pulse" width="5rem" />
                         ) : (
-                            `Joined in ${props.user?.createdAt?.toLocaleString('default', { month: 'long' })} , ${props.user?.createdAt?.getFullYear()}`
+                            `Joined in ${props.user?.createdAt?.toLocaleString(
+                                'default',
+                                { month: 'long' },
+                            )} , ${props.user?.createdAt?.getFullYear()}`
                         )}
                     </StyledTypography>
                 </Stack>

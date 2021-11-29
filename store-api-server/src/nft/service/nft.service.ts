@@ -81,12 +81,20 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
           untilNft,
         ],
       )
+      const priceBounds = await this.conn.query(
+        `
+SELECT min_price, max_price
+FROM price_bounds($1, $2, $3)`,
+        [params.address, params.categories, untilNft],
+      )
 
       const res = <NftEntityPage>{
         currentPage: params.page,
         numberOfPages: 0,
         firstRequestAt: params.firstRequestAt,
         nfts: [],
+        lowerPriceBound: priceBounds.rows[0].min_price,
+        upperPriceBound: priceBounds.rows[0].max_price,
       }
       if (nftIds.rows.length === 0) {
         return res

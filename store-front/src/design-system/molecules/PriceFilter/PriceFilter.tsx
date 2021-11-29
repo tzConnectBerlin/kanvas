@@ -5,6 +5,8 @@ import { FC } from 'react'
 import { Stack, Slider, Theme, TextField } from '@mui/material'
 
 interface PriceFilterProps {
+    minRange: number
+    maxRange: number
     range: [number, number]
     setRange: Function
 }
@@ -46,13 +48,13 @@ export const PriceFilter: FC<PriceFilterProps> = ({ ...props }) => {
             <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
                 <StyledTextField
                     type="number"
+                    value={props.range[0]}
                     onChange={(e) =>
                         props.setRange((bonds: [number, number]) => [
                             Number(e.target.value),
                             bonds[1],
                         ])
                     }
-                    value={props.range[0]}
                 />
                 <Typography
                     size="Subtitle1"
@@ -65,19 +67,21 @@ export const PriceFilter: FC<PriceFilterProps> = ({ ...props }) => {
                 </Typography>
                 <StyledTextField
                     type="number"
+                    value={props.range[1]}
                     onChange={(e) =>
                         props.setRange((bonds: [number, number]) => [
                             bonds[0],
                             Number(e.target.value),
                         ])
                     }
-                    value={props.range[1]}
                 />
             </Stack>
 
             <StyledSlider
                 getAriaLabel={() => 'Price range filter'}
                 value={props.range}
+                min={props.minRange}
+                max={props.maxRange}
                 onChange={(_, newValues) =>
                     props.setRange(newValues as [number, number])
                 }

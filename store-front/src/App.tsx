@@ -6,10 +6,10 @@ import styled from '@emotion/styled'
 import './assets/i18n/config'
 import { Suspense } from 'react'
 import { ToastContainer, cssTransition } from 'react-toastify'
-import smoothscroll from 'smoothscroll-polyfill';
+import smoothscroll from 'smoothscroll-polyfill'
 
-// Polyfill Makes scroll to anchor smooth on mobile browsers 
-smoothscroll.polyfill();
+// Polyfill Makes scroll to anchor smooth on mobile browsers
+smoothscroll.polyfill()
 
 const StyledToastContainer = styled(ToastContainer)`
     margin-top: 5rem !important;

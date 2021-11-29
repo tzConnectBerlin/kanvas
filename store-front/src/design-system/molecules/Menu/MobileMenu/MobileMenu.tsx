@@ -145,7 +145,7 @@ const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
         a {
             opacity: ${(props) => (props.expandMenu ? 1 : 0)} !important;
             transition: opacity 0.3s;
-            margin-bottom: .7rem;
+            margin-bottom: 0.7rem;
         }
 
         transition: max-width 0.3s, width 0.3s, padding 0.5s;
@@ -296,7 +296,7 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                     {
                         // add localStorage.getItem in a useState hook to get the state after signning in.
                         localStorage.getItem('Kanvas - address') ===
-                        props.user?.address && (
+                            props.user?.address && (
                             <CustomButton
                                 size="medium"
                                 onClick={() => props.setOpen(true)}

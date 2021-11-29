@@ -98,7 +98,10 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
                         />
                     ) : // Render Slider
                     imgToVideoToggler ? (
-                        <Slider loading={props.sliderLoading} sliderNfts={props.sliderNfts} />
+                        <Slider
+                            loading={props.sliderLoading}
+                            sliderNfts={props.sliderNfts}
+                        />
                     ) : (
                         //Render Single image
                         <Card

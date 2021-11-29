@@ -31,6 +31,7 @@
     "@types/pg": "^8.6.1",
     "@types/ramda": "^0.27.47",
     "@types/uuid": "^8.3.1",
+    "aws-sdk": "^2.1036.0",
     "bcrypt": "^5.0.1",
     "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",

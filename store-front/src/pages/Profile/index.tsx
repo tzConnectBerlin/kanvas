@@ -17,7 +17,7 @@ interface ParamTypes {
     tab?: string
 }
 
-interface ProfileProps { }
+interface ProfileProps {}
 
 const StyledStack = styled(Stack)`
     width: 100vw;
@@ -50,18 +50,22 @@ const Profile: FC<ProfileProps> = () => {
     // Using the useState hook in case adding more tabs in the future
     const [selectedTab, setSelectedTab] = useState('Collection')
 
-    const [userResponse, getUser] = useAxios({
-        url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users`,
-        withCredentials: true,
-    },
-        { manual: true }
+    const [userResponse, getUser] = useAxios(
+        {
+            url:
+                process.env.REACT_APP_API_SERVER_BASE_URL +
+                `/users?userAddress=${userAddress}`,
+            withCredentials: true,
+        },
+        { manual: true },
     )
 
-    const [userNftsResponse, getUserNfts] = useAxios({
-        url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/filter`,
-        withCredentials: true,
-    },
-        { manual: true }
+    const [userNftsResponse, getUserNfts] = useAxios(
+        {
+            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/filter`,
+            withCredentials: true,
+        },
+        { manual: true },
     )
 
     useEffect(() => {
@@ -71,14 +75,14 @@ const Profile: FC<ProfileProps> = () => {
 
         getUser({
             params: {
-                userAddress: userAddress
-            }
+                userAddress: userAddress,
+            },
         })
         getUserNfts({
             params: {
                 userAddress: userAddress,
-                pagesize: 12
-            }
+                pagesize: 12,
+            },
         })
     }, [])
 
@@ -129,7 +133,7 @@ const Profile: FC<ProfileProps> = () => {
                             user={userResponse.data?.user}
                             loading={userResponse.loading}
                             editProfile={editProfile}
-                            nftsCount={userResponse.data?.nftCount }
+                            nftsCount={userResponse.data?.nftCount}
                         />
 
                         <FlexSpacer minHeight={2} />

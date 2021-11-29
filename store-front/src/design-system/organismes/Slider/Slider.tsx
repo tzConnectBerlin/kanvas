@@ -53,7 +53,7 @@ export const Slider: FC<SliderProps> = ({ ...props }) => {
     return (
         <Box
             sx={{
-                height: '100%' ,
+                height: '100%',
                 display: isMobile ? 'none' : 'block',
                 borderRadius: 0,
                 marginLeft: 'auto',
@@ -74,7 +74,11 @@ export const Slider: FC<SliderProps> = ({ ...props }) => {
             >
                 {props.sliderNfts.map((nft: INft) => (
                     <Card
-                        sx={{ display: 'flex', borderRadius: '0', height: '100%' }}
+                        sx={{
+                            display: 'flex',
+                            borderRadius: '0',
+                            height: '100%',
+                        }}
                         key={nft.id}
                     >
                         <StyledBox

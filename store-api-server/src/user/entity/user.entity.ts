@@ -4,6 +4,8 @@ export interface UserEntity {
   id: number
   name: string
   address: string
+  createdAt: number // in UTC UNIX
+  pictureURL: string
   signedPayload?: string
   cartSession?: string
   roles: string[]
