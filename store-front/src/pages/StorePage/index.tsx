@@ -79,7 +79,7 @@ const StorePage = () => {
         0, 0,
     ])
     const [maxPriceFilterRange, setMaxPriceFilterRange] = useState<[number, number]>([
-        0, 0,
+        0, 100,
     ])
 
     // Api calls for the categories and the nfts
@@ -117,7 +117,6 @@ const StorePage = () => {
 
     // Call price filter request with delay to prevent flooding API
     useEffect(() => {
-
         const delayedSearch = setTimeout(() => {
             if (selectedFilters.length === 0) {
                 getNfts({
@@ -165,7 +164,6 @@ const StorePage = () => {
         }
 
     }, [priceFilterRange])
-
 
     const handlePaginationChange = (event: any, page: number) => {
         const pageParam = new URLSearchParams(search)
@@ -253,6 +251,9 @@ const StorePage = () => {
                 pageParam.append('categories', selectedFilters.join(','))
             }
 
+            pageParam.delete('priceAtMost')
+            pageParam.delete('priceAtLeast')
+
             history.push({ search: pageParam.toString() })
 
             getFilteredNfts({
@@ -269,6 +270,8 @@ const StorePage = () => {
         } else {
             let pageParam = new URLSearchParams(search)
             pageParam.delete('categories')
+            pageParam.delete('priceAtMost')
+            pageParam.delete('priceAtLeast')
             let pageReset = 0
 
             history.push({ search: pageParam.toString() })
