@@ -224,13 +224,12 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                     align="left"
                                     color="#C4C4C4"
                                 >
-                                    {timeLeft
-                                        ? `Your cart will expire in ${new Date(
-                                              timeLeft * 1000,
-                                          )
-                                              .toISOString()
-                                              .substr(14, 5)} minutes.`
-                                        : 'Cart expired'}
+                                    {timeLeft &&
+                                        `Your cart will expire in ${new Date(
+                                            timeLeft * 1000,
+                                        )
+                                            .toISOString()
+                                            .substr(14, 5)} minutes.`}
                                 </Typography>
                                 <button onClick={() => setTimeLeft(300)}>
                                     restart setTimeLeft(300){' '}
@@ -238,15 +237,29 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             </>
                         ))
                     ) : (
-                        <Typography
-                            size="Subtitle1"
-                            weight="Medium"
-                            display="initial !important"
-                            align="center"
-                            color="#C4C4C4"
-                        >
-                            {'Empty Shopping Cart..'}
-                        </Typography>
+                        <>
+                            <Typography
+                                size="Subtitle1"
+                                weight="Medium"
+                                display="initial !important"
+                                align="center"
+                                color="#C4C4C4"
+                            >
+                                {'Empty Shopping Cart..'}
+                            </Typography>
+                            
+                            {!timeLeft && (
+                                <Typography
+                                    size="Subtitle1"
+                                    weight="Medium"
+                                    display="initial !important"
+                                    align="center"
+                                    color="#C4C4C4"
+                                >
+                                    Cart expired
+                                </Typography>
+                            )}
+                        </>
                     )}
 
                     <FlexSpacer />
@@ -259,7 +272,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             align="left"
                             color="#C4C4C4"
                         >
-                            {new Date(
+                            {/* {new Date(
                                 new Date(props.expiresAt).getTime() -
                                     new Date().getDate(),
                             ).getTime() > 0
@@ -267,7 +280,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                       new Date(props.expiresAt).getTime() -
                                           new Date().getTime(),
                                   ).getMinutes()} minutes.`
-                                : 'Cart expired'}
+                                : 'Cart expired'} */}
                         </Typography>
                     )}
 
