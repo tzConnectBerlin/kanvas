@@ -8,7 +8,7 @@ import {
 } from '../../constants'
 import { Result, Err, Ok } from 'ts-results'
 import { S3Service } from '../../s3.service'
-let generate = require('meaningful-string')
+const generate = require('meaningful-string')
 
 interface CartMeta {
   id: number
@@ -19,7 +19,7 @@ interface CartMeta {
 export class UserService {
   RANDOM_NAME_OPTIONS = {
     numberUpto: 20,
-    joinBy: ' ',
+    joinBy: '_',
   }
   RANDOM_NAME_MAX_RETRIES = 5
 
