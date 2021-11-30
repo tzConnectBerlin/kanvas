@@ -102,7 +102,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     weight="Medium"
                     display="initial !important"
                     noWrap
-                    sx={{ cursor: 'pointer' }}
+                    sx={{ cursor: 'pointer', width: '85%' }}
                 >
                     {' ' + nft!.name + ' '}
                 </Typography>
@@ -112,7 +112,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     display="initial !important"
                     noWrap
                     color="#C4C4C4"
-                    sx={{ cursor: 'pointer' }}
+                    sx={{ cursor: 'pointer', width: '70%' }}
                 >
                     {' '}
                     {nft!.ipfsHash}{' '}

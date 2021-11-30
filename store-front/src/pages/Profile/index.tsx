@@ -68,10 +68,6 @@ const Profile: FC<ProfileProps> = () => {
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/filter`,
             withCredentials: true,
-            method: 'GET',
-            headers: {
-                ContentType: 'application/json'
-            }
         },
         { manual: true },
     )

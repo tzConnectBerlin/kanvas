@@ -74,7 +74,7 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
 `
 
 export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
-    const [timeLeft, setTimeLeft] = useState<any | null>(300)
+    const [timeLeft, setTimeLeft] = useState<number | null>(Number(props.expiresAt))
 
     const [deleteFromCartResponse, deleteFromCart] = useAxios('', {
         manual: true,
@@ -139,10 +139,13 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
 
     const [isWarned, setIsWarned] = useState(false);
     useEffect(() => {
+        const timeLeft = new Date(
+            new Date(props.expiresAt).getTime() -
+            new Date().getDate(),
+        ).getTime()
+
         if (timeLeft === 0) {
-            console.log('TIME LEFT IS 0')
-            setTimeLeft(null)
-            toast.error('Your cart has expired')         
+            toast.error('Your cart has expired')
         }
 
         if (!timeLeft) return
@@ -151,7 +154,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
             setTimeLeft(timeLeft - 1)
         }, 1000)
 
-        if (timeLeft < 300 && !isWarned) {
+        if (timeLeft < 1200000 && !isWarned) {
             toast.warning(`Your card will expire in ${new Date(timeLeft * 1000)
                 .toISOString()
                 .substr(14, 2)} mins`)
@@ -205,19 +208,16 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         [...new Array(3)].map(() => (
                             <ShoppingCartItem
                                 loading={true}
-                                removeNft={() => {}}
+                                removeNft={() => { }}
                             />
                         ))
                     ) : props.nftsInCart.length > 0 ? (
                         props.nftsInCart.map((nft) => (
-                            <>
-                                <ShoppingCartItem
-                                    loading={false}
-                                    nft={nft}
-                                    removeNft={handleDeleteFromBasket}
-                                />
-                                <FlexSpacer />
-                            </>
+                            <ShoppingCartItem
+                                loading={false}
+                                nft={nft}
+                                removeNft={handleDeleteFromBasket}
+                            />
                         ))
                     ) : (
                         <>
@@ -244,11 +244,14 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 align="left"
                                 color="#C4C4C4"
                             >
-                                {timeLeft
-                                    ? `Your cart will expire in${' '}
-                                ${new Date(timeLeft * 1000)
-                                    .toISOString()
-                                    .substr(14, 5)}${' '}
+                                {new Date(
+                                    new Date(props.expiresAt).getTime() -
+                                    new Date().getDate(),
+                                ).getTime() > 0
+                                    ? `Your cart will expire in ${new Date(
+                                        new Date(props.expiresAt).getTime() -
+                                        new Date().getTime(),
+                                    ).getMinutes()}
                                 minutes.`
                                     : 'Cart Expired'
                                 }

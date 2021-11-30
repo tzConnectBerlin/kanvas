@@ -178,7 +178,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                             onMouseDown={() => navigateTo(`/product/${nft.id}`)}
                                         >
                                             <Avatar
-                                                src={nft.dataUri}
+                                                src={nft?.dataUri}
                                                 height={65}
                                                 width={65}
                                                 borderRadius={0}
@@ -189,7 +189,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                                 sx={{ cursor: 'pointer' }}
                                             >
                                                 {' '}
-                                                {nft.name}{' '}
+                                                {nft?.name}{' '}
                                             </Typography>
                                         </ProfileResultWrapper>
                                     ),
