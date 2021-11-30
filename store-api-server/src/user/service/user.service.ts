@@ -149,7 +149,7 @@ WHERE address = $1
       page: 1,
       pageSize: 1,
       orderBy: 'id',
-      order: 'asc',
+      orderDirection: 'asc',
       firstRequestAt: undefined,
       categories: undefined,
       address: address,

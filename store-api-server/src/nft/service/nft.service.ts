@@ -87,6 +87,7 @@ LIMIT $3
   async findNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {
     const orderByMapping = new Map([
       ['id', 'nft_id'],
+      ['createdAt', 'nft_created_at'],
       ['name', 'nft_name'],
       ['price', 'price'],
       ['views', 'view_count'],
@@ -123,7 +124,7 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
           params.priceAtLeast,
           params.priceAtMost,
           orderBy,
-          params.order,
+          params.orderDirection,
           offset,
           limit,
           untilNft,
@@ -154,7 +155,7 @@ FROM price_bounds($1, $2, $3)`,
       res.nfts = await this.findByIds(
         nftIds.rows.map((row: any) => row.nft_id),
         orderBy,
-        params.order,
+        params.orderDirection,
       )
       return res
     } catch (err) {
@@ -208,6 +209,7 @@ SELECT
   token_id,
   categories,
   editions_available,
+  created_at,
   launch_at
 FROM nfts_by_id($1, $2, $3)`,
         [nftIds, orderBy, orderDirection],
@@ -223,6 +225,7 @@ FROM nfts_by_id($1, $2, $3)`,
           contract: nftRow['contract'],
           tokenId: nftRow['token_id'],
           editionsAvailable: Number(nftRow['editions_available']),
+          createdAt: Math.floor(nftRow['created_at'].getTime() / 1000),
           launchAt: Math.floor(nftRow['launch_at'].getTime() / 1000),
           categories: nftRow['categories'].map((categoryRow: any) => {
             return <CategoryEntity>{
