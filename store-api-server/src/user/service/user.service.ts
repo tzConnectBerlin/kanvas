@@ -1,9 +1,14 @@
 import { Injectable, Inject } from '@nestjs/common'
 import { UserEntity, ProfileEntity, UserCart } from '../entity/user.entity'
 import { NftService } from '../../nft/service/nft.service'
-import { PG_CONNECTION, CART_EXPIRATION_MILLI_SECS } from '../../constants'
+import {
+  PG_CONNECTION,
+  CART_EXPIRATION_MILLI_SECS,
+  PG_UNIQUE_VIOLATION_ERRCODE,
+} from '../../constants'
 import { Result, Err, Ok } from 'ts-results'
 import { S3Service } from '../../s3.service'
+let generate = require('meaningful-string')
 
 interface CartMeta {
   id: number
@@ -12,6 +17,12 @@ interface CartMeta {
 
 @Injectable()
 export class UserService {
+  RANDOM_NAME_OPTIONS = {
+    numberUpto: 20,
+    joinBy: ' ',
+  }
+  RANDOM_NAME_MAX_RETRIES = 5
+
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
     private readonly s3Service: S3Service,
@@ -19,18 +30,35 @@ export class UserService {
   ) {}
 
   async create(user: UserEntity): Promise<UserEntity> {
-    // note: this implementation ignores user.roles here.
-    const qryRes = await this.conn.query(
-      `
+    const generateRandomName = typeof user.userName === 'undefined'
+    let lastErr = null
+
+    for (let i = 0; i < this.RANDOM_NAME_MAX_RETRIES; i++) {
+      if (generateRandomName) {
+        user.userName = generate.meaningful(this.RANDOM_NAME_OPTIONS)
+      }
+
+      // note: this implementation ignores user.roles here.
+      try {
+        const qryRes = await this.conn.query(
+          `
 INSERT INTO kanvas_user(
   user_name, address, signed_payload
 )
 VALUES ($1, $2, $3)
 RETURNING id`,
-      [user.userName, user.address, user.signedPayload],
-    )
+          [user.userName, user.address, user.signedPayload],
+        )
 
-    return { ...user, id: qryRes.rows[0]['id'] }
+        return { ...user, id: qryRes.rows[0]['id'] }
+      } catch (err: any) {
+        if (!generateRandomName || err?.code !== PG_UNIQUE_VIOLATION_ERRCODE) {
+          throw err
+        }
+        lastErr = err
+      }
+    }
+    throw lastErr
   }
 
   async isNameAvailable(name: string): Promise<boolean> {
