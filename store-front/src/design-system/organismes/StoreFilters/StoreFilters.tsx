@@ -92,7 +92,7 @@ const StyledSection = styled.section<StyledStoreFiltersProps>`
         overflow: auto;
 
         margin-top: 0 !important;
-        padding-top: 1rem !important;
+        padding-top: .5rem;
 
         padding-bottom: 2.5rem;
 
@@ -182,52 +182,76 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
 
     return (
         <StyledSection openFilters={props.openFilters}>
-            {isMobile && (
-                <Stack direction="row" p=".5rem  1.5rem 0 1.5rem">
-                    <BackButton
-                        fill="#fff"
-                        onClick={() => props.setFilterOpen(false)}
-                        sx={{ cursor: 'pointer' }}
-                    />
-
-                    <Typography
-                        onClick={() => props.setSelectedFilters([])}
-                        size="h2"
-                        ml={2}
-                        weight={
-                            props.selectedFilters.length > 0
-                                ? 'Medium'
-                                : 'Light'
-                        }
-                        sx={{ lineHeight: 1.1 }}
-                    >
-                        Filters
-                    </Typography>
-                </Stack>
-            )}
             <StyledUl>
                 <Stack
                     direction="row"
                     sx={{ display: `${props.openFilters ? 'flex' : 'none'}` }}
                 >
-                    <FlexSpacer />
-                    <Typography
-                        onClick={() => props.setSelectedFilters([])}
-                        size="subtitle2"
-                        weight={
-                            props.selectedFilters.length > 0
-                                ? 'Medium'
-                                : 'Light'
-                        }
-                        color={
-                            props.selectedFilters.length > 0
-                                ? 'contrastText'
-                                : '#C4C4C4'
-                        }
-                        sx={{ paddingBottom: '0.5rem' }}
-                    >
-                        Clear All
-                    </Typography>
+                    {isMobile ? (
+                        <>
+                            <BackButton
+                                fill="#fff"
+                                onClick={() => props.setFilterOpen(false)}
+                                sx={{ cursor: 'pointer', marginBottom: '0.7rem' }}
+                            />
+
+                            <Typography
+                                p="0  1.5rem .5rem 0"
+                                onClick={() => props.setSelectedFilters([])}
+                                size="h2"
+                                ml={2}
+                                weight={
+                                    props.selectedFilters.length > 0
+                                        ? 'Medium'
+                                        : 'Light'
+                                }
+                                sx={{ lineHeight: 1.1 }}
+                            >
+                                Filters
+                            </Typography>
+
+                            <FlexSpacer />
+
+                            <Typography
+                                onClick={() => props.setSelectedFilters([])}
+                                size="subtitle2"
+                                weight={
+                                    props.selectedFilters.length > 0
+                                        ? 'Medium'
+                                        : 'Light'
+                                }
+                                color={
+                                    props.selectedFilters.length > 0
+                                        ? 'contrastText'
+                                        : '#C4C4C4'
+                                }
+                                sx={{ paddingBottom: '0.5rem' }}
+                            >
+                                Clear All
+                            </Typography>
+                        </>
+                    ) : (
+                        <>
+                            <FlexSpacer />
+                            <Typography
+                                onClick={() => props.setSelectedFilters([])}
+                                size="subtitle2"
+                                weight={
+                                    props.selectedFilters.length > 0
+                                        ? 'Medium'
+                                        : 'Light'
+                                }
+                                color={
+                                    props.selectedFilters.length > 0
+                                        ? 'contrastText'
+                                        : '#C4C4C4'
+                                }
+                                sx={{ paddingBottom: '0.5rem' }}
+                            >
+                                Clear All
+                            </Typography>
+                        </>
+                    )}
                 </Stack>
                 <StyledLi
                     openFilters={props.openFilters}
@@ -269,7 +293,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
 
                 {isMobile && (
                     <>
-                        <FlexSpacer borderBottom={false} minHeight={2} />
+                        <FlexSpacer borderBottom={false} minHeight={1} />
                         <Stack direction="column-reverse">
                             <CustomButton
                                 fullWidth={true}
@@ -281,7 +305,6 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                                     order: isMobile ? 99 : 0,
                                     color: theme.palette.primary.main,
                                     alignSelf: 'flex-start',
-                                    marginTop: 'auto',
                                 }}
                             ></CustomButton>
 
