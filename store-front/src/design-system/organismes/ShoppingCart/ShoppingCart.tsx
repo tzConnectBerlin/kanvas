@@ -74,7 +74,7 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
 `
 
 export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
-    const [timeLeft, setTimeLeft] = useState<number | null>(Number(props.expiresAt))
+    const [timeLeft, setTimeLeft] = useState<number>()
 
     const [deleteFromCartResponse, deleteFromCart] = useAxios('', {
         manual: true,
@@ -105,7 +105,10 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         }
     }, [checkoutResponse])
 
+    const [concernedDeletedNFT, setConcernedDeletedNft] = useState<number>()
+
     const handleDeleteFromBasket = (nftId: number) => {
+        setConcernedDeletedNft(nftId)
         deleteFromCart({
             url:
                 process.env.REACT_APP_API_SERVER_BASE_URL +
@@ -138,32 +141,33 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
     }, [props.open])
 
     const [isWarned, setIsWarned] = useState(false);
-    useEffect(() => {
-        const timeLeft = new Date(
-            new Date(props.expiresAt).getTime() -
-            new Date().getDate(),
-        ).getTime()
+    const [isExpiredError, setIsExpiredError] = useState(false);
 
-        if (timeLeft === 0) {
+    useEffect(() => {
+
+        if (isExpiredError && (timeLeft === 0 || (timeLeft && timeLeft < 0))) {
+            setIsExpiredError(true)
             toast.error('Your cart has expired')
         }
 
         if (!timeLeft) return
+        setInterval(() => {
+            setTimeLeft(new Date(props.expiresAt).getTime() -
+                new Date().getTime())
+        }, 60000)
 
-        const intervalId = setInterval(() => {
-            setTimeLeft(timeLeft - 1)
-        }, 1000)
-
-        if (timeLeft < 1200000 && !isWarned) {
-            toast.warning(`Your card will expire in ${new Date(timeLeft * 1000)
-                .toISOString()
-                .substr(14, 2)} mins`)
-
+        if (timeLeft < 300000 && !isWarned) {
+            toast.warning(`Your card will expire in ${new Date(timeLeft).getMinutes()} minutes`)
             setIsWarned(true);
         }
 
-        return () => clearInterval(intervalId)
     }, [timeLeft])
+
+    useEffect(() => {
+        setTimeLeft(
+            new Date(props.expiresAt).getTime() -
+            new Date().getTime())
+    }, [props.expiresAt])
 
     return (
         <>
@@ -216,6 +220,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             <ShoppingCartItem
                                 loading={false}
                                 nft={nft}
+                                removeNftLoading={deleteFromCartResponse.loading && concernedDeletedNFT === nft.id}
                                 removeNft={handleDeleteFromBasket}
                             />
                         ))
@@ -244,14 +249,8 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 align="left"
                                 color="#C4C4C4"
                             >
-                                {new Date(
-                                    new Date(props.expiresAt).getTime() -
-                                    new Date().getDate(),
-                                ).getTime() > 0
-                                    ? `Your cart will expire in ${new Date(
-                                        new Date(props.expiresAt).getTime() -
-                                        new Date().getTime(),
-                                    ).getMinutes()}
+                                {timeLeft && timeLeft > 0
+                                    ? `Your cart will expire in ${Math.round(timeLeft / 60000)}
                                 minutes.`
                                     : 'Cart Expired'
                                 }

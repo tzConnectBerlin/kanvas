@@ -7,11 +7,13 @@ import { FC } from 'react'
 import { Skeleton, Stack, Theme } from '@mui/material'
 import { INft } from '../../../interfaces/artwork'
 import Typography from '../../atoms/Typography'
+import CustomCircularProgress from '../../atoms/CircularProgress'
 
 interface ShoppingCartItemProps {
     loading: boolean
     nft?: INft
     removeNft: Function
+    removeNftLoading?: boolean
 }
 
 const StyledDiv = styled.div<{ theme?: Theme }>`
@@ -21,20 +23,23 @@ const StyledDiv = styled.div<{ theme?: Theme }>`
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 1px solid ${(props) => props.theme.palette.text.primary};
+    cursor: pointer;
+
+    transition: scale 0.1s;
 
     :hover {
-        outline: 1px solid ${(props) => props.theme.palette.text.primary};
-        transition: outline 0.1s;
+        scale: 1.15;
     }
+    /* border: 1px solid ${(props) => props.theme.palette.text.primary};
+
 
     :active {
         outline: 1px solid #c4c4c4;
         transition: outline 0.1s;
-    }
+    } */
 `
 
-const StyledClearIcon = styled(ClearIcon)<{ theme?: Theme }>`
+const StyledClearIcon = styled(ClearIcon) <{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.text.primary};
 `
 
@@ -118,8 +123,15 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     {nft!.ipfsHash}{' '}
                 </Typography>
             </Stack>
-            <StyledDiv onClick={() => props.removeNft(nft!.id)}>
-                <StyledClearIcon />
+            <StyledDiv onClick={() => props.removeNftLoading ? {} : props.removeNft(nft!.id)}>
+                {
+                    props.removeNftLoading ?
+                        <CustomCircularProgress
+                            height={1.2}
+                        />
+                        :
+                        <StyledClearIcon />
+            }
             </StyledDiv>
         </Stack>
     )

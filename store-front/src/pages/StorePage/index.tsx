@@ -111,7 +111,7 @@ const StorePage = () => {
         let pageParam = new URLSearchParams(search)
 
         if (
-            nftsResponse.data?.lowerPriceBoun !== undefined &&
+            nftsResponse.data?.lowerPriceBound !== undefined &&
             selectedFilters.length === 0
         ) {
             setMaxPriceFilterRange([
