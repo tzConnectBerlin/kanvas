@@ -109,7 +109,7 @@ const StorePage = () => {
 
     useEffect(() => {
         let pageParam = new URLSearchParams(search)
-
+        
         if (
             nftsResponse.data?.lowerPriceBound !== undefined &&
             selectedFilters.length === 0
