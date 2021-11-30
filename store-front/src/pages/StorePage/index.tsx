@@ -13,6 +13,7 @@ import { CustomSelect } from '../../design-system/atoms/Select'
 import { Typography } from '../../design-system/atoms/Typography'
 import { useLocation, useHistory } from 'react-router'
 import { toast } from 'react-toastify'
+import { HistoryOutlined } from '@mui/icons-material'
 
 interface ParamTypes {
     width?: any
@@ -69,7 +70,8 @@ const StorePage = () => {
     const history = useHistory()
 
     const categories = new URLSearchParams(search).get('categories')
-    const sort = new URLSearchParams(search).get('sort')
+    const orderBy : 'createdAt' | 'name' | 'price' = new URLSearchParams(search).get('orderBy') as 'createdAt' | 'name' | 'price'
+    const orderDirection : 'asc' | 'desc' = new URLSearchParams(search).get('orderDirection') as 'asc' | 'desc'
     const page = new URLSearchParams(search).get('page')
     const priceAtLeast = new URLSearchParams(search).get('priceAtLeast')
     const priceAtMost = new URLSearchParams(search).get('priceAtMost')
@@ -102,7 +104,7 @@ const StorePage = () => {
     // Is filter open ?
     const [filterOpen, setFilterOpen] = useState(true)
 
-    const [selectedSort, setSelectedSort] = useState('')
+    const [selectedSort, setSelectedSort] = useState<{orderBy: 'price' | 'name' | 'createdAt', orderDirection: 'asc' | 'desc'}>({orderBy: orderBy ?? 'createdAt', orderDirection: orderDirection ?? 'desc'})
     const [selectedFilters, setSelectedFilters] = useState<any[]>([])
 
     const [availableFilters, setAvailableFilters] = useState<any>()
@@ -160,7 +162,8 @@ const StorePage = () => {
                         page: 1,
                         pageSize: 12,
                         categories: selectedFilters.join(','),
-                        sort: selectedSort,
+                        orderBy: orderBy ?? 'createdAt',
+                        orderDirection: orderDirection ?? 'desc',
                         priceAtLeast:
                             priceFilterRange[0] ?? maxPriceFilterRange[0],
                         priceAtMost:
@@ -199,6 +202,31 @@ const StorePage = () => {
         }
     }, [priceFilterRange])
 
+    useEffect(() => {
+        let pageParam = new URLSearchParams(search)
+
+        if(pageParam.get('orderBy')) {
+            pageParam.set(
+                'orderBy',
+                selectedSort.orderBy,
+            )
+            pageParam.set(
+                'orderDirection',
+                selectedSort.orderDirection,
+            )
+        } else {
+            pageParam.append(
+                'orderBy',
+                selectedSort.orderBy,
+            )
+            pageParam.append(
+                'orderDirection',
+                selectedSort.orderDirection,
+            )
+        }
+        history.push({search: pageParam.toString()})
+    }, [selectedSort])
+
     const handlePaginationChange = (event: any, page: number) => {
         const pageParam = new URLSearchParams(search)
         setSelectedPage(page)
@@ -218,7 +246,8 @@ const StorePage = () => {
                     page: page,
                     pageSize: 12,
                     categories: selectedFilters.join(','),
-                    sort: selectedSort,
+                    orderBy: orderBy ?? 'createdAt',
+                    orderDirection: orderDirection ?? 'desc',
                     priceAtLeast: priceFilterRange[0] ?? maxPriceFilterRange[0],
                     priceAtMost: priceFilterRange[1] ?? maxPriceFilterRange[1],
                 },
@@ -230,7 +259,8 @@ const StorePage = () => {
                     page: page,
                     pageSize: 12,
                     categories: selectedFilters.join(','),
-                    sort: selectedSort,
+                    orderBy: orderBy ?? 'createdAt',
+                    orderDirection: orderDirection ?? 'desc',
                     priceAtLeast: priceFilterRange[0] ?? maxPriceFilterRange[0],
                     priceAtMost: priceFilterRange[1] ?? maxPriceFilterRange[1],
                 },
@@ -301,7 +331,8 @@ const StorePage = () => {
                     page: 1,
                     pageSize: 12,
                     categories: selectedFilters.join(','),
-                    sort: selectedSort,
+                    orderBy: orderBy ?? 'createdAt',
+                    orderDirection: orderDirection ?? 'desc',
                     priceAtLeast:
                         priceFilterRange[0] ??
                         Number(priceAtLeast) ??
@@ -329,13 +360,14 @@ const StorePage = () => {
                 params: {
                     pageSize: 12,
                     page: pageReset !== 0 ? pageReset : selectedPage,
-                    sort: sort,
+                    orderBy: orderBy ?? 'createdAt',
+                    orderDirection: orderDirection ?? 'desc',
                     priceAtLeast: priceFilterRange[0] ?? maxPriceFilterRange[0],
                     priceAtMost: priceFilterRange[1] ?? maxPriceFilterRange[1],
                 },
             })
         }
-    }, [selectedFilters])
+    }, [selectedFilters, selectedSort])
 
     return (
         <PageWrapper>
@@ -347,7 +379,6 @@ const StorePage = () => {
                     weight="SemiBold"
                     sx={{ justifyContent: 'center' }}
                 >
-                    {' '}
                     Store front
                 </Typography>
 
