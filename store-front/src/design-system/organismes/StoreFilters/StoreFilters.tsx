@@ -85,12 +85,14 @@ const StyledSection = styled.section<StyledStoreFiltersProps>`
     width: ${(props) => (props.openFilters ? '25rem' : '0')};
     margin-right: ${(props) => (props.openFilters ? '2.5rem' : '0')};
 
+
     @media (max-width: 874px) {
+        display: flex;
         flex-direction: column;
         display: none;
         max-width: ${(props) => (props.openFilters ? 100 : 0)}rem;
-        width: ${(props) => (props.openFilters ? 'auto' : 0)};
-        display: flex;
+        -webkit-overflow-scrolling: touch;
+        width: 100vw;
         height: 89vh;
         position: fixed;
         left: 0;
@@ -181,6 +183,8 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
     useEffect(() => {
         if (props.openFilters) {
             document.body.style.overflow = 'hidden'
+            document.body.style.position = 'relative'
+            document.body.style.height = '100%'
         } else {
             document.body.style.overflow = 'auto'
         }
@@ -263,7 +267,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                 )}
             </StyledHeader>
 
-            <Stack direction="column" sx={{ overflow: 'scroll' }}>
+            <Stack direction="column" sx={{ overflow: 'auto' }}>
                 <StyledUl>
                     <StyledLi
                         openFilters={props.openFilters}
