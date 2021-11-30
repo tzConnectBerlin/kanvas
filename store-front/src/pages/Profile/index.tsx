@@ -52,9 +52,7 @@ const Profile: FC<ProfileProps> = () => {
 
     const [userResponse, getUser] = useAxios(
         {
-            url:
-                process.env.REACT_APP_API_SERVER_BASE_URL +
-                `/users`,
+            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users`,
             withCredentials: true,
         },
         { manual: true },

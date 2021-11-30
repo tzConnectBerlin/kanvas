@@ -10,9 +10,9 @@ import { Typography } from '../../design-system/atoms/Typography'
 import { ProfileForm } from '../../design-system/organismes/ProfileForm'
 import { useLocation } from 'react-router'
 import { IUser } from '../../interfaces/user'
-import { useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom'
 
-interface EditProfileProps { }
+interface EditProfileProps {}
 
 const StyledStack = styled(Stack)`
     width: 100vw;
@@ -20,7 +20,6 @@ const StyledStack = styled(Stack)`
 `
 
 export const EditProfile: FC<EditProfileProps> = () => {
-
     const history = useHistory()
 
     const [initialValues, setInitialValues] = useState<{
@@ -41,20 +40,25 @@ export const EditProfile: FC<EditProfileProps> = () => {
             withCredentials: true,
             headers: {
                 ContentType: 'multipart/form-data',
-                Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`
-            }
+                Authorization: `Bearer ${localStorage.getItem(
+                    'Kanvas - Bearer',
+                )}`,
+            },
         },
         { manual: true },
     )
 
     const [checkIfUsernameValidResponse, checkIfUsernameValid] = useAxios(
         {
-            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/edit/check`,
+            url:
+                process.env.REACT_APP_API_SERVER_BASE_URL + `/users/edit/check`,
             method: 'GET',
             withCredentials: true,
             headers: {
-                Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`
-            }
+                Authorization: `Bearer ${localStorage.getItem(
+                    'Kanvas - Bearer',
+                )}`,
+            },
         },
         { manual: true },
     )
@@ -74,11 +78,12 @@ export const EditProfile: FC<EditProfileProps> = () => {
         data.append('userName', body.userName)
 
         const comfortEditLoader = setTimeout(() => {
-            editUser({data: data})
-
+            editUser({ data: data })
         }, 800)
 
-        return () => {clearTimeout(comfortEditLoader)}
+        return () => {
+            clearTimeout(comfortEditLoader)
+        }
     }
 
     useEffect(() => {

@@ -53,8 +53,8 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
                 setLoading(false)
                 getSearch({
                     params: {
-                        searchString: inputValue
-                    }
+                        searchString: inputValue,
+                    },
                 })
             }, 800)
 
@@ -117,7 +117,9 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
                     profilesSearchResult={[]}
                     error={searchResponse.error ? true : false}
                     artworksSearchResult={searchResponse.data?.nfts ?? []}
-                    categoriesSearchResult={searchResponse.data?.categories ?? []}
+                    categoriesSearchResult={
+                        searchResponse.data?.categories ?? []
+                    }
                     searchString={inputRef.current?.value}
                 />
             </QuickSearchWrapper>

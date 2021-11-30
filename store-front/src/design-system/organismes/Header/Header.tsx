@@ -71,7 +71,6 @@ export const Header: FC<HeaderProps> = ({
     listCart,
     ...props
 }) => {
-
     const handleCloseModal = () => props.setLoginOpen(false)
 
     // const loggedUser = {data: undefined, loading: false}

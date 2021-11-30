@@ -39,7 +39,7 @@ const StyledDiv = styled.div<{ theme?: Theme }>`
     } */
 `
 
-const StyledClearIcon = styled(ClearIcon) <{ theme?: Theme }>`
+const StyledClearIcon = styled(ClearIcon)<{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.text.primary};
 `
 
@@ -119,19 +119,19 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     color="#C4C4C4"
                     sx={{ cursor: 'pointer', width: '70%' }}
                 >
-
                     {nft!.ipfsHash}
                 </Typography>
             </Stack>
-            <StyledDiv onClick={() => props.removeNftLoading ? {} : props.removeNft(nft!.id)}>
-                {
-                    props.removeNftLoading ?
-                        <CustomCircularProgress
-                            height={1.2}
-                        />
-                        :
-                        <StyledClearIcon />
+            <StyledDiv
+                onClick={() =>
+                    props.removeNftLoading ? {} : props.removeNft(nft!.id)
                 }
+            >
+                {props.removeNftLoading ? (
+                    <CustomCircularProgress height={1.2} />
+                ) : (
+                    <StyledClearIcon />
+                )}
             </StyledDiv>
         </Stack>
     )

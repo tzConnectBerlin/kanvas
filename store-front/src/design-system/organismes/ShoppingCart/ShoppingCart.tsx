@@ -147,11 +147,10 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         }
     }, [props.open])
 
-    const [isWarned, setIsWarned] = useState(false);
-    const [isExpiredError, setIsExpiredError] = useState(false);
+    const [isWarned, setIsWarned] = useState(false)
+    const [isExpiredError, setIsExpiredError] = useState(false)
 
     useEffect(() => {
-
         if (isExpiredError && (timeLeft === 0 || (timeLeft && timeLeft < 0))) {
             setIsExpiredError(true)
             toast.error('Your cart has expired')
@@ -159,21 +158,23 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
 
         if (!timeLeft) return
         setInterval(() => {
-            setTimeLeft(new Date(props.expiresAt).getTime() -
-                new Date().getTime())
+            setTimeLeft(
+                new Date(props.expiresAt).getTime() - new Date().getTime(),
+            )
         }, 60000)
 
         if (timeLeft < 300000 && !isWarned) {
-            toast.warning(`Your card will expire in ${new Date(timeLeft).getMinutes()} minutes`)
-            setIsWarned(true);
+            toast.warning(
+                `Your card will expire in ${new Date(
+                    timeLeft,
+                ).getMinutes()} minutes`,
+            )
+            setIsWarned(true)
         }
-
     }, [timeLeft])
 
     useEffect(() => {
-        setTimeLeft(
-            new Date(props.expiresAt).getTime() -
-            new Date().getTime())
+        setTimeLeft(new Date(props.expiresAt).getTime() - new Date().getTime())
     }, [props.expiresAt])
 
     return (
@@ -219,7 +220,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         [...new Array(3)].map(() => (
                             <ShoppingCartItem
                                 loading={true}
-                                removeNft={() => { }}
+                                removeNft={() => {}}
                             />
                         ))
                     ) : props.nftsInCart.length > 0 ? (
@@ -227,42 +228,42 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             <ShoppingCartItem
                                 loading={false}
                                 nft={nft}
-                                removeNftLoading={deleteFromCartResponse.loading && concernedDeletedNFT === nft.id}
+                                removeNftLoading={
+                                    deleteFromCartResponse.loading &&
+                                    concernedDeletedNFT === nft.id
+                                }
                                 removeNft={handleDeleteFromBasket}
                             />
                         ))
                     ) : (
-                        <>
-                            <Typography
-                                size="Subtitle1"
-                                weight="Medium"
-                                display="initial !important"
-                                align="center"
-                                color="#C4C4C4"
-                            >
-                                {'Empty Shopping Cart..'}
-                            </Typography>
-                        </>
+                        <Typography
+                            size="Subtitle1"
+                            weight="Medium"
+                            display="initial !important"
+                            align="center"
+                            color="#C4C4C4"
+                        >
+                            {'Empty Shopping Cart..'}
+                        </Typography>
                     )}
 
                     <FlexSpacer />
 
                     {props.nftsInCart.length > 0 && (
-                        <>
-                            <Typography
-                                size="subtitle2"
-                                weight="Medium"
-                                display="initial !important"
-                                align="left"
-                                color="#C4C4C4"
-                            >
-                                {timeLeft && timeLeft > 0
-                                    ? `Your cart will expire in ${Math.round(timeLeft / 60000)}
+                        <Typography
+                            size="subtitle2"
+                            weight="Medium"
+                            display="initial !important"
+                            align="left"
+                            color="#C4C4C4"
+                        >
+                            {timeLeft && timeLeft > 0
+                                ? `Your cart will expire in ${Math.round(
+                                      timeLeft / 60000,
+                                  )}
                                 minutes.`
-                                    : 'Cart Expired'
-                                }
-                            </Typography>
-                        </>
+                                : 'Cart Expired'}
+                        </Typography>
                     )}
 
                     {props.open && (

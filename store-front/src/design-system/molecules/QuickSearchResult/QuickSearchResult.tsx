@@ -32,11 +32,11 @@ interface BoxProps extends MBoxProps {
     open?: boolean
 }
 
-const StyledBox = styled(Box) <BoxProps>`
+const StyledBox = styled(Box)<BoxProps>`
     display: ${(props) => (props.open ? 'flex' : 'none')};
 `
 
-const StyledPaper = styled(Paper) <{ theme?: Theme }>`
+const StyledPaper = styled(Paper)<{ theme?: Theme }>`
     box-shadow: none;
     border-radius: 0;
 
@@ -62,7 +62,7 @@ const StyledContentStack = styled(Stack)`
     padding-bottom: 0.5em;
 `
 
-const ProfileResultWrapper = styled(Stack) <{ theme?: Theme }>`
+const ProfileResultWrapper = styled(Stack)<{ theme?: Theme }>`
     display: flex;
     align-items: center;
     padding-left: 0.875em;
@@ -115,48 +115,48 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
         >
             <StyledPaper>
                 {/* Check if we only got errors and it is not loading from the api in which case we display the empty content */}
-                {
-                    !props.loading && (props.error || (props.artworksSearchResult.length === 0 && props.categoriesSearchResult.length === 0))  ? (
+                {!props.loading &&
+                (props.error ||
+                    (props.artworksSearchResult.length === 0 &&
+                        props.categoriesSearchResult.length === 0)) ? (
                     <EmptySearchResult searchString={props.searchString} />
-                    ) : undefined
-                }
-                {
-                    props.loading ? (
+                ) : undefined}
+                {props.loading ? (
+                    <>
+                        <StyledHeaderStack direction="row">
+                            <Typography size="h4" weight="SemiBold">
+                                {' '}
+                                Nfts{' '}
+                            </Typography>
+                        </StyledHeaderStack>
+                        <StyledContentStack spacing={1}>
+                            {[{}, {}, {}].map(() => (
+                                <ProfileResultWrapper
+                                    direction="row"
+                                    spacing={4}
+                                >
+                                    <Skeleton
+                                        animation="wave"
+                                        width={65}
+                                        height={65}
+                                        sx={{ borderRadius: 0 }}
+                                    />
+                                    <Skeleton
+                                        animation="wave"
+                                        height={14}
+                                        width="50%"
+                                        sx={{ borderRadius: 2 }}
+                                    />
+                                </ProfileResultWrapper>
+                            ))}
+                        </StyledContentStack>
+                    </>
+                ) : (
+                    props.artworksSearchResult.length > 0 && (
                         <>
                             <StyledHeaderStack direction="row">
                                 <Typography size="h4" weight="SemiBold">
-                                    {' '}
-                                    Nfts{' '}
-                                </Typography>
-                            </StyledHeaderStack>
-                            <StyledContentStack spacing={1}>
-                                {[{}, {}, {}].map(() => (
-                                    <ProfileResultWrapper
-                                        direction="row"
-                                        spacing={4}
-                                    >
-                                        <Skeleton
-                                            animation="wave"
-                                            width={65}
-                                            height={65}
-                                            sx={{ borderRadius: 0 }}
-                                        />
-                                        <Skeleton
-                                            animation="wave"
-                                            height={14}
-                                            width="50%"
-                                            sx={{ borderRadius: 2 }}
-                                        />
-                                    </ProfileResultWrapper>
-                                ))}
-                            </StyledContentStack>
-                        </>
-                    ) : props.artworksSearchResult.length > 0 && (
-                        <>
-                            <StyledHeaderStack direction="row">
-                                <Typography size="h4" weight="SemiBold">
-                                    {' '}
-                                    Nfts{' '}
+                                    Nfts
                                 </Typography>
                                 <FlexSpacer />
                                 <Typography
@@ -165,47 +165,44 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                     color="#0088a7 !important"
                                     sx={{ cursor: 'pointer' }}
                                 >
-                                    {' '}
-                                    See all{' '}
+                                    See all
                                 </Typography>
                             </StyledHeaderStack>
                             <StyledContentStack spacing={1}>
-                                {props.artworksSearchResult.map(
-                                    (nft: any) => (
-                                        <ProfileResultWrapper
-                                            direction="row"
-                                            spacing={5}
-                                            onMouseDown={() => navigateTo(`/product/${nft.id}`)}
+                                {props.artworksSearchResult.map((nft: any) => (
+                                    <ProfileResultWrapper
+                                        direction="row"
+                                        spacing={5}
+                                        onMouseDown={() =>
+                                            navigateTo(`/product/${nft.id}`)
+                                        }
+                                    >
+                                        <Avatar
+                                            src={nft?.dataUri}
+                                            height={65}
+                                            width={65}
+                                            borderRadius={0}
+                                        />
+                                        <Typography
+                                            size="h4"
+                                            weight="Medium"
+                                            sx={{ cursor: 'pointer' }}
                                         >
-                                            <Avatar
-                                                src={nft?.dataUri}
-                                                height={65}
-                                                width={65}
-                                                borderRadius={0}
-                                            />
-                                            <Typography
-                                                size="h4"
-                                                weight="Medium"
-                                                sx={{ cursor: 'pointer' }}
-                                            >
-                                                {' '}
-                                                {nft?.name}{' '}
-                                            </Typography>
-                                        </ProfileResultWrapper>
-                                    ),
-                                )}
+                                            {nft?.name}
+                                        </Typography>
+                                    </ProfileResultWrapper>
+                                ))}
                             </StyledContentStack>
                         </>
                     )
-                }
+                )}
                 {
                     // props.tagsSearchResult.loading ?
                     props.loading ? (
                         <>
                             <StyledHeaderStack direction="row">
                                 <Typography size="h4" weight="SemiBold">
-                                    {' '}
-                                    Categories{' '}
+                                    Categories
                                 </Typography>
                             </StyledHeaderStack>
                             <StyledContentStack sx={{ marginLeft: '1em' }}>
@@ -226,42 +223,46 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                 </StyledGrid>
                             </StyledContentStack>
                         </>
-                    ) : props.categoriesSearchResult.length > 0 && (
-                        <>
-                            <StyledHeaderStack direction="row">
-                                <Typography size="h4" weight="SemiBold">
-                                    {' '}
-                                    Categories{' '}
-                                </Typography>
-                                <FlexSpacer />
-                                <Typography
-                                    size="inherit"
-                                    weight="Light"
-                                    color="#0088a7 !important"
-                                    sx={{ cursor: 'pointer' }}
-                                >
-                                    {' '}
-                                    See all{' '}
-                                </Typography>
-                            </StyledHeaderStack>
-                            <StyledContentStack sx={{ marginLeft: '1em' }}>
-                                <StyledGrid container spacing={2}>
-                                    {props.categoriesSearchResult.map(
-                                        (category: any) => (
-                                            <Grid item >
-                                                <CustomButton
-                                                    size="medium"
-                                                    textSize="Light"
-                                                    primary={false}
-                                                    label={category.name}
-                                                    onMouseDown={() => navigateTo(`/store?categories=${category.id}`)}
-                                                />
-                                            </Grid>
-                                        ),
-                                    )}
-                                </StyledGrid>
-                            </StyledContentStack>
-                        </>
+                    ) : (
+                        props.categoriesSearchResult.length > 0 && (
+                            <>
+                                <StyledHeaderStack direction="row">
+                                    <Typography size="h4" weight="SemiBold">
+                                        Categories
+                                    </Typography>
+                                    <FlexSpacer />
+                                    <Typography
+                                        size="inherit"
+                                        weight="Light"
+                                        color="#0088a7 !important"
+                                        sx={{ cursor: 'pointer' }}
+                                    >
+                                        See all
+                                    </Typography>
+                                </StyledHeaderStack>
+                                <StyledContentStack sx={{ marginLeft: '1em' }}>
+                                    <StyledGrid container spacing={2}>
+                                        {props.categoriesSearchResult.map(
+                                            (category: any) => (
+                                                <Grid item>
+                                                    <CustomButton
+                                                        size="medium"
+                                                        textSize="Light"
+                                                        primary={false}
+                                                        label={category.name}
+                                                        onMouseDown={() =>
+                                                            navigateTo(
+                                                                `/store?categories=${category.id}`,
+                                                            )
+                                                        }
+                                                    />
+                                                </Grid>
+                                            ),
+                                        )}
+                                    </StyledGrid>
+                                </StyledContentStack>
+                            </>
+                        )
                     )
                 }
             </StyledPaper>
