@@ -109,9 +109,9 @@ const StorePage = () => {
 
     useEffect(() => {
         let pageParam = new URLSearchParams(search)
-        debugger
+        
         if (
-            nftsResponse.data?.lowerPriceBound !== undefined && 
+            nftsResponse.data?.lowerPriceBound !== undefined &&
             selectedFilters.length === 0
         ) {
             setMaxPriceFilterRange([
