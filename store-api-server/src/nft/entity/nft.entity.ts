@@ -12,6 +12,7 @@ export interface NftEntity {
   price: number
   categories: CategoryEntity[]
   editionsAvailable: number
+  launchAt: number
 }
 
 export interface NftEntityPage {

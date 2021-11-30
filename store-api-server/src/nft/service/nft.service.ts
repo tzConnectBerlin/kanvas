@@ -207,7 +207,8 @@ SELECT
   contract,
   token_id,
   categories,
-  editions_available
+  editions_available,
+  launch_at
 FROM nfts_by_id($1, $2, $3)`,
         [nftIds, orderBy, orderDirection],
       )
@@ -222,6 +223,7 @@ FROM nfts_by_id($1, $2, $3)`,
           contract: nftRow['contract'],
           tokenId: nftRow['token_id'],
           editionsAvailable: Number(nftRow['editions_available']),
+          launchAt: Math.floor(nftRow['launch_at'].getTime() / 1000),
           categories: nftRow['categories'].map((categoryRow: any) => {
             return <CategoryEntity>{
               name: categoryRow[0],
