@@ -180,15 +180,15 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
         }
     }, [])
 
-    useEffect(() => {
-        if (props.openFilters) {
-            document.body.style.overflow = 'hidden'
-            document.body.style.position = 'relative'
-            document.body.style.height = '100%'
-        } else {
-            document.body.style.overflow = 'auto'
-        }
-    }, [props.openFilters])
+    // useEffect(() => {
+    //     if (props.openFilters) {
+    //         document.body.style.overflow = 'hidden'
+    //         document.body.style.position = 'relative'
+    //         document.body.style.height = '100%'
+    //     } else {
+    //         document.body.style.overflow = 'auto'
+    //     }
+    // }, [props.openFilters])
 
     return (
         <StyledSection openFilters={props.openFilters}>
