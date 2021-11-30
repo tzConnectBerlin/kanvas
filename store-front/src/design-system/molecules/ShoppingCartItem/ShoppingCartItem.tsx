@@ -109,7 +109,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     noWrap
                     sx={{ cursor: 'pointer', width: '85%' }}
                 >
-                    {' ' + nft!.name + ' '}
+                    {nft!.name}
                 </Typography>
                 <Typography
                     size="body2"
@@ -119,8 +119,8 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     color="#C4C4C4"
                     sx={{ cursor: 'pointer', width: '70%' }}
                 >
-                    {' '}
-                    {nft!.ipfsHash}{' '}
+
+                    {nft!.ipfsHash}
                 </Typography>
             </Stack>
             <StyledDiv onClick={() => props.removeNftLoading ? {} : props.removeNft(nft!.id)}>
@@ -131,7 +131,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                         />
                         :
                         <StyledClearIcon />
-            }
+                }
             </StyledDiv>
         </Stack>
     )
