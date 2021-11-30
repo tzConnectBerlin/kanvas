@@ -231,6 +231,12 @@ WHERE session_id = $1
     }
 
     const nftIds = await this.getCartNftIds(cartMeta.id)
+    if (nftIds.length === 0) {
+      return {
+        nfts: [],
+        expiresAt: undefined,
+      }
+    }
     return {
       nfts: await this.nftService.findByIds(nftIds, 'nft_id', 'asc'),
       expiresAt: cartMeta.expiresAt,
