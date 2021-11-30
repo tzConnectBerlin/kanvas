@@ -24,6 +24,6 @@ import { CookieSessionMiddleware } from './middleware/cookie_session'
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(LoggerMiddleware, CookieSessionMiddleware).forRoutes('*')
+    consumer.apply(CookieSessionMiddleware, LoggerMiddleware).forRoutes('*')
   }
 }
