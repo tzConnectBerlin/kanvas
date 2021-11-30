@@ -39,11 +39,8 @@ export const EditProfile: FC<EditProfileProps> = () => {
             method: 'POST',
             withCredentials: true,
             headers: {
-                ContentType: 'multipart/form-data',
-                Authorization: `Bearer ${localStorage.getItem(
-                    'Kanvas - Bearer',
-                )}`,
-            },
+                Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`
+            }
         },
         { manual: true },
     )

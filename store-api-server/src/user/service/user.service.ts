@@ -270,7 +270,7 @@ WHERE session_id = $1`,
       tx.query(`ROLLBACK`)
       throw err
     } finally {
-      tx.cleanup()
+      tx.release()
     }
 
     return true
