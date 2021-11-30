@@ -74,6 +74,8 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
 `
 
 export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
+    const [timeLeft, setTimeLeft] = useState<any | null>(300)
+
     const [deleteFromCartResponse, deleteFromCart] = useAxios('', {
         manual: true,
     })
@@ -135,27 +137,29 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         }
     }, [props.open])
 
-    const [timeLeft, setTimeLeft] = useState<any | null>(300)
-
+    const [isWarned, setIsWarned] = useState(false);
     useEffect(() => {
         if (timeLeft === 0) {
             console.log('TIME LEFT IS 0')
             setTimeLeft(null)
+            toast.error('Your cart has expired')         
         }
 
-        // exit early when we reach 0
         if (!timeLeft) return
 
-        // save intervalId to clear the interval when the
-        // component re-renders
         const intervalId = setInterval(() => {
             setTimeLeft(timeLeft - 1)
         }, 1000)
 
-        // clear interval on re-render to avoid memory leaks
+        if (timeLeft < 300 && !isWarned) {
+            toast.warning(`Your card will expire in ${new Date(timeLeft * 1000)
+                .toISOString()
+                .substr(14, 2)} mins`)
+
+            setIsWarned(true);
+        }
+
         return () => clearInterval(intervalId)
-        // add timeLeft as a dependency to re-rerun the effect
-        // when we update it
     }, [timeLeft])
 
     return (
@@ -212,7 +216,6 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                     nft={nft}
                                     removeNft={handleDeleteFromBasket}
                                 />
-
                                 <FlexSpacer />
                             </>
                         ))
@@ -238,7 +241,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 size="subtitle2"
                                 weight="Medium"
                                 display="initial !important"
-                                align="center"
+                                align="left"
                                 color="#C4C4C4"
                             >
                                 {timeLeft
