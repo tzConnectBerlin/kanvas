@@ -262,80 +262,83 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                     </>
                 )}
             </StyledHeader>
-            <StyledUl>
-                <StyledLi
-                    openFilters={props.openFilters}
-                    collapsed={activeRef.indexOf('Categories') !== -1}
-                >
-                    <Filter
-                        name="Categories"
-                        collapsed={activeRef.indexOf('Categories') !== -1}
-                        active={props.selectedFilters.length > 0}
-                        setCollapsed={handleListItemClick}
-                    />
-                    <TreeView
-                        loading={props.loading}
-                        open={props.openFilters}
-                        nodes={props.availableFilters}
-                        filterFunction={props.filterFunction}
-                        selectedFilters={props.selectedFilters}
-                        setSelectedFilters={props.setSelectedFilters}
-                        collapsed={activeRef.indexOf('Categories') !== -1}
-                    />
-                </StyledLi>
-                <StyledLi openFilters={props.openFilters}>
-                    <Filter
-                        name="Price"
-                        active={false}
-                        collapsed={activeRef.indexOf('Price') !== -1}
-                        setCollapsed={handleListItemClick}
-                    />
 
-                    {activeRef.indexOf('Price') === -1 && (
-                        <PriceFilter
-                            minRange={props.minRange}
-                            maxRange={props.maxRange}
-                            range={props.priceFilterRange}
-                            setRange={props.setPriceFilterRange}
+            <Stack direction="column" sx={{ overflow: 'scroll' }}>
+                <StyledUl>
+                    <StyledLi
+                        openFilters={props.openFilters}
+                        collapsed={activeRef.indexOf('Categories') !== -1}
+                    >
+                        <Filter
+                            name="Categories"
+                            collapsed={activeRef.indexOf('Categories') !== -1}
+                            active={props.selectedFilters.length > 0}
+                            setCollapsed={handleListItemClick}
                         />
-                    )}
-                </StyledLi>
-            </StyledUl>
-            {isMobile && (
-                <>
-                    <FlexSpacer borderBottom={false} minHeight={1} />
+                        <TreeView
+                            loading={props.loading}
+                            open={props.openFilters}
+                            nodes={props.availableFilters}
+                            filterFunction={props.filterFunction}
+                            selectedFilters={props.selectedFilters}
+                            setSelectedFilters={props.setSelectedFilters}
+                            collapsed={activeRef.indexOf('Categories') !== -1}
+                        />
+                    </StyledLi>
+                    <StyledLi openFilters={props.openFilters}>
+                        <Filter
+                            name="Price"
+                            active={false}
+                            collapsed={activeRef.indexOf('Price') !== -1}
+                            setCollapsed={handleListItemClick}
+                        />
 
-                    <StyledFooter direction="column-reverse">
-                        <CustomButton
-                            fullWidth={true}
-                            color="secondary"
-                            type="submit"
-                            label={t('filters.button.results')}
-                            onClick={() => props.setFilterOpen(false)}
-                            style={{
-                                order: isMobile ? 99 : 0,
-                                color: theme.palette.primary.main,
-                                alignSelf: 'flex-start',
-                            }}
-                        ></CustomButton>
+                        {activeRef.indexOf('Price') === -1 && (
+                            <PriceFilter
+                                minRange={props.minRange}
+                                maxRange={props.maxRange}
+                                range={props.priceFilterRange}
+                                setRange={props.setPriceFilterRange}
+                            />
+                        )}
+                    </StyledLi>
+                </StyledUl>
+                {isMobile && (
+                    <>
+                        <FlexSpacer borderBottom={false} minHeight={1} />
 
-                        <FlexSpacer minHeight={2} />
+                        <StyledFooter direction="column-reverse">
+                            <CustomButton
+                                fullWidth={true}
+                                color="secondary"
+                                type="submit"
+                                label={t('filters.button.results')}
+                                onClick={() => props.setFilterOpen(false)}
+                                style={{
+                                    order: isMobile ? 99 : 0,
+                                    color: theme.palette.primary.main,
+                                    alignSelf: 'flex-start',
+                                }}
+                            ></CustomButton>
 
-                        <CustomButton
-                            fullWidth={!!isMobile}
-                            color="secondary"
-                            type="submit"
-                            onClick={() => props.setSelectedFilters([])}
-                            label={t('filters.button.reset')}
-                            style={{
-                                outline: 'none',
-                            }}
-                        ></CustomButton>
+                            <FlexSpacer minHeight={2} />
 
-                        <FlexSpacer minHeight={2} />
-                    </StyledFooter>
-                </>
-            )}
+                            <CustomButton
+                                fullWidth={!!isMobile}
+                                color="secondary"
+                                type="submit"
+                                onClick={() => props.setSelectedFilters([])}
+                                label={t('filters.button.reset')}
+                                style={{
+                                    outline: 'none',
+                                }}
+                            ></CustomButton>
+
+                            <FlexSpacer minHeight={2} />
+                        </StyledFooter>
+                    </>
+                )}
+            </Stack>
         </StyledSection>
     )
 }
