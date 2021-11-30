@@ -107,6 +107,7 @@ const Router = () => {
     }
 
     const [cartOpen, setCartOpen] = useState(false)
+    const [loginOpen, setLoginOpen] = useState(false)
 
     return (
         <ThemeProvider
@@ -127,6 +128,8 @@ const Router = () => {
                     nftsInCartNumber={nftsInCart.length}
                     notifications={0}
                     listCart={listCart}
+                    loginOpen={loginOpen}
+                    setLoginOpen={setLoginOpen}
                 />
 
                 <ScrollToTop>
@@ -169,6 +172,7 @@ const Router = () => {
 
                 <ShoppingCart
                     open={cartOpen}
+                    setOpenLogin={setLoginOpen}
                     nftsInCart={nftsInCart}
                     setNftsInCart={setNftsInCart}
                     listCart={listCart}

@@ -27,6 +27,8 @@ export interface HeaderProps {
     setCartOpen: Function
     nftsInCartNumber: number
     listCart: Function
+    loginOpen: boolean
+    setLoginOpen: Function
 }
 
 const StyledBox = styled(Box)<{ theme?: Theme }>`
@@ -69,8 +71,8 @@ export const Header: FC<HeaderProps> = ({
     listCart,
     ...props
 }) => {
-    const [open, setOpen] = useState(false)
-    const handleCloseModal = () => setOpen(false)
+
+    const handleCloseModal = () => props.setLoginOpen(false)
 
     // const loggedUser = {data: undefined, loading: false}
     const [loggedUser] = useAxios({
@@ -146,7 +148,7 @@ export const Header: FC<HeaderProps> = ({
                 isSearchOpen={isSearchOpen}
                 selectedTheme={selectedTheme}
                 switchTheme={switchTheme}
-                setOpen={setOpen}
+                setOpen={props.setLoginOpen}
                 onLogout={handleLogout}
                 openOrCloseShoppingCart={() =>
                     props.setCartOpen(!props.cartOpen)
@@ -159,7 +161,7 @@ export const Header: FC<HeaderProps> = ({
                 embedKukai={embedKukai}
                 setCurrentLoggedUser={setCurrentLoggedUser}
                 handleCloseModal={handleCloseModal}
-                open={open}
+                open={props.loginOpen}
                 listCart={listCart}
             />
         </StyledBox>

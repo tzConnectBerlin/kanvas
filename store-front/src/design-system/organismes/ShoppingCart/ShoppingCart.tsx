@@ -19,6 +19,7 @@ interface ShoppingCartProps {
     open: boolean
     listCart: Function
     expiresAt: string
+    setOpenLogin: Function
 }
 
 const ContainerPopupStyled = styled.div<{ open: boolean }>`
@@ -99,9 +100,13 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
     )
 
     useEffect(() => {
+        debugger
         if (checkoutResponse.data) {
-        } else if (checkoutResponse.error) {
-            toast.error('Unable to checkout')
+
+        } else if (checkoutResponse.error?.response?.status === 401) {
+            // popup login
+            props.setOpenLogin(true)
+            toast.info('Please login to checkout')
         }
     }, [checkoutResponse])
 
