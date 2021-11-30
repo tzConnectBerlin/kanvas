@@ -1,6 +1,6 @@
 export interface ITokenPayload {
   id: number
-  name: string
+  userName: string
   address: string
   roles: string[]
 }

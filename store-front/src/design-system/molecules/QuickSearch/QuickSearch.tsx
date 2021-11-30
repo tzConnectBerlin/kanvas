@@ -1,6 +1,7 @@
 import styled from '@emotion/styled'
 
 import { Stack } from '@mui/material'
+import useAxios from 'axios-hooks'
 import { FC, useEffect, useRef, useState } from 'react'
 
 import { SearchInput } from '../../atoms/SearchInput'
@@ -34,21 +35,27 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
 
     const [openSearchResult, setOpenSearchresult] = useState(false)
 
-    // const [getTagsSuggestions, tagsSuggestionResult] = useLazyQuery(GET_TAGS_SUGGESTIONS,  { fetchPolicy: 'cache-and-network' })
     const [loading, setLoading] = useState(false)
     const [inputValue, setInputValue] = useState('')
 
-    // const [getProfilesSearch, profilesSearchResult] = useLazyQuery(GET_PROFILES_SEARCH,  { fetchPolicy: 'cache-and-network' })
-    // const [getArtworksSearch, artworksSearchResult] = useLazyQuery(GET_ARTWORKS_SEARCH,  { fetchPolicy: 'cache-and-network' })
-    // const [getTagsSearch, tagsSearchResult] = useLazyQuery(GET_TAGS_SEARCH,  { fetchPolicy: 'cache-and-network' })
+    const [searchResponse, getSearch] = useAxios(
+        {
+            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/search`,
+            method: 'GET',
+            withCredentials: true,
+        },
+        { manual: true },
+    )
 
     useEffect(() => {
         if (inputValue.length >= 2) {
             const delaySearch = setTimeout(() => {
                 setLoading(false)
-                // getTagsSearch({variables: { searchString: `#${inputValue}` }})
-                // getProfilesSearch({variables: { searchString: inputValue }})
-                // getArtworksSearch({variables: { searchString: inputValue }})
+                getSearch({
+                    params: {
+                        searchString: inputValue
+                    }
+                })
             }, 800)
 
             return () => {
@@ -56,15 +63,6 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
             }
         } else {
             setLoading(false)
-            // profilesSearchResult.loading = false
-            // artworksSearchResult.loading = false
-            // tagsSearchResult.loading = false
-
-            // profilesSearchResult.data = undefined
-            // artworksSearchResult.data = undefined
-
-            // profilesSearchResult.called = false
-            // artworksSearchResult.called = false
         }
     }, [inputValue])
 
@@ -73,9 +71,6 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
 
         if (inputValue.length >= 1) {
             setLoading(true)
-            //  profilesSearchResult.loading = true
-            //  artworksSearchResult.loading = true
-            //  tagsSearchResult.loading = true
         }
     }
 
@@ -102,7 +97,6 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
             <QuickSearchWrapper
                 direction="column"
                 onClick={() => {
-                    console.log('click')
                     props.setSearchOpen(true)
                 }}
             >
@@ -110,20 +104,20 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
                     open={openSearchResult}
                     ref={inputRef}
                     onChange={handleChange}
-                    onBlur={() => handleCloseInput()}
                     onFocus={() => {
                         inputRef?.current?.focus()
-                        setOpenSearchresult(true)
+                        setTimeout(() => setOpenSearchresult(true), 200)
                         props.setSearchOpen(true)
                     }}
                 />
                 <QuickSearchResult
-                    loading={loading}
+                    loading={loading || searchResponse.loading}
                     open={openSearchResult}
                     closeResult={handleCloseInput}
                     profilesSearchResult={[]}
-                    artworksSearchResult={[]}
-                    tagsSearchResult={[]}
+                    error={searchResponse.error ? true : false}
+                    artworksSearchResult={searchResponse.data?.nfts ?? []}
+                    categoriesSearchResult={searchResponse.data?.categories ?? []}
                     searchString={inputRef.current?.value}
                 />
             </QuickSearchWrapper>

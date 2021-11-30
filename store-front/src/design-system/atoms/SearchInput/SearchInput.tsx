@@ -95,7 +95,6 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
             width: 40rem;
             height: 100rem;
             opacity: 1;
-            transition: width 0.2s, opacity 0.2s;
         }
     }
 `

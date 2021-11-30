@@ -296,15 +296,7 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                     {
                         // add localStorage.getItem in a useState hook to get the state after signning in.
                         localStorage.getItem('Kanvas - address') ===
-                        props.user?.address ? (
-                            props.user?.role === 'creator' ? (
-                                <CustomButton
-                                    size="medium"
-                                    onClick={props.onLogout}
-                                    label="Add artwork"
-                                />
-                            ) : undefined
-                        ) : (
+                            props.user?.address && (
                             <CustomButton
                                 size="medium"
                                 onClick={() => props.setOpen(true)}

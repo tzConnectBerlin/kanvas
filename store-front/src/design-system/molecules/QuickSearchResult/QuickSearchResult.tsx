@@ -18,9 +18,10 @@ import {
 } from '@mui/material'
 
 interface QuickSearResultProps {
+    error: boolean
     profilesSearchResult: any
     artworksSearchResult: any
-    tagsSearchResult: any
+    categoriesSearchResult: any
     searchString: string | unknown
     open?: boolean
     closeResult: Function
@@ -31,11 +32,11 @@ interface BoxProps extends MBoxProps {
     open?: boolean
 }
 
-const StyledBox = styled(Box)<BoxProps>`
+const StyledBox = styled(Box) <BoxProps>`
     display: ${(props) => (props.open ? 'flex' : 'none')};
 `
 
-const StyledPaper = styled(Paper)<{ theme?: Theme }>`
+const StyledPaper = styled(Paper) <{ theme?: Theme }>`
     box-shadow: none;
     border-radius: 0;
 
@@ -61,7 +62,7 @@ const StyledContentStack = styled(Stack)`
     padding-bottom: 0.5em;
 `
 
-const ProfileResultWrapper = styled(Stack)<{ theme?: Theme }>`
+const ProfileResultWrapper = styled(Stack) <{ theme?: Theme }>`
     display: flex;
     align-items: center;
     padding-left: 0.875em;
@@ -88,9 +89,9 @@ const StyledGrid = styled(Grid)`
 export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
     const history = useHistory()
 
-    const navigateTo = (userName: string) => {
+    const navigateTo = (path: string) => {
         props.closeResult()
-        history.push(`/profile/${userName}`)
+        history.push(path)
     }
 
     return (
@@ -115,56 +116,11 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
             <StyledPaper>
                 {/* Check if we only got errors and it is not loading from the api in which case we display the empty content */}
                 {
-                    // props.profilesSearchResult.error && !props.profilesSearchResult.loading && props.artworksSearchResult.error && !props.artworksSearchResult.loading && props.tagsSearchResult.error && !props.tagsSearchResult.loading ?
-                    !props.loading ? (
-                        <EmptySearchResult searchString={props.searchString} />
+                    !props.loading && (props.error || (props.artworksSearchResult.length === 0 && props.categoriesSearchResult.length === 0))  ? (
+                    <EmptySearchResult searchString={props.searchString} />
                     ) : undefined
                 }
-                {/* {
-          // props.profilesSearchResult.loading ?
-          props.loading ?
-            <>
-              <StyledHeaderStack direction='row'>
-                <Typography size="h4" weight="SemiBold"> Profiles </Typography>
-              </StyledHeaderStack>
-              <StyledContentStack spacing={1}>
                 {
-                  [{}, {}, {}].map(() =>
-                    <ProfileResultWrapper direction="row" spacing={4} >
-                      <Skeleton animation="wave" variant="circular" width={65} height={65} />
-                      <Skeleton animation="wave" height={14} width="50%" sx={{ borderRadius: 2 }} />
-                    </ProfileResultWrapper>
-                  )
-                }
-              </StyledContentStack>
-            </>
-            :
-            !props.profilesSearchResult.called || props.profilesSearchResult.error ?
-              undefined
-              :
-              <>
-                <StyledHeaderStack direction='row'>
-                  <Typography size="h4" weight="SemiBold"> Profiles </Typography>
-                  <FlexSpacer />
-                  <Typography size="inherit" weight="Light" color="#0088a7 !important" sx={{ cursor: 'pointer' }}> See all </Typography>
-                </StyledHeaderStack>
-                <StyledContentStack spacing={1}>
-                  {
-                    props.profilesSearchResult.data?.getUsersSearch.map((profile: any, index: number) =>
-                      <ProfileResultWrapper key={index + Date.now()} direction="row" spacing={5} onClick={() => navigateTo(profile.userName)}>
-                        <Avatar src={`${profile.profilePicture}?${Date.now()}`} height={65} width={65} />
-                        <Stack direction="column">
-                          <Typography size="h4" weight="Medium" sx={{ cursor: 'pointer' }}> {profile.firstName + ' ' + profile.lastName} </Typography>
-                          <Typography size="body2" weight="Light" color={'#0088a7'} sx={{ cursor: 'pointer' }}> @{profile.userName} </Typography>
-                        </Stack>
-                      </ProfileResultWrapper>
-                    )
-                  }
-                </StyledContentStack>
-              </>
-        } */}
-                {
-                    // props.artworksSearchResult.loading ?
                     props.loading ? (
                         <>
                             <StyledHeaderStack direction="row">
@@ -195,8 +151,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                 ))}
                             </StyledContentStack>
                         </>
-                    ) : !props.artworksSearchResult.called ||
-                      props.artworksSearchResult.error ? undefined : (
+                    ) : props.artworksSearchResult.length > 0 && (
                         <>
                             <StyledHeaderStack direction="row">
                                 <Typography size="h4" weight="SemiBold">
@@ -215,14 +170,15 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                 </Typography>
                             </StyledHeaderStack>
                             <StyledContentStack spacing={1}>
-                                {props.artworksSearchResult.data?.getArtworksSearch.map(
-                                    (artwork: any) => (
+                                {props.artworksSearchResult.map(
+                                    (nft: any) => (
                                         <ProfileResultWrapper
                                             direction="row"
                                             spacing={5}
+                                            onMouseDown={() => navigateTo(`/product/${nft.id}`)}
                                         >
                                             <Avatar
-                                                src={artwork.url}
+                                                src={nft.dataUri}
                                                 height={65}
                                                 width={65}
                                                 borderRadius={0}
@@ -233,7 +189,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                                 sx={{ cursor: 'pointer' }}
                                             >
                                                 {' '}
-                                                {artwork.title}{' '}
+                                                {nft.name}{' '}
                                             </Typography>
                                         </ProfileResultWrapper>
                                     ),
@@ -270,13 +226,12 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                 </StyledGrid>
                             </StyledContentStack>
                         </>
-                    ) : !props.tagsSearchResult.called ||
-                      props.tagsSearchResult.error ? undefined : (
+                    ) : props.categoriesSearchResult.length > 0 && (
                         <>
                             <StyledHeaderStack direction="row">
                                 <Typography size="h4" weight="SemiBold">
                                     {' '}
-                                    Tags{' '}
+                                    Categories{' '}
                                 </Typography>
                                 <FlexSpacer />
                                 <Typography
@@ -291,31 +246,19 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                             </StyledHeaderStack>
                             <StyledContentStack sx={{ marginLeft: '1em' }}>
                                 <StyledGrid container spacing={2}>
-                                    {props.tagsSearchResult.data?.getTagsSearch
-                                        ? props.tagsSearchResult.data?.getTagsSearch.map(
-                                              (tag: any) => (
-                                                  <Grid item>
-                                                      <CustomButton
-                                                          size="medium"
-                                                          textSize="Light"
-                                                          primary={false}
-                                                          label={tag.name}
-                                                      />
-                                                  </Grid>
-                                              ),
-                                          )
-                                        : props.tagsSearchResult.data?.getTagsSuggestions.map(
-                                              (tag: any) => (
-                                                  <Grid item>
-                                                      <CustomButton
-                                                          size="medium"
-                                                          textSize="Light"
-                                                          primary={false}
-                                                          label={tag.name}
-                                                      />
-                                                  </Grid>
-                                              ),
-                                          )}
+                                    {props.categoriesSearchResult.map(
+                                        (category: any) => (
+                                            <Grid item >
+                                                <CustomButton
+                                                    size="medium"
+                                                    textSize="Light"
+                                                    primary={false}
+                                                    label={category.name}
+                                                    onMouseDown={() => navigateTo(`/store?categories=${category.id}`)}
+                                                />
+                                            </Grid>
+                                        ),
+                                    )}
                                 </StyledGrid>
                             </StyledContentStack>
                         </>

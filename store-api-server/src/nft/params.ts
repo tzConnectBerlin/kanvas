@@ -51,6 +51,11 @@ export class FilterParams extends PaginationParams {
   priceAtMost?: number
 }
 
+export class SearchParam {
+  @IsString()
+  searchString: string
+}
+
 function parseStringArray(v: string | string[], sep: string): string[] {
   if (typeof v !== 'string') {
     return v

@@ -9,7 +9,7 @@ const bcrypt = require('bcrypt')
 
 interface IAuthentication {
   id: number
-  name: string
+  userName: string
   token: string
   maxAge: string
   address: string
@@ -44,7 +44,7 @@ export class AuthenticationService {
       return this.getCookieWithJwtToken(
         {
           id: user.id,
-          name: user.name,
+          userName: user.userName,
           address: user.address,
           roles: user.roles,
         },
@@ -123,7 +123,7 @@ export class AuthenticationService {
       return {
         token: token,
         id: user.id,
-        name: user.name,
+        userName: user.userName,
         maxAge: process.env.JWT_EXPIRATION_TIME,
         address: data.address,
       }
