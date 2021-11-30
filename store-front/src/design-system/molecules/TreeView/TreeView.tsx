@@ -22,7 +22,6 @@ interface TreeViewProps extends StyledTreeViewProps {
 const StyledDiv = styled.div<StyledTreeViewProps>`
     padding-left: 1.5rem;
     width: ${(props) => (props.open ? 'auto' : '0')};
-    height: 100%;
     transition: width 0.2s;
 `
 
