@@ -82,7 +82,7 @@ const StyledSection = styled.section<StyledStoreFiltersProps>`
         max-width: ${(props) => (props.openFilters ? 100 : 0)}rem;
         width: ${(props) => (props.openFilters ? 100 : 0)}%;
         display: flex;
-        height: 100vh;
+        height: 85vh;
         position: fixed;
         left: 0;
         top: 5rem;
