@@ -58,7 +58,7 @@ LIMIT $3
 
     const categoryIds = await this.conn.query(
       `
-SELECT id AS category_id, word_similarity($1, category) AS similarity
+SELECT id AS category_id, category AS category_name, word_similarity($1, category) AS similarity
 FROM nft_category
 WHERE word_similarity($1, category) >= $2
 ORDER BY similarity DESC
@@ -77,7 +77,7 @@ LIMIT $3
       nfts: nftIds.rows.map((row: any) =>
         nfts.find((nft) => nft.id === row.nft_id),
       ),
-      categories: categoryIds.rows.map((row: any) => row.category_id),
+      categories: categoryIds.rows.map((row: any) => ({id: row.category_id, name: row.category_name})),
     }
   }
 

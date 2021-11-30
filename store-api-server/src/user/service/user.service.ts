@@ -27,7 +27,7 @@ INSERT INTO kanvas_user(
 )
 VALUES ($1, $2, $3)
 RETURNING id`,
-      [user.name, user.address, user.signedPayload],
+      [user.userName, user.address, user.signedPayload],
     )
 
     return { ...user, id: qryRes.rows[0]['id'] }
@@ -50,14 +50,14 @@ WHERE user_name = $1
     name: string | undefined,
     picture: string | undefined,
   ) {
-    let pictureURL: string | undefined
+    let profilePicture: string | undefined
     if (typeof picture !== 'undefined') {
       const fileName = `profilePicture_${userId}`
       const s3PathRes = await this.s3Service.uploadFile(picture, fileName)
       if (!s3PathRes.ok) {
         throw s3PathRes.val
       }
-      pictureURL = s3PathRes.val
+      profilePicture = s3PathRes.val
     }
     await this.conn.query(
       `
@@ -67,7 +67,7 @@ SET
   picture_url = coalesce($3, picture_url)
 WHERE id = $1
 `,
-      [userId, name, pictureURL],
+      [userId, name, profilePicture],
     )
   }
 
@@ -96,10 +96,10 @@ WHERE address = $1
     }
     const res = {
       id: qryRes.rows[0]['id'],
-      name: qryRes.rows[0]['user_name'],
+      userName: qryRes.rows[0]['user_name'],
       address: qryRes.rows[0]['address'],
       createdAt: Math.floor(qryRes.rows[0]['created_at'].getTime() / 1000),
-      pictureURL: qryRes.rows[0]['picture_url'],
+      profilePicture: qryRes.rows[0]['picture_url'],
       signedPayload: qryRes.rows[0]['signed_payload'],
       roles: qryRes.rows
         .map((row: any) => row['role_label'])

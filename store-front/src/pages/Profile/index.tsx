@@ -27,8 +27,6 @@ const StyledStack = styled(Stack)`
 const StyledAnimated = styled(Animated)`
     display: 'initial';
     height: auto;
-    padding-left: 1.5rem !important;
-    padding-right: 1.5rem !important;
 
     @media (max-width: 650px) {
         padding-left: 0rem !important;
@@ -44,92 +42,6 @@ const StyledDiv = styled.div`
     }
 `
 
-const mockUser: IUser = {
-    profilePicture: '',
-    name: 'Tristan Nicolaides',
-    userName: 'tristan_ncl',
-    address: 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd',
-    createdAt: new Date(),
-}
-
-const mokeNft = [
-    {
-        id: 4,
-        name: 'first_nft',
-        ipfsHash: '',
-        price: 10,
-        dataUri:
-            'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
-        metadata: {
-            key2: 'value1',
-            test: 'hey',
-        },
-        dataUrl: 'heyyy',
-        contract: 'contract_address',
-        tokenId: 'teojteojt',
-    },
-    {
-        id: 3,
-        name: 'second_nft',
-        ipfsHash: '',
-        dataUri:
-            'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
-        price: 12,
-        metadata: {
-            key2: 'value1',
-            test: 'hey',
-        },
-        dataUrl: 'heyyy',
-        contract: 'contract_address',
-        tokenId: 'teojteojt',
-    },
-    {
-        id: 4,
-        name: 'third_nft',
-        ipfsHash: '',
-        dataUri:
-            'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
-        price: 10,
-        metadata: {
-            key2: 'value1',
-            test: 'hey',
-        },
-        dataUrl: 'heyyy',
-        contract: 'contract_address',
-        tokenId: 'teojteojt',
-    },
-    {
-        id: 3,
-        name: 'fourth_nft',
-        ipfsHash: '',
-        dataUri:
-            'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
-        price: 12,
-        metadata: {
-            key2: 'value1',
-            test: 'hey',
-        },
-        dataUrl: 'heyyy',
-        contract: 'contract_address',
-        tokenId: 'teojteojt',
-    },
-    {
-        id: 3,
-        name: 'fourth_nft',
-        ipfsHash: '',
-        dataUri:
-            'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
-        price: 12,
-        metadata: {
-            key2: 'value1',
-            test: 'hey',
-        },
-        dataUrl: 'heyyy',
-        contract: 'contract_address',
-        tokenId: 'teojteojt',
-    },
-]
-
 const Profile: FC<ProfileProps> = () => {
     let { userAddress } = useParams<ParamTypes>()
 
@@ -138,12 +50,49 @@ const Profile: FC<ProfileProps> = () => {
     // Using the useState hook in case adding more tabs in the future
     const [selectedTab, setSelectedTab] = useState('Collection')
 
-    const [userResponse, getUser] = useAxios({
-        url:
-            process.env.REACT_APP_API_SERVER_BASE_URL +
-            `/users?userAddress=${userAddress}`,
-        withCredentials: true,
-    })
+    const [userResponse, getUser] = useAxios(
+        {
+            url:
+                process.env.REACT_APP_API_SERVER_BASE_URL +
+                `/users`,
+            withCredentials: true,
+            method: 'GET',
+            headers: {
+                ContentType: 'application/json'
+            }
+        },
+        { manual: true },
+    )
+
+    const [userNftsResponse, getUserNfts] = useAxios(
+        {
+            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/filter`,
+            withCredentials: true,
+            method: 'GET',
+            headers: {
+                ContentType: 'application/json'
+            }
+        },
+        { manual: true },
+    )
+
+    useEffect(() => {
+        if (!userAddress) {
+            history.push('/404')
+        }
+
+        getUser({
+            params: {
+                userAddress: userAddress,
+            },
+        })
+        getUserNfts({
+            params: {
+                address: userAddress,
+                pagesize: 12,
+            },
+        })
+    }, [])
 
     const handleSwitchTab = (newValue: number) => {
         switch (newValue) {
@@ -167,8 +116,8 @@ const Profile: FC<ProfileProps> = () => {
     const editProfile = () => {
         if (userResponse.data?.user) {
             const currentUser = {
-                userName: '',
-                profilePicture: '',
+                userName: userResponse.data?.user.userName,
+                profilePicture: userResponse.data?.user.profilePicture,
             }
             history.push({
                 pathname: '/profile/edit',
@@ -192,6 +141,7 @@ const Profile: FC<ProfileProps> = () => {
                             user={userResponse.data?.user}
                             loading={userResponse.loading}
                             editProfile={editProfile}
+                            nftsCount={userResponse.data?.nftCount}
                         />
 
                         <FlexSpacer minHeight={2} />
@@ -211,10 +161,10 @@ const Profile: FC<ProfileProps> = () => {
 
                 <NftGrid
                     open={false}
-                    nfts={mokeNft}
+                    loading={userNftsResponse.loading}
+                    nfts={userNftsResponse.data?.nfts}
                     emptyMessage={'No Nfts in collection yet'}
                     emptyLink={'Click here to buy some in the store.'}
-                    loading={userResponse.loading}
                 />
             </StyledStack>
         </PageWrapper>

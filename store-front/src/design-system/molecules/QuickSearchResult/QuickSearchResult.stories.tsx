@@ -26,7 +26,7 @@ SuggestionLoading.args = {
         loading: false,
         data: [],
     },
-    tagsSearchResult: {
+    categoriesSearchResult: {
         error: undefined,
         loading: true,
         data: [],
@@ -42,7 +42,7 @@ Suggestion.args = {
     artworksSearchResult: {
         error: ApolloError,
     },
-    tagsSearchResult: {
+    categoriesSearchResult: {
         error: undefined,
         loading: false,
         data: [
@@ -79,7 +79,7 @@ LoadingResult.args = {
         error: undefined,
         loading: true,
     },
-    tagsSearchResult: {
+    categoriesSearchResult: {
         error: undefined,
         loading: true,
         data: [],
@@ -125,7 +125,7 @@ Result.args = {
             },
         ],
     },
-    tagsSearchResult: {
+    categoriesSearchResult: {
         error: undefined,
         loading: false,
         data: [
@@ -152,7 +152,7 @@ NoResult.args = {
         loading: false,
         data: [],
     },
-    tagsSearchResult: {
+    categoriesSearchResult: {
         error: undefined,
         loading: false,
         data: [],

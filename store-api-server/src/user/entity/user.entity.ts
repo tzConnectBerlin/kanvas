@@ -2,10 +2,10 @@ import { NftEntity } from 'src/nft/entity/nft.entity'
 
 export interface UserEntity {
   id: number
-  name: string
+  userName: string
   address: string
   createdAt: number // in UTC UNIX
-  pictureURL: string
+  profilePicture: string
   signedPayload?: string
   cartSession?: string
   roles: string[]
