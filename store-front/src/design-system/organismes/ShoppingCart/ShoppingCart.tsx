@@ -10,6 +10,7 @@ import { toast } from 'react-toastify'
 import { Stack, Theme } from '@mui/material'
 import { INft } from '../../../interfaces/artwork'
 import { Box } from '@mui/system'
+import { useHistory } from 'react-router-dom'
 
 interface ShoppingCartProps {
     nftsInCart: INft[]
@@ -75,6 +76,7 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
 `
 
 export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
+    const history = useHistory()
     const [timeLeft, setTimeLeft] = useState<number>()
 
     const [deleteFromCartResponse, deleteFromCart] = useAxios('', {
@@ -100,9 +102,9 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
     )
 
     useEffect(() => {
-        debugger
-        if (checkoutResponse.data) {
-
+        if (checkoutResponse.response?.status === 204) {
+            toast.info('Congratulations for your purchase')
+            history.push(`/profile/${localStorage.getItem('Kanvas - address')}`)
         } else if (checkoutResponse.error?.response?.status === 401) {
             // popup login
             props.setOpenLogin(true)
