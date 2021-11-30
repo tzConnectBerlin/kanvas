@@ -6,7 +6,7 @@ import FlexSpacer from '../../design-system/atoms/FlexSpacer'
 import PageWrapper from '../../design-system/commons/PageWrapper'
 import StoreFilters from '../../design-system/organismes/StoreFilters'
 
-import { useEffect, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { Stack, Theme, Pagination } from '@mui/material'
 import { CustomButton } from '../../design-system/atoms/Button'
 import { CustomSelect } from '../../design-system/atoms/Select'
@@ -16,6 +16,10 @@ import { toast } from 'react-toastify'
 
 interface ParamTypes {
     width?: any
+}
+
+export interface StorePageProps {
+    theme?: Theme
 }
 
 const StyledStack = styled(Stack)`
@@ -63,8 +67,7 @@ const StyledPagination = styled(Pagination)<{
         align-items: center !important;
     }
 `
-
-const StorePage = () => {
+ const StorePage: FC<StorePageProps> = ({ ...props }) => {
     const search = useLocation().search
     const history = useHistory()
 
@@ -382,6 +385,7 @@ const StorePage = () => {
                     <StoreFilters
                         availableFilters={availableFilters}
                         openFilters={filterOpen}
+                        setFilterOpen={setFilterOpen}
                         filterFunction={getFilteredNfts}
                         selectedFilters={selectedFilters}
                         setSelectedFilters={setSelectedFilters}

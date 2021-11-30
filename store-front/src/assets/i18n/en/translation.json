@@ -96,5 +96,11 @@
     "text": "By continuing to use this site you agree to the use of cookies. Learn more in our ",
     "button": "Agree and Close",
     "link": "Privacy Policy"
+  },
+  "filters": {
+    "button": {
+      "results": "View results",
+      "reset": "reset"
+    }
   }
 }
