@@ -208,7 +208,6 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                         sx={{ marginTop: '1.5rem' }}
                     >
                         <Typography size="body1" weight="Medium" align="left">
-                            {' '}
                             {props.loading ? (
                                 <Skeleton
                                     animation="pulse"
@@ -218,7 +217,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                                 />
                             ) : (
                                 props.nftsCount
-                            )}{' '}
+                            )}
                         </Typography>
                         <Typography
                             size="body1"
@@ -227,7 +226,6 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                             truncate={true}
                             align="left"
                         >
-                            {' '}
                             {props.loading ? (
                                 <Skeleton
                                     animation="pulse"
@@ -252,11 +250,15 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                         {' '}
                         {props.loading ? (
                             <Skeleton animation="pulse" width="5rem" />
-                        ) : props.user?.createdAt && (
-                            `Joined in ${new Date(props.user?.createdAt*1000).toLocaleString(
-                                'default',
-                                { month: 'long' },
-                            )} , ${new Date(props.user?.createdAt*1000).getFullYear()}`
+                        ) : (
+                            props.user?.createdAt &&
+                            `Joined in ${new Date(
+                                props.user?.createdAt * 1000,
+                            ).toLocaleString('default', {
+                                month: 'long',
+                            })} , ${new Date(
+                                props.user?.createdAt * 1000,
+                            ).getFullYear()}`
                         )}
                     </StyledTypography>
                 </Stack>

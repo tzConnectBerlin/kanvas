@@ -5,10 +5,12 @@ import CustomButton from '../../atoms/Button'
 import ShoppingCartItem from '../../molecules/ShoppingCartItem'
 import useAxios from 'axios-hooks'
 
-import { FC, useEffect } from 'react'
+import { FC, useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Stack, Theme } from '@mui/material'
 import { INft } from '../../../interfaces/artwork'
+import { Box } from '@mui/system'
+import { useHistory } from 'react-router-dom'
 
 interface ShoppingCartProps {
     nftsInCart: INft[]
@@ -18,6 +20,7 @@ interface ShoppingCartProps {
     open: boolean
     listCart: Function
     expiresAt: string
+    setOpenLogin: Function
 }
 
 const ContainerPopupStyled = styled.div<{ open: boolean }>`
@@ -73,6 +76,9 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
 `
 
 export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
+    const history = useHistory()
+    const [timeLeft, setTimeLeft] = useState<number>()
+
     const [deleteFromCartResponse, deleteFromCart] = useAxios('', {
         manual: true,
     })
@@ -96,13 +102,20 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
     )
 
     useEffect(() => {
-        if (checkoutResponse.data) {
-        } else if (checkoutResponse.error) {
-            toast.error('Unable to checkout')
+        if (checkoutResponse.response?.status === 204) {
+            toast.info('Congratulations for your purchase')
+            history.push(`/profile/${localStorage.getItem('Kanvas - address')}`)
+        } else if (checkoutResponse.error?.response?.status === 401) {
+            // popup login
+            props.setOpenLogin(true)
+            toast.info('Please login to checkout')
         }
     }, [checkoutResponse])
 
+    const [concernedDeletedNFT, setConcernedDeletedNft] = useState<number>()
+
     const handleDeleteFromBasket = (nftId: number) => {
+        setConcernedDeletedNft(nftId)
         deleteFromCart({
             url:
                 process.env.REACT_APP_API_SERVER_BASE_URL +
@@ -134,6 +147,36 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         }
     }, [props.open])
 
+    const [isWarned, setIsWarned] = useState(false)
+    const [isExpiredError, setIsExpiredError] = useState(false)
+
+    useEffect(() => {
+        if (isExpiredError && (timeLeft === 0 || (timeLeft && timeLeft < 0))) {
+            setIsExpiredError(true)
+            toast.error('Your cart has expired')
+        }
+
+        if (!timeLeft) return
+        setInterval(() => {
+            setTimeLeft(
+                new Date(props.expiresAt).getTime() - new Date().getTime(),
+            )
+        }, 60000)
+
+        if (timeLeft < 300000 && !isWarned) {
+            toast.warning(
+                `Your card will expire in ${new Date(
+                    timeLeft,
+                ).getMinutes()} minutes`,
+            )
+            setIsWarned(true)
+        }
+    }, [timeLeft])
+
+    useEffect(() => {
+        setTimeLeft(new Date(props.expiresAt).getTime() - new Date().getTime())
+    }, [props.expiresAt])
+
     return (
         <>
             <ContainerPopupStyled
@@ -148,8 +191,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         weight="SemiBold"
                         sx={{ marginTop: '1rem', marginLeft: '1rem' }}
                     >
-                        {' '}
-                        Summary{' '}
+                        Summary
                     </Typography>
                     <FlexSpacer />
                     <Typography
@@ -157,7 +199,6 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         weight="Medium"
                         sx={{ marginTop: '1rem', marginRight: '1rem' }}
                     >
-                        {' '}
                         {props.nftsInCart.length > 0 && (
                             <>{props.nftsInCart.length} - items </>
                         )}
@@ -187,6 +228,10 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             <ShoppingCartItem
                                 loading={false}
                                 nft={nft}
+                                removeNftLoading={
+                                    deleteFromCartResponse.loading &&
+                                    concernedDeletedNFT === nft.id
+                                }
                                 removeNft={handleDeleteFromBasket}
                             />
                         ))
@@ -203,7 +248,8 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                     )}
 
                     <FlexSpacer />
-                    {props.nftsInCart.length !== 0 && (
+
+                    {props.nftsInCart.length > 0 && (
                         <Typography
                             size="subtitle2"
                             weight="Medium"
@@ -211,17 +257,15 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             align="left"
                             color="#C4C4C4"
                         >
-                            {new Date(
-                                new Date(props.expiresAt).getTime() -
-                                    new Date().getDate(),
-                            ).getTime() > 0
-                                ? `*Your cart will expire in ${new Date(
-                                      new Date(props.expiresAt).getTime() -
-                                          new Date().getTime(),
-                                  ).getMinutes()} minutes.`
-                                : 'Cart expired'}
+                            {timeLeft && timeLeft > 0
+                                ? `Your cart will expire in ${Math.round(
+                                      timeLeft / 60000,
+                                  )}
+                                minutes.`
+                                : 'Cart Expired'}
                         </Typography>
                     )}
+
                     {props.open && (
                         <CustomButton
                             size="medium"

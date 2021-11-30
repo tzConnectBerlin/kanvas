@@ -20,7 +20,7 @@ interface ProfileFormProps {
     submit: Function
     loading: boolean
     checkIfUserNameValid: Function
-    checkIfUsernameValidResponse:  ResponseValues<any, boolean, any>
+    checkIfUsernameValidResponse: ResponseValues<any, boolean, any>
 }
 
 const StyledStack = styled(Stack)`
@@ -124,7 +124,7 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
     const [profilePictureFile, setProfilePictureFile] =
         useState<unknown>(undefined)
 
-    const [comfortLoader, setComfortLoader ] = useState(false)
+    const [comfortLoader, setComfortLoader] = useState(false)
     const [isUserNameValid, setIsUserNameValid] = useState(true)
     const [dropZoneErrorMessage, setDropZoneErrorMessage] = useState<
         string | null
@@ -150,12 +150,11 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
         enableReinitialize: true,
         onSubmit: async (values) => {
             props.submit({
-                    ...values,
-                    profilePicture: dataURLtoFile(
-                        JSON.parse(sessionStorage.getItem('profilePicture')!)
-                            .blob,
-                        'profilePicture',
-                    ),
+                ...values,
+                profilePicture: dataURLtoFile(
+                    JSON.parse(sessionStorage.getItem('profilePicture')!).blob,
+                    'profilePicture',
+                ),
             })
         },
     })
@@ -188,27 +187,32 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
 
     // useEffect for username verification
     useEffect(() => {
-
-        if (formik.values.userName.length >= 3 && formik.values.userName !== props.initialValues.userName) {
+        if (
+            formik.values.userName.length >= 3 &&
+            formik.values.userName !== props.initialValues.userName
+        ) {
             setComfortLoader(true)
             const delayUserNameAvailabilitySearch = setTimeout(() => {
                 props.checkIfUserNameValid({
                     params: {
-                        userName: formik.values.userName
-                    }
+                        userName: formik.values.userName,
+                    },
                 })
                 setComfortLoader(false)
             }, 800)
-            return () => { clearTimeout(delayUserNameAvailabilitySearch) }
+            return () => {
+                clearTimeout(delayUserNameAvailabilitySearch)
+            }
         }
     }, [formik.values.userName])
 
     useEffect(() => {
         if (props.checkIfUsernameValidResponse.data) {
             setComfortLoader(false)
-            setIsUserNameValid(props.checkIfUsernameValidResponse.data.available)
+            setIsUserNameValid(
+                props.checkIfUsernameValidResponse.data.available,
+            )
         }
-
     }, [props.checkIfUsernameValidResponse.data])
 
     return (
@@ -271,11 +275,13 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
                                 endAdornment: (
                                     <InputAdornment position="start">
                                         {' '}
-                                        {comfortLoader || props.checkIfUsernameValidResponse.loading ? (
+                                        {comfortLoader ||
+                                        props.checkIfUsernameValidResponse
+                                            .loading ? (
                                             <CustomCircularProgress
                                                 height={1}
                                             />
-                                        ): null}{' '}
+                                        ) : null}{' '}
                                     </InputAdornment>
                                 ),
                             }}
