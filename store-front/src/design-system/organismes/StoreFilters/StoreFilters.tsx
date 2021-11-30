@@ -92,7 +92,7 @@ const StyledSection = styled.section<StyledStoreFiltersProps>`
         overflow: scroll;
 
         margin-top: 0 !important;
-        padding-top: .5rem;
+        padding-top: 0.5rem;
 
         padding-bottom: 2.5rem;
 
@@ -192,7 +192,10 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                             <BackButton
                                 fill="#fff"
                                 onClick={() => props.setFilterOpen(false)}
-                                sx={{ cursor: 'pointer', marginBottom: '0.7rem' }}
+                                sx={{
+                                    cursor: 'pointer',
+                                    marginBottom: '0.7rem',
+                                }}
                             />
 
                             <Typography
@@ -294,6 +297,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                 {isMobile && (
                     <>
                         <FlexSpacer borderBottom={false} minHeight={1} />
+                        
                         <Stack direction="column-reverse">
                             <CustomButton
                                 fullWidth={true}
@@ -320,6 +324,8 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                                     outline: 'none',
                                 }}
                             ></CustomButton>
+
+                            <FlexSpacer minHeight={2} />
                         </Stack>
                     </>
                 )}
