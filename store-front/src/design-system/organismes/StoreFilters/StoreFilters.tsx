@@ -89,7 +89,7 @@ const StyledSection = styled.section<StyledStoreFiltersProps>`
         bottom: 0;
         z-index: 999999;
 
-        overflow: auto;
+        overflow: scroll;
 
         margin-top: 0 !important;
         padding-top: .5rem;
