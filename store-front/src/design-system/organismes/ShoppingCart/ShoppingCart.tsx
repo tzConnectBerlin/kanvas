@@ -106,7 +106,6 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
             toast.info('Congratulations for your purchase')
             history.push(`/profile/${localStorage.getItem('Kanvas - address')}`)
         } else if (checkoutResponse.error?.response?.status === 401) {
-            // popup login
             props.setOpenLogin(true)
             toast.info('Please login to checkout')
         }

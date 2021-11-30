@@ -11,10 +11,15 @@ import Select, {
     SelectChangeEvent,
 } from '@mui/material/Select'
 
+interface SortProps {
+    orderBy: 'price' | 'name' | 'createdAt'
+    orderDirection: 'asc' | 'desc'
+}
+
 interface SelectedProps extends MuiSelectProps {
     id: string
-    selectedOption: string
-    setSelectedOption: Function
+    selectedOption: SortProps
+    setSelectedOption: (input: SortProps) => void
 }
 
 const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
@@ -77,7 +82,7 @@ const StyledInputLabel = styled(InputLabel)<{ theme?: Theme }>`
 
 export const CustomSelect: FC<SelectedProps> = ({ ...props }) => {
     const handleChange = (event: SelectChangeEvent) => {
-        props.setSelectedOption(event.target.value)
+        props.setSelectedOption(JSON.parse(event.target.value))
     }
 
     return (
@@ -86,30 +91,19 @@ export const CustomSelect: FC<SelectedProps> = ({ ...props }) => {
             sx={{ m: 1, minWidth: 80, maxHeight: 40 }}
             disabled={props.disabled ?? false}
         >
-            <StyledInputLabel
-                variant="filled"
-                id={`${props.id}-label"`}
-                shrink={false}
-                disableAnimation
-            >
-                {props.selectedOption !== '' ? '' : 'Sort'}
-            </StyledInputLabel>
             <Select
                 labelId={`${props.id}-label"`}
                 id={props.id}
-                value={props.selectedOption}
+                value={JSON.stringify(props.selectedOption)}
                 onChange={handleChange}
                 autoWidth
             >
-                <MenuItem value="">
-                    <em>None</em>
-                </MenuItem>
-                <MenuItem value={'asc-name'}>asc - Name</MenuItem>
-                <MenuItem value={'desc-name'}>desc - Name</MenuItem>
-                <MenuItem value={'asc-price'}>asc - Price</MenuItem>
-                <MenuItem value={'desc-price'}>desc - Price</MenuItem>
-                <MenuItem value={'asc-created'}>asc - Created</MenuItem>
-                <MenuItem value={'desc-created'}>desc - Created</MenuItem>
+                <MenuItem value={JSON.stringify({orderBy: 'name', orderDirection: 'asc'})}>Name - asc</MenuItem>
+                <MenuItem value={JSON.stringify({orderBy: 'name', orderDirection: 'desc'})}>Name - desc</MenuItem>
+                <MenuItem value={JSON.stringify({orderBy: 'price', orderDirection: 'asc'})}>Price - asc</MenuItem>
+                <MenuItem value={JSON.stringify({orderBy: 'price', orderDirection: 'desc'})}>Price - desc</MenuItem>
+                <MenuItem value={JSON.stringify({orderBy: 'createdAt', orderDirection: 'asc'})}>Created - asc</MenuItem>
+                <MenuItem value={JSON.stringify({orderBy: 'createdAt', orderDirection: 'desc'})}> Created - desc</MenuItem>
             </Select>
         </StyledFormControl>
     )
