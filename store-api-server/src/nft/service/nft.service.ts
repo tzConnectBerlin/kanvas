@@ -74,10 +74,13 @@ LIMIT $3
     )
 
     return {
-      nfts: nftIds.rows.map((row: any) =>
-        nfts.find((nft) => nft.id === row.nft_id),
-      ),
-      categories: categoryIds.rows.map((row: any) => ({id: row.category_id, name: row.category_name})),
+      nfts: nftIds.rows
+        .map((row: any) => nfts.find((nft) => nft.id === row.nft_id))
+        .filter((nft: NftEntity | undefined) => typeof nft !== 'undefined'),
+      categories: categoryIds.rows.map((row: any) => ({
+        id: row.category_id,
+        name: row.category_name,
+      })),
     }
   }
 
