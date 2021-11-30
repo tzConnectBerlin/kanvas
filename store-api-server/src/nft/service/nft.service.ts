@@ -209,7 +209,7 @@ SELECT
   token_id,
   categories,
   editions_available,
-  created_at,
+  nft_created_at,
   launch_at
 FROM nfts_by_id($1, $2, $3)`,
         [nftIds, orderBy, orderDirection],
@@ -225,7 +225,7 @@ FROM nfts_by_id($1, $2, $3)`,
           contract: nftRow['contract'],
           tokenId: nftRow['token_id'],
           editionsAvailable: Number(nftRow['editions_available']),
-          createdAt: Math.floor(nftRow['created_at'].getTime() / 1000),
+          createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
           launchAt: Math.floor(nftRow['launch_at'].getTime() / 1000),
           categories: nftRow['categories'].map((categoryRow: any) => {
             return <CategoryEntity>{

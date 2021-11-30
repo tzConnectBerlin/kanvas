@@ -12,7 +12,7 @@ ALTER TABLE nft ADD COLUMN launch_at TIMESTAMP WITHOUT TIME ZONE DEFAULT (now() 
 ALTER FUNCTION nfts_by_id RENAME TO __nfts_by_id_v7;
 CREATE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT)
   RETURNS TABLE(
-    nft_id INTEGER, created_at TIMESTAMP WITHOUT TIME ZONE, launch_at TIMESTAMP WITHOUT TIME ZONE, nft_name TEXT, ipfs_hash TEXT, metadata jsonb, data_uri TEXT, contract TEXT, price NUMERIC, token_id TEXT, categories TEXT[][], editions_available BIGINT)
+    nft_id INTEGER, nft_created_at TIMESTAMP WITHOUT TIME ZONE, launch_at TIMESTAMP WITHOUT TIME ZONE, nft_name TEXT, ipfs_hash TEXT, metadata jsonb, data_uri TEXT, contract TEXT, price NUMERIC, token_id TEXT, categories TEXT[][], editions_available BIGINT)
 AS $$
 BEGIN
   IF orderDirection NOT IN ('asc', 'desc') THEN
@@ -20,8 +20,8 @@ BEGIN
   END IF;
   RETURN QUERY EXECUTE '
     SELECT
-      nft.id as nft_id,
-      created_at as nft_created_at,
+      nft.id AS nft_id,
+      created_at AS nft_created_at,
       launch_at,
       nft_name,
       ipfs_hash,
