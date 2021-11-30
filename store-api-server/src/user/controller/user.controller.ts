@@ -114,7 +114,7 @@ export class UserController {
     @Param('nftId') nftId: number,
   ) {
     const cartSession = await this.getCartSession(cookieSession, user)
-    const added = await this.userService
+    const addedRes = await this.userService
       .cartAdd(cartSession, nftId)
       .catch((err: any) => {
         if (err?.code === PG_FOREIGN_KEY_VIOLATION_ERRCODE) {
@@ -139,11 +139,8 @@ export class UserController {
         )
       })
 
-    if (!added) {
-      throw new HttpException(
-        'All editions of this nft have been reserved/bought',
-        HttpStatus.BAD_REQUEST,
-      )
+    if (!addedRes.ok) {
+      throw new HttpException(addedRes.val, HttpStatus.BAD_REQUEST)
     }
   }
 
