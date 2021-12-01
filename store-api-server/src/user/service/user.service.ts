@@ -272,9 +272,9 @@ DELETE FROM cart_session
 WHERE session_id = $1`,
         [session],
       )
-      tx.query(`COMMIT`)
+      await tx.query(`COMMIT`)
     } catch (err: any) {
-      tx.query(`ROLLBACK`)
+      await tx.query(`ROLLBACK`)
       throw err
     } finally {
       tx.release()
@@ -326,9 +326,9 @@ WHERE nft.id = $1`,
         return Err('This nft is not yet for sale')
       }
 
-      tx.query('COMMIT')
+      await tx.query('COMMIT')
     } catch (err) {
-      tx.query('ROLLBACK')
+      await tx.query('ROLLBACK')
       throw err
     } finally {
       tx.release()
