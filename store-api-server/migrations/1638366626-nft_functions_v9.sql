@@ -20,6 +20,9 @@ BEGIN
   IF order_direction NOT IN ('asc', 'desc') THEN
     RAISE EXCEPTION 'nft_ids_filtered(): invalid order_direction';
   END IF;
+  IF NOT (availability <@ '{soldOut, onSale, upcoming}'::text[]) THEN
+    RAISE EXCEPTION 'nft_ids_filtered(): invalid availability';
+  END IF;
   RETURN QUERY EXECUTE '
     SELECT
       nft.id as nft_id,
