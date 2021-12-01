@@ -149,7 +149,7 @@ WHERE address = $1
       page: 1,
       pageSize: 1,
       orderBy: 'id',
-      order: 'asc',
+      orderDirection: 'asc',
       firstRequestAt: undefined,
       categories: undefined,
       address: address,
@@ -231,6 +231,12 @@ WHERE session_id = $1
     }
 
     const nftIds = await this.getCartNftIds(cartMeta.id)
+    if (nftIds.length === 0) {
+      return {
+        nfts: [],
+        expiresAt: undefined,
+      }
+    }
     return {
       nfts: await this.nftService.findByIds(nftIds, 'nft_id', 'asc'),
       expiresAt: cartMeta.expiresAt,
@@ -287,7 +293,7 @@ WHERE cart_session_id = $1`,
     return qryRes.rows.map((row: any) => row['nft_id'])
   }
 
-  async cartAdd(session: string, nftId: number): Promise<boolean> {
+  async cartAdd(session: string, nftId: number): Promise<Result<{}, string>> {
     const cartMeta = await this.touchCart(session)
     const tx = await this.conn.connect()
     try {
@@ -305,15 +311,20 @@ VALUES ($1, $2)`,
         `
 SELECT
   (SELECT reserved + owned FROM nft_editions_locked($1)) AS editions_locked,
-  nft.editions_size
+  nft.editions_size,
+  nft.launch_at
 FROM nft
 WHERE nft.id = $1`,
         [nftId],
       )
       if (qryRes.rows[0]['editions_locked'] > qryRes.rows[0]['editions_size']) {
         tx.query('ROLLBACK')
-        return false
+        return Err('All editions of this nft have been reserved/bought')
       }
+      if (qryRes.rows[0]['launch_at'] > new Date()) {
+        return Err('This nft is not yet for sale')
+      }
+
       tx.query('COMMIT')
     } catch (err) {
       tx.query('ROLLBACK')
@@ -323,7 +334,7 @@ WHERE nft.id = $1`,
     }
 
     await this.resetCartExpiration(cartMeta.id)
-    return true
+    return Ok({})
   }
 
   async cartRemove(session: string, nftId: number): Promise<boolean> {

@@ -14,7 +14,7 @@ export class PaginationParams {
 
   @IsString()
   @IsOptional()
-  order: string = 'asc'
+  orderDirection: string = 'asc'
 
   @IsString()
   @IsOptional()

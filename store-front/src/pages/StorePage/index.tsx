@@ -13,7 +13,6 @@ import { CustomSelect } from '../../design-system/atoms/Select'
 import { Typography } from '../../design-system/atoms/Typography'
 import { useLocation, useHistory } from 'react-router'
 import { toast } from 'react-toastify'
-import { HistoryOutlined } from '@mui/icons-material'
 
 interface ParamTypes {
     width?: any
@@ -377,8 +376,13 @@ const StorePage = () => {
                 params: {
                     pageSize: 12,
                     page: pageReset !== 0 ? pageReset : selectedPage,
+<<<<<<< HEAD
                     orderBy: selectedSort.orderBy ?? 'createdAt',
                     orderDirection: selectedSort.orderDirection ?? 'desc',
+=======
+                    orderBy: orderBy ?? 'createdAt',
+                    orderDirection: orderDirection ?? 'desc',
+>>>>>>> staging
                     priceAtLeast: priceFilterRange[0] ?? maxPriceFilterRange[0],
                     priceAtMost: priceFilterRange[1] ?? maxPriceFilterRange[1],
                 },
