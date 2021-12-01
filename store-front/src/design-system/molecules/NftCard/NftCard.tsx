@@ -6,6 +6,7 @@ import { useHistory } from 'react-router-dom'
 import styled from '@emotion/styled'
 import { Box } from '@mui/system'
 import TezosLogo from '../../atoms/TezosLogo/TezosLogo'
+import { useEffect, useState } from 'react'
 
 export interface NftCardProps {
     loading?: boolean
@@ -16,6 +17,7 @@ export interface NftCardProps {
     ipfsHash?: string
     openFilters?: boolean
     dataUri?: string
+    launchAt?: number
     editionsAvailable?: number
 }
 
@@ -74,21 +76,22 @@ const StyledSkeleton = styled(Skeleton)`
     }
 `
 
-const StyledImg = styled.img<{ theme?: Theme }>`
+const StyledImg = styled.img<{ theme?: Theme; willDrop: boolean }>`
     position: absolute;
     width: 100%;
     height: -webkit-fill-available;
     object-position: center center;
     object-fit: cover;
     height: 100%;
+    opacity: ${(props) => (props.willDrop ? '0.4' : '1' )} !important;
 `
 
-const AvailabilityWrapper = styled.div<{ inStock: boolean }>`
+const AvailabilityWrapper = styled.div<{ inStock: boolean; willDrop: boolean }>`
     position: absolute;
     top: 1rem;
     right: 1rem;
 
-    background-color: ${(props) => (props.inStock ? '#00ca00' : 'red')};
+    background-color: ${(props) => (props.inStock ? props.willDrop ? '#136dff' : '#00ca00' : 'red')};
 
     padding-left: 0.5rem;
     padding-right: 0.5rem;
@@ -101,7 +104,22 @@ const AvailabilityWrapper = styled.div<{ inStock: boolean }>`
 export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
     const history = useHistory()
     const theme = useTheme()
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
+    const [launchTime, setLaunchTime] = useState<number>()
+
+    useEffect(() => {
+        if (props.launchAt) {
+            setLaunchTime(new Date(props.launchAt).getTime() - new Date().getTime())
+        }
+    }, [props.launchAt])
+
+    useEffect(() => {
+        if (props.launchAt) {
+            setTimeout(() => {
+                setLaunchTime(new Date(props.launchAt!).getTime() - new Date().getTime())
+            }, 1000)
+        }
+    }, [launchTime])
 
     const handleRedirect = (path: string) => {
         history.push(path)
@@ -126,6 +144,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     data-object-fit="cover"
                     src={props.dataUri}
                     alt="random"
+                    willDrop={!launchTime ? false : launchTime > 0}
                 />
             </StyledImgWrapper>
 
@@ -140,21 +159,24 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
             >
                 <AvailabilityWrapper
                     inStock={(props.editionsAvailable ?? 0) > 0}
+                    willDrop={!launchTime ? false : launchTime > 0}
                 >
                     <Typography weight="SemiBold" size="body2" color="white">
                         {(props.editionsAvailable ?? 0) > 0
-                            ? 'In stock'
+                            ? !launchTime ? false : launchTime > 0 ?
+                                'Drop'
+                                : 'In stock'
                             : 'Sold out'}
                     </Typography>
                 </AvailabilityWrapper>
                 <StyledBioWrapper>
-                    <Typography weight="SemiBold" size="h4">
+                    <Typography weight="SemiBold" size="h3">
                         {props.name}
                     </Typography>
 
                     <Box flexGrow="1" marginBottom=".5rem">
-                        <Typography weight="Light" size="body">
-                            Long Artist name here
+                        <Typography weight="Light" size="body" noWrap>
+                            {props.ipfsHash}
                         </Typography>
                     </Box>
                 </StyledBioWrapper>
@@ -166,7 +188,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     width="100%"
                 >
                     <Typography weight="Light" size="body">
-                        Remaining time
+                        {launchTime && launchTime > 0 && `${new Date(launchTime).getDate()} days - ${new Date(launchTime).getHours()} : ${new Date(launchTime).getMinutes()} : ${new Date(launchTime).getSeconds()}` }
                     </Typography>
 
                     <Box display="flex" flexDirection="row" marginLeft="auto">

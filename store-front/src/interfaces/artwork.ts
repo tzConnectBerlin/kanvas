@@ -13,4 +13,5 @@ export interface INft {
     creator?: string
     startDate?: string
     editionsAvailable?: string
+    launchAt: number
 }

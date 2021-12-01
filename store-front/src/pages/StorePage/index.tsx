@@ -227,7 +227,6 @@ const StorePage = () => {
                 selectedSort.orderDirection,
             )
         }
-
         history.push({ search: pageParam.toString() })
     }, [selectedSort])
 
@@ -243,7 +242,8 @@ const StorePage = () => {
 
         history.push({ search: pageParam.toString() })
 
-        if (selectedFilters.length === 0) {
+        if (selectedFilters.length === 0 && JSON.stringify(maxPriceFilterRange) ===
+            JSON.stringify(priceFilterRange)) {
             getNfts({
                 withCredentials: true,
                 params: {
@@ -314,7 +314,8 @@ const StorePage = () => {
     }, [])
 
     useEffect(() => {
-        if (selectedFilters.length > 0) {
+        if (selectedFilters.length > 0 || JSON.stringify(maxPriceFilterRange) !==
+        JSON.stringify(priceFilterRange)) {
             let pageParam = new URLSearchParams(search)
 
             if (pageParam.get('categories')) {

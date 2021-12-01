@@ -9,7 +9,6 @@ import { FC, useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Stack, Theme } from '@mui/material'
 import { INft } from '../../../interfaces/artwork'
-import { Box } from '@mui/system'
 import { useHistory } from 'react-router-dom'
 
 interface ShoppingCartProps {

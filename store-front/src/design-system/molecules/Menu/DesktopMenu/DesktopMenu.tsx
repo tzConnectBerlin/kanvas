@@ -68,7 +68,7 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
                         </StyledLink>
 
                         <StyledLink
-                            to="/store"
+                            to="/store?orderBy=createdAt&orderDirection=desc"
                             isSearchOpen={props.isSearchOpen}
                         >
                             <Typography
