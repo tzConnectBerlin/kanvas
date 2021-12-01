@@ -61,10 +61,13 @@ export class NftController {
       throw new HttpException('No filters specified', HttpStatus.BAD_REQUEST)
     }
 
-    if (filterAvailability) {
+    if (typeof params.availability !== 'undefined') {
       if (
-        !['upcoming', 'onSale', 'soldOut'].some(
-          (elem) => elem === params.availability,
+        params.availability.some(
+          (availabilityEntry: string) =>
+            !['upcoming', 'onSale', 'soldOut'].some(
+              (elem) => elem === availabilityEntry,
+            ),
         )
       ) {
         throw new HttpException(

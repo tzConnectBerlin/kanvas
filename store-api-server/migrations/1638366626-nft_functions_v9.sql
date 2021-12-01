@@ -10,7 +10,7 @@ ALTER FUNCTION nft_ids_filtered RENAME TO __nft_ids_filtered_v9;
 CREATE FUNCTION nft_ids_filtered(
     address TEXT, categories INTEGER[],
     price_at_least NUMERIC, price_at_most NUMERIC,
-    availability TEXT,
+    availability TEXT[],
     order_by TEXT, order_direction TEXT,
     "offset" INTEGER, "limit" INTEGER,
     until TIMESTAMP WITHOUT TIME ZONE)
@@ -37,21 +37,21 @@ BEGIN
       AND ($4 IS NULL OR nft.price >= $4)
       AND ($5 IS NULL OR nft.price <= $5)
       AND ($6 IS NULL OR (
-        CASE
-          WHEN $6 = ' || quote_literal('onSale') || '
-            THEN nft.launch_at <= now() AT TIME ZONE ' || quote_literal('UTC') || '
-             AND (
-                SELECT reserved + owned FROM nft_editions_locked(nft.id)
-             ) < nft.editions_size
-          WHEN $6 = ' || quote_literal('soldOut') || '
-            THEN (
-                SELECT reserved + owned FROM nft_editions_locked(nft.id)
-            ) >= nft.editions_size
-          WHEN $6 = ' || quote_literal('upcoming') || '
-            THEN nft.launch_at > now() AT TIME ZONE ' || quote_literal('UTC') || '
-          ELSE false
-        END
-      ))
+            (' || quote_literal('onSale') || ' = ANY($6) AND (
+                nft.launch_at <= now() AT TIME ZONE ' || quote_literal('UTC') || '
+                AND (
+                   SELECT reserved + owned FROM nft_editions_locked(nft.id)
+                ) < nft.editions_size
+            )) OR
+            (' || quote_literal('soldOut') || ' = ANY($6) AND (
+                (
+                  SELECT reserved + owned FROM nft_editions_locked(nft.id)
+                ) >= nft.editions_size
+            )) OR
+            (' || quote_literal('upcoming') || ' = ANY($6) AND (
+              nft.launch_at > now() AT TIME ZONE ' || quote_literal('UTC') || '
+            ))
+          ))
     GROUP BY nft.id
     ORDER BY ' || quote_ident(order_by) || ' ' || order_direction || '
     OFFSET $7

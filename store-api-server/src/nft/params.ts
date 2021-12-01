@@ -50,9 +50,10 @@ export class FilterParams extends PaginationParams {
   @IsOptional()
   priceAtMost?: number
 
-  @IsString()
+  @IsArray()
+  @Transform(({ value }) => (value ? parseStringArray(value, ',') : undefined))
   @IsOptional()
-  availability?: string
+  availability?: string[]
 }
 
 export class SearchParam {

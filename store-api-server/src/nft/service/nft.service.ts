@@ -88,6 +88,7 @@ LIMIT $3
       ['price', 'price'],
       ['views', 'view_count'],
     ])
+    console.log(params.availability)
 
     const orderBy = orderByMapping.get(params.orderBy)
     if (typeof orderBy === 'undefined') {
