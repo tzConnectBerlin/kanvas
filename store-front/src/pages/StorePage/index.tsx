@@ -28,7 +28,7 @@ const StyledStack = styled(Stack)`
         padding: 0 1.5rem 1rem;
     }
 `
-const StyledContentStack = styled(Stack)<ParamTypes>`
+const StyledContentStack = styled(Stack) <ParamTypes>`
     flex-direction: row;
     width: 100%;
 
@@ -36,12 +36,12 @@ const StyledContentStack = styled(Stack)<ParamTypes>`
         flex-direction: column;
     }
 `
-const StyledListIcon = styled(ListIcon)<{ theme?: Theme }>`
+const StyledListIcon = styled(ListIcon) <{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.text.primary};
     padding-right: 1rem;
 `
 
-const StyledPagination = styled(Pagination)<{
+const StyledPagination = styled(Pagination) <{
     theme?: Theme
     display: boolean
 }>`
@@ -55,7 +55,7 @@ const StyledPagination = styled(Pagination)<{
 
     .MuiPaginationItem-root.Mui-selected {
         background-color: ${(props) =>
-            props.theme.palette.background.default} !important;
+        props.theme.palette.background.default} !important;
         border: 1px solid ${(props) => props.theme.palette.text.primary} !important;
     }
 
@@ -66,12 +66,13 @@ const StyledPagination = styled(Pagination)<{
 `
 
 const StorePage = () => {
+    const location = useLocation()
     const search = useLocation().search
     const history = useHistory()
 
     const categories = new URLSearchParams(search).get('categories')
-    const orderBy : 'createdAt' | 'name' | 'price' = new URLSearchParams(search).get('orderBy') as 'createdAt' | 'name' | 'price'
-    const orderDirection : 'asc' | 'desc' = new URLSearchParams(search).get('orderDirection') as 'asc' | 'desc'
+    const orderBy: 'createdAt' | 'name' | 'price' = new URLSearchParams(search).get('orderBy') as 'createdAt' | 'name' | 'price'
+    const orderDirection: 'asc' | 'desc' = new URLSearchParams(search).get('orderDirection') as 'asc' | 'desc'
     const page = new URLSearchParams(search).get('page')
     const priceAtLeast = new URLSearchParams(search).get('priceAtLeast')
     const priceAtMost = new URLSearchParams(search).get('priceAtMost')
@@ -104,7 +105,10 @@ const StorePage = () => {
     // Is filter open ?
     const [filterOpen, setFilterOpen] = useState(true)
 
-    const [selectedSort, setSelectedSort] = useState<{orderBy: 'price' | 'name' | 'createdAt', orderDirection: 'asc' | 'desc'}>({orderBy: orderBy ?? 'createdAt', orderDirection: orderDirection ?? 'desc'})
+    const [selectedSort, setSelectedSort] = useState<{ orderBy: 'price' | 'name' | 'createdAt', orderDirection: 'asc' | 'desc' }>({
+        orderBy: orderBy,
+        orderDirection: orderDirection
+    })
     const [selectedFilters, setSelectedFilters] = useState<any[]>([])
 
     const [availableFilters, setAvailableFilters] = useState<any>()
@@ -153,7 +157,7 @@ const StorePage = () => {
         const delayedSearch = setTimeout(() => {
             if (
                 JSON.stringify(maxPriceFilterRange) !==
-                    JSON.stringify(priceFilterRange) &&
+                JSON.stringify(priceFilterRange) &&
                 firstCallMade
             ) {
                 getFilteredNfts({
@@ -162,8 +166,8 @@ const StorePage = () => {
                         page: 1,
                         pageSize: 12,
                         categories: selectedFilters.join(','),
-                        orderBy: orderBy ?? 'createdAt',
-                        orderDirection: orderDirection ?? 'desc',
+                        orderBy: selectedSort.orderBy ?? 'createdAt',
+                        orderDirection: selectedSort.orderDirection ?? 'desc',
                         priceAtLeast:
                             priceFilterRange[0] ?? maxPriceFilterRange[0],
                         priceAtMost:
@@ -205,7 +209,7 @@ const StorePage = () => {
     useEffect(() => {
         let pageParam = new URLSearchParams(search)
 
-        if(pageParam.get('orderBy')) {
+        if (pageParam.get('orderBy')) {
             pageParam.set(
                 'orderBy',
                 selectedSort.orderBy,
@@ -224,7 +228,8 @@ const StorePage = () => {
                 selectedSort.orderDirection,
             )
         }
-        history.push({search: pageParam.toString()})
+
+        history.push({ search: pageParam.toString() })
     }, [selectedSort])
 
     const handlePaginationChange = (event: any, page: number) => {
@@ -246,8 +251,8 @@ const StorePage = () => {
                     page: page,
                     pageSize: 12,
                     categories: selectedFilters.join(','),
-                    orderBy: orderBy ?? 'createdAt',
-                    orderDirection: orderDirection ?? 'desc',
+                    orderBy: selectedSort.orderBy ?? 'createdAt',
+                    orderDirection: selectedSort.orderDirection ?? 'desc',
                     priceAtLeast: priceFilterRange[0] ?? maxPriceFilterRange[0],
                     priceAtMost: priceFilterRange[1] ?? maxPriceFilterRange[1],
                 },
@@ -259,8 +264,8 @@ const StorePage = () => {
                     page: page,
                     pageSize: 12,
                     categories: selectedFilters.join(','),
-                    orderBy: orderBy ?? 'createdAt',
-                    orderDirection: orderDirection ?? 'desc',
+                    orderBy: selectedSort.orderBy ?? 'createdAt',
+                    orderDirection: selectedSort.orderDirection ?? 'desc',
                     priceAtLeast: priceFilterRange[0] ?? maxPriceFilterRange[0],
                     priceAtMost: priceFilterRange[1] ?? maxPriceFilterRange[1],
                 },
@@ -304,6 +309,7 @@ const StorePage = () => {
                 categories.split(',').map((categoryId) => Number(categoryId)),
             )
         } else {
+
             history.push({ search: pageParam.toString() })
         }
     }, [])
@@ -331,8 +337,8 @@ const StorePage = () => {
                     page: 1,
                     pageSize: 12,
                     categories: selectedFilters.join(','),
-                    orderBy: orderBy ?? 'createdAt',
-                    orderDirection: orderDirection ?? 'desc',
+                    orderBy: selectedSort.orderBy ?? 'createdAt',
+                    orderDirection: selectedSort.orderDirection ?? 'desc',
                     priceAtLeast:
                         priceFilterRange[0] ??
                         Number(priceAtLeast) ??
@@ -354,14 +360,25 @@ const StorePage = () => {
 
             let pageReset = 0
 
+            if (selectedSort.orderBy || selectedSort.orderDirection) {
+                pageParam.set(
+                    'orderBy',
+                    selectedSort.orderBy,
+                )
+                pageParam.set(
+                    'orderDirection',
+                    selectedSort.orderDirection,
+                )
+            }
+
             history.push({ search: pageParam.toString() })
             getNfts({
                 withCredentials: true,
                 params: {
                     pageSize: 12,
                     page: pageReset !== 0 ? pageReset : selectedPage,
-                    orderBy: orderBy ?? 'createdAt',
-                    orderDirection: orderDirection ?? 'desc',
+                    orderBy: selectedSort.orderBy ?? 'createdAt',
+                    orderDirection: selectedSort.orderDirection ?? 'desc',
                     priceAtLeast: priceFilterRange[0] ?? maxPriceFilterRange[0],
                     priceAtMost: priceFilterRange[1] ?? maxPriceFilterRange[1],
                 },
@@ -391,11 +408,10 @@ const StorePage = () => {
                         onClick={() => setFilterOpen(!filterOpen)}
                         aria-label="loading"
                         icon={<StyledListIcon />}
-                        label={`Filters ${
-                            selectedFilters.length > 0
+                        label={`Filters ${selectedFilters.length > 0
                                 ? `  - ${selectedFilters.length}`
                                 : ''
-                        }`}
+                            }`}
                         disabled={nftsResponse.loading}
                     />
 
@@ -427,7 +443,7 @@ const StorePage = () => {
                         open={filterOpen}
                         nfts={
                             selectedFilters.length === 0 &&
-                            JSON.stringify(maxPriceFilterRange) ===
+                                JSON.stringify(maxPriceFilterRange) ===
                                 JSON.stringify(priceFilterRange)
                                 ? nftsResponse.data?.nfts
                                 : nftsFilteredResponse.data?.nfts
@@ -445,7 +461,7 @@ const StorePage = () => {
                         page={selectedPage}
                         count={
                             selectedFilters.length === 0 &&
-                            JSON.stringify(maxPriceFilterRange) ===
+                                JSON.stringify(maxPriceFilterRange) ===
                                 JSON.stringify(priceFilterRange)
                                 ? nftsResponse.data?.numberOfPages
                                 : nftsFilteredResponse.data?.numberOfPages
