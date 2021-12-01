@@ -31,7 +31,7 @@ export interface HeaderProps {
     setLoginOpen: Function
 }
 
-const StyledBox = styled(Box)<{ theme?: Theme }>`
+const StyledBox = styled(Box) <{ theme?: Theme }>`
     margin-bottom: -6rem;
     color: ${(props) => props.theme.palette.text.primary};
 
@@ -74,13 +74,13 @@ export const Header: FC<HeaderProps> = ({
     const handleCloseModal = () => props.setLoginOpen(false)
 
     // const loggedUser = {data: undefined, loading: false}
-    const [loggedUser] = useAxios({
+    const [loggedUser, getLoggedUser] = useAxios({
         url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logged_user',
         withCredentials: true,
         headers: {
             Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,
         },
-    })
+    }, { manual: true })
 
     const [logoutUserResponse, logoutUser] = useAxios(
         {
@@ -111,7 +111,7 @@ export const Header: FC<HeaderProps> = ({
                     withCredentials: true,
                 })
             })
-            .catch((err) => {})
+            .catch((err) => { })
     }
 
     const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -127,6 +127,10 @@ export const Header: FC<HeaderProps> = ({
             localStorage.removeItem('Kanvas - address')
         }
     }, [loggedUser])
+
+    useEffect(() => {
+        getLoggedUser()
+    }, [])
 
     return (
         <StyledBox

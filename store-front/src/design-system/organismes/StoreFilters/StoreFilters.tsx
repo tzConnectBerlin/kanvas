@@ -64,6 +64,8 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
     setPriceFilterRange: Function
     minRange: number
     maxRange: number
+    triggerPriceFilter: () => void
+    setFilterSliding: (input: boolean) => void
 }
 
 const StyledUl = styled.ul<StyledStoreFiltersProps>`
@@ -159,6 +161,8 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                         maxRange={props.maxRange}
                         range={props.priceFilterRange}
                         setRange={props.setPriceFilterRange}
+                        triggerPriceFilter={props.triggerPriceFilter}
+                        setFilterSliding={props.setFilterSliding}
                     />
                 )}
             </StyledLi>

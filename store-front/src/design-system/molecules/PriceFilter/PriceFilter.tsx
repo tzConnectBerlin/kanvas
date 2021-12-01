@@ -9,6 +9,8 @@ interface PriceFilterProps {
     maxRange: number
     range: [number, number]
     setRange: Function
+    triggerPriceFilter: () => void
+    setFilterSliding: (input: boolean) => void
 }
 
 const StyledTextField = styled(TextField)<{ theme?: Theme }>`
@@ -85,6 +87,8 @@ export const PriceFilter: FC<PriceFilterProps> = ({ ...props }) => {
                 onChange={(_, newValues) =>
                     props.setRange(newValues as [number, number])
                 }
+                onMouseUp={() => { props.triggerPriceFilter(); props.setFilterSliding(false)}}
+                onMouseDown={() => props.setFilterSliding(true)}
                 valueLabelDisplay="auto"
                 getAriaValueText={() => 'valuetext'}
             />
