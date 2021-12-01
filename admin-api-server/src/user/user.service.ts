@@ -32,7 +32,7 @@ export class UserService {
 
   async findOne(id: number) {
     const result = await this.db.query<User>(
-      'SELECT id, user_name, address, signed_payload FROM kanvas_user WHERE id = ? ',
+      'SELECT id, user_name, address, signed_payload FROM kanvas_user WHERE id = $1 ',
       [id],
     );
     return result.rows;
