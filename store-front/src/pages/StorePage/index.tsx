@@ -113,6 +113,8 @@ const StorePage = () => {
 
     const [availableFilters, setAvailableFilters] = useState<any>()
 
+    const [availabilityFilter, setAvailabilityFilter] = useState<string[]>([])
+
     useEffect(() => {
         let pageParam = new URLSearchParams(search)
 
@@ -169,6 +171,7 @@ const StorePage = () => {
                     pageParam.get('priceAtLeast') ?? priceFilterRange[0] ?? maxPriceFilterRange[0],
                 priceAtMost:
                     pageParam.get('priceAtMost') ?? priceFilterRange[1] ?? maxPriceFilterRange[1],
+                availability: availabilityFilter.length === 0 ? 'onSale,soldOut,upcoming' : availabilityFilter.join(',')
             },
         })
 
@@ -235,7 +238,7 @@ const StorePage = () => {
         history.push({ search: pageParam.toString() })
 
         if (selectedFilters.length === 0 && JSON.stringify(maxPriceFilterRange) ===
-            JSON.stringify(priceFilterRange)) {
+            JSON.stringify(priceFilterRange) || availabilityFilter.length > 0) {
             getNfts({
                 withCredentials: true,
                 params: {
@@ -259,6 +262,7 @@ const StorePage = () => {
                     orderDirection: selectedSort.orderDirection ?? 'desc',
                     priceAtLeast: priceFilterRange[0] ?? maxPriceFilterRange[0],
                     priceAtMost: priceFilterRange[1] ?? maxPriceFilterRange[1],
+                    availability: availabilityFilter.length === 0 ? 'onSale,soldOut,upcoming' : availabilityFilter.join(',')
                 },
             })
         }
@@ -295,6 +299,13 @@ const StorePage = () => {
             triggerPriceFilter()
         }
 
+
+        if (!pageParam.get('orderBy')) {
+            pageParam.append('orderBy', 'createdAt')
+        } if (!pageParam.get('orderDirection')) {
+            pageParam.append('orderDirection', 'desc')
+        }
+
         // categories
         if (categories) {
             setSelectedFilters(
@@ -308,13 +319,15 @@ const StorePage = () => {
 
     useEffect(() => {
         if (selectedFilters.length > 0 || JSON.stringify(maxPriceFilterRange) !==
-            JSON.stringify(priceFilterRange)) {
+            JSON.stringify(priceFilterRange) || availabilityFilter.length > 0) {
             let pageParam = new URLSearchParams(search)
 
             if (pageParam.get('categories')) {
                 pageParam.set('categories', selectedFilters.join(','))
-            } else {
+            } else if (selectedFilters.length > 0 && !pageParam.get('categories')) {
                 pageParam.append('categories', selectedFilters.join(','))
+            } else if (selectedFilters.length === 0) {
+                pageParam.delete('categories')
             }
 
             if (firstCallMade) {
@@ -340,6 +353,7 @@ const StorePage = () => {
                         priceFilterRange[1] ??
                         Number(priceAtMost) ??
                         maxPriceFilterRange[1],
+                    availability: availabilityFilter.length === 0 ? 'onSale,soldOut,upcoming' : availabilityFilter.join(',')
                 },
             })
         } else {
@@ -377,7 +391,21 @@ const StorePage = () => {
                 },
             })
         }
-    }, [selectedFilters, selectedSort])
+    }, [selectedFilters, selectedSort, availabilityFilter])
+
+    useEffect(() => {
+        let pageParam = new URLSearchParams(search)
+        if (availabilityFilter.length === 0) {
+            pageParam.delete('availability')
+        } else {
+            if (!pageParam.get('availability')) {
+                pageParam.append('availability', availabilityFilter.join(','))
+            } else {
+                pageParam.set('availability', availabilityFilter.join(','))
+            }
+        }
+        history.push({search: pageParam.toString() })
+    }, [availabilityFilter])
 
     return (
         <PageWrapper>
@@ -432,6 +460,8 @@ const StorePage = () => {
                         maxRange={Number(maxPriceFilterRange[1])}
                         triggerPriceFilter={triggerPriceFilter}
                         setFilterSliding={setFilterSliding}
+                        availabilityFilter={availabilityFilter}
+                        setAvailabilityFilter={setAvailabilityFilter}
                     />
 
                     <NftGrid

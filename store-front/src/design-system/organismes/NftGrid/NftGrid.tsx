@@ -1,8 +1,7 @@
 import styled from '@emotion/styled'
-import FlexSpacer from '../../atoms/FlexSpacer'
 import Typography from '../../atoms/Typography'
 
-import { FC } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { Grid, Stack, useMediaQuery, useTheme } from '@mui/material'
 import { Layouts } from 'react-grid-layout'
 
@@ -38,9 +37,28 @@ const StyledDiv = styled.div`
 `
 
 export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
+
+    const [gridNfts, setGridNfts] = useState<INft[]>()
+    const [comfortLoading, setComfortLoading] = useState<boolean>(false)
+
+    useEffect(() => {
+        if (props.nfts) {
+            setGridNfts(props.nfts)
+        }
+    }, [props.nfts])
+
+    useEffect(() => {
+        if (props.loading) {
+            setComfortLoading(true)
+            setTimeout(() => {
+                setComfortLoading(false)
+            }, 400)
+        }
+    }, [props.loading])
+
     return (
         <StyledDiv>
-            {props.nfts && props.nfts.length > 0 ? (
+            {gridNfts && gridNfts.length > 0 ? (
                 <StyledGrid
                     container
                     md={props.open ? 9 : 6}
@@ -49,7 +67,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                     spacing={24}
                     columnSpacing={{ xs: 3, sm: 4 }}
                 >
-                    {props.nfts.map((nft) => (
+                    {gridNfts.map((nft) => (
                         <Grid
                             item
                             lg={props.open ? 4 : 3}
@@ -72,7 +90,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                         </Grid>
                     ))}
                 </StyledGrid>
-            ) : props.loading ? (
+            ) : props.loading || comfortLoading ? (
                 <StyledGrid
                     container
                     md={props.open ? 9 : 6}

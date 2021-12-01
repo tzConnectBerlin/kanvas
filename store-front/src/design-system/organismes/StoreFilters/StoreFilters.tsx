@@ -3,7 +3,7 @@ import FlexSpacer from '../../atoms/FlexSpacer'
 import Typography from '../../atoms/Typography'
 import TreeView from '../../molecules/TreeView/TreeView'
 
-import { Stack } from '@mui/material'
+import { Checkbox, Stack, Theme } from '@mui/material'
 import { FC, useState } from 'react'
 import PriceFilter from '../../molecules/PriceFilter'
 
@@ -64,6 +64,8 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
     setPriceFilterRange: Function
     minRange: number
     maxRange: number
+    availabilityFilter: string[]
+    setAvailabilityFilter: (input: string[]) => void
     triggerPriceFilter: () => void
     setFilterSliding: (input: boolean) => void
 }
@@ -89,6 +91,12 @@ const StyledLi = styled.li<StyledStoreFiltersProps>`
     border-top: 1px solid #c4c4c4;
 
     height: auto;
+`
+
+const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`
+    &.Mui-checked {
+        color: ${(props) => props.theme.palette.text.primary} !important;
+    }
 `
 
 export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
@@ -146,6 +154,75 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                     setSelectedFilters={props.setSelectedFilters}
                     collapsed={activeRef.indexOf('Categories') !== -1}
                 />
+            </StyledLi>
+            <StyledLi openFilters={props.openFilters} collapsed={activeRef.indexOf('Availability') !== -1}>
+                <Filter
+                    name="Availability"
+                    active={false}
+                    collapsed={activeRef.indexOf('Availability') !== -1}
+                    setCollapsed={handleListItemClick}
+                />
+
+                {activeRef.indexOf('Availability') === -1 && (
+                    <Stack direction="column" sx={{ marginBottom: '1rem' }}>
+                        <Stack direction="row">
+                            <StyledCheckBox
+                                checked={props.availabilityFilter.indexOf('onSale') !== -1 && props.availabilityFilter.length !== 0}
+                                onClick={() => {
+                                    props.availabilityFilter.indexOf('onSale') === -1 ?
+                                        props.setAvailabilityFilter([...props.availabilityFilter, 'onSale'])
+                                        :
+                                        props.setAvailabilityFilter(props.availabilityFilter.filter(param => param !== 'onSale'))}
+                                    }
+                                inputProps={{ 'aria-label': 'controlled' }}
+                                disableRipple
+                            />
+                            <Typography
+                                size="h5"
+                                weight="Light"
+                            >
+                                On sale
+                            </Typography>
+                        </Stack>
+                        <Stack direction="row">
+                            <StyledCheckBox
+                                checked={props.availabilityFilter.indexOf('upcoming') !== -1 && props.availabilityFilter.length !== 0}
+                                onClick={() => {
+                                    props.availabilityFilter.indexOf('upcoming') === -1 ?
+                                        props.setAvailabilityFilter([...props.availabilityFilter, 'upcoming'])
+                                        :
+                                        props.setAvailabilityFilter(props.availabilityFilter.filter(param => param !== 'upcoming'))}
+                                    }
+                                inputProps={{ 'aria-label': 'controlled' }}
+                                disableRipple
+                            />
+                            <Typography
+                                size="h5"
+                                weight="Light"
+                            >
+                                Upcoming
+                            </Typography>
+                        </Stack>
+                        <Stack direction="row">
+                            <StyledCheckBox
+                                checked={props.availabilityFilter.indexOf('soldOut') !== -1 && props.availabilityFilter.length !== 0}
+                                onClick={() => {
+                                    props.availabilityFilter.indexOf('soldOut') === -1 ?
+                                        props.setAvailabilityFilter([...props.availabilityFilter, 'soldOut'])
+                                        :
+                                        props.setAvailabilityFilter(props.availabilityFilter.filter(param => param !== 'soldOut'))}
+                                    }
+                            inputProps={{ 'aria-label': 'controlled' }}
+                            disableRipple
+                            />
+                            <Typography
+                                size="h5"
+                                weight="Light"
+                            >
+                                Sold out
+                            </Typography>
+                        </Stack>
+                    </Stack>)}
             </StyledLi>
             <StyledLi openFilters={props.openFilters}>
                 <Filter
