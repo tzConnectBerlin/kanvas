@@ -70,4 +70,13 @@ COMMIT;
 
 BEGIN;
 
+DROP FUNCTION nft_ids_filtered(
+    TEXT, INTEGER[],
+    NUMERIC, NUMERIC,
+    TEXT[],
+    TEXT, TEXT,
+    INTEGER, INTEGER,
+    TIMESTAMP WITHOUT TIME ZONE);
+ALTER FUNCTION __nft_ids_filtered_v9 RENAME TO nft_ids_filtered;
+
 COMMIT;
