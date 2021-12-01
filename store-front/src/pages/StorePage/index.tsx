@@ -13,7 +13,6 @@ import { CustomSelect } from '../../design-system/atoms/Select'
 import { Typography } from '../../design-system/atoms/Typography'
 import { useLocation, useHistory } from 'react-router'
 import { toast } from 'react-toastify'
-import { HistoryOutlined } from '@mui/icons-material'
 
 interface ParamTypes {
     width?: any
@@ -66,6 +65,7 @@ const StyledPagination = styled(Pagination) <{
 `
 
 const StorePage = () => {
+    const location = useLocation()
     const search = useLocation().search
     const history = useHistory()
 
@@ -104,7 +104,10 @@ const StorePage = () => {
     // Is filter open ?
     const [filterOpen, setFilterOpen] = useState(true)
 
-    const [selectedSort, setSelectedSort] = useState<{ orderBy: 'price' | 'name' | 'createdAt', orderDirection: 'asc' | 'desc' }>({ orderBy: orderBy ?? 'createdAt', orderDirection: orderDirection ?? 'desc' })
+    const [selectedSort, setSelectedSort] = useState<{ orderBy: 'price' | 'name' | 'createdAt', orderDirection: 'asc' | 'desc' }>({
+        orderBy: orderBy,
+        orderDirection: orderDirection
+    })
     const [selectedFilters, setSelectedFilters] = useState<any[]>([])
 
     const [availableFilters, setAvailableFilters] = useState<any>()
@@ -162,8 +165,8 @@ const StorePage = () => {
                         page: 1,
                         pageSize: 12,
                         categories: selectedFilters.join(','),
-                        orderBy: orderBy ?? 'createdAt',
-                        orderDirection: orderDirection ?? 'desc',
+                        orderBy: selectedSort.orderBy ?? 'createdAt',
+                        orderDirection: selectedSort.orderDirection ?? 'desc',
                         priceAtLeast:
                             priceFilterRange[0] ?? maxPriceFilterRange[0],
                         priceAtMost:
@@ -247,8 +250,8 @@ const StorePage = () => {
                     page: page,
                     pageSize: 12,
                     categories: selectedFilters.join(','),
-                    orderBy: orderBy ?? 'createdAt',
-                    orderDirection: orderDirection ?? 'desc',
+                    orderBy: selectedSort.orderBy ?? 'createdAt',
+                    orderDirection: selectedSort.orderDirection ?? 'desc',
                     priceAtLeast: priceFilterRange[0] ?? maxPriceFilterRange[0],
                     priceAtMost: priceFilterRange[1] ?? maxPriceFilterRange[1],
                 },
@@ -260,8 +263,8 @@ const StorePage = () => {
                     page: page,
                     pageSize: 12,
                     categories: selectedFilters.join(','),
-                    orderBy: orderBy ?? 'createdAt',
-                    orderDirection: orderDirection ?? 'desc',
+                    orderBy: selectedSort.orderBy ?? 'createdAt',
+                    orderDirection: selectedSort.orderDirection ?? 'desc',
                     priceAtLeast: priceFilterRange[0] ?? maxPriceFilterRange[0],
                     priceAtMost: priceFilterRange[1] ?? maxPriceFilterRange[1],
                 },
@@ -305,6 +308,7 @@ const StorePage = () => {
                 categories.split(',').map((categoryId) => Number(categoryId)),
             )
         } else {
+
             history.push({ search: pageParam.toString() })
         }
     }, [])
@@ -333,8 +337,8 @@ const StorePage = () => {
                     page: 1,
                     pageSize: 12,
                     categories: selectedFilters.join(','),
-                    orderBy: orderBy ?? 'createdAt',
-                    orderDirection: orderDirection ?? 'desc',
+                    orderBy: selectedSort.orderBy ?? 'createdAt',
+                    orderDirection: selectedSort.orderDirection ?? 'desc',
                     priceAtLeast:
                         priceFilterRange[0] ??
                         Number(priceAtLeast) ??
@@ -356,14 +360,25 @@ const StorePage = () => {
 
             let pageReset = 0
 
+            if (selectedSort.orderBy || selectedSort.orderDirection) {
+                pageParam.set(
+                    'orderBy',
+                    selectedSort.orderBy,
+                )
+                pageParam.set(
+                    'orderDirection',
+                    selectedSort.orderDirection,
+                )
+            }
+
             history.push({ search: pageParam.toString() })
             getNfts({
                 withCredentials: true,
                 params: {
                     pageSize: 12,
                     page: pageReset !== 0 ? pageReset : selectedPage,
-                    orderBy: orderBy ?? 'createdAt',
-                    orderDirection: orderDirection ?? 'desc',
+                    orderBy: selectedSort.orderBy ?? 'createdAt',
+                    orderDirection: selectedSort.orderDirection ?? 'desc',
                     priceAtLeast: priceFilterRange[0] ?? maxPriceFilterRange[0],
                     priceAtMost: priceFilterRange[1] ?? maxPriceFilterRange[1],
                 },
