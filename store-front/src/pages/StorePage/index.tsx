@@ -35,7 +35,7 @@ const StyledContentStack = styled(Stack)<ParamTypes>`
     flex-direction: row;
     width: 100%;
 
-    @media (max-width: 900px) {
+    @media (max-width: 874px) {
         flex-direction: column;
     }
 `

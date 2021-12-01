@@ -78,27 +78,24 @@ const BackButton = styled(ArrowBackIosNew)<StyledStoreFiltersProps>`
 const StyledSection = styled.section<StyledStoreFiltersProps>`
     display: block;
     position: relative;
-
     padding: 0 0;
     transition: width 0.2s;
-
     width: ${(props) => (props.openFilters ? '25rem' : '0')};
     margin-right: ${(props) => (props.openFilters ? '2.5rem' : '0')};
-
+    -webkit-overflow-scrolling: touch;
 
     @media (max-width: 874px) {
-        display: flex;
         flex-direction: column;
         display: none;
         max-width: ${(props) => (props.openFilters ? 100 : 0)}rem;
-        -webkit-overflow-scrolling: touch;
-        width: 100vw;
-        height: 89vh;
+        width: ${(props) => (props.openFilters ? '35%' : '0')};
+        display: flex;
+        height: 100vh;
         position: fixed;
         left: 0;
         top: 5rem;
         bottom: 0;
-        z-index: 999999;
+        z-index: 1;
 
         overflow: scroll;
 
@@ -116,37 +113,47 @@ const StyledSection = styled.section<StyledStoreFiltersProps>`
 
         transition: max-width 0.3s, width 0.3s, padding 0.5s;
     }
+
+    @media (max-width: 1100px) {
+        width: ${(props) => (props.openFilters ? 40 : 0)}%;
+    }
+
+    @media (max-width: 874px) {
+        width: ${(props) => (props.openFilters ? 100 : 0)}%;
+    }
+
+    @media (max-width: 650px) {
+        width: ${(props) => (props.openFilters ? 100 : 0)}%;
+    }
 `
 
 const StyledUl = styled.ul<StyledStoreFiltersProps>`
     display: flex;
     flex-direction: column;
     width: initial;
+    min-height: max-content;
+    height: max-content;
     margin: 4rem 0 0;
     transition: width 0.2s;
-    padding: 0.5rem 1.5rem 2.5rem;
+    padding: 0.5rem 1.5rem 0;
 
     @media (min-width: 900px) {
         height: fit-content;
-        width: ${(props) => (props.openFilters ? '25rem' : '90%')};
+        width: ${(props) => (props.openFilters ? '25rem' : '100%')};
         margin-right: ${(props) => (props.openFilters ? '2.5rem' : '0')};
+        padding: 0;
+        margin-top: 0;
     }
 `
 const StyledLi = styled.li<StyledStoreFiltersProps>`
-    cursor: pointer;
-
     display: ${(props) => (props.openFilters ? 'flex' : 'none')};
     padding-top: 1rem;
     flex-direction: column;
-
     border-top: 1px solid #c4c4c4;
-
-    height: auto;
+    height: max-content;
+    cursor: pointer;
 `
 
-const StyledFooter = styled(Stack)<StyledStoreFiltersProps>`
-    padding: 0.5rem 1.5rem 2.5rem;
-`
 const StyledHeader = styled(Stack)<StyledStoreFiltersProps>`
     position: fixed;
     width: -webkit-fill-available;
@@ -155,7 +162,14 @@ const StyledHeader = styled(Stack)<StyledStoreFiltersProps>`
 
     @media (min-width: 900px) {
         position: relative;
+        opacity: 1;
     }
+`
+
+const StyledFooter = styled(Stack)<StyledStoreFiltersProps>`
+    display: flex;
+    padding: 0.5rem 1.5rem 1rem;
+    min-height: 12rem;
 `
 export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
     const [activeRef, setActiveRef] = useState<string[]>([])
@@ -180,15 +194,13 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
         }
     }, [])
 
-    // useEffect(() => {
-    //     if (props.openFilters) {
-    //         document.body.style.overflow = 'hidden'
-    //         document.body.style.position = 'relative'
-    //         document.body.style.height = '100%'
-    //     } else {
-    //         document.body.style.overflow = 'auto'
-    //     }
-    // }, [props.openFilters])
+    useEffect(() => {
+        if (props.openFilters) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = 'auto'
+        }
+    }, [props.openFilters])
 
     return (
         <StyledSection openFilters={props.openFilters}>
@@ -267,7 +279,10 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                 )}
             </StyledHeader>
 
-            <Stack direction="column" sx={{ overflow: 'auto' }}>
+            <Stack
+                direction="column"
+                sx={{ overflow: 'auto', marginBottom: '6rem' }}
+            >
                 <StyledUl>
                     <StyledLi
                         openFilters={props.openFilters}
@@ -309,24 +324,11 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                 </StyledUl>
                 {isMobile && (
                     <>
-                        <FlexSpacer borderBottom={false} minHeight={1} />
-
-                        <StyledFooter direction="column-reverse">
-                            <CustomButton
-                                fullWidth={true}
-                                color="secondary"
-                                type="submit"
-                                label={t('filters.button.results')}
-                                onClick={() => props.setFilterOpen(false)}
-                                style={{
-                                    order: isMobile ? 99 : 0,
-                                    color: theme.palette.primary.main,
-                                    alignSelf: 'flex-start',
-                                }}
-                            ></CustomButton>
-
-                            <FlexSpacer minHeight={2} />
-
+                        <StyledFooter
+                            direction="column-reverse"
+                            minHeight="6rem"
+                        >
+                            <FlexSpacer borderBottom={false} minHeight={3} />
                             <CustomButton
                                 fullWidth={!!isMobile}
                                 color="secondary"
@@ -338,7 +340,19 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                                 }}
                             ></CustomButton>
 
-                            <FlexSpacer minHeight={2} />
+                            <CustomButton
+                                fullWidth={true}
+                                color="secondary"
+                                type="submit"
+                                label={t('filters.button.results')}
+                                onClick={() => props.setFilterOpen(false)}
+                                style={{
+                                    order: isMobile ? 99 : 0,
+                                    color: theme.palette.primary.main,
+                                    alignSelf: 'flex-start',
+                                    height: '2.5rem',
+                                }}
+                            ></CustomButton>
                         </StyledFooter>
                     </>
                 )}

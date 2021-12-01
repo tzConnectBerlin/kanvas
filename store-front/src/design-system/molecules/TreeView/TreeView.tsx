@@ -2,12 +2,13 @@ import styled from '@emotion/styled'
 import Typography from '../../atoms/Typography'
 import FlexSpacer from '../../atoms/FlexSpacer'
 
-import { Checkbox, Stack, Theme } from '@mui/material'
+import { Checkbox, Stack, Theme, useMediaQuery, useTheme } from '@mui/material'
 import { FC, useEffect, useState } from 'react'
 
 interface StyledTreeViewProps {
     open?: boolean
     theme?: Theme
+    isMobile?: Function
 }
 
 interface TreeViewProps extends StyledTreeViewProps {
@@ -23,6 +24,11 @@ const StyledDiv = styled.div<StyledTreeViewProps>`
     padding-left: 1.5rem;
     width: ${(props) => (props.open ? 'auto' : '0')};
     transition: width 0.2s;
+    min-height: 1.5rem;
+
+    @media (min-width: 900px) {
+        min-height: 3rem;
+    }
 `
 
 const StyledLi = styled.li<StyledTreeViewProps>`
@@ -30,12 +36,27 @@ const StyledLi = styled.li<StyledTreeViewProps>`
     display: ${(props) => (props.open ? 'flex' : 'none')};
     transition: width 0.2s;
     align-items: center;
-
-    height: 3rem;
     transition: width 0.2s, height 0.2s;
+    min-height: 1.5rem;
+
+    @media (min-width: 900px) {
+        min-height: 3rem;
+    }
 `
 
 const StyledCheckBox = styled(Checkbox)<{ theme?: Theme }>`
+    @media (max-width: 900px) {
+        padding: .5rem;
+
+        &:lastchild {
+            padding: .5rem;
+        }
+    }
+
+    @media (max-width: 400px) {
+        padding: .2rem;
+    }
+
     &.Mui-checked {
         color: ${(props) => props.theme.palette.text.primary} !important;
     }

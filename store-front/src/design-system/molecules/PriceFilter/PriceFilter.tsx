@@ -37,6 +37,14 @@ const StyledTextField = styled(TextField)<{ theme?: Theme }>`
 `
 
 const StyledSlider = styled(Slider)`
+    margin: 0.8rem 3.33% !important;
+    width: 93.3%;
+
+    @media (min-width: 900px) {
+        width: 90%;
+        margin: 0.8rem !important;
+    }
+
     .MuiSlider-valueLabelCircle {
         display: none;
     }
