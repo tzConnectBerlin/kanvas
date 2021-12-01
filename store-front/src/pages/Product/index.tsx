@@ -3,7 +3,7 @@ import styled from '@emotion/styled'
 import FlexSpacer from '../../design-system/atoms/FlexSpacer'
 import PageWrapper from '../../design-system/commons/PageWrapper'
 
-import { FC, useEffect } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CardMedia, Skeleton, Stack, Theme } from '@mui/material'
 import { CustomButton } from '../../design-system/atoms/Button'
@@ -76,10 +76,23 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
         }
     }
 
+    const [launchTime, setLaunchTime] = useState<number>()
+
     useEffect(() => {
+        if (nftResponse.data) {
+            setLaunchTime(new Date(nftResponse.data.launchAt * 1000).getTime() - new Date().getTime())
+        }
         if (nftResponse.error) {
         }
     }, [nftResponse])
+
+    useEffect(() => {
+        if (nftResponse.data) {
+            setTimeout(() => {
+                setLaunchTime(new Date(nftResponse.data.launchAt! * 1000).getTime() - new Date().getTime())
+            }, 1000)
+        }
+    }, [launchTime])
 
     return (
         <PageWrapper>
@@ -190,7 +203,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             weight="SemiBold"
                             sx={{ pt: 4 }}
                         >
-                            {nftResponse.loading
+                            {nftResponse.loading && (!launchTime || launchTime < 0)
                                 ? undefined
                                 : t('product.description.part_3')}
                         </Typography>
@@ -201,8 +214,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             sx={{ pt: 2, mb: 1 }}
                         >
                             {nftResponse.loading
-                                ? undefined
-                                : nftResponse.data?.startDate}
+                                ? <Skeleton width="8rem" height="2rem" />
+                                : launchTime && launchTime > 0 ? `${new Date(launchTime).getDate()} days - ${new Date(launchTime).getHours()} : ${new Date(launchTime).getMinutes()} : ${new Date(launchTime).getSeconds()}` : 'NFT has been dropped'}
                         </Typography>
 
                         <Typography
@@ -234,12 +247,15 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             size="medium"
                             onClick={() => handleAddToBasket()}
                             label={
-                                props.nftsInCart.filter(
-                                    (nft) =>
-                                        Number(nft.id) === nftResponse.data?.id,
-                                ).length > 0
-                                    ? 'Already in cart'
-                                    : t('product.button_1')
+                                launchTime! > 0 ?
+                                    'Not dropped yet'
+                                    :
+                                    props.nftsInCart.filter(
+                                        (nft) =>
+                                            Number(nft.id) === nftResponse.data?.id,
+                                    ).length > 0
+                                        ? 'Already in cart'
+                                        : t('product.button_1')
                             }
                             disabled={
                                 nftResponse.loading ||
@@ -248,7 +264,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                         Number(nft.id) === nftResponse.data?.id,
                                 ).length > 0 ||
                                 Number(nftResponse.data?.editionsAvailable) ===
-                                    0
+                                0 ||
+                                (launchTime! > 0)
                             }
                         />
                     </Stack>

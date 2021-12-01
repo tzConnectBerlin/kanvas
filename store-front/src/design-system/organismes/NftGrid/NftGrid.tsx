@@ -67,6 +67,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                                 editionsAvailable={Number(
                                     nft.editionsAvailable,
                                 )}
+                                launchAt={nft.launchAt * 1000}
                             />
                         </Grid>
                     ))}
