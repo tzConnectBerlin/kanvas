@@ -246,6 +246,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                         <CustomButton
                             size="medium"
                             onClick={() => handleAddToBasket()}
+                            loading={addToCartResponse.loading}
                             label={
                                 launchTime! > 0 ?
                                     'Not dropped yet'

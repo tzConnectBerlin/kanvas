@@ -9,7 +9,7 @@ import { Pagination, Stack } from '@mui/material'
 import { IUser } from '../../interfaces/user'
 import { Animated } from 'react-animated-css'
 import { FC, useEffect, useState } from 'react'
-import { useHistory, useParams } from 'react-router'
+import { useHistory, useLocation, useParams } from 'react-router'
 import { HeaderProfile } from '../../design-system/molecules/HeaderProfile/HeaderProfile'
 import { Theme } from '@mui/material'
 
@@ -71,6 +71,7 @@ const Profile: FC<ProfileProps> = () => {
     let { userAddress } = useParams<ParamTypes>()
 
     const history = useHistory()
+    const location = useLocation<{ refresh: boolean }>()
 
     // Using the useState hook in case adding more tabs in the future
     const [selectedTab, setSelectedTab] = useState('Collection')
@@ -87,6 +88,10 @@ const Profile: FC<ProfileProps> = () => {
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/filter`,
             withCredentials: true,
+            params: {
+                address: userAddress,
+                pageSize: 12,
+            },
         },
         { manual: true },
     )

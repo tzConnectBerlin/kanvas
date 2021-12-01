@@ -101,14 +101,14 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
     )
 
     useEffect(() => {
-        if (checkoutResponse.response?.status === 204) {
+        if (checkoutResponse.loading === false && checkoutResponse.response?.status === 204) {
             toast.info('Congratulations for your purchase')
             props.listCart()
             props.closeCart()
             history.push(`/profile/${localStorage.getItem('Kanvas - address')}`)
         } else if (checkoutResponse.error?.response?.status === 401) {
+            props.listCart()
             props.setOpenLogin(true)
-            toast.info('Please login to checkout')
         }
     }, [checkoutResponse])
 
@@ -270,7 +270,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         <CustomButton
                             size="medium"
                             label="Checkout"
-                            onClick={() => checkout()}
+                            onClick={() => !checkoutResponse.loading && checkout()}
                             disabled={props.nftsInCart.length === 0}
                             loading={checkoutResponse.loading}
                             sx={{
