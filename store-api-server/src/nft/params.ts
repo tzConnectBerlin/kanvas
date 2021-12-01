@@ -49,6 +49,10 @@ export class FilterParams extends PaginationParams {
   @Type(() => Number)
   @IsOptional()
   priceAtMost?: number
+
+  @IsString()
+  @IsOptional()
+  availability?: string
 }
 
 export class SearchParam {
