@@ -1,8 +1,12 @@
-import { NftEntity } from './nft/entity/nft.entity'
-import { NftStateTransitionConfig, transition, parse } from './state_transition'
-import { UserEntity } from './user/entity/user.entity'
-import { assoc } from 'ramda'
-import * as SExp from './s_expression'
+/* import { Nft } from './nft/entities/nft.entity';
+import {
+  NftStateTransitionConfig,
+  transition,
+  parse,
+} from './state_transition';
+import { User } from './user/entities/user.entity';
+import { assoc } from 'ramda';
+import * as SExp from './s_expression';
 let exampleNftStateTransitionConfig: NftStateTransitionConfig = {
   states: {
     terminal: [':start', ':rejected'],
@@ -28,7 +32,7 @@ let exampleNftStateTransitionConfig: NftStateTransitionConfig = {
       requiresConfirmations: 1,
     },
   ],
-}
+};
 
 export const exampleNftStateConfigSource = `
 (states (:start :rejected) ;; terminal stages
@@ -41,10 +45,10 @@ export const exampleNftStateConfigSource = `
 
 (transition (:uploaded :moderated)
             (requires :moderator 1))
-`
+`;
 
 describe('NFT state transition', () => {
-  let users: UserEntity[] = [
+  let users: User[] = [
     {
       id: 1337,
       name: 'Antonio Vivaldi',
@@ -59,8 +63,8 @@ describe('NFT state transition', () => {
       signedPayload: 'aihcogimoriuehafhiou',
       roles: [':moderator', ':editor'],
     },
-  ]
-  var nft: NftEntity = {
+  ];
+  var nft: Nft = {
     id: 7331,
     name: 'cool nft',
     ipfsHash: '12345',
@@ -70,34 +74,35 @@ describe('NFT state transition', () => {
     tokenId: '1234567',
     categories: [],
     status: ':uploaded',
-  }
+  };
   it('should allow state transitions when the user role is correct', () => {
     let actual = transition(
       exampleNftStateTransitionConfig,
       nft,
       users,
       ':moderated',
-    ).val
-    let expected = assoc('status', ':moderated', nft)
-    expect(actual).toStrictEqual(expected)
-  })
+    ).val;
+    let expected = assoc('status', ':moderated', nft);
+    expect(actual).toStrictEqual(expected);
+  });
   it('should disallow state transitions when insufficient amount of users have confirmed', () => {
-    nft = assoc('status', 'start', nft)
+    nft = assoc('status', 'start', nft);
     let actual = transition(
       exampleNftStateTransitionConfig,
       nft,
       users,
       ':uploaded',
-    )
-    let expected = assoc('status', ':uploaded', nft)
-    expect(actual).not.toStrictEqual(expected)
-  })
-})
+    );
+    let expected = assoc('status', ':uploaded', nft);
+    expect(actual).not.toStrictEqual(expected);
+  });
+});
 describe('parsing state transition configs', () => {
   it('should parse correctly', () => {
     expect(
       parse(SExp.parse(SExp.stripJunk('(' + exampleNftStateConfigSource + ')')))
         .val,
-    ).toStrictEqual(exampleNftStateTransitionConfig)
-  })
-})
+    ).toStrictEqual(exampleNftStateTransitionConfig);
+  });
+});
+ */
