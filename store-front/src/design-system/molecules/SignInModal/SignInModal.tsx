@@ -272,7 +272,6 @@ export const SignInModal: FC<SignInModalProps> = ({
             }
 
             const user: IUser = registerUserResponse.data
-            props.setCurrentLoggedUser(user)
 
             localStorage.setItem(
                 'Kanvas - Bearer',

@@ -5,19 +5,20 @@ import NftGrid from '../../design-system/organismes/NftGrid'
 import FlexSpacer from '../../design-system/atoms/FlexSpacer'
 import PageWrapper from '../../design-system/commons/PageWrapper'
 
-import { Stack } from '@mui/material'
+import { Pagination, Stack } from '@mui/material'
 import { IUser } from '../../interfaces/user'
 import { Animated } from 'react-animated-css'
 import { FC, useEffect, useState } from 'react'
 import { useHistory, useParams } from 'react-router'
 import { HeaderProfile } from '../../design-system/molecules/HeaderProfile/HeaderProfile'
+import { Theme } from '@mui/material'
 
 interface ParamTypes {
     userAddress: string
     tab?: string
 }
 
-interface ProfileProps {}
+interface ProfileProps { }
 
 const StyledStack = styled(Stack)`
     width: 100vw;
@@ -39,6 +40,30 @@ const StyledDiv = styled.div`
 
     @media (max-width: 650px) {
         padding-top: 2rem;
+    }
+`
+
+const StyledPagination = styled(Pagination) <{
+    theme?: Theme
+    display: boolean
+}>`
+    display: ${(props) => (props.display ? 'flex' : 'none')};
+
+    .MuiPaginationItem-root {
+        border-radius: 0;
+
+        font-family: 'Poppins' !important;
+    }
+
+    .MuiPaginationItem-root.Mui-selected {
+        background-color: ${(props) =>
+        props.theme.palette.background.default} !important;
+        border: 1px solid ${(props) => props.theme.palette.text.primary} !important;
+    }
+
+    nav {
+        display: flex;
+        align-items: center !important;
     }
 `
 
@@ -76,10 +101,11 @@ const Profile: FC<ProfileProps> = () => {
                 userAddress: userAddress,
             },
         })
+
         getUserNfts({
             params: {
                 address: userAddress,
-                pagesize: 12,
+                pageSize: 12,
             },
         })
     }, [])
@@ -115,6 +141,24 @@ const Profile: FC<ProfileProps> = () => {
             })
         }
     }
+
+    const [selectedPage, setSelectedPage] = useState(1)
+
+    const handlePaginationChange = (event: any, page: number) => {
+
+        setSelectedPage(page)
+
+        getUserNfts({
+            withCredentials: true,
+            params: {
+                address: userAddress,
+                page: page,
+                pageSize: 12,
+            },
+        })
+
+    }
+
 
     return (
         <PageWrapper>
@@ -156,6 +200,22 @@ const Profile: FC<ProfileProps> = () => {
                     emptyMessage={'No Nfts in collection yet'}
                     emptyLink={'Click here to buy some in the store.'}
                 />
+
+                <FlexSpacer minHeight={2} />
+
+                <Stack direction="row">
+                    <FlexSpacer />
+                    <StyledPagination
+                        display={userNftsResponse.data?.numberOfPages > 1}
+                        page={selectedPage}
+                        count={userNftsResponse.data?.numberOfPages}
+                        onChange={handlePaginationChange}
+                        variant="outlined"
+                        shape="rounded"
+                        disabled={userNftsResponse.loading || userNftsResponse.data?.numberOfPages === 1}
+                    />
+                </Stack>
+                <FlexSpacer minHeight={2} />
             </StyledStack>
         </PageWrapper>
     )
