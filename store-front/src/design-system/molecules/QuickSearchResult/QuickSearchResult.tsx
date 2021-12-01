@@ -186,7 +186,8 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                         <Typography
                                             size="h4"
                                             weight="Medium"
-                                            sx={{ cursor: 'pointer' }}
+                                            sx={{ cursor: 'pointer', width: '80%' }}
+                                            display="initial !important" noWrap
                                         >
                                             {nft?.name}
                                         </Typography>

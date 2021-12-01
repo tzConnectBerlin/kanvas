@@ -23,6 +23,7 @@ export interface NftCardProps {
 
 const StyledBioWrapper = styled.div<{ theme?: Theme }>`
     align-self: flex-start;
+    width: 100%;
 `
 const StyledImgWrapper = styled.div<{ theme?: Theme }>`
     position: relative;
@@ -83,7 +84,7 @@ const StyledImg = styled.img<{ theme?: Theme; willDrop: boolean }>`
     object-position: center center;
     object-fit: cover;
     height: 100%;
-    opacity: ${(props) => (props.willDrop ? '0.4' : '1' )} !important;
+    opacity: ${(props) => (props.willDrop ? '0.4' : '1')} !important;
 `
 
 const AvailabilityWrapper = styled.div<{ inStock: boolean; willDrop: boolean }>`
@@ -105,7 +106,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
     const history = useHistory()
     const theme = useTheme()
 
-    const [launchTime, setLaunchTime] = useState<number>()
+    const [launchTime, setLaunchTime] = useState<number>(new Date(props.launchAt!).getTime() - new Date().getTime())
 
     useEffect(() => {
         if (props.launchAt) {
@@ -115,9 +116,11 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
 
     useEffect(() => {
         if (props.launchAt) {
-            setTimeout(() => {
+            const launchTimeout = setTimeout(() => {
                 setLaunchTime(new Date(props.launchAt!).getTime() - new Date().getTime())
             }, 1000)
+
+            return () => clearTimeout(launchTimeout)
         }
     }, [launchTime])
 
@@ -169,17 +172,18 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                             : 'Sold out'}
                     </Typography>
                 </AvailabilityWrapper>
-                <StyledBioWrapper>
-                    <Typography weight="SemiBold" size="h3">
+                <Stack
+                    direction="column"
+                    sx={{ width: '100%', minWidth: '60%', marginBottom: '1rem' }}>
+                    <Typography weight="SemiBold" display="initial !important" noWrap size="h3">
                         {props.name}
                     </Typography>
 
-                    <Box flexGrow="1" marginBottom=".5rem">
-                        <Typography weight="Light" size="body" noWrap>
-                            {props.ipfsHash}
-                        </Typography>
-                    </Box>
-                </StyledBioWrapper>
+                    <Typography weight="Light" size="body" display="initial !important" noWrap sx={{ width: '85%' }}>
+                        {props.ipfsHash}
+                    </Typography>
+
+                </Stack>
 
                 <Box
                     display="flex"
@@ -188,7 +192,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     width="100%"
                 >
                     <Typography weight="Light" size="body">
-                        {launchTime && launchTime > 0 && `${new Date(launchTime).getDate()} days - ${new Date(launchTime).getHours()} : ${new Date(launchTime).getMinutes()} : ${new Date(launchTime).getSeconds()}` }
+                        {launchTime && launchTime > 0 && `${new Date(launchTime).getDate()} days - ${new Date(launchTime).getHours()} : ${new Date(launchTime).getMinutes()} : ${new Date(launchTime).getSeconds()}`}
                     </Typography>
 
                     <Box display="flex" flexDirection="row" marginLeft="auto">
