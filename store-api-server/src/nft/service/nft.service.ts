@@ -28,11 +28,6 @@ export class NftService {
       "Not yet implemented - let's implement it when we need it rather than have a big generated code blob",
     )
   }
-  async edit(_nft: NftEntity): Promise<NftEntity> {
-    throw new Error(
-      "Not yet implemented - let's implement it when we need it rather than have a big generated code blob",
-    )
-  }
 
   async findAll(params: PaginationParams): Promise<NftEntityPage> {
     return this.findNftsWithFilter({
@@ -41,6 +36,7 @@ export class NftService {
       address: undefined,
       priceAtLeast: undefined,
       priceAtMost: undefined,
+      availability: undefined,
     })
   }
 
@@ -117,12 +113,13 @@ LIMIT $3
       const nftIds = await this.conn.query(
         `
 SELECT nft_id, total_nft_count
-FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
         [
           params.address,
           params.categories,
           params.priceAtLeast,
           params.priceAtMost,
+          params.availability,
           orderBy,
           params.orderDirection,
           offset,

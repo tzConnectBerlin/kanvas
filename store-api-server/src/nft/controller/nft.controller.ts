@@ -48,11 +48,33 @@ export class NftController {
       typeof params.categories !== 'undefined' && params.categories.length > 0
     const filterAddress = typeof params.address === 'string'
     const filterPrice =
-      typeof params.priceAtLeast === 'number' ||
-      typeof params.priceAtMost === 'number'
+      typeof params.priceAtLeast !== 'undefined' ||
+      typeof params.priceAtMost !== 'undefined'
+    const filterAvailability = typeof params.availability !== 'undefined'
 
-    if (!filterCategories && !filterAddress && !filterPrice) {
+    if (
+      !filterCategories &&
+      !filterAddress &&
+      !filterPrice &&
+      !filterAvailability
+    ) {
       throw new HttpException('No filters specified', HttpStatus.BAD_REQUEST)
+    }
+
+    if (typeof params.availability !== 'undefined') {
+      if (
+        params.availability.some(
+          (availabilityEntry: string) =>
+            !['upcoming', 'onSale', 'soldOut'].some(
+              (elem) => elem === availabilityEntry,
+            ),
+        )
+      ) {
+        throw new HttpException(
+          `Requested availability ('${params.availability}') not supported`,
+          HttpStatus.BAD_REQUEST,
+        )
+      }
     }
 
     this.validatePaginationParams(params)

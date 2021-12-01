@@ -153,6 +153,7 @@ WHERE address = $1
       firstRequestAt: undefined,
       categories: undefined,
       address: address,
+      availability: undefined,
     })
 
     return new Ok({
@@ -271,9 +272,9 @@ DELETE FROM cart_session
 WHERE session_id = $1`,
         [session],
       )
-      tx.query(`COMMIT`)
+      await tx.query(`COMMIT`)
     } catch (err: any) {
-      tx.query(`ROLLBACK`)
+      await tx.query(`ROLLBACK`)
       throw err
     } finally {
       tx.release()
@@ -293,7 +294,7 @@ WHERE cart_session_id = $1`,
     return qryRes.rows.map((row: any) => row['nft_id'])
   }
 
-  async cartAdd(session: string, nftId: number): Promise<Result<{}, string>> {
+  async cartAdd(session: string, nftId: number): Promise<Result<null, string>> {
     const cartMeta = await this.touchCart(session)
     const tx = await this.conn.connect()
     try {
@@ -325,16 +326,16 @@ WHERE nft.id = $1`,
         return Err('This nft is not yet for sale')
       }
 
-      tx.query('COMMIT')
+      await tx.query('COMMIT')
     } catch (err) {
-      tx.query('ROLLBACK')
+      await tx.query('ROLLBACK')
       throw err
     } finally {
       tx.release()
     }
 
     await this.resetCartExpiration(cartMeta.id)
-    return Ok({})
+    return Ok(null)
   }
 
   async cartRemove(session: string, nftId: number): Promise<boolean> {
