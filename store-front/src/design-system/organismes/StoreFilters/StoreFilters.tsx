@@ -83,10 +83,10 @@ const StyledSection = styled.section<StyledStoreFiltersProps>`
     position: relative;
     padding: 0 0;
     transition: width 0.2s;
-    width: ${(props) => (props.openFilters ? '25rem' : '0')};
+    width: ${(props) => (props.openFilters ? '100%' : '0')};
     margin-right: ${(props) => (props.openFilters ? '2.5rem' : '0')};
     -webkit-overflow-scrolling: touch;
-
+    
     @media (max-width: 874px) {
         flex-direction: column;
         display: none;
@@ -139,9 +139,10 @@ const StyledUl = styled.ul<StyledStoreFiltersProps>`
     margin: 4rem 0 0;
     transition: width 0.2s;
     padding: 0.5rem 1.5rem 0;
-
+    
     @media (min-width: 900px) {
         height: fit-content;
+        min-width: 15rem;
         width: ${(props) => (props.openFilters ? '25rem' : '100%')};
         margin-right: ${(props) => (props.openFilters ? '2.5rem' : '0')};
         padding: 0;
