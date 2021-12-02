@@ -18,7 +18,7 @@ interface SortProps {
 
 interface SelectedProps extends MuiSelectProps {
     id: string
-    selectedOption: SortProps
+    selectedOption?: SortProps
     setSelectedOption: (input: SortProps) => void
 }
 
@@ -94,16 +94,16 @@ export const CustomSelect: FC<SelectedProps> = ({ ...props }) => {
             <Select
                 labelId={`${props.id}-label"`}
                 id={props.id}
-                value={JSON.stringify(props.selectedOption)}
+                value={JSON.stringify(props.selectedOption) ?? JSON.stringify({orderBy: 'createdAt', orderDirection: 'desc'}) }
                 onChange={handleChange}
                 autoWidth
             >
-                <MenuItem value={JSON.stringify({orderBy: 'name', orderDirection: 'asc'})}>Name - asc</MenuItem>
-                <MenuItem value={JSON.stringify({orderBy: 'name', orderDirection: 'desc'})}>Name - desc</MenuItem>
-                <MenuItem value={JSON.stringify({orderBy: 'price', orderDirection: 'asc'})}>Price - asc</MenuItem>
-                <MenuItem value={JSON.stringify({orderBy: 'price', orderDirection: 'desc'})}>Price - desc</MenuItem>
-                <MenuItem value={JSON.stringify({orderBy: 'createdAt', orderDirection: 'asc'})}>Created - asc</MenuItem>
-                <MenuItem value={JSON.stringify({orderBy: 'createdAt', orderDirection: 'desc'})}> Created - desc</MenuItem>
+                <MenuItem value={JSON.stringify({orderBy: 'name', orderDirection: 'desc'})}>Name: A - Z</MenuItem>
+                <MenuItem value={JSON.stringify({orderBy: 'name', orderDirection: 'asc'})}>Name: Z - A</MenuItem>
+                <MenuItem value={JSON.stringify({orderBy: 'price', orderDirection: 'desc'})}>Price: High - Low</MenuItem>
+                <MenuItem value={JSON.stringify({orderBy: 'price', orderDirection: 'asc'})}>Price: Low - High</MenuItem>
+                <MenuItem value={JSON.stringify({orderBy: 'createdAt', orderDirection: 'desc'})}>Created: New - Old</MenuItem>
+                <MenuItem value={JSON.stringify({orderBy: 'createdAt', orderDirection: 'asc'})}> Created: Old - New</MenuItem>
             </Select>
         </StyledFormControl>
     )

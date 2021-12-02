@@ -4,7 +4,7 @@ import Typography from '../../atoms/Typography'
 import TreeView from '../../molecules/TreeView/TreeView'
 
 import { Checkbox, Stack, Theme } from '@mui/material'
-import { FC, useState } from 'react'
+import { FC, useCallback, useState } from 'react'
 import PriceFilter from '../../molecules/PriceFilter'
 
 interface FilterProps {
@@ -111,7 +111,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
             setActiveRef([...activeRef, concernedRef])
         }
     }
-
+    
     return (
         <StyledUl openFilters={props.openFilters}>
             <Stack

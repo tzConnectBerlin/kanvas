@@ -35,7 +35,7 @@ export const EditProfile: FC<EditProfileProps> = () => {
 
     const [editUserResponse, editUser] = useAxios(
         {
-            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/edit`,
+            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/profile/edit`,
             method: 'POST',
             withCredentials: true,
             headers: {
@@ -48,7 +48,7 @@ export const EditProfile: FC<EditProfileProps> = () => {
     const [checkIfUsernameValidResponse, checkIfUsernameValid] = useAxios(
         {
             url:
-                process.env.REACT_APP_API_SERVER_BASE_URL + `/users/edit/check`,
+                process.env.REACT_APP_API_SERVER_BASE_URL + `/users/profile/edit/check`,
             method: 'GET',
             withCredentials: true,
             headers: {

@@ -91,27 +91,6 @@ export const ProfilePopover: FC<ProfilePopoverProps> = ({ ...props }) => {
                     </Typography>
                 </StyledMenuItem>
 
-                <StyledMenuItem onClick={() => navigateTo('/notifications')}>
-                    {props.notifications ? (
-                        <CustomBadge
-                            color="error"
-                            badgeContent={props.notifications}
-                            max={99}
-                        >
-                            <Avatar>
-                                <NotificationsRoundedIcon />
-                            </Avatar>
-                        </CustomBadge>
-                    ) : (
-                        <Avatar>
-                            <NotificationsRoundedIcon />
-                        </Avatar>
-                    )}
-                    <Typography size="inherit" weight="Medium">
-                        {' '}
-                        Notifications{' '}
-                    </Typography>
-                </StyledMenuItem>
 
                 <StyledMenuItem onClick={() => props.logOut()}>
                     <Avatar>
