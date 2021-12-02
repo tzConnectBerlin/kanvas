@@ -6,7 +6,7 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined'
 
 import { FC, useEffect, useState } from 'react'
-import { Stack, Theme } from '@mui/material'
+import { Badge, Stack, Theme } from '@mui/material'
 import { CustomButton } from '../../../atoms/Button'
 import { Typography } from '../../../atoms/Typography'
 import {
@@ -29,8 +29,8 @@ interface MenuIconProps {
 }
 
 const WrapperMenuIcon = styled.div<MenuIconProps>`
-    height: 2.5rem;
-    width: 2.5rem;
+    height: 2.2rem;
+    width: 2.2rem;
 
     cursor: pointer;
 
@@ -238,10 +238,11 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                     </MenuBarWrapper>
                 </WrapperMenuIcon>
 
-                <StyledShoppingCartRoundedIcon
-                    onClick={() => props.openOrCloseShoppingCart()}
-                />
-
+                <Badge color="error" badgeContent={props.nftsInCartNumber}>
+                    <StyledShoppingCartRoundedIcon
+                        onClick={() => props.openOrCloseShoppingCart()}
+                    />
+                </Badge>
                 <WrapperThemeIcon isSearchOpen={props.isSearchOpen}>
                     {props.selectedTheme === 'dark' ? (
                         <Brightness3Icon
