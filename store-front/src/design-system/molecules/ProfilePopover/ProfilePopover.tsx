@@ -33,7 +33,7 @@ const paperProps = {
         left: 'initial !important',
         right: '0px !important',
         width: '14em',
-        height: '12em',
+        height: '8em',
         paddingTop: '0.5em',
         transformOrigin: '200px -20px 0px !important',
         paddingBottom: '0.5em',

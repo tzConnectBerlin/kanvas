@@ -86,7 +86,7 @@ const Profile: FC<ProfileProps> = () => {
 
     const [userNftsResponse, getUserNfts] = useAxios(
         {
-            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/filter`,
+            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts`,
             withCredentials: true,
             params: {
                 userAddress: userAddress,

@@ -81,9 +81,7 @@ const StorePage = () => {
     const [selectedAvailability, setSelectedAvailability] = useState<string[]>([])
 
     // Price states
-    const [priceFilterRange, setPriceFilterRange] = useState<[number, number]>([
-        0, 100,
-    ])
+    const [priceFilterRange, setPriceFilterRange] = useState<[number, number]>()
 
     // Conditionnal states
     const [filterOpen, setFilterOpen] = useState<boolean>(true)
@@ -112,8 +110,8 @@ const StorePage = () => {
                     categories: selectedCategories.join(','),
                     orderBy: selectedSort?.orderBy ?? 'createdAt',
                     orderDirection: selectedSort?.orderDirection ?? 'desc',
-                    priceAtLeast: handlePriceRange ? priceFilterRange[0] : undefined,
-                    priceAtMost: handlePriceRange ? priceFilterRange[1] : undefined,
+                    priceAtLeast: handlePriceRange && priceFilterRange ? priceFilterRange[0] : undefined,
+                    priceAtMost: handlePriceRange && priceFilterRange ? priceFilterRange[1] : undefined,
                     availability: selectedAvailability.length === 0 ? 'onSale,soldOut,upcoming' : selectedAvailability.join(',')
                 },
             })
@@ -142,6 +140,8 @@ const StorePage = () => {
         // Prices
         if (priceAtLeast && priceAtMost) {
             setPriceFilterRange([Number(priceAtLeast), Number(priceAtMost)])
+        } else {
+            setPriceFilterRange(undefined)
         }
 
         // Order
@@ -194,8 +194,10 @@ const StorePage = () => {
     }
 
     const triggerPriceFilter = () => {
-        setPageParams('priceAtLeast', priceFilterRange[0].toString())
-        setPageParams('priceAtMost', priceFilterRange[1].toString())
+        if (priceFilterRange) {
+            setPageParams('priceAtLeast', priceFilterRange[0].toString())
+            setPageParams('priceAtMost', priceFilterRange[1].toString())
+        }
 
         callNFTsEndpoint(true)
     }
