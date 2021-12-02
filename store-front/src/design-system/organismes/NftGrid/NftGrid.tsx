@@ -33,7 +33,7 @@ const StyledGrid = styled(Grid)`
 `
 
 const StyledDiv = styled.div`
-    max-width:100%;
+    max-width: 100%;
 `
 
 export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
