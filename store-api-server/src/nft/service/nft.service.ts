@@ -32,9 +32,18 @@ export class NftService {
   async search(str: string): Promise<SearchResult> {
     const nftIds = await this.conn.query(
       `
-SELECT id AS nft_id, word_similarity($1, nft.nft_name) AS similarity
-FROM nft
-WHERE word_similarity($1, nft.nft_name) >= $2
+SELECT id
+FROM (
+  SELECT
+    id,
+    view_count,
+    GREATEST(
+      word_similarity($1, nft_name),
+      word_similarity($1, description)
+    ) AS similarity
+  FROM nft
+) AS inner_query
+WHERE similarity >= $2
 ORDER BY similarity DESC, view_count DESC
 LIMIT $3
     `,
@@ -43,28 +52,39 @@ LIMIT $3
 
     const categoryIds = await this.conn.query(
       `
-SELECT id AS category_id, category AS category_name, word_similarity($1, category) AS similarity
-FROM nft_category
-WHERE word_similarity($1, category) >= $2
-ORDER BY similarity DESC
+SELECT id, category AS name, description
+FROM (
+  SELECT
+    id,
+    category,
+    description,
+    GREATEST(
+      word_similarity($1, category),
+      word_similarity($1, description)
+    ) AS similarity
+  FROM nft_category
+) AS inner_query
+WHERE similarity >= $2
+ORDER BY similarity DESC, id
 LIMIT $3
     `,
       [str, SEARCH_SIMILARITY_LIMIT, SEARCH_MAX_CATEGORIES],
     )
 
     const nfts = await this.findByIds(
-      nftIds.rows.map((row: any) => row.nft_id),
+      nftIds.rows.map((row: any) => row.id),
       'nft_id',
       'asc',
     )
 
     return {
       nfts: nftIds.rows
-        .map((row: any) => nfts.find((nft) => nft.id === row.nft_id))
+        .map((row: any) => nfts.find((nft) => nft.id === row.id))
         .filter(Boolean),
       categories: categoryIds.rows.map((row: any) => ({
-        id: row.category_id,
-        name: row.category_name,
+        id: row.id,
+        name: row.name,
+        description: row.description,
       })),
     }
   }
@@ -187,6 +207,7 @@ WHERE id = $1
 SELECT
   nft_id,
   nft_name,
+  description,
   ipfs_hash,
   metadata,
   data_uri,
@@ -205,6 +226,7 @@ FROM nfts_by_id($1, $2, $3)`,
         return <NftEntity>{
           id: nftRow['nft_id'],
           name: nftRow['nft_name'],
+          description: nftRow['description'],
           ipfsHash: nftRow['ipfs_hash'],
           metadata: nftRow['metadata'],
           dataUri: nftRow['data_uri'],

@@ -36,7 +36,7 @@ interface EditProfile {
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Get()
+  @Get('/profile')
   @UseGuards(JwtFailableAuthGuard)
   async getProfile(
     @CurrentUser() user?: UserEntity,
@@ -68,7 +68,7 @@ export class UserController {
     return profile_res.val
   }
 
-  @Post('/edit')
+  @Post('/profile/edit')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileInterceptor('profilePicture', {
@@ -80,6 +80,7 @@ export class UserController {
     @Body() editFields: EditProfile,
     @UploadedFile() picture: any,
   ) {
+    console.log(editFields)
     try {
       await this.userService.edit(currentUser.id, editFields?.userName, picture)
     } catch (err: any) {
@@ -98,7 +99,7 @@ export class UserController {
     }
   }
 
-  @Get('/edit/check')
+  @Get('/profile/edit/check')
   @UseGuards(JwtAuthGuard)
   async checkAllowedEdit(@Query('userName') userName: string) {
     const available = await this.userService.isNameAvailable(userName)
