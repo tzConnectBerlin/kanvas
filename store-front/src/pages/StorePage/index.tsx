@@ -24,11 +24,12 @@ export interface StorePageProps {
 
 const StyledStack = styled(Stack)`
     max-width: 100rem;
-    width: 100vw;
+    width: 100%;
     height: 100%;
 
     @media (max-width: 650px) {
-        padding: 0 1.5rem 1rem;
+        padding: 1.5rem;
+        max-width: -webkit-fill-available;
     }
 `
 const StyledContentStack = styled(Stack) <ParamTypes>`
