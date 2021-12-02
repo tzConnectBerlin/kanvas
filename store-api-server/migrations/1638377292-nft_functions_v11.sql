@@ -1,4 +1,4 @@
--- Migration: nft_functions_v10
+-- Migration: nft_functions_v11
 -- Created at: 2021-12-01 17:48:12
 -- ====  UP  ====
 BEGIN;
