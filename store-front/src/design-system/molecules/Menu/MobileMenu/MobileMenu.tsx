@@ -145,7 +145,6 @@ const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
         a {
             opacity: ${(props) => (props.expandMenu ? 1 : 0)} !important;
             transition: opacity 0.3s;
-            margin-bottom: 0.7rem;
         }
 
         transition: max-width 0.3s, width 0.3s, padding 0.5s;
@@ -273,7 +272,7 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                             size="h2"
                             weight="SemiBold"
                             color="#9b9b9b"
-                            sx={{ cursor: 'pointer' }}
+                            sx={{ cursor: 'pointer', marginBottom: '0.7rem' }}
                         >
                             {t('menu.home')}
                         </Typography>
@@ -306,7 +305,7 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                         )
                     }
                 </StyledBox>
-                <FlexSpacer borderBottom={true} />
+                <FlexSpacer borderBottom={false} />
 
                 {/* Sub menu to navigate to personnal pages such as notifications profile or simply to logout */}
 
