@@ -1,4 +1,6 @@
 import { Ok, Err } from 'ts-results';
+import * as bcrypt from 'bcrypt';
+import { AUTH_SALT_ROUNDS } from './constants';
 
 class AssertionError extends Error {
   constructor(message: string) {
@@ -34,3 +36,7 @@ export function findOne(predicate: any, xs: any[]) {
     return new Err('findOne found multiple results');
   }
 }
+
+export const hashPassword = async (plaintext: string): Promise<string> => {
+  return bcrypt.hash(plaintext, AUTH_SALT_ROUNDS);
+};
