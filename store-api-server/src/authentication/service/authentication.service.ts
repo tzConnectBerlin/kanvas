@@ -10,9 +10,9 @@ const bcrypt = require('bcrypt')
 interface IAuthentication {
   id: number
   userName: string
+  userAddress: string
   token: string
   maxAge: string
-  address: string
 }
 
 @Injectable()
@@ -25,7 +25,7 @@ export class AuthenticationService {
   private async validate(
     userData: UserEntity,
   ): Promise<Result<UserEntity, string>> {
-    return await this.userService.findByAddress(userData.address)
+    return await this.userService.findByAddress(userData.userAddress)
   }
 
   public async login(userData: UserEntity): Promise<any | { status: number }> {
@@ -45,7 +45,7 @@ export class AuthenticationService {
         {
           id: user.id,
           userName: user.userName,
-          address: user.address,
+          userAddress: user.userAddress,
           roles: user.roles,
         },
         user,
@@ -125,7 +125,7 @@ export class AuthenticationService {
         id: user.id,
         userName: user.userName,
         maxAge: process.env.JWT_EXPIRATION_TIME,
-        address: data.address,
+        userAddress: data.userAddress,
       }
     } else {
       throw new Error('process.env.JWT_EXPIRATION_TIME not set')

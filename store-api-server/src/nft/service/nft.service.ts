@@ -104,7 +104,7 @@ LIMIT $3
 SELECT nft_id, total_nft_count
 FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
         [
-          params.address,
+          params.userAddress,
           params.categories,
           params.priceAtLeast,
           params.priceAtMost,
@@ -120,7 +120,7 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
         `
 SELECT min_price, max_price
 FROM price_bounds($1, $2, $3)`,
-        [params.address, params.categories, untilNft],
+        [params.userAddress, params.categories, untilNft],
       )
 
       const res = <NftEntityPage>{
@@ -194,6 +194,7 @@ SELECT
   contract,
   token_id,
   categories,
+  editions_size,
   editions_available,
   nft_created_at,
   launch_at
@@ -210,13 +211,15 @@ FROM nfts_by_id($1, $2, $3)`,
           price: Number(nftRow['price']),
           contract: nftRow['contract'],
           tokenId: nftRow['token_id'],
+          editionsSize: Number(nftRow['editions_size']),
           editionsAvailable: Number(nftRow['editions_available']),
           createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
           launchAt: Math.floor(nftRow['launch_at'].getTime() / 1000),
           categories: nftRow['categories'].map((categoryRow: any) => {
             return <CategoryEntity>{
-              name: categoryRow[0],
-              description: categoryRow[1],
+              id: Number(categoryRow[0]),
+              name: categoryRow[1],
+              description: categoryRow[2],
             }
           }),
         }

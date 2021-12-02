@@ -38,7 +38,7 @@ export class FilterParams extends PaginationParams {
 
   @IsString()
   @IsOptional()
-  address?: string
+  userAddress?: string
 
   @IsNumber()
   @Type(() => Number)

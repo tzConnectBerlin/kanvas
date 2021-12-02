@@ -43,7 +43,8 @@ export class UserController {
     @Query('userAddress') userAddress?: string,
   ) {
     const address =
-      userAddress || (typeof user !== 'undefined' ? user.address : undefined)
+      userAddress ||
+      (typeof user !== 'undefined' ? user.userAddress : undefined)
     if (typeof address === 'undefined') {
       throw new HttpException(
         'Define userAddress parameter or access this endpoint logged in',
@@ -98,6 +99,7 @@ export class UserController {
   }
 
   @Get('/edit/check')
+  @UseGuards(JwtAuthGuard)
   async checkAllowedEdit(@Query('userName') userName: string) {
     const available = await this.userService.isNameAvailable(userName)
     return {

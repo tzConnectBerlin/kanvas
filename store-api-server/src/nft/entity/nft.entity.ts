@@ -12,6 +12,7 @@ export interface NftEntity {
   tokenId: string
   price: number
   categories: CategoryEntity[]
+  editionsSize: number
   editionsAvailable: number
   launchAt: number
 }
