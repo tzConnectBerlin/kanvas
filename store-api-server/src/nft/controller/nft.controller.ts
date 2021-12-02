@@ -21,16 +21,10 @@ export class NftController {
     return this.nftService.create(nft)
   }
 
-  @Get('/filter')
-  async filter(@Query() params: FilterParams): Promise<NftEntityPage> {
+  @Get()
+  async getFiltered(@Query() params: FilterParams): Promise<NftEntityPage> {
     this.validateFilterParams(params)
     return this.nftService.findNftsWithFilter(params)
-  }
-
-  @Get()
-  async findAll(@Query() params: PaginationParams): Promise<NftEntityPage> {
-    this.validatePaginationParams(params)
-    return this.nftService.findAll(params)
   }
 
   @Get('/search')
@@ -44,23 +38,6 @@ export class NftController {
   }
 
   validateFilterParams(params: FilterParams): void {
-    const filterCategories =
-      typeof params.categories !== 'undefined' && params.categories.length > 0
-    const filterAddress = typeof params.address === 'string'
-    const filterPrice =
-      typeof params.priceAtLeast !== 'undefined' ||
-      typeof params.priceAtMost !== 'undefined'
-    const filterAvailability = typeof params.availability !== 'undefined'
-
-    if (
-      !filterCategories &&
-      !filterAddress &&
-      !filterPrice &&
-      !filterAvailability
-    ) {
-      throw new HttpException('No filters specified', HttpStatus.BAD_REQUEST)
-    }
-
     if (typeof params.availability !== 'undefined') {
       if (
         params.availability.some(
