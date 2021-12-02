@@ -9,6 +9,7 @@ export interface NftEntity {
   ipfsHash: string;
   metadata: any; // TODO expand on the meaning of this type
   dataUri: string;
+  thumbnailUri: string;
   contract: string;
   tokenId: string;
   price: number;

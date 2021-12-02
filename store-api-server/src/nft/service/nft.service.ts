@@ -198,8 +198,8 @@ WHERE id = $1
 
   async findByIds(
     nftIds: number[],
-    orderBy: string,
-    orderDirection: string,
+    orderBy: string = 'nft_id',
+    orderDirection: string = 'asc',
   ): Promise<NftEntity[]> {
     try {
       const nftsQryRes = await this.conn.query(

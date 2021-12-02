@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { UserEntity, ProfileEntity, UserCart } from '../entity/user.entity';
 import { NftService } from '../../nft/service/nft.service';
+import { MintService } from '../../nft/service/mint.service'
 import {
   PG_CONNECTION,
   CART_EXPIRATION_MILLI_SECS,
@@ -26,6 +27,7 @@ export class UserService {
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
     private readonly s3Service: S3Service,
+    private readonly mintService: MintService,
     public readonly nftService: NftService,
   ) {}
 
@@ -244,7 +246,7 @@ WHERE session_id = $1
     };
   }
 
-  async cartCheckout(userId: number, session: string): Promise<boolean> {
+  async cartCheckout(user: UserEntity, session: string): Promise<boolean> {
     const cartMeta = await this.getCartMeta(session);
     if (typeof cartMeta === 'undefined') {
       return false;
@@ -253,6 +255,12 @@ WHERE session_id = $1
     if (nftIds.length === 0) {
       return false;
     }
+
+    const nfts = await this.nftService.findByIds(nftIds)
+    await this.mintService.mint(nfts[0], user.userAddress)
+    return true
+
+    /*
     const tx = await this.conn.connect();
     try {
       tx.query(`BEGIN`);
@@ -264,7 +272,7 @@ INSERT INTO mtm_kanvas_user_nft (
 SELECT $1, nft.id
 FROM nft
 WHERE nft.id = ANY($2)`,
-        [userId, nftIds],
+        [user.id, nftIds],
       );
       await tx.query(
         `
@@ -281,6 +289,7 @@ WHERE session_id = $1`,
     }
 
     return true;
+*/
   }
 
   async getCartNftIds(cartId: number): Promise<number[]> {
