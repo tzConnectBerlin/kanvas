@@ -180,6 +180,7 @@ const StyledFooter = styled(Stack)<StyledStoreFiltersProps>`
     display: flex;
     padding: 0.5rem 1.5rem 1rem;
     min-height: 12rem;
+    z-index: 1;
 `
 export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
     const [activeRef, setActiveRef] = useState<string[]>([])
