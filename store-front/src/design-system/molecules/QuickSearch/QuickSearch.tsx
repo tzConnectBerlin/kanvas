@@ -1,7 +1,6 @@
 import styled from '@emotion/styled'
-import { ArrowBackIosNew } from '@mui/icons-material'
 
-import { Stack, Theme, useMediaQuery } from '@mui/material'
+import { Stack } from '@mui/material'
 import useAxios from 'axios-hooks'
 import { FC, useEffect, useRef, useState } from 'react'
 
@@ -16,8 +15,8 @@ const QuickSearchWrapper = styled(Stack)`
     display: block;
 `
 
-const StyledBackground = styled.div<{theme?: Theme, open: boolean }>`
-    opacity: ${(props) => (props.open ? '1' : '0')};
+const StyledBackground = styled.div<{ open: boolean }>`
+    opacity: ${(props) => (props.open ? '0.5' : '0')};
     height: ${(props) => (props.open ? '100vh' : '0')} !important;
 
     transition: opacity 0.3s;
@@ -26,15 +25,13 @@ const StyledBackground = styled.div<{theme?: Theme, open: boolean }>`
     width: 100vw;
     top: 0;
     left: 0;
-    background-color: ${(props) => props.theme.palette.background.default};
+    background-color: #000000;
     position: absolute;
     margin: 0 !important;
-    display: ${(props) => (!props.open ? 'none' : '0')} !important;
 `
 
 export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
     const inputRef = useRef<HTMLInputElement>(null)
-    const isMobile = useMediaQuery('(max-width:600px)')
 
     const [openSearchResult, setOpenSearchresult] = useState(false)
 
@@ -107,7 +104,6 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
                     open={openSearchResult}
                     ref={inputRef}
                     onChange={handleChange}
-                    closeResult={handleCloseInput}
                     onFocus={() => {
                         inputRef?.current?.focus()
                         setTimeout(() => setOpenSearchresult(true), 200)

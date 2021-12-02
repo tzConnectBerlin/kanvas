@@ -15,7 +15,6 @@ import {
     Skeleton,
     Stack,
     Theme,
-    useMediaQuery,
 } from '@mui/material'
 
 interface QuickSearResultProps {
@@ -35,10 +34,6 @@ interface BoxProps extends MBoxProps {
 
 const StyledBox = styled(Box)<BoxProps>`
     display: ${(props) => (props.open ? 'flex' : 'none')};
-    
-    @media (max-width: 730px) {
-        right: 5%;
-    }
 `
 
 const StyledPaper = styled(Paper)<{ theme?: Theme }>`
@@ -54,15 +49,6 @@ const StyledPaper = styled(Paper)<{ theme?: Theme }>`
     transition: height 0.3s;
     background-color: ${(props) => props.theme.palette.background.paper};
     background-image: none;
-
-    @media (max-width: 730px) {
-        outline: none;
-        top: 5rem;
-
-        :hover {
-            outline: none;
-        }
-    }
 `
 
 const StyledHeaderStack = styled(Stack)`
@@ -200,12 +186,8 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                         <Typography
                                             size="h4"
                                             weight="Medium"
-                                            sx={{
-                                                cursor: 'pointer',
-                                                width: '80%',
-                                            }}
-                                            display="initial !important"
-                                            noWrap
+                                            sx={{ cursor: 'pointer', width: '80%' }}
+                                            display="initial !important" noWrap
                                         >
                                             {nft?.name}
                                         </Typography>
