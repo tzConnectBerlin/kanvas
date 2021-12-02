@@ -18,8 +18,6 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
 import { Box } from '@mui/system'
-import { QuickSearch } from '../../QuickSearch'
-import { ArrowBackIosNew } from '@mui/icons-material'
 
 const WrapperThemeIcon = styled.div<SearchProps>`
     display: ${(props) => (props.isSearchOpen ? 'none' : 'flex')};
@@ -116,6 +114,7 @@ const MobileStyledMenuHeader = styled(Stack)<SearchProps>`
         height: 4rem;
         width: ${(props) => (props.isSearchOpen ? '100%' : '')};
         margin-left: auto !important;
+    }
 `
 
 const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
@@ -173,8 +172,6 @@ const StyledBox = styled.div`
     }
 `
 
-const MobileStyledQuickSearch = styled(QuickSearch)<SearchProps>``
-
 export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
     const { t } = useTranslation(['translation'])
     const history = useHistory()
@@ -192,19 +189,7 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
             document.body.style.overflow = 'auto'
         }
     }, [expandMenu])
-    interface BackButtonProps {
-        theme?: Theme
-    }
 
-    const BackButton = styled(ArrowBackIosNew)<BackButtonProps>`
-        fill: ${(props) => props.theme.palette.text.primary};
-        z-index: 999;
-        pointer-events: none;
-        cursor: pointer;
-    `
-    const handleClose = (props?: any) => {
-        props.closeResult()
-    }
     return (
         <>
             <StyledMenuCloser
@@ -219,15 +204,11 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                 spacing={2}
                 isSearchOpen={props.isSearchOpen}
             >
-                {props.isSearchOpen && <BackButton />}
-
                 {/* QuickSearch wrapper to close menu in case open */}
 
-                <div onClick={() => setExpandMenu(false)}>
-                    <MobileStyledQuickSearch
-                        setSearchOpen={props.setSearchOpen}
-                    />
-                </div>
+                {/* <div onClick={() => setExpandMenu(false)}>
+                        <QuickSearch setSearchOpen={props.setSearchOpen} />
+                    </div> */}
 
                 {/* Menu button, and closing button for search bar */}
 
@@ -238,25 +219,42 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                             : () => setExpandMenu(!expandMenu)
                     }
                 >
-                    {!props.isSearchOpen && (
-                        <MenuBarWrapper>
-                            <MenuBarUp
-                                expandMenu={
-                                    props.isSearchOpen
-                                        ? props.isSearchOpen
-                                        : expandMenu
-                                }
-                            />
-                            <MenuBarDown
-                                expandMenu={
-                                    props.isSearchOpen
-                                        ? props.isSearchOpen
-                                        : expandMenu
-                                }
-                            />
-                        </MenuBarWrapper>
-                    )}
+                    <MenuBarWrapper>
+                        <MenuBarUp
+                            expandMenu={
+                                props.isSearchOpen
+                                    ? props.isSearchOpen
+                                    : expandMenu
+                            }
+                        />
+                        <MenuBarDown
+                            expandMenu={
+                                props.isSearchOpen
+                                    ? props.isSearchOpen
+                                    : expandMenu
+                            }
+                        />
+                    </MenuBarWrapper>
                 </WrapperMenuIcon>
+
+                <Badge color="error" badgeContent={props.nftsInCartNumber}>
+                    <StyledShoppingCartRoundedIcon
+                        onClick={() => props.openOrCloseShoppingCart()}
+                    />
+                </Badge>
+                <WrapperThemeIcon isSearchOpen={props.isSearchOpen}>
+                    {props.selectedTheme === 'dark' ? (
+                        <Brightness3Icon
+                            onClick={() => props.switchTheme('light')}
+                            sx={{ cursor: 'pointer', bottom: 0 }}
+                        />
+                    ) : (
+                        <WbSunnyOutlinedIcon
+                            onClick={() => props.switchTheme('dark')}
+                            sx={{ cursor: 'pointer', bottom: 0 }}
+                        />
+                    )}
+                </WrapperThemeIcon>
             </MobileStyledMenuHeader>
 
             {/* Mobile Menu Content */}
@@ -268,35 +266,6 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                 sx={{ alignItems: 'beginning' }}
                 onClick={() => setExpandMenu(!expandMenu)}
             >
-                <Box
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        padding: '0 1.5rem 1.5rem',
-                    }}
-                >
-                    <WrapperThemeIcon isSearchOpen={props.isSearchOpen}>
-                        {props.selectedTheme === 'dark' ? (
-                            <Brightness3Icon
-                                onClick={() => props.switchTheme('light')}
-                                sx={{ cursor: 'pointer', bottom: 0 }}
-                            />
-                        ) : (
-                            <WbSunnyOutlinedIcon
-                                onClick={() => props.switchTheme('dark')}
-                                sx={{ cursor: 'pointer', bottom: 0 }}
-                            />
-                        )}
-                    </WrapperThemeIcon>
-
-                    <Badge color="error" badgeContent={props.nftsInCartNumber}>
-                        <StyledShoppingCartRoundedIcon
-                            onClick={() => props.openOrCloseShoppingCart()}
-                        />
-                    </Badge>
-                </Box>
-
                 <StyledBox>
                     <StyledLink to="/">
                         <Typography
@@ -336,7 +305,6 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                         )
                     }
                 </StyledBox>
-
                 <FlexSpacer borderBottom={false} />
 
                 {/* Sub menu to navigate to personnal pages such as notifications profile or simply to logout */}
