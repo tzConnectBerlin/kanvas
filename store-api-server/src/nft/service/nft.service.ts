@@ -29,17 +29,6 @@ export class NftService {
     )
   }
 
-  async findAll(params: PaginationParams): Promise<NftEntityPage> {
-    return this.findNftsWithFilter({
-      ...params,
-      categories: undefined,
-      address: undefined,
-      priceAtLeast: undefined,
-      priceAtMost: undefined,
-      availability: undefined,
-    })
-  }
-
   async search(str: string): Promise<SearchResult> {
     const nftIds = await this.conn.query(
       `
