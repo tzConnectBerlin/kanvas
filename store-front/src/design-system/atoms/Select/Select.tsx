@@ -98,8 +98,8 @@ export const CustomSelect: FC<SelectedProps> = ({ ...props }) => {
                 onChange={handleChange}
                 autoWidth
             >
-                <MenuItem value={JSON.stringify({orderBy: 'name', orderDirection: 'desc'})}>Name: A - Z</MenuItem>
-                <MenuItem value={JSON.stringify({orderBy: 'name', orderDirection: 'asc'})}>Name: Z - A</MenuItem>
+                <MenuItem value={JSON.stringify({orderBy: 'name', orderDirection: 'asc'})}>Name: A - Z</MenuItem>
+                <MenuItem value={JSON.stringify({orderBy: 'name', orderDirection: 'desc'})}>Name: Z - A</MenuItem>
                 <MenuItem value={JSON.stringify({orderBy: 'price', orderDirection: 'desc'})}>Price: High - Low</MenuItem>
                 <MenuItem value={JSON.stringify({orderBy: 'price', orderDirection: 'asc'})}>Price: Low - High</MenuItem>
                 <MenuItem value={JSON.stringify({orderBy: 'createdAt', orderDirection: 'desc'})}>Created: New - Old</MenuItem>

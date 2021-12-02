@@ -60,7 +60,7 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
     availableFilters: any[]
     filterFunction: Function
     loading: boolean
-    priceFilterRange: [number, number]
+    priceFilterRange?: [number, number]
     setPriceFilterRange: Function
     minRange: number
     maxRange: number
@@ -111,7 +111,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
             setActiveRef([...activeRef, concernedRef])
         }
     }
-    
+
     return (
         <StyledUl openFilters={props.openFilters}>
             <Stack

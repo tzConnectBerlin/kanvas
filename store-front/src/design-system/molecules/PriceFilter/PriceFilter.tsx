@@ -7,7 +7,7 @@ import { Stack, Slider, Theme, TextField } from '@mui/material'
 interface PriceFilterProps {
     minRange: number
     maxRange: number
-    range: [number, number]
+    range?: [number, number]
     setRange: Function
     triggerPriceFilter: () => void
     setFilterSliding: (input: boolean) => void
@@ -50,7 +50,7 @@ export const PriceFilter: FC<PriceFilterProps> = ({ ...props }) => {
             <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
                 <StyledTextField
                     type="number"
-                    value={props.range[0]}
+                    value={props.range ? props.range[0] : props.minRange}
                     onChange={(e) =>
                         props.setRange((bonds: [number, number]) => [
                             Number(e.target.value),
@@ -69,7 +69,7 @@ export const PriceFilter: FC<PriceFilterProps> = ({ ...props }) => {
                 </Typography>
                 <StyledTextField
                     type="number"
-                    value={props.range[1]}
+                    value={props.range ? props.range[1] : props.maxRange}
                     onChange={(e) =>
                         props.setRange((bonds: [number, number]) => [
                             bonds[0],
@@ -82,7 +82,7 @@ export const PriceFilter: FC<PriceFilterProps> = ({ ...props }) => {
             <StyledSlider
                 draggable
                 getAriaLabel={() => 'Price range filter'}
-                value={props.range}
+                value={props.range ?? [props.minRange, props.maxRange]}
                 min={props.minRange}
                 max={props.maxRange}
                 onChange={(_, newValues) => {

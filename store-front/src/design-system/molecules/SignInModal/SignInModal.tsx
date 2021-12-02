@@ -250,7 +250,7 @@ export const SignInModal: FC<SignInModalProps> = ({
             localStorage.setItem('Kanvas - Bearer', signUserResponse.data.token)
             localStorage.setItem(
                 'Kanvas - address',
-                signUserResponse.data.address,
+                signUserResponse.data.userAddress,
             )
 
             history.push(`/store`)
@@ -279,7 +279,7 @@ export const SignInModal: FC<SignInModalProps> = ({
             )
             localStorage.setItem(
                 'Kanvas - address',
-                registerUserResponse.data.address,
+                registerUserResponse.data.userAddress,
             )
 
             history.push(`/store`)
