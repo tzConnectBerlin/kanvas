@@ -47,7 +47,7 @@ INSERT INTO kanvas_user(
 )
 VALUES ($1, $2, $3)
 RETURNING id`,
-          [user.userName, user.address, user.signedPayload],
+          [user.userName, user.userAddress, user.signedPayload],
         )
 
         return { ...user, id: qryRes.rows[0]['id'] }
@@ -125,7 +125,7 @@ WHERE address = $1
     const res = {
       id: qryRes.rows[0]['id'],
       userName: qryRes.rows[0]['user_name'],
-      address: qryRes.rows[0]['address'],
+      userAddress: qryRes.rows[0]['address'],
       createdAt: Math.floor(qryRes.rows[0]['created_at'].getTime() / 1000),
       profilePicture: qryRes.rows[0]['picture_url'],
       signedPayload: qryRes.rows[0]['signed_payload'],
@@ -152,7 +152,7 @@ WHERE address = $1
       orderDirection: 'asc',
       firstRequestAt: undefined,
       categories: undefined,
-      address: address,
+      userAddress: address,
       availability: undefined,
     })
 

@@ -17,7 +17,8 @@ values
   (2, 3, 'Alps', 'ipfs://the-alps', '{}');
 
 update nft
-set launch_at = now() AT TIME ZONE 'UTC' + interval '1 hour'
+set launch_at = now() AT TIME ZONE 'UTC' + interval '1 hour',
+    description = 'its a mountain'
 where id = 3;
 
 insert into mtm_kanvas_user_nft (

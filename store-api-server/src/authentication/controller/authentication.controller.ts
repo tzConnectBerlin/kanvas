@@ -23,7 +23,7 @@ export class AuthenticationController {
   @UseGuards(JwtAuthGuard)
   async loggedUser(@CurrentUser() currentUser: UserEntity): Promise<any> {
     const loggedInUserRes = await this.authService.getLoggedUser(
-      currentUser.address,
+      currentUser.userAddress,
     )
     if (!loggedInUserRes.ok) {
       throw new HttpException(
