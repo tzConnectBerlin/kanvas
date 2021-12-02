@@ -469,7 +469,7 @@ const StorePage = () => {
                         nfts={
                             selectedFilters.length === 0 &&
                                 JSON.stringify(maxPriceFilterRange) ===
-                                JSON.stringify(priceFilterRange)
+                                JSON.stringify(priceFilterRange) && availabilityFilter.length === 0
                                 ? nftsResponse.data?.nfts
                                 : nftsFilteredResponse.data?.nfts
                         }
@@ -487,7 +487,7 @@ const StorePage = () => {
                         count={
                             selectedFilters.length === 0 &&
                                 JSON.stringify(maxPriceFilterRange) ===
-                                JSON.stringify(priceFilterRange)
+                                JSON.stringify(priceFilterRange) && availabilityFilter.length === 0
                                 ? nftsResponse.data?.numberOfPages
                                 : nftsFilteredResponse.data?.numberOfPages
                         }
