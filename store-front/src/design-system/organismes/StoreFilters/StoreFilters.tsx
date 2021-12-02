@@ -2,10 +2,13 @@ import styled from '@emotion/styled'
 import FlexSpacer from '../../atoms/FlexSpacer'
 import Typography from '../../atoms/Typography'
 import TreeView from '../../molecules/TreeView/TreeView'
-
-import { Checkbox, Stack, Theme } from '@mui/material'
-import { FC, useState } from 'react'
+import { Checkbox, Stack, Theme, useMediaQuery, useTheme } from '@mui/material'
 import PriceFilter from '../../molecules/PriceFilter'
+import CustomButton from '../../atoms/Button'
+import { ArrowBackIosNew } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
+import { reverse } from 'dns'
+import { FC, useEffect, useState } from 'react'
 
 interface FilterProps {
     name: string
@@ -52,6 +55,7 @@ const Filter: FC<FilterProps> = ({ ...props }) => {
 interface StyledStoreFiltersProps {
     openFilters?: boolean
     collapsed?: boolean
+    theme?: Theme
 }
 
 interface StoreFiltersProps extends StyledStoreFiltersProps {
@@ -68,39 +72,117 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
     setAvailabilityFilter: (input: string[]) => void
     triggerPriceFilter: () => void
     setFilterSliding: (input: boolean) => void
+    setFilterOpen: Function
 }
+const BackButton = styled(ArrowBackIosNew)<StyledStoreFiltersProps>`
+    fill: ${(props) => props.theme.palette.text.primary};
+`
 
-const StyledUl = styled.ul<StyledStoreFiltersProps>`
-    width: 100%;
+const StyledSection = styled.section<StyledStoreFiltersProps>`
+    display: block;
+    position: relative;
     padding: 0 0;
     transition: width 0.2s;
+    width: ${(props) => (props.openFilters ? '25rem' : '0')};
+    margin-right: ${(props) => (props.openFilters ? '2.5rem' : '0')};
+    -webkit-overflow-scrolling: touch;
 
-    @media (min-width: 900px) {
-        width: ${(props) => (props.openFilters ? '25rem' : '0')};
-        margin-right: ${(props) => (props.openFilters ? '2.5rem' : '0')};
+    @media (max-width: 874px) {
+        flex-direction: column;
+        display: none;
+        max-width: ${(props) => (props.openFilters ? 100 : 0)}rem;
+        width: ${(props) => (props.openFilters ? '35%' : '0')};
+        display: flex;
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 5rem;
+        bottom: 0;
+        z-index: 1;
+
+        overflow: scroll;
+
+        margin-top: 0 !important;
+        margin-right: 0;
+
+        background-color: ${(props) => props.theme.palette.background.paper};
+        opacity: 1;
+
+        p,
+        a {
+            opacity: ${(props) => (props.openFilters ? 1 : 0)} !important;
+            transition: opacity 0.3s;
+        }
+
+        transition: max-width 0.3s, width 0.3s, padding 0.5s;
+    }
+
+    @media (max-width: 1100px) {
+        width: ${(props) => (props.openFilters ? 40 : 0)}%;
+    }
+
+    @media (max-width: 874px) {
+        width: ${(props) => (props.openFilters ? 100 : 0)}%;
+    }
+
+    @media (max-width: 650px) {
+        width: ${(props) => (props.openFilters ? 100 : 0)}%;
     }
 `
 
-const StyledLi = styled.li<StyledStoreFiltersProps>`
-    cursor: pointer;
+const StyledUl = styled.ul<StyledStoreFiltersProps>`
+    display: flex;
+    flex-direction: column;
+    width: initial;
+    min-height: max-content;
+    height: max-content;
+    margin: 4rem 0 0;
+    transition: width 0.2s;
+    padding: 0.5rem 1.5rem 0;
 
+    @media (min-width: 900px) {
+        height: fit-content;
+        width: ${(props) => (props.openFilters ? '25rem' : '100%')};
+        margin-right: ${(props) => (props.openFilters ? '2.5rem' : '0')};
+        padding: 0;
+        margin-top: 0;
+    }
+`
+const StyledLi = styled.li<StyledStoreFiltersProps>`
     display: ${(props) => (props.openFilters ? 'flex' : 'none')};
     padding-top: 1rem;
     flex-direction: column;
-
     border-top: 1px solid #c4c4c4;
-
-    height: auto;
+    height: max-content;
+    cursor: pointer;
 `
 
-const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`
+const StyledHeader = styled(Stack)<StyledStoreFiltersProps>`
+    position: fixed;
+    width: -webkit-fill-available;
+    background-color: ${(props) => props.theme.palette.background.paper};
+    z-index: 1;
+
+    @media (min-width: 900px) {
+        position: relative;
+        opacity: 1;
+    }
+`
+
+const StyledCheckBox = styled(Checkbox)<{ theme?: Theme }>`
     &.Mui-checked {
         color: ${(props) => props.theme.palette.text.primary} !important;
     }
 `
 
+const StyledFooter = styled(Stack)<StyledStoreFiltersProps>`
+    display: flex;
+    padding: 0.5rem 1.5rem 1rem;
+    min-height: 12rem;
+`
 export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
     const [activeRef, setActiveRef] = useState<string[]>([])
+    const { t } = useTranslation(['translation'])
 
     const handleListItemClick = (concernedRef: string) => {
         if (activeRef.indexOf(concernedRef) !== -1) {
@@ -111,138 +193,181 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
             setActiveRef([...activeRef, concernedRef])
         }
     }
+    const theme = useTheme()
+
+    const isMobile = useMediaQuery('(max-width:900px)')
+
+    useEffect(() => {
+        if (isMobile) {
+            props.setFilterOpen(false)
+        }
+    }, [])
+
+    useEffect(() => {
+        if (props.openFilters) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = 'auto'
+        }
+    }, [props.openFilters])
 
     return (
-        <StyledUl openFilters={props.openFilters}>
-            <Stack
+        <StyledSection openFilters={props.openFilters}>
+            <StyledHeader
                 direction="row"
                 sx={{ display: `${props.openFilters ? 'flex' : 'none'}` }}
+                p={isMobile ? '2rem 1.5rem 0rem' : '0 0 .5rem 0'}
             >
-                <FlexSpacer />
-                <Typography
-                    onClick={() => props.setSelectedFilters([])}
-                    size="subtitle2"
-                    weight={
-                        props.selectedFilters.length > 0 ? 'Medium' : 'Light'
-                    }
-                    color={
-                        props.selectedFilters.length > 0
-                            ? 'contrastText'
-                            : '#C4C4C4'
-                    }
-                    sx={{ paddingBottom: '0.5rem' }}
-                >
-                    Clear All
-                </Typography>
-            </Stack>
-            <StyledLi
-                openFilters={props.openFilters}
-                collapsed={activeRef.indexOf('Categories') !== -1}
-            >
-                <Filter
-                    name="Categories"
-                    collapsed={activeRef.indexOf('Categories') !== -1}
-                    active={props.selectedFilters.length > 0}
-                    setCollapsed={handleListItemClick}
-                />
-                <TreeView
-                    loading={props.loading}
-                    open={props.openFilters}
-                    nodes={props.availableFilters}
-                    filterFunction={props.filterFunction}
-                    selectedFilters={props.selectedFilters}
-                    setSelectedFilters={props.setSelectedFilters}
-                    collapsed={activeRef.indexOf('Categories') !== -1}
-                />
-            </StyledLi>
-            <StyledLi openFilters={props.openFilters} collapsed={activeRef.indexOf('Availability') !== -1}>
-                <Filter
-                    name="Availability"
-                    active={false}
-                    collapsed={activeRef.indexOf('Availability') !== -1}
-                    setCollapsed={handleListItemClick}
-                />
+                {isMobile ? (
+                    <>
+                        <BackButton
+                            fill="#fff"
+                            onClick={() => props.setFilterOpen(false)}
+                            sx={{
+                                cursor: 'pointer',
+                                marginBottom: '0.7rem',
+                            }}
+                        />
 
-                {activeRef.indexOf('Availability') === -1 && (
-                    <Stack direction="column" sx={{ marginBottom: '1rem' }}>
-                        <Stack direction="row">
-                            <StyledCheckBox
-                                checked={props.availabilityFilter.indexOf('onSale') !== -1 && props.availabilityFilter.length !== 0}
-                                onClick={() => {
-                                    props.availabilityFilter.indexOf('onSale') === -1 ?
-                                        props.setAvailabilityFilter([...props.availabilityFilter, 'onSale'])
-                                        :
-                                        props.setAvailabilityFilter(props.availabilityFilter.filter(param => param !== 'onSale'))}
-                                    }
-                                inputProps={{ 'aria-label': 'controlled' }}
-                                disableRipple
-                            />
-                            <Typography
-                                size="h5"
-                                weight="Light"
-                            >
-                                On sale
-                            </Typography>
-                        </Stack>
-                        <Stack direction="row">
-                            <StyledCheckBox
-                                checked={props.availabilityFilter.indexOf('upcoming') !== -1 && props.availabilityFilter.length !== 0}
-                                onClick={() => {
-                                    props.availabilityFilter.indexOf('upcoming') === -1 ?
-                                        props.setAvailabilityFilter([...props.availabilityFilter, 'upcoming'])
-                                        :
-                                        props.setAvailabilityFilter(props.availabilityFilter.filter(param => param !== 'upcoming'))}
-                                    }
-                                inputProps={{ 'aria-label': 'controlled' }}
-                                disableRipple
-                            />
-                            <Typography
-                                size="h5"
-                                weight="Light"
-                            >
-                                Upcoming
-                            </Typography>
-                        </Stack>
-                        <Stack direction="row">
-                            <StyledCheckBox
-                                checked={props.availabilityFilter.indexOf('soldOut') !== -1 && props.availabilityFilter.length !== 0}
-                                onClick={() => {
-                                    props.availabilityFilter.indexOf('soldOut') === -1 ?
-                                        props.setAvailabilityFilter([...props.availabilityFilter, 'soldOut'])
-                                        :
-                                        props.setAvailabilityFilter(props.availabilityFilter.filter(param => param !== 'soldOut'))}
-                                    }
-                            inputProps={{ 'aria-label': 'controlled' }}
-                            disableRipple
-                            />
-                            <Typography
-                                size="h5"
-                                weight="Light"
-                            >
-                                Sold out
-                            </Typography>
-                        </Stack>
-                    </Stack>)}
-            </StyledLi>
-            <StyledLi openFilters={props.openFilters}>
-                <Filter
-                    name="Price"
-                    active={false}
-                    collapsed={activeRef.indexOf('Price') !== -1}
-                    setCollapsed={handleListItemClick}
-                />
+                        <Typography
+                            p="0  1.5rem .5rem 0"
+                            onClick={() => props.setSelectedFilters([])}
+                            size="h2"
+                            ml={2}
+                            weight={
+                                props.selectedFilters.length > 0
+                                    ? 'Medium'
+                                    : 'Light'
+                            }
+                            sx={{ lineHeight: 1.1 }}
+                        >
+                            Filters
+                        </Typography>
 
-                {activeRef.indexOf('Price') === -1 && (
-                    <PriceFilter
-                        minRange={props.minRange}
-                        maxRange={props.maxRange}
-                        range={props.priceFilterRange}
-                        setRange={props.setPriceFilterRange}
-                        triggerPriceFilter={props.triggerPriceFilter}
-                        setFilterSliding={props.setFilterSliding}
-                    />
+                        <FlexSpacer />
+
+                        <Typography
+                            onClick={() => props.setSelectedFilters([])}
+                            size="subtitle2"
+                            weight={
+                                props.selectedFilters.length > 0
+                                    ? 'Medium'
+                                    : 'Light'
+                            }
+                            color={
+                                props.selectedFilters.length > 0
+                                    ? 'contrastText'
+                                    : '#C4C4C4'
+                            }
+                            sx={{ paddingBottom: '0.5rem' }}
+                        >
+                            Clear All
+                        </Typography>
+                    </>
+                ) : (
+                    <>
+                        <FlexSpacer />
+                        <Typography
+                            onClick={() => props.setSelectedFilters([])}
+                            size="subtitle2"
+                            weight={
+                                props.selectedFilters.length > 0
+                                    ? 'Medium'
+                                    : 'Light'
+                            }
+                            color={
+                                props.selectedFilters.length > 0
+                                    ? 'contrastText'
+                                    : '#C4C4C4'
+                            }
+                            sx={{ paddingBottom: '0.5rem' }}
+                        >
+                            Clear All
+                        </Typography>
+                    </>
                 )}
-            </StyledLi>
-        </StyledUl>
+            </StyledHeader>
+
+            <Stack
+                direction="column"
+                sx={{ overflow: 'auto', marginBottom: '6rem' }}
+            >
+                <StyledUl>
+                    <StyledLi
+                        openFilters={props.openFilters}
+                        collapsed={activeRef.indexOf('Categories') !== -1}
+                    >
+                        <Filter
+                            name="Categories"
+                            collapsed={activeRef.indexOf('Categories') !== -1}
+                            active={props.selectedFilters.length > 0}
+                            setCollapsed={handleListItemClick}
+                        />
+                        <TreeView
+                            loading={props.loading}
+                            open={props.openFilters}
+                            nodes={props.availableFilters}
+                            filterFunction={props.filterFunction}
+                            selectedFilters={props.selectedFilters}
+                            setSelectedFilters={props.setSelectedFilters}
+                            collapsed={activeRef.indexOf('Categories') !== -1}
+                        />
+                    </StyledLi>
+                    <StyledLi openFilters={props.openFilters}>
+                        <Filter
+                            name="Price"
+                            active={false}
+                            collapsed={activeRef.indexOf('Price') !== -1}
+                            setCollapsed={handleListItemClick}
+                        />
+
+                        {activeRef.indexOf('Price') === -1 && (
+                            <PriceFilter
+                                minRange={props.minRange}
+                                maxRange={props.maxRange}
+                                range={props.priceFilterRange}
+                                setRange={props.setPriceFilterRange}
+                                triggerPriceFilter={props.triggerPriceFilter}
+                                setFilterSliding={props.setFilterSliding}
+                            />
+                        )}
+                    </StyledLi>
+                </StyledUl>
+                {isMobile && (
+                    <>
+                        <StyledFooter
+                            direction="column-reverse"
+                            minHeight="6rem"
+                        >
+                            <FlexSpacer borderBottom={false} minHeight={3} />
+                            <CustomButton
+                                fullWidth={!!isMobile}
+                                color="secondary"
+                                type="submit"
+                                onClick={() => props.setSelectedFilters([])}
+                                label={t('filters.button.reset')}
+                                style={{
+                                    outline: 'none',
+                                }}
+                            ></CustomButton>
+
+                            <CustomButton
+                                fullWidth={true}
+                                color="secondary"
+                                type="submit"
+                                label={t('filters.button.results')}
+                                onClick={() => props.setFilterOpen(false)}
+                                style={{
+                                    order: isMobile ? 99 : 0,
+                                    color: theme.palette.primary.main,
+                                    alignSelf: 'flex-start',
+                                    height: '2.5rem',
+                                }}
+                            ></CustomButton>
+                        </StyledFooter>
+                    </>
+                )}
+            </Stack>
+        </StyledSection>
     )
 }
