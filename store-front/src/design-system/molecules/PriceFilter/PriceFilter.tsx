@@ -1,19 +1,19 @@
 import styled from '@emotion/styled'
 import Typography from '../../atoms/Typography'
 
-import { FC } from 'react'
+import { FC, useState } from 'react'
 import { Stack, Slider, Theme, TextField } from '@mui/material'
 
 interface PriceFilterProps {
     minRange: number
     maxRange: number
-    range: [number, number]
+    range?: [number, number]
     setRange: Function
     triggerPriceFilter: () => void
     setFilterSliding: (input: boolean) => void
 }
 
-const StyledTextField = styled(TextField)<{ theme?: Theme }>`
+const StyledTextField = styled(TextField) <{ theme?: Theme }>`
     outline: none;
     border-bottom: 1px solid #c4c4c4;
 
@@ -58,7 +58,7 @@ export const PriceFilter: FC<PriceFilterProps> = ({ ...props }) => {
             <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
                 <StyledTextField
                     type="number"
-                    value={props.range[0]}
+                    value={props.range ? props.range[0] : props.minRange}
                     onChange={(e) =>
                         props.setRange((bonds: [number, number]) => [
                             Number(e.target.value),
@@ -77,7 +77,7 @@ export const PriceFilter: FC<PriceFilterProps> = ({ ...props }) => {
                 </Typography>
                 <StyledTextField
                     type="number"
-                    value={props.range[1]}
+                    value={props.range ? props.range[1] : props.maxRange}
                     onChange={(e) =>
                         props.setRange((bonds: [number, number]) => [
                             bonds[0],
@@ -88,15 +88,18 @@ export const PriceFilter: FC<PriceFilterProps> = ({ ...props }) => {
             </Stack>
 
             <StyledSlider
+                draggable
                 getAriaLabel={() => 'Price range filter'}
-                value={props.range}
+                value={props.range ?? [props.minRange, props.maxRange]}
                 min={props.minRange}
                 max={props.maxRange}
-                onChange={(_, newValues) =>
+                onChange={(_, newValues) => {
                     props.setRange(newValues as [number, number])
-                }
-                onMouseUp={() => { props.triggerPriceFilter(); props.setFilterSliding(false)}}
-                onMouseDown={() => props.setFilterSliding(true)}
+                }}
+                onChangeCommitted={() => {
+                    props.triggerPriceFilter();
+                    props.setFilterSliding(false)
+                }}
                 valueLabelDisplay="auto"
                 getAriaValueText={() => 'valuetext'}
             />

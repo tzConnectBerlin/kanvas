@@ -33,7 +33,7 @@ const paperProps = {
         left: 'initial !important',
         right: '0px !important',
         width: '14em',
-        height: '12em',
+        height: '8em',
         paddingTop: '0.5em',
         transformOrigin: '200px -20px 0px !important',
         paddingBottom: '0.5em',
@@ -91,27 +91,6 @@ export const ProfilePopover: FC<ProfilePopoverProps> = ({ ...props }) => {
                     </Typography>
                 </StyledMenuItem>
 
-                <StyledMenuItem onClick={() => navigateTo('/notifications')}>
-                    {props.notifications ? (
-                        <CustomBadge
-                            color="error"
-                            badgeContent={props.notifications}
-                            max={99}
-                        >
-                            <Avatar>
-                                <NotificationsRoundedIcon />
-                            </Avatar>
-                        </CustomBadge>
-                    ) : (
-                        <Avatar>
-                            <NotificationsRoundedIcon />
-                        </Avatar>
-                    )}
-                    <Typography size="inherit" weight="Medium">
-                        {' '}
-                        Notifications{' '}
-                    </Typography>
-                </StyledMenuItem>
 
                 <StyledMenuItem onClick={() => props.logOut()}>
                     <Avatar>

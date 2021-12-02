@@ -296,7 +296,7 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                     {
                         // add localStorage.getItem in a useState hook to get the state after signning in.
                         localStorage.getItem('Kanvas - address') ===
-                            props.user?.address && (
+                            props.user?.userAddress && (
                             <CustomButton
                                 size="medium"
                                 onClick={() => props.setOpen(true)}
@@ -310,7 +310,7 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                 {/* Sub menu to navigate to personnal pages such as notifications profile or simply to logout */}
 
                 {localStorage.getItem('Kanvas - address') ===
-                props.user?.address ? (
+                props.user?.userAddress ? (
                     <>
                         <Stack
                             direction="row"

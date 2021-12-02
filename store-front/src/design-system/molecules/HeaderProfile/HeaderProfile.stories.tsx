@@ -20,7 +20,7 @@ Primary.args = {
         profilePicture:
             'https://dart-creator-image-storage.fra1.digitaloceanspaces.com/undefined_profile_picture',
         userName: 'aurelia_durand',
-        address: 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd',
+        userAddress: 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd',
     },
 }
 
@@ -28,3 +28,4 @@ export const Loading = Template.bind({})
 Loading.args = {
     loading: true,
 }
+ 

@@ -36,7 +36,7 @@ interface SignInModalProps {
 }
 
 interface IUserParams {
-    address: string | null
+    userAddress: string | null
     signedPayload: string | null
 }
 
@@ -76,7 +76,7 @@ export const SignInModal: FC<SignInModalProps> = ({
     const [socialLoading, setSocialLoading] = useState(false)
     const [beaconLoading, setBeaconLoading] = useState(false)
     const [signInParams, setSignInParams] = useState<IUserParams>({
-        address: null,
+        userAddress: null,
         signedPayload: null,
     })
 
@@ -136,13 +136,13 @@ export const SignInModal: FC<SignInModalProps> = ({
                 const signedPayload =
                     await beaconWallet.client.requestSignPayload(payload)
                 setSignInParams({
-                    address: userAddress,
+                    userAddress: userAddress,
                     signedPayload: signedPayload.signature,
                 })
                 signUser({
                     data: {
                         name: userAddress,
-                        address: userAddress,
+                        userAddress: userAddress,
                         signedPayload: signedPayload.signature,
                     },
                 }).catch((err) => {
@@ -158,12 +158,12 @@ export const SignInModal: FC<SignInModalProps> = ({
                     '0501000000' + payload.payload.slice(2),
                 )
                 setSignInParams({
-                    address: userAddress,
+                    userAddress: userAddress,
                     signedPayload: signedPayload,
                 })
                 signUser({
                     data: {
-                        address: userAddress,
+                        userAddress: userAddress,
                         signedPayload: signedPayload,
                     },
                 }).catch((err) => {
@@ -250,7 +250,7 @@ export const SignInModal: FC<SignInModalProps> = ({
             localStorage.setItem('Kanvas - Bearer', signUserResponse.data.token)
             localStorage.setItem(
                 'Kanvas - address',
-                signUserResponse.data.address,
+                signUserResponse.data.userAddress,
             )
 
             history.push(`/store`)
@@ -279,7 +279,7 @@ export const SignInModal: FC<SignInModalProps> = ({
             )
             localStorage.setItem(
                 'Kanvas - address',
-                registerUserResponse.data.address,
+                registerUserResponse.data.userAddress,
             )
 
             history.push(`/store`)

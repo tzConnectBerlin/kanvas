@@ -3,13 +3,12 @@ import FlexSpacer from '../../atoms/FlexSpacer'
 import Typography from '../../atoms/Typography'
 import TreeView from '../../molecules/TreeView/TreeView'
 import { Checkbox, Stack, Theme, useMediaQuery, useTheme } from '@mui/material'
+import { FC, useEffect, useState } from 'react'
 import PriceFilter from '../../molecules/PriceFilter'
 import CustomButton from '../../atoms/Button'
 import { ArrowBackIosNew } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { reverse } from 'dns'
-import { FC, useEffect, useState } from 'react'
-
 interface FilterProps {
     name: string
     collapsed: boolean
@@ -64,7 +63,7 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
     availableFilters: any[]
     filterFunction: Function
     loading: boolean
-    priceFilterRange: [number, number]
+    priceFilterRange?: [number, number]
     setPriceFilterRange: Function
     minRange: number
     maxRange: number

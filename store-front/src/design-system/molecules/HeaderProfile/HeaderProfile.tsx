@@ -78,7 +78,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
 
     const copyAddressToClipBoard = () => {
         try {
-            navigator.clipboard.writeText(props.user?.address)
+            navigator.clipboard.writeText(props.user?.userAddress)
 
             setTooltipText('Copied !') // copy succeed.
             setShowCopyOverlay(true)
@@ -141,7 +141,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                         {
                             // Here goes validation if user profile is logged in user
                             localStorage.getItem('Kanvas - address') ===
-                            props.user?.address ? (
+                            props.user?.userAddress ? (
                                 <CustomButton
                                     size="medium"
                                     onClick={() => props.editProfile()}
@@ -168,7 +168,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                             {props.loading ? (
                                 <Skeleton width="5rem" />
                             ) : (
-                                props.user?.address
+                                props.user?.userAddress
                             )}{' '}
                         </Typography>
                         <FiCopyStyled
@@ -325,7 +325,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                             {props.loading ? (
                                 <Skeleton width="5rem" />
                             ) : (
-                                props.user?.address
+                                props.user?.userAddress
                             )}{' '}
                         </Typography>
                         <FiCopyStyled

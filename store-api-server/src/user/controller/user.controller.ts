@@ -36,14 +36,15 @@ interface EditProfile {
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Get()
+  @Get('/profile')
   @UseGuards(JwtFailableAuthGuard)
   async getProfile(
     @CurrentUser() user?: UserEntity,
     @Query('userAddress') userAddress?: string,
   ) {
     const address =
-      userAddress || (typeof user !== 'undefined' ? user.address : undefined)
+      userAddress ||
+      (typeof user !== 'undefined' ? user.userAddress : undefined)
     if (typeof address === 'undefined') {
       throw new HttpException(
         'Define userAddress parameter or access this endpoint logged in',
@@ -67,7 +68,7 @@ export class UserController {
     return profile_res.val
   }
 
-  @Post('/edit')
+  @Post('/profile/edit')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileInterceptor('profilePicture', {
@@ -79,6 +80,7 @@ export class UserController {
     @Body() editFields: EditProfile,
     @UploadedFile() picture: any,
   ) {
+    console.log(editFields)
     try {
       await this.userService.edit(currentUser.id, editFields?.userName, picture)
     } catch (err: any) {
@@ -97,7 +99,8 @@ export class UserController {
     }
   }
 
-  @Get('/edit/check')
+  @Get('/profile/edit/check')
+  @UseGuards(JwtAuthGuard)
   async checkAllowedEdit(@Query('userName') userName: string) {
     const available = await this.userService.isNameAvailable(userName)
     return {

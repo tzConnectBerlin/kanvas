@@ -29,8 +29,6 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
 
     const { t } = useTranslation(['translation'])
 
-    const [avatarSrc, setAvatarSrc] = useState<string>('')
-
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -89,7 +87,7 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
 
                 {/* Call to action button: `Sign in`, `Add artwork` for curators and artists, and profile avatar to display the submenu */}
 
-                {localStorage.getItem('Kanvas - address') === user?.address ? (
+                {localStorage.getItem('Kanvas - address') === user?.userAddress ? (
                     <Avatar
                         src={`${user?.profilePicture}?${Date.now()}`}
                         onClick={(e) =>
@@ -129,7 +127,7 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
             <ProfilePopover
                 open={Boolean(anchorEl)}
                 avatarSrc={`${user?.profilePicture}?${Date.now()}`}
-                address={user?.address}
+                address={user?.userAddress}
                 history={history}
                 logOut={onLogout}
                 onClose={handleClose}

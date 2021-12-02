@@ -78,7 +78,7 @@ const Profile: FC<ProfileProps> = () => {
 
     const [userResponse, getUser] = useAxios(
         {
-            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users`,
+            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/profile`,
             withCredentials: true,
         },
         { manual: true },
@@ -86,10 +86,10 @@ const Profile: FC<ProfileProps> = () => {
 
     const [userNftsResponse, getUserNfts] = useAxios(
         {
-            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/filter`,
+            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts`,
             withCredentials: true,
             params: {
-                address: userAddress,
+                userAddress: userAddress,
                 pageSize: 12,
             },
         },
@@ -109,7 +109,7 @@ const Profile: FC<ProfileProps> = () => {
 
         getUserNfts({
             params: {
-                address: userAddress,
+                userAddress: userAddress,
                 pageSize: 12,
             },
         })
@@ -156,14 +156,12 @@ const Profile: FC<ProfileProps> = () => {
         getUserNfts({
             withCredentials: true,
             params: {
-                address: userAddress,
+                userAddress: userAddress,
                 page: page,
                 pageSize: 12,
             },
         })
-
     }
-
 
     return (
         <PageWrapper>

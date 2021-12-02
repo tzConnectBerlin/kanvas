@@ -5,6 +5,7 @@ export interface NftEntity {
   id: number
   createdAt: number
   name: string
+  description?: string
   ipfsHash: string
   metadata: any // TODO expand on the meaning of this type
   dataUri: string
@@ -12,6 +13,7 @@ export interface NftEntity {
   tokenId: string
   price: number
   categories: CategoryEntity[]
+  editionsSize: number
   editionsAvailable: number
   launchAt: number
 }
