@@ -1,25 +1,25 @@
-import styled from '@emotion/styled'
-import Typography from '../../atoms/Typography'
-import FlexSpacer from '../../atoms/FlexSpacer'
-import CustomButton from '../../atoms/Button'
-import ShoppingCartItem from '../../molecules/ShoppingCartItem'
-import useAxios from 'axios-hooks'
+import styled from '@emotion/styled';
+import Typography from '../../atoms/Typography';
+import FlexSpacer from '../../atoms/FlexSpacer';
+import CustomButton from '../../atoms/Button';
+import ShoppingCartItem from '../../molecules/ShoppingCartItem';
+import useAxios from 'axios-hooks';
 
-import { FC, useEffect, useRef, useState } from 'react'
-import { toast } from 'react-toastify'
-import { Stack, Theme } from '@mui/material'
-import { INft } from '../../../interfaces/artwork'
-import { useHistory } from 'react-router-dom'
+import { FC, useEffect, useRef, useState } from 'react';
+import { toast } from 'react-toastify';
+import { Stack, Theme } from '@mui/material';
+import { INft } from '../../../interfaces/artwork';
+import { useHistory } from 'react-router-dom';
 
 interface ShoppingCartProps {
-    nftsInCart: INft[]
-    setNftsInCart: Function
-    closeCart: Function
-    loading: boolean
-    open: boolean
-    listCart: Function
-    expiresAt: string
-    setOpenLogin: Function
+    nftsInCart: INft[];
+    setNftsInCart: Function;
+    closeCart: Function;
+    loading: boolean;
+    open: boolean;
+    listCart: Function;
+    expiresAt: string;
+    setOpenLogin: Function;
 }
 
 const ContainerPopupStyled = styled.div<{ open: boolean }>`
@@ -33,7 +33,7 @@ const ContainerPopupStyled = styled.div<{ open: boolean }>`
 
     visibility: ${(props) => (props.open ? 'visible' : 'hidden')}!important;
     opacity: ${(props) => (props.open ? 1 : 0)} !important;
-`
+`;
 
 const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
     max-width: ${(props) => (props.open ? 25 : 0)}rem;
@@ -72,15 +72,15 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
     @media (max-width: 650px) {
         width: ${(props) => (props.open ? 100 : 0)}%;
     }
-`
+`;
 
 export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
-    const history = useHistory()
-    const [timeLeft, setTimeLeft] = useState<number>()
+    const history = useHistory();
+    const [timeLeft, setTimeLeft] = useState<number>();
 
     const [deleteFromCartResponse, deleteFromCart] = useAxios('', {
         manual: true,
-    })
+    });
 
     const [checkoutResponse, checkout] = useAxios(
         {
@@ -98,24 +98,29 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         {
             manual: true,
         },
-    )
+    );
 
     useEffect(() => {
-        if (checkoutResponse.loading === false && checkoutResponse.response?.status === 204) {
-            toast.info('Congratulations for your purchase')
-            props.listCart()
-            props.closeCart()
-            history.push(`/profile/${localStorage.getItem('Kanvas - address')}`)
+        if (
+            checkoutResponse.loading === false &&
+            checkoutResponse.response?.status === 204
+        ) {
+            toast.info('Congratulations for your purchase');
+            props.listCart();
+            props.closeCart();
+            history.push(
+                `/profile/${localStorage.getItem('Kanvas - address')}`,
+            );
         } else if (checkoutResponse.error?.response?.status === 401) {
-            props.listCart()
-            props.setOpenLogin(true)
+            props.listCart();
+            props.setOpenLogin(true);
         }
-    }, [checkoutResponse])
+    }, [checkoutResponse]);
 
-    const [concernedDeletedNFT, setConcernedDeletedNft] = useState<number>()
+    const [concernedDeletedNFT, setConcernedDeletedNft] = useState<number>();
 
     const handleDeleteFromBasket = (nftId: number) => {
-        setConcernedDeletedNft(nftId)
+        setConcernedDeletedNft(nftId);
         deleteFromCart({
             url:
                 process.env.REACT_APP_API_SERVER_BASE_URL +
@@ -131,51 +136,51 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         })
             .then((res) => {
                 if (res.status === 204) {
-                    props.listCart()
+                    props.listCart();
                 }
             })
             .catch((err) => {
-                toast.error(err.response?.data?.message ?? 'An error occured')
-            })
-    }
+                toast.error(err.response?.data?.message ?? 'An error occured');
+            });
+    };
 
     useEffect(() => {
         if (props.open) {
-            document.body.style.overflow = 'hidden'
+            document.body.style.overflow = 'hidden';
         } else {
-            document.body.style.overflow = 'auto'
+            document.body.style.overflow = 'auto';
         }
-    }, [props.open])
+    }, [props.open]);
 
-    const [isWarned, setIsWarned] = useState(false)
-    const [isExpiredError, setIsExpiredError] = useState(false)
+    const [isWarned, setIsWarned] = useState(false);
+    const [isExpiredError, setIsExpiredError] = useState(false);
 
     useEffect(() => {
         if (isExpiredError && (timeLeft === 0 || (timeLeft && timeLeft < 0))) {
-            setIsExpiredError(true)
-            toast.error('Your cart has expired')
+            setIsExpiredError(true);
+            toast.error('Your cart has expired');
         }
 
-        if (!timeLeft) return
+        if (!timeLeft) return;
         setInterval(() => {
             setTimeLeft(
                 new Date(props.expiresAt).getTime() - new Date().getTime(),
-            )
-        }, 60000)
+            );
+        }, 60000);
 
         if (timeLeft < 300000 && !isWarned) {
             toast.warning(
                 `Your card will expire in ${new Date(
                     timeLeft,
                 ).getMinutes()} minutes`,
-            )
-            setIsWarned(true)
+            );
+            setIsWarned(true);
         }
-    }, [timeLeft])
+    }, [timeLeft]);
 
     useEffect(() => {
-        setTimeLeft(new Date(props.expiresAt).getTime() - new Date().getTime())
-    }, [props.expiresAt])
+        setTimeLeft(new Date(props.expiresAt).getTime() - new Date().getTime());
+    }, [props.expiresAt]);
 
     return (
         <>
@@ -270,7 +275,9 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         <CustomButton
                             size="medium"
                             label="Checkout"
-                            onClick={() => !checkoutResponse.loading && checkout()}
+                            onClick={() =>
+                                !checkoutResponse.loading && checkout()
+                            }
                             disabled={props.nftsInCart.length === 0}
                             loading={checkoutResponse.loading}
                             sx={{
@@ -284,5 +291,5 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                 </Stack>
             </WrapperCart>
         </>
-    )
-}
+    );
+};

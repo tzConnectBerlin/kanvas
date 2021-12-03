@@ -1,12 +1,12 @@
-import styled from '@emotion/styled'
-import Avatar from '../../atoms/Avatar'
-import FlexSpacer from '../../atoms/FlexSpacer'
+import styled from '@emotion/styled';
+import Avatar from '../../atoms/Avatar';
+import FlexSpacer from '../../atoms/FlexSpacer';
 
-import { FC } from 'react'
-import { useHistory } from 'react-router'
-import { CustomButton } from '../../atoms/Button'
-import { Typography } from '../../atoms/Typography'
-import { EmptySearchResult } from '../../atoms/EmptySearchResult'
+import { FC } from 'react';
+import { useHistory } from 'react-router';
+import { CustomButton } from '../../atoms/Button';
+import { Typography } from '../../atoms/Typography';
+import { EmptySearchResult } from '../../atoms/EmptySearchResult';
 import {
     BoxProps as MBoxProps,
     Box,
@@ -15,26 +15,26 @@ import {
     Skeleton,
     Stack,
     Theme,
-} from '@mui/material'
+} from '@mui/material';
 
 interface QuickSearResultProps {
-    error: boolean
-    profilesSearchResult: any
-    artworksSearchResult: any
-    categoriesSearchResult: any
-    searchString: string | unknown
-    open?: boolean
-    closeResult: Function
-    loading?: boolean
+    error: boolean;
+    profilesSearchResult: any;
+    artworksSearchResult: any;
+    categoriesSearchResult: any;
+    searchString: string | unknown;
+    open?: boolean;
+    closeResult: Function;
+    loading?: boolean;
 }
 
 interface BoxProps extends MBoxProps {
-    open?: boolean
+    open?: boolean;
 }
 
 const StyledBox = styled(Box)<BoxProps>`
     display: ${(props) => (props.open ? 'flex' : 'none')};
-`
+`;
 
 const StyledPaper = styled(Paper)<{ theme?: Theme }>`
     box-shadow: none;
@@ -49,18 +49,18 @@ const StyledPaper = styled(Paper)<{ theme?: Theme }>`
     transition: height 0.3s;
     background-color: ${(props) => props.theme.palette.background.paper};
     background-image: none;
-`
+`;
 
 const StyledHeaderStack = styled(Stack)`
     padding: 1em 1.5em;
     margin-bottom: 0.5em;
-`
+`;
 
 const StyledContentStack = styled(Stack)`
     padding-top: 0.5em;
     padding-left: 1em;
     padding-bottom: 0.5em;
-`
+`;
 
 const ProfileResultWrapper = styled(Stack)<{ theme?: Theme }>`
     display: flex;
@@ -80,19 +80,19 @@ const ProfileResultWrapper = styled(Stack)<{ theme?: Theme }>`
         border-left: 2px solid
             ${(props) => props.theme.palette.primary.contrastText};
     }
-`
+`;
 
 const StyledGrid = styled(Grid)`
     padding-right: 1.5em;
-`
+`;
 
 export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
-    const history = useHistory()
+    const history = useHistory();
 
     const navigateTo = (path: string) => {
-        props.closeResult()
-        history.push(path)
-    }
+        props.closeResult();
+        history.push(path);
+    };
 
     return (
         <StyledBox
@@ -186,8 +186,12 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                         <Typography
                                             size="h4"
                                             weight="Medium"
-                                            sx={{ cursor: 'pointer', width: '80%' }}
-                                            display="initial !important" noWrap
+                                            sx={{
+                                                cursor: 'pointer',
+                                                width: '80%',
+                                            }}
+                                            display="initial !important"
+                                            noWrap
                                         >
                                             {nft?.name}
                                         </Typography>
@@ -268,5 +272,5 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                 }
             </StyledPaper>
         </StyledBox>
-    )
-}
+    );
+};

@@ -1,23 +1,22 @@
-import styled from '@emotion/styled'
-import Typography from '../../atoms/Typography'
-import FlexSpacer from '../../atoms/FlexSpacer'
+import styled from '@emotion/styled';
+import Typography from '../../atoms/Typography';
+import FlexSpacer from '../../atoms/FlexSpacer';
 
-import { Checkbox, Stack, Theme } from '@mui/material'
-import { FC, useEffect, useState } from 'react'
+import { Checkbox, Stack, Theme } from '@mui/material';
+import { FC, useEffect, useState } from 'react';
 
 interface StyledTreeViewProps {
-    open?: boolean
-    theme?: Theme
+    open?: boolean;
+    theme?: Theme;
 }
 
 interface TreeViewProps extends StyledTreeViewProps {
-    nodes?: any[]
-    loading: boolean
-    selectedFilters?: number[]
-    setSelectedFilters: Function
-    filterFunction: Function
-    collapsed: boolean
-    callNFTsEndpoint: (input: boolean) => void
+    nodes?: any[];
+    loading: boolean;
+    selectedFilters: number[];
+    setSelectedFilters: Function;
+    collapsed: boolean;
+    callNFTsEndpoint: (input: boolean) => void;
 }
 
 const StyledDiv = styled.div<StyledTreeViewProps>`
@@ -25,7 +24,7 @@ const StyledDiv = styled.div<StyledTreeViewProps>`
     width: ${(props) => (props.open ? 'auto' : '0')};
     height: 100%;
     transition: width 0.2s;
-`
+`;
 
 const StyledLi = styled.li<StyledTreeViewProps>`
     cursor: pointer;
@@ -35,18 +34,18 @@ const StyledLi = styled.li<StyledTreeViewProps>`
 
     height: 3rem;
     transition: width 0.2s, height 0.2s;
-`
+`;
 
 const StyledCheckBox = styled(Checkbox)<{ theme?: Theme }>`
     &.Mui-checked {
         color: ${(props) => props.theme.palette.text.primary} !important;
     }
-`
+`;
 
 interface recurseRes {
-    selectLeafs: number[]
+    selectLeafs: number[];
 
-    highlightParents: number[][]
+    highlightParents: number[][];
 }
 
 const TreeView: FC<TreeViewProps> = ({
@@ -55,66 +54,67 @@ const TreeView: FC<TreeViewProps> = ({
     setSelectedFilters,
     ...props
 }) => {
-    const [newCategorySelected, setNewCategorySelected] =useState<boolean>(false)
+    const [newCategorySelected, setNewCategorySelected] =
+        useState<boolean>(false);
     const [highlightedParentsState, setHighlightedParents] = useState<number[]>(
         [],
-    )
+    );
 
     const recurseChildrens = (node: any): recurseRes => {
         if (node.children?.length > 0) {
             let res: recurseRes = {
                 selectLeafs: [],
                 highlightParents: [],
-            }
+            };
             for (const child of node.children) {
-                const childRes = recurseChildrens(child)
-                res.selectLeafs = [...res.selectLeafs, ...childRes.selectLeafs]
+                const childRes = recurseChildrens(child);
+                res.selectLeafs = [...res.selectLeafs, ...childRes.selectLeafs];
                 res.highlightParents = [
                     ...res.highlightParents,
                     ...childRes.highlightParents,
-                ]
+                ];
             }
-            res.highlightParents.push([node.id, res.selectLeafs.length])
-            return res
+            res.highlightParents.push([node.id, res.selectLeafs.length]);
+            return res;
         } else {
             return {
                 selectLeafs: [node.id],
                 highlightParents: [],
-            }
+            };
         }
-    }
+    };
 
     const select = (node: any) => {
-        const recRes = recurseChildrens(node)
+        const recRes = recurseChildrens(node);
 
-        let childParents: any[] = []
-        let highlightedParents: any[] = []
+        let childParents: any[] = [];
+        let highlightedParents: any[] = [];
 
         for (const [childParent, highlightCount] of recRes.highlightParents) {
-            childParents.push(childParent)
+            childParents.push(childParent);
             highlightedParents = [
                 ...highlightedParents,
                 ...Array(highlightCount).fill(childParent),
-            ]
+            ];
         }
 
-        let selectedNodes = [...recRes.selectLeafs, ...childParents]
-        let incrAboveHighlightCount = recRes.selectLeafs.length
+        let selectedNodes = [...recRes.selectLeafs, ...childParents];
+        let incrAboveHighlightCount = recRes.selectLeafs.length;
 
         if (selectedFilters.indexOf(node.id) === -1) {
             incrAboveHighlightCount -= [...selectedFilters].filter(
                 (id) => id != node.id && recRes.selectLeafs.indexOf(id) !== -1,
-            ).length
+            ).length;
         }
 
         for (const parent of getParents(node)) {
             if (selectedFilters.indexOf(node.id) > -1) {
-                selectedNodes.push(parent)
+                selectedNodes.push(parent);
             }
             highlightedParents = [
                 ...highlightedParents,
                 ...Array(incrAboveHighlightCount).fill(parent),
-            ]
+            ];
         }
 
         if (selectedFilters.indexOf(node.id) > -1) {
@@ -122,79 +122,79 @@ const TreeView: FC<TreeViewProps> = ({
                 selectedFilters.filter(
                     (filterId) => selectedNodes.indexOf(filterId) === -1,
                 ),
-            )
+            );
             setHighlightedParents(
                 listDifference(highlightedParentsState, highlightedParents),
-            )
+            );
         } else {
             setSelectedFilters([
                 ...selectedFilters.filter(
                     (id) => selectedNodes.indexOf(id) === -1,
                 ),
                 ...selectedNodes,
-            ])
+            ]);
             setHighlightedParents([
                 ...highlightedParentsState.filter(
                     (id) => childParents.indexOf(id) === -1,
                 ),
                 ...highlightedParents,
-            ])
+            ]);
         }
-        setNewCategorySelected(true)
-    }
+        setNewCategorySelected(true);
+    };
 
     const listDifference = (dadList: any[], babyList: any[]): any[] => {
-        const dadListCopy = [...dadList]
+        const dadListCopy = [...dadList];
         babyList.forEach((parent) => {
-            const index = dadListCopy.indexOf(parent)
+            const index = dadListCopy.indexOf(parent);
 
             if (index > -1) {
-                dadListCopy.splice(index, 1)
+                dadListCopy.splice(index, 1);
             }
-        })
+        });
 
-        return dadListCopy
-    }
+        return dadListCopy;
+    };
 
     // Add recursively all the parents to an array and return the array
     const getParents = (node: any, parents: any[] = []) => {
         if (node.parent) {
-            parents.push(node.parent.id)
-            getParents(node.parent, parents)
+            parents.push(node.parent.id);
+            getParents(node.parent, parents);
         }
-        return parents
-    }
+        return parents;
+    };
 
     // Open or close childrens
     const handleListItemClick = (concernedRef: any) => {
         if (activeRef.indexOf(concernedRef) !== -1) {
-            setActiveRef(activeRef.filter((ref) => ref !== concernedRef))
+            setActiveRef(activeRef.filter((ref) => ref !== concernedRef));
         } else {
-            setActiveRef([...activeRef, concernedRef])
+            setActiveRef([...activeRef, concernedRef]);
         }
-    }
+    };
 
     useEffect(() => {
         if (selectedFilters.length === 0) {
-            setHighlightedParents([])
+            setHighlightedParents([]);
         }
         if (newCategorySelected) {
-            callNFTsEndpoint(false)
-            setNewCategorySelected(false)
+            callNFTsEndpoint(false);
+            setNewCategorySelected(false);
         }
-    }, [selectedFilters])
+    }, [selectedFilters]);
 
     useEffect(() => {
         if (selectedFilters) {
-            setActiveRef([...selectedFilters])
+            setActiveRef([...selectedFilters]);
         }
-    }, [])
+    }, []);
 
-    const [activeRef, setActiveRef] = useState<any[]>([])
+    const [activeRef, setActiveRef] = useState<any[]>([]);
 
     const renderTree: any = (parentNode: any, children: any) => {
         return children?.map((node: any) => {
-            node.parent = parentNode
+            node.parent = parentNode;
 
             return (
                 <StyledDiv
@@ -258,15 +258,15 @@ const TreeView: FC<TreeViewProps> = ({
                         ? renderTree(node, node.children)
                         : undefined}
                 </StyledDiv>
-            )
-        })
-    }
+            );
+        });
+    };
 
     return props.nodes && !props.collapsed ? (
         renderTree(props.nodes[0], props.nodes[0].children)
     ) : (
         <></>
-    )
-}
+    );
+};
 
-export default TreeView
+export default TreeView;

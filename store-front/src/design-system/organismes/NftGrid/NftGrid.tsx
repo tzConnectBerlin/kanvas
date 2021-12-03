@@ -1,26 +1,26 @@
-import styled from '@emotion/styled'
-import Typography from '../../atoms/Typography'
+import styled from '@emotion/styled';
+import Typography from '../../atoms/Typography';
 
-import { FC, useEffect, useState } from 'react'
-import { Grid, Stack, useMediaQuery, useTheme } from '@mui/material'
-import { Layouts } from 'react-grid-layout'
+import { FC, useEffect, useState } from 'react';
+import { Grid, Stack, useMediaQuery, useTheme } from '@mui/material';
+import { Layouts } from 'react-grid-layout';
 
-import { NftCard } from '../../molecules/NftCard'
-import { INft } from '../../../interfaces/artwork'
+import { NftCard } from '../../molecules/NftCard';
+import { INft } from '../../../interfaces/artwork';
 
 export interface NftGridProps {
-    editable?: boolean
-    layouts?: Layouts
-    setLayouts?: Function
-    assets?: any[]
-    emptyMessage?: string
-    emptyLink?: string
-    loading?: boolean
-    open?: boolean
-    nfts?: INft[]
-    openFilters?: boolean
-    collapsed?: boolean
-    sx?: any
+    editable?: boolean;
+    layouts?: Layouts;
+    setLayouts?: Function;
+    assets?: any[];
+    emptyMessage?: string;
+    emptyLink?: string;
+    loading?: boolean;
+    open?: boolean;
+    nfts?: INft[];
+    openFilters?: boolean;
+    collapsed?: boolean;
+    sx?: any;
 }
 
 const StyledGrid = styled(Grid)`
@@ -30,31 +30,30 @@ const StyledGrid = styled(Grid)`
     width: 100%;
     max-width: none !important;
     flex-basis: 102% !important;
-`
+`;
 
 const StyledDiv = styled.div`
     width: 100%;
-`
+`;
 
 export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
-
-    const [gridNfts, setGridNfts] = useState<INft[]>()
-    const [comfortLoading, setComfortLoading] = useState<boolean>(false)
+    const [gridNfts, setGridNfts] = useState<INft[]>();
+    const [comfortLoading, setComfortLoading] = useState<boolean>(false);
 
     useEffect(() => {
         if (props.nfts) {
-            setGridNfts(props.nfts)
+            setGridNfts(props.nfts);
         }
-    }, [props.nfts])
+    }, [props.nfts]);
 
     useEffect(() => {
         if (props.loading) {
-            setComfortLoading(true)
+            setComfortLoading(true);
             setTimeout(() => {
-                setComfortLoading(false)
-            }, 400)
+                setComfortLoading(false);
+            }, 400);
         }
-    }, [props.loading])
+    }, [props.loading]);
 
     return (
         <StyledDiv>
@@ -150,5 +149,5 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                 </StyledGrid>
             )}
         </StyledDiv>
-    )
-}
+    );
+};

@@ -1,1 +1,1 @@
-export { Copyright } from './Copyright'
+export { Copyright } from './Copyright';

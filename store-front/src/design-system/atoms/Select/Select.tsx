@@ -1,26 +1,26 @@
-import * as React from 'react'
-import styled from '@emotion/styled'
-import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import FormControl from '@mui/material/FormControl'
+import * as React from 'react';
+import styled from '@emotion/styled';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
 
-import { FC } from 'react'
-import { Theme } from '@mui/material'
+import { FC } from 'react';
+import { Theme } from '@mui/material';
 import Select, {
     SelectProps as MuiSelectProps,
     SelectChangeEvent,
-} from '@mui/material/Select'
+} from '@mui/material/Select';
 
 interface SortProps {
-    orderBy: 'price' | 'name' | 'createdAt'
-    orderDirection: 'asc' | 'desc'
+    orderBy: 'price' | 'name' | 'createdAt';
+    orderDirection: 'asc' | 'desc';
 }
 
 interface SelectedProps extends MuiSelectProps {
-    id: string
-    selectedOption?: SortProps
-    setSelectedOption: (input: SortProps) => void
-    callNFTsEndpoint: (input: boolean) => void
+    id: string;
+    selectedOption?: SortProps;
+    setSelectedOption: (input: SortProps) => void;
+    callNFTsEndpoint: (input: boolean) => void;
 }
 
 const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
@@ -58,7 +58,7 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
     svg {
         color: ${(props) => props.theme.palette.text.primary};
     }
-`
+`;
 
 const StyledInputLabel = styled(InputLabel)<{ theme?: Theme }>`
     height: 100%;
@@ -79,13 +79,16 @@ const StyledInputLabel = styled(InputLabel)<{ theme?: Theme }>`
         color: ${(props) => props.theme.palette.text.primary};
         outline: none;
     }
-`
+`;
 
-export const CustomSelect: FC<SelectedProps> = ({ callNFTsEndpoint, ...props }) => {
+export const CustomSelect: FC<SelectedProps> = ({
+    callNFTsEndpoint,
+    ...props
+}) => {
     const handleChange = (event: SelectChangeEvent) => {
-        callNFTsEndpoint(true)
-        props.setSelectedOption(JSON.parse(event.target.value))
-    }
+        callNFTsEndpoint(true);
+        props.setSelectedOption(JSON.parse(event.target.value));
+    };
 
     return (
         <StyledFormControl
@@ -96,17 +99,66 @@ export const CustomSelect: FC<SelectedProps> = ({ callNFTsEndpoint, ...props }) 
             <Select
                 labelId={`${props.id}-label"`}
                 id={props.id}
-                value={JSON.stringify(props.selectedOption) ?? JSON.stringify({orderBy: 'createdAt', orderDirection: 'desc'}) }
+                value={
+                    JSON.stringify(props.selectedOption) ??
+                    JSON.stringify({
+                        orderBy: 'createdAt',
+                        orderDirection: 'desc',
+                    })
+                }
                 onChange={handleChange}
                 autoWidth
             >
-                <MenuItem value={JSON.stringify({orderBy: 'name', orderDirection: 'asc'})}>Name: A - Z</MenuItem>
-                <MenuItem value={JSON.stringify({orderBy: 'name', orderDirection: 'desc'})}>Name: Z - A</MenuItem>
-                <MenuItem value={JSON.stringify({orderBy: 'price', orderDirection: 'desc'})}>Price: High - Low</MenuItem>
-                <MenuItem value={JSON.stringify({orderBy: 'price', orderDirection: 'asc'})}>Price: Low - High</MenuItem>
-                <MenuItem value={JSON.stringify({orderBy: 'createdAt', orderDirection: 'desc'})}>Created: New - Old</MenuItem>
-                <MenuItem value={JSON.stringify({orderBy: 'createdAt', orderDirection: 'asc'})}> Created: Old - New</MenuItem>
+                <MenuItem
+                    value={JSON.stringify({
+                        orderBy: 'name',
+                        orderDirection: 'asc',
+                    })}
+                >
+                    Name: A - Z
+                </MenuItem>
+                <MenuItem
+                    value={JSON.stringify({
+                        orderBy: 'name',
+                        orderDirection: 'desc',
+                    })}
+                >
+                    Name: Z - A
+                </MenuItem>
+                <MenuItem
+                    value={JSON.stringify({
+                        orderBy: 'price',
+                        orderDirection: 'desc',
+                    })}
+                >
+                    Price: High - Low
+                </MenuItem>
+                <MenuItem
+                    value={JSON.stringify({
+                        orderBy: 'price',
+                        orderDirection: 'asc',
+                    })}
+                >
+                    Price: Low - High
+                </MenuItem>
+                <MenuItem
+                    value={JSON.stringify({
+                        orderBy: 'createdAt',
+                        orderDirection: 'desc',
+                    })}
+                >
+                    Created: New - Old
+                </MenuItem>
+                <MenuItem
+                    value={JSON.stringify({
+                        orderBy: 'createdAt',
+                        orderDirection: 'asc',
+                    })}
+                >
+                    {' '}
+                    Created: Old - New
+                </MenuItem>
             </Select>
         </StyledFormControl>
-    )
-}
+    );
+};

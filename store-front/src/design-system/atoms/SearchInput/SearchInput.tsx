@@ -1,19 +1,19 @@
-import styled from '@emotion/styled'
-import SearchRounded from '@mui/icons-material/SearchRounded'
+import styled from '@emotion/styled';
+import SearchRounded from '@mui/icons-material/SearchRounded';
 
-import { forwardRef } from 'react'
-import { Theme } from '@mui/material'
+import { forwardRef } from 'react';
+import { Theme } from '@mui/material';
 import {
     InputBase as MInputBase,
     InputBaseProps as MInputBaseProps,
-} from '@mui/material'
+} from '@mui/material';
 
 interface InputBaseProps extends MInputBaseProps {
-    open: boolean
+    open: boolean;
 }
 
 interface MInputBasePropsStyled {
-    theme?: Theme
+    theme?: Theme;
 }
 
 const Search = styled.div<{ theme?: Theme }>`
@@ -45,7 +45,7 @@ const Search = styled.div<{ theme?: Theme }>`
             width: 100%;
         }
     }
-`
+`;
 
 const SearchIconWrapper = styled.div<{ theme?: Theme }>`
     position: absolute;
@@ -57,11 +57,11 @@ const SearchIconWrapper = styled.div<{ theme?: Theme }>`
     align-items: center;
     justify-content: center;
     z-index: 30;
-`
+`;
 
 const StyledSearchRounded = styled(SearchRounded)`
     color: #c4c4c4 !important;
-`
+`;
 
 const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
     color: inherit;
@@ -97,7 +97,7 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
             opacity: 1;
         }
     }
-`
+`;
 
 export const SearchInput = forwardRef<HTMLInputElement, InputBaseProps>(
     ({ ...props }, ref) => {
@@ -114,6 +114,6 @@ export const SearchInput = forwardRef<HTMLInputElement, InputBaseProps>(
                     onBlur={props.onBlur}
                 />
             </Search>
-        )
+        );
     },
-)
+);

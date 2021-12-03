@@ -1,24 +1,24 @@
-import styled from '@emotion/styled'
-import FlexSpacer from '../../atoms/FlexSpacer'
-import Typography from '../../atoms/Typography'
-import TreeView from '../../molecules/TreeView/TreeView'
+import styled from '@emotion/styled';
+import FlexSpacer from '../../atoms/FlexSpacer';
+import Typography from '../../atoms/Typography';
+import TreeView from '../../molecules/TreeView/TreeView';
 
-import { Checkbox, Stack, Theme } from '@mui/material'
-import { FC, useCallback, useState } from 'react'
-import PriceFilter from '../../molecules/PriceFilter'
+import { Checkbox, Stack, Theme } from '@mui/material';
+import { FC, useState } from 'react';
+import PriceFilter from '../../molecules/PriceFilter';
 
 interface FilterProps {
-    name: string
-    collapsed: boolean
-    setCollapsed: Function
-    active: boolean
+    name: string;
+    collapsed: boolean;
+    setCollapsed: Function;
+    active: boolean;
 }
 
 const StyledStack = styled(Stack)`
     align-items: center;
     width: 100%;
     padding-bottom: 1rem;
-`
+`;
 
 const Filter: FC<FilterProps> = ({ ...props }) => {
     return (
@@ -46,29 +46,28 @@ const Filter: FC<FilterProps> = ({ ...props }) => {
                 </Typography>
             )}
         </StyledStack>
-    )
-}
+    );
+};
 
 interface StyledStoreFiltersProps {
-    openFilters?: boolean
-    collapsed?: boolean
+    openFilters?: boolean;
+    collapsed?: boolean;
 }
 
 interface StoreFiltersProps extends StyledStoreFiltersProps {
-    selectedFilters?: number[]
-    setSelectedFilters: Function
-    availableFilters: any[]
-    filterFunction: Function
-    loading: boolean
-    priceFilterRange?: [number, number]
-    setPriceFilterRange: Function
-    minRange: number
-    maxRange: number
-    availabilityFilter: string[]
-    setAvailabilityFilter: (input: string[]) => void
-    triggerPriceFilter: () => void
-    setFilterSliding: (input: boolean) => void
-    callNFTsEndpoint: (input: boolean) => void
+    selectedFilters: number[];
+    setSelectedFilters: Function;
+    availableFilters: any[];
+    loading: boolean;
+    priceFilterRange?: [number, number];
+    setPriceFilterRange: Function;
+    minRange: number;
+    maxRange: number;
+    availabilityFilter: string[];
+    triggerPriceFilter: () => void;
+    setAvailabilityFilter: (input: string[]) => void;
+    setFilterSliding: (input: boolean) => void;
+    callNFTsEndpoint: (input: boolean) => void;
 }
 
 const StyledUl = styled.ul<StyledStoreFiltersProps>`
@@ -80,7 +79,7 @@ const StyledUl = styled.ul<StyledStoreFiltersProps>`
         width: ${(props) => (props.openFilters ? '25rem' : '0')};
         margin-right: ${(props) => (props.openFilters ? '2.5rem' : '0')};
     }
-`
+`;
 
 const StyledLi = styled.li<StyledStoreFiltersProps>`
     cursor: pointer;
@@ -92,36 +91,47 @@ const StyledLi = styled.li<StyledStoreFiltersProps>`
     border-top: 1px solid #c4c4c4;
 
     height: auto;
-`
+`;
 
-const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`
+const StyledCheckBox = styled(Checkbox)<{ theme?: Theme }>`
     &.Mui-checked {
         color: ${(props) => props.theme.palette.text.primary} !important;
     }
-`
+`;
 
-export const StoreFilters: FC<StoreFiltersProps> = ({ callNFTsEndpoint, children, ...props }) => {
-    const [activeRef, setActiveRef] = useState<string[]>([])
+export const StoreFilters: FC<StoreFiltersProps> = ({
+    callNFTsEndpoint,
+    children,
+    ...props
+}) => {
+    const [activeRef, setActiveRef] = useState<string[]>([]);
 
     const handleListItemClick = (concernedRef: string) => {
         if (activeRef.indexOf(concernedRef) !== -1) {
             setActiveRef(
                 activeRef.filter((ref: string) => ref !== concernedRef),
-            )
+            );
         } else {
-            setActiveRef([...activeRef, concernedRef])
+            setActiveRef([...activeRef, concernedRef]);
         }
-    }
+    };
 
     const handleChangeAvailabilityFilter = (availabilityParam: string) => {
         if (props.availabilityFilter.indexOf(availabilityParam) === -1) {
-            props.setAvailabilityFilter([...props.availabilityFilter, availabilityParam])
+            props.setAvailabilityFilter([
+                ...props.availabilityFilter,
+                availabilityParam,
+            ]);
         } else {
-            props.setAvailabilityFilter(props.availabilityFilter.filter(param => param !== availabilityParam))
+            props.setAvailabilityFilter(
+                props.availabilityFilter.filter(
+                    (param) => param !== availabilityParam,
+                ),
+            );
         }
 
-        callNFTsEndpoint(true)
-    }
+        callNFTsEndpoint(true);
+    };
 
     return (
         <StyledUl openFilters={props.openFilters}>
@@ -134,10 +144,10 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ callNFTsEndpoint, children
                     onClick={() => props.setSelectedFilters([])}
                     size="subtitle2"
                     weight={
-                        props.selectedFilters && props.selectedFilters.length > 0 ? 'Medium' : 'Light'
+                        props.selectedFilters.length > 0 ? 'Medium' : 'Light'
                     }
                     color={
-                        props.selectedFilters && props.selectedFilters.length > 0
+                        props.selectedFilters.length > 0
                             ? 'contrastText'
                             : '#C4C4C4'
                     }
@@ -153,21 +163,23 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ callNFTsEndpoint, children
                 <Filter
                     name="Categories"
                     collapsed={activeRef.indexOf('Categories') !== -1}
-                    active={props.selectedFilters ? props.selectedFilters.length > 0 : false}
+                    active={props.selectedFilters.length > 0}
                     setCollapsed={handleListItemClick}
                 />
                 <TreeView
                     loading={props.loading}
                     open={props.openFilters}
                     nodes={props.availableFilters}
-                    filterFunction={props.filterFunction}
                     selectedFilters={props.selectedFilters}
                     callNFTsEndpoint={callNFTsEndpoint}
                     setSelectedFilters={props.setSelectedFilters}
                     collapsed={activeRef.indexOf('Categories') !== -1}
                 />
             </StyledLi>
-            <StyledLi openFilters={props.openFilters} collapsed={activeRef.indexOf('Availability') !== -1}>
+            <StyledLi
+                openFilters={props.openFilters}
+                collapsed={activeRef.indexOf('Availability') !== -1}
+            >
                 <Filter
                     name="Availability"
                     active={false}
@@ -179,47 +191,60 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ callNFTsEndpoint, children
                     <Stack direction="column" sx={{ marginBottom: '1rem' }}>
                         <Stack direction="row">
                             <StyledCheckBox
-                                checked={props.availabilityFilter.indexOf('onSale') !== -1 && props.availabilityFilter.length !== 0}
-                                onClick={() => handleChangeAvailabilityFilter('onSale')}
+                                checked={
+                                    props.availabilityFilter.indexOf(
+                                        'onSale',
+                                    ) !== -1 &&
+                                    props.availabilityFilter.length !== 0
+                                }
+                                onClick={() =>
+                                    handleChangeAvailabilityFilter('onSale')
+                                }
                                 inputProps={{ 'aria-label': 'controlled' }}
                                 disableRipple
                             />
-                            <Typography
-                                size="h5"
-                                weight="Light"
-                            >
+                            <Typography size="h5" weight="Light">
                                 On sale
                             </Typography>
                         </Stack>
                         <Stack direction="row">
                             <StyledCheckBox
-                                checked={props.availabilityFilter.indexOf('upcoming') !== -1 && props.availabilityFilter.length !== 0}
-                                onClick={() => handleChangeAvailabilityFilter('upcoming')}
+                                checked={
+                                    props.availabilityFilter.indexOf(
+                                        'upcoming',
+                                    ) !== -1 &&
+                                    props.availabilityFilter.length !== 0
+                                }
+                                onClick={() =>
+                                    handleChangeAvailabilityFilter('upcoming')
+                                }
                                 inputProps={{ 'aria-label': 'controlled' }}
                                 disableRipple
                             />
-                            <Typography
-                                size="h5"
-                                weight="Light"
-                            >
+                            <Typography size="h5" weight="Light">
                                 Upcoming
                             </Typography>
                         </Stack>
                         <Stack direction="row">
                             <StyledCheckBox
-                                checked={props.availabilityFilter.indexOf('soldOut') !== -1 && props.availabilityFilter.length !== 0}
-                                onClick={() => handleChangeAvailabilityFilter('soldOut')}
+                                checked={
+                                    props.availabilityFilter.indexOf(
+                                        'soldOut',
+                                    ) !== -1 &&
+                                    props.availabilityFilter.length !== 0
+                                }
+                                onClick={() =>
+                                    handleChangeAvailabilityFilter('soldOut')
+                                }
                                 inputProps={{ 'aria-label': 'controlled' }}
                                 disableRipple
                             />
-                            <Typography
-                                size="h5"
-                                weight="Light"
-                            >
+                            <Typography size="h5" weight="Light">
                                 Sold out
                             </Typography>
                         </Stack>
-                    </Stack>)}
+                    </Stack>
+                )}
             </StyledLi>
             <StyledLi openFilters={props.openFilters}>
                 <Filter
@@ -241,5 +266,5 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ callNFTsEndpoint, children
                 )}
             </StyledLi>
         </StyledUl>
-    )
-}
+    );
+};

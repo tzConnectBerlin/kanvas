@@ -1,11 +1,11 @@
-import styled from '@emotion/styled'
+import styled from '@emotion/styled';
 
-import { FC } from 'react'
-import { Badge, BadgeProps, Theme } from '@mui/material'
+import { FC } from 'react';
+import { Badge, BadgeProps, Theme } from '@mui/material';
 
 interface IBadge extends BadgeProps {
-    profile?: boolean
-    theme?: Theme
+    profile?: boolean;
+    theme?: Theme;
 }
 
 const StyledBadge = styled(Badge)<IBadge>`
@@ -23,7 +23,7 @@ const StyledBadge = styled(Badge)<IBadge>`
         border: 2px solid ${(props) => props.theme.palette.background.default};
         display: ${(props) => (props.badgeContent ? 'flex' : 'none')};
     }
-`
+`;
 
 export const CustomBadge: FC<IBadge> = ({ profile = false, ...props }) => {
     return (
@@ -35,5 +35,5 @@ export const CustomBadge: FC<IBadge> = ({ profile = false, ...props }) => {
         >
             {props.children}
         </StyledBadge>
-    )
-}
+    );
+};

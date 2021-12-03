@@ -1,14 +1,14 @@
-import { DAppClientOptions, NetworkType } from '@airgap/beacon-sdk'
-import { BeaconWallet } from '@taquito/beacon-wallet'
-import { TezosToolkit, MichelCodecPacker } from '@taquito/taquito'
-import { NETWORK, RPC_URL } from '../global'
+import { DAppClientOptions, NetworkType } from '@airgap/beacon-sdk';
+import { BeaconWallet } from '@taquito/beacon-wallet';
+import { TezosToolkit, MichelCodecPacker } from '@taquito/taquito';
+import { NETWORK, RPC_URL } from '../global';
 
-let tezos: TezosToolkit
+let tezos: TezosToolkit;
 
 export const initTezos = (url = RPC_URL): void => {
-    tezos = new TezosToolkit(url)
-    tezos.setPackerProvider(new MichelCodecPacker())
-}
+    tezos = new TezosToolkit(url);
+    tezos.setPackerProvider(new MichelCodecPacker());
+};
 
 export const initWallet = (): BeaconWallet => {
     const options: DAppClientOptions = {
@@ -18,15 +18,15 @@ export const initWallet = (): BeaconWallet => {
         eventHandlers: {
             PERMISSION_REQUEST_SUCCESS: {
                 handler: async (data: any) => {
-                    console.log('permission data:', data)
+                    console.log('permission data:', data);
                 },
             },
         },
-    }
+    };
 
-    return new BeaconWallet(options)
-}
+    return new BeaconWallet(options);
+};
 
 export const setWalletProvider = (wallet: BeaconWallet): void => {
-    tezos && tezos.setProvider({ wallet })
-}
+    tezos && tezos.setProvider({ wallet });
+};

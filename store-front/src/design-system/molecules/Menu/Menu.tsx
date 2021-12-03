@@ -1,25 +1,25 @@
-import styled from '@emotion/styled'
-import MobileMenu from './MobileMenu'
-import DesktopMenu from './DesktopMenu'
-import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded'
+import styled from '@emotion/styled';
+import MobileMenu from './MobileMenu';
+import DesktopMenu from './DesktopMenu';
+import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded';
 
-import { FC } from 'react'
-import { NavLink } from 'react-router-dom'
-import { Stack, Theme } from '@mui/material'
-import { IUser } from '../../../interfaces/user'
+import { FC } from 'react';
+import { NavLink } from 'react-router-dom';
+import { Stack, Theme } from '@mui/material';
+import { IUser } from '../../../interfaces/user';
 
 export interface MenuProps {
-    user?: IUser
-    loading?: boolean
-    setOpen: Function
-    theme?: Theme
-    selectedTheme: string
-    switchTheme: Function
-    isSearchOpen: boolean
-    setSearchOpen: Function
-    onLogout: () => void
-    openOrCloseShoppingCart: Function
-    nftsInCartNumber: number
+    user?: IUser;
+    loading?: boolean;
+    setOpen: Function;
+    theme?: Theme;
+    selectedTheme: string;
+    switchTheme: Function;
+    isSearchOpen: boolean;
+    setSearchOpen: Function;
+    onLogout: () => void;
+    openOrCloseShoppingCart: Function;
+    nftsInCartNumber: number;
 }
 
 const StyledMenuStack = styled(Stack)`
@@ -36,11 +36,11 @@ const StyledMenuStack = styled(Stack)`
         transition: padding-left 0.2s;
         width: 100%;
     }
-`
+`;
 
 export interface SearchProps {
-    theme?: Theme
-    isSearchOpen?: boolean
+    theme?: Theme;
+    isSearchOpen?: boolean;
 }
 
 export const StyledLink = styled(NavLink)<SearchProps>`
@@ -59,11 +59,11 @@ export const StyledLink = styled(NavLink)<SearchProps>`
             color: ${(props) => props.theme.palette.text.primary} !important;
         }
     }
-`
+`;
 
 export const StyledShoppingCartRoundedIcon = styled(ShoppingCartRoundedIcon)`
     cursor: pointer;
-`
+`;
 
 export const Menu: FC<MenuProps> = ({
     user,
@@ -104,5 +104,5 @@ export const Menu: FC<MenuProps> = ({
                 nftsInCartNumber={props.nftsInCartNumber}
             />
         </StyledMenuStack>
-    )
-}
+    );
+};

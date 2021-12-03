@@ -1,19 +1,19 @@
-import styled from '@emotion/styled'
+import styled from '@emotion/styled';
 
-import { Stack } from '@mui/material'
-import useAxios from 'axios-hooks'
-import { FC, useEffect, useRef, useState } from 'react'
+import { Stack } from '@mui/material';
+import useAxios from 'axios-hooks';
+import { FC, useEffect, useRef, useState } from 'react';
 
-import { SearchInput } from '../../atoms/SearchInput'
-import { QuickSearchResult } from '../../molecules/QuickSearchResult'
+import { SearchInput } from '../../atoms/SearchInput';
+import { QuickSearchResult } from '../../molecules/QuickSearchResult';
 
 interface QuickSearchProps {
-    setSearchOpen: Function
+    setSearchOpen: Function;
 }
 
 const QuickSearchWrapper = styled(Stack)`
     display: block;
-`
+`;
 
 const StyledBackground = styled.div<{ open: boolean }>`
     opacity: ${(props) => (props.open ? '0.5' : '0')};
@@ -28,15 +28,15 @@ const StyledBackground = styled.div<{ open: boolean }>`
     background-color: #000000;
     position: absolute;
     margin: 0 !important;
-`
+`;
 
 export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
-    const inputRef = useRef<HTMLInputElement>(null)
+    const inputRef = useRef<HTMLInputElement>(null);
 
-    const [openSearchResult, setOpenSearchresult] = useState(false)
+    const [openSearchResult, setOpenSearchresult] = useState(false);
 
-    const [loading, setLoading] = useState(false)
-    const [inputValue, setInputValue] = useState('')
+    const [loading, setLoading] = useState(false);
+    const [inputValue, setInputValue] = useState('');
 
     const [searchResponse, getSearch] = useAxios(
         {
@@ -45,48 +45,48 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
             withCredentials: true,
         },
         { manual: true },
-    )
+    );
 
     useEffect(() => {
         if (inputValue.length >= 2) {
             const delaySearch = setTimeout(() => {
-                setLoading(false)
+                setLoading(false);
                 getSearch({
                     params: {
                         searchString: inputValue,
                     },
-                })
-            }, 800)
+                });
+            }, 800);
 
             return () => {
-                clearTimeout(delaySearch)
-            }
+                clearTimeout(delaySearch);
+            };
         } else {
-            setLoading(false)
+            setLoading(false);
         }
-    }, [inputValue])
+    }, [inputValue]);
 
     const handleChange = () => {
-        setInputValue(inputRef.current?.value as string)
+        setInputValue(inputRef.current?.value as string);
 
         if (inputValue.length >= 1) {
-            setLoading(true)
+            setLoading(true);
         }
-    }
+    };
 
     const handleCloseInput = () => {
-        setOpenSearchresult(false)
+        setOpenSearchresult(false);
 
         if (inputRef.current?.value) {
-            inputRef.current.value = ''
+            inputRef.current.value = '';
         }
-        inputRef?.current?.blur()
+        inputRef?.current?.blur();
 
         setTimeout(() => {
-            props.setSearchOpen(false)
-        }, 300)
-        setInputValue('')
-    }
+            props.setSearchOpen(false);
+        }, 300);
+        setInputValue('');
+    };
 
     return (
         <>
@@ -97,7 +97,7 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
             <QuickSearchWrapper
                 direction="column"
                 onClick={() => {
-                    props.setSearchOpen(true)
+                    props.setSearchOpen(true);
                 }}
             >
                 <SearchInput
@@ -105,9 +105,9 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
                     ref={inputRef}
                     onChange={handleChange}
                     onFocus={() => {
-                        inputRef?.current?.focus()
-                        setTimeout(() => setOpenSearchresult(true), 200)
-                        props.setSearchOpen(true)
+                        inputRef?.current?.focus();
+                        setTimeout(() => setOpenSearchresult(true), 200);
+                        props.setSearchOpen(true);
                     }}
                 />
                 <QuickSearchResult
@@ -124,5 +124,5 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
                 />
             </QuickSearchWrapper>
         </>
-    )
-}
+    );
+};

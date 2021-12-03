@@ -1,15 +1,15 @@
-import * as yup from 'yup'
-import styled from '@emotion/styled'
-import Avatar from '../../atoms/Avatar'
-import CustomButton from '../../atoms/Button'
-import Typography from '../../atoms/Typography'
-import FlexSpacer from '../../atoms/FlexSpacer'
+import * as yup from 'yup';
+import styled from '@emotion/styled';
+import Avatar from '../../atoms/Avatar';
+import CustomButton from '../../atoms/Button';
+import Typography from '../../atoms/Typography';
+import FlexSpacer from '../../atoms/FlexSpacer';
 
-import { useFormik } from 'formik'
-import { FC, useEffect, useState } from 'react'
-import { DropZone } from '../../molecules/DropZone'
-import { Badge, FormHelperText, Theme } from '@mui/material'
-import { Box, TextField, InputAdornment, Stack } from '@mui/material'
+import { useFormik } from 'formik';
+import { FC, useEffect, useState } from 'react';
+import { DropZone } from '../../molecules/DropZone';
+import { Badge, FormHelperText, Theme } from '@mui/material';
+import { Box, TextField, InputAdornment, Stack } from '@mui/material';
 
 interface CreatNFTFormProps {}
 
@@ -23,7 +23,7 @@ const StyledStack = styled(Stack)`
     .MuiTextField-root {
         width: 100% !important;
     }
-`
+`;
 
 const StyledInput = styled(TextField)<{ theme?: Theme; error?: boolean }>`
     .MuiInput-input {
@@ -45,7 +45,7 @@ const StyledInput = styled(TextField)<{ theme?: Theme; error?: boolean }>`
 
         position: absolute;
     }
-`
+`;
 
 const validationSchema = yup.object({
     name: yup
@@ -58,13 +58,13 @@ const validationSchema = yup.object({
         .min(2, 'Description should be of minimum 2 characters length')
         .max(30, 'Description should be of maximum 30 characters length')
         .required('Description is required'),
-})
+});
 
 export const CreatNFTForm: FC<CreatNFTFormProps> = ({ ...props }) => {
-    const [nftFile, setNftFile] = useState('')
+    const [nftFile, setNftFile] = useState('');
     const [dropZoneErrorMessage, setDropZoneErrorMessage] = useState<
         string | null
-    >(null)
+    >(null);
 
     const formik = useFormik({
         initialValues: {
@@ -75,9 +75,9 @@ export const CreatNFTForm: FC<CreatNFTFormProps> = ({ ...props }) => {
         validationSchema: validationSchema,
         enableReinitialize: true,
         onSubmit: async (values) => {
-            console.log('submit')
+            console.log('submit');
         },
-    })
+    });
 
     return (
         <>
@@ -112,11 +112,11 @@ export const CreatNFTForm: FC<CreatNFTFormProps> = ({ ...props }) => {
                                 placeholder="Type Here"
                                 onBlur={formik.handleBlur}
                                 onChange={(event) => {
-                                    formik.handleChange(event)
+                                    formik.handleChange(event);
                                     sessionStorage.setItem(
                                         'name',
                                         event.currentTarget.value,
-                                    )
+                                    );
                                 }}
                                 error={
                                     formik.touched.name &&
@@ -144,11 +144,11 @@ export const CreatNFTForm: FC<CreatNFTFormProps> = ({ ...props }) => {
                                 placeholder="Type Here"
                                 onBlur={formik.handleBlur}
                                 onChange={(event) => {
-                                    formik.handleChange(event)
+                                    formik.handleChange(event);
                                     sessionStorage.setItem(
                                         'description',
                                         event.currentTarget.value,
-                                    )
+                                    );
                                 }}
                                 error={
                                     formik.touched.description &&
@@ -177,5 +177,5 @@ export const CreatNFTForm: FC<CreatNFTFormProps> = ({ ...props }) => {
                 </form>
             </Box>
         </>
-    )
-}
+    );
+};

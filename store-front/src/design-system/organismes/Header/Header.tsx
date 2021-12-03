@@ -1,37 +1,37 @@
-import styled from '@emotion/styled'
-import { FlexSpacerProps } from '../../atoms/FlexSpacer'
-import { Box } from '@mui/system'
-import { FC, useEffect, useState } from 'react'
-import { Theme } from '@mui/material'
-import { KukaiEmbed } from 'kukai-embed'
-import { StickyLogo } from '../../atoms/StickyLogo'
-import { Menu } from '../../molecules/Menu'
-import { IUser } from '../../../interfaces/user'
-import useAxios from 'axios-hooks'
-import { BeaconWallet } from '@taquito/beacon-wallet'
-import { SignInModal } from '../../molecules/SignInModal'
+import styled from '@emotion/styled';
+import { FlexSpacerProps } from '../../atoms/FlexSpacer';
+import { Box } from '@mui/system';
+import { FC, useEffect, useState } from 'react';
+import { Theme } from '@mui/material';
+import { KukaiEmbed } from 'kukai-embed';
+import { StickyLogo } from '../../atoms/StickyLogo';
+import { Menu } from '../../molecules/Menu';
+import { IUser } from '../../../interfaces/user';
+import useAxios from 'axios-hooks';
+import { BeaconWallet } from '@taquito/beacon-wallet';
+import { SignInModal } from '../../molecules/SignInModal';
 
 export interface HeaderProps {
-    user?: { role: string }
-    theme?: Theme
-    loading?: boolean
-    beaconWallet?: BeaconWallet
-    embedKukai?: KukaiEmbed
-    setSignedPayload?: Function
-    handleCloseModal?: Function
-    selectedTheme: string
-    notifications?: number
-    switchTheme: Function
-    onCreateAccount?: () => void
-    cartOpen: boolean
-    setCartOpen: Function
-    nftsInCartNumber: number
-    listCart: Function
-    loginOpen: boolean
-    setLoginOpen: Function
+    user?: { role: string };
+    theme?: Theme;
+    loading?: boolean;
+    beaconWallet?: BeaconWallet;
+    embedKukai?: KukaiEmbed;
+    setSignedPayload?: Function;
+    handleCloseModal?: Function;
+    selectedTheme: string;
+    notifications?: number;
+    switchTheme: Function;
+    onCreateAccount?: () => void;
+    cartOpen: boolean;
+    setCartOpen: Function;
+    nftsInCartNumber: number;
+    listCart: Function;
+    loginOpen: boolean;
+    setLoginOpen: Function;
 }
 
-const StyledBox = styled(Box) <{ theme?: Theme }>`
+const StyledBox = styled(Box)<{ theme?: Theme }>`
     margin-bottom: -6rem;
     color: ${(props) => props.theme.palette.text.primary};
 
@@ -50,14 +50,14 @@ const StyledBox = styled(Box) <{ theme?: Theme }>`
         padding-right: 1rem !important;
         transition: padding-left 0.2s, padding-right 0.2s;
     }
-`
+`;
 
 const Spacer = styled.div<FlexSpacerProps>`
     flex-grow: 1;
     flex-grow: 1;
     width: ${(props) => (props.display ? '' : '0rem')};
     transition: width 0.2s;
-`
+`;
 
 export const Header: FC<HeaderProps> = ({
     user,
@@ -71,16 +71,22 @@ export const Header: FC<HeaderProps> = ({
     listCart,
     ...props
 }) => {
-    const handleCloseModal = () => props.setLoginOpen(false)
+    const handleCloseModal = () => props.setLoginOpen(false);
 
     // const loggedUser = {data: undefined, loading: false}
-    const [loggedUser, getLoggedUser] = useAxios({
-        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logged_user',
-        withCredentials: true,
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,
+    const [loggedUser, getLoggedUser] = useAxios(
+        {
+            url:
+                process.env.REACT_APP_API_SERVER_BASE_URL + '/auth/logged_user',
+            withCredentials: true,
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem(
+                    'Kanvas - Bearer',
+                )}`,
+            },
         },
-    }, { manual: true })
+        { manual: true },
+    );
 
     const [logoutUserResponse, logoutUser] = useAxios(
         {
@@ -94,13 +100,13 @@ export const Header: FC<HeaderProps> = ({
             },
         },
         { manual: true },
-    )
+    );
 
     const handleLogout = () => {
         logoutUser()
             .then((res) => {
-                localStorage.removeItem('Kanvas - Bearer')
-                localStorage.removeItem('Kanvas - address')
+                localStorage.removeItem('Kanvas - Bearer');
+                localStorage.removeItem('Kanvas - address');
 
                 listCart({
                     headers: {
@@ -109,28 +115,28 @@ export const Header: FC<HeaderProps> = ({
                         )}`,
                     },
                     withCredentials: true,
-                })
+                });
             })
-            .catch((err) => { })
-    }
+            .catch((err) => {});
+    };
 
-    const [isSearchOpen, setIsSearchOpen] = useState(false)
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [currentLoggedUser, setCurrentLoggedUser] = useState<
         IUser | undefined
-    >(undefined)
+    >(undefined);
 
     useEffect(() => {
         if (loggedUser.data) {
-            setCurrentLoggedUser(loggedUser.data)
+            setCurrentLoggedUser(loggedUser.data);
         } else if (loggedUser.error) {
-            localStorage.removeItem('Kanvas - Bearer')
-            localStorage.removeItem('Kanvas - address')
+            localStorage.removeItem('Kanvas - Bearer');
+            localStorage.removeItem('Kanvas - address');
         }
-    }, [loggedUser])
+    }, [loggedUser]);
 
     useEffect(() => {
-        getLoggedUser()
-    }, [])
+        getLoggedUser();
+    }, []);
 
     return (
         <StyledBox
@@ -168,5 +174,5 @@ export const Header: FC<HeaderProps> = ({
                 listCart={listCart}
             />
         </StyledBox>
-    )
-}
+    );
+};

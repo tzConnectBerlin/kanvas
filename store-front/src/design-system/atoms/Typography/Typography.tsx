@@ -1,14 +1,14 @@
-import styled from '@emotion/styled'
+import styled from '@emotion/styled';
 
-import { FC } from 'react'
+import { FC } from 'react';
 import {
     Theme,
     Typography as MTypography,
     TypographyProps as MTypographyProps,
-} from '@mui/material'
+} from '@mui/material';
 
 export interface TypographyProps extends Omit<MTypographyProps, 'variant'> {
-    weight: 'SemiBold' | 'Medium' | 'Light' | 'Currency'
+    weight: 'SemiBold' | 'Medium' | 'Light' | 'Currency';
     size?:
         | 'body1'
         | 'body2'
@@ -24,21 +24,21 @@ export interface TypographyProps extends Omit<MTypographyProps, 'variant'> {
         | 'overline'
         | 'subtitle1'
         | 'subtitle2'
-        | string
-    truncate?: boolean
-    margin?: string
-    lines?: number
-    color?: string
-    type?: 'link'
+        | string;
+    truncate?: boolean;
+    margin?: string;
+    lines?: number;
+    color?: string;
+    type?: 'link';
 }
 
 interface IStyledTypography {
-    theme?: Theme
-    fontSize: string
-    margin?: string
-    lines?: number
-    color?: string
-    type?: string
+    theme?: Theme;
+    fontSize: string;
+    margin?: string;
+    lines?: number;
+    color?: string;
+    type?: string;
 }
 
 const StyledTypography = styled(MTypography)<IStyledTypography>`
@@ -66,17 +66,17 @@ const StyledTypography = styled(MTypography)<IStyledTypography>`
         text-decoration: ${(props) =>
             props.type === 'link' ? 'underline' : 'none'};
     }
-`
+`;
 
 export const Typography: FC<TypographyProps> = (
     { size, weight, children, truncate, lines, ...props },
     ref,
 ) => {
     const fontSize =
-        size && (size.includes('em') || size.includes('px')) ? size : undefined
+        size && (size.includes('em') || size.includes('px')) ? size : undefined;
     const variant = (
         size && !fontSize ? size : 'body1'
-    ) as MTypographyProps['variant']
+    ) as MTypographyProps['variant'];
 
     return (
         <StyledTypography
@@ -95,5 +95,5 @@ export const Typography: FC<TypographyProps> = (
         >
             {children}
         </StyledTypography>
-    )
-}
+    );
+};

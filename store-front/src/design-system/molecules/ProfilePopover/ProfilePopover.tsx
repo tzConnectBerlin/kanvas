@@ -1,19 +1,19 @@
-import styled from '@emotion/styled'
-import Avatar from '../../atoms/Avatar'
-import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
-import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded'
+import styled from '@emotion/styled';
+import Avatar from '../../atoms/Avatar';
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 
-import { FC } from 'react'
-import { CustomBadge } from '../../atoms/Badge'
-import { Typography } from '../../atoms/Typography'
-import { Menu, MenuProps, MenuItem, Stack, Theme } from '@mui/material'
+import { FC } from 'react';
+import { CustomBadge } from '../../atoms/Badge';
+import { Typography } from '../../atoms/Typography';
+import { Menu, MenuProps, MenuItem, Stack, Theme } from '@mui/material';
 
 interface ProfilePopoverProps extends MenuProps {
-    avatarSrc?: string
-    address?: string
-    history: any
-    notifications?: number
-    logOut: () => void
+    avatarSrc?: string;
+    address?: string;
+    history: any;
+    notifications?: number;
+    logOut: () => void;
 }
 
 const StyledMenuItem = styled(MenuItem)`
@@ -21,7 +21,7 @@ const StyledMenuItem = styled(MenuItem)`
     margin-right: 0.5em !important;
     padding-left: 0.5em;
     border-radius: 0;
-`
+`;
 
 const paperProps = {
     sx: {
@@ -49,7 +49,7 @@ const paperProps = {
             height: '75%',
         },
     },
-}
+};
 
 const StyledMenu = styled(Menu)<{ theme?: Theme }>`
     .MuiPaper-root {
@@ -59,12 +59,12 @@ const StyledMenu = styled(Menu)<{ theme?: Theme }>`
             props.theme.palette.background.paper} !important;
         background-image: none !important;
     }
-`
+`;
 
 export const ProfilePopover: FC<ProfilePopoverProps> = ({ ...props }) => {
     const navigateTo = (path: string) => {
-        props.history.push(path)
-    }
+        props.history.push(path);
+    };
 
     return (
         <StyledMenu
@@ -91,7 +91,6 @@ export const ProfilePopover: FC<ProfilePopoverProps> = ({ ...props }) => {
                     </Typography>
                 </StyledMenuItem>
 
-
                 <StyledMenuItem onClick={() => props.logOut()}>
                     <Avatar>
                         <LogoutRoundedIcon
@@ -111,5 +110,5 @@ export const ProfilePopover: FC<ProfilePopoverProps> = ({ ...props }) => {
                 </StyledMenuItem>
             </Stack>
         </StyledMenu>
-    )
-}
+    );
+};

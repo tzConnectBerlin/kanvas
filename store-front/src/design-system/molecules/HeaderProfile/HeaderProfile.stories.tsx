@@ -1,6 +1,6 @@
-import { ComponentStory, ComponentMeta } from '@storybook/react'
+import { ComponentStory, ComponentMeta } from '@storybook/react';
 
-import { HeaderProfile } from './HeaderProfile'
+import { HeaderProfile } from './HeaderProfile';
 
 export default {
     title: 'Molecules/HeaderProfile',
@@ -8,13 +8,13 @@ export default {
     argTypes: {
         backgroundColor: { control: 'color' },
     },
-} as ComponentMeta<typeof HeaderProfile>
+} as ComponentMeta<typeof HeaderProfile>;
 
 const Template: ComponentStory<typeof HeaderProfile> = (args) => (
     <HeaderProfile {...args} />
-)
+);
 
-export const Primary = Template.bind({})
+export const Primary = Template.bind({});
 Primary.args = {
     user: {
         profilePicture:
@@ -22,10 +22,9 @@ Primary.args = {
         userName: 'aurelia_durand',
         userAddress: 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd',
     },
-}
+};
 
-export const Loading = Template.bind({})
+export const Loading = Template.bind({});
 Loading.args = {
     loading: true,
-}
- 
+};

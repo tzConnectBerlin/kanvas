@@ -1,25 +1,25 @@
-import useAxios from 'axios-hooks'
-import styled from '@emotion/styled'
-import FlexSpacer from '../../design-system/atoms/FlexSpacer'
-import PageWrapper from '../../design-system/commons/PageWrapper'
+import useAxios from 'axios-hooks';
+import styled from '@emotion/styled';
+import FlexSpacer from '../../design-system/atoms/FlexSpacer';
+import PageWrapper from '../../design-system/commons/PageWrapper';
 
-import { FC, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { CardMedia, Skeleton, Stack, Theme } from '@mui/material'
-import { CustomButton } from '../../design-system/atoms/Button'
-import { Typography } from '../../design-system/atoms/Typography'
-import { INft } from '../../interfaces/artwork'
-import { useHistory, useParams } from 'react-router-dom'
-import { toast } from 'react-toastify'
-import TezosLogo from '../../design-system/atoms/TezosLogo/TezosLogo'
-import { ICategory } from '../../interfaces/category'
-import { NavigateNextTwoTone } from '@mui/icons-material'
+import { FC, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { CardMedia, Skeleton, Stack, Theme } from '@mui/material';
+import { CustomButton } from '../../design-system/atoms/Button';
+import { Typography } from '../../design-system/atoms/Typography';
+import { INft } from '../../interfaces/artwork';
+import { useHistory, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import TezosLogo from '../../design-system/atoms/TezosLogo/TezosLogo';
+import { ICategory } from '../../interfaces/category';
+import { NavigateNextTwoTone } from '@mui/icons-material';
 
 export interface ProductPageProps {
-    theme?: Theme
-    nftsInCart: INft[]
-    setNftsInCart: Function
-    listCart: Function
+    theme?: Theme;
+    nftsInCart: INft[];
+    setNftsInCart: Function;
+    listCart: Function;
 }
 
 const StyledStack = styled(Stack)`
@@ -29,27 +29,27 @@ const StyledStack = styled(Stack)`
     height: 100%;
     align-items: center;
     margin-bottom: 4rem;
-`
+`;
 
 interface IProductParam {
-    id: string
+    id: string;
 }
 
 export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
-    const { t } = useTranslation(['translation'])
+    const { t } = useTranslation(['translation']);
 
-    const history = useHistory()
-    const { id } = useParams<IProductParam>()
+    const history = useHistory();
+    const { id } = useParams<IProductParam>();
 
     const [nftResponse, getNft] = useAxios({
         url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/${id}`,
         method: 'POST',
-    })
+    });
 
     const [addToCartResponse, addToCart] = useAxios(
         process.env.REACT_APP_API_SERVER_BASE_URL + `/user/cart/add/`,
         { manual: true },
-    )
+    );
 
     const handleAddToBasket = () => {
         if (nftResponse.data) {
@@ -68,38 +68,44 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
             })
                 .then((res) => {
                     if (res.status === 201) {
-                        props.listCart()
+                        props.listCart();
                     }
                 })
                 .catch((err) => {
                     toast.error(
                         err.response?.data?.message ?? 'An error occured',
-                    )
-                })
+                    );
+                });
         }
-    }
+    };
 
-    const [launchTime, setLaunchTime] = useState<number>()
+    const [launchTime, setLaunchTime] = useState<number>();
 
     const nagivateTo = (pathname: string) => {
-        history.push(pathname)
-    }
+        history.push(pathname);
+    };
 
     useEffect(() => {
         if (nftResponse.data) {
-            setLaunchTime(new Date(nftResponse.data.launchAt * 1000).getTime() - new Date().getTime())
+            setLaunchTime(
+                new Date(nftResponse.data.launchAt * 1000).getTime() -
+                    new Date().getTime(),
+            );
         }
         if (nftResponse.error) {
         }
-    }, [nftResponse])
+    }, [nftResponse]);
 
     useEffect(() => {
         if (nftResponse.data) {
             setTimeout(() => {
-                setLaunchTime(new Date(nftResponse.data.launchAt! * 1000).getTime() - new Date().getTime())
-            }, 1000)
+                setLaunchTime(
+                    new Date(nftResponse.data.launchAt! * 1000).getTime() -
+                        new Date().getTime(),
+                );
+            }, 1000);
         }
-    }, [launchTime])
+    }, [launchTime]);
 
     return (
         <PageWrapper>
@@ -202,7 +208,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     <Skeleton width="10rem" height="1rem" />
                                 </Stack>
                             ) : (
-                                nftResponse.data?.description ?? 'No description provided'
+                                nftResponse.data?.description ??
+                                'No description provided'
                             )}
                         </Typography>
                         <Typography
@@ -210,7 +217,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             weight="SemiBold"
                             sx={{ pt: 4 }}
                         >
-                            {nftResponse.loading && (!launchTime || launchTime < 0)
+                            {nftResponse.loading &&
+                            (!launchTime || launchTime < 0)
                                 ? undefined
                                 : t('product.description.part_3')}
                         </Typography>
@@ -220,9 +228,21 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             weight="Light"
                             sx={{ pt: 2, mb: 1 }}
                         >
-                            {nftResponse.loading
-                                ? <Skeleton width="8rem" height="2rem" />
-                                : launchTime && launchTime > 0 ? `${new Date(launchTime).getDate()} days - ${new Date(launchTime).getHours()} : ${new Date(launchTime).getMinutes()} : ${new Date(launchTime).getSeconds()}` : 'NFT has been dropped'}
+                            {nftResponse.loading ? (
+                                <Skeleton width="8rem" height="2rem" />
+                            ) : launchTime && launchTime > 0 ? (
+                                `${new Date(
+                                    launchTime,
+                                ).getDate()} days - ${new Date(
+                                    launchTime,
+                                ).getHours()} : ${new Date(
+                                    launchTime,
+                                ).getMinutes()} : ${new Date(
+                                    launchTime,
+                                ).getSeconds()}`
+                            ) : (
+                                'NFT has been dropped'
+                            )}
                         </Typography>
 
                         <Typography
@@ -240,9 +260,11 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             weight="Light"
                             sx={{ pt: 2, mb: 1 }}
                         >
-                            {nftResponse.loading ? undefined : (
-                                nftResponse.data?.editionsAvailable + '/' + nftResponse.data?.editionsSize
-                            )}
+                            {nftResponse.loading
+                                ? undefined
+                                : nftResponse.data?.editionsAvailable +
+                                  '/' +
+                                  nftResponse.data?.editionsSize}
                         </Typography>
 
                         <Typography
@@ -262,17 +284,26 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                         >
                             {nftResponse.loading ? undefined : (
                                 <>
-                                    {nftResponse.data?.categories.map((category: ICategory) =>
-                                        <Typography
-                                            size="body1"
-                                            weight="Medium"
-                                            type="link"
-                                            onClick={() => nagivateTo(`/store?categories=${category.id}`)}
-                                        >
-                                            {nftResponse.data?.categories.indexOf(category) === 0 ? category.name : `, ${category.name}`}
-                                        </Typography>
+                                    {nftResponse.data?.categories.map(
+                                        (category: ICategory) => (
+                                            <Typography
+                                                size="body1"
+                                                weight="Medium"
+                                                type="link"
+                                                onClick={() =>
+                                                    nagivateTo(
+                                                        `/store?categories=${category.id}`,
+                                                    )
+                                                }
+                                            >
+                                                {nftResponse.data?.categories.indexOf(
+                                                    category,
+                                                ) === 0
+                                                    ? category.name
+                                                    : `, ${category.name}`}
+                                            </Typography>
+                                        ),
                                     )}
-
                                 </>
                             )}
                         </Typography>
@@ -307,15 +338,15 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             onClick={() => handleAddToBasket()}
                             loading={addToCartResponse.loading}
                             label={
-                                launchTime! > 0 ?
-                                    'Not dropped yet'
-                                    :
-                                    props.nftsInCart.filter(
-                                        (nft) =>
-                                            Number(nft.id) === nftResponse.data?.id,
-                                    ).length > 0
-                                        ? 'Already in cart'
-                                        : t('product.button_1')
+                                launchTime! > 0
+                                    ? 'Not dropped yet'
+                                    : props.nftsInCart.filter(
+                                          (nft) =>
+                                              Number(nft.id) ===
+                                              nftResponse.data?.id,
+                                      ).length > 0
+                                    ? 'Already in cart'
+                                    : t('product.button_1')
                             }
                             disabled={
                                 nftResponse.loading ||
@@ -324,15 +355,15 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                         Number(nft.id) === nftResponse.data?.id,
                                 ).length > 0 ||
                                 Number(nftResponse.data?.editionsAvailable) ===
-                                0 ||
-                                (launchTime! > 0)
+                                    0 ||
+                                launchTime! > 0
                             }
                         />
                     </Stack>
                 </Stack>
             </StyledStack>
         </PageWrapper>
-    )
-}
+    );
+};
 
-export default ProductPage
+export default ProductPage;

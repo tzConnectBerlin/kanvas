@@ -1,1 +1,1 @@
-export { HeaderProfile as default } from './HeaderProfile'
+export { HeaderProfile as default } from './HeaderProfile';

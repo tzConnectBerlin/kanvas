@@ -1,1 +1,1 @@
-export { ShoppingCartItem as default } from './ShoppingCartItem'
+export { ShoppingCartItem as default } from './ShoppingCartItem';

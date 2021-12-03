@@ -24,6 +24,6 @@ const mockCarousel = [
         url: '/product/1',
         type: 'img',
     },
-]
+];
 
-export default mockCarousel
+export default mockCarousel;

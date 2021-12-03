@@ -138,6 +138,6 @@ const mockNft = [
         tokenId: 'teojteojt',
         editionsAvailable: '0',
     },
-]
+];
 
-export default mockNft
+export default mockNft;

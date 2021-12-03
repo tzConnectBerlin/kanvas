@@ -1,8 +1,8 @@
-import { FC } from 'react'
-import styled from '@emotion/styled'
-import PageWrapper from '../../design-system/commons/PageWrapper'
-import FlexSpacer from '../../design-system/atoms/FlexSpacer'
-import CustomButton from '../../design-system/atoms/Button'
+import { FC } from 'react';
+import styled from '@emotion/styled';
+import PageWrapper from '../../design-system/commons/PageWrapper';
+import FlexSpacer from '../../design-system/atoms/FlexSpacer';
+import CustomButton from '../../design-system/atoms/Button';
 import {
     Grid,
     Stack,
@@ -10,13 +10,13 @@ import {
     Theme,
     useTheme,
     Drawer,
-} from '@mui/material'
-import { Typography } from '../../design-system/atoms/Typography'
-import { useTranslation } from 'react-i18next'
+} from '@mui/material';
+import { Typography } from '../../design-system/atoms/Typography';
+import { useTranslation } from 'react-i18next';
 
 export interface PrivacyProps {
-    selectedTheme?: string
-    theme?: Theme
+    selectedTheme?: string;
+    theme?: Theme;
 }
 
 const StyledStack = styled(Stack)<{ theme?: Theme }>`
@@ -93,7 +93,7 @@ const StyledStack = styled(Stack)<{ theme?: Theme }>`
         }                  
     }
   }
-`
+`;
 
 const StyledSection = styled.section`
     margin-bottom: 4rem;
@@ -114,12 +114,12 @@ const StyledSection = styled.section`
     .MuiTypography-body2 {
         margin-bottom: 1rem;
     }
-`
+`;
 
 const Privacy: FC<PrivacyProps> = () => {
-    const { t } = useTranslation(['translation'])
-    const theme = useTheme()
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+    const { t } = useTranslation(['translation']);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const privacyItems = [
         {
@@ -158,7 +158,7 @@ const Privacy: FC<PrivacyProps> = () => {
             className: 'sub',
             id: '#three_one',
         },
-    ]
+    ];
 
     return (
         <PageWrapper>
@@ -208,7 +208,7 @@ const Privacy: FC<PrivacyProps> = () => {
                 </Grid>
             </StyledStack>
         </PageWrapper>
-    )
-}
+    );
+};
 
-export default Privacy
+export default Privacy;

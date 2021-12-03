@@ -1,19 +1,19 @@
-import styled from '@emotion/styled'
-import Avatar from '../../atoms/Avatar'
-import ClearIcon from '@mui/icons-material/Clear'
-import ImageNotSupportedOutlinedIcon from '@mui/icons-material/ImageNotSupportedOutlined'
+import styled from '@emotion/styled';
+import Avatar from '../../atoms/Avatar';
+import ClearIcon from '@mui/icons-material/Clear';
+import ImageNotSupportedOutlinedIcon from '@mui/icons-material/ImageNotSupportedOutlined';
 
-import { FC } from 'react'
-import { Skeleton, Stack, Theme } from '@mui/material'
-import { INft } from '../../../interfaces/artwork'
-import Typography from '../../atoms/Typography'
-import CustomCircularProgress from '../../atoms/CircularProgress'
+import { FC } from 'react';
+import { Skeleton, Stack, Theme } from '@mui/material';
+import { INft } from '../../../interfaces/artwork';
+import Typography from '../../atoms/Typography';
+import CustomCircularProgress from '../../atoms/CircularProgress';
 
 interface ShoppingCartItemProps {
-    loading: boolean
-    nft?: INft
-    removeNft: Function
-    removeNftLoading?: boolean
+    loading: boolean;
+    nft?: INft;
+    removeNft: Function;
+    removeNftLoading?: boolean;
 }
 
 const StyledDiv = styled.div<{ theme?: Theme }>`
@@ -37,11 +37,11 @@ const StyledDiv = styled.div<{ theme?: Theme }>`
         outline: 1px solid #c4c4c4;
         transition: outline 0.1s;
     } */
-`
+`;
 
 const StyledClearIcon = styled(ClearIcon)<{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.text.primary};
-`
+`;
 
 export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
     nft,
@@ -134,5 +134,5 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                 )}
             </StyledDiv>
         </Stack>
-    )
-}
+    );
+};

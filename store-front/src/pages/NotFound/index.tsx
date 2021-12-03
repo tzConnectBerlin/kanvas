@@ -1,14 +1,14 @@
-import styled from '@emotion/styled'
-import FlexSpacer from '../../design-system/atoms/FlexSpacer'
-import PageWrapper from '../../design-system/commons/PageWrapper'
-import { FC } from 'react'
-import { Grid, Stack } from '@mui/material'
-import { CreatNFTForm } from '../../design-system/organismes/CreateNFTForm'
-import { Link } from 'react-router-dom'
-import { Animated } from 'react-animated-css'
-import Typography from '../../design-system/atoms/Typography'
-import { CustomButton } from '../../design-system/atoms/Button'
-import { useTranslation } from 'react-i18next'
+import styled from '@emotion/styled';
+import FlexSpacer from '../../design-system/atoms/FlexSpacer';
+import PageWrapper from '../../design-system/commons/PageWrapper';
+import { FC } from 'react';
+import { Grid, Stack } from '@mui/material';
+import { CreatNFTForm } from '../../design-system/organismes/CreateNFTForm';
+import { Link } from 'react-router-dom';
+import { Animated } from 'react-animated-css';
+import Typography from '../../design-system/atoms/Typography';
+import { CustomButton } from '../../design-system/atoms/Button';
+import { useTranslation } from 'react-i18next';
 
 interface NotFoundProps {}
 
@@ -17,11 +17,11 @@ const LinkStyled = styled(Link)`
     position: absolute;
     top: 0;
     align-items: center;
-`
+`;
 const StyledStack = styled(Stack)`
     width: 100vw;
     max-width: 100rem;
-`
+`;
 
 const StyledGrid = styled(Grid)`
     transition: all 0.2s;
@@ -31,10 +31,10 @@ const StyledGrid = styled(Grid)`
     margin: 0;
     padding: -1.5rem;
     text-align: center;
-`
+`;
 
 const NotFound: FC<NotFoundProps> = () => {
-    const { t } = useTranslation(['translation'])
+    const { t } = useTranslation(['translation']);
 
     return (
         <PageWrapper>
@@ -92,7 +92,7 @@ const NotFound: FC<NotFoundProps> = () => {
                 <FlexSpacer minHeight={2} />
             </StyledStack>
         </PageWrapper>
-    )
-}
+    );
+};
 
-export default NotFound
+export default NotFound;

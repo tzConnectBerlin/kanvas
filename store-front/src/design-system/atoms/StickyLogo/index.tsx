@@ -1,1 +1,1 @@
-export { StickyLogo } from './StickyLogo'
+export { StickyLogo } from './StickyLogo';

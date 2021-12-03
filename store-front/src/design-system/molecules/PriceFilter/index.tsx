@@ -1,1 +1,1 @@
-export { PriceFilter as default } from './PriceFilter'
+export { PriceFilter as default } from './PriceFilter';

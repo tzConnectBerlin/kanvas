@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC } from 'react';
 import {
     Box,
     CardMedia,
@@ -6,21 +6,21 @@ import {
     useMediaQuery,
     useTheme,
     Card,
-} from '@mui/material'
-import { Typography } from '../../../design-system/atoms/Typography'
-import { CustomButton } from '../../../design-system/atoms/Button'
-import { useTranslation } from 'react-i18next'
-import { useHistory } from 'react-router-dom'
-import Carousel from 'react-material-ui-carousel'
-import { Animated } from 'react-animated-css'
-import { styled } from '@mui/material/styles'
-import { INft } from '../../../interfaces/artwork'
+} from '@mui/material';
+import { Typography } from '../../../design-system/atoms/Typography';
+import { CustomButton } from '../../../design-system/atoms/Button';
+import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
+import Carousel from 'react-material-ui-carousel';
+import { Animated } from 'react-animated-css';
+import { styled } from '@mui/material/styles';
+import { INft } from '../../../interfaces/artwork';
 
 export interface SliderProps {
-    sx?: any
-    loading?: boolean
-    selectedTheme?: string
-    sliderNfts: INft[]
+    sx?: any;
+    loading?: boolean;
+    selectedTheme?: string;
+    sliderNfts: INft[];
 }
 
 const StyledBox = styled(Animated)`
@@ -37,18 +37,18 @@ const StyledBox = styled(Animated)`
     left: 0;
     background-color: rgba(0, 0, 0, 0.05);
     backdrop-filter: blur(8px) saturate(100%) contrast(45%) brightness(80%);
-`
+`;
 
 export const Slider: FC<SliderProps> = ({ ...props }) => {
-    const { t } = useTranslation(['translation'])
+    const { t } = useTranslation(['translation']);
 
-    const theme = useTheme()
-    const history = useHistory()
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+    const theme = useTheme();
+    const history = useHistory();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const navigateTo = (productId: number) => {
-        history.push(`/product/${productId}`)
-    }
+        history.push(`/product/${productId}`);
+    };
 
     return (
         <Box
@@ -117,5 +117,5 @@ export const Slider: FC<SliderProps> = ({ ...props }) => {
                 ))}
             </Carousel>
         </Box>
-    )
-}
+    );
+};
