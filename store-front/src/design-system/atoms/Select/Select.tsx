@@ -10,6 +10,7 @@ import Select, {
     SelectProps as MuiSelectProps,
     SelectChangeEvent,
 } from '@mui/material/Select';
+import { IParamsNFTs } from '../../../pages/StorePage';
 
 interface SortProps {
     orderBy: 'price' | 'name' | 'createdAt';
@@ -20,7 +21,7 @@ interface SelectedProps extends MuiSelectProps {
     id: string;
     selectedOption?: SortProps;
     setSelectedOption: (input: SortProps) => void;
-    callNFTsEndpoint: (input: boolean) => void;
+    callNFTsEndpoint: (input: IParamsNFTs) => void;
 }
 
 const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
@@ -60,33 +61,12 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
     }
 `;
 
-const StyledInputLabel = styled(InputLabel)<{ theme?: Theme }>`
-    height: 100%;
-    align-items: center;
-    display: flex;
-    justify-content: center;
-    width: 75%;
-    transform: none;
-    color: ${(props) => props.theme.palette.text.primary};
-
-    font-size: 0.875rem;
-
-    &.Mui-focused {
-        color: ${(props) => props.theme.palette.text.primary} !important;
-    }
-
-    :focus {
-        color: ${(props) => props.theme.palette.text.primary};
-        outline: none;
-    }
-`;
-
 export const CustomSelect: FC<SelectedProps> = ({
     callNFTsEndpoint,
     ...props
 }) => {
     const handleChange = (event: SelectChangeEvent) => {
-        callNFTsEndpoint(true);
+        callNFTsEndpoint({handlePriceRange: true});
         props.setSelectedOption(JSON.parse(event.target.value));
     };
 

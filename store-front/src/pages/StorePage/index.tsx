@@ -26,7 +26,7 @@ const StyledStack = styled(Stack)`
         padding: 0 1.5rem 1rem;
     }
 `;
-const StyledContentStack = styled(Stack)<ParamTypes>`
+const StyledContentStack = styled(Stack) <ParamTypes>`
     flex-direction: row;
     width: 100%;
 
@@ -34,12 +34,12 @@ const StyledContentStack = styled(Stack)<ParamTypes>`
         flex-direction: column;
     }
 `;
-const StyledListIcon = styled(ListIcon)<{ theme?: Theme }>`
+const StyledListIcon = styled(ListIcon) <{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.text.primary};
     padding-right: 1rem;
 `;
 
-const StyledPagination = styled(Pagination)<{
+const StyledPagination = styled(Pagination) <{
     theme?: Theme;
     display: boolean;
 }>`
@@ -53,7 +53,7 @@ const StyledPagination = styled(Pagination)<{
 
     .MuiPaginationItem-root.Mui-selected {
         background-color: ${(props) =>
-            props.theme.palette.background.default} !important;
+        props.theme.palette.background.default} !important;
         border: 1px solid ${(props) => props.theme.palette.text.primary} !important;
     }
 
@@ -62,6 +62,17 @@ const StyledPagination = styled(Pagination)<{
         align-items: center !important;
     }
 `;
+
+export interface IParamsNFTs {
+    handlePriceRange: boolean;
+    page?: number;
+    categories?: number[];
+    orderBy?: string;
+    orderDirection?: string;
+    priceAtLeast?: number;
+    priceAtMost?: number;
+    availability?: string[];
+}
 
 const StorePage = () => {
     const history = useHistory();
@@ -107,42 +118,33 @@ const StorePage = () => {
         getPageParams();
     }, []);
 
-    const callNFTsEndpoint = (
-        handlePriceRange: boolean,
-        page?: number,
-        categories?: number[],
-        orderBy?: string,
-        orderDirection?: string,
-        priceAtLeast?: number,
-        priceAtMost?: number,
-        availability?: string[],
-    ) => {
+    const callNFTsEndpoint = (params: IParamsNFTs) => {
         setComfortLoader(true);
         const comfortTrigger = setTimeout(() => {
             getNfts({
                 withCredentials: true,
                 params: {
-                    page: page ?? 1,
+                    page: params.page ?? 1,
                     pageSize: 12,
                     categories:
-                        categories ?? selectedCategories.join(',') ?? undefined,
-                    orderBy: orderBy ?? selectedSort?.orderBy ?? 'createdAt',
+                        params.categories ?? selectedCategories.join(',') ?? undefined,
+                    orderBy: params.orderBy ?? selectedSort?.orderBy ?? 'createdAt',
                     orderDirection:
-                        orderDirection ??
+                        params.orderDirection ??
                         selectedSort?.orderDirection ??
                         'desc',
                     priceAtLeast:
-                        priceAtLeast ??
-                        (handlePriceRange && priceFilterRange
+                        params.priceAtLeast ??
+                        (params.handlePriceRange && priceFilterRange
                             ? priceFilterRange[0]
                             : undefined),
                     priceAtMost:
-                        priceAtMost ??
-                        (handlePriceRange && priceFilterRange
+                        params.priceAtMost ??
+                        (params.handlePriceRange && priceFilterRange
                             ? priceFilterRange[1]
                             : undefined),
                     availability:
-                        availability ??
+                        params.availability ??
                         (selectedAvailability.length === 0
                             ? 'onSale,soldOut,upcoming'
                             : selectedAvailability.join(',')),
@@ -204,15 +206,16 @@ const StorePage = () => {
             );
         }
 
-        callNFTsEndpoint(
-            true,
-            page ? Number(page) : 1,
-            categories?.split(',').map((categoryId) => Number(categoryId)),
-            orderBy,
-            orderDirection,
-            priceAtLeast ? Number(priceAtLeast) : undefined,
-            priceAtMost ? Number(priceAtMost) : undefined,
-            availability?.split(','),
+        callNFTsEndpoint({
+            handlePriceRange: true,
+            page: page? Number(page): 1,
+            categories: categories?.split(',').map((categoryId) => Number(categoryId)),
+            orderBy: orderBy,
+            orderDirection: orderDirection,
+            priceAtLeast: priceAtLeast? Number(priceAtLeast): undefined,
+            priceAtMost: priceAtMost? Number(priceAtMost): undefined,
+            availability: availability?.split(','),
+        }
         );
     };
 
@@ -260,7 +263,7 @@ const StorePage = () => {
     const handlePaginationChange = (event: any, page: number) => {
         setSelectedPage(page);
         setPageParams('page', page.toString());
-        callNFTsEndpoint(true);
+        callNFTsEndpoint({handlePriceRange: true});
     };
 
     const triggerPriceFilter = () => {
@@ -268,7 +271,7 @@ const StorePage = () => {
             setPageParams('priceAtLeast', priceFilterRange[0].toString());
             setPageParams('priceAtMost', priceFilterRange[1].toString());
         }
-        callNFTsEndpoint(true);
+        callNFTsEndpoint({handlePriceRange: true});
     };
 
     useEffect(() => {
@@ -329,11 +332,10 @@ const StorePage = () => {
                         onClick={() => setFilterOpen(!filterOpen)}
                         aria-label="loading"
                         icon={<StyledListIcon />}
-                        label={`Filters ${
-                            selectedCategories.length > 0
-                                ? `  - ${selectedCategories.length}`
-                                : ''
-                        }`}
+                        label={`Filters ${selectedCategories.length > 0
+                            ? `  - ${selectedCategories.length}`
+                            : ''
+                            }`}
                         disabled={nftsResponse.loading}
                     />
 
