@@ -1,14 +1,21 @@
-import { Controller, Get, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Post,
+} from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UserDto } from './dto/user.dto';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // create is not accessible via the HTTP API. Users are created by admins
-  create(@Body() createUserDto: CreateUserDto) {
+  @Post()
+  create(@Body() createUserDto: UserDto) {
     return this.userService.create(createUserDto);
   }
 
@@ -23,7 +30,7 @@ export class UserController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(@Param('id') id: string, @Body() updateUserDto: UserDto) {
     return this.userService.update(+id, updateUserDto);
   }
 

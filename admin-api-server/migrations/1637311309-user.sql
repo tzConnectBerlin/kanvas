@@ -7,9 +7,11 @@ BEGIN;
 -- mtm = many to many
 CREATE TABLE kanvas_user (
        id SERIAL PRIMARY KEY,
+       email TEXT UNIQUE NOT NULL,
        user_name TEXT,
        address TEXT UNIQUE NOT NULL,
-       signed_payload TEXT
+       password TEXT UNIQUE NOT NULL,
+       disabled boolean DEFAULT false
 );
 CREATE TABLE user_role (
        id SERIAL PRIMARY KEY,
