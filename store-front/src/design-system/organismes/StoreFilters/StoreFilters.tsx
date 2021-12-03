@@ -93,7 +93,7 @@ const StyledLi = styled.li<StyledStoreFiltersProps>`
     height: auto;
 `;
 
-const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`
+const StyledCheckBox = styled(Checkbox)<{ theme?: Theme }>`
     &.Mui-checked {
         color: ${(props) => props.theme.palette.text.primary} !important;
     }
@@ -105,7 +105,8 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
     ...props
 }) => {
     const [activeRef, setActiveRef] = useState<string[]>([]);
-    const [availabilityChange, setAvailabilityChange] = useState<boolean>(false)
+    const [availabilityChange, setAvailabilityChange] =
+        useState<boolean>(false);
 
     const handleListItemClick = (concernedRef: string) => {
         if (activeRef.indexOf(concernedRef) !== -1) {
@@ -130,7 +131,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                 ),
             );
         }
-        setAvailabilityChange(true)
+        setAvailabilityChange(true);
     };
 
     useEffect(() => {
@@ -138,7 +139,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
             setAvailabilityChange(false);
             callNFTsEndpoint(true);
         }
-    }, [availabilityChange])
+    }, [availabilityChange]);
 
     return (
         <StyledUl openFilters={props.openFilters}>
