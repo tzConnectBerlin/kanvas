@@ -66,7 +66,7 @@ export const CustomSelect: FC<SelectedProps> = ({
     ...props
 }) => {
     const handleChange = (event: SelectChangeEvent) => {
-        callNFTsEndpoint({handlePriceRange: true});
+        callNFTsEndpoint({ handlePriceRange: true });
         props.setSelectedOption(JSON.parse(event.target.value));
     };
 

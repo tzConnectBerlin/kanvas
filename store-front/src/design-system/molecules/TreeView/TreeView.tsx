@@ -180,7 +180,7 @@ const TreeView: FC<TreeViewProps> = ({
             setHighlightedParents([]);
         }
         if (newCategorySelected) {
-            callNFTsEndpoint({handlePriceRange: true});
+            callNFTsEndpoint({ handlePriceRange: true });
             setNewCategorySelected(false);
         }
     }, [selectedFilters]);

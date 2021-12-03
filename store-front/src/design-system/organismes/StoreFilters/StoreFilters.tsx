@@ -138,7 +138,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
     useEffect(() => {
         if (availabilityChange) {
             setAvailabilityChange(false);
-            callNFTsEndpoint({handlePriceRange: true});
+            callNFTsEndpoint({ handlePriceRange: true });
         }
     }, [availabilityChange]);
 
