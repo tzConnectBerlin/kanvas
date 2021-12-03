@@ -154,7 +154,7 @@ const StorePage = () => {
                 },
             });
             setComfortLoader(false);
-        }, 300);
+        }, 400);
 
         return () => {
             clearTimeout(comfortTrigger);
