@@ -1,35 +1,58 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { PG_CONNECTION } from 'src/constants';
 import { DbClient } from 'src/db.module';
 import { hashPassword } from 'src/utils';
 import { UserDto } from './dto/user.dto';
 import { User } from './entities/user.entity';
 
+const getSelectStatement = (whereClause = ''): string => {
+  return `SELECT id, user_name as "userName", address, email, disabled, ARRAY_AGG(mkuur.user_role_id) as roles 
+       FROM kanvas_user ku 
+       inner join mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id ${whereClause}
+       GROUP BY ku.id`;
+};
+
 @Injectable()
 export class UserService {
   constructor(@Inject(PG_CONNECTION) private db: DbClient) {}
-  async create({ password, ...rest }: UserDto) {
+  async create({ password, roles, ...rest }: UserDto) {
     const hashedPassword = await hashPassword(password);
-    const result = await this.db.query(
-      'INSERT INTO kanvas_user (email, user_name, address, password) VALUES ($1, $2, $3, $4) RETURNING id',
-      [rest.email, rest.userName, rest.address, hashedPassword],
-    );
-    if (result.rowCount > 0) {
-      return { id: result.rows[0].id, ...rest };
+    try {
+      await this.db.query('BEGIN');
+      const resultInsertUser = await this.db.query(
+        'INSERT INTO kanvas_user (email, user_name, address, password) VALUES ($1, $2, $3, $4) RETURNING id',
+        [rest.email, rest.userName, rest.address, hashedPassword],
+      );
+      const userId = resultInsertUser.rows[0].id;
+      let rolesIndex = 0;
+      const insertRolesQuery = `INSERT INTO mtm_kanvas_user_user_role (kanvas_user_id, user_role_id) values ${roles
+        .map(() => {
+          const userIdIndex = rolesIndex + 1;
+          rolesIndex = userIdIndex + 1;
+          return `($${userIdIndex}, $${rolesIndex})`;
+        })
+        .join(',')}`;
+      const insertRoleValues = roles.map((roleId) => [userId, roleId]).flat();
+      await this.db.query(insertRolesQuery, insertRoleValues);
+      await this.db.query('COMMIT');
+      return { id: userId, roles, ...rest };
+    } catch (e) {
+      await this.db.query('ROLLBACK');
+      throw new HttpException(
+        'Unable to create new user',
+        HttpStatus.BAD_REQUEST,
+      );
     }
-    throw Error('Unable to create new user');
   }
 
   async findAll() {
-    const result = await this.db.query<User[]>(
-      'SELECT id, user_name, address, email, disabled FROM kanvas_user',
-    );
+    const result = await this.db.query<User[]>(getSelectStatement());
     return result.rows;
   }
 
   async findOne(id: number) {
     const result = await this.db.query<User>(
-      'SELECT id, email, user_name, address, password, disabled FROM kanvas_user WHERE id = $1 ',
+      getSelectStatement(`WHERE id = $1`),
       [id],
     );
     return result.rows[0];
@@ -37,7 +60,7 @@ export class UserService {
 
   async findOneByEmail(email: string) {
     const result = await this.db.query<User>(
-      'SELECT id, email, user_name, address, password, disabled FROM kanvas_user WHERE email = $1 ',
+      getSelectStatement(`WHERE email = $1`),
       [email],
     );
     return result.rows[0];
