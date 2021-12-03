@@ -12,7 +12,7 @@ export class UserService {
     const hashedPassword = await hashPassword(password);
     const result = await this.db.query(
       'INSERT INTO kanvas_user (email, user_name, address, password) VALUES ($1, $2, $3, $4) RETURNING id',
-      [rest.email, rest.user_name, rest.address, hashedPassword],
+      [rest.email, rest.userName, rest.address, hashedPassword],
     );
     if (result.rowCount > 0) {
       return { id: result.rows[0].id, ...rest };

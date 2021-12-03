@@ -16,7 +16,7 @@ export class UserDto {
   @JoiSchema(Joi.string().required())
   @JoiSchema([CREATE], Joi.string().required())
   @JoiSchema([UPDATE], Joi.string().optional())
-  user_name: string;
+  userName: string;
 
   @JoiSchema(Joi.string().required())
   @JoiSchema([CREATE], Joi.string().required())

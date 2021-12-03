@@ -1,7 +1,7 @@
 export class User {
   id: number;
   email: string;
-  user_name: string;
+  userName: string;
   address: string;
   password?: string;
   disabled: boolean;
