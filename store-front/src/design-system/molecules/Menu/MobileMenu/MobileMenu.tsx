@@ -6,7 +6,7 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 
 import { FC, useEffect, useState } from 'react';
-import { Badge, Stack, Theme } from '@mui/material';
+import { Badge, Stack, Theme, useMediaQuery, useTheme } from '@mui/material';
 import { CustomButton } from '../../../atoms/Button';
 import { Typography } from '../../../atoms/Typography';
 import {
@@ -14,12 +14,12 @@ import {
     SearchProps,
     StyledShoppingCartRoundedIcon,
     StyledLink,
-} from '../Menu'
-import { useTranslation } from 'react-i18next'
-import { useHistory } from 'react-router-dom'
-import { Box } from '@mui/system'
-import { QuickSearch } from '../../QuickSearch'
-import { ArrowBackIosNew } from '@mui/icons-material'
+} from '../Menu';
+import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
+import { Box } from '@mui/system';
+import { QuickSearch } from '../../QuickSearch';
+import { ArrowBackIosNew } from '@mui/icons-material';
 
 const WrapperThemeIcon = styled.div<SearchProps>`
     display: ${(props) => (props.isSearchOpen ? 'none' : 'flex')};
@@ -54,9 +54,8 @@ const WrapperMenuIcon = styled.div<MenuIconProps>`
         transition: filter 0.2s;
     }
 
-
     background: ${(props) => props.theme.palette.background.paper};
-`
+`;
 
 const StyledMenuCloser = styled.div<MenuIconProps>`
     display: ${(props) => (props.expandMenu ? 'flex' : 'none')};
@@ -120,7 +119,7 @@ const MobileStyledMenuHeader = styled(Stack)<SearchProps>`
         width: ${(props) => (props.isSearchOpen ? '100%' : '')};
         margin-left: auto !important;
         justify-content: space-between;
-`
+`;
 
 const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
     display: none;
@@ -172,7 +171,7 @@ const StyledBox = styled.div`
     }
 `;
 
-const MobileStyledQuickSearch = styled(QuickSearch)<SearchProps>``
+const MobileStyledQuickSearch = styled(QuickSearch)<SearchProps>``;
 
 export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
     const { t } = useTranslation(['translation']);
@@ -190,9 +189,9 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
         } else {
             document.body.style.overflow = 'auto';
         }
-    }, [expandMenu])
+    }, [expandMenu]);
     interface BackButtonProps {
-        theme?: Theme
+        theme?: Theme;
     }
 
     const BackButton = styled(ArrowBackIosNew)<BackButtonProps>`
@@ -200,10 +199,22 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
         z-index: 999;
         pointer-events: none;
         cursor: pointer;
-    `
+    `;
     const handleClose = (props?: any) => {
-        props.closeResult()
-    }
+        props.closeResult();
+    };
+    
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+    useEffect(() => {
+        if (props.isSearchOpen && isMobile) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+    }, [props.isSearchOpen, isMobile]);
+
     return (
         <>
             <StyledMenuCloser

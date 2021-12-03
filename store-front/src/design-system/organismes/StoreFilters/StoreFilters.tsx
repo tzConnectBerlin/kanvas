@@ -4,7 +4,7 @@ import Typography from '../../atoms/Typography';
 import TreeView from '../../molecules/TreeView/TreeView';
 
 import { Checkbox, Stack, Theme, useMediaQuery } from '@mui/material';
-import { FC, useCallback, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import PriceFilter from '../../molecules/PriceFilter';
 import { ArrowBackIosNew } from '@mui/icons-material';
 import { useTheme } from '@mui/system';
@@ -222,6 +222,14 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
 
         callNFTsEndpoint(true);
     };
+
+    useEffect(() => {
+        if (props.openFilters && isMobile) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+    }, [props.openFilters, isMobile]);
 
     return (
         <StyledSection openFilters={props.openFilters}>

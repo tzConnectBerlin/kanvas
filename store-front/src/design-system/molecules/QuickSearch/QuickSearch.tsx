@@ -17,6 +17,9 @@ const QuickSearchWrapper = styled(Stack)`
 `;
 
 const StyledBackground = styled.div<{ theme?: Theme; open: boolean }>`
+    position: fixed;
+    margin: 0 !important;
+    display: ${(props) => (!props.open ? 'none' : '0')} !important;
     opacity: ${(props) => (props.open ? '1' : '0')};
     height: ${(props) => (props.open ? '100vh' : '0')} !important;
 
@@ -35,9 +38,6 @@ const StyledBackground = styled.div<{ theme?: Theme; open: boolean }>`
 
         background-color: ${(props) => props.theme.palette.background.paper};
     }
-    position: absolute;
-    margin: 0 !important;
-    display: ${(props) => (!props.open ? 'none' : '0')} !important;
 `
 
 export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
