@@ -78,7 +78,7 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
     openFilters?: boolean;
     collapsed?: boolean;
 }
- 
+
 const BackButton = styled(ArrowBackIosNew)<StyledStoreFiltersProps>`
     fill: ${(props) => props.theme.palette.text.primary};
 `;
@@ -163,7 +163,7 @@ const StyledHeader = styled(Stack)<StyledStoreFiltersProps>`
     z-index: 1;
 
     @media (max-width: 874px) {
-        padding: 2rem 1.5rem .5rem;
+        padding: 2rem 1.5rem 0.5rem;
         background-color: ${(props) => props.theme.palette.background.paper};
     }
 
@@ -228,6 +228,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
             <StyledHeader
                 direction="row"
                 sx={{ display: `${props.openFilters ? 'flex' : 'none'}` }}
+                p={isMobile ? '2rem 1.5rem 0rem' : '0 0 .5rem 0'}
             >
                 {isMobile ? (
                     <>
@@ -307,6 +308,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                     <StyledLi
                         openFilters={props.openFilters}
                         collapsed={activeRef.indexOf('Categories') !== -1}
+                        style={{ marginBottom: '1rem' }}
                     >
                         <Filter
                             name="Categories"
@@ -349,22 +351,11 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                                             props.availabilityFilter.length !==
                                                 0
                                         }
-                                        onClick={() => {
-                                            props.availabilityFilter.indexOf(
+                                        onClick={() =>
+                                            handleChangeAvailabilityFilter(
                                                 'onSale',
-                                            ) === -1
-                                                ? props.setAvailabilityFilter([
-                                                      ...props.availabilityFilter,
-                                                      'onSale',
-                                                  ])
-                                                : props.setAvailabilityFilter(
-                                                      props.availabilityFilter.filter(
-                                                          (param) =>
-                                                              param !==
-                                                              'onSale',
-                                                      ),
-                                                  );
-                                        }}
+                                            )
+                                        }
                                         inputProps={{
                                             'aria-label': 'controlled',
                                         }}
@@ -383,22 +374,11 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                                             props.availabilityFilter.length !==
                                                 0
                                         }
-                                        onClick={() => {
-                                            props.availabilityFilter.indexOf(
+                                        onClick={() =>
+                                            handleChangeAvailabilityFilter(
                                                 'upcoming',
-                                            ) === -1
-                                                ? props.setAvailabilityFilter([
-                                                      ...props.availabilityFilter,
-                                                      'upcoming',
-                                                  ])
-                                                : props.setAvailabilityFilter(
-                                                      props.availabilityFilter.filter(
-                                                          (param) =>
-                                                              param !==
-                                                              'upcoming',
-                                                      ),
-                                                  );
-                                        }}
+                                            )
+                                        }
                                         inputProps={{
                                             'aria-label': 'controlled',
                                         }}
@@ -417,22 +397,11 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                                             props.availabilityFilter.length !==
                                                 0
                                         }
-                                        onClick={() => {
-                                            props.availabilityFilter.indexOf(
+                                        onClick={() =>
+                                            handleChangeAvailabilityFilter(
                                                 'soldOut',
-                                            ) === -1
-                                                ? props.setAvailabilityFilter([
-                                                      ...props.availabilityFilter,
-                                                      'soldOut',
-                                                  ])
-                                                : props.setAvailabilityFilter(
-                                                      props.availabilityFilter.filter(
-                                                          (param) =>
-                                                              param !==
-                                                              'soldOut',
-                                                      ),
-                                                  );
-                                        }}
+                                            )
+                                        }
                                         inputProps={{
                                             'aria-label': 'controlled',
                                         }}
