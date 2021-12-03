@@ -10,6 +10,7 @@ import { ArrowBackIosNew } from '@mui/icons-material';
 import { useTheme } from '@mui/system';
 import { useTranslation } from 'react-i18next';
 import CustomButton from '../../atoms/Button';
+import { IParamsNFTs } from '../../../pages/StorePage';
 
 interface FilterProps {
     name: string;
@@ -74,9 +75,9 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
     triggerPriceFilter: () => void;
     setAvailabilityFilter: (input: string[]) => void;
     setFilterSliding: (input: boolean) => void;
-    callNFTsEndpoint: (input: boolean) => void;
     openFilters?: boolean;
     collapsed?: boolean;
+    callNFTsEndpoint: (input: IParamsNFTs) => void;
 }
 
 const BackButton = styled(ArrowBackIosNew)<StyledStoreFiltersProps>`
@@ -194,6 +195,8 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
     const [activeRef, setActiveRef] = useState<string[]>([]);
     const { t } = useTranslation(['translation']);
     const theme = useTheme();
+    const [availabilityChange, setAvailabilityChange] =
+        useState<boolean>(false);
 
     const isMobile = useMediaQuery('(max-width:900px)');
     const handleListItemClick = (concernedRef: string) => {
@@ -219,8 +222,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                 ),
             );
         }
-
-        callNFTsEndpoint(true);
+        setAvailabilityChange(true);
     };
 
     useEffect(() => {

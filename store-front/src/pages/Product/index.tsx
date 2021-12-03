@@ -85,6 +85,10 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
         history.push(pathname);
     };
 
+    // useEffect(() => {
+
+    // }, [])
+
     useEffect(() => {
         if (nftResponse.data) {
             setLaunchTime(
@@ -119,9 +123,14 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                 >
                     {nftResponse.loading ? (
                         <Skeleton
-                            height="40rem"
-                            width="40rem"
-                            sx={{ transform: 'none' }}
+                            height="75vh"
+                            width="40vw"
+                            sx={{
+                                transform: 'none',
+                                minHeight: 400,
+                                maxHeight: 1000,
+                                maxWidth: 1000,
+                            }}
                         />
                     ) : (
                         <CardMedia
