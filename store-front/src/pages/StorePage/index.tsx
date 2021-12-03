@@ -366,7 +366,6 @@ const StorePage = () => {
                         availableFilters={availableFilters}
                         openFilters={isMobile ? !filterOpen : filterOpen}
                         callNFTsEndpoint={callNFTsEndpoint}
-                        filterFunction={getNfts}
                         setFilterOpen={setFilterOpen}
                         selectedFilters={selectedCategories}
                         setSelectedFilters={setSelectedCategories}

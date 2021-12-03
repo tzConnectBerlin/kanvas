@@ -54,7 +54,6 @@ const StyledPaper = styled(Paper)<{ theme?: Theme }>`
     }
 
     transition: height 0.3s;
-    margin-left: -2%;
     background-image: none;
 
     @media (max-width: 874px) {

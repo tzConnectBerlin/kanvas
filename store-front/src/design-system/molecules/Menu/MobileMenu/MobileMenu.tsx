@@ -29,6 +29,9 @@ interface MenuIconProps {
     expandMenu?: boolean;
     theme?: Theme;
 }
+interface BackButtonProps {
+    theme?: Theme;
+}
 
 const WrapperMenuIcon = styled.div<MenuIconProps>`
     height: 2.2rem;
@@ -171,7 +174,12 @@ const StyledBox = styled.div`
     }
 `;
 
-const MobileStyledQuickSearch = styled(QuickSearch)<SearchProps>``;
+const BackButton = styled(ArrowBackIosNew)<BackButtonProps>`
+    fill: ${(props) => props.theme.palette.text.primary};
+    z-index: 999;
+    pointer-events: none;
+    cursor: pointer;
+`;
 
 export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
     const { t } = useTranslation(['translation']);
@@ -190,20 +198,11 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
             document.body.style.overflow = 'auto';
         }
     }, [expandMenu]);
-    interface BackButtonProps {
-        theme?: Theme;
-    }
 
-    const BackButton = styled(ArrowBackIosNew)<BackButtonProps>`
-        fill: ${(props) => props.theme.palette.text.primary};
-        z-index: 999;
-        pointer-events: none;
-        cursor: pointer;
-    `;
     const handleClose = (props?: any) => {
         props.closeResult();
     };
-    
+
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -234,9 +233,7 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                 {/* QuickSearch wrapper to close menu in case open */}
 
                 <div onClick={() => setExpandMenu(false)}>
-                    <MobileStyledQuickSearch
-                        setSearchOpen={props.setSearchOpen}
-                    />
+                    <QuickSearch setSearchOpen={props.setSearchOpen} />
                 </div>
 
                 {/* Menu button, and closing button for search bar */}

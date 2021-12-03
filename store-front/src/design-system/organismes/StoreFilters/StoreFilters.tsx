@@ -70,7 +70,7 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
     minRange: number;
     maxRange: number;
     setFilterOpen: Function;
-    filterFunction: Function;
+    filterFunction?: Function;
     availabilityFilter: string[];
     triggerPriceFilter: () => void;
     setAvailabilityFilter: (input: string[]) => void;
