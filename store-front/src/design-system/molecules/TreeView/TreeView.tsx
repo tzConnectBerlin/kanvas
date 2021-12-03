@@ -4,6 +4,7 @@ import FlexSpacer from '../../atoms/FlexSpacer';
 
 import { Checkbox, Stack, Theme } from '@mui/material';
 import { FC, useEffect, useState } from 'react';
+import { IParamsNFTs } from '../../../pages/StorePage';
 
 interface StyledTreeViewProps {
     open?: boolean;
@@ -16,7 +17,7 @@ interface TreeViewProps extends StyledTreeViewProps {
     selectedFilters: number[];
     setSelectedFilters: Function;
     collapsed: boolean;
-    callNFTsEndpoint: (input: boolean) => void;
+    callNFTsEndpoint: (input: IParamsNFTs) => void;
 }
 
 const StyledDiv = styled.div<StyledTreeViewProps>`
@@ -179,7 +180,7 @@ const TreeView: FC<TreeViewProps> = ({
             setHighlightedParents([]);
         }
         if (newCategorySelected) {
-            callNFTsEndpoint(false);
+            callNFTsEndpoint({ handlePriceRange: true });
             setNewCategorySelected(false);
         }
     }, [selectedFilters]);

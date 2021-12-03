@@ -4,8 +4,9 @@ import Typography from '../../atoms/Typography';
 import TreeView from '../../molecules/TreeView/TreeView';
 
 import { Checkbox, Stack, Theme } from '@mui/material';
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import PriceFilter from '../../molecules/PriceFilter';
+import { IParamsNFTs } from '../../../pages/StorePage';
 
 interface FilterProps {
     name: string;
@@ -67,7 +68,7 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
     triggerPriceFilter: () => void;
     setAvailabilityFilter: (input: string[]) => void;
     setFilterSliding: (input: boolean) => void;
-    callNFTsEndpoint: (input: boolean) => void;
+    callNFTsEndpoint: (input: IParamsNFTs) => void;
 }
 
 const StyledUl = styled.ul<StyledStoreFiltersProps>`
@@ -105,6 +106,8 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
     ...props
 }) => {
     const [activeRef, setActiveRef] = useState<string[]>([]);
+    const [availabilityChange, setAvailabilityChange] =
+        useState<boolean>(false);
 
     const handleListItemClick = (concernedRef: string) => {
         if (activeRef.indexOf(concernedRef) !== -1) {
@@ -129,9 +132,15 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                 ),
             );
         }
-
-        callNFTsEndpoint(true);
+        setAvailabilityChange(true);
     };
+
+    useEffect(() => {
+        if (availabilityChange) {
+            setAvailabilityChange(false);
+            callNFTsEndpoint({ handlePriceRange: true });
+        }
+    }, [availabilityChange]);
 
     return (
         <StyledUl openFilters={props.openFilters}>

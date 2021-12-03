@@ -63,6 +63,17 @@ const StyledPagination = styled(Pagination)<{
     }
 `;
 
+export interface IParamsNFTs {
+    handlePriceRange: boolean;
+    page?: number;
+    categories?: number[];
+    orderBy?: string;
+    orderDirection?: string;
+    priceAtLeast?: number;
+    priceAtMost?: number;
+    availability?: string[];
+}
+
 const StorePage = () => {
     const history = useHistory();
 
@@ -105,32 +116,41 @@ const StorePage = () => {
     useEffect(() => {
         getCategories();
         getPageParams();
-        callNFTsEndpoint(true);
     }, []);
 
-    const callNFTsEndpoint = (handlePriceRange: boolean) => {
+    const callNFTsEndpoint = (params: IParamsNFTs) => {
         setComfortLoader(true);
         const comfortTrigger = setTimeout(() => {
             getNfts({
                 withCredentials: true,
                 params: {
-                    page: 1,
+                    page: params.page ?? 1,
                     pageSize: 12,
-                    categories: selectedCategories.join(',') ?? undefined,
-                    orderBy: selectedSort?.orderBy ?? 'createdAt',
-                    orderDirection: selectedSort?.orderDirection ?? 'desc',
+                    categories:
+                        params.categories ??
+                        selectedCategories.join(',') ??
+                        undefined,
+                    orderBy:
+                        params.orderBy ?? selectedSort?.orderBy ?? 'createdAt',
+                    orderDirection:
+                        params.orderDirection ??
+                        selectedSort?.orderDirection ??
+                        'desc',
                     priceAtLeast:
-                        handlePriceRange && priceFilterRange
+                        params.priceAtLeast ??
+                        (params.handlePriceRange && priceFilterRange
                             ? priceFilterRange[0]
-                            : undefined,
+                            : undefined),
                     priceAtMost:
-                        handlePriceRange && priceFilterRange
+                        params.priceAtMost ??
+                        (params.handlePriceRange && priceFilterRange
                             ? priceFilterRange[1]
-                            : undefined,
+                            : undefined),
                     availability:
-                        selectedAvailability.length === 0
+                        params.availability ??
+                        (selectedAvailability.length === 0
                             ? 'onSale,soldOut,upcoming'
-                            : selectedAvailability.join(','),
+                            : selectedAvailability.join(',')),
                 },
             });
             setComfortLoader(false);
@@ -188,6 +208,19 @@ const StorePage = () => {
                 categories.split(',').map((categoryId) => Number(categoryId)),
             );
         }
+
+        callNFTsEndpoint({
+            handlePriceRange: true,
+            page: page ? Number(page) : 1,
+            categories: categories
+                ?.split(',')
+                .map((categoryId) => Number(categoryId)),
+            orderBy: orderBy,
+            orderDirection: orderDirection,
+            priceAtLeast: priceAtLeast ? Number(priceAtLeast) : undefined,
+            priceAtMost: priceAtMost ? Number(priceAtMost) : undefined,
+            availability: availability?.split(','),
+        });
     };
 
     const setPageParams = (
@@ -234,7 +267,7 @@ const StorePage = () => {
     const handlePaginationChange = (event: any, page: number) => {
         setSelectedPage(page);
         setPageParams('page', page.toString());
-        callNFTsEndpoint(true);
+        callNFTsEndpoint({ handlePriceRange: true });
     };
 
     const triggerPriceFilter = () => {
@@ -242,8 +275,7 @@ const StorePage = () => {
             setPageParams('priceAtLeast', priceFilterRange[0].toString());
             setPageParams('priceAtMost', priceFilterRange[1].toString());
         }
-
-        callNFTsEndpoint(true);
+        callNFTsEndpoint({ handlePriceRange: true });
     };
 
     useEffect(() => {
