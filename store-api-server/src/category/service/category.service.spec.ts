@@ -1,22 +1,22 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { CategoryService } from './category.service'
-import { DbMockModule } from '../../db_mock.module'
+import { Test, TestingModule } from '@nestjs/testing';
+import { CategoryService } from './category.service';
+import { DbMockModule } from '../../db_mock.module';
 
 describe('CategoryService', () => {
-  let service: CategoryService
+  let service: CategoryService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DbMockModule],
       providers: [CategoryService],
-    }).compile()
+    }).compile();
 
-    service = module.get<CategoryService>(CategoryService)
-  })
+    service = module.get<CategoryService>(CategoryService);
+  });
 
   it('should be defined', () => {
-    expect(service).toBeDefined()
-  })
+    expect(service).toBeDefined();
+  });
 
   const categoryTransformTests = [
     {
@@ -201,12 +201,12 @@ describe('CategoryService', () => {
         },
       ],
     },
-  ]
+  ];
   for (const testcase of categoryTransformTests) {
     it('categoriesQryRespToEntities should: ' + testcase.name, () => {
       expect(
         service.categoriesQryRespToEntities(testcase.categoryRows),
-      ).toStrictEqual(testcase.expectRes)
-    })
+      ).toStrictEqual(testcase.expectRes);
+    });
   }
-})
+});

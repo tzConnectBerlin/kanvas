@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common'
-import { CategoryController } from './controller/category.controller'
-import { CategoryService } from './service/category.service'
-import { DbModule } from '../db.module'
+import { Module } from '@nestjs/common';
+import { CategoryController } from './controller/category.controller';
+import { CategoryService } from './service/category.service';
+import { DbModule } from '../db.module';
 
 @Module({
   imports: [DbModule],

@@ -1,29 +1,35 @@
-import { IsString, IsInt, IsNumber, IsOptional, IsArray } from 'class-validator'
-import { Type, Transform } from 'class-transformer'
+import {
+  IsString,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsArray,
+} from 'class-validator';
+import { Type, Transform } from 'class-transformer';
 
 export class PaginationParams {
   @IsInt()
   @Type(() => Number)
   @IsOptional()
-  page: number = 1
+  page: number = 1;
 
   @IsInt()
   @Type(() => Number)
   @IsOptional()
-  pageSize: number = 10
+  pageSize: number = 10;
 
   @IsString()
   @IsOptional()
-  orderDirection: string = 'asc'
+  orderDirection: string = 'asc';
 
   @IsString()
   @IsOptional()
-  orderBy: string = 'id'
+  orderBy: string = 'id';
 
   @IsInt()
   @Type(() => Number)
   @IsOptional()
-  firstRequestAt?: number
+  firstRequestAt?: number;
 }
 
 export class FilterParams extends PaginationParams {
@@ -34,36 +40,36 @@ export class FilterParams extends PaginationParams {
       : undefined,
   )
   @IsOptional()
-  categories?: number[]
+  categories?: number[];
 
   @IsString()
   @IsOptional()
-  userAddress?: string
+  userAddress?: string;
 
   @IsNumber()
   @Type(() => Number)
   @IsOptional()
-  priceAtLeast?: number
+  priceAtLeast?: number;
 
   @IsNumber()
   @Type(() => Number)
   @IsOptional()
-  priceAtMost?: number
+  priceAtMost?: number;
 
   @IsArray()
   @Transform(({ value }) => (value ? parseStringArray(value, ',') : undefined))
   @IsOptional()
-  availability?: string[]
+  availability?: string[];
 }
 
 export class SearchParam {
   @IsString()
-  searchString: string
+  searchString: string;
 }
 
 function parseStringArray(v: string | string[], sep: string): string[] {
   if (typeof v !== 'string') {
-    return v
+    return v;
   }
-  return v.split(sep)
+  return v.split(sep);
 }

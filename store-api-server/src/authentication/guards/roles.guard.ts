@@ -4,11 +4,11 @@ import {
   CanActivate,
   ExecutionContext,
   SetMetadata,
-} from '@nestjs/common'
-import { Reflector } from '@nestjs/core'
-import { Observable } from 'rxjs'
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { Observable } from 'rxjs';
 
-export const Roles = (...roles: string[]) => SetMetadata('roles', roles)
+export const Roles = (...roles: string[]) => SetMetadata('roles', roles);
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -20,13 +20,13 @@ export class RolesGuard implements CanActivate {
     const roles = this.reflector.getAllAndOverride<string[]>('roles', [
       context.getHandler(),
       context.getClass(),
-    ])
+    ]);
     if (!roles) {
-      return true
+      return true;
     }
-    const req = context.switchToHttp().getRequest()
+    const req = context.switchToHttp().getRequest();
     return req.user.roles.some((user_role: string) =>
       roles.some((allowed_role) => user_role === allowed_role),
-    )
+    );
   }
 }

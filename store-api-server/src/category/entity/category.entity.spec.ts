@@ -2,6 +2,6 @@
 
 describe('NftCategory', () => {
   it('should satisfy the test runner', () => {
-    expect(true).toBeTruthy()
-  })
-})
+    expect(true).toBeTruthy();
+  });
+});
