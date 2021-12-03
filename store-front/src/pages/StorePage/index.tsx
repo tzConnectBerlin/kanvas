@@ -21,12 +21,8 @@ const StyledStack = styled(Stack)`
     max-width: 100rem;
     width: 100vw;
     height: 100%;
-
-    @media (max-width: 650px) {
-        padding: 0 1.5rem 1rem;
-    }
-`;
-const StyledContentStack = styled(Stack)<ParamTypes>`
+`
+const StyledContentStack = styled(Stack) <ParamTypes>`
     flex-direction: row;
     width: 100%;
 
@@ -328,6 +324,8 @@ const StorePage = () => {
                         availableFilters={availableFilters}
                         openFilters={filterOpen}
                         callNFTsEndpoint={callNFTsEndpoint}
+                        filterFunction={getNfts}
+                        setFilterOpen={setFilterOpen}
                         selectedFilters={selectedCategories}
                         setSelectedFilters={setSelectedCategories}
                         priceFilterRange={priceFilterRange}
