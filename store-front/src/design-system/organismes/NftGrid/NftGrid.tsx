@@ -33,10 +33,11 @@ const StyledGrid = styled(Grid)`
 `
 
 const StyledDiv = styled.div`
-    max-width: 100%;
+    width: 100%;
 `
 
 export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
+
     const [gridNfts, setGridNfts] = useState<INft[]>()
     const [comfortLoading, setComfortLoading] = useState<boolean>(false)
 

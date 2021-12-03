@@ -6,7 +6,7 @@ import FlexSpacer from '../../design-system/atoms/FlexSpacer'
 import PageWrapper from '../../design-system/commons/PageWrapper'
 import StoreFilters from '../../design-system/organismes/StoreFilters'
 
-import { FC, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Stack, Theme, Pagination } from '@mui/material'
 import { CustomButton } from '../../design-system/atoms/Button'
 import { CustomSelect } from '../../design-system/atoms/Select'
@@ -18,34 +18,29 @@ interface ParamTypes {
     width?: any
 }
 
-export interface StorePageProps {
-    theme?: Theme
-}
-
 const StyledStack = styled(Stack)`
     max-width: 100rem;
-    width: 100%;
+    width: 100vw;
     height: 100%;
 
     @media (max-width: 650px) {
-        padding: 1.5rem;
-        max-width: -webkit-fill-available;
+        padding: 0 1.5rem 1rem;
     }
 `
-const StyledContentStack = styled(Stack)<ParamTypes>`
+const StyledContentStack = styled(Stack) <ParamTypes>`
     flex-direction: row;
     width: 100%;
 
-    @media (max-width: 874px) {
+    @media (max-width: 900px) {
         flex-direction: column;
     }
 `
-const StyledListIcon = styled(ListIcon)<{ theme?: Theme }>`
+const StyledListIcon = styled(ListIcon) <{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.text.primary};
     padding-right: 1rem;
 `
 
-const StyledPagination = styled(Pagination)<{
+const StyledPagination = styled(Pagination) <{
     theme?: Theme
     display: boolean
 }>`
@@ -59,7 +54,7 @@ const StyledPagination = styled(Pagination)<{
 
     .MuiPaginationItem-root.Mui-selected {
         background-color: ${(props) =>
-            props.theme.palette.background.default} !important;
+        props.theme.palette.background.default} !important;
         border: 1px solid ${(props) => props.theme.palette.text.primary} !important;
     }
 
@@ -69,7 +64,7 @@ const StyledPagination = styled(Pagination)<{
     }
 `
 
-const StorePage: FC<StorePageProps> = ({ ...props }) => {
+const StorePage = () => {
 
     const history = useHistory()
 
@@ -300,7 +295,6 @@ const StorePage: FC<StorePageProps> = ({ ...props }) => {
                     <StoreFilters
                         availableFilters={availableFilters}
                         openFilters={filterOpen}
-                        setFilterOpen={setFilterOpen}
                         filterFunction={getNfts}
                         selectedFilters={selectedCategories}
                         setSelectedFilters={setSelectedCategories}
