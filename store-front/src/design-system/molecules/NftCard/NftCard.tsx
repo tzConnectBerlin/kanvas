@@ -25,6 +25,7 @@ const StyledBioWrapper = styled.div<{ theme?: Theme }>`
     align-self: flex-start;
     width: 100%;
 `;
+
 const StyledImgWrapper = styled.div<{ theme?: Theme }>`
     position: relative;
     overflow: hidden;
@@ -84,7 +85,7 @@ const StyledImg = styled.img<{ theme?: Theme; willDrop: boolean }>`
     object-position: center center;
     object-fit: cover;
     height: 100%;
-    opacity: ${(props) => (props.willDrop ? '0.4' : '1')} !important;
+    opacity: ${(props) => (props.willDrop ? '0.4' : '1')} !important;  
 `;
 
 const AvailabilityWrapper = styled.div<{ inStock: boolean; willDrop: boolean }>`
