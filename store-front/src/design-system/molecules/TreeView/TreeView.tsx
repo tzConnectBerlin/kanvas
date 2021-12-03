@@ -19,29 +19,44 @@ interface TreeViewProps extends StyledTreeViewProps {
     collapsed: boolean;
     callNFTsEndpoint: (input: IParamsNFTs) => void;
 }
-
 const StyledDiv = styled.div<StyledTreeViewProps>`
     padding-left: 1.5rem;
     width: ${(props) => (props.open ? 'auto' : '0')};
-    height: 100%;
     transition: width 0.2s;
-`;
+    min-height: 1.5rem;
+
+    @media (min-width: 900px) {
+        min-height: 3rem;
+    }
+`
 
 const StyledLi = styled.li<StyledTreeViewProps>`
     cursor: pointer;
     display: ${(props) => (props.open ? 'flex' : 'none')};
     transition: width 0.2s;
     align-items: center;
-
-    height: 3rem;
     transition: width 0.2s, height 0.2s;
-`;
+    min-height: 1.5rem;
+
+    @media (min-width: 900px) {
+        min-height: 3rem;
+    }
+`
 
 const StyledCheckBox = styled(Checkbox)<{ theme?: Theme }>`
+    @media (max-width: 900px) {
+        padding: .5rem;
+
+        &:lastchild {
+            padding: .5rem;
+        }
+    }
+    
     &.Mui-checked {
         color: ${(props) => props.theme.palette.text.primary} !important;
     }
-`;
+`
+
 
 interface recurseRes {
     selectLeafs: number[];

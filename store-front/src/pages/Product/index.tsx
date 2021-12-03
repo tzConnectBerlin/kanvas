@@ -30,6 +30,17 @@ const StyledStack = styled(Stack)`
     align-items: center;
     margin-bottom: 4rem;
 `;
+const StyledCardMedia = styled(CardMedia)<{ component?: string; alt: string }>`
+    @media (min-width: 900px) {
+        width: 50%;
+        height: 50rem;
+    }
+    
+    @media (min-width: 1440px) {
+        width: 1000%;
+        height: auto;
+    }
+`;
 
 interface IProductParam {
     id: string;
@@ -133,7 +144,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             }}
                         />
                     ) : (
-                        <CardMedia
+                        <StyledCardMedia
                             component="img"
                             image={nftResponse.data?.dataUri}
                             alt="random"
