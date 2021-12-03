@@ -85,11 +85,15 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
         history.push(pathname);
     };
 
+    // useEffect(() => {
+
+    // }, [])
+
     useEffect(() => {
         if (nftResponse.data) {
             setLaunchTime(
                 new Date(nftResponse.data.launchAt * 1000).getTime() -
-                    new Date().getTime(),
+                new Date().getTime(),
             );
         }
         if (nftResponse.error) {
@@ -101,7 +105,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
             setTimeout(() => {
                 setLaunchTime(
                     new Date(nftResponse.data.launchAt! * 1000).getTime() -
-                        new Date().getTime(),
+                    new Date().getTime(),
                 );
             }, 1000);
         }
@@ -119,9 +123,14 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                 >
                     {nftResponse.loading ? (
                         <Skeleton
-                            height="40rem"
-                            width="40rem"
-                            sx={{ transform: 'none' }}
+                            height="75vh"
+                            width="40vw"
+                            sx={{
+                                transform: 'none',
+                                minHeight: 400,
+                                maxHeight: 1000,
+                                maxWidth: 1000,
+                            }}
                         />
                     ) : (
                         <CardMedia
@@ -218,7 +227,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             sx={{ pt: 4 }}
                         >
                             {nftResponse.loading &&
-                            (!launchTime || launchTime < 0)
+                                (!launchTime || launchTime < 0)
                                 ? undefined
                                 : t('product.description.part_3')}
                         </Typography>
@@ -263,8 +272,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             {nftResponse.loading
                                 ? undefined
                                 : nftResponse.data?.editionsAvailable +
-                                  '/' +
-                                  nftResponse.data?.editionsSize}
+                                '/' +
+                                nftResponse.data?.editionsSize}
                         </Typography>
 
                         <Typography
@@ -341,12 +350,12 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 launchTime! > 0
                                     ? 'Not dropped yet'
                                     : props.nftsInCart.filter(
-                                          (nft) =>
-                                              Number(nft.id) ===
-                                              nftResponse.data?.id,
-                                      ).length > 0
-                                    ? 'Already in cart'
-                                    : t('product.button_1')
+                                        (nft) =>
+                                            Number(nft.id) ===
+                                            nftResponse.data?.id,
+                                    ).length > 0
+                                        ? 'Already in cart'
+                                        : t('product.button_1')
                             }
                             disabled={
                                 nftResponse.loading ||
@@ -355,7 +364,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                         Number(nft.id) === nftResponse.data?.id,
                                 ).length > 0 ||
                                 Number(nftResponse.data?.editionsAvailable) ===
-                                    0 ||
+                                0 ||
                                 launchTime! > 0
                             }
                         />

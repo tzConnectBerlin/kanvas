@@ -4,7 +4,7 @@ import Typography from '../../atoms/Typography';
 import TreeView from '../../molecules/TreeView/TreeView';
 
 import { Checkbox, Stack, Theme } from '@mui/material';
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import PriceFilter from '../../molecules/PriceFilter';
 
 interface FilterProps {
@@ -93,7 +93,7 @@ const StyledLi = styled.li<StyledStoreFiltersProps>`
     height: auto;
 `;
 
-const StyledCheckBox = styled(Checkbox)<{ theme?: Theme }>`
+const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`
     &.Mui-checked {
         color: ${(props) => props.theme.palette.text.primary} !important;
     }
@@ -105,6 +105,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
     ...props
 }) => {
     const [activeRef, setActiveRef] = useState<string[]>([]);
+    const [availabilityChange, setAvailabilityChange] = useState<boolean>(false)
 
     const handleListItemClick = (concernedRef: string) => {
         if (activeRef.indexOf(concernedRef) !== -1) {
@@ -129,9 +130,15 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                 ),
             );
         }
-
-        callNFTsEndpoint(true);
+        setAvailabilityChange(true)
     };
+
+    useEffect(() => {
+        if (availabilityChange) {
+            setAvailabilityChange(false);
+            callNFTsEndpoint(true);
+        }
+    }, [availabilityChange])
 
     return (
         <StyledUl openFilters={props.openFilters}>
