@@ -1,3 +1,5 @@
+import { ICategory } from "./category";
+
 export interface IArtwork {
     title: string
     url: string
@@ -7,6 +9,7 @@ export interface INft {
     id: number
     name: string
     artistName?: string
+    description?: string
     ipfsHash: string
     dataUri: string
     price: number
@@ -14,4 +17,5 @@ export interface INft {
     startDate?: string
     editionsAvailable?: string
     launchAt: number
+    categories?: ICategory[]
 }

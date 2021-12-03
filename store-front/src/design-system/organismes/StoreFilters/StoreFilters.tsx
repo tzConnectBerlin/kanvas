@@ -55,7 +55,7 @@ interface StyledStoreFiltersProps {
 }
 
 interface StoreFiltersProps extends StyledStoreFiltersProps {
-    selectedFilters: number[]
+    selectedFilters?: number[]
     setSelectedFilters: Function
     availableFilters: any[]
     filterFunction: Function
@@ -68,6 +68,7 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
     setAvailabilityFilter: (input: string[]) => void
     triggerPriceFilter: () => void
     setFilterSliding: (input: boolean) => void
+    callNFTsEndpoint: (input: boolean) => void
 }
 
 const StyledUl = styled.ul<StyledStoreFiltersProps>`
@@ -99,7 +100,7 @@ const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`
     }
 `
 
-export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
+export const StoreFilters: FC<StoreFiltersProps> = ({ callNFTsEndpoint, children, ...props }) => {
     const [activeRef, setActiveRef] = useState<string[]>([])
 
     const handleListItemClick = (concernedRef: string) => {
@@ -110,6 +111,16 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
         } else {
             setActiveRef([...activeRef, concernedRef])
         }
+    }
+
+    const handleChangeAvailabilityFilter = (availabilityParam: string) => {
+        if (props.availabilityFilter.indexOf(availabilityParam) === -1) {
+            props.setAvailabilityFilter([...props.availabilityFilter, availabilityParam])
+        } else {
+            props.setAvailabilityFilter(props.availabilityFilter.filter(param => param !== availabilityParam))
+        }
+
+        callNFTsEndpoint(true)
     }
 
     return (
@@ -123,10 +134,10 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                     onClick={() => props.setSelectedFilters([])}
                     size="subtitle2"
                     weight={
-                        props.selectedFilters.length > 0 ? 'Medium' : 'Light'
+                        props.selectedFilters && props.selectedFilters.length > 0 ? 'Medium' : 'Light'
                     }
                     color={
-                        props.selectedFilters.length > 0
+                        props.selectedFilters && props.selectedFilters.length > 0
                             ? 'contrastText'
                             : '#C4C4C4'
                     }
@@ -142,7 +153,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                 <Filter
                     name="Categories"
                     collapsed={activeRef.indexOf('Categories') !== -1}
-                    active={props.selectedFilters.length > 0}
+                    active={props.selectedFilters ? props.selectedFilters.length > 0 : false}
                     setCollapsed={handleListItemClick}
                 />
                 <TreeView
@@ -151,6 +162,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                     nodes={props.availableFilters}
                     filterFunction={props.filterFunction}
                     selectedFilters={props.selectedFilters}
+                    callNFTsEndpoint={callNFTsEndpoint}
                     setSelectedFilters={props.setSelectedFilters}
                     collapsed={activeRef.indexOf('Categories') !== -1}
                 />
@@ -168,12 +180,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                         <Stack direction="row">
                             <StyledCheckBox
                                 checked={props.availabilityFilter.indexOf('onSale') !== -1 && props.availabilityFilter.length !== 0}
-                                onClick={() => {
-                                    props.availabilityFilter.indexOf('onSale') === -1 ?
-                                        props.setAvailabilityFilter([...props.availabilityFilter, 'onSale'])
-                                        :
-                                        props.setAvailabilityFilter(props.availabilityFilter.filter(param => param !== 'onSale'))}
-                                    }
+                                onClick={() => handleChangeAvailabilityFilter('onSale')}
                                 inputProps={{ 'aria-label': 'controlled' }}
                                 disableRipple
                             />
@@ -187,12 +194,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                         <Stack direction="row">
                             <StyledCheckBox
                                 checked={props.availabilityFilter.indexOf('upcoming') !== -1 && props.availabilityFilter.length !== 0}
-                                onClick={() => {
-                                    props.availabilityFilter.indexOf('upcoming') === -1 ?
-                                        props.setAvailabilityFilter([...props.availabilityFilter, 'upcoming'])
-                                        :
-                                        props.setAvailabilityFilter(props.availabilityFilter.filter(param => param !== 'upcoming'))}
-                                    }
+                                onClick={() => handleChangeAvailabilityFilter('upcoming')}
                                 inputProps={{ 'aria-label': 'controlled' }}
                                 disableRipple
                             />
@@ -206,14 +208,9 @@ export const StoreFilters: FC<StoreFiltersProps> = ({ children, ...props }) => {
                         <Stack direction="row">
                             <StyledCheckBox
                                 checked={props.availabilityFilter.indexOf('soldOut') !== -1 && props.availabilityFilter.length !== 0}
-                                onClick={() => {
-                                    props.availabilityFilter.indexOf('soldOut') === -1 ?
-                                        props.setAvailabilityFilter([...props.availabilityFilter, 'soldOut'])
-                                        :
-                                        props.setAvailabilityFilter(props.availabilityFilter.filter(param => param !== 'soldOut'))}
-                                    }
-                            inputProps={{ 'aria-label': 'controlled' }}
-                            disableRipple
+                                onClick={() => handleChangeAvailabilityFilter('soldOut')}
+                                inputProps={{ 'aria-label': 'controlled' }}
+                                disableRipple
                             />
                             <Typography
                                 size="h5"

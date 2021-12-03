@@ -13,10 +13,11 @@ interface StyledTreeViewProps {
 interface TreeViewProps extends StyledTreeViewProps {
     nodes?: any[]
     loading: boolean
-    selectedFilters: number[]
+    selectedFilters?: number[]
     setSelectedFilters: Function
     filterFunction: Function
     collapsed: boolean
+    callNFTsEndpoint: (input: boolean) => void
 }
 
 const StyledDiv = styled.div<StyledTreeViewProps>`
@@ -49,10 +50,12 @@ interface recurseRes {
 }
 
 const TreeView: FC<TreeViewProps> = ({
-    selectedFilters,
+    selectedFilters = [],
+    callNFTsEndpoint,
     setSelectedFilters,
     ...props
 }) => {
+    const [newCategorySelected, setNewCategorySelected] =useState<boolean>(false)
     const [highlightedParentsState, setHighlightedParents] = useState<number[]>(
         [],
     )
@@ -137,6 +140,7 @@ const TreeView: FC<TreeViewProps> = ({
                 ...highlightedParents,
             ])
         }
+        setNewCategorySelected(true)
     }
 
     const listDifference = (dadList: any[], babyList: any[]): any[] => {
@@ -173,6 +177,10 @@ const TreeView: FC<TreeViewProps> = ({
     useEffect(() => {
         if (selectedFilters.length === 0) {
             setHighlightedParents([])
+        }
+        if (newCategorySelected) {
+            callNFTsEndpoint(false)
+            setNewCategorySelected(false)
         }
     }, [selectedFilters])
 

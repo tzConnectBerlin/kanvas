@@ -20,6 +20,7 @@ interface SelectedProps extends MuiSelectProps {
     id: string
     selectedOption?: SortProps
     setSelectedOption: (input: SortProps) => void
+    callNFTsEndpoint: (input: boolean) => void
 }
 
 const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
@@ -80,8 +81,9 @@ const StyledInputLabel = styled(InputLabel)<{ theme?: Theme }>`
     }
 `
 
-export const CustomSelect: FC<SelectedProps> = ({ ...props }) => {
+export const CustomSelect: FC<SelectedProps> = ({ callNFTsEndpoint, ...props }) => {
     const handleChange = (event: SelectChangeEvent) => {
+        callNFTsEndpoint(true)
         props.setSelectedOption(JSON.parse(event.target.value))
     }
 

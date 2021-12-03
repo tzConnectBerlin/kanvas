@@ -9,9 +9,11 @@ import { CardMedia, Skeleton, Stack, Theme } from '@mui/material'
 import { CustomButton } from '../../design-system/atoms/Button'
 import { Typography } from '../../design-system/atoms/Typography'
 import { INft } from '../../interfaces/artwork'
-import { useParams } from 'react-router-dom'
+import { useHistory, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import TezosLogo from '../../design-system/atoms/TezosLogo/TezosLogo'
+import { ICategory } from '../../interfaces/category'
+import { NavigateNextTwoTone } from '@mui/icons-material'
 
 export interface ProductPageProps {
     theme?: Theme
@@ -36,6 +38,7 @@ interface IProductParam {
 export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
     const { t } = useTranslation(['translation'])
 
+    const history = useHistory()
     const { id } = useParams<IProductParam>()
 
     const [nftResponse, getNft] = useAxios({
@@ -77,6 +80,10 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
     }
 
     const [launchTime, setLaunchTime] = useState<number>()
+
+    const nagivateTo = (pathname: string) => {
+        history.push(pathname)
+    }
 
     useEffect(() => {
         if (nftResponse.data) {
@@ -195,7 +202,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     <Skeleton width="10rem" height="1rem" />
                                 </Stack>
                             ) : (
-                                t('common.lorenIpsum')
+                                nftResponse.data?.description ?? 'No description provided'
                             )}
                         </Typography>
                         <Typography
@@ -216,6 +223,58 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             {nftResponse.loading
                                 ? <Skeleton width="8rem" height="2rem" />
                                 : launchTime && launchTime > 0 ? `${new Date(launchTime).getDate()} days - ${new Date(launchTime).getHours()} : ${new Date(launchTime).getMinutes()} : ${new Date(launchTime).getSeconds()}` : 'NFT has been dropped'}
+                        </Typography>
+
+                        <Typography
+                            size="body1"
+                            weight="SemiBold"
+                            sx={{ pt: 4 }}
+                        >
+                            {nftResponse.loading
+                                ? undefined
+                                : t('product.description.editions')}
+                        </Typography>
+
+                        <Typography
+                            size="h5"
+                            weight="Light"
+                            sx={{ pt: 2, mb: 1 }}
+                        >
+                            {nftResponse.loading ? undefined : (
+                                nftResponse.data?.editionsAvailable + '/' + nftResponse.data?.editionsSize
+                            )}
+                        </Typography>
+
+                        <Typography
+                            size="body1"
+                            weight="SemiBold"
+                            sx={{ pt: 4 }}
+                        >
+                            {nftResponse.loading
+                                ? undefined
+                                : t('product.description.categories')}
+                        </Typography>
+
+                        <Typography
+                            size="h5"
+                            weight="Light"
+                            sx={{ pt: 2, mb: 1 }}
+                        >
+                            {nftResponse.loading ? undefined : (
+                                <>
+                                    {nftResponse.data?.categories.map((category: ICategory) =>
+                                        <Typography
+                                            size="body1"
+                                            weight="Medium"
+                                            type="link"
+                                            onClick={() => nagivateTo(`/store?categories=${category.id}`)}
+                                        >
+                                            {nftResponse.data?.categories.indexOf(category) === 0 ? category.name : `, ${category.name}`}
+                                        </Typography>
+                                    )}
+
+                                </>
+                            )}
                         </Typography>
 
                         <Typography

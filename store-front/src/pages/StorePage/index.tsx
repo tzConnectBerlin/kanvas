@@ -75,7 +75,7 @@ const StorePage = () => {
     const [selectedSort, setSelectedSort] = useState<{ orderBy: 'price' | 'name' | 'createdAt', orderDirection: 'asc' | 'desc' }>()
 
     // Categories state
-    const [selectedCategories, setSelectedCategories] = useState<any[]>([])
+    const [selectedCategories, setSelectedCategories] = useState<any[]>()
 
     // Availability state
     const [selectedAvailability, setSelectedAvailability] = useState<string[]>([])
@@ -98,6 +98,11 @@ const StorePage = () => {
         { manual: true },
     )
 
+    useEffect(() => {
+        getCategories()
+        getPageParams()
+        callNFTsEndpoint(true)
+    }, [])
 
     const callNFTsEndpoint = (handlePriceRange: boolean) => {
         setComfortLoader(true)
@@ -107,7 +112,7 @@ const StorePage = () => {
                 params: {
                     page: 1,
                     pageSize: 12,
-                    categories: selectedCategories.join(','),
+                    categories: selectedCategories?.join(',') ?? undefined,
                     orderBy: selectedSort?.orderBy ?? 'createdAt',
                     orderDirection: selectedSort?.orderDirection ?? 'desc',
                     priceAtLeast: handlePriceRange && priceFilterRange ? priceFilterRange[0] : undefined,
@@ -210,17 +215,16 @@ const StorePage = () => {
             deletePageParams('orderBy')
             deletePageParams('orderDirection')
         }
-
-        callNFTsEndpoint(true)
     }, [selectedSort])
 
     useEffect(() => {
-        if (selectedCategories.length)
-            setPageParams('categories', selectedCategories.join(','))
-        else
-            deletePageParams('categories')
+        if (selectedCategories) {
+            if (selectedCategories.length)
+                setPageParams('categories', selectedCategories.join(','))
+            else
+                deletePageParams('categories')
+        }
 
-        callNFTsEndpoint(false)
     }, [selectedCategories])
 
     useEffect(() => {
@@ -228,15 +232,7 @@ const StorePage = () => {
             setPageParams('availability', selectedAvailability.join(','))
         else
             deletePageParams('availability')
-
-        callNFTsEndpoint(true)
     }, [selectedAvailability])
-
-    useEffect(() => {
-        getCategories()
-        getPageParams()
-        callNFTsEndpoint(true)
-    }, [])
 
     const [availableFilters, setAvailableFilters] = useState<any>()
 
@@ -274,7 +270,7 @@ const StorePage = () => {
                         onClick={() => setFilterOpen(!filterOpen)}
                         aria-label="loading"
                         icon={<StyledListIcon />}
-                        label={`Filters ${selectedCategories.length > 0
+                        label={`Filters ${selectedCategories && selectedCategories.length > 0
                             ? `  - ${selectedCategories.length}`
                             : ''
                             }`}
@@ -287,6 +283,7 @@ const StorePage = () => {
                         id="Sort filter - store page"
                         selectedOption={selectedSort}
                         setSelectedOption={setSelectedSort}
+                        callNFTsEndpoint={callNFTsEndpoint}
                         disabled={nftsResponse.loading}
                     />
                 </Stack>
@@ -296,6 +293,7 @@ const StorePage = () => {
                         availableFilters={availableFilters}
                         openFilters={filterOpen}
                         filterFunction={getNfts}
+                        callNFTsEndpoint={callNFTsEndpoint}
                         selectedFilters={selectedCategories}
                         setSelectedFilters={setSelectedCategories}
                         priceFilterRange={priceFilterRange}
