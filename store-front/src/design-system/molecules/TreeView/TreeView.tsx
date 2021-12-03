@@ -51,11 +51,7 @@ const StyledCheckBox = styled(Checkbox)<{ theme?: Theme }>`
             padding: .5rem;
         }
     }
-
-    @media (max-width: 400px) {
-        padding: .2rem;
-    }
-
+    
     &.Mui-checked {
         color: ${(props) => props.theme.palette.text.primary} !important;
     }
