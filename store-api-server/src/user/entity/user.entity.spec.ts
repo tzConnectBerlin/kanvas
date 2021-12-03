@@ -1,5 +1,5 @@
 // import { UserEntity } from './user.entity'
 
 describe('UserEntity', () => {
-  it('satisfies the frameworks test runner', () => expect(true).toBe(true))
-})
+  it('satisfies the frameworks test runner', () => expect(true).toBe(true));
+});

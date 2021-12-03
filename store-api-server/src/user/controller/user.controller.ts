@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config();
 import {
   Session,
   HttpException,
@@ -13,23 +13,23 @@ import {
   Get,
   UseGuards,
   Logger,
-} from '@nestjs/common'
-import { FileInterceptor } from '@nestjs/platform-express'
-import { UserEntity } from '../entity/user.entity'
-import { UserService } from '../service/user.service'
-import { CurrentUser } from '../../decoraters/user.decorator'
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UserEntity } from '../entity/user.entity';
+import { UserService } from '../service/user.service';
+import { CurrentUser } from '../../decoraters/user.decorator';
 import {
   JwtAuthGuard,
   JwtFailableAuthGuard,
-} from '../../authentication/guards/jwt-auth.guard'
+} from '../../authentication/guards/jwt-auth.guard';
 import {
   PG_UNIQUE_VIOLATION_ERRCODE,
   PG_FOREIGN_KEY_VIOLATION_ERRCODE,
   PROFILE_PICTURE_MAX_BYTES,
-} from '../../constants'
+} from '../../constants';
 
 interface EditProfile {
-  userName?: string
+  userName?: string;
 }
 
 @Controller('users')
@@ -44,28 +44,28 @@ export class UserController {
   ) {
     const address =
       userAddress ||
-      (typeof user !== 'undefined' ? user.userAddress : undefined)
+      (typeof user !== 'undefined' ? user.userAddress : undefined);
     if (typeof address === 'undefined') {
       throw new HttpException(
         'Define userAddress parameter or access this endpoint logged in',
         HttpStatus.BAD_REQUEST,
-      )
+      );
     }
 
-    const profile_res = await this.userService.getProfile(address)
+    const profile_res = await this.userService.getProfile(address);
     if (!profile_res.ok) {
       if (typeof userAddress === 'undefined') {
         throw new HttpException(
           'Failed to find user associated to JWT',
           HttpStatus.INTERNAL_SERVER_ERROR,
-        )
+        );
       }
       throw new HttpException(
         'No user registered with requested userAddress',
         HttpStatus.BAD_REQUEST,
-      )
+      );
     }
-    return profile_res.val
+    return profile_res.val;
   }
 
   @Post('/profile/edit')
@@ -80,33 +80,37 @@ export class UserController {
     @Body() editFields: EditProfile,
     @UploadedFile() picture: any,
   ) {
-    console.log(editFields)
+    console.log(editFields);
     try {
-      await this.userService.edit(currentUser.id, editFields?.userName, picture)
+      await this.userService.edit(
+        currentUser.id,
+        editFields?.userName,
+        picture,
+      );
     } catch (err: any) {
       if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
         throw new HttpException(
           'This username is already taken',
           HttpStatus.BAD_REQUEST,
-        )
+        );
       }
 
-      Logger.warn(err)
+      Logger.warn(err);
       throw new HttpException(
         'Failed to edit profile',
         HttpStatus.INTERNAL_SERVER_ERROR,
-      )
+      );
     }
   }
 
   @Get('/profile/edit/check')
   @UseGuards(JwtAuthGuard)
   async checkAllowedEdit(@Query('userName') userName: string) {
-    const available = await this.userService.isNameAvailable(userName)
+    const available = await this.userService.isNameAvailable(userName);
     return {
       userName: userName,
       available: available,
-    }
+    };
   }
 
   @Post('cart/add/:nftId')
@@ -116,7 +120,7 @@ export class UserController {
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    const cartSession = await this.getCartSession(cookieSession, user)
+    const cartSession = await this.getCartSession(cookieSession, user);
     const addedRes = await this.userService
       .cartAdd(cartSession, nftId)
       .catch((err: any) => {
@@ -124,26 +128,26 @@ export class UserController {
           throw new HttpException(
             'This nft does not exist',
             HttpStatus.BAD_REQUEST,
-          )
+          );
         }
         if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
           throw new HttpException(
             'This nft is already in the cart',
             HttpStatus.BAD_REQUEST,
-          )
+          );
         }
 
         Logger.error(
           `Error on adding nft to cart. cartSession=${cartSession}, nftId=${nftId}, err: ${err}`,
-        )
+        );
         throw new HttpException(
           'Something went wrong',
           HttpStatus.INTERNAL_SERVER_ERROR,
-        )
-      })
+        );
+      });
 
     if (!addedRes.ok) {
-      throw new HttpException(addedRes.val, HttpStatus.BAD_REQUEST)
+      throw new HttpException(addedRes.val, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -154,16 +158,16 @@ export class UserController {
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    const cartSession = await this.getCartSession(cookieSession, user)
-    const removed = await this.userService.cartRemove(cartSession, nftId)
+    const cartSession = await this.getCartSession(cookieSession, user);
+    const removed = await this.userService.cartRemove(cartSession, nftId);
     if (!removed) {
       throw new HttpException(
         'This nft was not in the cart',
         HttpStatus.BAD_REQUEST,
-      )
+      );
     }
     // return 204 (successful delete, returning nothing)
-    throw new HttpException('', HttpStatus.NO_CONTENT)
+    throw new HttpException('', HttpStatus.NO_CONTENT);
   }
 
   @Post('cart/list')
@@ -172,34 +176,37 @@ export class UserController {
     @Session() cookieSession: any,
     @CurrentUser() user: UserEntity | undefined,
   ) {
-    const cartSession = await this.getCartSession(cookieSession, user)
-    return await this.userService.cartList(cartSession)
+    const cartSession = await this.getCartSession(cookieSession, user);
+    return await this.userService.cartList(cartSession);
   }
 
   @Post('cart/checkout')
   @UseGuards(JwtAuthGuard)
   async cartCheckout(@CurrentUser() user: UserEntity) {
-    const cartSessionRes = await this.userService.getUserCartSession(user.id)
+    const cartSessionRes = await this.userService.getUserCartSession(user.id);
     if (!cartSessionRes.ok) {
       throw new HttpException(
         'Something went wrong',
         HttpStatus.INTERNAL_SERVER_ERROR,
-      )
+      );
     }
-    const cartSession: string | undefined = cartSessionRes.val
+    const cartSession: string | undefined = cartSessionRes.val;
     if (typeof cartSession === 'undefined') {
-      throw new HttpException('User has no active cart', HttpStatus.BAD_REQUEST)
+      throw new HttpException(
+        'User has no active cart',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
-    const success = await this.userService.cartCheckout(user.id, cartSession)
+    const success = await this.userService.cartCheckout(user.id, cartSession);
     if (!success) {
       throw new HttpException(
         'Empty cart cannot be checked out',
         HttpStatus.BAD_REQUEST,
-      )
+      );
     }
     // return 204 (applied, returning nothing)
-    throw new HttpException('', HttpStatus.NO_CONTENT)
+    throw new HttpException('', HttpStatus.NO_CONTENT);
   }
 
   async getCartSession(
@@ -207,11 +214,11 @@ export class UserController {
     user: UserEntity | undefined,
   ): Promise<string> {
     if (typeof user === 'undefined') {
-      return cookieSession.uuid
+      return cookieSession.uuid;
     }
     return await this.userService.ensureUserCartSession(
       user.id,
       cookieSession.uuid,
-    )
+    );
   }
 }

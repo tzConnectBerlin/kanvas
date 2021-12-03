@@ -4,20 +4,20 @@ import {
   Logger,
   Injectable,
   Inject,
-} from '@nestjs/common'
+} from '@nestjs/common';
 import {
   NftEntity,
   NftEntityPage,
   SearchResult,
-} from 'src/nft/entity/nft.entity'
-import { CategoryEntity } from 'src/category/entity/category.entity'
-import { FilterParams, PaginationParams } from '../params'
+} from 'src/nft/entity/nft.entity';
+import { CategoryEntity } from 'src/category/entity/category.entity';
+import { FilterParams, PaginationParams } from '../params';
 import {
   PG_CONNECTION,
   SEARCH_MAX_NFTS,
   SEARCH_MAX_CATEGORIES,
   SEARCH_SIMILARITY_LIMIT,
-} from '../../constants'
+} from '../../constants';
 
 @Injectable()
 export class NftService {
@@ -26,7 +26,7 @@ export class NftService {
   async create(_nft: NftEntity): Promise<NftEntity> {
     throw new Error(
       "Not yet implemented - let's implement it when we need it rather than have a big generated code blob",
-    )
+    );
   }
 
   async search(str: string): Promise<SearchResult> {
@@ -48,7 +48,7 @@ ORDER BY similarity DESC, view_count DESC
 LIMIT $3
     `,
       [str, SEARCH_SIMILARITY_LIMIT, SEARCH_MAX_NFTS],
-    )
+    );
 
     const categoryIds = await this.conn.query(
       `
@@ -69,13 +69,13 @@ ORDER BY similarity DESC, id
 LIMIT $3
     `,
       [str, SEARCH_SIMILARITY_LIMIT, SEARCH_MAX_CATEGORIES],
-    )
+    );
 
     const nfts = await this.findByIds(
       nftIds.rows.map((row: any) => row.id),
       'nft_id',
       'asc',
-    )
+    );
 
     return {
       nfts: nftIds.rows
@@ -86,7 +86,7 @@ LIMIT $3
         name: row.name,
         description: row.description,
       })),
-    }
+    };
   }
 
   async findNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {
@@ -96,26 +96,26 @@ LIMIT $3
       ['name', 'nft_name'],
       ['price', 'price'],
       ['views', 'view_count'],
-    ])
+    ]);
 
-    const orderBy = orderByMapping.get(params.orderBy)
+    const orderBy = orderByMapping.get(params.orderBy);
     if (typeof orderBy === 'undefined') {
       Logger.error(
         'Error in nft.filter(), orderBy unmapped, request.orderBy: ' +
           params.orderBy,
-      )
+      );
       throw new HttpException(
         'Something went wrong',
         HttpStatus.INTERNAL_SERVER_ERROR,
-      )
+      );
     }
 
-    const offset = (params.page - 1) * params.pageSize
-    const limit = params.pageSize
+    const offset = (params.page - 1) * params.pageSize;
+    const limit = params.pageSize;
 
-    let untilNft: string | undefined = undefined
+    let untilNft: string | undefined = undefined;
     if (typeof params.firstRequestAt === 'number') {
-      untilNft = new Date(params.firstRequestAt * 1000).toISOString()
+      untilNft = new Date(params.firstRequestAt * 1000).toISOString();
     }
 
     try {
@@ -135,13 +135,13 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
           limit,
           untilNft,
         ],
-      )
+      );
       const priceBounds = await this.conn.query(
         `
 SELECT min_price, max_price
 FROM price_bounds($1, $2, $3)`,
         [params.userAddress, params.categories, untilNft],
-      )
+      );
 
       const res = <NftEntityPage>{
         currentPage: params.page,
@@ -150,39 +150,39 @@ FROM price_bounds($1, $2, $3)`,
         nfts: [],
         lowerPriceBound: Number(priceBounds.rows[0].min_price),
         upperPriceBound: Number(priceBounds.rows[0].max_price),
-      }
+      };
       if (nftIds.rows.length === 0) {
-        return res
+        return res;
       }
 
       res.numberOfPages = Math.ceil(
         nftIds.rows[0].total_nft_count / params.pageSize,
-      )
+      );
       res.nfts = await this.findByIds(
         nftIds.rows.map((row: any) => row.nft_id),
         orderBy,
         params.orderDirection,
-      )
-      return res
+      );
+      return res;
     } catch (err) {
-      Logger.error('Error on nft filtered query, err: ' + err)
+      Logger.error('Error on nft filtered query, err: ' + err);
       throw new HttpException(
         'Something went wrong',
         HttpStatus.INTERNAL_SERVER_ERROR,
-      )
+      );
     }
   }
 
   async byId(id: number): Promise<NftEntity> {
-    const nfts = await this.findByIds([id], 'nft_id', 'asc')
+    const nfts = await this.findByIds([id], 'nft_id', 'asc');
     if (nfts.length === 0) {
       throw new HttpException(
         'NFT with the requested id does not exist',
         HttpStatus.BAD_REQUEST,
-      )
+      );
     }
-    this.incrementNftViewCount(id)
-    return nfts[0]
+    this.incrementNftViewCount(id);
+    return nfts[0];
   }
 
   async incrementNftViewCount(id: number) {
@@ -193,7 +193,7 @@ SET view_count = view_count + 1
 WHERE id = $1
 `,
       [id],
-    )
+    );
   }
 
   async findByIds(
@@ -221,7 +221,7 @@ SELECT
   launch_at
 FROM nfts_by_id($1, $2, $3)`,
         [nftIds, orderBy, orderDirection],
-      )
+      );
       return nftsQryRes.rows.map((nftRow: any) => {
         return <NftEntity>{
           id: nftRow['nft_id'],
@@ -242,16 +242,16 @@ FROM nfts_by_id($1, $2, $3)`,
               id: Number(categoryRow[0]),
               name: categoryRow[1],
               description: categoryRow[2],
-            }
+            };
           }),
-        }
-      })
+        };
+      });
     } catch (err) {
-      Logger.error('Error on find nfts by ids query: ' + err)
+      Logger.error('Error on find nfts by ids query: ' + err);
       throw new HttpException(
         'Something went wrong',
         HttpStatus.INTERNAL_SERVER_ERROR,
-      )
+      );
     }
   }
 }
