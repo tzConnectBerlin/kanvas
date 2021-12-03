@@ -8,6 +8,7 @@ import { Skeleton, Stack, Theme } from '@mui/material';
 import { INft } from '../../../interfaces/artwork';
 import Typography from '../../atoms/Typography';
 import CustomCircularProgress from '../../atoms/CircularProgress';
+import { useHistory } from 'react-router-dom';
 
 interface ShoppingCartItemProps {
     loading: boolean;
@@ -30,13 +31,6 @@ const StyledDiv = styled.div<{ theme?: Theme }>`
     :hover {
         scale: 1.15;
     }
-    /* border: 1px solid ${(props) => props.theme.palette.text.primary};
-
-
-    :active {
-        outline: 1px solid #c4c4c4;
-        transition: outline 0.1s;
-    } */
 `;
 
 const StyledClearIcon = styled(ClearIcon)<{ theme?: Theme }>`
@@ -47,6 +41,12 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
     nft,
     ...props
 }) => {
+    const history = useHistory()
+
+    const navigateTo = (pathname: string) => {
+        history.push({pathname: pathname})
+    }
+
     return props.loading ? (
         <Stack
             direction="row"
@@ -99,7 +99,6 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
             </Avatar>
             <Stack
                 direction="column"
-                spacing={1}
                 sx={{ width: 'auto', minWidth: '60%' }}
             >
                 <Typography
@@ -107,6 +106,8 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     weight="Medium"
                     display="initial !important"
                     noWrap
+                    type="link"
+                    onClick={() => navigateTo(`/product/${nft!.id}`)}
                     sx={{ cursor: 'pointer', width: '85%' }}
                 >
                     {nft!.name}

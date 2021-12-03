@@ -28,7 +28,7 @@ const StyledStack = styled(Stack)`
     width: 100vw;
     height: 100%;
 `;
-const StyledContentStack = styled(Stack)<ParamTypes>`
+const StyledContentStack = styled(Stack) <ParamTypes>`
     flex-direction: row;
     width: 100%;
 
@@ -36,12 +36,12 @@ const StyledContentStack = styled(Stack)<ParamTypes>`
         flex-direction: column;
     }
 `;
-const StyledListIcon = styled(ListIcon)<{ theme?: Theme }>`
+const StyledListIcon = styled(ListIcon) <{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.text.primary};
     padding-right: 1rem;
 `;
 
-const StyledPagination = styled(Pagination)<{
+const StyledPagination = styled(Pagination) <{
     theme?: Theme;
     display: boolean;
 }>`
@@ -55,7 +55,7 @@ const StyledPagination = styled(Pagination)<{
 
     .MuiPaginationItem-root.Mui-selected {
         background-color: ${(props) =>
-            props.theme.palette.background.default} !important;
+        props.theme.palette.background.default} !important;
         border: 1px solid ${(props) => props.theme.palette.text.primary} !important;
     }
 
@@ -108,6 +108,7 @@ const StorePage = () => {
 
     const [filterSliding, setFilterSliding] = useState<boolean>(false);
     const [comfortLoader, setComfortLoader] = useState<boolean>(false);
+    const [onInit, setOnInit] = useState(true)
 
     // Api calls for the categories and the nfts
     const [nftsResponse, getNfts] = useAxios(
@@ -160,7 +161,7 @@ const StorePage = () => {
                 },
             });
             setComfortLoader(false);
-        }, 300);
+        }, 400);
 
         return () => {
             clearTimeout(comfortTrigger);
@@ -285,25 +286,31 @@ const StorePage = () => {
     };
 
     useEffect(() => {
-        if (selectedSort) {
-            setPageParams('orderBy', selectedSort.orderBy);
-            setPageParams('orderDirection', selectedSort.orderDirection);
-        } else {
-            deletePageParams('orderBy');
-            deletePageParams('orderDirection');
+        if (!onInit) {
+            if (selectedSort) {
+                setPageParams('orderBy', selectedSort.orderBy);
+                setPageParams('orderDirection', selectedSort.orderDirection);
+            } else {
+                deletePageParams('orderBy');
+                deletePageParams('orderDirection');
+            }
         }
     }, [selectedSort]);
 
     useEffect(() => {
-        if (selectedCategories.length)
-            setPageParams('categories', selectedCategories.join(','));
-        else deletePageParams('categories');
+        if (!onInit) {
+            if (selectedCategories.length)
+                setPageParams('categories', selectedCategories.join(','));
+            else deletePageParams('categories');
+        }
     }, [selectedCategories]);
 
     useEffect(() => {
-        if (selectedAvailability.length)
-            setPageParams('availability', selectedAvailability.join(','));
-        else deletePageParams('availability');
+        if (!onInit) {
+            if (selectedAvailability.length)
+                setPageParams('availability', selectedAvailability.join(','));
+            else deletePageParams('availability');
+        }
     }, [selectedAvailability]);
 
     const [availableFilters, setAvailableFilters] = useState<any>();
@@ -317,6 +324,7 @@ const StorePage = () => {
                     children: categoriesResponse.data,
                 },
             ]);
+            setOnInit(false);
         }
     }, [categoriesResponse.data]);
 
@@ -342,11 +350,10 @@ const StorePage = () => {
                         onClick={() => setFilterOpen(!filterOpen)}
                         aria-label="loading"
                         icon={<StyledListIcon />}
-                        label={`Filters ${
-                            selectedCategories.length > 0
-                                ? `  - ${selectedCategories.length}`
-                                : ''
-                        }`}
+                        label={`Filters ${selectedCategories.length > 0
+                            ? `  - ${selectedCategories.length}`
+                            : ''
+                            }`}
                         disabled={nftsResponse.loading}
                     />
 

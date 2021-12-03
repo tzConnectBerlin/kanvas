@@ -26,7 +26,6 @@ export interface NftGridProps {
 const StyledGrid = styled(Grid)`
     flex-direction: row;
     flex-wrap: wrap;
-    transition: all 0.2s;
     width: 100%;
     max-width: none !important;
     flex-basis: 102% !important;
