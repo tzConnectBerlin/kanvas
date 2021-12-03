@@ -2,7 +2,7 @@
 
 set -ex
 
-cd $(git rev-parse --show-toplevel)/store-api-server
+cd $(git rev-parse --show-toplevel)/admin-api-server
 
 [ -z $DB_PORT ] && export DB_PORT=5433
 [ -z $DB_PASSWORD ] && export DB_PASSWORD=dev_password
