@@ -35,6 +35,11 @@ const StyledCardMedia = styled(CardMedia)<{ component?: string; alt: string }>`
         width: 50%;
         height: 50rem;
     }
+    
+    @media (min-width: 1440px) {
+        width: 1000%;
+        height: auto;
+    }
 `;
 
 interface IProductParam {

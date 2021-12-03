@@ -25,8 +25,8 @@ const Search = styled.div<{ theme?: Theme }>`
     background: ${(props) => props.theme.button.background};
     transition: width 0.3s;
 
-    width: 25rem;
-    min-width: 25rem;
+    width: 23rem;
+    min-width: 23rem;
     height: 2.5rem !important;
     transition: width 0.3s;
 
