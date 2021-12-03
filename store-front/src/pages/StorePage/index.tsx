@@ -7,7 +7,13 @@ import PageWrapper from '../../design-system/commons/PageWrapper';
 import StoreFilters from '../../design-system/organismes/StoreFilters';
 
 import { useEffect, useState } from 'react';
-import { Stack, Theme, Pagination } from '@mui/material';
+import {
+    Stack,
+    Theme,
+    Pagination,
+    useMediaQuery,
+    useTheme,
+} from '@mui/material';
 import { CustomButton } from '../../design-system/atoms/Button';
 import { CustomSelect } from '../../design-system/atoms/Select';
 import { Typography } from '../../design-system/atoms/Typography';
@@ -21,8 +27,8 @@ const StyledStack = styled(Stack)`
     max-width: 100rem;
     width: 100vw;
     height: 100%;
-`
-const StyledContentStack = styled(Stack) <ParamTypes>`
+`;
+const StyledContentStack = styled(Stack)<ParamTypes>`
     flex-direction: row;
     width: 100%;
 
@@ -71,6 +77,9 @@ export interface IParamsNFTs {
 }
 
 const StorePage = () => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
     const history = useHistory();
 
     // Pagination state
@@ -96,6 +105,7 @@ const StorePage = () => {
 
     // Conditionnal states
     const [filterOpen, setFilterOpen] = useState<boolean>(true);
+
     const [filterSliding, setFilterSliding] = useState<boolean>(false);
     const [comfortLoader, setComfortLoader] = useState<boolean>(false);
 
@@ -354,7 +364,7 @@ const StorePage = () => {
                 <StyledContentStack>
                     <StoreFilters
                         availableFilters={availableFilters}
-                        openFilters={filterOpen}
+                        openFilters={isMobile ? !filterOpen : filterOpen}
                         callNFTsEndpoint={callNFTsEndpoint}
                         filterFunction={getNfts}
                         setFilterOpen={setFilterOpen}

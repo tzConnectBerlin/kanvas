@@ -244,7 +244,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                     <>
                         <BackButton
                             fill="#fff"
-                            onClick={() => props.setFilterOpen(false)}
+                            onClick={() => props.setFilterOpen(true)}
                             sx={{
                                 cursor: 'pointer',
                                 marginBottom: '0.7rem',
