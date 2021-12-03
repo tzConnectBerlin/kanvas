@@ -15,6 +15,7 @@ import {
     Skeleton,
     Stack,
     Theme,
+    useMediaQuery,
 } from '@mui/material'
 
 interface QuickSearResultProps {
@@ -34,6 +35,12 @@ interface BoxProps extends MBoxProps {
 
 const StyledBox = styled(Box)<BoxProps>`
     display: ${(props) => (props.open ? 'flex' : 'none')};
+    max-width: 35rem;
+    
+    @media (max-width: 874px) {
+        right: 5%;
+        max-width: 100vw;
+    }
 `
 
 const StyledPaper = styled(Paper)<{ theme?: Theme }>`
@@ -47,8 +54,19 @@ const StyledPaper = styled(Paper)<{ theme?: Theme }>`
     }
 
     transition: height 0.3s;
-    background-color: ${(props) => props.theme.palette.background.paper};
+    margin-left: -2%;
     background-image: none;
+
+    @media (max-width: 874px) {
+        margin-left: initial;
+
+        outline: none;
+        top: 5rem;
+
+        :hover {
+            outline: none;
+        }
+    }
 `
 
 const StyledHeaderStack = styled(Stack)`
@@ -104,7 +122,6 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                     m: 1,
                     transition: 'height 0.3s',
                     width: '90vw',
-                    maxWidth: '35rem',
                     height: 'auto',
                     marginTop: '1.2em',
                     margin: 0,
@@ -186,8 +203,12 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                         <Typography
                                             size="h4"
                                             weight="Medium"
-                                            sx={{ cursor: 'pointer', width: '80%' }}
-                                            display="initial !important" noWrap
+                                            sx={{
+                                                cursor: 'pointer',
+                                                width: '80%',
+                                            }}
+                                            display="initial !important"
+                                            noWrap
                                         >
                                             {nft?.name}
                                         </Typography>
