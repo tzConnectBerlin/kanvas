@@ -1,1 +1,1 @@
-export { EmptySearchResult } from './EmptySearchResult'
+export { EmptySearchResult } from './EmptySearchResult';

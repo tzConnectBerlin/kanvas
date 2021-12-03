@@ -1,2 +1,2 @@
-export { FlexSpacer as default } from './FlexSpacer'
-export type { FlexSpacerProps } from './FlexSpacer'
+export { FlexSpacer as default } from './FlexSpacer';
+export type { FlexSpacerProps } from './FlexSpacer';

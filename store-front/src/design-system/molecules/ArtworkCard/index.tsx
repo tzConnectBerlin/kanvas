@@ -1,1 +1,1 @@
-export { ArtworkCard as default } from './ArtworkCard'
+export { ArtworkCard as default } from './ArtworkCard';

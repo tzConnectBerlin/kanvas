@@ -1,11 +1,11 @@
-import styled from '@emotion/styled'
-import { Theme } from '@mui/material'
+import styled from '@emotion/styled';
+import { Theme } from '@mui/material';
 
-import { FC } from 'react'
-import { Link } from 'react-router-dom'
+import { FC } from 'react';
+import { Link } from 'react-router-dom';
 
 interface StickyLogoProps {
-    display?: boolean
+    display?: boolean;
 }
 
 const ImgStyled = styled.img<{ theme?: Theme }>`
@@ -17,7 +17,7 @@ const ImgStyled = styled.img<{ theme?: Theme }>`
         height: 2.8rem;
         transition: height 0.2s;
     }
-`
+`;
 
 const LinkStyled = styled(Link)<StickyLogoProps>`
     @media (max-width: 875px) {
@@ -28,12 +28,12 @@ const LinkStyled = styled(Link)<StickyLogoProps>`
     position: absolute;
 
     align-items: center;
-`
+`;
 
 export const StickyLogo: FC<StickyLogoProps> = ({ ...props }) => {
     return (
         <LinkStyled to="/" display={props.display}>
             <ImgStyled alt="Sticky Logo" src={'/img/Logo.svg'} />
         </LinkStyled>
-    )
-}
+    );
+};

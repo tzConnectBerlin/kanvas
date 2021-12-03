@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useState } from 'react';
 import {
     ButtonBase,
     Card,
@@ -11,40 +11,40 @@ import {
     Theme,
     useMediaQuery,
     useTheme,
-} from '@mui/material'
-import FlexSpacer from '../../../design-system/atoms/FlexSpacer'
-import Slider from '../../../design-system/organismes/Slider'
-import { CustomButton } from '../../atoms/Button'
-import { Typography } from '../../../design-system/atoms/Typography'
-import { useTranslation } from 'react-i18next'
-import { useParams, useHistory } from 'react-router-dom'
-import { INft } from '../../../interfaces/artwork'
+} from '@mui/material';
+import FlexSpacer from '../../../design-system/atoms/FlexSpacer';
+import Slider from '../../../design-system/organismes/Slider';
+import { CustomButton } from '../../atoms/Button';
+import { Typography } from '../../../design-system/atoms/Typography';
+import { useTranslation } from 'react-i18next';
+import { useParams, useHistory } from 'react-router-dom';
+import { INft } from '../../../interfaces/artwork';
 
 export interface HeroProps {
-    loading?: boolean
-    selectedTheme?: string
-    theme?: Theme
-    sliderLoading?: boolean
-    sliderNfts: INft[]
+    loading?: boolean;
+    selectedTheme?: string;
+    theme?: Theme;
+    sliderLoading?: boolean;
+    sliderNfts: INft[];
 }
 
 interface IProductParam {
-    id: string
+    id: string;
 }
 
 export const Hero: FC<HeroProps> = ({ ...props }) => {
-    const { t } = useTranslation(['translation'])
-    const theme = useTheme()
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+    const { t } = useTranslation(['translation']);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-    const history = useHistory()
+    const history = useHistory();
     const navigateTo = (componentURL: string) => {
-        history.push(`/${componentURL}`)
-    }
+        history.push(`/${componentURL}`);
+    };
 
-    const [imgToVideoToggler, setImgToVideoToggler] = useState(true)
+    const [imgToVideoToggler, setImgToVideoToggler] = useState(true);
 
-    const { id } = useParams<IProductParam>()
+    const { id } = useParams<IProductParam>();
     // const [nftResponse, getNft] = useAxios(DART_REDIRECT_URI + `/nfts/${id}`)
 
     // useEffect(() => {
@@ -134,5 +134,5 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
                 }
             </Grid>
         </Grid>
-    )
-}
+    );
+};

@@ -1,27 +1,27 @@
-import styled from '@emotion/styled'
-import FlexSpacer from '../../design-system/atoms/FlexSpacer'
-import PageWrapper from '../../design-system/commons/PageWrapper'
-import { FC } from 'react'
-import { Animated } from 'react-animated-css'
-import { Stack, Theme } from '@mui/material'
-import { useTranslation } from 'react-i18next'
-import { Typography } from '../../design-system/atoms/Typography'
-import NftGrid from '../../design-system/organismes/NftGrid'
-import Hero from '../../design-system/organismes/Hero'
-import mockNft from '../../_mocks/mockNft'
-import { KukaiEmbed } from 'kukai-embed'
-import { BeaconWallet } from '@taquito/beacon-wallet'
-import { CustomButton } from '../../design-system/atoms/Button'
-import useAxios from 'axios-hooks'
+import styled from '@emotion/styled';
+import FlexSpacer from '../../design-system/atoms/FlexSpacer';
+import PageWrapper from '../../design-system/commons/PageWrapper';
+import { FC } from 'react';
+import { Animated } from 'react-animated-css';
+import { Stack, Theme } from '@mui/material';
+import { useTranslation } from 'react-i18next';
+import { Typography } from '../../design-system/atoms/Typography';
+import NftGrid from '../../design-system/organismes/NftGrid';
+import Hero from '../../design-system/organismes/Hero';
+import mockNft from '../../_mocks/mockNft';
+import { KukaiEmbed } from 'kukai-embed';
+import { BeaconWallet } from '@taquito/beacon-wallet';
+import { CustomButton } from '../../design-system/atoms/Button';
+import useAxios from 'axios-hooks';
 
-import { useHistory } from 'react-router'
+import { useHistory } from 'react-router';
 
 interface HomePageProps {
-    theme?: Theme
-    handleCloseModal?: Function
-    beaconWallet?: BeaconWallet
-    embedKukai?: KukaiEmbed
-    setSignedPayload?: Function
+    theme?: Theme;
+    handleCloseModal?: Function;
+    beaconWallet?: BeaconWallet;
+    embedKukai?: KukaiEmbed;
+    setSignedPayload?: Function;
 }
 const StyledStack = styled(Stack)`
     overflow: hidden;
@@ -35,7 +35,7 @@ const StyledStack = styled(Stack)`
     @media (max-width: 650px) {
         padding: 0 1.5rem 1rem;
     }
-`
+`;
 
 const LinkStyled = styled(CustomButton)<{ theme?: Theme }>`
     outline: none;
@@ -55,16 +55,16 @@ const LinkStyled = styled(CustomButton)<{ theme?: Theme }>`
         font-family: 'Poppins SemiBold';
         font-weight: 400;
     }
-`
+`;
 
 const StyledAnimated = styled(Animated)`
     width: 100%;
-`
+`;
 
 const HomePage: FC<HomePageProps> = () => {
-    const { t } = useTranslation(['translation'])
+    const { t } = useTranslation(['translation']);
 
-    const history = useHistory()
+    const history = useHistory();
 
     const [sliderNftResponse] = useAxios({
         url: process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts?',
@@ -77,7 +77,7 @@ const HomePage: FC<HomePageProps> = () => {
         headers: {
             Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,
         },
-    })
+    });
 
     const [FeaturedNftsResponse] = useAxios({
         url: process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts?',
@@ -90,7 +90,7 @@ const HomePage: FC<HomePageProps> = () => {
         headers: {
             Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,
         },
-    })
+    });
 
     return (
         <PageWrapper>
@@ -142,7 +142,7 @@ const HomePage: FC<HomePageProps> = () => {
                 <FlexSpacer minHeight={2} />
             </StyledStack>
         </PageWrapper>
-    )
-}
+    );
+};
 
-export default HomePage
+export default HomePage;

@@ -1,15 +1,15 @@
-import './App.css'
-import 'animate.css/animate.min.css'
-import 'react-toastify/dist/ReactToastify.css'
-import Router from './router'
-import styled from '@emotion/styled'
-import './assets/i18n/config'
-import { Suspense } from 'react'
-import { ToastContainer, cssTransition } from 'react-toastify'
-import smoothscroll from 'smoothscroll-polyfill'
+import './App.css';
+import 'animate.css/animate.min.css';
+import 'react-toastify/dist/ReactToastify.css';
+import Router from './router';
+import styled from '@emotion/styled';
+import './assets/i18n/config';
+import { Suspense } from 'react';
+import { ToastContainer, cssTransition } from 'react-toastify';
+import smoothscroll from 'smoothscroll-polyfill';
 
 // Polyfill Makes scroll to anchor smooth on mobile browsers
-smoothscroll.polyfill()
+smoothscroll.polyfill();
 
 const StyledToastContainer = styled(ToastContainer)`
     margin-top: 5rem !important;
@@ -21,12 +21,12 @@ const StyledToastContainer = styled(ToastContainer)`
         min-height: 5rem;
         min-width: 20rem;
     }
-`
+`;
 
 export const fade = cssTransition({
     enter: 'animate__animated animate__fadeIn',
     exit: 'animate__animated animate__fadeOut',
-})
+});
 
 function App() {
     return (
@@ -34,7 +34,7 @@ function App() {
             <Router />
             <StyledToastContainer transition={fade} />
         </Suspense>
-    )
+    );
 }
 
-export default App
+export default App;

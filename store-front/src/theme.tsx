@@ -1,5 +1,5 @@
-import { ITheme } from './interfaces/theme'
-import { createTheme, PaletteOptions } from '@mui/material/styles'
+import { ITheme } from './interfaces/theme';
+import { createTheme, PaletteOptions } from '@mui/material/styles';
 
 export const DarkTheme: ITheme = {
     background: {
@@ -13,7 +13,7 @@ export const DarkTheme: ITheme = {
             primary: '#ffffff',
         },
     },
-}
+};
 
 export const LightTheme: ITheme = {
     background: {
@@ -27,45 +27,45 @@ export const LightTheme: ITheme = {
             primary: '#000000',
         },
     },
-}
+};
 
 declare module '@mui/material/styles' {
     interface Theme {
         logo: {
-            filter: string
-        }
+            filter: string;
+        };
         button: {
-            background: string
-        }
+            background: string;
+        };
         header: {
-            background: string
-        }
+            background: string;
+        };
         footer: {
-            background: string
-        }
+            background: string;
+        };
         dropShadow: {
-            default: string
-            hover: string
-        }
+            default: string;
+            hover: string;
+        };
     }
     // allow configuration using `createTheme`
     interface ThemeOptions {
         logo: {
-            filter: string
-        }
+            filter: string;
+        };
         button: {
-            background: string
-        }
+            background: string;
+        };
         header: {
-            background: string
-        }
+            background: string;
+        };
         footer: {
-            background: string
-        }
+            background: string;
+        };
         dropShadow: {
-            default: string
-            hover: string
-        }
+            default: string;
+            hover: string;
+        };
     }
 }
 
@@ -116,7 +116,7 @@ const lightThemePalette: PaletteOptions = {
     },
     tonalOffset: 0.05,
     mode: 'light',
-}
+};
 
 const darkThemePalette: PaletteOptions = {
     primary: {
@@ -165,7 +165,7 @@ const darkThemePalette: PaletteOptions = {
     },
     tonalOffset: 0.05,
     mode: 'dark',
-}
+};
 
 export const lightTheme = createTheme({
     palette: lightThemePalette,
@@ -242,7 +242,7 @@ export const lightTheme = createTheme({
         default: 'drop-shadow(0px 0px 6px #5c5c5c2d)',
         hover: 'drop-shadow(0px 0px 6px #1f1f1f33)',
     },
-})
+});
 
 export const darkTheme = createTheme({
     palette: darkThemePalette,
@@ -318,4 +318,4 @@ export const darkTheme = createTheme({
         default: 'drop-shadow(0px 0px 10px #18181886)',
         hover: 'drop-shadow(0px 0px 10px #0e0e0e9b)',
     },
-})
+});

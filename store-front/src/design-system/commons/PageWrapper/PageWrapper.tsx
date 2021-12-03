@@ -1,5 +1,5 @@
-import styled from '@emotion/styled'
-import { Theme } from '@mui/material'
+import styled from '@emotion/styled';
+import { Theme } from '@mui/material';
 
 export const PageWrapper = styled.div<{ theme?: Theme }>`
     min-height: calc(102vh - 224px);
@@ -28,4 +28,4 @@ export const PageWrapper = styled.div<{ theme?: Theme }>`
         padding-left: 0;
         padding-right: 0;
     }
-`
+`;

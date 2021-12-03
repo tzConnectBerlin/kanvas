@@ -1,18 +1,18 @@
-import styled from '@emotion/styled'
-import Avatar from '../../../atoms/Avatar'
-import Brightness3Icon from '@mui/icons-material/Brightness3'
-import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined'
-import ProfilePopover from '../../ProfilePopover'
+import styled from '@emotion/styled';
+import Avatar from '../../../atoms/Avatar';
+import Brightness3Icon from '@mui/icons-material/Brightness3';
+import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
+import ProfilePopover from '../../ProfilePopover';
 
-import { Badge } from '@mui/material'
-import { QuickSearch } from '../../../molecules/QuickSearch'
-import { FC, useState } from 'react'
-import { Stack } from '@mui/material'
-import { CustomButton } from '../../../atoms/Button'
-import { Typography } from '../../../atoms/Typography'
-import { MenuProps, StyledShoppingCartRoundedIcon, StyledLink } from '../Menu'
-import { useTranslation } from 'react-i18next'
-import { useHistory, useLocation } from 'react-router-dom'
+import { Badge } from '@mui/material';
+import { QuickSearch } from '../../../molecules/QuickSearch';
+import { FC, useState } from 'react';
+import { Stack } from '@mui/material';
+import { CustomButton } from '../../../atoms/Button';
+import { Typography } from '../../../atoms/Typography';
+import { MenuProps, StyledShoppingCartRoundedIcon, StyledLink } from '../Menu';
+import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
 
 const DesktopMenuContent = styled(Stack)`
     display: none;
@@ -21,23 +21,23 @@ const DesktopMenuContent = styled(Stack)`
     @media (min-width: 875px) {
         display: flex;
     }
-`
+`;
 
 export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
-    const history = useHistory()
-    const location = useLocation()
+    const history = useHistory();
+    const location = useLocation();
 
-    const { t } = useTranslation(['translation'])
+    const { t } = useTranslation(['translation']);
 
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget)
-    }
+        setAnchorEl(event.currentTarget);
+    };
 
     const handleClose = () => {
-        setAnchorEl(null)
-    }
+        setAnchorEl(null);
+    };
 
     return (
         <>
@@ -87,7 +87,8 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
 
                 {/* Call to action button: `Sign in`, `Add artwork` for curators and artists, and profile avatar to display the submenu */}
 
-                {localStorage.getItem('Kanvas - address') === user?.userAddress ? (
+                {localStorage.getItem('Kanvas - address') ===
+                user?.userAddress ? (
                     <Avatar
                         src={`${user?.profilePicture}?${Date.now()}`}
                         onClick={(e) =>
@@ -134,5 +135,5 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
                 onClick={handleClose}
             />
         </>
-    )
-}
+    );
+};

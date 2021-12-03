@@ -1,8 +1,8 @@
-import { FC, useState } from 'react'
-import styled from '@emotion/styled'
-import PageWrapper from '../../design-system/commons/PageWrapper'
-import FlexSpacer from '../../design-system/atoms/FlexSpacer'
-import CustomButton from '../../design-system/atoms/Button'
+import { FC, useState } from 'react';
+import styled from '@emotion/styled';
+import PageWrapper from '../../design-system/commons/PageWrapper';
+import FlexSpacer from '../../design-system/atoms/FlexSpacer';
+import CustomButton from '../../design-system/atoms/Button';
 import {
     Grid,
     Tooltip,
@@ -11,16 +11,16 @@ import {
     Theme,
     useTheme,
     Drawer,
-} from '@mui/material'
-import { Typography } from '../../design-system/atoms/Typography'
-import { useTranslation } from 'react-i18next'
-import Scrollspy from 'react-scrollspy-ez'
-import ListIcon from '@mui/icons-material/List'
-import ClickAwayListener from '@mui/material/ClickAwayListener'
+} from '@mui/material';
+import { Typography } from '../../design-system/atoms/Typography';
+import { useTranslation } from 'react-i18next';
+import Scrollspy from 'react-scrollspy-ez';
+import ListIcon from '@mui/icons-material/List';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
 
 export interface FaqProps {
-    selectedTheme?: string
-    theme?: Theme
+    selectedTheme?: string;
+    theme?: Theme;
 }
 
 const StyledIconButton = styled(CustomButton)`
@@ -31,7 +31,7 @@ const StyledIconButton = styled(CustomButton)`
     &:hover {
         background-color: rgba(0, 0, 0, 0);
     }
-`
+`;
 
 const StyledStack = styled(Stack)<{ theme?: Theme }>`
   max-width: 100rem;
@@ -107,7 +107,7 @@ const StyledStack = styled(Stack)<{ theme?: Theme }>`
         }                  
     }
   }
-`
+`;
 const StyledSection = styled.section`
     margin-bottom: 4rem;
 
@@ -127,32 +127,32 @@ const StyledSection = styled.section`
     .MuiTypography-body2 {
         margin-bottom: 1rem;
     }
-`
+`;
 
 const StickyNav = styled.nav`
     position: sticky;
     top: 10rem;
     left: 0;
     bottom: -28.125rem;
-`
+`;
 
 const StyledDrawer = styled(Drawer)<{ theme?: Theme }>`
     .MuiDrawer-paper {
         padding: 1.9rem 1.9rem 0 1.9rem;
     }
-`
+`;
 
 const Faq: FC<FaqProps> = () => {
-    const { t } = useTranslation(['translation'])
-    const theme = useTheme()
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-    const [open, setOpen] = useState(true)
+    const { t } = useTranslation(['translation']);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const [open, setOpen] = useState(true);
 
-    window.scrollBy({ top: -100, left: 0 })
+    window.scrollBy({ top: -100, left: 0 });
 
     const onClickToggler = () => {
-        setOpen(!open)
-    }
+        setOpen(!open);
+    };
 
     const faqItems = [
         {
@@ -191,7 +191,7 @@ const Faq: FC<FaqProps> = () => {
             className: 'sub',
             id: '#three_one',
         },
-    ]
+    ];
 
     return (
         <PageWrapper>
@@ -237,8 +237,8 @@ const Faq: FC<FaqProps> = () => {
                                         label=""
                                         size="small"
                                         onClick={(event) => {
-                                            event.stopPropagation()
-                                            onClickToggler()
+                                            event.stopPropagation();
+                                            onClickToggler();
                                         }}
                                         icon={
                                             <ListIcon
@@ -326,7 +326,7 @@ const Faq: FC<FaqProps> = () => {
                 </Grid>
             </StyledStack>
         </PageWrapper>
-    )
-}
+    );
+};
 
-export default Faq
+export default Faq;

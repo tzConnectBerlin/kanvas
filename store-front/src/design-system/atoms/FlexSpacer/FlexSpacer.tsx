@@ -1,11 +1,11 @@
-import styled from '@emotion/styled'
-import { FC } from 'react'
+import styled from '@emotion/styled';
+import { FC } from 'react';
 
 export interface FlexSpacerProps {
-    borderBottom?: boolean
-    minHeight?: number
-    minWidth?: number
-    display?: boolean
+    borderBottom?: boolean;
+    minHeight?: number;
+    minWidth?: number;
+    display?: boolean;
 }
 
 const FlexSpacerStyled = styled.div<FlexSpacerProps>`
@@ -30,7 +30,7 @@ const FlexSpacerStyled = styled.div<FlexSpacerProps>`
             props.minHeight ? props.minHeight * 0.6 : 0}rem;
         min-width: ${(props) => (props.minWidth ? props.minWidth * 0.6 : 0)}rem;
     }
-`
+`;
 
 export const FlexSpacer: FC<FlexSpacerProps> = ({
     display = true,
@@ -43,5 +43,5 @@ export const FlexSpacer: FC<FlexSpacerProps> = ({
             minWidth={props.minWidth}
             display={display}
         />
-    )
-}
+    );
+};

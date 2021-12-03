@@ -1,21 +1,20 @@
-import useAxios from 'axios-hooks'
-import styled from '@emotion/styled'
-import ListIcon from '@mui/icons-material/List'
-import NftGrid from '../../design-system/organismes/NftGrid'
-import FlexSpacer from '../../design-system/atoms/FlexSpacer'
-import PageWrapper from '../../design-system/commons/PageWrapper'
-import StoreFilters from '../../design-system/organismes/StoreFilters'
+import useAxios from 'axios-hooks';
+import styled from '@emotion/styled';
+import ListIcon from '@mui/icons-material/List';
+import NftGrid from '../../design-system/organismes/NftGrid';
+import FlexSpacer from '../../design-system/atoms/FlexSpacer';
+import PageWrapper from '../../design-system/commons/PageWrapper';
+import StoreFilters from '../../design-system/organismes/StoreFilters';
 
-import { useEffect, useState } from 'react'
-import { Stack, Theme, Pagination } from '@mui/material'
-import { CustomButton } from '../../design-system/atoms/Button'
-import { CustomSelect } from '../../design-system/atoms/Select'
-import { Typography } from '../../design-system/atoms/Typography'
-import { useLocation, useHistory } from 'react-router'
-import { toast } from 'react-toastify'
+import { useEffect, useState } from 'react';
+import { Stack, Theme, Pagination } from '@mui/material';
+import { CustomButton } from '../../design-system/atoms/Button';
+import { CustomSelect } from '../../design-system/atoms/Select';
+import { Typography } from '../../design-system/atoms/Typography';
+import { useHistory } from 'react-router';
 
 interface ParamTypes {
-    width?: any
+    width?: any;
 }
 
 const StyledStack = styled(Stack)`
@@ -26,23 +25,23 @@ const StyledStack = styled(Stack)`
     @media (max-width: 650px) {
         padding: 0 1.5rem 1rem;
     }
-`
-const StyledContentStack = styled(Stack) <ParamTypes>`
+`;
+const StyledContentStack = styled(Stack)<ParamTypes>`
     flex-direction: row;
     width: 100%;
 
     @media (max-width: 900px) {
         flex-direction: column;
     }
-`
-const StyledListIcon = styled(ListIcon) <{ theme?: Theme }>`
+`;
+const StyledListIcon = styled(ListIcon)<{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.text.primary};
     padding-right: 1rem;
-`
+`;
 
-const StyledPagination = styled(Pagination) <{
-    theme?: Theme
-    display: boolean
+const StyledPagination = styled(Pagination)<{
+    theme?: Theme;
+    display: boolean;
 }>`
     display: ${(props) => (props.display ? 'flex' : 'none')};
 
@@ -54,7 +53,7 @@ const StyledPagination = styled(Pagination) <{
 
     .MuiPaginationItem-root.Mui-selected {
         background-color: ${(props) =>
-        props.theme.palette.background.default} !important;
+            props.theme.palette.background.default} !important;
         border: 1px solid ${(props) => props.theme.palette.text.primary} !important;
     }
 
@@ -62,183 +61,214 @@ const StyledPagination = styled(Pagination) <{
         display: flex;
         align-items: center !important;
     }
-`
+`;
 
 const StorePage = () => {
-
-    const history = useHistory()
+    const history = useHistory();
 
     // Pagination state
-    const [selectedPage, setSelectedPage] = useState<number>(1)
+    const [selectedPage, setSelectedPage] = useState<number>(1);
 
     // Sort state
-    const [selectedSort, setSelectedSort] = useState<{ orderBy: 'price' | 'name' | 'createdAt', orderDirection: 'asc' | 'desc' }>()
+    const [selectedSort, setSelectedSort] = useState<{
+        orderBy: 'price' | 'name' | 'createdAt';
+        orderDirection: 'asc' | 'desc';
+    }>();
 
     // Categories state
-    const [selectedCategories, setSelectedCategories] = useState<any[]>([])
+    const [selectedCategories, setSelectedCategories] = useState<any[]>([]);
 
     // Availability state
-    const [selectedAvailability, setSelectedAvailability] = useState<string[]>([])
+    const [selectedAvailability, setSelectedAvailability] = useState<string[]>(
+        [],
+    );
 
     // Price states
-    const [priceFilterRange, setPriceFilterRange] = useState<[number, number]>()
+    const [priceFilterRange, setPriceFilterRange] =
+        useState<[number, number]>();
 
     // Conditionnal states
-    const [filterOpen, setFilterOpen] = useState<boolean>(true)
-    const [filterSliding, setFilterSliding] = useState<boolean>(false)
-    const [comfortLoader, setComfortLoader] = useState<boolean>(false)
+    const [filterOpen, setFilterOpen] = useState<boolean>(true);
+    const [filterSliding, setFilterSliding] = useState<boolean>(false);
+    const [comfortLoader, setComfortLoader] = useState<boolean>(false);
 
     // Api calls for the categories and the nfts
     const [nftsResponse, getNfts] = useAxios(
         process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts',
         { manual: true },
-    )
+    );
     const [categoriesResponse, getCategories] = useAxios(
         process.env.REACT_APP_API_SERVER_BASE_URL + '/categories',
         { manual: true },
-    )
+    );
 
+    useEffect(() => {
+        getCategories();
+        getPageParams();
+        callNFTsEndpoint(true);
+    }, []);
 
     const callNFTsEndpoint = (handlePriceRange: boolean) => {
-        setComfortLoader(true)
+        setComfortLoader(true);
         const comfortTrigger = setTimeout(() => {
             getNfts({
                 withCredentials: true,
                 params: {
                     page: 1,
                     pageSize: 12,
-                    categories: selectedCategories.join(','),
+                    categories: selectedCategories.join(',') ?? undefined,
                     orderBy: selectedSort?.orderBy ?? 'createdAt',
                     orderDirection: selectedSort?.orderDirection ?? 'desc',
-                    priceAtLeast: handlePriceRange && priceFilterRange ? priceFilterRange[0] : undefined,
-                    priceAtMost: handlePriceRange && priceFilterRange ? priceFilterRange[1] : undefined,
-                    availability: selectedAvailability.length === 0 ? 'onSale,soldOut,upcoming' : selectedAvailability.join(',')
+                    priceAtLeast:
+                        handlePriceRange && priceFilterRange
+                            ? priceFilterRange[0]
+                            : undefined,
+                    priceAtMost:
+                        handlePriceRange && priceFilterRange
+                            ? priceFilterRange[1]
+                            : undefined,
+                    availability:
+                        selectedAvailability.length === 0
+                            ? 'onSale,soldOut,upcoming'
+                            : selectedAvailability.join(','),
                 },
-            })
-            setComfortLoader(false)
-        }, 300)
+            });
+            setComfortLoader(false);
+        }, 300);
 
-        return () => {clearTimeout(comfortTrigger)}
-    }
+        return () => {
+            clearTimeout(comfortTrigger);
+        };
+    };
 
     const getPageParams = () => {
-        let pageParam = new URLSearchParams(history.location.search)
+        let pageParam = new URLSearchParams(history.location.search);
 
-        const page = pageParam.get('page')
-        const categories = pageParam.get('categories')
-        const priceAtLeast = pageParam.get('priceAtLeast')
-        const priceAtMost = pageParam.get('priceAtMost')
-        const orderBy = pageParam.get('orderBy') as 'createdAt' | 'price' | 'name'
-        const orderDirection = pageParam.get('orderDirection') as 'asc' | 'desc'
-        const availability = pageParam.get('availability')
+        const page = pageParam.get('page');
+        const categories = pageParam.get('categories');
+        const priceAtLeast = pageParam.get('priceAtLeast');
+        const priceAtMost = pageParam.get('priceAtMost');
+        const orderBy = pageParam.get('orderBy') as
+            | 'createdAt'
+            | 'price'
+            | 'name';
+        const orderDirection = pageParam.get('orderDirection') as
+            | 'asc'
+            | 'desc';
+        const availability = pageParam.get('availability');
 
         // Pagination
         if (page) {
-            setSelectedPage(Number(page))
+            setSelectedPage(Number(page));
         }
 
         // Prices
         if (priceAtLeast && priceAtMost) {
-            setPriceFilterRange([Number(priceAtLeast), Number(priceAtMost)])
+            setPriceFilterRange([Number(priceAtLeast), Number(priceAtMost)]);
         } else {
-            setPriceFilterRange(undefined)
+            setPriceFilterRange(undefined);
         }
 
         // Order
         if (orderBy && orderDirection) {
             setSelectedSort({
                 orderBy: orderBy,
-                orderDirection: orderDirection
-            })
+                orderDirection: orderDirection,
+            });
         }
 
         // Availability
         if (availability) {
-            setSelectedAvailability(availability.split(','))
+            setSelectedAvailability(availability.split(','));
         }
 
         // Categories
         if (categories) {
             setSelectedCategories(
                 categories.split(',').map((categoryId) => Number(categoryId)),
-            )
+            );
         }
-    }
+    };
 
-    const setPageParams = (queryParam: 'categories' | 'page' | 'availability' | 'priceAtLeast' | 'priceAtMost' | 'orderBy' | 'orderDirection', queryParamValue: string) => {
-        const actualPageParam = new URLSearchParams(history.location.search)
+    const setPageParams = (
+        queryParam:
+            | 'categories'
+            | 'page'
+            | 'availability'
+            | 'priceAtLeast'
+            | 'priceAtMost'
+            | 'orderBy'
+            | 'orderDirection',
+        queryParamValue: string,
+    ) => {
+        const actualPageParam = new URLSearchParams(history.location.search);
 
         if (actualPageParam.get(queryParam)) {
-            actualPageParam.set(queryParam, queryParamValue)
+            actualPageParam.set(queryParam, queryParamValue);
         } else {
-            actualPageParam.append(queryParam, queryParamValue)
+            actualPageParam.append(queryParam, queryParamValue);
         }
 
-        history.push({ search: actualPageParam.toString() })
-    }
+        history.push({ search: actualPageParam.toString() });
+    };
 
-    const deletePageParams = (queryParam: 'categories' | 'page' | 'availability' | 'priceAtLeast' | 'priceAtMost' | 'orderBy' | 'orderDirection') => {
-        const actualPageParam = new URLSearchParams(history.location.search)
+    const deletePageParams = (
+        queryParam:
+            | 'categories'
+            | 'page'
+            | 'availability'
+            | 'priceAtLeast'
+            | 'priceAtMost'
+            | 'orderBy'
+            | 'orderDirection',
+    ) => {
+        const actualPageParam = new URLSearchParams(history.location.search);
 
         if (actualPageParam.get(queryParam)) {
-            actualPageParam.delete(queryParam)
+            actualPageParam.delete(queryParam);
         }
 
-        history.push({ search: actualPageParam.toString() })
-    }
+        history.push({ search: actualPageParam.toString() });
+    };
 
     const handlePaginationChange = (event: any, page: number) => {
-        setSelectedPage(page)
-        setPageParams('page', page.toString())
-        callNFTsEndpoint(true)
-    }
+        setSelectedPage(page);
+        setPageParams('page', page.toString());
+        callNFTsEndpoint(true);
+    };
 
     const triggerPriceFilter = () => {
         if (priceFilterRange) {
-            setPageParams('priceAtLeast', priceFilterRange[0].toString())
-            setPageParams('priceAtMost', priceFilterRange[1].toString())
+            setPageParams('priceAtLeast', priceFilterRange[0].toString());
+            setPageParams('priceAtMost', priceFilterRange[1].toString());
         }
 
-        callNFTsEndpoint(true)
-    }
+        callNFTsEndpoint(true);
+    };
 
     useEffect(() => {
         if (selectedSort) {
-            setPageParams('orderBy', selectedSort.orderBy)
-            setPageParams('orderDirection', selectedSort.orderDirection)
+            setPageParams('orderBy', selectedSort.orderBy);
+            setPageParams('orderDirection', selectedSort.orderDirection);
         } else {
-            deletePageParams('orderBy')
-            deletePageParams('orderDirection')
+            deletePageParams('orderBy');
+            deletePageParams('orderDirection');
         }
-
-        callNFTsEndpoint(true)
-    }, [selectedSort])
+    }, [selectedSort]);
 
     useEffect(() => {
         if (selectedCategories.length)
-            setPageParams('categories', selectedCategories.join(','))
-        else
-            deletePageParams('categories')
-
-        callNFTsEndpoint(false)
-    }, [selectedCategories])
+            setPageParams('categories', selectedCategories.join(','));
+        else deletePageParams('categories');
+    }, [selectedCategories]);
 
     useEffect(() => {
         if (selectedAvailability.length)
-            setPageParams('availability', selectedAvailability.join(','))
-        else
-            deletePageParams('availability')
+            setPageParams('availability', selectedAvailability.join(','));
+        else deletePageParams('availability');
+    }, [selectedAvailability]);
 
-        callNFTsEndpoint(true)
-    }, [selectedAvailability])
-
-    useEffect(() => {
-        getCategories()
-        getPageParams()
-        callNFTsEndpoint(true)
-    }, [])
-
-    const [availableFilters, setAvailableFilters] = useState<any>()
+    const [availableFilters, setAvailableFilters] = useState<any>();
 
     useEffect(() => {
         if (categoriesResponse.data) {
@@ -248,9 +278,9 @@ const StorePage = () => {
                     name: 'Categories',
                     children: categoriesResponse.data,
                 },
-            ])
+            ]);
         }
-    }, [categoriesResponse.data])
+    }, [categoriesResponse.data]);
 
     return (
         <PageWrapper>
@@ -274,10 +304,11 @@ const StorePage = () => {
                         onClick={() => setFilterOpen(!filterOpen)}
                         aria-label="loading"
                         icon={<StyledListIcon />}
-                        label={`Filters ${selectedCategories.length > 0
-                            ? `  - ${selectedCategories.length}`
-                            : ''
-                            }`}
+                        label={`Filters ${
+                            selectedCategories.length > 0
+                                ? `  - ${selectedCategories.length}`
+                                : ''
+                        }`}
                         disabled={nftsResponse.loading}
                     />
 
@@ -287,6 +318,7 @@ const StorePage = () => {
                         id="Sort filter - store page"
                         selectedOption={selectedSort}
                         setSelectedOption={setSelectedSort}
+                        callNFTsEndpoint={callNFTsEndpoint}
                         disabled={nftsResponse.loading}
                     />
                 </Stack>
@@ -295,7 +327,7 @@ const StorePage = () => {
                     <StoreFilters
                         availableFilters={availableFilters}
                         openFilters={filterOpen}
-                        filterFunction={getNfts}
+                        callNFTsEndpoint={callNFTsEndpoint}
                         selectedFilters={selectedCategories}
                         setSelectedFilters={setSelectedCategories}
                         priceFilterRange={priceFilterRange}
@@ -312,7 +344,11 @@ const StorePage = () => {
                     <NftGrid
                         open={filterOpen}
                         nfts={nftsResponse.data?.nfts}
-                        loading={nftsResponse.loading || filterSliding || comfortLoader}
+                        loading={
+                            nftsResponse.loading ||
+                            filterSliding ||
+                            comfortLoader
+                        }
                     />
                 </StyledContentStack>
 
@@ -325,14 +361,18 @@ const StorePage = () => {
                         onChange={handlePaginationChange}
                         variant="outlined"
                         shape="rounded"
-                        disabled={nftsResponse.loading || filterSliding || comfortLoader}
+                        disabled={
+                            nftsResponse.loading ||
+                            filterSliding ||
+                            comfortLoader
+                        }
                     />
                 </Stack>
 
                 <FlexSpacer minHeight={5} />
             </StyledStack>
         </PageWrapper>
-    )
-}
+    );
+};
 
-export default StorePage
+export default StorePage;

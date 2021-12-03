@@ -1,12 +1,12 @@
-import styled from '@emotion/styled'
-import SearchRounded from '@mui/icons-material/SearchRounded'
+import styled from '@emotion/styled';
+import SearchRounded from '@mui/icons-material/SearchRounded';
 
-import { FC } from 'react'
-import { Stack } from '@mui/material'
-import { Typography } from '../../atoms/Typography'
+import { FC } from 'react';
+import { Stack } from '@mui/material';
+import { Typography } from '../../atoms/Typography';
 
 interface EmptySearchResultProps {
-    searchString?: string | unknown
+    searchString?: string | unknown;
 }
 
 const StyledStack = styled(Stack)`
@@ -15,7 +15,7 @@ const StyledStack = styled(Stack)`
     justify-content: center;
     margin-top: 4em;
     margin-bottom: 4em;
-`
+`;
 
 export const EmptySearchResult: FC<EmptySearchResultProps> = ({ ...props }) => {
     return (
@@ -28,5 +28,5 @@ export const EmptySearchResult: FC<EmptySearchResultProps> = ({ ...props }) => {
                 There are no results for '{props.searchString}'{' '}
             </Typography>
         </StyledStack>
-    )
-}
+    );
+};

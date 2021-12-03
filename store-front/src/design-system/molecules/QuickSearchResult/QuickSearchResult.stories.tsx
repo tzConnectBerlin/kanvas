@@ -1,19 +1,19 @@
-import React from 'react'
-import { ComponentStory, ComponentMeta } from '@storybook/react'
+import React from 'react';
+import { ComponentStory, ComponentMeta } from '@storybook/react';
 
-import { QuickSearchResult } from './QuickSearchResult'
-import { ApolloError, LazyQueryResult } from '@apollo/client'
+import { QuickSearchResult } from './QuickSearchResult';
+import { ApolloError, LazyQueryResult } from '@apollo/client';
 
 export default {
     title: 'Molecules/QuickSearchResult',
     component: QuickSearchResult,
-} as ComponentMeta<typeof QuickSearchResult>
+} as ComponentMeta<typeof QuickSearchResult>;
 
 const Template: ComponentStory<typeof QuickSearchResult> = (args) => (
     <QuickSearchResult {...args} />
-)
+);
 
-export const SuggestionLoading = Template.bind({})
+export const SuggestionLoading = Template.bind({});
 SuggestionLoading.args = {
     open: undefined,
     profilesSearchResult: {
@@ -31,9 +31,9 @@ SuggestionLoading.args = {
         loading: true,
         data: [],
     },
-}
+};
 
-export const Suggestion = Template.bind({})
+export const Suggestion = Template.bind({});
 Suggestion.args = {
     open: true,
     profilesSearchResult: {
@@ -66,9 +66,9 @@ Suggestion.args = {
             },
         ],
     },
-}
+};
 
-export const LoadingResult = Template.bind({})
+export const LoadingResult = Template.bind({});
 LoadingResult.args = {
     open: true,
     profilesSearchResult: {
@@ -84,9 +84,9 @@ LoadingResult.args = {
         loading: true,
         data: [],
     },
-}
+};
 
-export const Result = Template.bind({})
+export const Result = Template.bind({});
 Result.args = {
     open: true,
     profilesSearchResult: {
@@ -137,9 +137,9 @@ Result.args = {
             },
         ],
     },
-}
+};
 
-export const NoResult = Template.bind({})
+export const NoResult = Template.bind({});
 NoResult.args = {
     open: true,
     profilesSearchResult: {
@@ -158,4 +158,4 @@ NoResult.args = {
         data: [],
     },
     searchString: 'yololo',
-}
+};

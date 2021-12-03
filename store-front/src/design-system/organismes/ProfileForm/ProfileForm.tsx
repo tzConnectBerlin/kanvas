@@ -1,26 +1,26 @@
-import * as yup from 'yup'
-import Scroll from 'react-scroll'
-import styled from '@emotion/styled'
-import Avatar from '../../atoms/Avatar'
-import CustomButton from '../../atoms/Button'
-import Typography from '../../atoms/Typography'
-import FlexSpacer from '../../atoms/FlexSpacer'
-import CustomCircularProgress from '../../atoms/CircularProgress'
+import * as yup from 'yup';
+import Scroll from 'react-scroll';
+import styled from '@emotion/styled';
+import Avatar from '../../atoms/Avatar';
+import CustomButton from '../../atoms/Button';
+import Typography from '../../atoms/Typography';
+import FlexSpacer from '../../atoms/FlexSpacer';
+import CustomCircularProgress from '../../atoms/CircularProgress';
 
-import { useFormik } from 'formik'
-import { FC, useEffect, useState } from 'react'
-import { ClearRounded } from '@mui/icons-material'
-import { DropZone } from '../../molecules/DropZone'
-import { Theme } from '@mui/material'
-import { Box, TextField, InputAdornment, Stack } from '@mui/material'
-import { ResponseValues } from 'axios-hooks'
+import { useFormik } from 'formik';
+import { FC, useEffect, useState } from 'react';
+import { ClearRounded } from '@mui/icons-material';
+import { DropZone } from '../../molecules/DropZone';
+import { Theme } from '@mui/material';
+import { Box, TextField, InputAdornment, Stack } from '@mui/material';
+import { ResponseValues } from 'axios-hooks';
 
 interface ProfileFormProps {
-    initialValues: any
-    submit: Function
-    loading: boolean
-    checkIfUserNameValid: Function
-    checkIfUsernameValidResponse: ResponseValues<any, boolean, any>
+    initialValues: any;
+    submit: Function;
+    loading: boolean;
+    checkIfUserNameValid: Function;
+    checkIfUsernameValidResponse: ResponseValues<any, boolean, any>;
 }
 
 const StyledStack = styled(Stack)`
@@ -39,7 +39,7 @@ const StyledStack = styled(Stack)`
     @media (max-width: 650px) {
         width: 100%;
     }
-`
+`;
 
 const StyledInput = styled(TextField)<{ theme?: Theme }>`
     .MuiInput-input {
@@ -58,11 +58,11 @@ const StyledInput = styled(TextField)<{ theme?: Theme }>`
 
         position: absolute;
     }
-`
+`;
 
 const StyledAvataWrapper = styled.div`
     position: relative;
-`
+`;
 
 const ClearContentWrapper = styled.div<{ theme?: Theme }>`
     height: 2rem;
@@ -96,19 +96,19 @@ const ClearContentWrapper = styled.div<{ theme?: Theme }>`
     :active {
         filter: drop-shadow(0px 0px 6px #98989833);
     }
-`
+`;
 
 const StyledClearContent = styled(ClearRounded)<{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.text.primary};
-`
+`;
 
 const validationSchema = yup.object({
     userName: yup
         .string()
         .min(3, 'Username must be at least 3 characters length'),
-})
+});
 
-let Element = Scroll.Element
+let Element = Scroll.Element;
 
 const StyledForm = styled.form`
     display: flex;
@@ -117,32 +117,32 @@ const StyledForm = styled.form`
 
     padding-left: 2rem;
     padding-right: 2rem;
-`
+`;
 
 export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
-    const [profilePicture, setProfilePicture] = useState('')
+    const [profilePicture, setProfilePicture] = useState('');
     const [profilePictureFile, setProfilePictureFile] =
-        useState<unknown>(undefined)
+        useState<unknown>(undefined);
 
-    const [comfortLoader, setComfortLoader] = useState(false)
-    const [isUserNameValid, setIsUserNameValid] = useState(true)
+    const [comfortLoader, setComfortLoader] = useState(false);
+    const [isUserNameValid, setIsUserNameValid] = useState(true);
     const [dropZoneErrorMessage, setDropZoneErrorMessage] = useState<
         string | null
-    >(null)
+    >(null);
 
     const dataURLtoFile = (dataurl: any, filename: any) => {
         var arr = dataurl.split(','),
             mime = arr[0].match(/:(.*?);/)[1],
             bstr = atob(arr[1]),
             n = bstr.length,
-            u8arr = new Uint8Array(n)
+            u8arr = new Uint8Array(n);
 
         while (n--) {
-            u8arr[n] = bstr.charCodeAt(n)
+            u8arr[n] = bstr.charCodeAt(n);
         }
 
-        return new File([u8arr], filename, { type: mime })
-    }
+        return new File([u8arr], filename, { type: mime });
+    };
 
     const formik = useFormik({
         initialValues: props.initialValues,
@@ -155,9 +155,9 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
                     JSON.parse(sessionStorage.getItem('profilePicture')!).blob,
                     'profilePicture',
                 ),
-            })
+            });
         },
-    })
+    });
 
     const scrollTo = (id: string) => {
         Scroll.scroller.scrollTo(id, {
@@ -165,8 +165,8 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
             delay: 0,
             smooth: true,
             offset: -550,
-        })
-    }
+        });
+    };
 
     // useEffect for profilepicture initial values in case of refresh
     useEffect(() => {
@@ -174,16 +174,16 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
             try {
                 const blobJson = JSON.parse(
                     sessionStorage.getItem('profilePicture')!,
-                )
+                );
 
                 if ('blob' in blobJson) {
-                    setProfilePicture(blobJson.blob)
+                    setProfilePicture(blobJson.blob);
                 }
             } catch (error) {
-                console.log(error)
+                console.log(error);
             }
         }
-    }, [])
+    }, []);
 
     // useEffect for username verification
     useEffect(() => {
@@ -191,29 +191,29 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
             formik.values.userName.length >= 3 &&
             formik.values.userName !== props.initialValues.userName
         ) {
-            setComfortLoader(true)
+            setComfortLoader(true);
             const delayUserNameAvailabilitySearch = setTimeout(() => {
                 props.checkIfUserNameValid({
                     params: {
                         userName: formik.values.userName,
                     },
-                })
-                setComfortLoader(false)
-            }, 800)
+                });
+                setComfortLoader(false);
+            }, 800);
             return () => {
-                clearTimeout(delayUserNameAvailabilitySearch)
-            }
+                clearTimeout(delayUserNameAvailabilitySearch);
+            };
         }
-    }, [formik.values.userName])
+    }, [formik.values.userName]);
 
     useEffect(() => {
         if (props.checkIfUsernameValidResponse.data) {
-            setComfortLoader(false)
+            setComfortLoader(false);
             setIsUserNameValid(
                 props.checkIfUsernameValidResponse.data.available,
-            )
+            );
         }
-    }, [props.checkIfUsernameValidResponse.data])
+    }, [props.checkIfUsernameValidResponse.data]);
 
     return (
         <Box component="form" autoComplete="off">
@@ -264,11 +264,11 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
                             onFocus={() => scrollTo('userName')}
                             onBlur={formik.handleBlur}
                             onChange={(event) => {
-                                formik.handleChange(event)
+                                formik.handleChange(event);
                                 sessionStorage.setItem(
                                     'userName',
                                     event.currentTarget.value,
-                                )
+                                );
                             }}
                             variant="standard"
                             InputProps={{
@@ -315,5 +315,5 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
                 <FlexSpacer minHeight={5} />
             </StyledForm>
         </Box>
-    )
-}
+    );
+};

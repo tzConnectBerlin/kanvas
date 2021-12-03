@@ -1,20 +1,20 @@
-import styled from '@emotion/styled'
+import styled from '@emotion/styled';
 import {
     Avatar as MAvatar,
     AvatarProps as MAvatarProps,
     Skeleton,
     Theme,
-} from '@mui/material'
-import { FC } from 'react'
+} from '@mui/material';
+import { FC } from 'react';
 
 export interface AvatarProps extends MAvatarProps {
-    icon?: boolean
-    height?: number
-    width?: number
-    borderRadius?: number
-    theme?: Theme
-    loading?: boolean
-    responsive?: boolean
+    icon?: boolean;
+    height?: number;
+    width?: number;
+    borderRadius?: number;
+    theme?: Theme;
+    loading?: boolean;
+    responsive?: boolean;
 }
 
 const StyledAvatar = styled(MAvatar)<AvatarProps>`
@@ -54,7 +54,7 @@ const StyledAvatar = styled(MAvatar)<AvatarProps>`
                 ? (props.width ?? 40) * 0.55
                 : props.width ?? 40}px;
     }
-`
+`;
 
 const StyledSkeleton = styled(Skeleton)<AvatarProps>`
     height: ${(props) => props.height ?? 40}px !important;
@@ -92,7 +92,7 @@ const StyledSkeleton = styled(Skeleton)<AvatarProps>`
                 ? (props.width ?? 40) * 0.55
                 : props.width ?? 40}px !important;
     }
-`
+`;
 
 export const Avatar: FC<AvatarProps> = ({
     loading = false,
@@ -121,5 +121,5 @@ export const Avatar: FC<AvatarProps> = ({
         >
             {props.children}
         </StyledAvatar>
-    )
-}
+    );
+};

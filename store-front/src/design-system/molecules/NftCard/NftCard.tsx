@@ -1,30 +1,30 @@
-import { Skeleton, Stack, useMediaQuery, Theme, useTheme } from '@mui/material'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '../../atoms/Typography'
-import { useHistory } from 'react-router-dom'
-import styled from '@emotion/styled'
-import { Box } from '@mui/system'
-import TezosLogo from '../../atoms/TezosLogo/TezosLogo'
-import { useEffect, useState } from 'react'
+import { Skeleton, Stack, useMediaQuery, Theme, useTheme } from '@mui/material';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '../../atoms/Typography';
+import { useHistory } from 'react-router-dom';
+import styled from '@emotion/styled';
+import { Box } from '@mui/system';
+import TezosLogo from '../../atoms/TezosLogo/TezosLogo';
+import { useEffect, useState } from 'react';
 
 export interface NftCardProps {
-    loading?: boolean
-    id?: string
-    name?: string
-    price?: number
-    height?: number
-    ipfsHash?: string
-    openFilters?: boolean
-    dataUri?: string
-    launchAt?: number
-    editionsAvailable?: number
+    loading?: boolean;
+    id?: string;
+    name?: string;
+    price?: number;
+    height?: number;
+    ipfsHash?: string;
+    openFilters?: boolean;
+    dataUri?: string;
+    launchAt?: number;
+    editionsAvailable?: number;
 }
 
 const StyledBioWrapper = styled.div<{ theme?: Theme }>`
     align-self: flex-start;
     width: 100%;
-`
+`;
 const StyledImgWrapper = styled.div<{ theme?: Theme }>`
     position: relative;
     overflow: hidden;
@@ -50,7 +50,7 @@ const StyledImgWrapper = styled.div<{ theme?: Theme }>`
         min-height: 330px;
         max-height: 370px;
     }
-`
+`;
 
 const StyledSkeleton = styled(Skeleton)`
     min-height: 90vw;
@@ -75,7 +75,7 @@ const StyledSkeleton = styled(Skeleton)`
         min-height: 330px;
         max-height: 370px;
     }
-`
+`;
 
 const StyledImg = styled.img<{ theme?: Theme; willDrop: boolean }>`
     position: absolute;
@@ -85,14 +85,15 @@ const StyledImg = styled.img<{ theme?: Theme; willDrop: boolean }>`
     object-fit: cover;
     height: 100%;
     opacity: ${(props) => (props.willDrop ? '0.4' : '1')} !important;
-`
+`;
 
 const AvailabilityWrapper = styled.div<{ inStock: boolean; willDrop: boolean }>`
     position: absolute;
     top: 1rem;
     right: 1rem;
 
-    background-color: ${(props) => (props.inStock ? props.willDrop ? '#136dff' : '#00ca00' : 'red')};
+    background-color: ${(props) =>
+        props.inStock ? (props.willDrop ? '#136dff' : '#00ca00') : 'red'};
 
     padding-left: 0.5rem;
     padding-right: 0.5rem;
@@ -100,33 +101,39 @@ const AvailabilityWrapper = styled.div<{ inStock: boolean; willDrop: boolean }>`
     padding-bottom: 0.25rem;
 
     border-radius: 0.2rem;
-`
+`;
 
 export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
-    const history = useHistory()
-    const theme = useTheme()
+    const history = useHistory();
+    const theme = useTheme();
 
-    const [launchTime, setLaunchTime] = useState<number>(new Date(props.launchAt!).getTime() - new Date().getTime())
+    const [launchTime, setLaunchTime] = useState<number>(
+        new Date(props.launchAt!).getTime() - new Date().getTime(),
+    );
 
     useEffect(() => {
         if (props.launchAt) {
-            setLaunchTime(new Date(props.launchAt).getTime() - new Date().getTime())
+            setLaunchTime(
+                new Date(props.launchAt).getTime() - new Date().getTime(),
+            );
         }
-    }, [props.launchAt])
+    }, [props.launchAt]);
 
     useEffect(() => {
         if (props.launchAt) {
             const launchTimeout = setTimeout(() => {
-                setLaunchTime(new Date(props.launchAt!).getTime() - new Date().getTime())
-            }, 1000)
+                setLaunchTime(
+                    new Date(props.launchAt!).getTime() - new Date().getTime(),
+                );
+            }, 1000);
 
-            return () => clearTimeout(launchTimeout)
+            return () => clearTimeout(launchTimeout);
         }
-    }, [launchTime])
+    }, [launchTime]);
 
     const handleRedirect = (path: string) => {
-        history.push(path)
-    }
+        history.push(path);
+    };
 
     return !loading ? (
         <Card
@@ -166,23 +173,40 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                 >
                     <Typography weight="SemiBold" size="body2" color="white">
                         {(props.editionsAvailable ?? 0) > 0
-                            ? !launchTime ? false : launchTime > 0 ?
-                                'Drop'
+                            ? !launchTime
+                                ? false
+                                : launchTime > 0
+                                ? 'Drop'
                                 : 'In stock'
                             : 'Sold out'}
                     </Typography>
                 </AvailabilityWrapper>
                 <Stack
                     direction="column"
-                    sx={{ width: '100%', minWidth: '60%', marginBottom: '1rem' }}>
-                    <Typography weight="SemiBold" display="initial !important" noWrap size="h3">
+                    sx={{
+                        width: '100%',
+                        minWidth: '60%',
+                        marginBottom: '1rem',
+                    }}
+                >
+                    <Typography
+                        weight="SemiBold"
+                        display="initial !important"
+                        noWrap
+                        size="h3"
+                    >
                         {props.name}
                     </Typography>
 
-                    <Typography weight="Light" size="body" display="initial !important" noWrap sx={{ width: '85%' }}>
+                    <Typography
+                        weight="Light"
+                        size="body"
+                        display="initial !important"
+                        noWrap
+                        sx={{ width: '85%' }}
+                    >
                         {props.ipfsHash}
                     </Typography>
-
                 </Stack>
 
                 <Box
@@ -192,7 +216,17 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     width="100%"
                 >
                     <Typography weight="Light" size="body">
-                        {launchTime && launchTime > 0 && `${new Date(launchTime).getDate()} days - ${new Date(launchTime).getHours()} : ${new Date(launchTime).getMinutes()} : ${new Date(launchTime).getSeconds()}`}
+                        {launchTime &&
+                            launchTime > 0 &&
+                            `${new Date(
+                                launchTime,
+                            ).getDate()} days - ${new Date(
+                                launchTime,
+                            ).getHours()} : ${new Date(
+                                launchTime,
+                            ).getMinutes()} : ${new Date(
+                                launchTime,
+                            ).getSeconds()}`}
                     </Typography>
 
                     <Box display="flex" flexDirection="row" marginLeft="auto">
@@ -277,5 +311,5 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                 </Box>
             </CardContent>
         </Card>
-    )
-}
+    );
+};

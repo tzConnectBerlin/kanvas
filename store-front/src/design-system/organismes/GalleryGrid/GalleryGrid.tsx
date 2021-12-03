@@ -1,27 +1,27 @@
-import styled from '@emotion/styled'
-import FlexSpacer from '../../atoms/FlexSpacer'
-import Typography from '../../atoms/Typography'
+import styled from '@emotion/styled';
+import FlexSpacer from '../../atoms/FlexSpacer';
+import Typography from '../../atoms/Typography';
 
-import { Animated } from 'react-animated-css'
-import { FC, useEffect, useState } from 'react'
-import { Theme, Stack, Box } from '@mui/material'
-import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout'
+import { Animated } from 'react-animated-css';
+import { FC, useEffect, useState } from 'react';
+import { Theme, Stack, Box } from '@mui/material';
+import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 
-const ResponsiveReactGridLayout = WidthProvider(Responsive)
+const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 interface GalleryGridProps {
-    editable: boolean
-    layouts: Layouts
-    setLayouts: Function
-    assets: any[]
-    emptyMessage: string
-    emptyLink: string
-    loading: boolean
+    editable: boolean;
+    layouts: Layouts;
+    setLayouts: Function;
+    assets: any[];
+    emptyMessage: string;
+    emptyLink: string;
+    loading: boolean;
 }
 
 const StyledResponsiveReactGridLayout = styled(ResponsiveReactGridLayout)<{
-    theme?: Theme
-    editable: boolean
+    theme?: Theme;
+    editable: boolean;
 }>`
     .react-resizable-handle {
         position: absolute;
@@ -48,17 +48,17 @@ const StyledResponsiveReactGridLayout = styled(ResponsiveReactGridLayout)<{
     .react-grid-item {
         padding: 3rem;
     }
-`
+`;
 
 const WrapperElement = styled.span`
     padding: 2rem;
     display: flex;
-`
+`;
 
 export const GalleryGrid: FC<GalleryGridProps> = ({ ...props }) => {
     const onLayoutChange = (layout: any, layouts: any) => {
-        props.setLayouts(layouts)
-    }
+        props.setLayouts(layouts);
+    };
 
     return (
         <>
@@ -103,8 +103,8 @@ export const GalleryGrid: FC<GalleryGridProps> = ({ ...props }) => {
                     layouts={props.layouts}
                     rowHeight={500}
                     onLayoutChange={(layout, layouts) => {
-                        onLayoutChange(layout, layouts)
-                        console.log(layouts)
+                        onLayoutChange(layout, layouts);
+                        console.log(layouts);
                     }}
                     editable={props.editable}
                 >
@@ -149,5 +149,5 @@ export const GalleryGrid: FC<GalleryGridProps> = ({ ...props }) => {
                 </Animated>
             )}
         </>
-    )
-}
+    );
+};

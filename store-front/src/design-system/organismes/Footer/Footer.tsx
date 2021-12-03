@@ -1,17 +1,17 @@
-import { Box } from '@mui/system'
-import Grid from '@mui/material/Grid'
-import { FC } from 'react'
-import styled from '@emotion/styled'
-import { Link } from 'react-router-dom'
-import { Stack, Theme, useMediaQuery, useTheme } from '@mui/material'
-import Typography from '../../atoms/Typography'
-import { Copyright } from '../../atoms/Copyright'
-import { useTranslation } from 'react-i18next'
-import { lightTheme as theme } from '../../../theme'
+import { Box } from '@mui/system';
+import Grid from '@mui/material/Grid';
+import { FC } from 'react';
+import styled from '@emotion/styled';
+import { Link } from 'react-router-dom';
+import { Stack, Theme, useMediaQuery, useTheme } from '@mui/material';
+import Typography from '../../atoms/Typography';
+import { Copyright } from '../../atoms/Copyright';
+import { useTranslation } from 'react-i18next';
+import { lightTheme as theme } from '../../../theme';
 
 export interface FooterProps {
-    selectedTheme?: string
-    theme?: Theme
+    selectedTheme?: string;
+    theme?: Theme;
 }
 
 const StyledBox = styled(Box)<{ theme?: Theme }>`
@@ -39,14 +39,14 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
         padding-right: 1rem !important;
         transition: padding-left 0.2s, padding-right 0.2s;
     }
-`
+`;
 const LinkStyled = styled(Link)`
     display: block;
     transition: 0.2s;
     width: 100%;
     height: 2.5rem;
     align-items: center;
-`
+`;
 
 const LogoStyled = styled.img<{ theme?: Theme }>`
     filter: ${(props) => props.theme.logo.filter ?? 'invert(0%)'};
@@ -58,16 +58,16 @@ const LogoStyled = styled.img<{ theme?: Theme }>`
         height: 1.8rem;
         transition: height 0.2s;
     }
-`
+`;
 
 const FacebookStyled = styled.img<{ theme?: Theme }>`
     filter: ${(props) => props.theme.logo.filter ?? 'invert(0%)'};
     height: 1.6rem;
-`
+`;
 const TwitterStyled = styled.img<{ theme?: Theme }>`
     filter: ${(props) => props.theme.logo.filter ?? 'invert(0%)'};
     height: 1.6rem;
-`
+`;
 const iconStyle = {
     width: 25,
     height: 25,
@@ -75,7 +75,7 @@ const iconStyle = {
     justifyContent: 'center',
     alignItems: 'center',
     mr: 1,
-}
+};
 
 const StyledLink = styled(Link)<{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.text.primary};
@@ -86,10 +86,10 @@ const StyledLink = styled(Link)<{ theme?: Theme }>`
     @media (max-width: 1100px) {
         height: 2rem;
     }
-`
+`;
 
 export const Footer: FC<FooterProps> = () => {
-    const { t } = useTranslation(['translation'])
+    const { t } = useTranslation(['translation']);
 
     return (
         <StyledBox>
@@ -254,5 +254,5 @@ export const Footer: FC<FooterProps> = () => {
                 </Grid>
             </Grid>
         </StyledBox>
-    )
-}
+    );
+};

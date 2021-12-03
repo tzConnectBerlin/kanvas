@@ -1,5 +1,5 @@
-import { IUser } from './user'
-import { IArtwork } from './artwork'
+import { IUser } from './user';
+import { IArtwork } from './artwork';
 
 export enum NotificationEnum {
     FOLLOWING = 'following',
@@ -21,18 +21,18 @@ export enum CurrencyEnum {
 }
 
 export interface ISaleInfo {
-    type: 'auction' | 'drop' | 'fixedPrice'
-    price: number
-    sellerPrice: number
-    currency: CurrencyEnum
+    type: 'auction' | 'drop' | 'fixedPrice';
+    price: number;
+    sellerPrice: number;
+    currency: CurrencyEnum;
 }
 
 export interface INotification {
-    date: Date
-    description: string
-    concernedUser: IUser
-    concernedNft?: IArtwork
-    saleInfo?: ISaleInfo
-    read: boolean
-    type: NotificationEnum
+    date: Date;
+    description: string;
+    concernedUser: IUser;
+    concernedNft?: IArtwork;
+    saleInfo?: ISaleInfo;
+    read: boolean;
+    type: NotificationEnum;
 }

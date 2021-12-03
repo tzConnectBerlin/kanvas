@@ -1,31 +1,31 @@
-import styled from '@emotion/styled'
-import Profile from './pages/Profile'
-import StorePage from './pages/StorePage'
-import HomePage from './pages/HomePage'
-import Faq from './pages/Faq'
-import Privacy from './pages/Privacy'
-import CreateNFT from './pages/CreateNFT'
-import EditProfile from './pages/EditProfile'
-import ProductPage from './pages/Product'
-import NotFound from './pages/NotFound'
-import ShoppingCart from './design-system/organismes/ShoppingCart'
-import useAxios from 'axios-hooks'
-import ScrollToTop from './ScrollToTop'
-import CookieBanner from './design-system/molecules/CookiesBanner'
-import { Redirect } from 'react-router'
-import { KUKAI_NETWORK, RPC_URL } from './global'
-import { Theme } from '@mui/material'
-import { useEffect, useState } from 'react'
-import { darkTheme, lightTheme } from './theme'
-import { KukaiEmbed, Networks } from 'kukai-embed'
-import { BeaconWallet } from '@taquito/beacon-wallet'
-import { initTezos, initWallet } from './contracts/init'
-import { Header } from './design-system/organismes/Header'
-import { Footer } from './design-system/organismes/Footer'
-import { BrowserRouter, Route, Switch } from 'react-router-dom'
-import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles'
-import { INft } from './interfaces/artwork'
-import { toast } from 'react-toastify'
+import styled from '@emotion/styled';
+import Profile from './pages/Profile';
+import StorePage from './pages/StorePage';
+import HomePage from './pages/HomePage';
+import Faq from './pages/Faq';
+import Privacy from './pages/Privacy';
+import CreateNFT from './pages/CreateNFT';
+import EditProfile from './pages/EditProfile';
+import ProductPage from './pages/Product';
+import NotFound from './pages/NotFound';
+import ShoppingCart from './design-system/organismes/ShoppingCart';
+import useAxios from 'axios-hooks';
+import ScrollToTop from './ScrollToTop';
+import CookieBanner from './design-system/molecules/CookiesBanner';
+import { Redirect } from 'react-router';
+import { KUKAI_NETWORK, RPC_URL } from './global';
+import { Theme } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { darkTheme, lightTheme } from './theme';
+import { KukaiEmbed, Networks } from 'kukai-embed';
+import { BeaconWallet } from '@taquito/beacon-wallet';
+import { initTezos, initWallet } from './contracts/init';
+import { Header } from './design-system/organismes/Header';
+import { Footer } from './design-system/organismes/Footer';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
+import { INft } from './interfaces/artwork';
+import { toast } from 'react-toastify';
 
 const StyledBrowserRouter = styled(BrowserRouter)<{ theme?: Theme }>`
     display: block;
@@ -33,23 +33,23 @@ const StyledBrowserRouter = styled(BrowserRouter)<{ theme?: Theme }>`
     #root {
         background-color: ${(props) => props.theme.palette.background.default};
     }
-`
+`;
 
 const Router = () => {
-    const hasCookie = document.cookie.match(/^(.*;)?\s*user\s*=\s*[^;]+(.*)?$/)
-    const [cookie, setCookie] = useState(false)
+    const hasCookie = document.cookie.match(/^(.*;)?\s*user\s*=\s*[^;]+(.*)?$/);
+    const [cookie, setCookie] = useState(false);
 
-    const [embedKukai, setEmbedKukai] = useState<KukaiEmbed>()
-    const [beaconWallet, setBeaconWallet] = useState<BeaconWallet>()
+    const [embedKukai, setEmbedKukai] = useState<KukaiEmbed>();
+    const [beaconWallet, setBeaconWallet] = useState<BeaconWallet>();
 
     const [selectedTheme, setSelectedTheme] = useState<'light' | 'dark'>(
         localStorage.getItem('Kanvas - theme') as 'light' | 'dark',
-    )
+    );
 
-    const darkThemeResponsive = responsiveFontSizes(darkTheme)
-    const lightThemeResponsive = responsiveFontSizes(lightTheme)
+    const darkThemeResponsive = responsiveFontSizes(darkTheme);
+    const lightThemeResponsive = responsiveFontSizes(lightTheme);
 
-    const [nftsInCart, setNftsInCart] = useState<INft[]>([])
+    const [nftsInCart, setNftsInCart] = useState<INft[]>([]);
 
     const [listCartResponse, listCart] = useAxios(
         {
@@ -58,9 +58,9 @@ const Router = () => {
             withCredentials: true,
         },
         { manual: true },
-    )
+    );
 
-    const [listCalled, setListCalled] = useState(false)
+    const [listCalled, setListCalled] = useState(false);
 
     // Getting list of nfts in the cart
     useEffect(() => {
@@ -74,16 +74,16 @@ const Router = () => {
         })
             .then((res) => setListCalled(true))
             .catch((err) => {
-                setListCalled(true)
-                toast.error(err)
-            })
-    }, [])
+                setListCalled(true);
+                toast.error(err);
+            });
+    }, []);
 
     useEffect(() => {
         if (listCartResponse.data) {
-            setNftsInCart(listCartResponse.data.nfts)
+            setNftsInCart(listCartResponse.data.nfts);
         }
-    }, [listCartResponse])
+    }, [listCartResponse]);
 
     useEffect(() => {
         if (!embedKukai) {
@@ -92,22 +92,22 @@ const Router = () => {
                     net: Networks[KUKAI_NETWORK],
                     icon: false,
                 }),
-            )
+            );
         }
-    }, [])
+    }, []);
 
     useEffect(() => {
-        initTezos(RPC_URL)
-        setBeaconWallet(initWallet())
-    }, [])
+        initTezos(RPC_URL);
+        setBeaconWallet(initWallet());
+    }, []);
 
     const handleSelectTheme = (themeName: 'dark' | 'light') => {
-        setSelectedTheme(themeName)
-        localStorage.setItem('Kanvas - theme', themeName)
-    }
+        setSelectedTheme(themeName);
+        localStorage.setItem('Kanvas - theme', themeName);
+    };
 
-    const [cartOpen, setCartOpen] = useState(false)
-    const [loginOpen, setLoginOpen] = useState(false)
+    const [cartOpen, setCartOpen] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
 
     return (
         <ThemeProvider
@@ -188,7 +188,7 @@ const Router = () => {
                 <Footer />
             </StyledBrowserRouter>
         </ThemeProvider>
-    )
-}
+    );
+};
 
-export default Router
+export default Router;

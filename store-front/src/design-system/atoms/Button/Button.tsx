@@ -1,49 +1,49 @@
-import styled from '@emotion/styled'
-import CustomCircularProgress from '../CircularProgress'
+import styled from '@emotion/styled';
+import CustomCircularProgress from '../CircularProgress';
 
-import { FC } from 'react'
-import { Typography } from '../Typography'
+import { FC } from 'react';
+import { Typography } from '../Typography';
 import {
     Button as MButton,
     ButtonProps as MButtonProps,
     Theme,
-} from '@mui/material'
+} from '@mui/material';
 
 export interface CustomButtonProps extends MButtonProps {
     /**
      * Is this the principal call to action on the page?
      */
-    primary?: boolean
+    primary?: boolean;
     /**
      * What background color to use
      */
-    backgroundColor?: string
+    backgroundColor?: string;
     /**
      * How large should the button be?
      */
-    size?: 'small' | 'medium' | 'large'
+    size?: 'small' | 'medium' | 'large';
     /**
      * Button contents
      */
-    label: string
+    label: string;
     /**
      * Optional click handler
      */
-    textSize?: 'Light' | 'Medium' | 'SemiBold'
-    onClick?: (e?: any) => void
+    textSize?: 'Light' | 'Medium' | 'SemiBold';
+    onClick?: (e?: any) => void;
 
-    loading?: boolean
+    loading?: boolean;
 
-    icon?: any
+    icon?: any;
 
-    verified?: boolean
+    verified?: boolean;
 }
 
 interface StyledButtonProps {
-    verified?: boolean
-    bordercolor: string
-    theme?: Theme
-    primary: boolean
+    verified?: boolean;
+    bordercolor: string;
+    theme?: Theme;
+    primary: boolean;
 }
 
 const StyledButton = styled(MButton)<StyledButtonProps>`
@@ -129,12 +129,12 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
     }
 
     transition: all 0.1s linear;
-`
+`;
 
 const StyledContainer = styled.div`
     display: flex;
     align-items: center;
-`
+`;
 
 export const CustomButton: FC<CustomButtonProps> = ({
     primary = true,
@@ -169,5 +169,5 @@ export const CustomButton: FC<CustomButtonProps> = ({
                 </StyledContainer>
             )}
         </StyledButton>
-    )
-}
+    );
+};

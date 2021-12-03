@@ -1,28 +1,28 @@
-import styled from '@emotion/styled'
-import Avatar from '../../atoms/Avatar'
-import Typography from '../../atoms/Typography'
-import FlexSpacer from '../../atoms/FlexSpacer'
+import styled from '@emotion/styled';
+import Avatar from '../../atoms/Avatar';
+import Typography from '../../atoms/Typography';
+import FlexSpacer from '../../atoms/FlexSpacer';
 
-import { FC, useState } from 'react'
-import { FiCopy } from 'react-icons/fi'
-import { Skeleton, Stack, Theme } from '@mui/material'
-import { IUser } from '../../../interfaces/user'
-import { CustomButton } from '../../atoms/Button'
-import { Animated } from 'react-animated-css'
+import { FC, useState } from 'react';
+import { FiCopy } from 'react-icons/fi';
+import { Skeleton, Stack, Theme } from '@mui/material';
+import { IUser } from '../../../interfaces/user';
+import { CustomButton } from '../../atoms/Button';
+import { Animated } from 'react-animated-css';
 
 interface HeaderProfileProps {
-    user: IUser
-    loading: boolean
-    theme?: Theme
-    nftsCount: number
-    editProfile: Function
+    user: IUser;
+    loading: boolean;
+    theme?: Theme;
+    nftsCount: number;
+    editProfile: Function;
 }
 
 const FiCopyStyled = styled(FiCopy)<{ theme?: Theme; loading: boolean }>`
     color: ${(props) =>
         props.loading ? '#C4C4C4' : props.theme.palette.text.primary};
     cursor: ${(props) => (props.loading ? '' : 'pointer')};
-`
+`;
 
 const StyledPictureStack = styled(Stack)`
     /* justify-content: center; */
@@ -35,16 +35,16 @@ const StyledPictureStack = styled(Stack)`
         margin-top: 2rem;
         min-height: 8rem;
     }
-`
+`;
 
 const StyledTypography = styled(Typography)`
     -webkit-box-align: start;
-`
+`;
 
 const AddressStack = styled(Stack)`
     display: flex;
     margin-top: 0.5rem;
-`
+`;
 
 const MobileWrapperStack = styled(Stack)`
     display: none;
@@ -56,7 +56,7 @@ const MobileWrapperStack = styled(Stack)`
     @media (max-width: 650px) {
         display: flex;
     }
-`
+`;
 
 const DesktopWrapperStack = styled(Stack)`
     display: flex;
@@ -65,34 +65,34 @@ const DesktopWrapperStack = styled(Stack)`
     @media (max-width: 650px) {
         display: none;
     }
-`
+`;
 
 const StyledAnimated = styled(Animated)`
     display: flex;
     justify-content: center;
-`
+`;
 
 export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
-    const [tooltipText, setTooltipText] = useState('')
-    const [showCopyOverlay, setShowCopyOverlay] = useState(false)
+    const [tooltipText, setTooltipText] = useState('');
+    const [showCopyOverlay, setShowCopyOverlay] = useState(false);
 
     const copyAddressToClipBoard = () => {
         try {
-            navigator.clipboard.writeText(props.user?.userAddress)
+            navigator.clipboard.writeText(props.user?.userAddress);
 
-            setTooltipText('Copied !') // copy succeed.
-            setShowCopyOverlay(true)
+            setTooltipText('Copied !'); // copy succeed.
+            setShowCopyOverlay(true);
 
             setTimeout(() => {
-                setShowCopyOverlay(false)
-            }, 1000)
+                setShowCopyOverlay(false);
+            }, 1000);
         } catch (e) {
-            setTooltipText('Oops..') // copy failed.
+            setTooltipText('Oops..'); // copy failed.
             setTimeout(() => {
-                setShowCopyOverlay(false)
-            }, 1000)
+                setShowCopyOverlay(false);
+            }, 1000);
         }
-    }
+    };
 
     return (
         <>
@@ -365,5 +365,5 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                 </Stack>
             </MobileWrapperStack>
         </>
-    )
-}
+    );
+};

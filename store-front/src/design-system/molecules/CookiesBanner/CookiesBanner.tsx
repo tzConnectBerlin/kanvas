@@ -1,35 +1,35 @@
-import * as React from 'react'
-import styled from '@emotion/styled'
-import { Grid, Paper, useMediaQuery, useTheme } from '@mui/material'
-import { CustomButton } from '../../atoms/Button'
-import { Typography } from '../../atoms/Typography'
-import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
-import { Theme } from '@mui/material'
-import FlexSpacer from '../../atoms/FlexSpacer'
+import * as React from 'react';
+import styled from '@emotion/styled';
+import { Grid, Paper, useMediaQuery, useTheme } from '@mui/material';
+import { CustomButton } from '../../atoms/Button';
+import { Typography } from '../../atoms/Typography';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import { Theme } from '@mui/material';
+import FlexSpacer from '../../atoms/FlexSpacer';
 
 interface StyledPaperProps {
-    backgroundColor?: string
+    backgroundColor?: string;
 }
 
 export interface CookiesBannerProps {
-    theme?: Theme
+    theme?: Theme;
     /**
      * Title for the Cookies
      */
-    title?: string
+    title?: string;
     /**
      * text for the banner
      */
-    text?: string
+    text?: string;
     /**
      * checkboxes for the cookies
      */
-    standard?: { [name: string]: boolean }
+    standard?: { [name: string]: boolean };
     /**
      * the fields used to generate the checkbox options
      */
-    handleClose?: (title: string) => void | Promise<void>
+    handleClose?: (title: string) => void | Promise<void>;
 }
 
 const StyledLink = styled(Link)<{ theme?: Theme }>`
@@ -38,7 +38,7 @@ const StyledLink = styled(Link)<{ theme?: Theme }>`
     font-family: inherit;
     display: inline;
     text-decoration: underline;
-`
+`;
 const StyledPaper = styled(Paper)<StyledPaperProps>`
     background-color: #ccc;
     border-radius: 0.25rem;
@@ -49,7 +49,7 @@ const StyledPaper = styled(Paper)<StyledPaperProps>`
     bottom: 0;
     z-index: 100;
     box-shadow: 0 -4px 6px -2px rgba(9, 9, 9, 0.2);
-`
+`;
 
 const StyledGrid = styled(Grid)<{ isMobile: boolean }>`
     justify-content: ${({ isMobile }) => (isMobile ? 'center' : 'flex-start')};
@@ -66,42 +66,42 @@ const StyledGrid = styled(Grid)<{ isMobile: boolean }>`
                 isMobile ? '1.5rem' : 'initial'};
         }
     }
-`
+`;
 
 const defaultCookies = {
     necessary: true,
     preferences: false,
     statistics: false,
     marketing: false,
-}
+};
 
 const fullCookies = {
     necessary: true,
     preferences: true,
     statistics: true,
     marketing: true,
-}
+};
 
 export const CookiesBanner: React.FC<CookiesBannerProps> = ({
     title = 'Privacy Policy',
     standard = defaultCookies,
     handleClose,
 }) => {
-    const theme = useTheme()
-    const { t } = useTranslation(['translation'])
+    const theme = useTheme();
+    const { t } = useTranslation(['translation']);
 
-    const { primary } = theme.palette
-    const isMobile = useMediaQuery('(max-width:600px)')
-    const isDesktop = useMediaQuery('(min-width:1150px)')
-    const [cookie, setCookie] = React.useState(standard)
+    const { primary } = theme.palette;
+    const isMobile = useMediaQuery('(max-width:600px)');
+    const isDesktop = useMediaQuery('(min-width:1150px)');
+    const [cookie, setCookie] = React.useState(standard);
     const addCookie = (cookies: { [name: string]: boolean }) => {
-        document.cookie = `user=${JSON.stringify(cookies)}; max-age=8640000;}`
-    }
+        document.cookie = `user=${JSON.stringify(cookies)}; max-age=8640000;}`;
+    };
 
     const handleSubmit = () => {
-        addCookie(cookie)
-        handleClose && handleClose(title)
-    }
+        addCookie(cookie);
+        handleClose && handleClose(title);
+    };
 
     return (
         <StyledPaper elevation={0} backgroundColor={primary.main}>
@@ -146,5 +146,5 @@ export const CookiesBanner: React.FC<CookiesBannerProps> = ({
                 </Grid>
             </Grid>
         </StyledPaper>
-    )
-}
+    );
+};

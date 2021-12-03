@@ -1,31 +1,31 @@
-import styled from '@emotion/styled'
-import Typography from '../../atoms/Typography'
-import FlexSpacer from '../../atoms/FlexSpacer'
+import styled from '@emotion/styled';
+import Typography from '../../atoms/Typography';
+import FlexSpacer from '../../atoms/FlexSpacer';
 
-import { FC, useEffect, useState } from 'react'
-import { Theme, Stack, Box } from '@mui/material'
+import { FC, useEffect, useState } from 'react';
+import { Theme, Stack, Box } from '@mui/material';
 
 interface IAuction {
-    endDate?: number
-    startingPrice?: number
+    endDate?: number;
+    startingPrice?: number;
 }
 
 interface IDrop {
-    startDate?: number
-    price?: number
+    startDate?: number;
+    price?: number;
 }
 
 interface IFixedPrice {
-    price?: number
+    price?: number;
 }
 
 interface ArtworkCardProps {
-    url: string
-    artistName: string
-    curatorName?: string
-    drop: IDrop
-    auction: IAuction
-    fixedPrice: IFixedPrice
+    url: string;
+    artistName: string;
+    curatorName?: string;
+    drop: IDrop;
+    auction: IAuction;
+    fixedPrice: IFixedPrice;
 }
 
 const StyledElement = styled.span<{ url?: string }>`
@@ -42,28 +42,28 @@ const StyledElement = styled.span<{ url?: string }>`
     :hover {
         opacity: 0.5;
     }
-`
+`;
 
 export const ArtworkCard: FC<ArtworkCardProps> = ({ ...props }) => {
     const [saleType, setSaleType] = useState<
         'Drop' | 'FixedPrice' | 'Auction' | null
-    >(null)
-    const [price, setPrice] = useState<number | null>(null)
+    >(null);
+    const [price, setPrice] = useState<number | null>(null);
 
     const calculateTimeLeft = (dropOrAuctionDate: number | undefined) => {
         const endDate =
             dropOrAuctionDate ??
-            new Date(new Date().getTime() + new Date().getTimezoneOffset())
+            new Date(new Date().getTime() + new Date().getTimezoneOffset());
 
         // Change Reference date to utc as datetime are stored in utc in the DB
         let difference =
             +new Date(endDate) -
-            +new Date(new Date().getTime() + new Date().getTimezoneOffset())
+            +new Date(new Date().getTime() + new Date().getTimezoneOffset());
 
-        if (difference > 0) return new Date(difference - 3600000)
+        if (difference > 0) return new Date(difference - 3600000);
 
-        return undefined
-    }
+        return undefined;
+    };
 
     const [timeLeft, setTimeLeft] = useState<Date | undefined>(
         calculateTimeLeft(
@@ -73,45 +73,45 @@ export const ArtworkCard: FC<ArtworkCardProps> = ({ ...props }) => {
                 ? props.auction.endDate
                 : undefined,
         ),
-    )
+    );
 
     useEffect(() => {
         if (props.drop && props.drop.price) {
-            setSaleType('Drop')
+            setSaleType('Drop');
         } else if (props.auction && props.auction.startingPrice) {
-            setSaleType('Auction')
+            setSaleType('Auction');
         } else if (props.fixedPrice && props.fixedPrice.price) {
-            setSaleType('FixedPrice')
+            setSaleType('FixedPrice');
         }
-    }, [])
+    }, []);
 
     useEffect(() => {
         if (props.drop.startDate) {
-            setTimeLeft(calculateTimeLeft(props.drop.startDate))
+            setTimeLeft(calculateTimeLeft(props.drop.startDate));
 
             setTimeout(() => {
-                setTimeLeft(timeLeft)
-            }, 1000)
+                setTimeLeft(timeLeft);
+            }, 1000);
         } else if (props.auction.endDate) {
-            setTimeLeft(calculateTimeLeft(props.auction.endDate))
+            setTimeLeft(calculateTimeLeft(props.auction.endDate));
 
             setTimeout(() => {
-                setTimeLeft(timeLeft)
-            }, 1000)
+                setTimeLeft(timeLeft);
+            }, 1000);
         }
-    }, [timeLeft])
+    }, [timeLeft]);
 
     useEffect(() => {
         if (props.drop.startDate && props.drop.price) {
-            setPrice(props.drop.price)
+            setPrice(props.drop.price);
         } else if (
             props.auction.startingPrice &&
             props.auction.endDate &&
             props.auction.endDate > Date.now()
         ) {
-            setPrice(props.auction.startingPrice)
+            setPrice(props.auction.startingPrice);
         }
-    }, [props.drop, props.auction])
+    }, [props.drop, props.auction]);
 
     return (
         <Stack direction="column" sx={{ width: '100%', height: '100%' }}>
@@ -208,5 +208,5 @@ export const ArtworkCard: FC<ArtworkCardProps> = ({ ...props }) => {
                 </>
             </Stack>
         </Stack>
-    )
-}
+    );
+};

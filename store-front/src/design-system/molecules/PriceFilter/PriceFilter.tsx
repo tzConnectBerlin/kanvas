@@ -1,19 +1,19 @@
-import styled from '@emotion/styled'
-import Typography from '../../atoms/Typography'
+import styled from '@emotion/styled';
+import Typography from '../../atoms/Typography';
 
-import { FC, useState } from 'react'
-import { Stack, Slider, Theme, TextField } from '@mui/material'
+import { FC, useState } from 'react';
+import { Stack, Slider, Theme, TextField } from '@mui/material';
 
 interface PriceFilterProps {
-    minRange: number
-    maxRange: number
-    range?: [number, number]
-    setRange: Function
-    triggerPriceFilter: () => void
-    setFilterSliding: (input: boolean) => void
+    minRange: number;
+    maxRange: number;
+    range?: [number, number];
+    setRange: Function;
+    triggerPriceFilter: () => void;
+    setFilterSliding: (input: boolean) => void;
 }
 
-const StyledTextField = styled(TextField) <{ theme?: Theme }>`
+const StyledTextField = styled(TextField)<{ theme?: Theme }>`
     outline: none;
     border-bottom: 1px solid #c4c4c4;
 
@@ -36,13 +36,13 @@ const StyledTextField = styled(TextField) <{ theme?: Theme }>`
     }
 
     transition: all 0.2s;
-`
+`;
 
 const StyledSlider = styled(Slider)`
     .MuiSlider-valueLabelCircle {
         display: none;
     }
-`
+`;
 
 export const PriceFilter: FC<PriceFilterProps> = ({ ...props }) => {
     return (
@@ -86,15 +86,15 @@ export const PriceFilter: FC<PriceFilterProps> = ({ ...props }) => {
                 min={props.minRange}
                 max={props.maxRange}
                 onChange={(_, newValues) => {
-                    props.setRange(newValues as [number, number])
+                    props.setRange(newValues as [number, number]);
                 }}
                 onChangeCommitted={() => {
                     props.triggerPriceFilter();
-                    props.setFilterSliding(false)
+                    props.setFilterSliding(false);
                 }}
                 valueLabelDisplay="auto"
                 getAriaValueText={() => 'valuetext'}
             />
         </Stack>
-    )
-}
+    );
+};

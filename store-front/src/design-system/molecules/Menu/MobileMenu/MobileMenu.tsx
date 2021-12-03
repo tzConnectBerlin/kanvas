@@ -1,31 +1,31 @@
-import styled from '@emotion/styled'
-import Avatar from '../../../atoms/Avatar'
-import FlexSpacer from '../../../atoms/FlexSpacer'
-import Brightness3Icon from '@mui/icons-material/Brightness3'
-import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
-import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined'
+import styled from '@emotion/styled';
+import Avatar from '../../../atoms/Avatar';
+import FlexSpacer from '../../../atoms/FlexSpacer';
+import Brightness3Icon from '@mui/icons-material/Brightness3';
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 
-import { FC, useEffect, useState } from 'react'
-import { Badge, Stack, Theme } from '@mui/material'
-import { CustomButton } from '../../../atoms/Button'
-import { Typography } from '../../../atoms/Typography'
+import { FC, useEffect, useState } from 'react';
+import { Badge, Stack, Theme } from '@mui/material';
+import { CustomButton } from '../../../atoms/Button';
+import { Typography } from '../../../atoms/Typography';
 import {
     MenuProps,
     SearchProps,
     StyledShoppingCartRoundedIcon,
     StyledLink,
-} from '../Menu'
-import { useTranslation } from 'react-i18next'
-import { useHistory } from 'react-router-dom'
-import { Box } from '@mui/system'
+} from '../Menu';
+import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
+import { Box } from '@mui/system';
 
 const WrapperThemeIcon = styled.div<SearchProps>`
     display: ${(props) => (props.isSearchOpen ? 'none' : 'flex')};
-`
+`;
 
 interface MenuIconProps {
-    expandMenu?: boolean
-    theme?: Theme
+    expandMenu?: boolean;
+    theme?: Theme;
 }
 
 const WrapperMenuIcon = styled.div<MenuIconProps>`
@@ -51,7 +51,7 @@ const WrapperMenuIcon = styled.div<MenuIconProps>`
         outline: ${(props) => `solid 2px ${props.theme.palette.text.primary}`};
         transition: filter 0.2s;
     }
-`
+`;
 
 const StyledMenuCloser = styled.div<MenuIconProps>`
     display: ${(props) => (props.expandMenu ? 'flex' : 'none')};
@@ -60,7 +60,7 @@ const StyledMenuCloser = styled.div<MenuIconProps>`
     left: 0;
     height: 100vh;
     width: 100vw;
-`
+`;
 
 const MenuBarUp = styled.div<MenuIconProps>`
     background: ${(props) => props.theme.palette.text.primary};
@@ -72,7 +72,7 @@ const MenuBarUp = styled.div<MenuIconProps>`
     width: 22px;
     transform: ${(props) =>
         props.expandMenu ? 'rotate(45deg) translateY(-4.8px)' : undefined};
-`
+`;
 
 const MenuBarDown = styled.div<MenuIconProps>`
     background: ${(props) => props.theme.palette.text.primary};
@@ -88,12 +88,12 @@ const MenuBarDown = styled.div<MenuIconProps>`
             : undefined};
     margin-top: 8px;
     transform-origin: center;
-`
+`;
 
 const MenuBarWrapper = styled.div`
     height: auto;
     display: inline-table;
-`
+`;
 
 const MobileStyledMenuHeader = styled(Stack)<SearchProps>`
     display: none;
@@ -115,7 +115,7 @@ const MobileStyledMenuHeader = styled(Stack)<SearchProps>`
         width: ${(props) => (props.isSearchOpen ? '100%' : '')};
         margin-left: auto !important;
     }
-`
+`;
 
 const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
     display: none;
@@ -162,7 +162,7 @@ const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
     @media (max-width: 650px) {
         width: ${(props) => (props.expandMenu ? 100 : 0)}%;
     }
-`
+`;
 
 const StyledBox = styled.div`
     @media (max-width: 874px) {
@@ -171,13 +171,13 @@ const StyledBox = styled.div`
         padding: 0 1.5rem;
         height: 100%;
     }
-`
+`;
 
 export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
-    const { t } = useTranslation(['translation'])
-    const history = useHistory()
+    const { t } = useTranslation(['translation']);
+    const history = useHistory();
 
-    const [expandMenu, setExpandMenu] = useState(false)
+    const [expandMenu, setExpandMenu] = useState(false);
 
     // const navigateTo = (componentURL: string) => {
     //     history.push(`/${componentURL}`)
@@ -185,11 +185,11 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
 
     useEffect(() => {
         if (expandMenu) {
-            document.body.style.overflow = 'hidden'
+            document.body.style.overflow = 'hidden';
         } else {
-            document.body.style.overflow = 'auto'
+            document.body.style.overflow = 'auto';
         }
-    }, [expandMenu])
+    }, [expandMenu]);
 
     return (
         <>
@@ -353,5 +353,5 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                 ) : undefined}
             </MobileStyledMenuContent>
         </>
-    )
-}
+    );
+};

@@ -1,29 +1,29 @@
-import useAxios from 'axios-hooks'
-import styled from '@emotion/styled'
-import Tabs from '../../design-system/molecules/Tabs'
-import NftGrid from '../../design-system/organismes/NftGrid'
-import FlexSpacer from '../../design-system/atoms/FlexSpacer'
-import PageWrapper from '../../design-system/commons/PageWrapper'
+import useAxios from 'axios-hooks';
+import styled from '@emotion/styled';
+import Tabs from '../../design-system/molecules/Tabs';
+import NftGrid from '../../design-system/organismes/NftGrid';
+import FlexSpacer from '../../design-system/atoms/FlexSpacer';
+import PageWrapper from '../../design-system/commons/PageWrapper';
 
-import { Pagination, Stack } from '@mui/material'
-import { IUser } from '../../interfaces/user'
-import { Animated } from 'react-animated-css'
-import { FC, useEffect, useState } from 'react'
-import { useHistory, useLocation, useParams } from 'react-router'
-import { HeaderProfile } from '../../design-system/molecules/HeaderProfile/HeaderProfile'
-import { Theme } from '@mui/material'
+import { Pagination, Stack } from '@mui/material';
+import { IUser } from '../../interfaces/user';
+import { Animated } from 'react-animated-css';
+import { FC, useEffect, useState } from 'react';
+import { useHistory, useLocation, useParams } from 'react-router';
+import { HeaderProfile } from '../../design-system/molecules/HeaderProfile/HeaderProfile';
+import { Theme } from '@mui/material';
 
 interface ParamTypes {
-    userAddress: string
-    tab?: string
+    userAddress: string;
+    tab?: string;
 }
 
-interface ProfileProps { }
+interface ProfileProps {}
 
 const StyledStack = styled(Stack)`
     width: 100vw;
     max-width: 100rem;
-`
+`;
 
 const StyledAnimated = styled(Animated)`
     display: 'initial';
@@ -33,7 +33,7 @@ const StyledAnimated = styled(Animated)`
         padding-left: 0rem !important;
         padding-right: 0rem !important;
     }
-`
+`;
 
 const StyledDiv = styled.div`
     transition: max-height 0.5s, min-height 0.5s;
@@ -41,11 +41,11 @@ const StyledDiv = styled.div`
     @media (max-width: 650px) {
         padding-top: 2rem;
     }
-`
+`;
 
-const StyledPagination = styled(Pagination) <{
-    theme?: Theme
-    display: boolean
+const StyledPagination = styled(Pagination)<{
+    theme?: Theme;
+    display: boolean;
 }>`
     display: ${(props) => (props.display ? 'flex' : 'none')};
 
@@ -57,7 +57,7 @@ const StyledPagination = styled(Pagination) <{
 
     .MuiPaginationItem-root.Mui-selected {
         background-color: ${(props) =>
-        props.theme.palette.background.default} !important;
+            props.theme.palette.background.default} !important;
         border: 1px solid ${(props) => props.theme.palette.text.primary} !important;
     }
 
@@ -65,16 +65,16 @@ const StyledPagination = styled(Pagination) <{
         display: flex;
         align-items: center !important;
     }
-`
+`;
 
 const Profile: FC<ProfileProps> = () => {
-    let { userAddress } = useParams<ParamTypes>()
+    let { userAddress } = useParams<ParamTypes>();
 
-    const history = useHistory()
-    const location = useLocation<{ refresh: boolean }>()
+    const history = useHistory();
+    const location = useLocation<{ refresh: boolean }>();
 
     // Using the useState hook in case adding more tabs in the future
-    const [selectedTab, setSelectedTab] = useState('Collection')
+    const [selectedTab, setSelectedTab] = useState('Collection');
 
     const [userResponse, getUser] = useAxios(
         {
@@ -82,7 +82,7 @@ const Profile: FC<ProfileProps> = () => {
             withCredentials: true,
         },
         { manual: true },
-    )
+    );
 
     const [userNftsResponse, getUserNfts] = useAxios(
         {
@@ -94,44 +94,44 @@ const Profile: FC<ProfileProps> = () => {
             },
         },
         { manual: true },
-    )
+    );
 
     useEffect(() => {
         if (!userAddress) {
-            history.push('/404')
+            history.push('/404');
         }
 
         getUser({
             params: {
                 userAddress: userAddress,
             },
-        })
+        });
 
         getUserNfts({
             params: {
                 userAddress: userAddress,
                 pageSize: 12,
             },
-        })
-    }, [])
+        });
+    }, []);
 
     const handleSwitchTab = (newValue: number) => {
         switch (newValue) {
             // Collection
             case 1:
-                setSelectedTab('Collection')
-                break
+                setSelectedTab('Collection');
+                break;
             default:
-                setSelectedTab('Collection')
-                break
+                setSelectedTab('Collection');
+                break;
         }
-    }
+    };
 
     useEffect(() => {
         if (userResponse.error?.code === '404') {
-            history.push('/404')
+            history.push('/404');
         }
-    }, [userResponse])
+    }, [userResponse]);
 
     // Edit profile section
     const editProfile = () => {
@@ -139,19 +139,18 @@ const Profile: FC<ProfileProps> = () => {
             const currentUser = {
                 userName: userResponse.data?.user.userName,
                 profilePicture: userResponse.data?.user.profilePicture,
-            }
+            };
             history.push({
                 pathname: '/profile/edit',
                 state: { currentUser },
-            })
+            });
         }
-    }
+    };
 
-    const [selectedPage, setSelectedPage] = useState(1)
+    const [selectedPage, setSelectedPage] = useState(1);
 
     const handlePaginationChange = (event: any, page: number) => {
-
-        setSelectedPage(page)
+        setSelectedPage(page);
 
         getUserNfts({
             withCredentials: true,
@@ -160,8 +159,8 @@ const Profile: FC<ProfileProps> = () => {
                 page: page,
                 pageSize: 12,
             },
-        })
-    }
+        });
+    };
 
     return (
         <PageWrapper>
@@ -215,13 +214,16 @@ const Profile: FC<ProfileProps> = () => {
                         onChange={handlePaginationChange}
                         variant="outlined"
                         shape="rounded"
-                        disabled={userNftsResponse.loading || userNftsResponse.data?.numberOfPages === 1}
+                        disabled={
+                            userNftsResponse.loading ||
+                            userNftsResponse.data?.numberOfPages === 1
+                        }
                     />
                 </Stack>
                 <FlexSpacer minHeight={2} />
             </StyledStack>
         </PageWrapper>
-    )
-}
+    );
+};
 
-export default Profile
+export default Profile;
