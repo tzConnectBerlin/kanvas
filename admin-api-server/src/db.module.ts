@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import { assertEnv } from './utils';
 import { PG_CONNECTION } from './constants';
-import { Client, PoolClient, types } from 'pg';
+import { Client, types } from 'pg';
 import * as Pool from 'pg-pool';
 
 dotenv.config();
 
-export type DbClient = Client & PoolClient;
+export type DbPool = Pool<Client>;
 
 // Read postgres TIMESTAMP WITHOUT TIME ZONE values as UTC+0 Date
 types.setTypeParser(
@@ -28,9 +28,7 @@ export const dbPool = new Pool({
 
 const dbProvider = {
   provide: PG_CONNECTION,
-  useFactory: async (): Promise<DbClient> => {
-    return dbPool.connect();
-  },
+  useValue: dbPool,
 };
 
 @Module({

@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { PG_CONNECTION } from '../constants';
-import { DbClient } from '../db.module';
+import { DbPool } from '../db.module';
 import { hashPassword } from '../utils';
 import { UserDto } from './dto/user.dto';
 import { User } from './entities/user.entity';
@@ -14,30 +14,23 @@ const getSelectStatement = (whereClause = ''): string => {
 
 @Injectable()
 export class UserService {
-  constructor(@Inject(PG_CONNECTION) private db: DbClient) {}
+  constructor(@Inject(PG_CONNECTION) private db: DbPool) {}
   async create({ password, roles, ...rest }: UserDto) {
+    const client = await this.db.connect();
     const hashedPassword = await hashPassword(password);
     try {
-      await this.db.query('BEGIN');
-      const resultInsertUser = await this.db.query(
+      await client.query('BEGIN');
+      const resultInsertUser = await client.query(
         'INSERT INTO kanvas_user (email, user_name, address, password) VALUES ($1, $2, $3, $4) RETURNING id',
         [rest.email, rest.userName, rest.address, hashedPassword],
       );
       const userId = resultInsertUser.rows[0].id;
-      let rolesIndex = 0;
-      const insertRolesQuery = `INSERT INTO mtm_kanvas_user_user_role (kanvas_user_id, user_role_id) values ${roles
-        .map(() => {
-          const userIdIndex = rolesIndex + 1;
-          rolesIndex = userIdIndex + 1;
-          return `($${userIdIndex}, $${rolesIndex})`;
-        })
-        .join(',')}`;
-      const insertRoleValues = roles.map((roleId) => [userId, roleId]).flat();
-      await this.db.query(insertRolesQuery, insertRoleValues);
-      await this.db.query('COMMIT');
+      const insertRolesQuery = `INSERT INTO mtm_kanvas_user_user_role (kanvas_user_id, user_role_id) values ($1, unnest($2::integer[]))`;
+      await client.query(insertRolesQuery, [userId, roles]);
+      await client.query('COMMIT');
       return { id: userId, roles, ...rest };
     } catch (e) {
-      await this.db.query('ROLLBACK');
+      await client.query('ROLLBACK');
       throw new HttpException(
         'Unable to create new user',
         HttpStatus.BAD_REQUEST,

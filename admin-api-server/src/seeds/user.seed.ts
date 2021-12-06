@@ -3,9 +3,8 @@ import { dbPool } from '../db.module';
 import { RoleService } from '../role/role.service';
 
 export const seedUser = async () => {
-  const client = await dbPool.connect();
-  const roleService = new RoleService(client);
-  const userService = new UserService(client);
+  const roleService = new RoleService(dbPool);
+  const userService = new UserService(dbPool);
   const adminRole = await roleService.create({ id: 1, roleLabel: 'admin' });
   await userService.create({
     password: 'supersafepassword',

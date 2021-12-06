@@ -1,11 +1,11 @@
 import { Injectable, Inject, HttpException, HttpStatus } from '@nestjs/common';
 import { PG_CONNECTION } from '../constants';
-import { DbClient } from '../db.module';
+import { DbPool } from '../db.module';
 import { Role } from './role.entity';
 
 @Injectable()
 export class RoleService {
-  constructor(@Inject(PG_CONNECTION) private db: DbClient) {}
+  constructor(@Inject(PG_CONNECTION) private db: DbPool) {}
   async create({ id, roleLabel }: Role) {
     try {
       await this.db.query(
