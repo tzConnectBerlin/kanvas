@@ -1,10 +1,7 @@
 import styled from '@emotion/styled'
-import { ArrowBackIosNew } from '@mui/icons-material'
-
 import { Stack, Theme, useMediaQuery } from '@mui/material'
 import useAxios from 'axios-hooks'
 import { FC, useEffect, useRef, useState } from 'react'
-
 import { SearchInput } from '../../atoms/SearchInput';
 import { QuickSearchResult } from '../../molecules/QuickSearchResult';
 

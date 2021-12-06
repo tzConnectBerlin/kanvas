@@ -467,7 +467,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                                 color="secondary"
                                 type="submit"
                                 label={t('filters.button.results')}
-                                onClick={() => props.setFilterOpen(false)}
+                                onClick={() => props.setFilterOpen(true)}
                                 style={{
                                     order: isMobile ? 99 : 0,
                                     color: theme.palette.primary.main,
