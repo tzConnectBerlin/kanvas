@@ -74,12 +74,12 @@ const lightThemePalette: PaletteOptions = {
         dark: 'rgba(30, 30, 30, 1)',
         main: 'rgba(1, 102, 255, 1)',
         light: 'rgba(1, 102, 255, 0.12)',
-        contrastText: '#0088a7',
+        contrastText: 'rgba(1, 102, 255, 1)',
     },
     secondary: {
         dark: 'rgba(1, 102, 255, 0.10)',
         main: 'rgba(1, 102, 255, 0.12)',
-        contrastText: '#0088a7',
+        contrastText: 'rgba(1, 102, 255, 1)',
     },
     success: {
         dark: 'rgba(212, 241, 204, 1)',
@@ -123,12 +123,12 @@ const darkThemePalette: PaletteOptions = {
         dark: '#ebebeb',
         main: 'rgba(1, 102, 255, 1)',
         light: 'rgba(1, 102, 255, 0.12)',
-        contrastText: '#0088a7',
+        contrastText: 'rgba(1, 102, 255, 1)',
     },
     secondary: {
         dark: 'rgba(1, 102, 255, 0.10)',
         main: 'rgba(1, 102, 255, 0.12)',
-        contrastText: 'r#0088a7',
+        contrastText: 'rgba(1, 102, 255, 1)',
     },
     success: {
         dark: 'rgba(212, 241, 204, 1)',

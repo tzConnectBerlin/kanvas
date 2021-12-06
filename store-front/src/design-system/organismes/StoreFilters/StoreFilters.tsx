@@ -61,6 +61,7 @@ interface StyledStoreFiltersProps {
 }
 
 interface StoreFiltersProps extends StyledStoreFiltersProps {
+    preSelectedFilters: number[];
     selectedFilters: number[];
     setSelectedFilters: Function;
     availableFilters: any[];
@@ -269,7 +270,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                         <FlexSpacer />
 
                         <Typography
-                            onClick={() => props.setSelectedFilters([])}
+                            onClick={() => {props.setSelectedFilters([]); props.setAvailabilityFilter([]); props.setPriceFilterRange([props.minRange, props.maxRange]) }}
                             size="subtitle2"
                             weight={
                                 props.selectedFilters.length > 0
@@ -318,7 +319,6 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                     <StyledLi
                         openFilters={props.openFilters}
                         collapsed={activeRef.indexOf('Categories') !== -1}
-                        style={{ marginBottom: '1rem' }}
                     >
                         <Filter
                             name="Categories"
@@ -330,6 +330,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                             loading={props.loading}
                             open={props.openFilters}
                             nodes={props.availableFilters}
+                            preSelectedFilters={props.preSelectedFilters}
                             selectedFilters={props.selectedFilters}
                             callNFTsEndpoint={callNFTsEndpoint}
                             setSelectedFilters={props.setSelectedFilters}

@@ -93,7 +93,7 @@ const StorePage = () => {
 
     // Categories state
     const [selectedCategories, setSelectedCategories] = useState<any[]>([]);
-
+    const [preSelectedCategories, setPreSelectedCategories] = useState<any[]>([])
     // Availability state
     const [selectedAvailability, setSelectedAvailability] = useState<string[]>(
         [],
@@ -211,7 +211,7 @@ const StorePage = () => {
 
         // Categories
         if (categories) {
-            setSelectedCategories(
+            setPreSelectedCategories(
                 categories.split(',').map((categoryId) => Number(categoryId)),
             );
         }
@@ -374,6 +374,7 @@ const StorePage = () => {
                         openFilters={isMobile ? !filterOpen : filterOpen}
                         callNFTsEndpoint={callNFTsEndpoint}
                         setFilterOpen={setFilterOpen}
+                        preSelectedFilters={preSelectedCategories}
                         selectedFilters={selectedCategories}
                         setSelectedFilters={setSelectedCategories}
                         priceFilterRange={priceFilterRange}
