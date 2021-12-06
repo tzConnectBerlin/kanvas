@@ -27,4 +27,9 @@ export class UserDto {
   @JoiSchema([CREATE], Joi.string().required())
   @JoiSchema([UPDATE], Joi.forbidden())
   password?: string;
+
+  @JoiSchema(Joi.array().items(Joi.number()))
+  @JoiSchema([CREATE], Joi.array().items(Joi.number()).required())
+  @JoiSchema([UPDATE], Joi.array().items(Joi.number()).optional())
+  roles: number[];
 }
