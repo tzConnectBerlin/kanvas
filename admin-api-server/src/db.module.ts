@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import * as dotenv from 'dotenv';
-import { assertEnv } from 'src/utils';
+import { assertEnv } from './utils';
 import { PG_CONNECTION } from './constants';
 import { Client, PoolClient, types } from 'pg';
 import * as Pool from 'pg-pool';
@@ -18,7 +18,7 @@ types.setTypeParser(
 );
 console.debug('PORT IS', Number(assertEnv('DB_PORT')));
 
-const dbPool = new Pool({
+export const dbPool = new Pool({
   host: assertEnv('DB_HOST'),
   port: Number(assertEnv('DB_PORT')),
   user: assertEnv('DB_USERNAME'),

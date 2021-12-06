@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { PG_CONNECTION } from 'src/constants';
-import { DbClient } from 'src/db.module';
-import { hashPassword } from 'src/utils';
+import { PG_CONNECTION } from '../constants';
+import { DbClient } from '../db.module';
+import { hashPassword } from '../utils';
 import { UserDto } from './dto/user.dto';
 import { User } from './entities/user.entity';
 
