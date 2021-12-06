@@ -1,15 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { assert } from 'src/utils';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
-    assert(
-      typeof process.env.JWT_SECRET === 'string',
-      'You must set environment variable JWT_SECRET before starting this program',
-    );
+  constructor(private userService: UserService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -18,9 +14,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    return {
-      id: payload.sub,
-      userName: payload.userName,
-    };
+    const user = await this.userService.findOne(payload.sub);
+    if (!user.disabled) {
+      return user;
+    }
+    return null;
   }
 }
