@@ -1,0 +1,28 @@
+setup_nft:  <- this is the state the nft must be in to do things below
+- set_editions_size:   <- this is an action
+  - roles: [editor, creator]
+    attributes: [editions]
+- set_price:
+  - roles: [editor]
+    attributes: [price]
+- propose:
+  - roles: [editor]
+            \/   \/  set of preconditions that must hold on this NFT
+    guards: [editions > 0, price > 0]
+    new_state: proposed
+
+proposed:
+- reject:
+  - roles: [moderator]
+    new_state: setup_nft
+- accept:
+  - roles: [moderator]
+    new_state: prototype
+
+prototype:
+- accept:
+  - roles: [god]
+    new_state: deploy_to_store
+- reject:
+  - roles: [god]
+    new_state: setup_nft
