@@ -52,7 +52,8 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
     }
 
     .MuiSelect-select {
-        padding-top: 0.5rem !important;
+        background-color: ${props => props.theme.palette.background.paper};
+        padding-top: 0.6rem !important;
         padding-bottom: 0.7rem !important;
     }
 
