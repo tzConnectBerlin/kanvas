@@ -1,35 +1,53 @@
-setup_nft:  <- this is the state the nft must be in to do things below
-- state_transitions:
-  - new_state: proposed
-    when: [editions > 0, price > 0]
-- actions:
-  - set_editions_size:
-    - roles: [editor, creator]
-      attributes: [editions]
-  - set_price:
-    - roles: [editor]
-      attributes: [price]
+attributes:
+- price: integer
+  editions_size: integer
+  categories: [string]
+  proposed: boolean
+  proposal_pass: [user]
+  proposal_reject: [user]
+  prototype_pass: [user]
+  prototype_reject: [user]
 
-proposed:
-- state_transitions:
-  - new_state: setup_nft
-    when: [accepted]
-  - new_state: prototype
-    when: [rejected]
-- actions:
-  - reject:
-    - roles: [moderator]
-  - accept:
-    - roles: [moderator]
+# notes:
+# - mutable integers have set,unset
+# - mutable booleans have set,unset
+# - mutable [..] have add,unset
+# - [..] are probably going to be sets, not lists
 
-prototype:
-- state_transitions:
-  - new_state: finish
-    when: [accept_count == 3]
-  - new_state: setup_nft
-    when: [rejected]
-- actions:
-  - accept:
-    - roles: [god]
-  - reject:
-    - roles: [god]
+
+
+states:
+- setup_nft:
+  - state_transitions:
+    - next_state: proposed
+      when: 'proposed && editions > 0 && price > 0 && count(categories) > 0'
+  - mutables:
+    - attributes: [price, editions_size, proposed]
+      by_roles: [editor, creator]
+
+
+- proposed:
+  - state_transitions:
+    - next_state: setup_nft
+      when: 'count(proposal_rejects) > 0'
+      unset: [proposed, proposal_rejects, proposal_accepts]
+
+    - next_state: prototype
+      when: 'count(proposal_accepts) = 3'
+
+  - mutables:
+    - attributes: [proposal_accepts, proposal_rejects]
+      by_roles: [moderator]
+
+
+- prototype:
+  - state_transitions:
+    - new_state: finish
+      when: 'count(prototype_accepts) = 3'
+
+    - new_state: setup_nft
+      when: 'count(prototype_rejects) > 0'
+
+  - mutables:
+    - attributes: [prototype_accepts, prototype_rejects]
+      by_roles: [moderator]
