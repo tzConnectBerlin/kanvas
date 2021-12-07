@@ -1,4 +1,4 @@
-import { Skeleton, Stack, useMediaQuery, Theme, useTheme } from '@mui/material';
+import { Skeleton, Stack, Theme, useTheme } from '@mui/material';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '../../atoms/Typography';
@@ -6,6 +6,7 @@ import { useHistory } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { Box } from '@mui/system';
 import TezosLogo from '../../atoms/TezosLogo/TezosLogo';
+import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 
 export interface NftCardProps {
@@ -85,7 +86,7 @@ const StyledImg = styled.img<{ theme?: Theme; willDrop: boolean }>`
     object-position: center center;
     object-fit: cover;
     height: 100%;
-    opacity: ${(props) => (props.willDrop ? '0.4' : '1')} !important;  
+    opacity: ${(props) => (props.willDrop ? '0.4' : '1')} !important;
 `;
 
 const AvailabilityWrapper = styled.div<{ inStock: boolean; willDrop: boolean }>`
@@ -177,8 +178,8 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                             ? !launchTime
                                 ? false
                                 : launchTime > 0
-                                ? 'Drop'
-                                : 'In stock'
+                                    ? 'Drop'
+                                    : 'In stock'
                             : 'Sold out'}
                     </Typography>
                 </AvailabilityWrapper>
@@ -221,13 +222,10 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                             launchTime > 0 &&
                             `${new Date(
                                 launchTime,
-                            ).getDate()} days - ${new Date(
-                                launchTime,
-                            ).getHours()} : ${new Date(
-                                launchTime,
-                            ).getMinutes()} : ${new Date(
-                                launchTime,
-                            ).getSeconds()}`}
+                            ).getDate()} days - ${format(new Date(
+                                launchTime
+                            ), 'HH : mm : ss')}`
+                        }
                     </Typography>
 
                     <Box display="flex" flexDirection="row" marginLeft="auto">

@@ -81,7 +81,7 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
     callNFTsEndpoint: (input: IParamsNFTs) => void;
 }
 
-const BackButton = styled(ArrowBackIosNew)<StyledStoreFiltersProps>`
+const BackButton = styled(ArrowBackIosNew) <StyledStoreFiltersProps>`
     fill: ${(props) => props.theme.palette.text.primary};
 `;
 
@@ -158,7 +158,7 @@ const StyledLi = styled.li<StyledStoreFiltersProps>`
     cursor: pointer;
 `;
 
-const StyledHeader = styled(Stack)<StyledStoreFiltersProps>`
+const StyledHeader = styled(Stack) <StyledStoreFiltersProps>`
     position: fixed;
     width: -webkit-fill-available;
     padding: 0.5rem 1.5rem 0;
@@ -175,14 +175,14 @@ const StyledHeader = styled(Stack)<StyledStoreFiltersProps>`
     }
 `;
 
-const StyledFooter = styled(Stack)<StyledStoreFiltersProps>`
+const StyledFooter = styled(Stack) <StyledStoreFiltersProps>`
     display: flex;
     padding: 0.5rem 1.5rem 1rem;
     min-height: 12rem;
     z-index: 1;
 `;
 
-const StyledCheckBox = styled(Checkbox)<{ theme?: Theme }>`
+const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`
     &.Mui-checked {
         color: ${(props) => props.theme.palette.text.primary} !important;
     }
@@ -232,7 +232,13 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
         } else {
             document.body.style.overflow = 'auto';
         }
-    }, [props.openFilters, isMobile]);
+        if (availabilityChange) {
+            console.log(props.availabilityFilter)
+            callNFTsEndpoint({handlePriceRange: true})
+            debugger
+            setAvailabilityChange(false)
+        }
+    }, [props.openFilters, isMobile, availabilityChange]);
 
     return (
         <StyledSection openFilters={props.openFilters}>
@@ -270,19 +276,25 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                         <FlexSpacer />
 
                         <Typography
-                            onClick={() => {props.setSelectedFilters([]); props.setAvailabilityFilter([]); props.setPriceFilterRange([props.minRange, props.maxRange]) }}
+                            onClick={() => {
+                                props.setSelectedFilters([]);
+                                props.setAvailabilityFilter([]);
+                                props.setPriceFilterRange([props.minRange, props.maxRange]);
+                                callNFTsEndpoint({handlePriceRange: false, categories: [], availability: []});
+                            }}
                             size="subtitle2"
                             weight={
-                                props.selectedFilters.length > 0
+                                props.selectedFilters.length > 0 || props.availabilityFilter.length > 0
                                     ? 'Medium'
                                     : 'Light'
                             }
                             color={
-                                props.selectedFilters.length > 0
+                                props.selectedFilters.length > 0 || props.availabilityFilter.length > 0
                                     ? 'contrastText'
                                     : '#C4C4C4'
                             }
-                            sx={{ paddingBottom: '0.5rem' }}
+                            sx={{ paddingBottom: '0.5rem', cursor: 'pointer !important' }}
+                            noWrap
                         >
                             Clear All
                         </Typography>
@@ -291,19 +303,24 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                     <>
                         <FlexSpacer />
                         <Typography
-                            onClick={() => props.setSelectedFilters([])}
+                            onClick={() => {
+                                props.setSelectedFilters([]);
+                                props.setAvailabilityFilter([]);
+                                props.setPriceFilterRange([props.minRange, props.maxRange]);
+                                callNFTsEndpoint({handlePriceRange: false, categories: [], availability: []});
+                            }}
                             size="subtitle2"
                             weight={
-                                props.selectedFilters.length > 0
+                                props.selectedFilters.length > 0 || props.availabilityFilter.length > 0
                                     ? 'Medium'
                                     : 'Light'
                             }
                             color={
-                                props.selectedFilters.length > 0
+                                props.selectedFilters.length > 0 || props.availabilityFilter.length > 0
                                     ? 'contrastText'
                                     : '#C4C4C4'
                             }
-                            sx={{ paddingBottom: '0.5rem' }}
+                            sx={{ paddingBottom: '0.5rem', cursor: 'pointer !important' }}
                         >
                             Clear All
                         </Typography>
@@ -360,7 +377,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                                                 'onSale',
                                             ) !== -1 &&
                                             props.availabilityFilter.length !==
-                                                0
+                                            0
                                         }
                                         onClick={() =>
                                             handleChangeAvailabilityFilter(
@@ -383,7 +400,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                                                 'upcoming',
                                             ) !== -1 &&
                                             props.availabilityFilter.length !==
-                                                0
+                                            0
                                         }
                                         onClick={() =>
                                             handleChangeAvailabilityFilter(
@@ -406,7 +423,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                                                 'soldOut',
                                             ) !== -1 &&
                                             props.availabilityFilter.length !==
-                                                0
+                                            0
                                         }
                                         onClick={() =>
                                             handleChangeAvailabilityFilter(

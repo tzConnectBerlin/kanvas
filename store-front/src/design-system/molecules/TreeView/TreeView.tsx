@@ -62,8 +62,8 @@ const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`
 
 
 interface recurseRes {
-    selectNodes: number[];
-    highlightParents: number[];
+    flipNodes: number[];
+    deltaHighlightParents: number[];
 }
 
 interface TreeState {
@@ -85,54 +85,37 @@ const TreeView: FC<TreeViewProps> = ({
     );
 
     const recurseChildrens = (node: any, isActionSelect: boolean, previouslySelectedNodes: any[]): recurseRes => {
+        const wasSelected = previouslySelectedNodes.indexOf(node.id) !== -1;
+
+        let res: recurseRes = {
+            flipNodes: (isActionSelect && !wasSelected) || (!isActionSelect && wasSelected) ? [node.id] : [],
+            deltaHighlightParents: []
+        }
 
         if (node.children?.length > 0) {
-            let res: recurseRes = {
-                selectNodes: [node.id],
-                highlightParents: [],
-            };
             for (const child of node.children) {
                 const childRes = recurseChildrens(child, isActionSelect, previouslySelectedNodes);
-                res.selectNodes = [...res.selectNodes, ...childRes.selectNodes];
-                // Omit from highlightParents if action == select, and child node already selected (in this case it's already in prev state's highlight count)
-                const wasChildNotSelected = previouslySelectedNodes.indexOf(child.id) === -1
+                res.flipNodes = [...res.flipNodes, ...childRes.flipNodes];
 
-                if ((isActionSelect && wasChildNotSelected) || (!isActionSelect && !wasChildNotSelected)) {
-                    res.highlightParents = [
-                        ...res.highlightParents,
-                        ...childRes.highlightParents,
-                    ];
-                }
+                res.deltaHighlightParents = [
+                    ...res.deltaHighlightParents,
+                    ...childRes.deltaHighlightParents,
+                ];
             }
-            res.highlightParents = [...res.highlightParents, ...Array(res.selectNodes.length).fill(node.id)];
-
-            return res;
-        } else {
-            const wasChildSelected = previouslySelectedNodes.indexOf(node.id) !== -1
-
-            if (isActionSelect && wasChildSelected) {
-                return {
-                    selectNodes: [],
-                    highlightParents: []
-                }
-            }
-
-            return {
-                selectNodes: [node.id],
-                highlightParents: [],
-            };
+            res.deltaHighlightParents = [...res.deltaHighlightParents, ...Array(res.flipNodes.length).fill(node.id)];
         }
+        return res;
     };
 
     const handleFlip = (node: any, treeState?: TreeState): TreeState => {
         let newTreeState;
+        const isActionSelect = selectedFilters.indexOf(node.id) === -1;
+
         if (!treeState) {
-            const isActionSelect = selectedFilters.indexOf(node.id) === -1;
             newTreeState = select(node, isActionSelect, { selectedNodes: selectedFilters, highlightedParents: highlightedParents })
             setSelectedFilters(newTreeState.selectedNodes)
             setHighlightedParents(newTreeState.highlightedParents)
         } else {
-            const isActionSelect = treeState.selectedNodes.indexOf(node.id) === -1;
             newTreeState = select(node, isActionSelect, treeState)
         }
 
@@ -142,18 +125,17 @@ const TreeView: FC<TreeViewProps> = ({
     const select = (node: any, isActionSelect: boolean, treeState: TreeState): TreeState => {
         const recRes = recurseChildrens(node, isActionSelect, treeState.selectedNodes);
 
-        let incrAboveHighlightCount = recRes.selectNodes.length;
+        let incrAboveHighlightCount = recRes.flipNodes.length;
 
         for (const parent of getParents(node)) {
             if (!isActionSelect) {
-                recRes.selectNodes.push(parent);
+                recRes.flipNodes.push(parent);
                 if (treeState.selectedNodes.indexOf(parent) > -1) {
-                    //recRes.highlightParents.push(parent)
                     incrAboveHighlightCount += 1
                 }
             }
-            recRes.highlightParents = [
-                ...recRes.highlightParents,
+            recRes.deltaHighlightParents = [
+                ...recRes.deltaHighlightParents,
                 ...Array(incrAboveHighlightCount).fill(parent),
             ];
         }
@@ -161,24 +143,21 @@ const TreeView: FC<TreeViewProps> = ({
         if (isActionSelect) {
             treeState.selectedNodes = [
                 ...treeState.selectedNodes.filter(
-                    (id) => recRes.selectNodes.indexOf(id) === -1,
+                    (id) => recRes.flipNodes.indexOf(id) === -1,
                 ),
-                ...recRes.selectNodes,
+                ...recRes.flipNodes,
             ]
 
             treeState.highlightedParents = [
                 ...treeState.highlightedParents,
-                // ...treeState.highlightedParents.filter(
-                //     (id) => recRes.selectNodes.indexOf(id) === -1,
-                // ),
-                ...recRes.highlightParents
+                ...recRes.deltaHighlightParents
             ]
         } else {
             treeState.selectedNodes = treeState.selectedNodes.filter(
-                (filterId) => recRes.selectNodes.indexOf(filterId) === -1,
+                (filterId) => recRes.flipNodes.indexOf(filterId) === -1,
             )
 
-            treeState.highlightedParents = listDifference(treeState.highlightedParents, recRes.highlightParents);
+            treeState.highlightedParents = listDifference(treeState.highlightedParents, recRes.deltaHighlightParents);
         }
         return treeState
     };
@@ -327,7 +306,7 @@ const TreeView: FC<TreeViewProps> = ({
                                             : ''
                                     }
                                 >
-                                    {node.name} - {countHighlightedParentOccurence(node.id, highlightedParents)}
+                                    {node.name}
                                 </Typography>
 
                                 <FlexSpacer />
