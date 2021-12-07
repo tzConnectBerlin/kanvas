@@ -35,7 +35,7 @@ const StyledCardMedia = styled(CardMedia)<{ component?: string; alt: string }>`
         width: 50%;
         height: 50rem;
     }
-    
+
     @media (min-width: 1440px) {
         width: 1000%;
         height: auto;
@@ -162,7 +162,6 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             sx={{
                                 height: '75vh',
                                 minHeight: 400,
-                                maxHeight: 1000,
                                 maxWidth: 1000,
                             }}
                         />

@@ -260,7 +260,9 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                             launchTime > 0 &&
                             `${new Date(
                                 launchTime,
-                            ).getDate()} days - ${format(new Date(
+                            ).getDate() - 1} day${new Date(
+                                launchTime,
+                            ).getDate() > 2 ? 's' : '' } - ${format(new Date(
                                 launchTime
                             ), 'HH : mm : ss')}`
                         }
