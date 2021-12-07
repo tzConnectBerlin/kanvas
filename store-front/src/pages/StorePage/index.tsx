@@ -274,7 +274,7 @@ const StorePage = () => {
     const handlePaginationChange = (event: any, page: number) => {
         setSelectedPage(page);
         setPageParams('page', page.toString());
-        callNFTsEndpoint({ handlePriceRange: true });
+        callNFTsEndpoint({ handlePriceRange: true, page: page });
     };
 
     const triggerPriceFilter = () => {

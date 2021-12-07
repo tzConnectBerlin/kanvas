@@ -8,6 +8,7 @@ import { Box } from '@mui/system';
 import TezosLogo from '../../atoms/TezosLogo/TezosLogo';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
+import CircularProgress from '../../atoms/CircularProgress';
 
 export interface NftCardProps {
     loading?: boolean;
@@ -105,9 +106,20 @@ const AvailabilityWrapper = styled.div<{ inStock: boolean; willDrop: boolean }>`
     border-radius: 0.2rem;
 `;
 
+const StyledWapper = styled.div`
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
 export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
     const history = useHistory();
-    const theme = useTheme();
+    const [componentLoading, setComponentLoading] = useState(true)
 
     const [launchTime, setLaunchTime] = useState<number>(
         new Date(props.launchAt!).getTime() - new Date().getTime(),
@@ -133,6 +145,21 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
         }
     }, [launchTime]);
 
+    const loadImage = async (imageUrl: string)  => {
+        let img;
+        setComponentLoading(true)
+
+        const imageLoadPromise = new Promise(resolve => {
+            img = new Image();
+            img.onload = resolve;
+            img.src = imageUrl;
+        });
+
+        await imageLoadPromise;
+        setComponentLoading(false)
+        return img;
+    }
+
     const handleRedirect = (path: string) => {
         history.push(path);
     };
@@ -155,9 +182,16 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                 <StyledImg
                     data-object-fit="cover"
                     src={props.dataUri}
-                    alt="random"
+                    alt={props.name}
                     willDrop={!launchTime ? false : launchTime > 0}
+                    onLoad={() => props.dataUri ? loadImage(props.dataUri) : undefined}
                 />
+                {
+                    componentLoading &&
+                    <StyledWapper>
+                        <CircularProgress height={2}/>
+                    </StyledWapper>
+                }
             </StyledImgWrapper>
 
             <CardContent

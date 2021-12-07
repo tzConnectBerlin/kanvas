@@ -221,7 +221,7 @@ const TreeView: FC<TreeViewProps> = ({
             setHighlightedParents([]);
         }
         if (newCategorySelected) {
-            callNFTsEndpoint({ handlePriceRange: true });
+            callNFTsEndpoint({ handlePriceRange: false });
             setNewCategorySelected(false);
         }
     }, [selectedFilters]);
@@ -230,12 +230,12 @@ const TreeView: FC<TreeViewProps> = ({
         if (preSelectedFilters && props.nodes && props.nodes.length > 0) {
             setActiveRef([...preSelectedFilters]);
 
-            let treeState: TreeState = {
+            const treeState: TreeState = {
                 selectedNodes: [],
                 highlightedParents: []
             }
 
-            let concernedNodes: any[] = []
+            const concernedNodes: any[] = []
             preSelectedFilters.map(nodeId => concernedNodes.push(getNodeById(props.nodes![0], nodeId)))
 
             concernedNodes.map(node => {
@@ -250,17 +250,6 @@ const TreeView: FC<TreeViewProps> = ({
             setHighlightedParents(treeState.highlightedParents)
         }
     }, [props.nodes]);
-
-
-    const countHighlightedParentOccurence = (nodeId: number, highlightedParents: number[]): number => {
-        let c = 0
-        for (const parentId of highlightedParents) {
-            if (parentId === nodeId) {
-                c++
-            }
-        }
-        return c
-    }
 
     const [activeRef, setActiveRef] = useState<any[]>([]);
 

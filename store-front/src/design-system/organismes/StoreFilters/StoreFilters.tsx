@@ -235,7 +235,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
         if (availabilityChange) {
             console.log(props.availabilityFilter)
             callNFTsEndpoint({handlePriceRange: true})
-            debugger
+
             setAvailabilityChange(false)
         }
     }, [props.openFilters, isMobile, availabilityChange]);
