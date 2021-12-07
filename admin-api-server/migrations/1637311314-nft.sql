@@ -17,23 +17,6 @@ CREATE TABLE nft (
        token_id TEXT
 );
 
--- updated_at procedure
-
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-   IF row(NEW.*) IS DISTINCT FROM row(OLD.*) THEN
-      NEW.updated_at = now(); 
-      RETURN NEW;
-   ELSE
-      RETURN OLD;
-   END IF;
-END;
-$$ language 'plpgsql';
-
--- set trigger
-CREATE TRIGGER update_nft_updated_at BEFORE UPDATE ON nft FOR EACH ROW EXECUTE PROCEDURE  update_updated_at_column();
-
 COMMIT;
 
 -- ==== DOWN ====
