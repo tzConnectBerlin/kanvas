@@ -1,8 +1,8 @@
 attributes:
-  price: integer
-  editions_size: integer
+  price: Number
+  editions_size: Integer
   categories: '[string]'
-  proposed: boolean
+  proposed: Boolean
   proposal_pass: '[user]'
   proposal_reject: '[user]'
   prototype_pass: '[user]'

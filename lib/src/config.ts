@@ -12,10 +12,16 @@ interface State {
       when: string;
     },
   ];
+  mutables: [
+    {
+      attributes: string[];
+      by_roles: string[];
+    },
+  ];
 }
 
 export class StateTransitionMachine {
-  attributes: any = {};
+  attrTypes: any = {};
   states: any = {};
 
   constructor(filepath: string) {
@@ -26,25 +32,40 @@ export class StateTransitionMachine {
     console.log('END');
 
     for (const attr in parsed.attributes) {
-      this.attributes[attr] = parsed.attributes[attr];
+      this.attrTypes[attr] = parsed.attributes[attr];
     }
 
-    for (const state in parsed.states) {
-      this.states[state] = {
-        transitions: parsed.states[state].state_transitions,
+    for (const stateName in parsed.states) {
+      const st = parsed.states[stateName];
+      this.states[stateName] = {
+        transitions: st.state_transitions,
+        mutables: st.mutables,
       };
     }
   }
 
-  attributeSet(nft: Nft, role: string, attribute: string, value: string) {}
+  tryAttributeSet(nft: Nft, role: string, attr: string, v: string) {
+    const st = this.states[nft.state];
+    const isAllowed =
+      st.mutables.findIndex(
+        (m: any) =>
+          m.attributes.some((mutableAttr: string) => attr === mutableAttr) &&
+          m.by_roles.some((allowedRole: string) => role == allowedRole),
+      ) !== -1;
+    if (!isAllowed) {
+      throw `attribute '${attr}' is not allowed to be set by user of role '${role}' for nft with state '${nft.state}'`;
+    }
+
+    nft.attributes[attr] = eval(`${this.attrTypes[attr]}(${v})`);
+  }
 
   // greedily move nft if possible to a new state
   // returns true if moved, false if not
   // if moved, adjusts nft in memory
   tryMoveNft(nft: Nft): boolean {
-    const state = this.states[nft.state];
+    const st = this.states[nft.state];
 
-    for (const transition of state.transitions) {
+    for (const transition of st.transitions) {
       const evalRes = evalExpr(nft, transition.when);
       if (!evalRes.ok) {
         throw evalRes.val;
