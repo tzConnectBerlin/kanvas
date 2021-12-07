@@ -156,7 +156,10 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
         });
 
         await imageLoadPromise;
-        setComponentLoading(false)
+        // comfort loader
+        setTimeout(() => {
+            setComponentLoading(false)
+        }, 800)
         return img;
     }
 
@@ -185,6 +188,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     alt={props.name}
                     willDrop={!launchTime ? false : launchTime > 0}
                     onLoad={() => props.dataUri ? loadImage(props.dataUri) : undefined}
+                    style={{filter: `${componentLoading ? 'blur(20px)' : 'none'}`}}
                 />
                 {
                     componentLoading &&
