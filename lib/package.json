@@ -1,0 +1,24 @@
+{
+  "name": "StateMachineLib",
+  "version": "0.0.1",
+  "description": "state machine from config",
+  "author": "Rick Klomp",
+  "license": "MIT",
+  "private": true,
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "start": "NODE_ENV=production node ."
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.12",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.5.2"
+  },
+  "dependencies": {
+    "@types/parsimmon": "^1.10.6",
+    "parsimmon": "^1.18.0",
+    "ts-results": "^3.3.0",
+    "yaml": "^1.10.2"
+  }
+}

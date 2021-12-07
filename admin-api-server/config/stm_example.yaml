@@ -1,12 +1,12 @@
 attributes:
-- price: integer
+  price: integer
   editions_size: integer
-  categories: [string]
+  categories: '[string]'
   proposed: boolean
-  proposal_pass: [user]
-  proposal_reject: [user]
-  prototype_pass: [user]
-  prototype_reject: [user]
+  proposal_pass: '[user]'
+  proposal_reject: '[user]'
+  prototype_pass: '[user]'
+  prototype_reject: '[user]'
 
 # notes:
 # - mutable integers have set,unset
@@ -17,37 +17,37 @@ attributes:
 
 
 states:
-- setup_nft:
-  - state_transitions:
+  setup_nft:
+    state_transitions:
     - next_state: proposed
-      when: 'proposed && editions > 0 && price > 0 && count(categories) > 0'
-  - mutables:
+      when: 'nft.proposed && nft.editions_size > 0 && nft.price > 0 && nft.categories.length > 0'
+    mutables:
     - attributes: [price, editions_size, proposed]
       by_roles: [editor, creator]
 
 
-- proposed:
-  - state_transitions:
+  proposed:
+    state_transitions:
     - next_state: setup_nft
-      when: 'count(proposal_rejects) > 0'
+      when: 'nft.proposal_rejects.length > 0'
       unset: [proposed, proposal_rejects, proposal_accepts]
 
     - next_state: prototype
-      when: 'count(proposal_accepts) = 3'
+      when: 'nft.proposal_accepts.length == 3'
 
-  - mutables:
+    mutables:
     - attributes: [proposal_accepts, proposal_rejects]
       by_roles: [moderator]
 
 
-- prototype:
-  - state_transitions:
+  prototype:
+    state_transitions:
     - new_state: finish
-      when: 'count(prototype_accepts) = 3'
+      when: 'nft.prototype_accepts.length == 3'
 
     - new_state: setup_nft
-      when: 'count(prototype_rejects) > 0'
+      when: 'nft.prototype_rejects.length > 0'
 
-  - mutables:
+    mutables:
     - attributes: [prototype_accepts, prototype_rejects]
       by_roles: [moderator]
