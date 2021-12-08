@@ -1,0 +1,1 @@
+export { CustomBadge } from './Badge';
