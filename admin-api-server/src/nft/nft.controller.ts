@@ -1,14 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { NftService } from './nft.service';
-import { CreateNftDto } from './dto/create-nft.dto';
-import { UpdateNftDto } from './dto/update-nft.dto';
+import { NftDto } from './dto/nft.dto';
 
 @Controller('nft')
 export class NftController {
   constructor(private readonly nftService: NftService) {}
 
   @Post()
-  create(@Body() createNftDto: CreateNftDto) {
+  create(@Body() createNftDto: NftDto) {
     return this.nftService.create(createNftDto);
   }
 
@@ -23,7 +30,7 @@ export class NftController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateNftDto: UpdateNftDto) {
+  update(@Param('id') id: string, @Body() updateNftDto: NftDto) {
     return this.nftService.update(+id, updateNftDto);
   }
 

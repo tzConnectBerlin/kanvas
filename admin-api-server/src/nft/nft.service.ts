@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CreateNftDto } from './dto/create-nft.dto';
-import { UpdateNftDto } from './dto/update-nft.dto';
+import { NftDto } from './dto/nft.dto';
 
 @Injectable()
 export class NftService {
-  create(createNftDto: CreateNftDto) {
+  create(createNftDto: NftDto) {
     return 'This action adds a new nft';
   }
 
@@ -16,7 +15,7 @@ export class NftService {
     return `This action returns a #${id} nft`;
   }
 
-  update(id: number, updateNftDto: UpdateNftDto) {
+  update(id: number, updateNftDto: NftDto) {
     return `This action updates a #${id} nft`;
   }
 
