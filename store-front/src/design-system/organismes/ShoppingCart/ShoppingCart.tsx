@@ -188,7 +188,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         setTimeLeft(new Date(props.expiresAt).getTime() - new Date().getTime());
     }, [props.expiresAt]);
 
-    const calculateTotal = (priceArray: number[]) => {
+        const calculateTotal = (priceArray: number[]) => priceArray.reduce((total: number, price: number) => total += price, 0);
         let total = 0
         priceArray.map((price: number) => {
             total += price
