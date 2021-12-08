@@ -36,7 +36,7 @@ interface BoxProps extends MBoxProps {
 const StyledBox = styled(Box)<BoxProps>`
     display: ${(props) => (props.open ? 'flex' : 'none')};
     max-width: 35rem;
-    
+
     @media (max-width: 874px) {
         right: 5%;
         max-width: 100vw;
@@ -45,9 +45,9 @@ const StyledBox = styled(Box)<BoxProps>`
 
 const StyledPaper = styled(Paper)<{ theme?: Theme }>`
     box-shadow: none;
-    border-radius: 0;
+    border-radius: 2rem;
 
-    outline: ${(props) => `solid 1px ${props.theme.palette.text.primary}`};
+    /* outline: ${(props) => `solid 1px ${props.theme.palette.text.primary}`}; */
 
     :hover {
         outline: ${(props) => `solid 2px ${props.theme.palette.text.primary}`};

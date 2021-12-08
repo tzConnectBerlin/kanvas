@@ -67,7 +67,7 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
                     {t('home.hero.description_1')}
                 </Typography>
 
-                <Typography size="h5" weight="Light" sx={{ pt: 2, mb: 1 }}>
+                <Typography size="h5" weight="Light" color="#C4C4C4" sx={{ pt: 1, mb: 1 }}>
                     {t('home.hero.description_2')}
                 </Typography>
 
@@ -106,7 +106,7 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
                         //Render Single image
                         <Card
                             sx={{
-                                borderRadius: 0,
+                                borderRadius: '1rem',
                                 marginLeft: 'auto',
                                 maxWidth: 750,
                             }}

@@ -35,10 +35,9 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
     margin-bottom: -6rem;
     color: ${(props) => props.theme.palette.text.primary};
 
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    filter: ${(props) => props.theme.dropShadow.default};
 
-    background-color: ${(props) => props.theme.header.background};
+    background-color: ${(props) => props.theme.palette.background.default};
     position: sticky;
     top: 0;
     z-index: 10;

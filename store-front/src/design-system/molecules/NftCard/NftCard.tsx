@@ -32,56 +32,59 @@ const StyledImgWrapper = styled.div<{ theme?: Theme }>`
     position: relative;
     overflow: hidden;
     min-height: 90vw;
+    border-radius: 1rem;
 
     @media (min-width: 600px) {
-        min-height: 40vw;
+        min-height: 50vw;
     }
 
     @media (min-width: 650px) {
-        min-height: 25vw;
+        min-height: 35vw;
     }
 
     @media (min-width: 900px) {
-        min-height: 23.5vw;
+        min-height: 25vw;
     }
 
     @media (min-width: 1200px) {
-        min-height: 17vw;
+        min-height: 25vw;
     }
 
     @media (min-width: 1440px) {
-        min-height: 330px;
-        max-height: 370px;
+        min-height: 400px;
+        max-height: 440px;
     }
 `;
 
 const StyledSkeleton = styled(Skeleton)`
     min-height: 90vw;
+    border-radius: 1rem;
 
     @media (min-width: 600px) {
-        min-height: 40vw;
+        min-height: 50vw;
     }
 
     @media (min-width: 650px) {
-        min-height: 25vw;
+        min-height: 35vw;
     }
 
     @media (min-width: 900px) {
-        min-height: 23.5vw;
+        min-height: 25vw;
     }
 
     @media (min-width: 1200px) {
-        min-height: 17vw;
+        min-height: 25vw;
     }
 
     @media (min-width: 1440px) {
-        min-height: 330px;
-        max-height: 370px;
+        min-height: 400px;
+        max-height: 440px;
     }
 `;
 
 const StyledImg = styled.img<{ theme?: Theme; willDrop: boolean }>`
     position: absolute;
+    border-radius: 1rem;
     width: 100%;
     height: -webkit-fill-available;
     object-position: center center;
@@ -92,6 +95,7 @@ const StyledImg = styled.img<{ theme?: Theme; willDrop: boolean }>`
 
 const AvailabilityWrapper = styled.div<{ inStock: boolean; willDrop: boolean }>`
     position: absolute;
+
     top: 1rem;
     right: 1rem;
 
@@ -103,7 +107,7 @@ const AvailabilityWrapper = styled.div<{ inStock: boolean; willDrop: boolean }>`
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
 
-    border-radius: 0.2rem;
+    border-radius: 0.5rem;
 `;
 
 const StyledWapper = styled.div`
@@ -115,6 +119,15 @@ const StyledWapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+`
+
+const StyledCardContent = styled(CardContent)<{theme?: Theme}>`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+    flex-grow: 1;
+    background-color: ${props => props.theme.palette.background.default};
 `
 
 export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
@@ -145,7 +158,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
         }
     }, [launchTime]);
 
-    const loadImage = async (imageUrl: string)  => {
+    const loadImage = async (imageUrl: string) => {
         let img;
         setComponentLoading(true)
 
@@ -171,7 +184,6 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
         <Card
             onClick={() => handleRedirect(`/product/${props.id}`)}
             sx={{
-                borderRadius: 0,
                 height: props.height,
                 display: 'flex',
                 position: 'relative',
@@ -179,6 +191,8 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                 width: '100%',
                 minHeight: '100%',
                 cursor: 'pointer',
+                borderRadius: '1rem',
+                boxShadow: 'none'
             }}
         >
             <StyledImgWrapper>
@@ -188,17 +202,17 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     alt={props.name}
                     willDrop={!launchTime ? false : launchTime > 0}
                     onLoad={() => props.dataUri ? loadImage(props.dataUri) : undefined}
-                    style={{filter: `${componentLoading ? 'blur(20px)' : 'none'}`}}
+                    style={{ filter: `${componentLoading ? 'blur(20px)' : 'none'}` }}
                 />
                 {
                     componentLoading &&
                     <StyledWapper>
-                        <CircularProgress height={2}/>
+                        <CircularProgress height={2} />
                     </StyledWapper>
                 }
             </StyledImgWrapper>
 
-            <CardContent
+            <StyledCardContent
                 sx={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -221,32 +235,56 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                             : 'Sold out'}
                     </Typography>
                 </AvailabilityWrapper>
-                <Stack
-                    direction="column"
-                    sx={{
-                        width: '100%',
-                        minWidth: '60%',
-                        marginBottom: '1rem',
-                    }}
-                >
-                    <Typography
-                        weight="SemiBold"
-                        display="initial !important"
-                        noWrap
-                        size="h3"
+                <Stack direction="row" sx={{
+                    width: '100%',
+                    justifyContent: 'center'
+                }}>
+                    <Stack
+                        direction="column"
+                        sx={{
+                            width: '100%',
+                            minWidth: '60%',
+                            marginBottom: '1rem',
+                        }}
                     >
-                        {props.name}
-                    </Typography>
+                        <Typography
+                            weight="SemiBold"
+                            display="initial !important"
+                            noWrap
+                            size="h3"
+                            sx={{ width: '90%' }}
+                        >
+                            {props.name}
+                        </Typography>
 
-                    <Typography
-                        weight="Light"
-                        size="body"
-                        display="initial !important"
-                        noWrap
-                        sx={{ width: '85%' }}
-                    >
-                        {props.ipfsHash}
-                    </Typography>
+                        <Typography
+                            weight="Light"
+                            size="body"
+                            display="initial !important"
+                            noWrap
+                            sx={{ width: '85%' }}
+                        >
+                            {props.ipfsHash}
+                        </Typography>
+                    </Stack>
+                    <Box display="flex" flexDirection="row" marginLeft="auto">
+                        <Typography
+                            weight="SemiBold"
+                            size="h4"
+                            marginLeft="auto"
+                        >
+                            {' '}
+                            {props.price ? props.price : '- '}
+                        </Typography>
+
+                        <Typography
+                            weight="Currency"
+                            size="h4"
+                            marginLeft="auto"
+                        >
+                            <TezosLogo width="18px" margin="0 0.2rem" />
+                        </Typography>
+                    </Box>
                 </Stack>
 
                 <Box
@@ -262,43 +300,25 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                                 launchTime,
                             ).getDate() - 1} day${new Date(
                                 launchTime,
-                            ).getDate() > 2 ? 's' : '' } - ${format(new Date(
+                            ).getDate() > 2 ? 's' : ''} - ${format(new Date(
                                 launchTime
                             ), 'HH : mm : ss')}`
                         }
                     </Typography>
-
-                    <Box display="flex" flexDirection="row" marginLeft="auto">
-                        <Typography
-                            weight="SemiBold"
-                            size="h3"
-                            marginLeft="auto"
-                        >
-                            {' '}
-                            {props.price ? props.price : '- '}
-                        </Typography>
-
-                        <Typography
-                            weight="Currency"
-                            size="h3"
-                            marginLeft="auto"
-                        >
-                            <TezosLogo width="18px" margin="0 0.2rem" />
-                        </Typography>
-                    </Box>
                 </Box>
-            </CardContent>
+            </StyledCardContent>
         </Card>
     ) : (
         <Card
             sx={{
-                borderRadius: 0,
                 height: props.height,
                 display: 'flex',
                 position: 'relative',
                 flexDirection: 'column',
                 width: '100%',
                 minHeight: '100%',
+                borderRadius: '1rem',
+                boxShadow: 'none'
             }}
         >
             <StyledSkeleton
@@ -307,7 +327,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                 height={'120%'}
             />
 
-            <CardContent
+            <StyledCardContent
                 sx={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -348,7 +368,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                         </Typography>
                     </Box>
                 </Box>
-            </CardContent>
+            </StyledCardContent>
         </Card>
     );
 };

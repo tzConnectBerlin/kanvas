@@ -26,13 +26,15 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
     margin-top: -0.2rem;
     color: ${(props) => props.theme.palette.text.primary};
 
-    background-color: ${(props) => props.theme.footer.background};
+    background-color: ${(props) => props.theme.palette.background.default};
 
     position: sticky;
     top: 0;
     z-index: 10;
     transition: padding-left 0.2s, padding-right 0.2s;
     padding: 3rem 3rem 1rem;
+
+    filter: ${(props) => props.theme.dropShadow.default};
 
     @media (max-width: 900px) {
         padding-left: 1.5rem;

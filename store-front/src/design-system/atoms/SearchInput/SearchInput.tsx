@@ -33,7 +33,7 @@ const Search = styled.div<{ theme?: Theme }>`
     display: flex;
     align-items: center;
 
-    border-radius: 0;
+    border-radius: 2rem !important;
 
     &:active {
         transition: width 0.2s;
@@ -66,9 +66,12 @@ const Search = styled.div<{ theme?: Theme }>`
 `;
 
 const SearchIconWrapper = styled.div<{ theme?: Theme }>`
+    border-radius: 2rem;
+
     position: absolute;
+
     height: 2.1rem;
-    width: 2.3rem !important;
+    width: 2.5rem !important;
     pointer-events: none;
     background-color: ${(props) => props.theme.palette.background.default};
     display: flex;
@@ -92,13 +95,15 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
     width: 100%;
     cursor: pointer;
     padding-left: 2.5rem !important;
+    transition: outline 0.2s;
+    border-radius: 2rem;
 
     background-color: ${(props) => props.theme.palette.background.default};
 
-    outline: ${(props) => `solid 1px ${props.theme.palette.text.primary}`};
+    outline: solid 1px #C4C4C4;
 
     :hover {
-        outline: ${(props) => `solid 2px ${props.theme.palette.text.primary}`};
+        outline: solid 2px #C4C4C4;
     }
 
     &.MuiInputBase-root {

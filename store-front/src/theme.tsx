@@ -46,6 +46,7 @@ declare module '@mui/material/styles' {
         dropShadow: {
             default: string;
             hover: string;
+            avatar: string;
         };
     }
     // allow configuration using `createTheme`
@@ -65,6 +66,7 @@ declare module '@mui/material/styles' {
         dropShadow: {
             default: string;
             hover: string;
+            avatar: string;
         };
     }
 }
@@ -161,7 +163,7 @@ const darkThemePalette: PaletteOptions = {
     },
     background: {
         default: '#0a0a0a',
-        paper: '#2c2c2c',
+        paper: '#202020',
     },
     tonalOffset: 0.05,
     mode: 'dark',
@@ -239,8 +241,9 @@ export const lightTheme = createTheme({
         background: 'rgba(255, 255, 255, 1)',
     },
     dropShadow: {
-        default: 'drop-shadow(0px 0px 6px #5c5c5c2d)',
-        hover: 'drop-shadow(0px 0px 6px #1f1f1f33)',
+        default: 'drop-shadow(0 0 0.45rem #C4C4C4)',
+        hover: 'drop-shadow(0 0 0.55rem #C4C4C4)',
+        avatar: 'drop-shadow(0 0 0.25rem #C4C4C4)'
     },
 });
 
@@ -315,7 +318,8 @@ export const darkTheme = createTheme({
         background: 'rgba(0, 0, 0, 1)',
     },
     dropShadow: {
-        default: 'drop-shadow(0px 0px 10px #18181886)',
-        hover: 'drop-shadow(0px 0px 10px #0e0e0e9b)',
+        default: 'drop-shadow(0 0 0.45rem black)',
+        hover: 'drop-shadow(0 0 0.45rem #0e0e0e9b)',
+        avatar: 'drop-shadow(0 0 0.25rem black)'
     },
 });

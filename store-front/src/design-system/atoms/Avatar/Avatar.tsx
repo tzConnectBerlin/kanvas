@@ -22,7 +22,7 @@ const StyledAvatar = styled(MAvatar)<AvatarProps>`
     width: ${(props) => props.width ?? 40}px;
     cursor: pointer;
 
-    filter: ${(props) => props.theme.dropShadow.default};
+    filter: ${(props) => props.theme.dropShadow.avatar};
 
     transition: all 0.2s;
 

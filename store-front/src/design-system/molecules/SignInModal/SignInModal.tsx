@@ -44,6 +44,7 @@ const StyledBox = styled(Stack)<{ theme?: Theme }>`
     position: absolute;
     top: 50%;
     left: 50%;
+    border-radius: 2rem;
     transform: translate(-50%, -50%);
     border: 2px solid #000;
     box-shadow: 24px;
@@ -319,6 +320,7 @@ export const SignInModal: FC<SignInModalProps> = ({
             <StyledBox
                 bgcolor="background.paper"
                 minWidth={isMobile ? '17rem' : '28rem'}
+                maxWidth={'28rem'}
             >
                 <StyledStack direction="column" spacing={3}>
                     <FlexSpacer minHeight={1} />

@@ -42,8 +42,11 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
     position: fixed;
     right: 0;
     bottom: 0;
-    z-index: 5;
+    z-index: 10;
     top: 0;
+    border-top: 1px solid #C4C4C4;
+    
+    filter: drop-shadow(0 0.8rem 0.45rem #C4C4C4);
 
     overflow: auto;
 
@@ -51,7 +54,7 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
 
     padding-bottom: 2.5rem;
 
-    background-color: ${(props) => props.theme.palette.background.paper};
+    background-color: ${(props) => props.theme.palette.background.default};
     opacity: 1;
 
     p {
@@ -236,7 +239,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 removeNft={() => { }}
                             />
                         ))
-                    ) : props.nftsInCart.length > 0 ? (
+                    ) : props.nftsInCart.length > 0 ? (<>{
                         props.nftsInCart.map((nft) => (
                             <ShoppingCartItem
                                 loading={false}
@@ -247,8 +250,32 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 }
                                 removeNft={handleDeleteFromBasket}
                             />
-                        ))
-                    ) : (
+                        ))}
+
+                        <StyledStackWrapper direction="row">
+                            <Typography
+                                size="h4"
+                                weight="SemiBold"
+                                display="initial !important"
+                                align="left"
+                                color="#C4C4C4"
+                            >
+                                Total
+                            </Typography>
+
+                            <FlexSpacer />
+
+                            <Typography
+                                size="h4"
+                                weight="SemiBold"
+                                display="initial !important"
+                                align="right"
+                                color="#C4C4C4"
+                            >
+                                {`${calculateTotal(props.nftsInCart.map((nft) => nft.price))} ꜩ`}
+                            </Typography>
+                        </StyledStackWrapper>
+                    </>) : (
                         <Typography
                             size="Subtitle1"
                             weight="Medium"
@@ -259,32 +286,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             {'Empty Shopping Cart..'}
                         </Typography>
                     )}
-
                     <FlexSpacer />
-                    <StyledStackWrapper direction="row">
-                        <Typography
-                            size="h4"
-                            weight="SemiBold"
-                            display="initial !important"
-                            align="left"
-                            color="#C4C4C4"
-                        >
-                            Total
-                        </Typography>
-
-                        <FlexSpacer />
-
-                        <Typography
-                            size="h4"
-                            weight="SemiBold"
-                            display="initial !important"
-                            align="right"
-                            color="#C4C4C4"
-                        >
-                            {`${calculateTotal(props.nftsInCart.map((nft) => nft.price))} ꜩ`}
-                        </Typography>
-                    </StyledStackWrapper>
-
                     {props.nftsInCart.length > 0 && (
                         <Typography
                             size="subtitle2"

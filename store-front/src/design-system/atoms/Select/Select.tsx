@@ -32,8 +32,8 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
     }
 
     .MuiOutlinedInput-root.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-formControl {
-        border-radius: 0 !important;
-        border: 1px solid ${(props) => props.theme.palette.text.primary};
+        border-radius: 2rem !important;
+        outline: solid 1.5px #C4C4C4;
         font-size: 0.9rem;
         transition: outline 0.2s;
 
@@ -42,7 +42,7 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
         }
 
         :hover {
-            outline: 1px solid ${(props) => props.theme.palette.text.primary};
+            outline: 2px solid ${(props) => props.theme.palette.text.primary};
         }
 
         &.Mui-focused {
@@ -52,6 +52,7 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
     }
 
     .MuiSelect-select {
+        border-radius: 2rem !important;
         background-color: ${props => props.theme.palette.background.paper};
         padding-top: 0.6rem !important;
         padding-bottom: 0.7rem !important;
