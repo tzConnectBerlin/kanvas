@@ -14,6 +14,7 @@ import { Roles } from 'src/role/role.decorator';
 import { Role } from 'src/role/role';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/role/role.guard';
+import { UpdateUserGuard } from './update-user.guard';
 
 @Controller('user')
 export class UserController {
@@ -36,8 +37,8 @@ export class UserController {
     return this.userService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard, UpdateUserGuard)
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
   update(@Param('id') id: string, @Body() updateUserDto: UserDto) {
     return this.userService.update(+id, updateUserDto);
   }
