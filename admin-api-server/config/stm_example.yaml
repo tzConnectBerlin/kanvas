@@ -1,6 +1,6 @@
 attributes:
   price: Number
-  editions_size: Integer
+  editions_size: Number
   categories: '[string]'
   proposed: Boolean
   proposal_pass: '[user]'
@@ -30,7 +30,7 @@ states:
     state_transitions:
     - next_state: setup_nft
       when: 'nft.proposal_rejects.length > 0'
-      unset: [proposed, proposal_rejects, proposal_accepts]
+      do: 'delete nft.proposed'
 
     - next_state: prototype
       when: 'nft.proposal_accepts.length == 3'

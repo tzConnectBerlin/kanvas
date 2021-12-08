@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 const file = fs.readFileSync('./redacted_redacted.yaml', 'utf8');
 import { parse } from 'yaml';
-import { evalExpr } from './expr';
+import { evalExpr, execExpr } from './expr';
 
 interface StateTransition {}
 
@@ -10,6 +10,7 @@ interface State {
     {
       next_state: string;
       when: string;
+      do?: string;
     },
   ];
   mutables: [
@@ -44,7 +45,7 @@ export class StateTransitionMachine {
     }
   }
 
-  tryAttributeSet(nft: Nft, role: string, attr: string, v: string) {
+  tryAttributeSet(nft: Nft, role: string, attr: string, v?: string) {
     const st = this.states[nft.state];
     const isAllowed =
       st.mutables.findIndex(
@@ -56,22 +57,27 @@ export class StateTransitionMachine {
       throw `attribute '${attr}' is not allowed to be set by user of role '${role}' for nft with state '${nft.state}'`;
     }
 
+    if (typeof v === 'undefined') {
+      delete nft.attributes[attr];
+      return;
+    }
     nft.attributes[attr] = eval(`${this.attrTypes[attr]}(${v})`);
   }
 
   // greedily move nft if possible to a new state
-  // returns true if moved, false if not
-  // if moved, adjusts nft in memory
+  // returns true if moved and adjusts nft in memory
+  // returns false if not moved
   tryMoveNft(nft: Nft): boolean {
     const st = this.states[nft.state];
 
     for (const transition of st.transitions) {
-      const evalRes = evalExpr(nft, transition.when);
-      if (!evalRes.ok) {
-        throw evalRes.val;
-      }
-      if (evalRes.val) {
+      const exprRes = evalExpr<boolean>(nft, transition.when, false);
+      console.log(`in stm: ${exprRes}, type=${typeof exprRes}`);
+      if (exprRes) {
         nft.state = transition.next_state;
+        if (typeof transition.do !== 'undefined') {
+          execExpr(nft, transition.do);
+        }
         return true;
       }
     }
