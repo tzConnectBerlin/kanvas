@@ -74,7 +74,7 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
     }
 `;
 
-export const StyledStackWrapper = styled(Stack)<{theme?: Theme}>`
+export const StyledStackWrapper = styled(Stack) <{ theme?: Theme }>`
     width: 100%;
     border-top: 1px solid #C4C4C4;
     padding-top: 1rem;
@@ -188,13 +188,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         setTimeLeft(new Date(props.expiresAt).getTime() - new Date().getTime());
     }, [props.expiresAt]);
 
-    const calculateTotal = (priceArray: number[]) => {
-        let total = 0
-        priceArray.map((price: number) => {
-            total += price
-        })
-        return total
-    }
+    const calculateTotal = (priceArray: number[]) => priceArray.reduce((total: number, price: number) => total += price, 0);
 
     return (
         <>
@@ -239,7 +233,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         [...new Array(3)].map(() => (
                             <ShoppingCartItem
                                 loading={true}
-                                removeNft={() => {}}
+                                removeNft={() => { }}
                             />
                         ))
                     ) : props.nftsInCart.length > 0 ? (
@@ -278,7 +272,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             Total
                         </Typography>
 
-                        <FlexSpacer/>
+                        <FlexSpacer />
 
                         <Typography
                             size="h4"
@@ -301,8 +295,8 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         >
                             {timeLeft && timeLeft > 0
                                 ? `Your cart will expire in ${Math.round(
-                                      timeLeft / 60000,
-                                  )}
+                                    timeLeft / 60000,
+                                )}
                                 minutes.`
                                 : 'Cart Expired'}
                         </Typography>
