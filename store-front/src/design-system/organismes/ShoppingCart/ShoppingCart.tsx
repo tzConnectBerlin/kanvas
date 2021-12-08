@@ -74,6 +74,12 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
     }
 `;
 
+export const StyledStackWrapper = styled(Stack)<{theme?: Theme}>`
+    width: 100%;
+    border-top: 1px solid #C4C4C4;
+    padding-top: 1rem;
+`
+
 export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
     const history = useHistory();
     const [timeLeft, setTimeLeft] = useState<number>();
@@ -182,6 +188,14 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         setTimeLeft(new Date(props.expiresAt).getTime() - new Date().getTime());
     }, [props.expiresAt]);
 
+    const calculateTotal = (priceArray: number[]) => {
+        let total = 0
+        priceArray.map((price: number) => {
+            total += price
+        })
+        return total
+    }
+
     return (
         <>
             <ContainerPopupStyled
@@ -253,6 +267,29 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                     )}
 
                     <FlexSpacer />
+                    <StyledStackWrapper direction="row">
+                        <Typography
+                            size="h4"
+                            weight="SemiBold"
+                            display="initial !important"
+                            align="left"
+                            color="#C4C4C4"
+                        >
+                            Total
+                        </Typography>
+
+                        <FlexSpacer/>
+
+                        <Typography
+                            size="h4"
+                            weight="SemiBold"
+                            display="initial !important"
+                            align="right"
+                            color="#C4C4C4"
+                        >
+                            {`${calculateTotal(props.nftsInCart.map((nft) => nft.price))} ꜩ`}
+                        </Typography>
+                    </StyledStackWrapper>
 
                     {props.nftsInCart.length > 0 && (
                         <Typography

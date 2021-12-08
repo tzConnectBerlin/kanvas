@@ -33,7 +33,7 @@ const StyledDiv = styled.div<{ theme?: Theme }>`
     }
 `;
 
-const StyledClearIcon = styled(ClearIcon)<{ theme?: Theme }>`
+const StyledClearIcon = styled(ClearIcon) <{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.text.primary};
 `;
 
@@ -44,7 +44,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
     const history = useHistory()
 
     const navigateTo = (pathname: string) => {
-        history.push({pathname: pathname})
+        history.push({ pathname: pathname })
     }
 
     return props.loading ? (
@@ -108,7 +108,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     noWrap
                     type="link"
                     onClick={() => navigateTo(`/product/${nft!.id}`)}
-                    sx={{ cursor: 'pointer', width: '85%' }}
+                    sx={{ cursor: 'pointer', width: 'auto' }}
                 >
                     {nft!.name}
                 </Typography>
@@ -118,22 +118,34 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     display="initial !important"
                     noWrap
                     color="#C4C4C4"
-                    sx={{ cursor: 'pointer', width: '70%' }}
+                    sx={{ cursor: 'pointer', maxWidth: '70%' }}
                 >
                     {nft!.ipfsHash}
                 </Typography>
+                <Typography
+                    onClick={() =>
+                        props.removeNftLoading ? {} : props.removeNft(nft!.id)
+                    }
+                    size="body2"
+                    weight="Medium"
+                    type='link'
+                    color="#C4C4C4"
+                    sx={{ cursor: 'pointer', width: 'auto', margin: '0 !important', marginTop: '0.4rem !important' }}
+                >
+                    Remove
+                    {props.removeNftLoading &&
+                        <CustomCircularProgress height={0.6} sx={{marginLeft: '0.7rem'}} />
+                    }
+                </Typography>
             </Stack>
-            <StyledDiv
-                onClick={() =>
-                    props.removeNftLoading ? {} : props.removeNft(nft!.id)
-                }
+            <Typography
+                size="body1"
+                weight="Light"
+                noWrap
+                sx={{ cursor: 'pointer', width: 'auto', margin: '0 !important' }}
             >
-                {props.removeNftLoading ? (
-                    <CustomCircularProgress height={1.2} />
-                ) : (
-                    <StyledClearIcon />
-                )}
-            </StyledDiv>
+                {`${nft!.price} ꜩ`}
+            </Typography>
         </Stack>
     );
 };
