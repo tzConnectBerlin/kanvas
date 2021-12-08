@@ -76,6 +76,13 @@ export interface IParamsNFTs {
     availability?: string[];
 }
 
+export interface ITreeCategory {
+    id: number | string;
+    name: string;
+    parent?: ITreeCategory;
+    children?: ITreeCategory[];
+}
+
 const StorePage = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -93,7 +100,7 @@ const StorePage = () => {
 
     // Categories state
     const [selectedCategories, setSelectedCategories] = useState<any[]>([]);
-
+    const [preSelectedCategories, setPreSelectedCategories] = useState<any[]>([])
     // Availability state
     const [selectedAvailability, setSelectedAvailability] = useState<string[]>(
         [],
@@ -211,7 +218,7 @@ const StorePage = () => {
 
         // Categories
         if (categories) {
-            setSelectedCategories(
+            setPreSelectedCategories(
                 categories.split(',').map((categoryId) => Number(categoryId)),
             );
         }
@@ -274,7 +281,7 @@ const StorePage = () => {
     const handlePaginationChange = (event: any, page: number) => {
         setSelectedPage(page);
         setPageParams('page', page.toString());
-        callNFTsEndpoint({ handlePriceRange: true });
+        callNFTsEndpoint({ handlePriceRange: true, page: page });
     };
 
     const triggerPriceFilter = () => {
@@ -313,7 +320,7 @@ const StorePage = () => {
         }
     }, [selectedAvailability]);
 
-    const [availableFilters, setAvailableFilters] = useState<any>();
+    const [availableFilters, setAvailableFilters] = useState<ITreeCategory[]>();
 
     useEffect(() => {
         if (categoriesResponse.data) {
@@ -374,6 +381,7 @@ const StorePage = () => {
                         openFilters={isMobile ? !filterOpen : filterOpen}
                         callNFTsEndpoint={callNFTsEndpoint}
                         setFilterOpen={setFilterOpen}
+                        preSelectedFilters={preSelectedCategories}
                         selectedFilters={selectedCategories}
                         setSelectedFilters={setSelectedCategories}
                         priceFilterRange={priceFilterRange}

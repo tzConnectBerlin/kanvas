@@ -70,11 +70,12 @@ const SearchIconWrapper = styled.div<{ theme?: Theme }>`
     height: 2.1rem;
     width: 2.3rem !important;
     pointer-events: none;
+    background-color: ${(props) => props.theme.palette.background.default};
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 30;
-    
+
     @media (max-width: 874px) {
         background-color: ${(props) => props.theme.palette.background.paper};
     }

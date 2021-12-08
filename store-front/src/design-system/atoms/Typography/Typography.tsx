@@ -62,7 +62,8 @@ const StyledTypography = styled(MTypography)<IStyledTypography>`
     }
 
     :hover {
-        cursor: pointer;
+        cursor: ${(props) =>
+            props.type === 'link' ? 'pointer !important' : ''};
         text-decoration: ${(props) =>
             props.type === 'link' ? 'underline' : 'none'};
     }
@@ -91,6 +92,7 @@ export const Typography: FC<TypographyProps> = (
             align={props.align}
             sx={props.sx}
             display={props.display}
+            type={props.type}
             {...props}
         >
             {children}

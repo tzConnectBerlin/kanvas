@@ -35,7 +35,7 @@ const StyledCardMedia = styled(CardMedia)<{ component?: string; alt: string }>`
         width: 50%;
         height: 50rem;
     }
-    
+
     @media (min-width: 1440px) {
         width: 1000%;
         height: auto;
@@ -137,7 +137,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                 <Stack
                     direction={{ xs: 'column', md: 'row' }}
                     spacing={5}
-                    sx={{ width: '100%' }}
+                    sx={{ width: '100%', height: '75vh' }}
                 >
                     {nftResponse.loading || comfortLoader ? (
                         <Box
@@ -162,7 +162,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             sx={{
                                 height: '75vh',
                                 minHeight: 400,
-                                maxHeight: 1000,
+                                maxHeight: '75vh',
                                 maxWidth: 1000,
                             }}
                         />

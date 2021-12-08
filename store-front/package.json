@@ -37,6 +37,7 @@
     "axios-hooks": "^3.0.0",
     "babel-loader": "8.1.0",
     "bootstrap": "^5.1.0",
+    "date-fns": "^2.27.0",
     "emotion-theming": "^11.0.0",
     "formik": "^2.2.9",
     "graphql": "^16.0.1",
