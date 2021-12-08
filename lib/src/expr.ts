@@ -1,11 +1,14 @@
 import { Result, Ok, Err } from 'ts-results';
+import * as log from 'log';
+import { Nft } from './types';
 
 export function evalExpr<T>(nftState: Nft, s: string, defaultOnErr: T): T {
-  console.log(`evaluation '${s}'`);
+  log.debug(`evaluation '${s}'`);
   try {
     const nft = nftState.attributes;
     const res = eval(s);
     if (typeof defaultOnErr === 'undefined') {
+      // T is void, just accept any return value/type here, useful for execExpr.
       return res;
     }
 
@@ -14,7 +17,7 @@ export function evalExpr<T>(nftState: Nft, s: string, defaultOnErr: T): T {
     }
     return res;
   } catch (err: any) {
-    console.log(err);
+    log.info(err);
     return defaultOnErr;
   }
 }

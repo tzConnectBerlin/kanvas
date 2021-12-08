@@ -1,4 +1,13 @@
+require('log-node')();
 import { StateTransitionMachine } from './stm';
+import * as log from 'log';
+
+// Note: set log level through env variable LOG_LEVEL to one of:
+// - debug
+// - info
+// - notice (default)
+// - warning
+// - error
 
 const nft = {
   name: 'test',
@@ -10,12 +19,11 @@ const nft = {
 
 let stm = new StateTransitionMachine('./redacted_redacted.yaml');
 
-console.log(JSON.stringify(stm));
+log.debug(JSON.stringify(stm));
 
 stm.tryAttributeSet(nft, 'editor', 'editions_size', '1');
-console.log(stm.tryMoveNft(nft));
 stm.tryAttributeSet(nft, 'editor', 'price', '4');
-console.log(stm.tryMoveNft(nft));
 stm.tryAttributeSet(nft, 'editor', 'proposed', 'true');
-console.log(stm.tryMoveNft(nft));
-console.log(nft);
+
+stm.tryMoveNft(nft);
+log.warn(nft);

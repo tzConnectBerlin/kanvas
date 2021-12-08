@@ -21,6 +21,7 @@ states:
     state_transitions:
     - next_state: proposed
       when: 'nft.proposed && nft.editions_size > 0 && nft.price > 0 && nft.categories.length > 0'
+      do: 'delete nft.proposed'
     mutables:
     - attributes: [price, editions_size, proposed]
       by_roles: [editor, creator]

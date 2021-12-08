@@ -17,6 +17,8 @@
   },
   "dependencies": {
     "@types/parsimmon": "^1.10.6",
+    "log": "^6.3.1",
+    "log-node": "^8.0.2",
     "parsimmon": "^1.18.0",
     "ts-results": "^3.3.0",
     "yaml": "^1.10.2"

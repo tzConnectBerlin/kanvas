@@ -2,6 +2,7 @@ import * as fs from 'fs';
 const file = fs.readFileSync('./redacted_redacted.yaml', 'utf8');
 import { parse } from 'yaml';
 import { evalExpr, execExpr } from './expr';
+import { Nft } from './types';
 
 interface StateTransition {}
 
@@ -27,10 +28,6 @@ export class StateTransitionMachine {
 
   constructor(filepath: string) {
     const parsed = parse(file);
-
-    console.log('BEGIN');
-    console.log(JSON.stringify(parsed));
-    console.log('END');
 
     for (const attr in parsed.attributes) {
       this.attrTypes[attr] = parsed.attributes[attr];
@@ -71,9 +68,7 @@ export class StateTransitionMachine {
     const st = this.states[nft.state];
 
     for (const transition of st.transitions) {
-      const exprRes = evalExpr<boolean>(nft, transition.when, false);
-      console.log(`in stm: ${exprRes}, type=${typeof exprRes}`);
-      if (exprRes) {
+      if (evalExpr<boolean>(nft, transition.when, false)) {
         nft.state = transition.next_state;
         if (typeof transition.do !== 'undefined') {
           execExpr(nft, transition.do);
