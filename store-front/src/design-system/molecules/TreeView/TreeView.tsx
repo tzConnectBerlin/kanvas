@@ -4,8 +4,7 @@ import FlexSpacer from '../../atoms/FlexSpacer';
 
 import { Checkbox, Stack, Theme } from '@mui/material';
 import { FC, useEffect, useState } from 'react';
-import { IParamsNFTs } from '../../../pages/StorePage';
-import { EscalatorWarningTwoTone } from '@mui/icons-material';
+import { IParamsNFTs, ITreeCategory } from '../../../pages/StorePage';
 
 interface StyledTreeViewProps {
     open?: boolean;
@@ -13,7 +12,7 @@ interface StyledTreeViewProps {
 }
 
 interface TreeViewProps extends StyledTreeViewProps {
-    nodes?: any[];
+    nodes?: ITreeCategory[];
     loading: boolean;
     selectedFilters: number[];
     preSelectedFilters: number[];
@@ -107,9 +106,9 @@ const TreeView: FC<TreeViewProps> = ({
         return res;
     };
 
-    const handleFlip = (node: any, treeState?: TreeState): TreeState => {
+    const handleFlip = (node: ITreeCategory, treeState?: TreeState): TreeState => {
         let newTreeState;
-        const isActionSelect = selectedFilters.indexOf(node.id) === -1;
+        const isActionSelect = selectedFilters.indexOf(node.id as number) === -1;
 
         if (!treeState) {
             newTreeState = select(node, isActionSelect, { selectedNodes: selectedFilters, highlightedParents: highlightedParents })
@@ -122,7 +121,7 @@ const TreeView: FC<TreeViewProps> = ({
         return newTreeState
     }
 
-    const select = (node: any, isActionSelect: boolean, treeState: TreeState): TreeState => {
+    const select = (node: ITreeCategory, isActionSelect: boolean, treeState: TreeState): TreeState => {
         const recRes = recurseChildrens(node, isActionSelect, treeState.selectedNodes);
 
         let incrAboveHighlightCount = recRes.flipNodes.length;
@@ -176,7 +175,7 @@ const TreeView: FC<TreeViewProps> = ({
     };
 
     // Add recursively all the parents to an array and return the array
-    const getParents = (node: any, parents: any[] = []) => {
+    const getParents = (node: ITreeCategory, parents: any[] = []) => {
         if (node.parent) {
             parents.push(node.parent.id);
             getParents(node.parent, parents);
@@ -184,7 +183,7 @@ const TreeView: FC<TreeViewProps> = ({
         return parents;
     };
 
-    const getNodeById = (node: any, nodeId: number, concernedNode: any = null, parent?: any) => {
+    const getNodeById = (node: ITreeCategory, nodeId: number, concernedNode: ITreeCategory | undefined = undefined, parent?: ITreeCategory) => {
         if (parent) {
             node.parent = parent
         }
@@ -193,7 +192,7 @@ const TreeView: FC<TreeViewProps> = ({
         }
 
         if (node.children) {
-            node.children.map((child: any) => {
+            node.children.map((child: ITreeCategory) => {
                 if (child.id === nodeId) {
                     child.parent = node
                     concernedNode = child

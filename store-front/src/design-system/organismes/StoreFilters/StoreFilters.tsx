@@ -10,7 +10,7 @@ import { ArrowBackIosNew } from '@mui/icons-material';
 import { useTheme } from '@mui/system';
 import { useTranslation } from 'react-i18next';
 import CustomButton from '../../atoms/Button';
-import { IParamsNFTs } from '../../../pages/StorePage';
+import { IParamsNFTs, ITreeCategory } from '../../../pages/StorePage';
 
 interface FilterProps {
     name: string;
@@ -64,7 +64,7 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
     preSelectedFilters: number[];
     selectedFilters: number[];
     setSelectedFilters: Function;
-    availableFilters: any[];
+    availableFilters: ITreeCategory[] | undefined;
     loading: boolean;
     priceFilterRange?: [number, number];
     setPriceFilterRange: Function;

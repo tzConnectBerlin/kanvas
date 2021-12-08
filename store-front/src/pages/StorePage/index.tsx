@@ -76,6 +76,13 @@ export interface IParamsNFTs {
     availability?: string[];
 }
 
+export interface ITreeCategory {
+    id: number | string;
+    name: string;
+    parent?: ITreeCategory;
+    children?: ITreeCategory[];
+}
+
 const StorePage = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -313,7 +320,7 @@ const StorePage = () => {
         }
     }, [selectedAvailability]);
 
-    const [availableFilters, setAvailableFilters] = useState<any>();
+    const [availableFilters, setAvailableFilters] = useState<ITreeCategory[]>();
 
     useEffect(() => {
         if (categoriesResponse.data) {
