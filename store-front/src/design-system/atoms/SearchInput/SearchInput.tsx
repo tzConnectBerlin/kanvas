@@ -1,18 +1,18 @@
 import styled from '@emotion/styled';
 import SearchRounded from '@mui/icons-material/SearchRounded';
 
-import { forwardRef } from 'react'
+import { forwardRef } from 'react';
 import {
     Theme,
     useMediaQuery,
     InputBase as MInputBase,
     InputBaseProps as MInputBaseProps,
-} from '@mui/material'
-import { ArrowBackIosNew } from '@mui/icons-material'
+} from '@mui/material';
+import { ArrowBackIosNew } from '@mui/icons-material';
 
 interface InputBaseProps extends MInputBaseProps {
-    open: boolean
-    closeResult?: Function
+    open: boolean;
+    closeResult?: Function;
 }
 
 interface MInputBasePropsStyled {
@@ -50,30 +50,35 @@ const Search = styled.div<{ theme?: Theme }>`
     }
 
     @media (max-width: 874px) {
-        width: 3rem;
+        max-height: 2.2rem;
         min-width: 3rem;
+        padding-left: .2rem;
         display: flex;
-        width: 2.6rem;
-        min-width: 2.6rem;
+        width: 2.3rem;
+        min-width: 2.3rem;
         flex-direction: row-reverse;
-        margin-right: .5rem;
+        margin-right: 0.5rem;
 
         &:focus-within {
             min-width: calc(100vw - 5.7rem);
         }
     }
-`
+`;
 
 const SearchIconWrapper = styled.div<{ theme?: Theme }>`
     position: absolute;
-    height: 2.5rem;
-    width: 2.5rem !important;
+    height: 2.1rem;
+    width: 2.3rem !important;
     pointer-events: none;
     background-color: ${(props) => props.theme.palette.background.default};
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 30;
+
+    @media (max-width: 874px) {
+        background-color: ${(props) => props.theme.palette.background.paper};
+    }
 `;
 
 const StyledSearchRounded = styled(SearchRounded)`
@@ -119,8 +124,9 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
     @media (max-width: 874px) {
         padding-left: 0;
         padding-left: 0.5rem !important;
+        min-width: 2.4rem;
     }
-`
+`;
 
 export const SearchInput = forwardRef<HTMLInputElement, InputBaseProps>(
     ({ ...props }, ref) => {
