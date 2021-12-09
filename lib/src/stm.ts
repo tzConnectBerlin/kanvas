@@ -43,10 +43,10 @@ export class StateTransitionMachine {
     }
   }
 
-  getAllowedActions(actor: Actor, nft: Nft): string[] {
-    let res: string[] = [];
+  getAllowedActions(actor: Actor, nft: Nft): any {
+    let res: any = {};
 
-    const st = this.states[nft.state];
+    const st: State = this.states[nft.state];
     for (const mut of st.mutables) {
       if (
         !mut.by_roles.some((allowedRole: string) => actor.hasRole(allowedRole))
@@ -54,7 +54,9 @@ export class StateTransitionMachine {
         continue;
       }
 
-      res = [...res, ...mut.attributes];
+      for (const attr of mut.attributes) {
+        res[attr] = this.attrTypes[attr];
+      }
     }
 
     return res;
