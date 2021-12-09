@@ -11,17 +11,13 @@ import { SelectChangeEvent } from '@mui/material/Select';
 import { Box } from '@mui/system';
 import { useTranslation } from 'react-i18next';
 
-interface LanguageSwitcherProps {
-    handleLanguageChange?: Function;
-}
-
 export const LanguageSwitcher = () => {
     const { t } = useTranslation(['translation']);
 
-    const [age, setAge] = useState('');
+    const [language, setLanguage] = useState('');
 
     const handleChange = (event: SelectChangeEvent) => {
-        setAge(event.target.value as string);
+        setLanguage(event.target.value as string);
         i18next.changeLanguage(event.target.value as string);
     };
 
@@ -34,8 +30,8 @@ export const LanguageSwitcher = () => {
                 <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
-                    value={age}
-                    label="Age"
+                    value={language}
+                    label={t('common.language')}
                     onChange={handleChange}
                     sx={{
                         borderRadius: 0,
