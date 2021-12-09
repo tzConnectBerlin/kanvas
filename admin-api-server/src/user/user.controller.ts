@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -15,6 +16,8 @@ import { Role } from 'src/role/role';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/role/role.guard';
 import { UpdateUserGuard } from './update-user.guard';
+import { FilterParams } from 'src/types';
+import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
 
 @Controller('user')
 export class UserController {
@@ -28,8 +31,14 @@ export class UserController {
   }
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  findAll(
+    @Query('sort', new ParseJSONArrayPipe())
+    sort?: string[],
+    @Query('filter', new ParseJSONArrayPipe()) filter?: FilterParams,
+    @Query('range', new ParseJSONArrayPipe())
+    range?: number[],
+  ) {
+    return this.userService.findAll({ sort, filter, range });
   }
 
   @Get(':id')

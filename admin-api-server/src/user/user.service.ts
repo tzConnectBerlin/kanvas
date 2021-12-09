@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { FilterParams, QueryParams } from 'src/types';
 import { PG_CONNECTION } from '../constants';
 import { DbPool } from '../db.module';
 import { convertToSnakeCase, hashPassword } from '../utils';
@@ -7,10 +8,13 @@ import { User } from './entities/user.entity';
 
 const getSelectStatement = (
   whereClause = '',
+  limitClause = '',
+  sortDirection = 'ASC',
 ): string => `SELECT id, user_name as "userName", address, email, password, disabled, ARRAY_AGG(mkuur.user_role_id) as roles 
        FROM kanvas_user ku 
        inner join mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id ${whereClause}
-       GROUP BY ku.id`;
+       GROUP BY ku.id
+       ORDER BY $1 ${sortDirection} ${limitClause}`;
 
 const getUpdateQuery = (fields: string[], indexes: string[]) =>
   `UPDATE kanvas_user SET (${fields.join(',')}) = (${indexes.join(
@@ -28,6 +32,25 @@ const DELETE_ROLES_QUERY =
 
 const DELETE_USER_QUERY =
   'UPDATE kanvas_user SET disabled = true WHERE id = $1';
+
+const prepareFilterClause = (filter: FilterParams): string => {
+  let whereClause = '';
+  let indexes = 1;
+  if (filter) {
+    const keys = Object.keys(filter);
+    whereClause = keys.reduce((acc, curr, index) => {
+      indexes++;
+      acc += Array.isArray(filter[curr])
+        ? `WHERE ${curr} = ANY ($${indexes}) `
+        : `WHERE ${curr} = $${indexes} `;
+      if (index !== keys.length - 1) {
+        acc += 'AND ';
+      }
+      return acc;
+    }, '');
+  }
+  return whereClause;
+};
 
 @Injectable()
 export class UserService {
@@ -56,23 +79,33 @@ export class UserService {
     }
   }
 
-  async findAll() {
-    const result = await this.db.query<User[]>(getSelectStatement());
+  async findAll({ range, sort, filter }: QueryParams) {
+    const whereClause = prepareFilterClause(filter);
+    const filterValues = Object.values(filter);
+    const limitClause = range
+      ? `LIMIT ${range[1] - range[0]} OFFSET ${range[0]}`
+      : undefined;
+    const sortField = sort && sort[0] ? sort[0] : 'id';
+    const sortDirection = sort && sort[1] ? sort[1] : 'ASC';
+    const result = await this.db.query<User[]>(
+      getSelectStatement(whereClause, limitClause, sortDirection),
+      [sortField, ...filterValues],
+    );
     return result.rows;
   }
 
   async findOne(id: number) {
     const result = await this.db.query<User>(
-      getSelectStatement(`WHERE id = $1`),
-      [id],
+      getSelectStatement(`WHERE id = $2`),
+      ['id', id],
     );
     return result.rows[0];
   }
 
   async findOneByEmail(email: string) {
     const result = await this.db.query<User>(
-      getSelectStatement(`WHERE email = $1`),
-      [email],
+      getSelectStatement(`WHERE email = $2`),
+      ['id', email],
     );
     return result.rows[0];
   }
