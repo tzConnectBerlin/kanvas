@@ -9,6 +9,7 @@ import { INft } from '../../../interfaces/artwork';
 import Typography from '../../atoms/Typography';
 import CustomCircularProgress from '../../atoms/CircularProgress';
 import { useHistory } from 'react-router-dom';
+import FlexSpacer from '../../atoms/FlexSpacer';
 
 interface ShoppingCartItemProps {
     loading: boolean;
@@ -92,14 +93,14 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                 src={nft!.dataUri ? nft!.dataUri : undefined}
                 height={62}
                 width={62}
-                borderRadius={0}
+                borderRadius={2}
                 responsive
             >
                 <ImageNotSupportedOutlinedIcon />
             </Avatar>
             <Stack
                 direction="column"
-                sx={{ width: 'auto', minWidth: '60%' }}
+                sx={{ width: 'auto', minWidth: '40%' }}
             >
                 <Typography
                     size="h4"
@@ -129,7 +130,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     size="body2"
                     weight="Medium"
                     type='link'
-                    color="#C4C4C4"
+                    color="contrastText"
                     sx={{ cursor: 'pointer', width: 'auto', margin: '0 !important', marginTop: '0.4rem !important' }}
                 >
                     Remove
@@ -138,11 +139,12 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     }
                 </Typography>
             </Stack>
+            <FlexSpacer/>
             <Typography
                 size="body1"
                 weight="Light"
                 noWrap
-                sx={{ cursor: 'pointer', width: 'auto', margin: '0 !important' }}
+                sx={{ cursor: 'pointer', width: 'auto', margin: '0 !important' , overflow: 'clip'}}
             >
                 {`${nft!.price} ꜩ`}
             </Typography>

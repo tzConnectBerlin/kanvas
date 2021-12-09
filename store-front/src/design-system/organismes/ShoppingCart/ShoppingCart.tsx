@@ -44,9 +44,9 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
     bottom: 0;
     z-index: 10;
     top: 0;
-    border-top: 1px solid #C4C4C4;
+    border-top: 1px solid black;
 
-    filter: ${props => props.theme.dropShadow.default};
+    filter: ${props => props.theme.dropShadow.shoppingCart};
 
     overflow: auto;
 
@@ -252,13 +252,14 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             />
                         ))}
 
+                        <FlexSpacer />
+
                         <StyledStackWrapper direction="row">
                             <Typography
                                 size="h4"
                                 weight="SemiBold"
                                 display="initial !important"
                                 align="left"
-                                color="#C4C4C4"
                             >
                                 Total
                             </Typography>
@@ -270,7 +271,6 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 weight="SemiBold"
                                 display="initial !important"
                                 align="right"
-                                color="#C4C4C4"
                             >
                                 {`${calculateTotal(props.nftsInCart.map((nft) => nft.price))} ꜩ`}
                             </Typography>
@@ -286,7 +286,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             {'Empty Shopping Cart..'}
                         </Typography>
                     )}
-                    <FlexSpacer />
+
                     {props.nftsInCart.length > 0 && (
                         <Typography
                             size="subtitle2"
