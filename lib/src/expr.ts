@@ -16,10 +16,7 @@ export function evalExpr<T>(nftState: Nft, s: string, defaultOnErr: T): T {
     const res = Function(
       `
 "use strict";
-function test(nft, ext) {
-  ${s};
-}
-return test(this.nft, this.ext)`,
+return ((nft, ext) => ${s})(this.nft, this.ext)`,
     ).bind({ nft: nft, ext: ext })();
 
     if (typeof defaultOnErr === 'undefined') {
