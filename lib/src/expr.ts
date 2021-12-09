@@ -13,11 +13,12 @@ export function evalExpr<T>(nftState: Nft, s: string, defaultOnErr: T): T {
 
     //const res = eval(s);
     //const res = scopedEval({ nft: nftState.attributes, ext: ext }, s);
-    const res = Function(
-      `
+    const res = Function(`
 "use strict";
-return ((nft, ext) => ${s})(this.nft, this.ext)`,
-    ).bind({ nft: nft, ext: ext })();
+return ((nft, ext) => ${s})(this.nft, this.ext)`).bind({
+      nft: nft,
+      ext: ext,
+    })();
 
     if (typeof defaultOnErr === 'undefined') {
       // T is void, just accept any return value/type here, useful for execExpr.

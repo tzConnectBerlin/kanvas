@@ -1,12 +1,12 @@
 attributes:
   price: Number
   editions_size: Number
-  categories: 'eval'
+  categories: todo
   proposed: Boolean
-  proposal_pass: '[user]'
-  proposal_reject: '[user]'
-  prototype_pass: '[user]'
-  prototype_reject: '[user]'
+  proposal_pass: signatures
+  proposal_reject: signatures
+  prototype_pass: signatures
+  prototype_reject: signatures
 
 # notes:
 # - mutable integers have set,unset
@@ -25,12 +25,6 @@ states:
         nft.editions_size > 0 &&
         nft.price > 0 &&
         nft.categories.length > 0
-      do: |
-        {
-          delete nft.proposed;
-          ext.testFunction(555);
-          delete nft.editions_size;
-        }
     mutables:
     - attributes: [price, editions_size, proposed, categories]
       by_roles: [editor, creator]
@@ -39,25 +33,30 @@ states:
   proposed:
     state_transitions:
     - next_state: setup_nft
-      when: 'nft.proposal_rejects.length > 0'
-      do: 'nft.proposed = false'
+      when: |
+        nft.proposal_reject.length > 0
+      do: |
+        {
+          nft.proposed = false
+        }
 
     - next_state: prototype
-      when: 'nft.proposal_accepts.length == 3'
+      when: |
+        nft.proposal_pass.length == 3
 
     mutables:
-    - attributes: [proposal_accepts, proposal_rejects]
+    - attributes: [proposal_pass, proposal_reject]
       by_roles: [moderator]
 
 
   prototype:
     state_transitions:
     - new_state: finish
-      when: 'nft.prototype_accepts.length == 3'
+      when: 'nft.prototype_pass.length == 3'
 
     - new_state: setup_nft
-      when: 'nft.prototype_rejects.length > 0'
+      when: 'nft.prototype_reject.length > 0'
 
     mutables:
-    - attributes: [prototype_accepts, prototype_rejects]
+    - attributes: [prototype_pass, prototype_reject]
       by_roles: [moderator]
