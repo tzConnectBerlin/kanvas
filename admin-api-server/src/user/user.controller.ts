@@ -8,7 +8,6 @@ import {
   Post,
   Query,
   UseGuards,
-  Res,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserDto } from './dto/user.dto';
@@ -32,22 +31,18 @@ export class UserController {
   }
 
   @Get()
-  async findAll(
-    @Res() res,
+  findAll(
     @Query('sort', new ParseJSONArrayPipe())
     sort?: string[],
     @Query('filter', new ParseJSONArrayPipe()) filter?: FilterParams,
     @Query('range', new ParseJSONArrayPipe())
     range?: number[],
   ) {
-    const { data, count } = await this.userService.findAll({
+    return this.userService.findAll({
       sort,
       filter,
       range,
     });
-    console.log(data, count);
-    res.set('Content-Range', count);
-    res.send(data);
   }
 
   @Get(':id')
