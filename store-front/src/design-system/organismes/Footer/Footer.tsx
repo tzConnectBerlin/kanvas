@@ -57,7 +57,7 @@ const LogoStyled = styled.img<{ theme?: Theme }>`
     transition: height 0.2s;
 
     @media (max-width: 650px) {
-        height: 1.8rem;
+        height: 0.9rem;
         transition: height 0.2s;
     }
 `;

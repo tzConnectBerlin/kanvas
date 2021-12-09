@@ -155,7 +155,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                         animation="wave"
                                         width={65}
                                         height={65}
-                                        sx={{ borderRadius: 0 }}
+                                        sx={{ borderRadius: 2 }}
                                     />
                                     <Skeleton
                                         animation="wave"
@@ -174,15 +174,6 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                 <Typography size="h4" weight="SemiBold">
                                     Nfts
                                 </Typography>
-                                <FlexSpacer />
-                                <Typography
-                                    size="inherit"
-                                    weight="Light"
-                                    color="#0088a7 !important"
-                                    sx={{ cursor: 'pointer' }}
-                                >
-                                    See all
-                                </Typography>
                             </StyledHeaderStack>
                             <StyledContentStack spacing={1}>
                                 {props.artworksSearchResult.map((nft: any) => (
@@ -197,7 +188,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                             src={nft?.dataUri}
                                             height={65}
                                             width={65}
-                                            borderRadius={0}
+                                            borderRadius={2}
                                         />
                                         <Typography
                                             size="h4"
@@ -252,14 +243,6 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                         Categories
                                     </Typography>
                                     <FlexSpacer />
-                                    <Typography
-                                        size="inherit"
-                                        weight="Light"
-                                        color="#0088a7 !important"
-                                        sx={{ cursor: 'pointer' }}
-                                    >
-                                        See all
-                                    </Typography>
                                 </StyledHeaderStack>
                                 <StyledContentStack sx={{ marginLeft: '1em' }}>
                                     <StyledGrid container spacing={2}>

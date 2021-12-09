@@ -21,6 +21,7 @@ export interface NftGridProps {
     openFilters?: boolean;
     collapsed?: boolean;
     sx?: any;
+    nftCardMode?: 'user';
 }
 
 const StyledGrid = styled(Grid)`
@@ -83,6 +84,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                                 editionsAvailable={Number(
                                     nft.editionsAvailable,
                                 )}
+                                nftCardMode={props.nftCardMode}
                                 launchAt={nft.launchAt * 1000}
                             />
                         </Grid>

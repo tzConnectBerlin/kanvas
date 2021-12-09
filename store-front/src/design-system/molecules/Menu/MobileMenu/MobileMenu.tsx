@@ -39,8 +39,6 @@ const WrapperMenuIcon = styled.div<MenuIconProps>`
 
     cursor: pointer;
 
-    background-color: ${(props) => props.theme.palette.background.paper};
-    outline: ${(props) => `solid 1px ${props.theme.palette.text.primary}`};
     transition: filter 0.2s;
 
     display: flex;
@@ -53,11 +51,8 @@ const WrapperMenuIcon = styled.div<MenuIconProps>`
 
     &:hover {
         cursor: pointer;
-        outline: ${(props) => `solid 2px ${props.theme.palette.text.primary}`};
         transition: filter 0.2s;
     }
-
-    background: ${(props) => props.theme.palette.background.paper};
 `;
 
 const StyledMenuCloser = styled.div<MenuIconProps>`

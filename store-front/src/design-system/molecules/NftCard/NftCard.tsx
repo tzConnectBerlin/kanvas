@@ -21,9 +21,10 @@ export interface NftCardProps {
     dataUri?: string;
     launchAt?: number;
     editionsAvailable?: number;
+    nftCardMode?: 'user';
 }
 
-const StyledCard = styled(Card)<{theme?: Theme}>`
+const StyledCard = styled(Card) <{ theme?: Theme }>`
     &.MuiPaper-root {
         background-image: none !important;
         background-color: ${props => props.theme.palette.background.default};
@@ -133,7 +134,7 @@ const StyledWapper = styled.div`
     align-items: center;
 `
 
-const StyledCardContent = styled(CardContent)<{theme?: Theme}>`
+const StyledCardContent = styled(CardContent) <{ theme?: Theme }>`
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -233,20 +234,24 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     flexGrow: 1,
                 }}
             >
-                <AvailabilityWrapper
-                    inStock={(props.editionsAvailable ?? 0) > 0}
-                    willDrop={!launchTime ? false : launchTime > 0}
-                >
-                    <Typography weight="SemiBold" size="body2" color="white">
-                        {(props.editionsAvailable ?? 0) > 0
-                            ? !launchTime
-                                ? false
-                                : launchTime > 0
-                                    ? 'Drop'
-                                    : 'In stock'
-                            : 'Sold out'}
-                    </Typography>
-                </AvailabilityWrapper>
+
+                {
+                    props.nftCardMode !== 'user' &&
+                    <AvailabilityWrapper
+                        inStock={(props.editionsAvailable ?? 0) > 0}
+                        willDrop={!launchTime ? false : launchTime > 0}
+                    >
+                        <Typography weight="SemiBold" size="body2" color="white">
+                            {(props.editionsAvailable ?? 0) > 0
+                                ? !launchTime
+                                    ? false
+                                    : launchTime > 0
+                                        ? 'Drop'
+                                        : 'In stock'
+                                : 'Sold out'}
+                        </Typography>
+                    </AvailabilityWrapper>
+                }
                 <Stack direction="row" sx={{
                     width: '100%',
                     justifyContent: 'center'
@@ -280,24 +285,27 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                         </Typography>
                     </Stack>
 
-                    <Box display="flex" flexDirection="row" marginLeft="auto">
-                        <Typography
-                            weight="SemiBold"
-                            size="h4"
-                            marginLeft="auto"
-                        >
-                            {' '}
-                            {props.price ? props.price : '- '}
-                        </Typography>
+                    {
+                        props.nftCardMode !== 'user' &&
+                        <Box display="flex" flexDirection="row" marginLeft="auto" >
+                            <Typography
+                                weight="SemiBold"
+                                size="h4"
+                                marginLeft="auto"
+                            >
+                                {' '}
+                                {props.price ? props.price : '- '}
+                            </Typography>
 
-                        <Typography
-                            weight="Currency"
-                            size="h4"
-                            marginLeft="auto"
-                        >
-                            <TezosLogo width="18px" margin="0 0.2rem" />
-                        </Typography>
-                    </Box>
+                            <Typography
+                                weight="Currency"
+                                size="h4"
+                                marginLeft="auto"
+                            >
+                                <TezosLogo width="18px" margin="0 0.2rem" />
+                            </Typography>
+                        </Box>
+                    }
                 </Stack>
 
                 <Box

@@ -14,7 +14,7 @@ const ImgStyled = styled.img<{ theme?: Theme }>`
     transition: height 0.2s;
 
     @media (max-width: 650px) {
-        height: 2.8rem;
+        height: 0.8rem;
         transition: height 0.2s;
     }
 `;

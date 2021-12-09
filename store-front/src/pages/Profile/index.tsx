@@ -201,6 +201,7 @@ const Profile: FC<ProfileProps> = () => {
                     nfts={userNftsResponse.data?.nfts}
                     emptyMessage={'No Nfts in collection yet'}
                     emptyLink={'Click here to buy some in the store.'}
+                    nftCardMode='user'
                 />
 
                 <FlexSpacer minHeight={2} />
