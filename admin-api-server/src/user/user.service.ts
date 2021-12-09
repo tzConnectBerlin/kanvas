@@ -20,6 +20,13 @@ const getSelectStatement = (
        GROUP BY ku.id
        ORDER BY $1 ${sortDirection} ${limitClause}`;
 
+const getSelectCountStatement = (
+  whereClause = '',
+): string => `SELECT COUNT(*) FROM kanvas_user ku 
+       inner join mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id ${whereClause}
+       GROUP BY ku.id
+       ORDER BY $1`;
+
 const getUpdateQuery = (fields: string[], indexes: string[]) =>
   `UPDATE kanvas_user SET (${fields.join(',')}) = (${indexes.join(
     ',',
@@ -71,11 +78,15 @@ export class UserService {
       : undefined;
     const sortField = sort && sort[0] ? sort[0] : 'id';
     const sortDirection = sort && sort[1] ? sort[1] : 'ASC';
+    const countResult = await this.db.query(
+      getSelectCountStatement(whereClause),
+      [sortField, ...params],
+    );
     const result = await this.db.query<User[]>(
       getSelectStatement(whereClause, limitClause, sortDirection),
       [sortField, ...params],
     );
-    return result.rows;
+    return { data: result.rows, count: countResult?.rows[0]?.count ?? 0 };
   }
 
   async findOne(id: number) {
