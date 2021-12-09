@@ -3,6 +3,7 @@ const file = fs.readFileSync('./redacted_redacted.yaml', 'utf8');
 import { parse } from 'yaml';
 import { evalExpr, execExpr } from './expr';
 import { Nft } from './types';
+import * as log from 'log';
 
 interface StateTransition {}
 
@@ -58,7 +59,8 @@ export class StateTransitionMachine {
       delete nft.attributes[attr];
       return;
     }
-    nft.attributes[attr] = eval(`${this.attrTypes[attr]}(${v})`);
+    nft.attributes[attr] = JSON.parse(v);
+    log.info(`type of attribute '${attr}' is '${typeof nft.attributes[attr]}'`);
   }
 
   // greedily move nft if possible to a new state

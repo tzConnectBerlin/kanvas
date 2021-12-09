@@ -24,6 +24,7 @@ log.debug(JSON.stringify(stm));
 stm.tryAttributeSet(nft, 'editor', 'editions_size', '1');
 stm.tryAttributeSet(nft, 'editor', 'price', '4');
 stm.tryAttributeSet(nft, 'editor', 'proposed', 'true');
+stm.tryAttributeSet(nft, 'editor', 'categories', '[1]');
 
 stm.tryMoveNft(nft);
 log.warn(nft);

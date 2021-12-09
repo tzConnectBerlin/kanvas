@@ -1,3 +1,3 @@
-export function testFunction() {
-  console.log('called!');
+export function testFunction(input: any) {
+  console.log(`called with: ${input}`);
 }
