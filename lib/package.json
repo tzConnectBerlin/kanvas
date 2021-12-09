@@ -1,5 +1,5 @@
 {
-  "name": "StateMachineLib",
+  "name": "roles_stm",
   "version": "0.0.1",
   "description": "state machine from config",
   "author": "Rick Klomp",
@@ -20,6 +20,8 @@
     "log": "^6.3.1",
     "log-node": "^8.0.2",
     "parsimmon": "^1.18.0",
+    "rollup": "^2.61.0",
+    "rollup-plugin-typescript2": "^0.31.1",
     "ts-results": "^3.3.0",
     "yaml": "^1.10.2"
   }

@@ -7,6 +7,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
+console.log('running!');
+throw 'exit';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
   app.use(
