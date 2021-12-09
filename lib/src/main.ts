@@ -11,6 +11,7 @@ import * as log from 'log';
 // - error
 
 const nft = {
+  id: 0,
   name: 'test',
   state: 'setup_nft',
   attributes: {},
@@ -33,6 +34,7 @@ stm.tryAttributeApply(editor, nft, 'categories', '[1]');
 stm.tryAttributeApply(moderator1, nft, 'proposal_pass', 'true');
 stm.tryAttributeApply(moderator3, nft, 'proposal_pass', 'true');
 stm.tryAttributeApply(moderator3, nft, 'proposal_pass', 'false');
+stm.tryAttributeApply(moderator3, nft, 'proposal_pass', 'true');
 try {
   stm.tryAttributeApply(moderator3, nft, 'proposal_pass', 'true');
 } catch (err: any) {
@@ -40,6 +42,4 @@ try {
   log.warn(err);
 }
 
-log.warn(`before: ${JSON.stringify(nft)}`);
 stm.tryAttributeApply(moderator2, nft, 'proposal_pass', 'true');
-log.warn(`after: ${JSON.stringify(nft)}`);

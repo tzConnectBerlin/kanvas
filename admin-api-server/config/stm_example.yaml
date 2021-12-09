@@ -8,13 +8,6 @@ attributes:
   prototype_pass: signatures
   prototype_reject: signatures
 
-# notes:
-# - mutable integers have set,unset
-# - mutable booleans have set,unset
-# - mutable [..] have add,unset
-# - [..] are probably going to be sets, not lists
-
-
 
 states:
   setup_nft:

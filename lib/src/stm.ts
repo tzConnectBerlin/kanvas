@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-const file = fs.readFileSync('./redacted_redacted.yaml', 'utf8');
 import { parse } from 'yaml';
 import { evalExpr, execExpr } from './expr';
 import { Nft, Actor } from './types';
@@ -28,6 +27,7 @@ export class StateTransitionMachine {
   states: any = {};
 
   constructor(filepath: string) {
+    const file = fs.readFileSync(filepath, 'utf8');
     const parsed = parse(file);
 
     for (const attr in parsed.attributes) {
@@ -68,6 +68,7 @@ export class StateTransitionMachine {
         break;
     }
 
+    log.notice(`nft.id ${nft.id}: '${attr}' ${v} (by actor.id ${actor.id})`);
     this.tryMoveNft(nft);
   }
 
@@ -96,14 +97,14 @@ export class StateTransitionMachine {
       nft.attributes[attr] = [];
     }
     if (nft.attributes[attr].some((id: number) => id === actorId)) {
-      throw `actor with id ${actorId} already signed nft with attr '${attr}, nft=${JSON.stringify(
+      throw `actor with id ${actorId} already signed nft with attr '${attr}', nft=${JSON.stringify(
         nft,
       )}'`;
     }
     nft.attributes[attr].push(actorId);
   }
 
-  // greedily move nft if possible to a new state
+  // move nft if possible to a new state
   // returns true if moved and adjusts nft in memory
   // returns false if not moved
   tryMoveNft(nft: Nft): boolean {
@@ -111,10 +112,10 @@ export class StateTransitionMachine {
 
     for (const transition of st.transitions) {
       if (evalExpr<boolean>(nft, transition.when, false)) {
-        log.warn(
-          `nft ${nft.state} -> ${transition.next_state}, attrs=${JSON.stringify(
-            nft.attributes,
-          )}`,
+        log.notice(
+          `nft.id ${nft.id} ${nft.state} -> ${
+            transition.next_state
+          }, attrs=${JSON.stringify(nft.attributes)}`,
         );
         nft.state = transition.next_state;
         if (typeof transition.do !== 'undefined') {
