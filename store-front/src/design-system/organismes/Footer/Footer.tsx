@@ -8,6 +8,7 @@ import Typography from '../../atoms/Typography';
 import { Copyright } from '../../atoms/Copyright';
 import { useTranslation } from 'react-i18next';
 import { lightTheme as theme } from '../../../theme';
+import { LanguageSwitcher } from '../../molecules/LanguageSwitcher';
 
 export interface FooterProps {
     selectedTheme?: string;
@@ -121,6 +122,9 @@ export const Footer: FC<FooterProps> = () => {
                 >
                     {t('home.hero.description_1')}
                 </Typography>
+                <Box sx={{ marginTop: '.5rem' }}>
+                    <Copyright />
+                </Box>
             </Grid>
 
             <Grid
@@ -249,7 +253,7 @@ export const Footer: FC<FooterProps> = () => {
                     </Box>
 
                     <Box sx={{ marginTop: '2.5rem' }}>
-                        <Copyright />
+                        <LanguageSwitcher />
                     </Box>
                 </Grid>
             </Grid>

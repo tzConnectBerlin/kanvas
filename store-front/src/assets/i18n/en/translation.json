@@ -10,7 +10,8 @@
     "notifications": "Notifications",
     "button": {
       "backToHome": "Back to home"
-    }
+    },
+    "language": "lang"
   },
   "menu": {
     "home": "Home",
