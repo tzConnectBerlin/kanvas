@@ -43,6 +43,23 @@ export class StateTransitionMachine {
     }
   }
 
+  getAllowedActions(actor: Actor, nft: Nft): string[] {
+    let res: string[] = [];
+
+    const st = this.states[nft.state];
+    for (const mut of st.mutables) {
+      if (
+        !mut.by_roles.some((allowedRole: string) => actor.hasRole(allowedRole))
+      ) {
+        continue;
+      }
+
+      res = [...res, ...mut.attributes];
+    }
+
+    return res;
+  }
+
   tryAttributeApply(actor: Actor, nft: Nft, attr: string, v?: string) {
     const st = this.states[nft.state];
     const isAllowed =
@@ -56,11 +73,11 @@ export class StateTransitionMachine {
     }
 
     switch (this.attrTypes[attr]) {
-      case 'signatures':
+      case 'votes':
         if (v === 'true') {
-          this.#tryAttributeAddActorId(nft, attr, actor.id);
+          this.#tryAttributeAddVote(nft, attr, actor.id);
         } else {
-          this.#tryAttributeRemoveActorId(nft, attr, actor.id);
+          this.#tryAttributeRemoveVote(nft, attr, actor.id);
         }
         break;
       default:
@@ -81,7 +98,7 @@ export class StateTransitionMachine {
     log.info(`type of attribute '${attr}' is '${typeof nft.attributes[attr]}'`);
   }
 
-  #tryAttributeRemoveActorId(nft: Nft, attr: string, actorId: number) {
+  #tryAttributeRemoveVote(nft: Nft, attr: string, actorId: number) {
     if (!nft.attributes.hasOwnProperty(attr)) {
       throw `cannot remove actor id from non existing attr ${attr}, nft=${JSON.stringify(
         nft,
@@ -92,7 +109,7 @@ export class StateTransitionMachine {
     );
   }
 
-  #tryAttributeAddActorId(nft: Nft, attr: string, actorId: number) {
+  #tryAttributeAddVote(nft: Nft, attr: string, actorId: number) {
     if (!nft.attributes.hasOwnProperty(attr)) {
       nft.attributes[attr] = [];
     }

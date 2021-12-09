@@ -1,6 +1,5 @@
 export interface Nft {
   id: number;
-  name: string;
   state: string;
   attributes: any;
 }

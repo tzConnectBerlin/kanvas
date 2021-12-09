@@ -12,24 +12,41 @@ import * as log from 'log';
 
 const nft = {
   id: 0,
-  name: 'test',
   state: 'setup_nft',
   attributes: {},
 };
 
 let stm = new StateTransitionMachine('./redacted_redacted.yaml');
 
-log.debug(JSON.stringify(stm));
-
 const editor = new Actor(0, ['editor', 'something']);
 const moderator1 = new Actor(1, ['moderator']);
 const moderator2 = new Actor(2, ['moderator']);
 const moderator3 = new Actor(3, ['moderator']);
 
+log.notice(
+  `allowed actions (editor): ${JSON.stringify(
+    stm.getAllowedActions(editor, nft),
+  )}`,
+);
+log.notice(
+  `allowed actions (moderator): ${JSON.stringify(
+    stm.getAllowedActions(moderator1, nft),
+  )}`,
+);
 stm.tryAttributeApply(editor, nft, 'editions_size', '1');
 stm.tryAttributeApply(editor, nft, 'price', '4');
 stm.tryAttributeApply(editor, nft, 'proposed', 'true');
-stm.tryAttributeApply(editor, nft, 'categories', '[1]');
+stm.tryAttributeApply(editor, nft, 'categories', '[1,4]');
+log.notice(
+  `allowed actions (editor): ${JSON.stringify(
+    stm.getAllowedActions(editor, nft),
+  )}`,
+);
+log.notice(
+  `allowed actions (moderator): ${JSON.stringify(
+    stm.getAllowedActions(moderator1, nft),
+  )}`,
+);
 
 stm.tryAttributeApply(moderator1, nft, 'proposal_pass', 'true');
 stm.tryAttributeApply(moderator3, nft, 'proposal_pass', 'true');

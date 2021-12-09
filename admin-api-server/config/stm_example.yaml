@@ -1,12 +1,12 @@
 attributes:
-  price: Number
-  editions_size: Number
-  categories: todo
-  proposed: Boolean
-  proposal_pass: signatures
-  proposal_reject: signatures
-  prototype_pass: signatures
-  prototype_reject: signatures
+  price: number
+  editions_size: number
+  categories: number[]
+  proposed: boolean
+  proposal_pass: votes
+  proposal_reject: votes
+  prototype_pass: votes
+  prototype_reject: votes
 
 
 states:
