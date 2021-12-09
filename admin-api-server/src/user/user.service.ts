@@ -1,8 +1,12 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { FilterParams, QueryParams } from 'src/types';
+import { QueryParams } from 'src/types';
 import { PG_CONNECTION } from '../constants';
 import { DbPool } from '../db.module';
-import { convertToSnakeCase, hashPassword } from '../utils';
+import {
+  convertToSnakeCase,
+  hashPassword,
+  prepareFilterClause,
+} from '../utils';
 import { UserDto } from './dto/user.dto';
 import { User } from './entities/user.entity';
 
@@ -33,25 +37,6 @@ const DELETE_ROLES_QUERY =
 const DELETE_USER_QUERY =
   'UPDATE kanvas_user SET disabled = true WHERE id = $1';
 
-const prepareFilterClause = (filter: FilterParams): string => {
-  let whereClause = '';
-  let indexes = 1;
-  if (filter) {
-    const keys = Object.keys(filter);
-    whereClause = keys.reduce((acc, curr, index) => {
-      indexes++;
-      acc += Array.isArray(filter[curr])
-        ? `WHERE ${curr} = ANY ($${indexes}) `
-        : `WHERE ${curr} = $${indexes} `;
-      if (index !== keys.length - 1) {
-        acc += 'AND ';
-      }
-      return acc;
-    }, '');
-  }
-  return whereClause;
-};
-
 @Injectable()
 export class UserService {
   constructor(@Inject(PG_CONNECTION) private db: DbPool) {}
@@ -80,8 +65,7 @@ export class UserService {
   }
 
   async findAll({ range, sort, filter }: QueryParams) {
-    const whereClause = prepareFilterClause(filter);
-    const filterValues = Object.values(filter);
+    const { query: whereClause, params } = prepareFilterClause(filter);
     const limitClause = range
       ? `LIMIT ${range[1] - range[0]} OFFSET ${range[0]}`
       : undefined;
@@ -89,7 +73,7 @@ export class UserService {
     const sortDirection = sort && sort[1] ? sort[1] : 'ASC';
     const result = await this.db.query<User[]>(
       getSelectStatement(whereClause, limitClause, sortDirection),
-      [sortField, ...filterValues],
+      [sortField, ...params],
     );
     return result.rows;
   }

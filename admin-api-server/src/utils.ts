@@ -1,6 +1,7 @@
 import { Ok, Err } from 'ts-results';
 import * as bcrypt from 'bcrypt';
 import { AUTH_SALT_ROUNDS } from './constants';
+import { FilterParams } from './types';
 
 class AssertionError extends Error {
   constructor(message: string) {
@@ -51,4 +52,25 @@ export const convertToSnakeCase = (str: string) => {
       .map((s) => s.toLowerCase())
       .join('_')
   );
+};
+
+export const prepareFilterClause = (
+  filter: FilterParams = {},
+): { query: string; params: unknown[] } => {
+  let query = '';
+  let indexes = 1;
+  const keys = Object.keys(filter);
+  if (keys.length) {
+    query = keys.reduce((acc, curr, index) => {
+      indexes++;
+      acc += Array.isArray(filter[curr])
+        ? `WHERE ${curr} = ANY ($${indexes}) `
+        : `WHERE ${curr} = $${indexes} `;
+      if (index !== keys.length - 1) {
+        acc += 'AND ';
+      }
+      return acc;
+    }, '');
+  }
+  return { query, params: Object.values(filter) };
 };

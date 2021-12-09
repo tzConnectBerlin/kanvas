@@ -1,5 +1,5 @@
 export interface FilterParams {
-  [key: string]: string | string[];
+  [key: string]: unknown | unknown[];
 }
 
 export interface QueryParams {
