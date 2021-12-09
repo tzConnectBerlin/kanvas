@@ -45,8 +45,8 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
     z-index: 10;
     top: 0;
     border-top: 1px solid #C4C4C4;
-    
-    filter: drop-shadow(0 0.8rem 0.45rem #C4C4C4);
+
+    filter: ${props => props.theme.dropShadow.default};
 
     overflow: auto;
 

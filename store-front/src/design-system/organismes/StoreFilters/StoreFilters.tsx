@@ -19,25 +19,34 @@ interface FilterProps {
     active: boolean;
 }
 
-const StyledStack = styled(Stack)`
+const StyledStack = styled(Stack)<{selected?: boolean, theme?: Theme}>`
     align-items: center;
     width: 100%;
     padding-bottom: 1rem;
 `;
+
+const StyledTypography = styled(Typography)<{selected?: boolean, theme?: Theme}>`
+    border-left: ${props => props.selected ? `2px solid ${props.theme.palette.primary.contrastText}` : 'none'};
+    height: 2rem;
+    padding-left: ${props => props.selected ? `1rem` : '0'};;
+    transition: padding-left 0.2s;
+`
 
 const Filter: FC<FilterProps> = ({ ...props }) => {
     return (
         <StyledStack
             direction="row"
             onClick={() => props.setCollapsed(props.name)}
+            selected={props.active}
         >
-            <Typography
+            <StyledTypography
                 size="h5"
-                weight={props.active ? 'SemiBold' : 'Medium'}
+                weight={'SemiBold'}
                 color={props.active ? 'contrastText' : ''}
+                selected={props.active}
             >
                 {props.name}
-            </Typography>
+            </StyledTypography>
 
             <FlexSpacer />
 
@@ -153,7 +162,7 @@ const StyledLi = styled.li<StyledStoreFiltersProps>`
     display: ${(props) => (props.openFilters ? 'flex' : 'none')};
     padding-top: 1rem;
     flex-direction: column;
-    border-top: 1px solid #c4c4c4;
+    /* border-top: 1px solid #c4c4c4; */
     height: max-content;
     cursor: pointer;
 `;
@@ -184,7 +193,7 @@ const StyledFooter = styled(Stack) <StyledStoreFiltersProps>`
 
 const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`
     &.Mui-checked {
-        color: ${(props) => props.theme.palette.text.primary} !important;
+        color: ${props => props.theme.palette.primary.contrastText} !important;
     }
 `;
 
@@ -360,7 +369,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                     >
                         <Filter
                             name="Availability"
-                            active={false}
+                            active={props.availabilityFilter.length > 0}
                             collapsed={activeRef.indexOf('Availability') !== -1}
                             setCollapsed={handleListItemClick}
                         />
@@ -445,7 +454,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                     <StyledLi openFilters={props.openFilters}>
                         <Filter
                             name="Price"
-                            active={false}
+                            active={JSON.stringify(props.priceFilterRange) !== JSON.stringify([props.minRange, props.maxRange])}
                             collapsed={activeRef.indexOf('Price') !== -1}
                             setCollapsed={handleListItemClick}
                         />

@@ -55,8 +55,15 @@ const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`
     }
 
     &.Mui-checked {
-        color: ${(props) => props.theme.palette.text.primary} !important;
+        color: ${props => props.theme.palette.primary.contrastText} !important;
     }
+`
+
+const StyledStack = styled(Stack) <{ theme?: Theme, selected: boolean }>`
+    align-items: center;
+    width: 100%;
+    border-left: ${props => props.selected ? `2px solid ${props.theme.palette.primary.contrastText}` : 'none'};
+    height: 2rem;
 `
 
 
@@ -264,9 +271,12 @@ const TreeView: FC<TreeViewProps> = ({
                     }}
                 >
                     <StyledLi open={props.open} key={node.id}>
-                        <Stack
+                        <StyledStack
                             direction="row"
-                            sx={{ alignItems: 'center', width: '100%' }}
+                            selected={highlightedParents.indexOf(
+                                node.id,
+                            ) !== -1 &&
+                                selectedFilters.indexOf(node.id) === -1}
                         >
                             <StyledCheckBox
                                 checked={
@@ -312,7 +322,7 @@ const TreeView: FC<TreeViewProps> = ({
                                     )
                                 ) : undefined}
                             </Stack>
-                        </Stack>
+                        </StyledStack>
                     </StyledLi>
                     {activeRef.indexOf(node.id) !== -1
                         ? renderTree(node, node.children)

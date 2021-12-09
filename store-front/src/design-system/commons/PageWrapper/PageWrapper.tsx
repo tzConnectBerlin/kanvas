@@ -2,7 +2,8 @@ import styled from '@emotion/styled';
 import { Theme } from '@mui/material';
 
 export const PageWrapper = styled.div<{ theme?: Theme }>`
-    min-height: calc(102vh - 224px);
+    min-height: 102vh;
+
 
     display: flex;
     align-items: flex-start;

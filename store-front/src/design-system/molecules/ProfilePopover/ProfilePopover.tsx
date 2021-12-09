@@ -1,10 +1,8 @@
 import styled from '@emotion/styled';
 import Avatar from '../../atoms/Avatar';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
-import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 
 import { FC } from 'react';
-import { CustomBadge } from '../../atoms/Badge';
 import { Typography } from '../../atoms/Typography';
 import { Menu, MenuProps, MenuItem, Stack, Theme } from '@mui/material';
 

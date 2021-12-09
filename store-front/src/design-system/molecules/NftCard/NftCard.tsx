@@ -23,6 +23,13 @@ export interface NftCardProps {
     editionsAvailable?: number;
 }
 
+const StyledCard = styled(Card)<{theme?: Theme}>`
+    &.MuiPaper-root {
+        background-image: none !important;
+        background-color: ${props => props.theme.palette.background.default};
+    }
+`
+
 const StyledBioWrapper = styled.div<{ theme?: Theme }>`
     align-self: flex-start;
     width: 100%;
@@ -33,6 +40,11 @@ const StyledImgWrapper = styled.div<{ theme?: Theme }>`
     overflow: hidden;
     min-height: 90vw;
     border-radius: 1rem;
+    transition: scale 0.2s;
+
+    :hover {
+        scale: 0.98;
+    }
 
     @media (min-width: 600px) {
         min-height: 50vw;
@@ -181,7 +193,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
     };
 
     return !loading ? (
-        <Card
+        <StyledCard
             onClick={() => handleRedirect(`/product/${props.id}`)}
             sx={{
                 height: props.height,
@@ -267,6 +279,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                             {props.ipfsHash}
                         </Typography>
                     </Stack>
+
                     <Box display="flex" flexDirection="row" marginLeft="auto">
                         <Typography
                             weight="SemiBold"
@@ -307,9 +320,9 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     </Typography>
                 </Box>
             </StyledCardContent>
-        </Card>
+        </StyledCard>
     ) : (
-        <Card
+        <StyledCard
             sx={{
                 height: props.height,
                 display: 'flex',
@@ -369,6 +382,6 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     </Box>
                 </Box>
             </StyledCardContent>
-        </Card>
+        </StyledCard>
     );
 };

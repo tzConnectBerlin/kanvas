@@ -53,7 +53,7 @@ const LinkStyled = styled(Link)`
 const LogoStyled = styled.img<{ theme?: Theme }>`
     filter: ${(props) => props.theme.logo.filter ?? 'invert(0%)'};
     display: block;
-    height: 1.8rem;
+    height: 1rem;
     transition: height 0.2s;
 
     @media (max-width: 650px) {
