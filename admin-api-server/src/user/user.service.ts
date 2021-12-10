@@ -128,11 +128,11 @@ export class UserService {
         await client.query(INSERT_ROLES_QUERY, [rest.id, roles]);
       }
       const result = await client.query(updateQuery, [...values, id]);
+      client.query('COMMIT');
       if (result.rowCount === 1) {
         const { password, ...rest } = await this.findOne(id);
         return rest;
       }
-      client.query('COMMIT');
     } catch (e) {
       await client.query('ROLLBACK');
       console.log(e);
