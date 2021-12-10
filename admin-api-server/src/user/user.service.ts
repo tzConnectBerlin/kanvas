@@ -76,7 +76,6 @@ export class UserService {
 
   async findAll({ range, sort, filter }: QueryParams) {
     const { query: whereClause, params } = prepareFilterClause(filter);
-    console.log('>>>>>>>>>>>', whereClause, params);
     const limitClause = range
       ? `LIMIT ${range[1] - range[0]} OFFSET ${range[0]}`
       : undefined;
