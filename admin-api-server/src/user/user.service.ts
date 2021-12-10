@@ -13,12 +13,13 @@ import { User } from './entities/user.entity';
 const getSelectStatement = (
   whereClause = '',
   limitClause = '',
+  sortField = 'id',
   sortDirection = 'ASC',
 ): string => `SELECT id, user_name as "userName", address, email, password, disabled, ARRAY_AGG(mkuur.user_role_id) as roles 
        FROM kanvas_user ku 
        inner join mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id ${whereClause}
        GROUP BY ku.id
-       ORDER BY $1 ${sortDirection} ${limitClause}`;
+       ORDER BY ${sortField} ${sortDirection} ${limitClause}`;
 
 const getSelectCountStatement = (
   whereClause = '',
@@ -75,6 +76,7 @@ export class UserService {
 
   async findAll({ range, sort, filter }: QueryParams) {
     const { query: whereClause, params } = prepareFilterClause(filter);
+    console.log('>>>>>>>>>>>', whereClause, params);
     const limitClause = range
       ? `LIMIT ${range[1] - range[0]} OFFSET ${range[0]}`
       : undefined;
@@ -85,24 +87,24 @@ export class UserService {
       [sortField, ...params],
     );
     const result = await this.db.query<User[]>(
-      getSelectStatement(whereClause, limitClause, sortDirection),
-      [sortField, ...params],
+      getSelectStatement(whereClause, limitClause, sortField, sortDirection),
+      params,
     );
     return { data: result.rows, count: countResult?.rows[0]?.count ?? 0 };
   }
 
   async findOne(id: number) {
     const result = await this.db.query<User>(
-      getSelectStatement(`WHERE id = $2`),
-      ['id', id],
+      getSelectStatement(`WHERE id = $1`),
+      [id],
     );
     return result.rows[0];
   }
 
   async findOneByEmail(email: string) {
     const result = await this.db.query<User>(
-      getSelectStatement(`WHERE email = $2`),
-      ['id', email],
+      getSelectStatement(`WHERE email = $1`),
+      [email],
     );
     return result.rows[0];
   }

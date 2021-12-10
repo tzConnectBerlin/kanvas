@@ -9,7 +9,7 @@ import {
 export class ParseJSONArrayPipe implements PipeTransform<string, any[]> {
   transform(value: string, metadata: ArgumentMetadata): any[] {
     try {
-      return JSON.parse(value);
+      return JSON.parse(value ?? '{}');
     } catch (error) {
       throw new BadRequestException(error, 'Validation failed');
     }
