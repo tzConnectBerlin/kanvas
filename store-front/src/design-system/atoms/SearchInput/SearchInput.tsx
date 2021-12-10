@@ -2,14 +2,17 @@ import styled from '@emotion/styled';
 import SearchRounded from '@mui/icons-material/SearchRounded';
 
 import { forwardRef } from 'react';
-import { Theme } from '@mui/material';
 import {
+    Theme,
+    useMediaQuery,
     InputBase as MInputBase,
     InputBaseProps as MInputBaseProps,
 } from '@mui/material';
+import { ArrowBackIosNew } from '@mui/icons-material';
 
 interface InputBaseProps extends MInputBaseProps {
     open: boolean;
+    closeResult?: Function;
 }
 
 interface MInputBasePropsStyled {
@@ -22,8 +25,8 @@ const Search = styled.div<{ theme?: Theme }>`
     background: ${(props) => props.theme.button.background};
     transition: width 0.3s;
 
-    width: 15rem;
-    min-width: 15rem;
+    width: 23rem;
+    min-width: 23rem;
     height: 2.5rem !important;
     transition: width 0.3s;
 
@@ -41,22 +44,41 @@ const Search = styled.div<{ theme?: Theme }>`
         width: 35rem;
         transition: width 0.2s;
 
-        @media (max-width: 730px) {
+        @media (max-width: 874px) {
             width: 100%;
+        }
+    }
+
+    @media (max-width: 874px) {
+        max-height: 2.2rem;
+        min-width: 3rem;
+        padding-left: .2rem;
+        display: flex;
+        width: 2.3rem;
+        min-width: 2.3rem;
+        flex-direction: row-reverse;
+        margin-right: 0.5rem;
+
+        &:focus-within {
+            min-width: calc(100vw - 5.7rem);
         }
     }
 `;
 
 const SearchIconWrapper = styled.div<{ theme?: Theme }>`
     position: absolute;
-    height: 100%;
-    width: 40px !important;
+    height: 2.1rem;
+    width: 2.3rem !important;
     pointer-events: none;
-
+    background-color: ${(props) => props.theme.palette.background.default};
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 30;
+
+    @media (max-width: 874px) {
+        background-color: ${(props) => props.theme.palette.background.paper};
+    }
 `;
 
 const StyledSearchRounded = styled(SearchRounded)`
@@ -69,6 +91,7 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
     height: 100%;
     width: 100%;
     cursor: pointer;
+    padding-left: 2.5rem !important;
 
     background-color: ${(props) => props.theme.palette.background.default};
 
@@ -85,7 +108,7 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
     &.MuiInputBase-input {
         padding: theme.spacing(1, 1, 1, 0);
 
-        padding-left: '40px';
+        padding-left: 40px;
         transition: width 0.2s, opacity 0.2s;
 
         opacity: 0;
@@ -96,6 +119,12 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
             height: 100rem;
             opacity: 1;
         }
+    }
+
+    @media (max-width: 874px) {
+        padding-left: 0;
+        padding-left: 0.5rem !important;
+        min-width: 2.4rem;
     }
 `;
 

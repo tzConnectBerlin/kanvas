@@ -6,6 +6,7 @@ import { CircularProgress, Theme } from '@mui/material';
 interface CircularProgressProps {
     height: number;
     theme?: Theme;
+    sx?: any;
 }
 
 const StyledCircularProgress = styled(CircularProgress)<CircularProgressProps>`
@@ -17,5 +18,5 @@ const StyledCircularProgress = styled(CircularProgress)<CircularProgressProps>`
 export const CustomCircularProgress: FC<CircularProgressProps> = ({
     ...props
 }) => {
-    return <StyledCircularProgress height={props.height} />;
+    return <StyledCircularProgress height={props.height} sx={props.sx} />;
 };

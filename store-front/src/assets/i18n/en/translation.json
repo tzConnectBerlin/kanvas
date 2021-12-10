@@ -21,7 +21,7 @@
       "part_1": "About the artist",
       "part_2": "Description",
       "part_3": "Will drop in",
-      "editions": "Number of editions available",
+      "editions": "Availability",
       "categories": "Attached catagories",
       "price": "Price",
       "button": "Add to cart"
@@ -98,5 +98,11 @@
     "text": "By continuing to use this site you agree to the use of cookies. Learn more in our ",
     "button": "Agree and Close",
     "link": "Privacy Policy"
+  },
+  "filters": {
+    "button": {
+      "results": "View results",
+      "reset": "reset"
+    }
   }
 }
