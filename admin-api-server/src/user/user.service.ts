@@ -68,6 +68,8 @@ export class UserService {
         'Unable to create new user',
         HttpStatus.BAD_REQUEST,
       );
+    } finally {
+      client.release();
     }
   }
 
@@ -132,11 +134,14 @@ export class UserService {
       }
       client.query('COMMIT');
     } catch (e) {
+      await client.query('ROLLBACK');
       console.log(e);
       throw new HttpException(
         'Unable to update new user',
         HttpStatus.BAD_REQUEST,
       );
+    } finally {
+      client.release();
     }
   }
 
