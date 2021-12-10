@@ -57,12 +57,16 @@ const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`
     &.Mui-checked {
         color: ${props => props.theme.palette.primary.contrastText} !important;
     }
+
+    &.MuiCheckbox-indeterminate {
+        color: ${props => props.theme.palette.primary.contrastText} !important;
+    }
 `
 
 const StyledStack = styled(Stack) <{ theme?: Theme, selected: boolean }>`
     align-items: center;
     width: 100%;
-    border-left: ${props => props.selected ? `2px solid ${props.theme.palette.primary.contrastText}` : 'none'};
+    /* border-left: ${props => props.selected ? `2px solid ${props.theme.palette.primary.contrastText}` : 'none'}; */
     height: 2rem;
 `
 
@@ -282,6 +286,9 @@ const TreeView: FC<TreeViewProps> = ({
                                 checked={
                                     selectedFilters.indexOf(node.id) !== -1
                                 }
+                                indeterminate={highlightedParents.indexOf(
+                                    node.id,
+                                ) !== -1 }
                                 onClick={() => { handleFlip(node); setNewCategorySelected(true); }}
                                 inputProps={{ 'aria-label': 'controlled' }}
                                 disableRipple
@@ -294,14 +301,13 @@ const TreeView: FC<TreeViewProps> = ({
                             >
                                 <Typography
                                     size="h5"
-                                    weight="Light"
-                                    color={
+                                    weight={
                                         highlightedParents.indexOf(
                                             node.id,
                                         ) !== -1 &&
-                                            selectedFilters.indexOf(node.id) === -1
-                                            ? 'contrastText'
-                                            : ''
+                                            selectedFilters.indexOf(node.id) === -1 || selectedFilters.indexOf(node.id) !== -1
+                                            ? 'SemiBold'
+                                            : 'Light'
                                     }
                                 >
                                     {node.name}

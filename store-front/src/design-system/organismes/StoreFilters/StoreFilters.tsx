@@ -19,17 +19,17 @@ interface FilterProps {
     active: boolean;
 }
 
-const StyledStack = styled(Stack)<{selected?: boolean, theme?: Theme}>`
+const StyledStack = styled(Stack) <{ selected?: boolean, theme?: Theme }>`
     align-items: center;
     width: 100%;
     padding-bottom: 1rem;
 `;
 
-const StyledTypography = styled(Typography)<{selected?: boolean, theme?: Theme}>`
+const StyledTypography = styled(Typography) <{ selected?: boolean, theme?: Theme }>`
     border-left: ${props => props.selected ? `2px solid ${props.theme.palette.primary.contrastText}` : 'none'};
     height: 2rem;
-    padding-left: ${props => props.selected ? `1rem` : '0'};;
-    transition: padding-left 0.2s;
+    padding-left: ${props => props.selected ? `1rem` : '0'};
+    margin-left: ${props => props.selected ? '-1rem' : 0};
 `
 
 const Filter: FC<FilterProps> = ({ ...props }) => {
@@ -51,11 +51,11 @@ const Filter: FC<FilterProps> = ({ ...props }) => {
             <FlexSpacer />
 
             {props.collapsed ? (
-                <Typography size="h5" weight="Light">
+                <Typography size="h5" weight="Light" color={props.active ? 'contrastText' : ''}>
                     +
                 </Typography>
             ) : (
-                <Typography size="h5" weight="Light">
+                <Typography size="h5" weight="Light" color={props.active ? 'contrastText' : ''}>
                     -
                 </Typography>
             )}
@@ -150,18 +150,27 @@ const StyledUl = styled.ul<StyledStoreFiltersProps>`
     height: max-content;
     transition: width 0.2s ease 0s;
 
-    padding: 0.5rem 1.5rem 0;
-    margin-top: 5rem;
+    padding: 0 1.5rem 0;
+    /* margin-top: 3rem; */
 
     @media (min-width: 874px) {
         margin-top: 0;
         padding: 0.5rem 1.5rem 0 0;
+    }
+
+    &:first-child {
+        padding-top: 0 !important;
+
+        li {
+            padding-top: 0 !important;
+        }
     }
 `;
 const StyledLi = styled.li<StyledStoreFiltersProps>`
     display: ${(props) => (props.openFilters ? 'flex' : 'none')};
     padding-top: 1rem;
     flex-direction: column;
+    margin-left: 1rem;
     /* border-top: 1px solid #c4c4c4; */
     height: max-content;
     cursor: pointer;
@@ -243,7 +252,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
         }
         if (availabilityChange) {
             console.log(props.availabilityFilter)
-            callNFTsEndpoint({handlePriceRange: true})
+            callNFTsEndpoint({ handlePriceRange: true })
 
             setAvailabilityChange(false)
         }
@@ -251,91 +260,63 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
 
     return (
         <StyledSection openFilters={props.openFilters}>
-            <StyledHeader
-                direction="row"
-                sx={{ display: `${props.openFilters ? 'flex' : 'none'}` }}
-                p={isMobile ? '2rem 1.5rem 0rem' : '0 0 .5rem 0'}
-            >
-                {isMobile ? (
-                    <>
-                        <BackButton
-                            fill="#fff"
-                            onClick={() => props.setFilterOpen(true)}
-                            sx={{
-                                cursor: 'pointer',
-                                marginBottom: '0.7rem',
-                            }}
-                        />
+            {isMobile &&
+                <StyledHeader
+                    direction="row"
+                    sx={{ display: `${props.openFilters ? 'flex' : 'none'}` }}
+                    p={isMobile ? '2rem 1.5rem 0rem' : '0 0 .5rem 0'}
+                >
+                    <BackButton
+                        fill="#fff"
+                        onClick={() => props.setFilterOpen(true)}
+                        sx={{
+                            cursor: 'pointer',
+                            marginBottom: '0.7rem',
+                        }}
+                    />
 
-                        <Typography
-                            p="0  1.5rem .5rem 0"
-                            onClick={() => props.setSelectedFilters([])}
-                            size="h2"
-                            ml={2}
-                            weight={
-                                props.selectedFilters.length > 0
-                                    ? 'Medium'
-                                    : 'Light'
-                            }
-                            sx={{ lineHeight: 1.1 }}
-                        >
-                            Filters
-                        </Typography>
+                    <Typography
+                        p="0  1.5rem .5rem 0"
+                        onClick={() => props.setSelectedFilters([])}
+                        size="h2"
+                        ml={2}
+                        weight={
+                            props.selectedFilters.length > 0
+                                ? 'Medium'
+                                : 'Light'
+                        }
+                        sx={{ lineHeight: 1.1 }}
+                    >
+                        Filters
+                    </Typography>
 
-                        <FlexSpacer />
+                    <FlexSpacer />
 
-                        <Typography
-                            onClick={() => {
-                                props.setSelectedFilters([]);
-                                props.setAvailabilityFilter([]);
-                                props.setPriceFilterRange([props.minRange, props.maxRange]);
-                                callNFTsEndpoint({handlePriceRange: false, categories: [], availability: []});
-                            }}
-                            size="subtitle2"
-                            weight={
-                                props.selectedFilters.length > 0 || props.availabilityFilter.length > 0
-                                    ? 'Medium'
-                                    : 'Light'
-                            }
-                            color={
-                                props.selectedFilters.length > 0 || props.availabilityFilter.length > 0
-                                    ? 'contrastText'
-                                    : '#C4C4C4'
-                            }
-                            sx={{ paddingBottom: '0.5rem', cursor: 'pointer !important' }}
-                            noWrap
-                        >
-                            Clear All
-                        </Typography>
-                    </>
-                ) : (
-                    <>
-                        <FlexSpacer />
-                        <Typography
-                            onClick={() => {
-                                props.setSelectedFilters([]);
-                                props.setAvailabilityFilter([]);
-                                props.setPriceFilterRange([props.minRange, props.maxRange]);
-                                callNFTsEndpoint({handlePriceRange: false, categories: [], availability: []});
-                            }}
-                            size="subtitle2"
-                            weight={
-                                props.selectedFilters.length > 0 || props.availabilityFilter.length > 0
-                                    ? 'Medium'
-                                    : 'Light'
-                            }
-                            color={
-                                props.selectedFilters.length > 0 || props.availabilityFilter.length > 0
-                                    ? 'contrastText'
-                                    : '#C4C4C4'
-                            }
-                            sx={{ paddingBottom: '0.5rem', cursor: 'pointer !important' }}
-                        >
-                            Clear All
-                        </Typography>
-                    </>
-                )}
-            </StyledHeader>
+                    <Typography
+                        onClick={() => {
+                            props.setSelectedFilters([]);
+                            props.setAvailabilityFilter([]);
+                            props.setPriceFilterRange([props.minRange, props.maxRange]);
+                            callNFTsEndpoint({ handlePriceRange: false, categories: [], availability: [] });
+                        }}
+                        size="subtitle2"
+                        weight={
+                            props.selectedFilters.length > 0 || props.availabilityFilter.length > 0
+                                ? 'Medium'
+                                : 'Light'
+                        }
+                        color={
+                            props.selectedFilters.length > 0 || props.availabilityFilter.length > 0
+                                ? 'contrastText'
+                                : '#C4C4C4'
+                        }
+                        sx={{ paddingBottom: '0.5rem', cursor: 'pointer !important' }}
+                        noWrap
+                    >
+                        Clear All
+                    </Typography>
+                </StyledHeader>
+            }
 
             <Stack
                 direction="column"

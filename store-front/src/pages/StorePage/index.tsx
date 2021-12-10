@@ -5,6 +5,8 @@ import NftGrid from '../../design-system/organismes/NftGrid';
 import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
 import StoreFilters from '../../design-system/organismes/StoreFilters';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 import { useEffect, useState } from 'react';
 import {
@@ -13,8 +15,9 @@ import {
     Pagination,
     useMediaQuery,
     useTheme,
+    Chip
 } from '@mui/material';
-import { CustomButton } from '../../design-system/atoms/Button';
+
 import { CustomSelect } from '../../design-system/atoms/Select';
 import { Typography } from '../../design-system/atoms/Typography';
 import { useHistory } from 'react-router';
@@ -28,9 +31,11 @@ const StyledStack = styled(Stack)`
     width: 100vw;
     height: 100%;
 `;
+
 const StyledContentStack = styled(Stack) <ParamTypes>`
     flex-direction: row;
     width: 100%;
+    margin-top: 2.5rem !important;
 
     @media (max-width: 900px) {
         flex-direction: column;
@@ -38,7 +43,8 @@ const StyledContentStack = styled(Stack) <ParamTypes>`
 `;
 const StyledListIcon = styled(ListIcon) <{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.text.primary};
-    padding-right: 1rem;
+    padding-right: 0.5rem;
+    width: 1.4rem;
 `;
 
 const StyledPagination = styled(Pagination) <{
@@ -64,6 +70,21 @@ const StyledPagination = styled(Pagination) <{
         align-items: center !important;
     }
 `;
+
+const StyledChevronLeftIcon = styled(ChevronLeftIcon) <{ opened: boolean, theme?: Theme }>`
+    height: 1.8rem;
+    width: 1.8rem;
+    color: ${props => props.theme.palette.text.primary};
+    transform: ${props => props.opened ? '' : 'rotate(180deg)'};
+
+    transition: transform 0.3s;
+
+    cursor: pointer;
+`
+
+const StyledChip = styled(Chip)<{theme?: Theme}>`
+
+`
 
 export interface IParamsNFTs {
     handlePriceRange: boolean;
@@ -282,6 +303,7 @@ const StorePage = () => {
         setSelectedPage(page);
         setPageParams('page', page.toString());
         callNFTsEndpoint({ handlePriceRange: true, page: page });
+        window.scrollTo(0, 0);
     };
 
     const triggerPriceFilter = () => {
@@ -351,19 +373,24 @@ const StorePage = () => {
                 <FlexSpacer minHeight={1} />
 
                 {/* Toggle options */}
-                <Stack direction="row">
-                    <CustomButton
-                        size="medium"
+                <Stack direction="row" sx={{ justifyContent: 'center', alignItems: 'center' }}>
+
+                    <StyledChevronLeftIcon opened={filterOpen} onClick={() => setFilterOpen(!filterOpen)} />
+                    <Typography
+                        size="body1"
+                        weight="SemiBold"
                         onClick={() => setFilterOpen(!filterOpen)}
-                        aria-label="loading"
-                        icon={<StyledListIcon />}
-                        label={`Filters ${selectedCategories.length > 0
+                        sx={{ justifyContent: 'center', cursor: 'pointer', paddingLeft: '1rem' }}
+                    >
+                        {`Filters ${selectedCategories.length > 0
                             ? `  - ${selectedCategories.length}`
                             : ''
                             }`}
-                        disabled={nftsResponse.loading}
-                    />
-
+                    </Typography>
+                    {
+                        selectedCategories.length > 0 &&
+                            <Chip label="Clear all" variant="outlined" onDelete={() => {}} />
+                    }
                     <FlexSpacer />
 
                     <CustomSelect
