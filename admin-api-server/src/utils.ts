@@ -58,7 +58,7 @@ export const prepareFilterClause = (
   filter: FilterParams = {},
 ): { query: string; params: unknown[] } => {
   let query = '';
-  let indexes = 1;
+  let indexes = 0;
   const keys = Object.keys(filter);
   if (keys.length) {
     query = keys.reduce((acc, curr, index) => {
