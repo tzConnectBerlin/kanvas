@@ -25,28 +25,17 @@ const getSelectCountStatement = (
 const DELETE_NFT_QUERY = 'UPDATE nft SET disabled = true WHERE id = $1';
 
 const getInsertStatement = (nft: Nft) => {
-  const keys = Object.keys(nft);
-  let index = 0;
-  return `INSERT INTO nft (${keys
-    .filter((key: string) => Boolean(nft[key]))
-    .join(',')}) VALUES (${keys
-    .reduce((acc, key) => {
-      if (nft[key]) {
-        index += 1;
-        acc.push(`$${index}`);
-      }
-      return acc;
-    }, [])
+  const keys = nft.getFieldsWithValues();
+  return `INSERT INTO nft (${keys.join(',')}) VALUES (${keys
+    .map((key, index) => `$${index + 1}`)
     .join(',')}) RETURNING id;`;
 };
 
 const getUpdateStatement = (nft: Nft) => {
-  const keys = Object.keys(nft);
-  return `UPDATE nft set (${keys
-    .map((key: string) => key)
-    .join(',')}) = (${keys.map((key, index) => `$${index + 1}`)}) WHERE id = $${
-    keys.length + 2
-  };`;
+  const keys = nft.getFieldsWithValues();
+  return `UPDATE nft set (${keys.join(',')}) = (${keys
+    .map((key, index) => `$${index + 1}`)
+    .join(',')}) WHERE id = $${keys.length + 1};`;
 };
 
 @Injectable()
@@ -71,17 +60,19 @@ export class NftService {
 
   async findAll({ range, sort, filter }: QueryParams) {
     const { query: whereClause, params } = prepareFilterClause(filter);
-    const limitClause = range
-      ? `LIMIT ${range[1] - range[0]} OFFSET ${range[0]}`
-      : undefined;
+    const limitClause =
+      range.length === 2
+        ? `LIMIT ${range[1] - range[0]} OFFSET ${range[0]}`
+        : undefined;
     const sortField = sort && sort[0] ? sort[0] : 'id';
     const sortDirection = sort && sort[1] ? sort[1] : 'ASC';
     const countResult = await this.db.query(
-      getSelectCountStatement(whereClause),
-      [sortField, ...params],
+      getSelectCountStatement(whereClause, sortField),
+      params,
     );
+
     const result = await this.db.query<Nft>(
-      getSelectStatement(whereClause, limitClause, sortField, sortDirection),
+      getSelectStatement(whereClause, sortField, sortDirection, limitClause),
       params,
     );
     return {
@@ -101,7 +92,8 @@ export class NftService {
   async update(id: number, updateNftDto: NftDto) {
     const nft = new Nft(updateNftDto);
     const query = getUpdateStatement(nft);
-    const result = await this.db.query(query, [Object.values(nft), id]);
+    const params = Object.values(nft).filter((item) => Boolean(item));
+    const result = await this.db.query(query, [...params, id]);
     if (result.rowCount >= 1) {
       return this.findOne(id);
     }

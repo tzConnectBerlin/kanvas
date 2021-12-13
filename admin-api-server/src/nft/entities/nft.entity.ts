@@ -30,4 +30,8 @@ export class Nft {
   nft_contract?: string;
   token_id?: string;
   disabled?: boolean;
+
+  getFieldsWithValues() {
+    return Object.keys(this).filter((key: string) => Boolean(this[key]));
+  }
 }
