@@ -83,7 +83,8 @@ const StyledChevronLeftIcon = styled(ChevronLeftIcon) <{ opened: boolean, theme?
 `
 
 const StyledChip = styled(Chip)<{theme?: Theme}>`
-
+    margin-left: 1.5rem;
+    border: 1px solid #C4C4C4;
 `
 
 export interface IParamsNFTs {
@@ -367,7 +368,7 @@ const StorePage = () => {
                     weight="SemiBold"
                     sx={{ justifyContent: 'center' }}
                 >
-                    Store front
+                    The Store
                 </Typography>
 
                 <FlexSpacer minHeight={1} />
@@ -377,7 +378,7 @@ const StorePage = () => {
 
                     <StyledChevronLeftIcon opened={filterOpen} onClick={() => setFilterOpen(!filterOpen)} />
                     <Typography
-                        size="body1"
+                        size="h4"
                         weight="SemiBold"
                         onClick={() => setFilterOpen(!filterOpen)}
                         sx={{ justifyContent: 'center', cursor: 'pointer', paddingLeft: '1rem' }}
@@ -388,8 +389,13 @@ const StorePage = () => {
                             }`}
                     </Typography>
                     {
-                        selectedCategories.length > 0 &&
-                            <Chip label="Clear all" variant="outlined" onDelete={() => {}} />
+                        (selectedAvailability.length > 0 || selectedCategories.length > 0 || JSON.stringify(priceFilterRange) !== JSON.stringify([nftsResponse.data?.lowerPriceBound, nftsResponse.data?.upperPriceBound])) &&
+                            <StyledChip label="Clear all" variant="outlined" onDelete={() => {
+                                    setSelectedCategories([]);
+                                    setSelectedAvailability([]);
+                                    setPriceFilterRange([nftsResponse.data?.lowerPriceBound, nftsResponse.data?.upperPriceBound]);
+                                    callNFTsEndpoint({ handlePriceRange: false, categories: [], availability: [] });
+                                }} />
                     }
                     <FlexSpacer />
 

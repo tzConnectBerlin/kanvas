@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { FC } from 'react';
 import { Theme } from '@mui/material';
@@ -29,39 +30,58 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
 
     .MuiOutlinedInput-root.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-formControl:after {
         border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .MuiOutlinedInput-root.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-formControl {
         border-radius: 2rem !important;
-        outline: solid 1.5px #C4C4C4;
         font-size: 0.9rem;
+        font-weight: 900;
         transition: outline 0.2s;
 
         fieldset {
             display: none !important;
         }
 
-        :hover {
-            outline: 2px solid ${(props) => props.theme.palette.text.primary};
-        }
 
         &.Mui-focused {
             color: ${(props) => props.theme.palette.text.primary} !important;
-            outline: 1px solid ${(props) => props.theme.palette.text.primary} !important;
         }
     }
 
+
     .MuiSelect-select {
         border-radius: 2rem !important;
-        background-color: ${props => props.theme.palette.background.paper};
         padding-top: 0.6rem !important;
         padding-bottom: 0.7rem !important;
+        padding-right: 3rem !important;
     }
 
     svg {
         color: ${(props) => props.theme.palette.text.primary};
     }
 `;
+
+const StyledMenuItem = styled(MenuItem)<{theme?: Theme}>`
+    font-family: 'Poppins' !important;
+    border-radius: 0.5rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+
+    &.Mui-selected {
+        background-color: ${(props) => props.theme.palette.primary.contrastText} !important;
+    }
+`
+
+const StyledExpandMoreIcon = styled(ExpandMoreIcon) <{theme?: Theme }>`
+    width: 1.8rem;
+    margin-left: 0.5rem;
+    color: ${props => props.theme.palette.text.primary};
+
+    transition: transform 0.3s;
+`
 
 export const CustomSelect: FC<SelectedProps> = ({
     callNFTsEndpoint,
@@ -89,49 +109,56 @@ export const CustomSelect: FC<SelectedProps> = ({
                     })
                 }
                 onChange={handleChange}
+                IconComponent={StyledExpandMoreIcon}
                 autoWidth
             >
-                <MenuItem
+                <StyledMenuItem
+                    disableRipple
                     value={JSON.stringify({
                         orderBy: 'name',
                         orderDirection: 'asc',
                     })}
                 >
                     Name: A - Z
-                </MenuItem>
-                <MenuItem
+                </StyledMenuItem>
+                <StyledMenuItem
+                    disableRipple
                     value={JSON.stringify({
                         orderBy: 'name',
                         orderDirection: 'desc',
                     })}
                 >
                     Name: Z - A
-                </MenuItem>
-                <MenuItem
+                </StyledMenuItem>
+                <StyledMenuItem
+                    disableRipple
                     value={JSON.stringify({
                         orderBy: 'price',
                         orderDirection: 'desc',
                     })}
                 >
                     Price: High - Low
-                </MenuItem>
-                <MenuItem
+                </StyledMenuItem>
+                <StyledMenuItem
+                    disableRipple
                     value={JSON.stringify({
                         orderBy: 'price',
                         orderDirection: 'asc',
                     })}
                 >
                     Price: Low - High
-                </MenuItem>
-                <MenuItem
+                </StyledMenuItem>
+                <StyledMenuItem
+                    disableRipple
                     value={JSON.stringify({
                         orderBy: 'createdAt',
                         orderDirection: 'desc',
                     })}
                 >
                     Created: New - Old
-                </MenuItem>
-                <MenuItem
+                </StyledMenuItem>
+                <StyledMenuItem
+                    disableRipple
                     value={JSON.stringify({
                         orderBy: 'createdAt',
                         orderDirection: 'asc',
@@ -139,7 +166,7 @@ export const CustomSelect: FC<SelectedProps> = ({
                 >
                     {' '}
                     Created: Old - New
-                </MenuItem>
+                </StyledMenuItem>
             </Select>
         </StyledFormControl>
     );
