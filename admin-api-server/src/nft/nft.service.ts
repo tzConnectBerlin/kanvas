@@ -20,7 +20,7 @@ const getSelectCountStatement = (
   sortField = 'id',
   sortDirection = 'ASC',
 ): string =>
-  `SELECT * FROM nft ${whereClause} ORDER BY ${sortField} ${sortDirection}`;
+  `SELECT COUNT(*) FROM nft ${whereClause} GROUP BY nft.id ORDER BY ${sortField} ${sortDirection}`;
 
 const DELETE_NFT_QUERY = 'UPDATE nft SET disabled = true WHERE id = $1';
 
@@ -70,14 +70,13 @@ export class NftService {
       getSelectCountStatement(whereClause, sortField),
       params,
     );
-
     const result = await this.db.query<Nft>(
       getSelectStatement(whereClause, sortField, sortDirection, limitClause),
       params,
     );
     return {
       data: result.rows.map((nft: Nft) => new NftDto(nft)),
-      count: countResult?.rows[0]?.count ?? 0,
+      count: countResult.rowCount ?? 0,
     };
   }
 
