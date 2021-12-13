@@ -22,7 +22,7 @@ interface MInputBasePropsStyled {
 const Search = styled.div<{ theme?: Theme }>`
     cursor: pointer;
 
-    background: ${(props) => props.theme.button.background};
+    background: ${(props) => props.theme.palette.background.paper};
     transition: width 0.3s;
 
     width: 23rem;
@@ -50,17 +50,15 @@ const Search = styled.div<{ theme?: Theme }>`
     }
 
     @media (max-width: 874px) {
-        max-height: 2.2rem;
-        min-width: 3rem;
-        padding-left: .2rem;
         display: flex;
-        width: 2.3rem;
-        min-width: 2.3rem;
+        width: 2.5rem;
+        min-width: 2.5rem;
         flex-direction: row-reverse;
-        margin-right: 0.5rem;
+        background-color: ${(props) => props.theme.palette.background.default};
 
         &:focus-within {
             min-width: calc(100vw - 5.7rem);
+            background-color: ${(props) => props.theme.palette.background.paper};
         }
     }
 `;
@@ -129,7 +127,9 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
     @media (max-width: 874px) {
         padding-left: 0;
         padding-left: 0.5rem !important;
-        min-width: 2.4rem;
+        min-width: 2.1rem;
+        outline: none;
+        background-color: ${(props) => props.theme.palette.background.paper};
     }
 `;
 

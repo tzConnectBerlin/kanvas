@@ -13,11 +13,9 @@ import {
     MenuProps,
     SearchProps,
     StyledShoppingCartRoundedIcon,
-    StyledLink,
 } from '../Menu';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
-import { Box } from '@mui/system';
+import { Link, useHistory } from 'react-router-dom';
 import { QuickSearch } from '../../QuickSearch';
 import { ArrowBackIosNew } from '@mui/icons-material';
 
@@ -29,6 +27,7 @@ interface MenuIconProps {
     expandMenu?: boolean;
     theme?: Theme;
 }
+
 interface BackButtonProps {
     theme?: Theme;
 }
@@ -97,7 +96,7 @@ const MenuBarWrapper = styled.div`
     display: inline-table;
 `;
 
-const MobileStyledMenuHeader = styled(Stack)<SearchProps>`
+const MobileStyledMenuHeader = styled(Stack) <SearchProps>`
     display: none;
     margin-top: 0rem !important;
 
@@ -117,9 +116,10 @@ const MobileStyledMenuHeader = styled(Stack)<SearchProps>`
         width: ${(props) => (props.isSearchOpen ? '100%' : '')};
         margin-left: auto !important;
         justify-content: space-between;
+    }
 `;
 
-const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
+const MobileStyledMenuContent = styled(Stack) <MenuIconProps>`
     display: none;
 
     @media (max-width: 874px) {
@@ -140,7 +140,7 @@ const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
 
         padding-bottom: 2.5rem;
 
-        background-color: ${(props) => props.theme.palette.background.paper};
+        background-color: ${(props) => props.theme.palette.background.default};
         opacity: 1;
 
         p,
@@ -153,9 +153,9 @@ const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
     }
 
     @media (max-width: 1100px) {
-        width: ${(props) => (props.expandMenu ? 40 : 0)}%;
+        width: ${(props) => (props.expandMenu ? 50 : 0)}%;
     }
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         width: ${(props) => (props.expandMenu ? 100 : 0)}%;
     }
 `;
@@ -169,7 +169,22 @@ const StyledBox = styled.div`
     }
 `;
 
-const BackButton = styled(ArrowBackIosNew)<BackButtonProps>`
+const StyledMobileLink = styled(Link) <{ theme?: Theme }>`
+    color: ${(props) => props.theme.palette.text.primary};
+    text-decoration: none;
+
+    height: 2rem;
+    margin-left: 0.5rem;
+    margin-top: 0.5rem;
+`
+
+const StyledSignIn = styled(Typography)`
+    height: 2rem;
+    margin-left: 0.5rem;
+    margin-top: 0.5rem;
+`
+
+const BackButton = styled(ArrowBackIosNew) <BackButtonProps>`
     fill: ${(props) => props.theme.palette.text.primary};
     z-index: 999;
     pointer-events: none;
@@ -178,13 +193,13 @@ const BackButton = styled(ArrowBackIosNew)<BackButtonProps>`
 
 export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
     const { t } = useTranslation(['translation']);
-    const history = useHistory();
+    const history = useHistory()
 
     const [expandMenu, setExpandMenu] = useState(false);
 
-    // const navigateTo = (componentURL: string) => {
-    //     history.push(`/${componentURL}`)
-    // }
+    const navigateTo = (componentURL: string) => {
+        history.push(componentURL)
+    }
 
     useEffect(() => {
         if (expandMenu) {
@@ -233,6 +248,29 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
 
                 {/* Menu button, and closing button for search bar */}
 
+                <Badge
+                    color="error"
+                    badgeContent={props.nftsInCartNumber}
+                >
+                    <StyledShoppingCartRoundedIcon
+                        onClick={() => props.openOrCloseShoppingCart()}
+                    />
+                </Badge>
+
+                <WrapperThemeIcon isSearchOpen={props.isSearchOpen}>
+                    {props.selectedTheme === 'dark' ? (
+                        <Brightness3Icon
+                            onClick={() => props.switchTheme('light')}
+                            sx={{ cursor: 'pointer', bottom: 0 }}
+                        />
+                    ) : (
+                        <WbSunnyOutlinedIcon
+                            onClick={() => props.switchTheme('dark')}
+                            sx={{ cursor: 'pointer', bottom: 0 }}
+                        />
+                    )}
+                </WrapperThemeIcon>
+
                 {!props.isSearchOpen && (
                     <WrapperMenuIcon
                         onClick={
@@ -261,6 +299,7 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                         )}
                     </WrapperMenuIcon>
                 )}
+
             </MobileStyledMenuHeader>
 
             {/* Mobile Menu Content */}
@@ -272,124 +311,94 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                 sx={{ alignItems: 'beginning' }}
                 onClick={() => setExpandMenu(!expandMenu)}
             >
-                <Box
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'end',
-                        padding: '0 1.5rem 1.5rem',
-                    }}
-                >
-                    <Badge
-                        color="error"
-                        badgeContent={props.nftsInCartNumber}
-                        style={{ marginRight: '1rem' }}
-                    >
-                        <StyledShoppingCartRoundedIcon
-                            onClick={() => props.openOrCloseShoppingCart()}
-                        />
-                    </Badge>
-
-                    <WrapperThemeIcon isSearchOpen={props.isSearchOpen}>
-                        {props.selectedTheme === 'dark' ? (
-                            <Brightness3Icon
-                                onClick={() => props.switchTheme('light')}
-                                sx={{ cursor: 'pointer', bottom: 0 }}
-                            />
-                        ) : (
-                            <WbSunnyOutlinedIcon
-                                onClick={() => props.switchTheme('dark')}
-                                sx={{ cursor: 'pointer', bottom: 0 }}
-                            />
-                        )}
-                    </WrapperThemeIcon>
-                </Box>
-
                 <StyledBox>
-                    <StyledLink to="/">
+                    <Typography
+                        size="h5"
+                        weight="Medium"
+                        color="#9b9b9b"
+                        sx={{ cursor: 'pointer', marginBottom: '0.7rem' }}
+                    >
+                        Menu
+                    </Typography>
+                    <StyledMobileLink to="/">
                         <Typography
                             size="h2"
                             weight="SemiBold"
-                            color="#9b9b9b"
                             sx={{ cursor: 'pointer', marginBottom: '0.7rem' }}
                         >
                             {t('menu.home')}
                         </Typography>
-                    </StyledLink>
+                    </StyledMobileLink>
 
-                    <StyledLink to="/store">
+                    <StyledMobileLink to="/store">
                         <Typography
                             size="h2"
                             weight="SemiBold"
-                            color="#9b9b9b"
                             sx={{ cursor: 'pointer' }}
                         >
                             {t('menu.store')}
                         </Typography>
-                    </StyledLink>
+                    </StyledMobileLink>
 
-                    <FlexSpacer borderBottom={false} minHeight={2} />
-
-                    {/* Call to action button: `Sign in` and `Add artwork` for curators and artists */}
+                    <Typography
+                        size="h5"
+                        weight="Medium"
+                        color="#9b9b9b"
+                        sx={{ cursor: 'pointer', marginBottom: '0.7rem', marginTop: '1rem' }}
+                    >
+                        User
+                    </Typography>
 
                     {
-                        // add localStorage.getItem in a useState hook to get the state after signning in.
-                        localStorage.getItem('Kanvas - address') ===
-                            props.user?.userAddress && (
-                            <CustomButton
-                                size="medium"
-                                onClick={() => props.setOpen(true)}
-                                label="Sign in"
-                            />
-                        )
+                        localStorage.getItem('Kanvas - address') !==
+                        props.user?.userAddress &&
+                        <StyledSignIn size="h2" weight="SemiBold" sx={{ cursor: 'pointer' }} onClick={() => props.setOpen(true)}>
+                            Sign in
+                        </StyledSignIn>
                     }
+
+
+                    {localStorage.getItem('Kanvas - address') ===
+                        props.user?.userAddress && (
+                            <>
+                                <Stack
+                                    direction="row"
+                                    sx={{ alignItems: 'center', marginBottom: '0.7rem' }}
+                                    spacing={3}
+                                >
+                                    <Typography size="h2"
+                                        weight="SemiBold"
+                                        noWrap
+                                        sx={{ display: 'initial', cursor: 'pointer', marginLeft: '0.5rem' }}
+                                        onClick={() => navigateTo(`/profile/${props.user?.userAddress}`)}
+                                    >
+                                        Go to profile
+                                    </Typography>
+                                    <Avatar
+                                        // TODO: Add link to user profile
+                                        src={`${props.user?.profilePicture}?${Date.now()}`}
+                                        sx={{ cursor: 'pointer !important' }}
+                                    />
+                                </Stack>
+
+                                <Typography
+                                    size="h2"
+                                    weight="SemiBold"
+                                    sx={{ cursor: 'pointer', marginBottom: '0.7rem', marginLeft: '0.5rem' }}
+                                    onClick={() => props.onLogout()}
+                                >
+                                    Sign out
+                                </Typography>
+
+                            </>
+                        )}
+
                 </StyledBox>
 
-                <FlexSpacer borderBottom={false} />
 
                 {/* Sub menu to navigate to personnal pages such as notifications profile or simply to logout */}
 
-                {localStorage.getItem('Kanvas - address') ===
-                props.user?.userAddress ? (
-                    <>
-                        <Stack
-                            direction="row"
-                            sx={{ alignItems: 'center' }}
-                            spacing={3}
-                        >
-                            <Avatar
-                                // TODO: Add link to user profile
-                                src={`?${Date.now()}`}
-                                sx={{ cursor: 'pointer !important' }}
-                            />
-                            <Typography size="inherit" weight="Medium">
-                                {' Go to profile '}
-                            </Typography>
-                        </Stack>
 
-                        <Stack
-                            direction="row"
-                            spacing={3}
-                            onClick={props.onLogout}
-                        >
-                            <Avatar>
-                                <LogoutRoundedIcon
-                                    sx={{
-                                        '&.MuiSvgIcon-root': {
-                                            marginLeft: 0.5,
-                                            height: '65%',
-                                            width: '60%',
-                                        },
-                                    }}
-                                />
-                            </Avatar>
-                            <Typography size="inherit" weight="Medium">
-                                {' '}
-                                Sign out{' '}
-                            </Typography>
-                        </Stack>
-                    </>
-                ) : undefined}
             </MobileStyledMenuContent>
         </>
     );

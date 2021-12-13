@@ -25,13 +25,12 @@ const FiCopyStyled = styled(FiCopy)<{ theme?: Theme; loading: boolean }>`
 `;
 
 const StyledPictureStack = styled(Stack)`
-    /* justify-content: center; */
+    justify-content: center;
     align-items: center;
     position: relative;
     min-height: 195px;
 
-    @media (max-width: 650px) {
-        align-items: start;
+    @media (max-width: 600px) {
         margin-top: 2rem;
         min-height: 8rem;
     }
@@ -48,12 +47,10 @@ const AddressStack = styled(Stack)`
 
 const MobileWrapperStack = styled(Stack)`
     display: none;
-
     padding-bottom: 2rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
+    width: 100%;
 
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         display: flex;
     }
 `;
@@ -62,7 +59,7 @@ const DesktopWrapperStack = styled(Stack)`
     display: flex;
     width: 100%;
 
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         display: none;
     }
 `;
@@ -274,7 +271,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                         loading={props.loading}
                         responsive={true}
                     />
-                    <FlexSpacer minWidth={4} />
+                    <FlexSpacer minWidth={2} />
                     {props.loading ? undefined : (
                         <CustomButton
                             size="small"
@@ -293,7 +290,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                     }}
                 >
                     <Typography
-                        fontSize={'1.8rem'}
+                        fontSize={'1.6em'}
                         weight="SemiBold"
                         noWrap={true}
                         align="right"
@@ -310,7 +307,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                     <AddressStack
                         direction="row"
                         spacing={2}
-                        sx={{ maxWidth: 400, alignItems: 'center' }}
+                        sx={{ width: '100%', alignItems: 'center' }}
                     >
                         <Typography
                             size="h5"
@@ -319,7 +316,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                             noWrap={true}
                             align="center"
                             display="initial !important"
-                            width="16rem"
+                            width="50%"
                         >
                             {' '}
                             {props.loading ? (

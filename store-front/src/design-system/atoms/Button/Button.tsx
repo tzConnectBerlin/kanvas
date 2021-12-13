@@ -116,7 +116,7 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
             size === 'large' ? '0.975rem' : size === 'medium' ? '0.8' : '0.8'};
     }
 
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         height: 38px;
         font-size: 0.8rem;
     }

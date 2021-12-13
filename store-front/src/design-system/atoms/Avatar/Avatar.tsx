@@ -35,7 +35,7 @@ const StyledAvatar = styled(MAvatar)<AvatarProps>`
             props.responsive ? (props.width ?? 40) * 0.7 : props.width ?? 40}px;
     }
 
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         height: ${(props) =>
             props.responsive
                 ? (props.height ?? 40) * 0.6
@@ -71,7 +71,7 @@ const StyledSkeleton = styled(Skeleton)<AvatarProps>`
                 : props.width ?? 40}px !important;
     }
 
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         height: ${(props) =>
             props.responsive
                 ? (props.height ?? 40) * 0.6

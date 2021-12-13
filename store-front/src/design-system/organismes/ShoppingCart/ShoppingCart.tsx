@@ -27,12 +27,25 @@ const ContainerPopupStyled = styled.div<{ open: boolean }>`
     top: 0;
     bottom: 0;
     left: 0;
-    right: 0;
     height: 100vh;
-    z-index: 3;
+    z-index: 11;
 
+    width: ${(props) => (props.open ? 65 : 0)}%;
     visibility: ${(props) => (props.open ? 'visible' : 'hidden')}!important;
     opacity: ${(props) => (props.open ? 1 : 0)} !important;
+
+    @media (max-width: 1100px) {
+        width: ${(props) => (props.open ? 60 : 0)}%;
+    }
+
+    @media (max-width: 730px) {
+        width: ${(props) => (props.open ? 50 : 0)}%;
+    }
+
+    @media (max-width: 600px) {
+        width: ${(props) => (props.open ? 100 : 0)}%;
+        height: 5rem;
+    }
 `;
 
 const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
@@ -72,7 +85,7 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
         width: ${(props) => (props.open ? 50 : 0)}%;
     }
 
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         width: ${(props) => (props.open ? 100 : 0)}%;
     }
 `;
@@ -282,9 +295,11 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             display="initial !important"
                             align="center"
                             color="#C4C4C4"
+                            sx={{marginBottom: '1.5rem'}}
                         >
                             {'Empty Shopping Cart..'}
                         </Typography>
+
                     )}
 
                     {props.nftsInCart.length > 0 && (

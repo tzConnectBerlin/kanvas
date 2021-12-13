@@ -6,7 +6,6 @@ import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
 import StoreFilters from '../../design-system/organismes/StoreFilters';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import FilterListIcon from '@mui/icons-material/FilterList';
 
 import { useEffect, useState } from 'react';
 import {
@@ -28,7 +27,7 @@ interface ParamTypes {
 
 const StyledStack = styled(Stack)`
     max-width: 100rem;
-    width: 100vw;
+    width: 100%;
     height: 100%;
 `;
 
@@ -40,11 +39,6 @@ const StyledContentStack = styled(Stack) <ParamTypes>`
     @media (max-width: 900px) {
         flex-direction: column;
     }
-`;
-const StyledListIcon = styled(ListIcon) <{ theme?: Theme }>`
-    color: ${(props) => props.theme.palette.text.primary};
-    padding-right: 0.5rem;
-    width: 1.4rem;
 `;
 
 const StyledPagination = styled(Pagination) <{
@@ -190,7 +184,6 @@ const StorePage = () => {
                 },
             }).then( response => {
                 if (!params.handlePriceRange) {
-                    debugger
                     setPriceFilterRange([response.data.lowerPriceBound, response.data.upperPriceBound])
                 }
             })
@@ -251,7 +244,7 @@ const StorePage = () => {
         }
 
         callNFTsEndpoint({
-            handlePriceRange: true,
+            handlePriceRange: priceAtLeast !== null && priceAtMost !== null,
             page: page ? Number(page) : 1,
             categories: categories
                 ?.split(',')
@@ -376,7 +369,7 @@ const StorePage = () => {
                     The Store
                 </Typography>
 
-                <FlexSpacer minHeight={1} />
+                <FlexSpacer />
 
                 {/* Toggle options */}
                 <Stack direction="row" sx={{ justifyContent: 'center', alignItems: 'center' }}>

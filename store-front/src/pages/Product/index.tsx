@@ -36,27 +36,32 @@ const StyledStack = styled(Stack)`
 `;
 
 const StyledMetadataStack = styled(Stack)`
+    min-width: 30%;
 
     @media (min-width: 900px) {
-        width: 30%;
+        /* width: 30%; */
     }
 
     @media (min-width: 1440px) {
-        width: 30%;
+        /* width: 30%; */
         height: auto;
     }
 `
 
 const StyledCardMedia = styled(CardMedia) <{ component?: string; alt: string }>`
     object-fit: contain;
+    max-height: 75vh;
+    min-height: 35rem;
 
-    @media (min-width: 900px) {
-        width: 70%;
+    @media (max-width: 900px) {
+
+        max-height: 100%;
+        /* width: 70%; */
     }
 
     @media (min-width: 1440px) {
-        width: 70%;
-        height: auto;
+        /* width: 70%; */
+        /* height: auto; */
     }
 `;
 
@@ -113,7 +118,7 @@ const FullScreenView = styled.div<{ theme?: Theme, open: boolean }>`
     width: 100%;
     height: 100%;
     z-index: 21;
-    opacity: ${props => props.open ? '0.8 !important' : 0};
+    opacity: ${props => props.open ? '1 !important' : 0};
     transition: opacity 0.4s;
 `
 
@@ -126,10 +131,7 @@ const StyledImage = styled.img<{ open: boolean }>`
     height: 100%;
     width: 100%;
     transition: opacity 0.4s;
-`
-
-const StyledDiv = styled.div`
-    position: relative;
+    border-radius: 1rem;
 `
 
 interface IProductParam {
@@ -232,11 +234,11 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                 <FullScreenView open={fullScreenView}>
                 </FullScreenView>
             </WrapperFullScreen>
-            <StyledStack direction="column" spacing={3} sx={{ position: 'relative', justifyContent: 'center', alignItems: 'center'}}>
+            <StyledStack direction="column" spacing={3} sx={{ position: 'relative', justifyContent: 'center', alignItems: 'center', minHeight: '45rem'}}>
                 <Stack
                     direction={{ xs: 'column', md: 'row' }}
                     spacing={5}
-                    sx={{ width: '100%', minHeight: '20rem', marginTop: '7rem'}}
+                    sx={{ width: '100%', minHeight: '20rem', marginTop: '7rem', justifyContent: 'center'}}
                 >
                     {nftResponse.loading || comfortLoader ? (
                         <Box
@@ -254,7 +256,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             <CircularProgress height={2} />
                         </Box>
                     ) : (
-                        <StyledDiv>
+                        <Box sx={{position: 'relative'}}>
                             <StyledCardMedia
                                 component="img"
                                 image={nftResponse.data?.dataUri}
@@ -263,7 +265,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             <StyledWrapperIcon onClick={() => !fullScreenView ? setFullScreenView(true) : {}}>
                                 <StyledFullscreenIcon />
                             </StyledWrapperIcon>
-                        </StyledDiv>
+                        </Box>
                     )}
 
                     <StyledMetadataStack
@@ -293,6 +295,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             size="body"
                             weight="SemiBold"
                             sx={{ pt: 4 }}
+                            color="#757575"
                         >
                             {nftResponse.loading || comfortLoader ? (
                                 <Skeleton width="10rem" height="2rem" />
@@ -324,6 +327,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     size="body1"
                                     weight="SemiBold"
                                     sx={{ pt: 4 }}
+                                    color="#757575"
                                 >
                                     {nftResponse.loading || comfortLoader &&
                                         (!launchTime || launchTime < 0)
@@ -359,6 +363,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             size="body1"
                             weight="SemiBold"
                             sx={{ pt: 4 }}
+                            color="#757575"
                         >
                             {nftResponse.loading || comfortLoader
                                 ? undefined
@@ -402,6 +407,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     size="body1"
                                     weight="SemiBold"
                                     sx={{ pt: 4 }}
+                                    color="#757575"
                                 >
                                     {nftResponse.loading || comfortLoader
                                         ? undefined
@@ -410,7 +416,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
 
                                 <Typography
                                     size="h5"
-                                    weight="Light"
+                                    weight="SemiBold"
                                     sx={{ pt: 2, mb: 1 }}
                                 >
                                     {nftResponse.loading || comfortLoader
@@ -425,6 +431,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     size="body1"
                                     weight="SemiBold"
                                     sx={{ pt: 4 }}
+                                    color="#757575"
                                 >
                                     {nftResponse.loading || comfortLoader
                                         ? undefined
@@ -433,13 +440,12 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
 
                                 <Typography
                                     size="h5"
-                                    weight="Light"
+                                    weight="SemiBold"
                                     sx={{ pt: 2, mb: 1 }}
                                 >
                                     {nftResponse.loading || comfortLoader ? undefined : (
                                         <>
-                                            {nftResponse.data?.price}
-                                            <TezosLogo width="18px" margin="0 0.2rem" />
+                                            {nftResponse.data?.price} ꜩ
                                         </>
                                     )}
                                 </Typography>

@@ -1,3 +1,4 @@
+import styled from '@emotion/styled';
 import { FC, useEffect, useState } from 'react';
 import {
     ButtonBase,
@@ -28,9 +29,11 @@ export interface HeroProps {
     sliderNfts: INft[];
 }
 
-interface IProductParam {
-    id: string;
-}
+const GridStyled = styled(Grid)`
+    @media(max-width: 900px) {
+        display: none;
+    }
+`
 
 export const Hero: FC<HeroProps> = ({ ...props }) => {
     const { t } = useTranslation(['translation']);
@@ -43,15 +46,6 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
     };
 
     const [imgToVideoToggler, setImgToVideoToggler] = useState(true);
-
-    const { id } = useParams<IProductParam>();
-    // const [nftResponse, getNft] = useAxios(DART_REDIRECT_URI + `/nfts/${id}`)
-
-    // useEffect(() => {
-    //     if (nftResponse.error) {
-    //         console.log(nftResponse, '')
-    //     }
-    // }, [nftResponse])
 
     return (
         <Grid container>
@@ -83,7 +77,7 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
             </Grid>
 
             {/* HERO: Featured Image */}
-            <Grid item xs={12} md={7} px={0} sx={{ display: 'flex' }}>
+            <GridStyled item xs={12} md={7} px={0} sx={{ display: 'flex' }}>
                 {
                     //Render Skeleton if image not loading
                     props.sliderLoading ? (
@@ -132,7 +126,7 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
                         </Card>
                     )
                 }
-            </Grid>
+            </GridStyled>
         </Grid>
     );
 };

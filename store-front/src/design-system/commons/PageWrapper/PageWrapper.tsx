@@ -20,13 +20,8 @@ export const PageWrapper = styled.div<{ theme?: Theme }>`
         padding-right: 4em;
     }
 
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         padding-left: 2rem;
         padding-right: 2rem;
-    }
-
-    @media (max-width: 650px) {
-        padding-left: 0;
-        padding-right: 0;
     }
 `;

@@ -39,7 +39,8 @@ const StyledBioWrapper = styled.div<{ theme?: Theme }>`
 const StyledImgWrapper = styled.div<{ theme?: Theme }>`
     position: relative;
     overflow: hidden;
-    min-height: 90vw;
+    height: 22.5vw !important;
+    max-height: 25rem !important;
     border-radius: 1rem;
     transition: scale 0.2s;
 
@@ -47,51 +48,35 @@ const StyledImgWrapper = styled.div<{ theme?: Theme }>`
         scale: 0.98;
     }
 
-    @media (min-width: 600px) {
-        min-height: 50vw;
+    @media (max-width: 1200px) {
+        min-height: 24.5vw;
     }
 
-    @media (min-width: 650px) {
-        min-height: 35vw;
+    @media (max-width: 900px) {
+        min-height: 40vw !important;
     }
 
-    @media (min-width: 900px) {
-        min-height: 25vw;
-    }
-
-    @media (min-width: 1200px) {
-        min-height: 25vw;
-    }
-
-    @media (min-width: 1440px) {
-        min-height: 400px;
-        max-height: 440px;
+    @media (max-width: 600px) {
+        min-height: 85vw !important;
     }
 `;
 
 const StyledSkeleton = styled(Skeleton)`
-    min-height: 90vw;
+    height: 22.5vw !important;
+    max-height: 25rem !important;
+    position: relative;
     border-radius: 1rem;
 
-    @media (min-width: 600px) {
-        min-height: 50vw;
+    @media (max-width: 1200px) {
+        min-height: 24.5vw;
     }
 
-    @media (min-width: 650px) {
-        min-height: 35vw;
+    @media (max-width: 900px) {
+        min-height: 40vw !important;
     }
 
-    @media (min-width: 900px) {
-        min-height: 25vw;
-    }
-
-    @media (min-width: 1200px) {
-        min-height: 25vw;
-    }
-
-    @media (min-width: 1440px) {
-        min-height: 400px;
-        max-height: 440px;
+    @media (max-width: 600px) {
+        min-height: 85vw !important;
     }
 `;
 
@@ -139,7 +124,7 @@ const StyledCardContent = styled(CardContent) <{ theme?: Theme }>`
     justify-content: space-between;
     align-items: center;
     flex-direction: column;
-    flex-grow: 1;
+    flex-grow: 0;
     background-color: ${props => props.theme.palette.background.default};
 `
 

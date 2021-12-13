@@ -39,6 +39,7 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
 
     background-color: ${(props) => props.theme.palette.background.default};
     position: sticky;
+
     top: 0;
     z-index: 10;
     transition: padding-left 0.2s, padding-right 0.2s;
@@ -48,6 +49,9 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
         padding-left: 1.5rem;
         padding-right: 1rem !important;
         transition: padding-left 0.2s, padding-right 0.2s;
+        position: absolute;
+        left: 0;
+        right: 0;
     }
 `;
 

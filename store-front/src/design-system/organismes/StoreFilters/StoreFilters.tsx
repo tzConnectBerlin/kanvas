@@ -17,11 +17,13 @@ interface FilterProps {
     collapsed: boolean;
     setCollapsed: Function;
     active: boolean;
+    sx?: any;
 }
 
 const StyledStack = styled(Stack) <{ selected?: boolean, theme?: Theme }>`
     align-items: center;
     width: 100%;
+    padding-top: 1rem;
     padding-bottom: 1rem;
 `;
 
@@ -38,6 +40,7 @@ const Filter: FC<FilterProps> = ({ ...props }) => {
             direction="row"
             onClick={() => props.setCollapsed(props.name)}
             selected={props.active}
+            sx={props.sx}
         >
             <StyledTypography
                 size="h5"
@@ -165,6 +168,8 @@ const StyledUl = styled.ul<StyledStoreFiltersProps>`
             padding-top: 0 !important;
         }
     }
+
+
 `;
 const StyledLi = styled.li<StyledStoreFiltersProps>`
     display: ${(props) => (props.openFilters ? 'flex' : 'none')};
@@ -324,6 +329,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
             >
                 <StyledUl openFilters={props.openFilters}>
                     <StyledLi
+                        id="first-li"
                         openFilters={props.openFilters}
                         collapsed={activeRef.indexOf('Categories') !== -1}
                     >
@@ -332,6 +338,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                             collapsed={activeRef.indexOf('Categories') !== -1}
                             active={props.selectedFilters.length > 0}
                             setCollapsed={handleListItemClick}
+                            sx={{paddingTop: '0 !important'}}
                         />
                         <TreeView
                             loading={props.loading}

@@ -32,10 +32,9 @@ const StyledBackground = styled.div<{ theme?: Theme; open: boolean }>`
 
     @media (max-width: 874px) {
         opacity: 1;
-
         background-color: ${(props) => props.theme.palette.background.paper};
     }
-`
+`;
 
 export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
     const inputRef = useRef<HTMLInputElement>(null)

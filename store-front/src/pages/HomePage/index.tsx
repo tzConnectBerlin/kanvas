@@ -3,7 +3,7 @@ import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
 import { FC } from 'react';
 import { Animated } from 'react-animated-css';
-import { Stack, Theme } from '@mui/material';
+import { Stack, Theme, useMediaQuery, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Typography } from '../../design-system/atoms/Typography';
 import NftGrid from '../../design-system/organismes/NftGrid';
@@ -32,8 +32,8 @@ const StyledStack = styled(Stack)`
     margin-bottom: 4rem;
     max-width: 1536px;
 
-    @media (max-width: 650px) {
-        padding: 0 1.5rem 1rem;
+    @media (max-width: 600px) {
+        padding: 0 0 0;
     }
 `;
 
@@ -66,6 +66,9 @@ const HomePage: FC<HomePageProps> = () => {
 
     const history = useHistory();
 
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
     const [sliderNftResponse] = useAxios({
         url: process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts?',
         withCredentials: true,
@@ -95,7 +98,7 @@ const HomePage: FC<HomePageProps> = () => {
     return (
         <PageWrapper>
             <StyledStack>
-                <FlexSpacer minHeight={12} />
+                <FlexSpacer minHeight={isMobile ? 6 : 12} />
 
                 <StyledAnimated
                     animationIn="fadeIn"
@@ -107,7 +110,7 @@ const HomePage: FC<HomePageProps> = () => {
                         sliderNfts={sliderNftResponse.data?.nfts ?? []}
                     />
 
-                    <FlexSpacer minHeight={7} />
+                    <FlexSpacer minHeight={isMobile ? 5 : 7} />
 
                     <Stack
                         direction="row"
