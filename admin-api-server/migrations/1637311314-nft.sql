@@ -14,9 +14,10 @@ CREATE TABLE nft (
        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
        ipfs_hash TEXT,
        nft_contract TEXT,
-       token_id TEXT
-       created_by INT REFERENCES kanvas_user(id),
-       disabled boolean DEFAULT false
+       token_id TEXT,
+       disabled boolean DEFAULT false,
+       created_by INT REFERENCES kanvas_user(id)
+       
 );
 
 COMMIT;

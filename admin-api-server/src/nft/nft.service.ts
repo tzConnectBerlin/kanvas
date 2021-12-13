@@ -26,10 +26,17 @@ const DELETE_NFT_QUERY = 'UPDATE nft SET disabled = true WHERE id = $1';
 
 const getInsertStatement = (nft: Nft) => {
   const keys = Object.keys(nft);
+  let index = 0;
   return `INSERT INTO nft (${keys
-    .map((key: string) => key)
+    .filter((key: string) => Boolean(nft[key]))
     .join(',')}) VALUES (${keys
-    .map((key, index) => `$${index + 1}`)
+    .reduce((acc, key) => {
+      if (nft[key]) {
+        index += 1;
+        acc.push(`$${index}`);
+      }
+      return acc;
+    }, [])
     .join(',')}) RETURNING id;`;
 };
 
@@ -49,8 +56,9 @@ export class NftService {
   async create(creator: User, createNftDto: NftDto) {
     try {
       const nftEntity = new Nft({ ...createNftDto, createdBy: creator.id });
+      const params = Object.values(nftEntity).filter((item) => Boolean(item));
       const query = getInsertStatement(nftEntity);
-      const result = await this.db.query(query, Object.values(nftEntity));
+      const result = await this.db.query(query, params);
       return { id: result.rows[0].id, ...createNftDto };
     } catch (error) {
       console.log('Unable to create new nft', error);
