@@ -22,6 +22,16 @@ interface State {
   ];
 }
 
+export enum STMResultStatus {
+  Ok,
+  NotAllowed,
+}
+
+export interface STMResult {
+  status: STMResultStatus;
+  message?: string;
+}
+
 export class StateTransitionMachine {
   attrTypes: any = {};
   states: any = {};
@@ -62,7 +72,12 @@ export class StateTransitionMachine {
     return res;
   }
 
-  tryAttributeApply(actor: Actor, nft: Nft, attr: string, v?: string) {
+  tryAttributeApply(
+    actor: Actor,
+    nft: Nft,
+    attr: string,
+    v?: string,
+  ): STMResult {
     const st = this.states[nft.state];
     const isAllowed =
       st.mutables.findIndex(
@@ -71,7 +86,10 @@ export class StateTransitionMachine {
           m.by_roles.some((allowedRole: string) => actor.hasRole(allowedRole)),
       ) !== -1;
     if (!isAllowed) {
-      throw `attribute '${attr}' is not allowed to be set by user with roles '${actor.roles}' for nft with state '${nft.state}'`;
+      return <STMResult>{
+        status: STMResultStatus.NotAllowed,
+        message: `attribute '${attr}' is not allowed to be set by user with roles '${actor.roles}' for nft with state '${nft.state}'`,
+      };
     }
 
     switch (this.attrTypes[attr]) {
@@ -89,6 +107,10 @@ export class StateTransitionMachine {
 
     log.notice(`nft.id ${nft.id}: '${attr}' ${v} (by actor.id ${actor.id})`);
     this.tryMoveNft(nft);
+
+    return <STMResult>{
+      status: STMResultStatus.Ok,
+    };
   }
 
   #attributeSet(nft: Nft, attr: string, v?: string) {

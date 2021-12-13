@@ -20,4 +20,16 @@ export class RoleService {
       );
     }
   }
+
+  async getLabels(roleIds: number[]): Promise<string[]> {
+    const labelsQryRes = await this.db.query(
+      `
+SELECT role_label
+FROM user_role
+WHERE id = ANY($1)
+`,
+      [roleIds],
+    );
+    return labelsQryRes.rows.map((row: any) => row.role_label);
+  }
 }
