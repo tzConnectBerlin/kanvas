@@ -393,7 +393,7 @@ RETURNING id, expires_at`,
     // TODO: might want to do this deleteExpiredCarts() in a garbage collector
     // (at eg an interval of 30 seconds), instead of at every cart access
     // because it might result in excessive database load
-    this.deleteExpiredCarts();
+    await this.deleteExpiredCarts();
 
     const qryRes = await this.conn.query(
       `
