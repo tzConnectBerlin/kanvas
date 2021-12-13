@@ -15,6 +15,8 @@ CREATE TABLE nft (
        ipfs_hash TEXT,
        nft_contract TEXT,
        token_id TEXT
+       created_by INT REFERENCES kanvas_user(id),
+       disabled boolean DEFAULT false
 );
 
 COMMIT;

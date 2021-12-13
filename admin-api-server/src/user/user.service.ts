@@ -137,10 +137,7 @@ export class UserService {
     } catch (e) {
       await client.query('ROLLBACK');
       console.log(e);
-      throw new HttpException(
-        'Unable to update new user',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('Unable to update user', HttpStatus.BAD_REQUEST);
     } finally {
       client.release();
     }
