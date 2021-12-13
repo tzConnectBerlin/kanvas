@@ -27,7 +27,6 @@ export class NftController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
   findAll(
     @Query('sort', new ParseJSONArrayPipe())
     sort?: string[],
@@ -39,7 +38,6 @@ export class NftController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
   findOne(@Param('id') id: string) {
     return this.nftService.findOne(+id);
   }
