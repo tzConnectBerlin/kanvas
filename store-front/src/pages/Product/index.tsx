@@ -48,6 +48,8 @@ const StyledMetadataStack = styled(Stack)`
 `
 
 const StyledCardMedia = styled(CardMedia) <{ component?: string; alt: string }>`
+    object-fit: contain;
+
     @media (min-width: 900px) {
         width: 70%;
     }
@@ -116,14 +118,18 @@ const FullScreenView = styled.div<{ theme?: Theme, open: boolean }>`
 `
 
 const StyledImage = styled.img<{ open: boolean }>`
-    max-height: 100vh;
-    max-width: 100vw;
+    max-height: 90vh;
+    max-width: 90vw;
     opacity: ${props => props.open ? '1 !important' : 0};
     z-index: 22;
     object-fit: contain;
     height: 100%;
     width: 100%;
     transition: opacity 0.4s;
+`
+
+const StyledDiv = styled.div`
+    position: relative;
 `
 
 interface IProductParam {
@@ -230,7 +236,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                 <Stack
                     direction={{ xs: 'column', md: 'row' }}
                     spacing={5}
-                    sx={{ width: '100%', minHeight: '20rem', }}
+                    sx={{ width: '100%', minHeight: '20rem', marginTop: '7rem'}}
                 >
                     {nftResponse.loading || comfortLoader ? (
                         <Box
@@ -248,22 +254,16 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             <CircularProgress height={2} />
                         </Box>
                     ) : (
-                        <>
+                        <StyledDiv>
                             <StyledCardMedia
                                 component="img"
                                 image={nftResponse.data?.dataUri}
                                 alt="random"
-                                sx={{
-                                    height: '75vh',
-                                    minHeight: 400,
-                                    maxHeight: '75vh',
-                                    maxWidth: 1000,
-                                }}
                             />
                             <StyledWrapperIcon onClick={() => !fullScreenView ? setFullScreenView(true) : {}}>
                                 <StyledFullscreenIcon />
                             </StyledWrapperIcon>
-                        </>
+                        </StyledDiv>
                     )}
 
                     <StyledMetadataStack
