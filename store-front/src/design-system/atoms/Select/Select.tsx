@@ -88,7 +88,11 @@ export const CustomSelect: FC<SelectedProps> = ({
     ...props
 }) => {
     const handleChange = (event: SelectChangeEvent) => {
-        callNFTsEndpoint({ handlePriceRange: true });
+        const sort : SortProps = {
+            orderBy: JSON.parse(event.target.value).orderBy,
+            orderDirection: JSON.parse(event.target.value).orderDirection
+        }
+        callNFTsEndpoint({ handlePriceRange: true, orderBy: sort.orderBy, orderDirection: sort.orderDirection  });
         props.setSelectedOption(JSON.parse(event.target.value));
     };
 
@@ -99,8 +103,8 @@ export const CustomSelect: FC<SelectedProps> = ({
             disabled={props.disabled ?? false}
         >
             <Select
-                labelId={`${props.id}-label"`}
                 id={props.id}
+                labelId={`${props.id}-label"`}
                 value={
                     JSON.stringify(props.selectedOption) ??
                     JSON.stringify({
