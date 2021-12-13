@@ -252,7 +252,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
         }
         if (availabilityChange) {
             console.log(props.availabilityFilter)
-            callNFTsEndpoint({ handlePriceRange: true })
+            callNFTsEndpoint({ handlePriceRange: false })
 
             setAvailabilityChange(false)
         }

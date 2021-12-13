@@ -188,7 +188,12 @@ const StorePage = () => {
                             ? 'onSale,soldOut,upcoming'
                             : selectedAvailability.join(',')),
                 },
-            });
+            }).then( response => {
+                if (!params.handlePriceRange) {
+                    debugger
+                    setPriceFilterRange([response.data.lowerPriceBound, response.data.upperPriceBound])
+                }
+            })
             setComfortLoader(false);
         }, 400);
 
