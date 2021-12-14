@@ -53,7 +53,7 @@ export class NftService {
       console.log('Unable to create new nft', error);
       throw new HttpException(
         'Unable to create new nft',
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
