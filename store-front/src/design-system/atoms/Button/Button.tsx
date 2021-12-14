@@ -47,7 +47,7 @@ interface StyledButtonProps {
 }
 
 const StyledButton = styled(MButton)<StyledButtonProps>`
-    border-radius: 0;
+    border-radius: 2rem;
 
     height: ${({ size }) =>
         size === 'large' ? '44px' : size === 'medium' ? '40px' : '38px'};
@@ -66,7 +66,7 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
             ? 'transparent'
             : props.theme.button.background};
 
-    outline: ${(props) => `solid 1px ${props.theme.palette.text.primary}`};
+    outline: solid 1px #c4c4c4;
     margin: 1px;
     text-transform: none;
     transition: outline 0.6s linear;
@@ -116,7 +116,7 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
             size === 'large' ? '0.975rem' : size === 'medium' ? '0.8' : '0.8'};
     }
 
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         height: 38px;
         font-size: 0.8rem;
     }

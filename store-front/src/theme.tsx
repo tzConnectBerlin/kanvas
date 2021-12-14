@@ -46,6 +46,8 @@ declare module '@mui/material/styles' {
         dropShadow: {
             default: string;
             hover: string;
+            avatar: string;
+            shoppingCart: string;
         };
     }
     // allow configuration using `createTheme`
@@ -65,6 +67,8 @@ declare module '@mui/material/styles' {
         dropShadow: {
             default: string;
             hover: string;
+            avatar: string;
+            shoppingCart: string;
         };
     }
 }
@@ -74,12 +78,12 @@ const lightThemePalette: PaletteOptions = {
         dark: 'rgba(30, 30, 30, 1)',
         main: 'rgba(1, 102, 255, 1)',
         light: 'rgba(1, 102, 255, 0.12)',
-        contrastText: 'rgba(1, 102, 255, 1)',
+        contrastText: 'rgb(151, 113, 255)',
     },
     secondary: {
         dark: 'rgba(1, 102, 255, 0.10)',
         main: 'rgba(1, 102, 255, 0.12)',
-        contrastText: 'rgba(1, 102, 255, 1)',
+        contrastText: 'rgb(151, 113, 255)',
     },
     success: {
         dark: 'rgba(212, 241, 204, 1)',
@@ -123,12 +127,12 @@ const darkThemePalette: PaletteOptions = {
         dark: '#ebebeb',
         main: 'rgba(1, 102, 255, 1)',
         light: 'rgba(1, 102, 255, 0.12)',
-        contrastText: 'rgba(1, 102, 255, 1)',
+        contrastText: 'rgb(151, 113, 255)',
     },
     secondary: {
         dark: 'rgba(1, 102, 255, 0.10)',
         main: 'rgba(1, 102, 255, 0.12)',
-        contrastText: 'rgba(1, 102, 255, 1)',
+        contrastText: 'rgb(151, 113, 255)',
     },
     success: {
         dark: 'rgba(212, 241, 204, 1)',
@@ -161,7 +165,7 @@ const darkThemePalette: PaletteOptions = {
     },
     background: {
         default: '#0a0a0a',
-        paper: '#2c2c2c',
+        paper: '#202020',
     },
     tonalOffset: 0.05,
     mode: 'dark',
@@ -239,8 +243,10 @@ export const lightTheme = createTheme({
         background: 'rgba(255, 255, 255, 1)',
     },
     dropShadow: {
-        default: 'drop-shadow(0px 0px 6px #5c5c5c2d)',
-        hover: 'drop-shadow(0px 0px 6px #1f1f1f33)',
+        default: 'drop-shadow(0 0 0.45rem #C4C4C4)',
+        hover: 'drop-shadow(0 0 0.55rem #C4C4C4)',
+        avatar: 'drop-shadow(0 0 0.25rem #e0e0e0)',
+        shoppingCart: 'drop-shadow(0 1rem 0.55rem #C4C4C4)',
     },
 });
 
@@ -315,7 +321,9 @@ export const darkTheme = createTheme({
         background: 'rgba(0, 0, 0, 1)',
     },
     dropShadow: {
-        default: 'drop-shadow(0px 0px 10px #18181886)',
-        hover: 'drop-shadow(0px 0px 10px #0e0e0e9b)',
+        default: 'drop-shadow(0 0 0.45rem black)',
+        hover: 'drop-shadow(0 0 0.45rem #0e0e0e9b)',
+        avatar: 'drop-shadow(0 0 0.25rem black)',
+        shoppingCart: 'drop-shadow(0 1rem 0.55rem black)',
     },
 });
