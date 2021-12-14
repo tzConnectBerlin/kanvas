@@ -272,13 +272,6 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                         responsive={true}
                     />
                     <FlexSpacer minWidth={2} />
-                    {props.loading ? undefined : (
-                        <CustomButton
-                            size="small"
-                            onClick={() => {}}
-                            label="Edit profile"
-                        />
-                    )}
                 </StyledPictureStack>
 
                 <Stack
@@ -346,8 +339,8 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                                 sx={{ marginBottom: '0.5rem' }}
                             />
                         ) : (
-                            0
-                        )}{' '}
+                            props.nftsCount
+                        )}
                     </Typography>
                     <Typography
                         size="body1"
