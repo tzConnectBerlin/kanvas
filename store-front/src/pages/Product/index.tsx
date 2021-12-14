@@ -37,6 +37,7 @@ const StyledStack = styled(Stack)`
 
 const StyledMetadataStack = styled(Stack)`
     min-width: 30%;
+    max-width: 50%;
 
     @media (min-width: 900px) {
         /* width: 30%; */
