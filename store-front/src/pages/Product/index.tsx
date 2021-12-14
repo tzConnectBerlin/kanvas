@@ -50,11 +50,12 @@ const StyledMetadataStack = styled(Stack)`
 
 const StyledCardMedia = styled(CardMedia) <{ component?: string; alt: string }>`
     object-fit: contain;
-    max-height: 75vh;
-    min-height: 35rem;
+
+    /* min-height: 35rem; */
 
     @media (max-width: 847px) {
         min-height: 0;
+        max-height: 100%;
     }
 
     @media (min-width: 1440px) {
@@ -254,7 +255,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             <CircularProgress height={2} />
                         </Box>
                     ) : (
-                        <Box sx={{position: 'relative'}}>
+                        <Box sx={{position: 'relative', display: 'flex',flexDirection: 'row', alignItems: 'flex-end'}}>
                             <StyledCardMedia
                                 component="img"
                                 image={nftResponse.data?.dataUri}
