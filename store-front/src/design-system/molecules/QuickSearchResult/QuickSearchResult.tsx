@@ -38,16 +38,14 @@ const StyledBox = styled(Box)<BoxProps>`
     max-width: 35rem;
 
     @media (max-width: 874px) {
-        right: 5%;
-        max-width: 100vw;
+        left: 0;
+        right: 0;
     }
 `
 
 const StyledPaper = styled(Paper)<{ theme?: Theme }>`
     box-shadow: none;
     border-radius: 2rem;
-
-    /* outline: ${(props) => `solid 1px ${props.theme.palette.text.primary}`}; */
 
     :hover {
         outline: ${(props) => `solid 2px ${props.theme.palette.text.primary}`};
@@ -58,9 +56,10 @@ const StyledPaper = styled(Paper)<{ theme?: Theme }>`
 
     @media (max-width: 874px) {
         margin-left: initial;
+        width: 100% !important;
 
         outline: none;
-        top: 5rem;
+        top: 5rem !important;
 
         :hover {
             outline: none;

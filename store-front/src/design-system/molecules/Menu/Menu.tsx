@@ -59,6 +59,10 @@ export const StyledLink = styled(NavLink)<SearchProps>`
 
 export const StyledShoppingCartRoundedIcon = styled(ShoppingCartRoundedIcon)`
     cursor: pointer;
+
+    @media (max-width: 874px) {
+        height: 1.4rem;
+    }
 `;
 
 export const Menu: FC<MenuProps> = ({

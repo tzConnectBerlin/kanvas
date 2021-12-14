@@ -1,12 +1,10 @@
 import styled from '@emotion/styled';
 import Avatar from '../../../atoms/Avatar';
-import FlexSpacer from '../../../atoms/FlexSpacer';
 import Brightness3Icon from '@mui/icons-material/Brightness3';
-import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 
-import { FC, useEffect, useState } from 'react';
-import { Badge, Stack, Theme, useMediaQuery, useTheme } from '@mui/material';
+import { FC, useEffect, useRef, useState } from 'react';
+import { Badge, Slide, Stack, Theme, useMediaQuery, useTheme } from '@mui/material';
 import { CustomButton } from '../../../atoms/Button';
 import { Typography } from '../../../atoms/Typography';
 import {
@@ -20,7 +18,7 @@ import { QuickSearch } from '../../QuickSearch';
 import { ArrowBackIosNew } from '@mui/icons-material';
 
 const WrapperThemeIcon = styled.div<SearchProps>`
-    display: ${(props) => (props.isSearchOpen ? 'none' : 'flex')};
+    display: flex;
 `;
 
 interface MenuIconProps {
@@ -30,6 +28,7 @@ interface MenuIconProps {
 
 interface BackButtonProps {
     theme?: Theme;
+    isSearchOpen: boolean;
 }
 
 const WrapperMenuIcon = styled.div<MenuIconProps>`
@@ -189,7 +188,26 @@ const BackButton = styled(ArrowBackIosNew) <BackButtonProps>`
     z-index: 999;
     pointer-events: none;
     cursor: pointer;
+    opacity: ${props => props.isSearchOpen ? 1 : 0};
+    /* transition: opacity 0.2s; */
 `;
+
+const StyledWrapper = styled(Stack)`
+    justify-content: center;
+    align-items: center;
+`
+
+const StyledBrightness3Icon = styled(Brightness3Icon )`
+    @media (max-width: 874px) {
+        height: 1.3rem;
+    }
+`
+
+const StyledWbSunnyOutlinedIcon = styled(WbSunnyOutlinedIcon)`
+    @media (max-width: 874px) {
+        height: 1.3rem;
+    }
+`
 
 export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
     const { t } = useTranslation(['translation']);
@@ -209,12 +227,10 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
         }
     }, [expandMenu]);
 
-    const handleClose = (props?: any) => {
-        props.closeResult();
-    };
-
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+    const wrapperRef = useRef()
 
     useEffect(() => {
         if (props.isSearchOpen && isMobile) {
@@ -237,68 +253,65 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                 direction={'row'}
                 spacing={2}
                 isSearchOpen={props.isSearchOpen}
+                ref={wrapperRef}
+                overflow={'hidden'}
+                alignItems={'flex-end'}
             >
-                {props.isSearchOpen && <BackButton />}
+                <BackButton isSearchOpen={props.isSearchOpen} />
 
                 {/* QuickSearch wrapper to close menu in case open */}
 
-                <div onClick={() => setExpandMenu(false)}>
-                    <QuickSearch setSearchOpen={props.setSearchOpen} />
-                </div>
+                <Stack onClick={() => !props.isSearchOpen ? props.setSearchOpen(!props.isSearchOpen) : {}} >
+                    <QuickSearch searchOpen={props.isSearchOpen} setSearchOpen={props.setSearchOpen} />
+                </Stack>
 
                 {/* Menu button, and closing button for search bar */}
 
-                <Badge
-                    color="error"
-                    badgeContent={props.nftsInCartNumber}
-                >
-                    <StyledShoppingCartRoundedIcon
-                        onClick={() => props.openOrCloseShoppingCart()}
-                    />
-                </Badge>
+                <Slide direction="left" in={!props.isSearchOpen} container={wrapperRef.current} style={{marginLeft: '0.8rem'}}>
+                    <StyledWrapper spacing={2} direction="row" >
 
-                <WrapperThemeIcon isSearchOpen={props.isSearchOpen}>
-                    {props.selectedTheme === 'dark' ? (
-                        <Brightness3Icon
-                            onClick={() => props.switchTheme('light')}
-                            sx={{ cursor: 'pointer', bottom: 0 }}
-                        />
-                    ) : (
-                        <WbSunnyOutlinedIcon
-                            onClick={() => props.switchTheme('dark')}
-                            sx={{ cursor: 'pointer', bottom: 0 }}
-                        />
-                    )}
-                </WrapperThemeIcon>
+                        <Badge
+                            color="error"
+                            badgeContent={props.nftsInCartNumber}
+                        >
+                            <StyledShoppingCartRoundedIcon
+                                onClick={() => props.openOrCloseShoppingCart()}
+                            />
+                        </Badge>
 
-                {!props.isSearchOpen && (
-                    <WrapperMenuIcon
-                        onClick={
-                            props.isSearchOpen
-                                ? () => props.setSearchOpen(false)
-                                : () => setExpandMenu(!expandMenu)
-                        }
-                    >
-                        {!props.isSearchOpen && (
+                        <WrapperThemeIcon isSearchOpen={props.isSearchOpen}>
+                            {props.selectedTheme === 'dark' ? (
+                                <StyledBrightness3Icon
+                                    onClick={() => props.switchTheme('light')}
+                                    sx={{ cursor: 'pointer', bottom: 0 }}
+                                />
+                            ) : (
+                                <StyledWbSunnyOutlinedIcon
+                                    onClick={() => props.switchTheme('dark')}
+                                    sx={{ cursor: 'pointer', bottom: 0 }}
+                                />
+                            )}
+                        </WrapperThemeIcon>
+                        <WrapperMenuIcon
+                            onClick={
+                                props.isSearchOpen
+                                    ? () => props.setSearchOpen(false)
+                                    : () => setExpandMenu(!expandMenu)
+                            }
+                        >
                             <MenuBarWrapper>
                                 <MenuBarUp
-                                    expandMenu={
-                                        props.isSearchOpen
-                                            ? props.isSearchOpen
-                                            : expandMenu
-                                    }
+                                    expandMenu={expandMenu}
                                 />
                                 <MenuBarDown
-                                    expandMenu={
-                                        props.isSearchOpen
-                                            ? props.isSearchOpen
-                                            : expandMenu
-                                    }
+                                    expandMenu={expandMenu}
                                 />
                             </MenuBarWrapper>
-                        )}
-                    </WrapperMenuIcon>
-                )}
+
+                        </WrapperMenuIcon>
+                    </StyledWrapper>
+                </Slide>
+
 
             </MobileStyledMenuHeader>
 
