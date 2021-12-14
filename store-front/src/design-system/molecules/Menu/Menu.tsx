@@ -25,7 +25,6 @@ export interface MenuProps {
 const StyledMenuStack = styled(Stack)`
     align-items: end !important;
 
-
     @media (max-width: 874px) {
         height: 3rem;
         padding-left: 0rem;

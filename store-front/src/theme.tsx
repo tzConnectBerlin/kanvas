@@ -246,7 +246,7 @@ export const lightTheme = createTheme({
         default: 'drop-shadow(0 0 0.45rem #C4C4C4)',
         hover: 'drop-shadow(0 0 0.55rem #C4C4C4)',
         avatar: 'drop-shadow(0 0 0.25rem #e0e0e0)',
-        shoppingCart: 'drop-shadow(0 1rem 0.55rem #C4C4C4)'
+        shoppingCart: 'drop-shadow(0 1rem 0.55rem #C4C4C4)',
     },
 });
 
@@ -324,6 +324,6 @@ export const darkTheme = createTheme({
         default: 'drop-shadow(0 0 0.45rem black)',
         hover: 'drop-shadow(0 0 0.45rem #0e0e0e9b)',
         avatar: 'drop-shadow(0 0 0.25rem black)',
-        shoppingCart: 'drop-shadow(0 1rem 0.55rem black)'
+        shoppingCart: 'drop-shadow(0 1rem 0.55rem black)',
     },
 });

@@ -23,19 +23,25 @@ interface FilterProps {
     sx?: any;
 }
 
-const StyledStack = styled(Stack) <{ selected?: boolean, theme?: Theme }>`
+const StyledStack = styled(Stack)<{ selected?: boolean; theme?: Theme }>`
     align-items: center;
     width: 100%;
     padding-top: 1rem;
     padding-bottom: 1rem;
 `;
 
-const StyledTypography = styled(Typography) <{ selected?: boolean, theme?: Theme }>`
-    border-left: ${props => props.selected ? `2px solid ${props.theme.palette.primary.contrastText}` : 'none'};
+const StyledTypography = styled(Typography)<{
+    selected?: boolean;
+    theme?: Theme;
+}>`
+    border-left: ${(props) =>
+        props.selected
+            ? `2px solid ${props.theme.palette.primary.contrastText}`
+            : 'none'};
     height: 2rem;
-    padding-left: ${props => props.selected ? `1rem` : '0'};
-    margin-left: ${props => props.selected ? '-1rem' : 0};
-`
+    padding-left: ${(props) => (props.selected ? `1rem` : '0')};
+    margin-left: ${(props) => (props.selected ? '-1rem' : 0)};
+`;
 
 const Filter: FC<FilterProps> = ({ ...props }) => {
     return (
@@ -56,18 +62,25 @@ const Filter: FC<FilterProps> = ({ ...props }) => {
 
             <FlexSpacer />
 
-            {props.loading ?
+            {props.loading ? (
                 <CircularProgress height={1} />
-                :
-                props.collapsed ? (
-                    <Typography size="h5" weight="Light" color={props.active ? 'contrastText' : ''}>
-                        +
-                    </Typography>
-                ) : (
-                    <Typography size="h5" weight="Light" color={props.active ? 'contrastText' : ''}>
-                        -
-                    </Typography>
-                )}
+            ) : props.collapsed ? (
+                <Typography
+                    size="h5"
+                    weight="Light"
+                    color={props.active ? 'contrastText' : ''}
+                >
+                    +
+                </Typography>
+            ) : (
+                <Typography
+                    size="h5"
+                    weight="Light"
+                    color={props.active ? 'contrastText' : ''}
+                >
+                    -
+                </Typography>
+            )}
         </StyledStack>
     );
 };
@@ -99,7 +112,7 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
     callNFTsEndpoint: (input: IParamsNFTs) => void;
 }
 
-const BackButton = styled(ArrowBackIosNew) <StyledStoreFiltersProps>`
+const BackButton = styled(ArrowBackIosNew)<StyledStoreFiltersProps>`
     fill: ${(props) => props.theme.palette.text.primary};
     height: 1.2rem;
 `;
@@ -175,8 +188,6 @@ const StyledUl = styled.ul<StyledStoreFiltersProps>`
             padding-top: 0 !important;
         }
     }
-
-
 `;
 const StyledLi = styled.li<StyledStoreFiltersProps>`
     display: ${(props) => (props.openFilters ? 'flex' : 'none')};
@@ -188,7 +199,7 @@ const StyledLi = styled.li<StyledStoreFiltersProps>`
     cursor: pointer;
 `;
 
-const StyledHeader = styled(Stack) <StyledStoreFiltersProps>`
+const StyledHeader = styled(Stack)<StyledStoreFiltersProps>`
     position: fixed;
     width: -webkit-fill-available;
     padding: 0.5rem 1.5rem 0;
@@ -206,16 +217,17 @@ const StyledHeader = styled(Stack) <StyledStoreFiltersProps>`
     }
 `;
 
-const StyledFooter = styled(Stack) <StyledStoreFiltersProps>`
+const StyledFooter = styled(Stack)<StyledStoreFiltersProps>`
     display: flex;
     padding: 0.5rem 1.5rem 1rem;
     min-height: 12rem;
     z-index: 1;
 `;
 
-const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`
+const StyledCheckBox = styled(Checkbox)<{ theme?: Theme }>`
     &.Mui-checked {
-        color: ${props => props.theme.palette.primary.contrastText} !important;
+        color: ${(props) =>
+            props.theme.palette.primary.contrastText} !important;
     }
 `;
 
@@ -223,11 +235,11 @@ const StyledFilterStack = styled(Stack)`
     overflow: auto;
     margin-bottom: 6rem;
 
-    @media(max-width: 874px) {
+    @media (max-width: 874px) {
         position: relative;
         top: 5rem;
     }
-`
+`;
 
 export const StoreFilters: FC<StoreFiltersProps> = ({
     callNFTsEndpoint,
@@ -274,10 +286,10 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
             document.body.style.overflow = 'auto';
         }
         if (availabilityChange) {
-            console.log(props.availabilityFilter)
-            callNFTsEndpoint({ handlePriceRange: false })
+            console.log(props.availabilityFilter);
+            callNFTsEndpoint({ handlePriceRange: false });
 
-            setAvailabilityChange(false)
+            setAvailabilityChange(false);
         }
     }, [props.openFilters, isMobile, availabilityChange]);
 
@@ -288,7 +300,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
 
     return (
         <StyledSection openFilters={props.openFilters}>
-            {isMobile &&
+            {isMobile && (
                 <StyledHeader
                     direction="row"
                     sx={{ display: `${props.openFilters ? 'flex' : 'none'}` }}
@@ -320,31 +332,41 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                         onClick={() => {
                             props.setSelectedFilters([]);
                             props.setAvailabilityFilter([]);
-                            props.setPriceFilterRange([props.minRange, props.maxRange]);
-                            callNFTsEndpoint({ handlePriceRange: false, categories: [], availability: [] });
+                            props.setPriceFilterRange([
+                                props.minRange,
+                                props.maxRange,
+                            ]);
+                            callNFTsEndpoint({
+                                handlePriceRange: false,
+                                categories: [],
+                                availability: [],
+                            });
                         }}
                         size="subtitle2"
                         weight={
-                            props.selectedFilters.length > 0 || props.availabilityFilter.length > 0
+                            props.selectedFilters.length > 0 ||
+                            props.availabilityFilter.length > 0
                                 ? 'Medium'
                                 : 'Light'
                         }
                         color={
-                            props.selectedFilters.length > 0 || props.availabilityFilter.length > 0
+                            props.selectedFilters.length > 0 ||
+                            props.availabilityFilter.length > 0
                                 ? 'contrastText'
                                 : '#C4C4C4'
                         }
-                        sx={{ paddingBottom: '0.5rem', cursor: 'pointer !important' }}
+                        sx={{
+                            paddingBottom: '0.5rem',
+                            cursor: 'pointer !important',
+                        }}
                         noWrap
                     >
                         Clear All
                     </Typography>
                 </StyledHeader>
-            }
+            )}
 
-            <StyledFilterStack
-                direction="column"
-            >
+            <StyledFilterStack direction="column">
                 <StyledUl openFilters={props.openFilters}>
                     <StyledLi
                         id="first-li"
@@ -354,8 +376,14 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                         <Filter
                             name="Categories"
                             loading={props.loading}
-                            collapsed={!props.loading && activeRef.indexOf('Categories') !== -1}
-                            active={!props.loading && props.selectedFilters.length > 0}
+                            collapsed={
+                                !props.loading &&
+                                activeRef.indexOf('Categories') !== -1
+                            }
+                            active={
+                                !props.loading &&
+                                props.selectedFilters.length > 0
+                            }
                             setCollapsed={handleListItemClick}
                             sx={{ paddingTop: '0 !important' }}
                         />
@@ -377,114 +405,131 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                         <Filter
                             name="Availability"
                             loading={props.loading}
-                            active={!props.loading && props.availabilityFilter.length > 0}
-                            collapsed={!props.loading && activeRef.indexOf('Availability') !== -1}
+                            active={
+                                !props.loading &&
+                                props.availabilityFilter.length > 0
+                            }
+                            collapsed={
+                                !props.loading &&
+                                activeRef.indexOf('Availability') !== -1
+                            }
                             setCollapsed={handleListItemClick}
                         />
 
-                        {!props.loading && activeRef.indexOf('Availability') === -1 && (
-                            <Stack
-                                direction="column"
-                                sx={{ marginBottom: '1rem' }}
-                            >
-                                <Stack direction="row">
-                                    <StyledCheckBox
-                                        checked={
-                                            props.availabilityFilter.indexOf(
-                                                'onSale',
-                                            ) !== -1 &&
-                                            props.availabilityFilter.length !==
-                                            0
-                                        }
-                                        onClick={() =>
-                                            handleChangeAvailabilityFilter(
-                                                'onSale',
-                                            )
-                                        }
-                                        inputProps={{
-                                            'aria-label': 'controlled',
-                                        }}
-                                        disableRipple
-                                    />
-                                    <Typography size="h5" weight="Light">
-                                        On sale
-                                    </Typography>
+                        {!props.loading &&
+                            activeRef.indexOf('Availability') === -1 && (
+                                <Stack
+                                    direction="column"
+                                    sx={{ marginBottom: '1rem' }}
+                                >
+                                    <Stack direction="row">
+                                        <StyledCheckBox
+                                            checked={
+                                                props.availabilityFilter.indexOf(
+                                                    'onSale',
+                                                ) !== -1 &&
+                                                props.availabilityFilter
+                                                    .length !== 0
+                                            }
+                                            onClick={() =>
+                                                handleChangeAvailabilityFilter(
+                                                    'onSale',
+                                                )
+                                            }
+                                            inputProps={{
+                                                'aria-label': 'controlled',
+                                            }}
+                                            disableRipple
+                                        />
+                                        <Typography size="h5" weight="Light">
+                                            On sale
+                                        </Typography>
+                                    </Stack>
+                                    <Stack direction="row">
+                                        <StyledCheckBox
+                                            checked={
+                                                props.availabilityFilter.indexOf(
+                                                    'upcoming',
+                                                ) !== -1 &&
+                                                props.availabilityFilter
+                                                    .length !== 0
+                                            }
+                                            onClick={() =>
+                                                handleChangeAvailabilityFilter(
+                                                    'upcoming',
+                                                )
+                                            }
+                                            inputProps={{
+                                                'aria-label': 'controlled',
+                                            }}
+                                            disableRipple
+                                        />
+                                        <Typography size="h5" weight="Light">
+                                            Upcoming
+                                        </Typography>
+                                    </Stack>
+                                    <Stack direction="row">
+                                        <StyledCheckBox
+                                            checked={
+                                                props.availabilityFilter.indexOf(
+                                                    'soldOut',
+                                                ) !== -1 &&
+                                                props.availabilityFilter
+                                                    .length !== 0
+                                            }
+                                            onClick={() =>
+                                                handleChangeAvailabilityFilter(
+                                                    'soldOut',
+                                                )
+                                            }
+                                            inputProps={{
+                                                'aria-label': 'controlled',
+                                            }}
+                                            disableRipple
+                                        />
+                                        <Typography size="h5" weight="Light">
+                                            Sold out
+                                        </Typography>
+                                    </Stack>
                                 </Stack>
-                                <Stack direction="row">
-                                    <StyledCheckBox
-                                        checked={
-                                            props.availabilityFilter.indexOf(
-                                                'upcoming',
-                                            ) !== -1 &&
-                                            props.availabilityFilter.length !==
-                                            0
-                                        }
-                                        onClick={() =>
-                                            handleChangeAvailabilityFilter(
-                                                'upcoming',
-                                            )
-                                        }
-                                        inputProps={{
-                                            'aria-label': 'controlled',
-                                        }}
-                                        disableRipple
-                                    />
-                                    <Typography size="h5" weight="Light">
-                                        Upcoming
-                                    </Typography>
-                                </Stack>
-                                <Stack direction="row">
-                                    <StyledCheckBox
-                                        checked={
-                                            props.availabilityFilter.indexOf(
-                                                'soldOut',
-                                            ) !== -1 &&
-                                            props.availabilityFilter.length !==
-                                            0
-                                        }
-                                        onClick={() =>
-                                            handleChangeAvailabilityFilter(
-                                                'soldOut',
-                                            )
-                                        }
-                                        inputProps={{
-                                            'aria-label': 'controlled',
-                                        }}
-                                        disableRipple
-                                    />
-                                    <Typography size="h5" weight="Light">
-                                        Sold out
-                                    </Typography>
-                                </Stack>
-                            </Stack>
-                        )}
+                            )}
                     </StyledLi>
                     <StyledLi openFilters={props.openFilters}>
                         <Filter
                             name="Price"
                             loading={props.loading}
-                            active={!props.loading && JSON.stringify(props.priceFilterRange) !== JSON.stringify([props.minRange, props.maxRange])}
-                            collapsed={!props.loading && activeRef.indexOf('Price') !== -1}
+                            active={
+                                !props.loading &&
+                                JSON.stringify(props.priceFilterRange) !==
+                                    JSON.stringify([
+                                        props.minRange,
+                                        props.maxRange,
+                                    ])
+                            }
+                            collapsed={
+                                !props.loading &&
+                                activeRef.indexOf('Price') !== -1
+                            }
                             setCollapsed={handleListItemClick}
                         />
 
-                        {!props.loading && activeRef.indexOf('Price') === -1 && (
-                            <PriceFilter
-                                minRange={props.minRange}
-                                maxRange={props.maxRange}
-                                range={props.priceFilterRange}
-                                setRange={props.setPriceFilterRange}
-                                triggerPriceFilter={props.triggerPriceFilter}
-                                setFilterSliding={props.setFilterSliding}
-                            />
-                        )}
+                        {!props.loading &&
+                            activeRef.indexOf('Price') === -1 && (
+                                <PriceFilter
+                                    minRange={props.minRange}
+                                    maxRange={props.maxRange}
+                                    range={props.priceFilterRange}
+                                    setRange={props.setPriceFilterRange}
+                                    triggerPriceFilter={
+                                        props.triggerPriceFilter
+                                    }
+                                    setFilterSliding={props.setFilterSliding}
+                                />
+                            )}
                     </StyledLi>
                 </StyledUl>
                 {isMobile && (
-                    <StyledFooter
-                        direction="column-reverse"
-                        minHeight="6rem"
-                    >
+                    <StyledFooter direction="column-reverse" minHeight="6rem">
                         <FlexSpacer borderBottom={false} minHeight={3} />
 
                         <CustomButton

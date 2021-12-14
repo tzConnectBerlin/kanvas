@@ -14,7 +14,7 @@ export const initWallet = (): BeaconWallet => {
     const options: DAppClientOptions = {
         name: 'D /a:rt/',
         iconUrl: 'https://tezostaquito.io/img/favicon.png',
-        preferredNetwork: NetworkType[NETWORK]
+        preferredNetwork: NetworkType[NETWORK],
     };
 
     return new BeaconWallet(options);

@@ -66,7 +66,7 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
             ? 'transparent'
             : props.theme.button.background};
 
-    outline: solid 1px #C4C4C4;
+    outline: solid 1px #c4c4c4;
     margin: 1px;
     text-transform: none;
     transition: outline 0.6s linear;

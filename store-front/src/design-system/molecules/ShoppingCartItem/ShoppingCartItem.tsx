@@ -34,7 +34,7 @@ const StyledDiv = styled.div<{ theme?: Theme }>`
     }
 `;
 
-const StyledClearIcon = styled(ClearIcon) <{ theme?: Theme }>`
+const StyledClearIcon = styled(ClearIcon)<{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.text.primary};
 `;
 
@@ -42,11 +42,11 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
     nft,
     ...props
 }) => {
-    const history = useHistory()
+    const history = useHistory();
 
     const navigateTo = (pathname: string) => {
-        history.push({ pathname: pathname })
-    }
+        history.push({ pathname: pathname });
+    };
 
     return props.loading ? (
         <Stack
@@ -98,10 +98,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
             >
                 <ImageNotSupportedOutlinedIcon />
             </Avatar>
-            <Stack
-                direction="column"
-                sx={{ width: 'auto', minWidth: '40%' }}
-            >
+            <Stack direction="column" sx={{ width: 'auto', minWidth: '40%' }}>
                 <Typography
                     size="h4"
                     weight="Medium"
@@ -129,22 +126,35 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     }
                     size="body2"
                     weight="Medium"
-                    type='link'
+                    type="link"
                     color="contrastText"
-                    sx={{ cursor: 'pointer', width: 'auto', margin: '0 !important', marginTop: '0.4rem !important' }}
+                    sx={{
+                        cursor: 'pointer',
+                        width: 'auto',
+                        margin: '0 !important',
+                        marginTop: '0.4rem !important',
+                    }}
                 >
                     Remove
-                    {props.removeNftLoading &&
-                        <CustomCircularProgress height={0.6} sx={{marginLeft: '0.7rem'}} />
-                    }
+                    {props.removeNftLoading && (
+                        <CustomCircularProgress
+                            height={0.6}
+                            sx={{ marginLeft: '0.7rem' }}
+                        />
+                    )}
                 </Typography>
             </Stack>
-            <FlexSpacer/>
+            <FlexSpacer />
             <Typography
                 size="body1"
                 weight="Light"
                 noWrap
-                sx={{ cursor: 'pointer', width: 'auto', margin: '0 !important' , overflow: 'clip'}}
+                sx={{
+                    cursor: 'pointer',
+                    width: 'auto',
+                    margin: '0 !important',
+                    overflow: 'clip',
+                }}
             >
                 {`${nft!.price} ꜩ`}
             </Typography>

@@ -21,7 +21,7 @@ interface MInputBasePropsStyled {
     searchOpen: boolean;
 }
 
-const Search = styled.div<{ theme?: Theme, searchOpen: boolean }>`
+const Search = styled.div<{ theme?: Theme; searchOpen: boolean }>`
     cursor: pointer;
     z-index: 90;
 
@@ -30,18 +30,22 @@ const Search = styled.div<{ theme?: Theme, searchOpen: boolean }>`
     display: flex;
     align-items: center;
 
-    min-width: ${props => props.searchOpen ? '35rem' : '2.5rem'};
+    min-width: ${(props) => (props.searchOpen ? '35rem' : '2.5rem')};
 
     flex-direction: row;
 
     @media (max-width: 874px) {
         flex-direction: row-reverse;
-        width: ${props => props.searchOpen ? '100%' : 'auto'};
-        min-width: ${props => props.searchOpen ? 'calc(100vw - 5.7rem)' : '2.5rem'};
+        width: ${(props) => (props.searchOpen ? '100%' : 'auto')};
+        min-width: ${(props) =>
+            props.searchOpen ? 'calc(100vw - 5.7rem)' : '2.5rem'};
         border-bottom: none !important;
     }
 
-    border-bottom: ${props => props.searchOpen ? `1px solid ${props.theme.palette.text.primary}` : ''};
+    border-bottom: ${(props) =>
+        props.searchOpen
+            ? `1px solid ${props.theme.palette.text.primary}`
+            : ''};
 
     transition: width 0.3s, min-width 0.3s !important;
 `;
@@ -61,11 +65,14 @@ const SearchIconWrapper = styled.div<{ theme?: Theme }>`
     cursor: pointer;
 `;
 
-const StyledSearchRounded = styled(SearchRounded)<{theme?: Theme, isMobile: boolean}>`
-    color: ${props => props.theme.palette.text.primary};
+const StyledSearchRounded = styled(SearchRounded)<{
+    theme?: Theme;
+    isMobile: boolean;
+}>`
+    color: ${(props) => props.theme.palette.text.primary};
     cursor: pointer;
-    height: ${props => props.isMobile ? '1.6rem' : '1.4rem'};
-    width: ${props => props.isMobile ? '1.6rem' : '1.4rem'};
+    height: ${(props) => (props.isMobile ? '1.6rem' : '1.4rem')};
+    width: ${(props) => (props.isMobile ? '1.6rem' : '1.4rem')};
 `;
 
 const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
@@ -78,10 +85,10 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
 
     &.MuiInputBase-root {
         font-family: 'Poppins Medium' !important;
-        width: ${props => props.searchOpen ? '100%' : '0'} !important ;
+        width: ${(props) => (props.searchOpen ? '100%' : '0')} !important ;
 
         @media (max-width: 874px) {
-            width: ${props => props.searchOpen ? '100%' : '1rem'} ;
+            width: ${(props) => (props.searchOpen ? '100%' : '1rem')};
         }
     }
 
@@ -91,7 +98,7 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
         padding-left: 40px;
         transition: width 0.3s, opacity 0.1s;
 
-        opacity: ${props => props.searchOpen ? 1 : 0};
+        opacity: ${(props) => (props.searchOpen ? 1 : 0)};
         height: 100%;
     }
 
@@ -99,16 +106,24 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
         padding-left: 0 !important;
         min-width: 0;
         outline: none;
-        cursor: ${props => props.searchOpen ? 'text' : 'pointer'} ;
+        cursor: ${(props) => (props.searchOpen ? 'text' : 'pointer')};
     }
 `;
 
 export const SearchInput = forwardRef<HTMLInputElement, InputBaseProps>(
     ({ ...props }, ref) => {
         return (
-            <Search searchOpen={props.searchOpen} onClick={props.searchOpen ? () => {} : props.onClick}>
-                <SearchIconWrapper onClick={props.searchOpen ? () => {} : props.onClick}>
-                    <StyledSearchRounded fontSize="small" isMobile={props.isMobile}/>
+            <Search
+                searchOpen={props.searchOpen}
+                onClick={props.searchOpen ? () => {} : props.onClick}
+            >
+                <SearchIconWrapper
+                    onClick={props.searchOpen ? () => {} : props.onClick}
+                >
+                    <StyledSearchRounded
+                        fontSize="small"
+                        isMobile={props.isMobile}
+                    />
                 </SearchIconWrapper>
                 <StyledInputBase
                     inputRef={ref}

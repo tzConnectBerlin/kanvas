@@ -16,7 +16,7 @@ import {
     Stack,
     Theme,
     useMediaQuery,
-} from '@mui/material'
+} from '@mui/material';
 
 interface QuickSearResultProps {
     error: boolean;
@@ -42,7 +42,7 @@ const StyledBox = styled(Box)<BoxProps>`
         right: 0;
         max-width: 100rem;
     }
-`
+`;
 
 const StyledPaper = styled(Paper)<{ theme?: Theme }>`
     box-shadow: none;
@@ -66,7 +66,7 @@ const StyledPaper = styled(Paper)<{ theme?: Theme }>`
             outline: none;
         }
     }
-`
+`;
 
 const StyledHeaderStack = styled(Stack)`
     padding: 1em 1.5em;

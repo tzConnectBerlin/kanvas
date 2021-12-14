@@ -24,7 +24,6 @@ const FlexSpacerStyled = styled.div<FlexSpacerProps>`
             props.minHeight ? props.minHeight * 0.8 : 0}rem;
         min-width: ${(props) => (props.minWidth ? props.minWidth * 0.8 : 0)}rem;
     }
-
 `;
 
 export const FlexSpacer: FC<FlexSpacerProps> = ({

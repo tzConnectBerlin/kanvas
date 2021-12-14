@@ -4,14 +4,17 @@ import Brightness3Icon from '@mui/icons-material/Brightness3';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 
 import { FC, useEffect, useRef, useState } from 'react';
-import { Badge, Slide, Stack, Theme, useMediaQuery, useTheme } from '@mui/material';
+import {
+    Badge,
+    Slide,
+    Stack,
+    Theme,
+    useMediaQuery,
+    useTheme,
+} from '@mui/material';
 import { CustomButton } from '../../../atoms/Button';
 import { Typography } from '../../../atoms/Typography';
-import {
-    MenuProps,
-    SearchProps,
-    StyledShoppingCartRoundedIcon,
-} from '../Menu';
+import { MenuProps, SearchProps, StyledShoppingCartRoundedIcon } from '../Menu';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory } from 'react-router-dom';
 import { QuickSearch } from '../../QuickSearch';
@@ -95,7 +98,7 @@ const MenuBarWrapper = styled.div`
     display: inline-table;
 `;
 
-const MobileStyledMenuHeader = styled(Stack) <SearchProps>`
+const MobileStyledMenuHeader = styled(Stack)<SearchProps>`
     display: none;
     margin-top: 0rem !important;
 
@@ -118,7 +121,7 @@ const MobileStyledMenuHeader = styled(Stack) <SearchProps>`
     }
 `;
 
-const MobileStyledMenuContent = styled(Stack) <MenuIconProps>`
+const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
     display: none;
 
     @media (max-width: 874px) {
@@ -168,56 +171,56 @@ const StyledBox = styled.div`
     }
 `;
 
-const StyledMobileLink = styled(Link) <{ theme?: Theme }>`
+const StyledMobileLink = styled(Link)<{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.text.primary};
     text-decoration: none;
 
     height: 2rem;
     margin-left: 0.5rem;
     margin-top: 0.5rem;
-`
+`;
 
 const StyledSignIn = styled(Typography)`
     height: 2rem;
     margin-left: 0.5rem;
     margin-top: 0.5rem;
-`
+`;
 
-const BackButton = styled(ArrowBackIosNew) <BackButtonProps>`
+const BackButton = styled(ArrowBackIosNew)<BackButtonProps>`
     fill: ${(props) => props.theme.palette.text.primary};
     z-index: 999;
     pointer-events: none;
     cursor: pointer;
-    opacity: ${props => props.isSearchOpen ? 1 : 0};
+    opacity: ${(props) => (props.isSearchOpen ? 1 : 0)};
     /* transition: opacity 0.2s; */
 `;
 
 const StyledWrapper = styled(Stack)`
     justify-content: center;
     align-items: center;
-`
+`;
 
-const StyledBrightness3Icon = styled(Brightness3Icon )`
+const StyledBrightness3Icon = styled(Brightness3Icon)`
     @media (max-width: 874px) {
         height: 1.3rem;
     }
-`
+`;
 
 const StyledWbSunnyOutlinedIcon = styled(WbSunnyOutlinedIcon)`
     @media (max-width: 874px) {
         height: 1.3rem;
     }
-`
+`;
 
 export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
     const { t } = useTranslation(['translation']);
-    const history = useHistory()
+    const history = useHistory();
 
     const [expandMenu, setExpandMenu] = useState(false);
 
     const navigateTo = (componentURL: string) => {
-        history.push(componentURL)
-    }
+        history.push(componentURL);
+    };
 
     useEffect(() => {
         if (expandMenu) {
@@ -230,7 +233,7 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-    const wrapperRef = useRef()
+    const wrapperRef = useRef();
 
     useEffect(() => {
         if (props.isSearchOpen && isMobile) {
@@ -261,15 +264,28 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
 
                 {/* QuickSearch wrapper to close menu in case open */}
 
-                <Stack onClick={() => !props.isSearchOpen ? props.setSearchOpen(!props.isSearchOpen) : {}} >
-                    <QuickSearch searchOpen={props.isSearchOpen} setSearchOpen={props.setSearchOpen} />
+                <Stack
+                    onClick={() =>
+                        !props.isSearchOpen
+                            ? props.setSearchOpen(!props.isSearchOpen)
+                            : {}
+                    }
+                >
+                    <QuickSearch
+                        searchOpen={props.isSearchOpen}
+                        setSearchOpen={props.setSearchOpen}
+                    />
                 </Stack>
 
                 {/* Menu button, and closing button for search bar */}
 
-                <Slide direction="left" in={!props.isSearchOpen} container={wrapperRef.current} style={{marginLeft: '0.8rem'}}>
-                    <StyledWrapper spacing={2} direction="row" >
-
+                <Slide
+                    direction="left"
+                    in={!props.isSearchOpen}
+                    container={wrapperRef.current}
+                    style={{ marginLeft: '0.8rem' }}
+                >
+                    <StyledWrapper spacing={2} direction="row">
                         <Badge
                             color="error"
                             badgeContent={props.nftsInCartNumber}
@@ -300,19 +316,12 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                             }
                         >
                             <MenuBarWrapper>
-                                <MenuBarUp
-                                    expandMenu={expandMenu}
-                                />
-                                <MenuBarDown
-                                    expandMenu={expandMenu}
-                                />
+                                <MenuBarUp expandMenu={expandMenu} />
+                                <MenuBarDown expandMenu={expandMenu} />
                             </MenuBarWrapper>
-
                         </WrapperMenuIcon>
                     </StyledWrapper>
                 </Slide>
-
-
             </MobileStyledMenuHeader>
 
             {/* Mobile Menu Content */}
@@ -357,61 +366,81 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                         size="h5"
                         weight="Medium"
                         color="#9b9b9b"
-                        sx={{ cursor: 'pointer', marginBottom: '0.7rem', marginTop: '1rem' }}
+                        sx={{
+                            cursor: 'pointer',
+                            marginBottom: '0.7rem',
+                            marginTop: '1rem',
+                        }}
                     >
                         User
                     </Typography>
 
-                    {
-                        localStorage.getItem('Kanvas - address') !==
-                        props.user?.userAddress &&
-                        <StyledSignIn size="h2" weight="SemiBold" sx={{ cursor: 'pointer' }} onClick={() => props.setOpen(true)}>
+                    {localStorage.getItem('Kanvas - address') !==
+                        props.user?.userAddress && (
+                        <StyledSignIn
+                            size="h2"
+                            weight="SemiBold"
+                            sx={{ cursor: 'pointer' }}
+                            onClick={() => props.setOpen(true)}
+                        >
                             Sign in
                         </StyledSignIn>
-                    }
-
+                    )}
 
                     {localStorage.getItem('Kanvas - address') ===
                         props.user?.userAddress && (
-                            <>
-                                <Stack
-                                    direction="row"
-                                    sx={{ alignItems: 'center', marginBottom: '0.7rem' }}
-                                    spacing={3}
-                                >
-                                    <Typography size="h2"
-                                        weight="SemiBold"
-                                        noWrap
-                                        sx={{ display: 'initial', cursor: 'pointer', marginLeft: '0.5rem' }}
-                                        onClick={() => navigateTo(`/profile/${props.user?.userAddress}`)}
-                                    >
-                                        Go to profile
-                                    </Typography>
-                                    <Avatar
-                                        // TODO: Add link to user profile
-                                        src={`${props.user?.profilePicture}?${Date.now()}`}
-                                        sx={{ cursor: 'pointer !important' }}
-                                    />
-                                </Stack>
-
+                        <>
+                            <Stack
+                                direction="row"
+                                sx={{
+                                    alignItems: 'center',
+                                    marginBottom: '0.7rem',
+                                }}
+                                spacing={3}
+                            >
                                 <Typography
                                     size="h2"
                                     weight="SemiBold"
-                                    sx={{ cursor: 'pointer', marginBottom: '0.7rem', marginLeft: '0.5rem' }}
-                                    onClick={() => props.onLogout()}
+                                    noWrap
+                                    sx={{
+                                        display: 'initial',
+                                        cursor: 'pointer',
+                                        marginLeft: '0.5rem',
+                                    }}
+                                    onClick={() =>
+                                        navigateTo(
+                                            `/profile/${props.user?.userAddress}`,
+                                        )
+                                    }
                                 >
-                                    Sign out
+                                    Go to profile
                                 </Typography>
+                                <Avatar
+                                    // TODO: Add link to user profile
+                                    src={`${
+                                        props.user?.profilePicture
+                                    }?${Date.now()}`}
+                                    sx={{ cursor: 'pointer !important' }}
+                                />
+                            </Stack>
 
-                            </>
-                        )}
-
+                            <Typography
+                                size="h2"
+                                weight="SemiBold"
+                                sx={{
+                                    cursor: 'pointer',
+                                    marginBottom: '0.7rem',
+                                    marginLeft: '0.5rem',
+                                }}
+                                onClick={() => props.onLogout()}
+                            >
+                                Sign out
+                            </Typography>
+                        </>
+                    )}
                 </StyledBox>
 
-
                 {/* Sub menu to navigate to personnal pages such as notifications profile or simply to logout */}
-
-
             </MobileStyledMenuContent>
         </>
     );

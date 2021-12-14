@@ -38,11 +38,11 @@ const StyledTextField = styled(TextField)<{ theme?: Theme }>`
     transition: all 0.2s;
 `;
 
-const StyledSlider = styled(Slider)<{theme?: Theme}>`
+const StyledSlider = styled(Slider)<{ theme?: Theme }>`
     margin: 0.8rem 3.33% !important;
     width: 90%;
 
-    color: ${props => props.theme.palette.primary.contrastText};
+    color: ${(props) => props.theme.palette.primary.contrastText};
 
     @media (min-width: 900px) {
         width: 95%;

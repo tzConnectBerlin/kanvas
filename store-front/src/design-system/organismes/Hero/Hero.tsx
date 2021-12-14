@@ -30,10 +30,10 @@ export interface HeroProps {
 }
 
 const GridStyled = styled(Grid)`
-    @media(max-width: 900px) {
+    @media (max-width: 900px) {
         display: none;
     }
-`
+`;
 
 export const Hero: FC<HeroProps> = ({ ...props }) => {
     const { t } = useTranslation(['translation']);
@@ -61,7 +61,12 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
                     {t('home.hero.description_1')}
                 </Typography>
 
-                <Typography size="h5" weight="Light" color="#C4C4C4" sx={{ pt: 1, mb: 1 }}>
+                <Typography
+                    size="h5"
+                    weight="Light"
+                    color="#C4C4C4"
+                    sx={{ pt: 1, mb: 1 }}
+                >
                     {t('home.hero.description_2')}
                 </Typography>
 

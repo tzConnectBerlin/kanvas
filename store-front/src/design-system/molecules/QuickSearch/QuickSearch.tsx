@@ -1,7 +1,7 @@
-import styled from '@emotion/styled'
-import { Stack, Theme, useMediaQuery } from '@mui/material'
-import useAxios from 'axios-hooks'
-import { FC, useEffect, useRef, useState } from 'react'
+import styled from '@emotion/styled';
+import { Stack, Theme, useMediaQuery } from '@mui/material';
+import useAxios from 'axios-hooks';
+import { FC, useEffect, useRef, useState } from 'react';
 import { SearchInput } from '../../atoms/SearchInput';
 import { QuickSearchResult } from '../../molecules/QuickSearchResult';
 
@@ -38,8 +38,8 @@ const StyledBackground = styled.div<{ theme?: Theme; open: boolean }>`
 `;
 
 export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
-    const inputRef = useRef<HTMLInputElement>(null)
-    const isMobile = useMediaQuery('(max-width:874px)')
+    const inputRef = useRef<HTMLInputElement>(null);
+    const isMobile = useMediaQuery('(max-width:874px)');
 
     const [openSearchResult, setOpenSearchresult] = useState(false);
 
@@ -114,7 +114,7 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
                     onChange={handleChange}
                     closeResult={handleCloseInput}
                     onClick={() => {
-                        inputRef.current?.focus()
+                        inputRef.current?.focus();
                         setOpenSearchresult(true);
                         props.setSearchOpen(true);
                     }}

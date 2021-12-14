@@ -138,7 +138,7 @@ export const Header: FC<HeaderProps> = ({
     }, [loggedUser]);
 
     useEffect(() => {
-        getLoggedUser().catch(err => console.log(err));
+        getLoggedUser().catch((err) => console.log(err));
     }, []);
 
     return (

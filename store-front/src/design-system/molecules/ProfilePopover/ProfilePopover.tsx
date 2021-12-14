@@ -51,7 +51,7 @@ const paperProps = {
 
 const StyledMenu = styled(Menu)<{ theme?: Theme }>`
     .MuiPaper-root {
-        filter: ${props => props.theme.dropShadow.default};
+        filter: ${(props) => props.theme.dropShadow.default};
         background-color: ${(props) =>
             props.theme.palette.background.paper} !important;
         background-image: none !important;

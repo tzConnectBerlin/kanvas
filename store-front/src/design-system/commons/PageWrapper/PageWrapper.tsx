@@ -4,7 +4,6 @@ import { Theme } from '@mui/material';
 export const PageWrapper = styled.div<{ theme?: Theme }>`
     min-height: 102vh;
 
-
     display: flex;
     align-items: flex-start;
     justify-content: center;

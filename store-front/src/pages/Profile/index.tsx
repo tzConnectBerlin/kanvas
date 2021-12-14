@@ -168,7 +168,6 @@ const Profile: FC<ProfileProps> = () => {
     return (
         <PageWrapper>
             <StyledStack direction="column">
-
                 <FlexSpacer minHeight={isMobile ? 4 : 10} />
 
                 <StyledDiv>
@@ -205,7 +204,7 @@ const Profile: FC<ProfileProps> = () => {
                     nfts={userNftsResponse.data?.nfts}
                     emptyMessage={'No Nfts in collection yet'}
                     emptyLink={'Click here to buy some in the store.'}
-                    nftCardMode='user'
+                    nftCardMode="user"
                 />
 
                 <FlexSpacer minHeight={2} />

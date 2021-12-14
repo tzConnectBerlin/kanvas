@@ -25,7 +25,7 @@ export interface ProductPageProps {
 
 const StytledPageWrapper = styled(PageWrapper)`
     align-items: center;
-`
+`;
 
 const StyledStack = styled(Stack)`
     overflow: hidden;
@@ -46,9 +46,9 @@ const StyledMetadataStack = styled(Stack)`
         /* width: 30%; */
         height: auto;
     }
-`
+`;
 
-const StyledCardMedia = styled(CardMedia) <{ component?: string; alt: string }>`
+const StyledCardMedia = styled(CardMedia)<{ component?: string; alt: string }>`
     object-fit: contain;
     max-height: 75vh;
     /* min-height: 35rem; */
@@ -65,7 +65,7 @@ const StyledCardMedia = styled(CardMedia) <{ component?: string; alt: string }>`
 `;
 
 const StyledWrapperIcon = styled.div<{ theme?: Theme }>`
-    background-color: ${props => props.theme.palette.background.paper};
+    background-color: ${(props) => props.theme.palette.background.paper};
     border-radius: 2rem;
     margin: 0 !important;
     height: 2.5rem;
@@ -87,17 +87,17 @@ const StyledWrapperIcon = styled.div<{ theme?: Theme }>`
         cursor: pointer;
         scale: 0.98;
     }
-`
+`;
 
-const StyledFullscreenIcon = styled(FullscreenIcon) <{ theme?: Theme }>`
+const StyledFullscreenIcon = styled(FullscreenIcon)<{ theme?: Theme }>`
     margin: 0 !important;
     height: 1.8rem;
     width: 1.8rem;
-    color: ${props => props.theme.palette.text.primary};
-`
+    color: ${(props) => props.theme.palette.text.primary};
+`;
 
 const WrapperFullScreen = styled.div<{ open: boolean }>`
-    visibility: ${props => props.open ? 'visivble' : 'hidden'};
+    visibility: ${(props) => (props.open ? 'visivble' : 'hidden')};
     display: flex;
     justify-content: center;
     align-items: center;
@@ -109,29 +109,29 @@ const WrapperFullScreen = styled.div<{ open: boolean }>`
     z-index: 20;
 
     transition: visibility 0.3s;
-`
+`;
 
-const FullScreenView = styled.div<{ theme?: Theme, open: boolean }>`
+const FullScreenView = styled.div<{ theme?: Theme; open: boolean }>`
     position: absolute;
-    background-color: ${props => props.theme.palette.background.default};
+    background-color: ${(props) => props.theme.palette.background.default};
     width: 100%;
     height: 100%;
     z-index: 21;
-    opacity: ${props => props.open ? '1 !important' : 0};
+    opacity: ${(props) => (props.open ? '1 !important' : 0)};
     transition: opacity 0.4s;
-`
+`;
 
 const StyledImage = styled.img<{ open: boolean }>`
     max-height: 90vh;
     max-width: 90vw;
-    opacity: ${props => props.open ? '1 !important' : 0};
+    opacity: ${(props) => (props.open ? '1 !important' : 0)};
     z-index: 22;
     object-fit: contain;
     height: 100%;
     width: 100%;
     transition: opacity 0.4s;
     border-radius: 1rem;
-`
+`;
 
 interface IProductParam {
     id: string;
@@ -143,11 +143,12 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
     const history = useHistory();
     const { id } = useParams<IProductParam>();
 
-    const [nftResponse, getNft] = useAxios({
-        url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/${id}`,
-        method: 'POST',
-    },
-        { manual: true }
+    const [nftResponse, getNft] = useAxios(
+        {
+            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/${id}`,
+            method: 'POST',
+        },
+        { manual: true },
     );
 
     const [addToCartResponse, addToCart] = useAxios(
@@ -155,8 +156,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
         { manual: true },
     );
 
-    const [comfortLoader, setComfortLoader] = useState<boolean>(true)
-    const [fullScreenView, setFullScreenView] = useState<boolean>(false)
+    const [comfortLoader, setComfortLoader] = useState<boolean>(true);
+    const [fullScreenView, setFullScreenView] = useState<boolean>(false);
 
     const handleAddToBasket = () => {
         if (nftResponse.data) {
@@ -194,16 +195,16 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
 
     useEffect(() => {
         const comfortTrigger = setTimeout(() => {
-            getNft()
-            setComfortLoader(false)
+            getNft();
+            setComfortLoader(false);
         }, 800);
-    }, [])
+    }, []);
 
     useEffect(() => {
         if (nftResponse.data) {
             setLaunchTime(
                 new Date(nftResponse.data.launchAt * 1000).getTime() -
-                new Date().getTime(),
+                    new Date().getTime(),
             );
         }
         if (nftResponse.error) {
@@ -215,7 +216,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
             setTimeout(() => {
                 setLaunchTime(
                     new Date(nftResponse.data.launchAt! * 1000).getTime() -
-                    new Date().getTime(),
+                        new Date().getTime(),
                 );
             }, 1000);
         }
@@ -227,17 +228,32 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                 <StyledImage
                     src={nftResponse.data?.dataUri}
                     alt="random"
-                    onClick={() => fullScreenView ? setFullScreenView(false) : {}}
+                    onClick={() =>
+                        fullScreenView ? setFullScreenView(false) : {}
+                    }
                     open={fullScreenView}
                 />
-                <FullScreenView open={fullScreenView}>
-                </FullScreenView>
+                <FullScreenView open={fullScreenView}></FullScreenView>
             </WrapperFullScreen>
-            <StyledStack direction="column" spacing={3} sx={{ position: 'relative', justifyContent: 'center', alignItems: 'center', minHeight: '45rem'}}>
+            <StyledStack
+                direction="column"
+                spacing={3}
+                sx={{
+                    position: 'relative',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '45rem',
+                }}
+            >
                 <Stack
                     direction={{ xs: 'column', md: 'row' }}
                     spacing={5}
-                    sx={{ width: '100%', minHeight: '20rem', marginTop: '7rem', justifyContent: 'center'}}
+                    sx={{
+                        width: '100%',
+                        minHeight: '20rem',
+                        marginTop: '7rem',
+                        justifyContent: 'center',
+                    }}
                 >
                     {nftResponse.loading || comfortLoader ? (
                         <Box
@@ -249,19 +265,32 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 maxWidth: 1000,
                                 display: 'flex',
                                 justifyContent: 'center',
-                                alignItems: 'center'
+                                alignItems: 'center',
                             }}
                         >
                             <CircularProgress height={2} />
                         </Box>
                     ) : (
-                        <Box sx={{position: 'relative', display: 'flex',flexDirection: 'row', alignItems: 'flex-end'}}>
+                        <Box
+                            sx={{
+                                position: 'relative',
+                                display: 'flex',
+                                flexDirection: 'row',
+                                alignItems: 'flex-end',
+                            }}
+                        >
                             <StyledCardMedia
                                 component="img"
                                 image={nftResponse.data?.dataUri}
                                 alt="random"
                             />
-                            <StyledWrapperIcon onClick={() => !fullScreenView ? setFullScreenView(true) : {}}>
+                            <StyledWrapperIcon
+                                onClick={() =>
+                                    !fullScreenView
+                                        ? setFullScreenView(true)
+                                        : {}
+                                }
+                            >
                                 <StyledFullscreenIcon />
                             </StyledWrapperIcon>
                         </Box>
@@ -319,8 +348,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 'No description provided'
                             )}
                         </Typography>
-                        {
-                            launchTime && launchTime > 0 &&
+                        {launchTime && launchTime > 0 && (
                             <>
                                 <Typography
                                     size="body1"
@@ -328,8 +356,9 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     sx={{ pt: 4 }}
                                     color="#757575"
                                 >
-                                    {nftResponse.loading || comfortLoader &&
-                                        (!launchTime || launchTime < 0)
+                                    {nftResponse.loading ||
+                                    (comfortLoader &&
+                                        (!launchTime || launchTime < 0))
                                         ? undefined
                                         : t('product.description.part_3')}
                                 </Typography>
@@ -356,8 +385,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     )}
                                 </Typography>
                             </>
-
-                        }
+                        )}
                         <Typography
                             size="body1"
                             weight="SemiBold"
@@ -374,7 +402,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             weight="Light"
                             sx={{ pt: 2, mb: 1 }}
                         >
-                            {nftResponse.loading || comfortLoader ? undefined : (
+                            {nftResponse.loading ||
+                            comfortLoader ? undefined : (
                                 <>
                                     {nftResponse.data?.categories.map(
                                         (category: ICategory) => (
@@ -421,8 +450,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     {nftResponse.loading || comfortLoader
                                         ? undefined
                                         : nftResponse.data?.editionsAvailable +
-                                        '/' +
-                                        nftResponse.data?.editionsSize}
+                                          '/' +
+                                          nftResponse.data?.editionsSize}
                                 </Typography>
                             </Stack>
                             <Stack direction="column">
@@ -442,10 +471,9 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     weight="SemiBold"
                                     sx={{ pt: 2, mb: 1 }}
                                 >
-                                    {nftResponse.loading || comfortLoader ? undefined : (
-                                        <>
-                                            {nftResponse.data?.price} ꜩ
-                                        </>
+                                    {nftResponse.loading ||
+                                    comfortLoader ? undefined : (
+                                        <>{nftResponse.data?.price} ꜩ</>
                                     )}
                                 </Typography>
                             </Stack>
@@ -459,21 +487,22 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 launchTime! > 0
                                     ? 'Not dropped yet'
                                     : props.nftsInCart.filter(
-                                        (nft) =>
-                                            Number(nft.id) ===
-                                            nftResponse.data?.id,
-                                    ).length > 0
-                                        ? 'Already in cart'
-                                        : t('product.button_1')
+                                          (nft) =>
+                                              Number(nft.id) ===
+                                              nftResponse.data?.id,
+                                      ).length > 0
+                                    ? 'Already in cart'
+                                    : t('product.button_1')
                             }
                             disabled={
-                                nftResponse.loading || comfortLoader ||
+                                nftResponse.loading ||
+                                comfortLoader ||
                                 props.nftsInCart.filter(
                                     (nft) =>
                                         Number(nft.id) === nftResponse.data?.id,
                                 ).length > 0 ||
                                 Number(nftResponse.data?.editionsAvailable) ===
-                                0 ||
+                                    0 ||
                                 launchTime! > 0
                             }
                             sx={{ marginTop: '3rem !important' }}

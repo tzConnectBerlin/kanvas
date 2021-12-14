@@ -14,7 +14,7 @@ import {
     Pagination,
     useMediaQuery,
     useTheme,
-    Chip
+    Chip,
 } from '@mui/material';
 
 import { CustomSelect } from '../../design-system/atoms/Select';
@@ -31,7 +31,7 @@ const StyledStack = styled(Stack)`
     height: 100%;
 `;
 
-const StyledContentStack = styled(Stack) <ParamTypes>`
+const StyledContentStack = styled(Stack)<ParamTypes>`
     flex-direction: row;
     width: 100%;
     margin-top: 2.5rem !important;
@@ -41,7 +41,7 @@ const StyledContentStack = styled(Stack) <ParamTypes>`
     }
 `;
 
-const StyledPagination = styled(Pagination) <{
+const StyledPagination = styled(Pagination)<{
     theme?: Theme;
     display: boolean;
 }>`
@@ -55,7 +55,7 @@ const StyledPagination = styled(Pagination) <{
 
     .MuiPaginationItem-root.Mui-selected {
         background-color: ${(props) =>
-        props.theme.palette.background.default} !important;
+            props.theme.palette.background.default} !important;
         border: 1px solid ${(props) => props.theme.palette.text.primary} !important;
     }
 
@@ -65,21 +65,24 @@ const StyledPagination = styled(Pagination) <{
     }
 `;
 
-const StyledChevronLeftIcon = styled(ChevronLeftIcon) <{ opened: boolean, theme?: Theme }>`
+const StyledChevronLeftIcon = styled(ChevronLeftIcon)<{
+    opened: boolean;
+    theme?: Theme;
+}>`
     height: 1.8rem;
     width: 1.8rem;
-    color: ${props => props.theme.palette.text.primary};
-    transform: ${props => props.opened ? '' : 'rotate(180deg)'};
+    color: ${(props) => props.theme.palette.text.primary};
+    transform: ${(props) => (props.opened ? '' : 'rotate(180deg)')};
 
     transition: transform 0.3s;
 
     cursor: pointer;
-`
+`;
 
-const StyledChip = styled(Chip) <{ theme?: Theme }>`
+const StyledChip = styled(Chip)<{ theme?: Theme }>`
     margin-left: 1.5rem;
-    border: 1px solid #C4C4C4;
-`
+    border: 1px solid #c4c4c4;
+`;
 
 export interface IParamsNFTs {
     handlePriceRange: boolean;
@@ -116,7 +119,9 @@ const StorePage = () => {
 
     // Categories state
     const [selectedCategories, setSelectedCategories] = useState<any[]>([]);
-    const [preSelectedCategories, setPreSelectedCategories] = useState<any[]>([])
+    const [preSelectedCategories, setPreSelectedCategories] = useState<any[]>(
+        [],
+    );
     // Availability state
     const [selectedAvailability, setSelectedAvailability] = useState<string[]>(
         [],
@@ -131,7 +136,7 @@ const StorePage = () => {
 
     const [filterSliding, setFilterSliding] = useState<boolean>(false);
     const [comfortLoader, setComfortLoader] = useState<boolean>(false);
-    const [onInit, setOnInit] = useState(true)
+    const [onInit, setOnInit] = useState(true);
 
     // Api calls for the categories and the nfts
     const [nftsResponse, getNfts] = useAxios(
@@ -182,11 +187,14 @@ const StorePage = () => {
                             ? 'onSale,soldOut,upcoming'
                             : selectedAvailability.join(',')),
                 },
-            }).then(response => {
+            }).then((response) => {
                 if (!params.handlePriceRange) {
-                    setPriceFilterRange([response.data.lowerPriceBound, response.data.upperPriceBound])
+                    setPriceFilterRange([
+                        response.data.lowerPriceBound,
+                        response.data.upperPriceBound,
+                    ]);
                 }
-            })
+            });
             setComfortLoader(false);
         }, 400);
 
@@ -361,7 +369,7 @@ const StorePage = () => {
             <StyledStack direction="column" spacing={3}>
                 <FlexSpacer minHeight={isMobile ? 6 : 10} />
 
-                {!isMobile &&
+                {!isMobile && (
                     <Typography
                         size="h1"
                         weight="SemiBold"
@@ -369,35 +377,63 @@ const StorePage = () => {
                     >
                         The Store
                     </Typography>
-                }
+                )}
 
                 <FlexSpacer />
 
                 {/* Toggle options */}
-                <Stack direction="row" sx={{ justifyContent: 'center', alignItems: 'center' }}>
-
-                    <StyledChevronLeftIcon opened={isMobile ? false : filterOpen} onClick={() => setFilterOpen(!filterOpen)} />
+                <Stack
+                    direction="row"
+                    sx={{ justifyContent: 'center', alignItems: 'center' }}
+                >
+                    <StyledChevronLeftIcon
+                        opened={isMobile ? false : filterOpen}
+                        onClick={() => setFilterOpen(!filterOpen)}
+                    />
                     <Typography
                         size="h4"
                         weight="SemiBold"
                         onClick={() => setFilterOpen(!filterOpen)}
-                        sx={{ justifyContent: 'center', cursor: 'pointer', paddingLeft: '0.5rem' }}
-                    >
-                        {`Filters ${selectedCategories.length > 0
-                            ? `  - ${selectedCategories.length}`
-                            : ''
-                            }`}
-                    </Typography>
-                    {
-                        (selectedAvailability.length > 0 || selectedCategories.length > 0 || (JSON.stringify(priceFilterRange) !== JSON.stringify([nftsResponse.data?.lowerPriceBound, nftsResponse.data?.upperPriceBound])) && !categoriesResponse.loading && !nftsResponse.loading) &&
-                        <StyledChip label="Clear all" variant="outlined" onDelete={() => {
-                            setSelectedCategories([]);
-                            setSelectedAvailability([]);
-                            setPriceFilterRange([nftsResponse.data?.lowerPriceBound, nftsResponse.data?.upperPriceBound]);
-                            callNFTsEndpoint({ handlePriceRange: false, categories: [], availability: [] });
+                        sx={{
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            paddingLeft: '0.5rem',
                         }}
-                        sx={{display: `${isMobile ? 'none' : 'flex'}`}}/>
-                    }
+                    >
+                        {`Filters ${
+                            selectedCategories.length > 0
+                                ? `  - ${selectedCategories.length}`
+                                : ''
+                        }`}
+                    </Typography>
+                    {(selectedAvailability.length > 0 ||
+                        selectedCategories.length > 0 ||
+                        (JSON.stringify(priceFilterRange) !==
+                            JSON.stringify([
+                                nftsResponse.data?.lowerPriceBound,
+                                nftsResponse.data?.upperPriceBound,
+                            ]) &&
+                            !categoriesResponse.loading &&
+                            !nftsResponse.loading)) && (
+                        <StyledChip
+                            label="Clear all"
+                            variant="outlined"
+                            onDelete={() => {
+                                setSelectedCategories([]);
+                                setSelectedAvailability([]);
+                                setPriceFilterRange([
+                                    nftsResponse.data?.lowerPriceBound,
+                                    nftsResponse.data?.upperPriceBound,
+                                ]);
+                                callNFTsEndpoint({
+                                    handlePriceRange: false,
+                                    categories: [],
+                                    availability: [],
+                                });
+                            }}
+                            sx={{ display: `${isMobile ? 'none' : 'flex'}` }}
+                        />
+                    )}
                     <FlexSpacer />
 
                     <CustomSelect
@@ -407,7 +443,6 @@ const StorePage = () => {
                         callNFTsEndpoint={callNFTsEndpoint}
                         disabled={nftsResponse.loading}
                     />
-
                 </Stack>
 
                 <StyledContentStack>
@@ -421,7 +456,9 @@ const StorePage = () => {
                         setSelectedFilters={setSelectedCategories}
                         priceFilterRange={priceFilterRange}
                         setPriceFilterRange={setPriceFilterRange}
-                        loading={categoriesResponse.loading && nftsResponse.loading}
+                        loading={
+                            categoriesResponse.loading && nftsResponse.loading
+                        }
                         minRange={nftsResponse.data?.lowerPriceBound ?? 0}
                         maxRange={nftsResponse.data?.upperPriceBound ?? 100}
                         triggerPriceFilter={triggerPriceFilter}

@@ -59,7 +59,7 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
     top: 0;
     border-top: 1px solid black;
 
-    filter: ${props => props.theme.dropShadow.shoppingCart};
+    filter: ${(props) => props.theme.dropShadow.shoppingCart};
 
     overflow: auto;
 
@@ -90,11 +90,11 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
     }
 `;
 
-export const StyledStackWrapper = styled(Stack) <{ theme?: Theme }>`
+export const StyledStackWrapper = styled(Stack)<{ theme?: Theme }>`
     width: 100%;
-    border-top: 1px solid #C4C4C4;
+    border-top: 1px solid #c4c4c4;
     padding-top: 1rem;
-`
+`;
 
 export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
     const history = useHistory();
@@ -204,7 +204,11 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         setTimeLeft(new Date(props.expiresAt).getTime() - new Date().getTime());
     }, [props.expiresAt]);
 
-    const calculateTotal = (priceArray: number[]) => priceArray.reduce((total: number, price: number) => total += price, 0);
+    const calculateTotal = (priceArray: number[]) =>
+        priceArray.reduce(
+            (total: number, price: number) => (total += price),
+            0,
+        );
 
     return (
         <>
@@ -249,57 +253,62 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         [...new Array(3)].map(() => (
                             <ShoppingCartItem
                                 loading={true}
-                                removeNft={() => { }}
+                                removeNft={() => {}}
                             />
                         ))
-                    ) : props.nftsInCart.length > 0 ? (<>{
-                        props.nftsInCart.map((nft) => (
-                            <ShoppingCartItem
-                                loading={false}
-                                nft={nft}
-                                removeNftLoading={
-                                    deleteFromCartResponse.loading &&
-                                    concernedDeletedNFT === nft.id
-                                }
-                                removeNft={handleDeleteFromBasket}
-                            />
-                        ))}
-
-                        <FlexSpacer />
-
-                        <StyledStackWrapper direction="row">
-                            <Typography
-                                size="h4"
-                                weight="SemiBold"
-                                display="initial !important"
-                                align="left"
-                            >
-                                Total
-                            </Typography>
+                    ) : props.nftsInCart.length > 0 ? (
+                        <>
+                            {props.nftsInCart.map((nft) => (
+                                <ShoppingCartItem
+                                    loading={false}
+                                    nft={nft}
+                                    removeNftLoading={
+                                        deleteFromCartResponse.loading &&
+                                        concernedDeletedNFT === nft.id
+                                    }
+                                    removeNft={handleDeleteFromBasket}
+                                />
+                            ))}
 
                             <FlexSpacer />
 
-                            <Typography
-                                size="h4"
-                                weight="SemiBold"
-                                display="initial !important"
-                                align="right"
-                            >
-                                {`${calculateTotal(props.nftsInCart.map((nft) => nft.price))} ꜩ`}
-                            </Typography>
-                        </StyledStackWrapper>
-                    </>) : (
+                            <StyledStackWrapper direction="row">
+                                <Typography
+                                    size="h4"
+                                    weight="SemiBold"
+                                    display="initial !important"
+                                    align="left"
+                                >
+                                    Total
+                                </Typography>
+
+                                <FlexSpacer />
+
+                                <Typography
+                                    size="h4"
+                                    weight="SemiBold"
+                                    display="initial !important"
+                                    align="right"
+                                >
+                                    {`${calculateTotal(
+                                        props.nftsInCart.map(
+                                            (nft) => nft.price,
+                                        ),
+                                    )} ꜩ`}
+                                </Typography>
+                            </StyledStackWrapper>
+                        </>
+                    ) : (
                         <Typography
                             size="Subtitle1"
                             weight="Medium"
                             display="initial !important"
                             align="center"
                             color="#C4C4C4"
-                            sx={{marginBottom: '1.5rem'}}
+                            sx={{ marginBottom: '1.5rem' }}
                         >
                             {'Empty Shopping Cart..'}
                         </Typography>
-
                     )}
 
                     {props.nftsInCart.length > 0 && (
@@ -312,8 +321,8 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         >
                             {timeLeft && timeLeft > 0
                                 ? `Your cart will expire in ${Math.round(
-                                    timeLeft / 60000,
-                                )}
+                                      timeLeft / 60000,
+                                  )}
                                 minutes.`
                                 : 'Cart Expired'}
                         </Typography>
