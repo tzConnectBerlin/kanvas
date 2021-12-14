@@ -94,7 +94,6 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                 height={62}
                 width={62}
                 borderRadius={2}
-                responsive
             >
                 <ImageNotSupportedOutlinedIcon />
             </Avatar>

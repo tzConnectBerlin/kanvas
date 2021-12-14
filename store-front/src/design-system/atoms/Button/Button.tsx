@@ -72,7 +72,7 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
     transition: outline 0.6s linear;
 
     &:hover {
-        outline: ${(props) => `solid 2px ${props.theme.palette.text.primary}`};
+        outline: ${(props) => `solid 1px ${props.theme.palette.primary.contrastText}`};
         box-shadow: none;
         background-color: ${(props) =>
             props.verified
@@ -83,7 +83,7 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
     }
 
     &:active {
-        outline: 2px solid #c4c4c4;
+        outline: 1px solid #c4c4c4;
         transition: outline 0.1s;
 
         box-shadow: none;
