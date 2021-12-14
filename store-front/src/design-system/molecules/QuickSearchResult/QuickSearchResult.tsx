@@ -35,11 +35,12 @@ interface BoxProps extends MBoxProps {
 
 const StyledBox = styled(Box)<BoxProps>`
     display: ${(props) => (props.open ? 'flex' : 'none')};
-    max-width: 35rem;
+    max-width: 30rem;
 
     @media (max-width: 874px) {
         left: 0;
         right: 0;
+        max-width: 100rem;
     }
 `
 

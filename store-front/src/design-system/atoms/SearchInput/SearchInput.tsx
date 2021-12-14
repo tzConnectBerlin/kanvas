@@ -64,8 +64,8 @@ const SearchIconWrapper = styled.div<{ theme?: Theme }>`
 const StyledSearchRounded = styled(SearchRounded)<{theme?: Theme, isMobile: boolean}>`
     color: ${props => props.theme.palette.text.primary};
     cursor: pointer;
-    height: ${props => props.isMobile ? '1.6rem' : '1.7rem'};
-    width: ${props => props.isMobile ? '1.6rem' : '1.7rem'};
+    height: ${props => props.isMobile ? '1.6rem' : '1.4rem'};
+    width: ${props => props.isMobile ? '1.6rem' : '1.4rem'};
 `;
 
 const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`

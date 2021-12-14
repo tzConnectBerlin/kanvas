@@ -12,6 +12,7 @@ import { useTheme } from '@mui/system';
 import { useTranslation } from 'react-i18next';
 import CustomButton from '../../atoms/Button';
 import { IParamsNFTs, ITreeCategory } from '../../../pages/StorePage';
+import CustomSelect from '../../atoms/Select';
 
 interface FilterProps {
     name: string;
@@ -56,7 +57,7 @@ const Filter: FC<FilterProps> = ({ ...props }) => {
             <FlexSpacer />
 
             {props.loading ?
-                <CircularProgress height={1}/>
+                <CircularProgress height={1} />
                 :
                 props.collapsed ? (
                     <Typography size="h5" weight="Light" color={props.active ? 'contrastText' : ''}>
@@ -100,6 +101,7 @@ interface StoreFiltersProps extends StyledStoreFiltersProps {
 
 const BackButton = styled(ArrowBackIosNew) <StyledStoreFiltersProps>`
     fill: ${(props) => props.theme.palette.text.primary};
+    height: 1.2rem;
 `;
 
 const StyledSection = styled.section<StyledStoreFiltersProps>`
@@ -119,9 +121,9 @@ const StyledSection = styled.section<StyledStoreFiltersProps>`
         height: 100vh;
         position: fixed;
         left: 0;
-        top: 5rem;
+        top: 0;
         bottom: 0;
-        z-index: 1;
+        z-index: 1000;
 
         overflow: scroll;
 
@@ -191,6 +193,7 @@ const StyledHeader = styled(Stack) <StyledStoreFiltersProps>`
     width: -webkit-fill-available;
     padding: 0.5rem 1.5rem 0;
     z-index: 1;
+    width: 90%;
 
     @media (max-width: 874px) {
         padding: 2rem 1.5rem 0.5rem;
@@ -215,6 +218,16 @@ const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`
         color: ${props => props.theme.palette.primary.contrastText} !important;
     }
 `;
+
+const StyledFilterStack = styled(Stack)`
+    overflow: auto;
+    margin-bottom: 6rem;
+
+    @media(max-width: 874px) {
+        position: relative;
+        top: 5rem;
+    }
+`
 
 export const StoreFilters: FC<StoreFiltersProps> = ({
     callNFTsEndpoint,
@@ -268,6 +281,11 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
         }
     }, [props.openFilters, isMobile, availabilityChange]);
 
+    const [selectedSort, setSelectedSort] = useState<{
+        orderBy: 'price' | 'name' | 'createdAt';
+        orderDirection: 'asc' | 'desc';
+    }>();
+
     return (
         <StyledSection openFilters={props.openFilters}>
             {isMobile &&
@@ -288,13 +306,9 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                     <Typography
                         p="0  1.5rem .5rem 0"
                         onClick={() => props.setSelectedFilters([])}
-                        size="h2"
+                        size="h3"
                         ml={2}
-                        weight={
-                            props.selectedFilters.length > 0
-                                ? 'Medium'
-                                : 'Light'
-                        }
+                        weight="SemiBold"
                         sx={{ lineHeight: 1.1 }}
                     >
                         Filters
@@ -328,9 +342,8 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                 </StyledHeader>
             }
 
-            <Stack
+            <StyledFilterStack
                 direction="column"
-                sx={{ overflow: 'auto', marginBottom: '6rem' }}
             >
                 <StyledUl openFilters={props.openFilters}>
                     <StyledLi
@@ -468,40 +481,28 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                     </StyledLi>
                 </StyledUl>
                 {isMobile && (
-                    <>
-                        <StyledFooter
-                            direction="column-reverse"
-                            minHeight="6rem"
-                        >
-                            <FlexSpacer borderBottom={false} minHeight={3} />
-                            <CustomButton
-                                fullWidth={!!isMobile}
-                                color="secondary"
-                                type="submit"
-                                onClick={() => props.setSelectedFilters([])}
-                                label={t('filters.button.reset')}
-                                style={{
-                                    outline: 'none',
-                                }}
-                            ></CustomButton>
+                    <StyledFooter
+                        direction="column-reverse"
+                        minHeight="6rem"
+                    >
+                        <FlexSpacer borderBottom={false} minHeight={3} />
 
-                            <CustomButton
-                                fullWidth={true}
-                                color="secondary"
-                                type="submit"
-                                label={t('filters.button.results')}
-                                onClick={() => props.setFilterOpen(true)}
-                                style={{
-                                    order: isMobile ? 99 : 0,
-                                    color: theme.palette.primary.main,
-                                    alignSelf: 'flex-start',
-                                    height: '2.5rem',
-                                }}
-                            ></CustomButton>
-                        </StyledFooter>
-                    </>
+                        <CustomButton
+                            fullWidth={true}
+                            color="secondary"
+                            type="submit"
+                            label={t('filters.button.results')}
+                            onClick={() => props.setFilterOpen(true)}
+                            style={{
+                                order: isMobile ? 99 : 0,
+                                color: theme.palette.primary.main,
+                                alignSelf: 'flex-start',
+                                height: '2.5rem',
+                            }}
+                        ></CustomButton>
+                    </StyledFooter>
                 )}
-            </Stack>
+            </StyledFilterStack>
         </StyledSection>
     );
 };

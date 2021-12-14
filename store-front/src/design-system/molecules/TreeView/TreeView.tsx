@@ -25,11 +25,7 @@ const StyledDiv = styled.div<StyledTreeViewProps>`
     padding-left: 1.5rem;
     width: ${(props) => (props.open ? 'auto' : '0')};
     transition: width 0.2s;
-    min-height: 1.5rem;
-
-    @media (min-width: 900px) {
-        min-height: 2.7rem;
-    }
+    min-height: 2.7rem;
 `
 
 const StyledLi = styled.li<StyledTreeViewProps>`
@@ -38,11 +34,7 @@ const StyledLi = styled.li<StyledTreeViewProps>`
     transition: width 0.2s;
     align-items: center;
     transition: width 0.2s, height 0.2s;
-    min-height: 1.5rem;
-
-    @media (min-width: 900px) {
-        min-height: 2.7rem;
-    }
+    min-height: 2.7rem;
 `
 
 const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`

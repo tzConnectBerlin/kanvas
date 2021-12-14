@@ -6,7 +6,7 @@ import FormControl from '@mui/material/FormControl';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { FC } from 'react';
-import { Theme } from '@mui/material';
+import { Theme, useMediaQuery } from '@mui/material';
 import Select, {
     SelectProps as MuiSelectProps,
     SelectChangeEvent,
@@ -25,7 +25,7 @@ interface SelectedProps extends MuiSelectProps {
     callNFTsEndpoint: (input: IParamsNFTs) => void;
 }
 
-const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
+const StyledFormControl = styled(FormControl) <{ theme?: Theme }>`
     margin: 0;
 
     .MuiOutlinedInput-root.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-formControl:after {
@@ -37,8 +37,7 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
 
     .MuiOutlinedInput-root.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-formControl {
         border-radius: 2rem !important;
-        font-size: 0.9rem;
-        font-weight: 900;
+
         transition: outline 0.2s;
 
         fieldset {
@@ -54,9 +53,16 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
 
     .MuiSelect-select {
         border-radius: 2rem !important;
-        padding-top: 0.6rem !important;
-        padding-bottom: 0.7rem !important;
+        /* padding-top: 0.6rem !important;
+        padding-bottom: 0.7rem !important; */
+        min-height: 0 !important;
+        font-family: 'Poppins SemiBold' !important;
+        font-size: 1.1rem;
         padding-right: 3rem !important;
+
+        @media (max-width: 874px) {
+            width: 4.5rem;
+        }
     }
 
     svg {
@@ -64,9 +70,9 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
     }
 `;
 
-const StyledMenuItem = styled(MenuItem)<{theme?: Theme}>`
+const StyledMenuItem = styled(MenuItem) <{ theme?: Theme }>`
     font-family: 'Poppins' !important;
-    font-size: 1.05rem !important;
+    font-size: 1.1rem !important;
     border-radius: 0.5rem;
     margin-left: 0.5rem;
     margin-right: 0.5rem;
@@ -76,7 +82,7 @@ const StyledMenuItem = styled(MenuItem)<{theme?: Theme}>`
     }
 `
 
-const StyledExpandMoreIcon = styled(ExpandMoreIcon) <{theme?: Theme }>`
+const StyledExpandMoreIcon = styled(ExpandMoreIcon) <{ theme?: Theme }>`
     width: 1.8rem;
     margin-left: 0.5rem;
     color: ${props => props.theme.palette.text.primary};
@@ -90,18 +96,20 @@ export const CustomSelect: FC<SelectedProps> = ({
     ...props
 }) => {
     const handleChange = (event: SelectChangeEvent) => {
-        const sort : SortProps = {
+        const sort: SortProps = {
             orderBy: JSON.parse(event.target.value).orderBy,
             orderDirection: JSON.parse(event.target.value).orderDirection
         }
-        callNFTsEndpoint({ handlePriceRange: true, orderBy: sort.orderBy, orderDirection: sort.orderDirection  });
+        callNFTsEndpoint({ handlePriceRange: true, orderBy: sort.orderBy, orderDirection: sort.orderDirection });
         props.setSelectedOption(JSON.parse(event.target.value));
     };
+
+    const isMobile = useMediaQuery('(max-width:900px)');
 
     return (
         <StyledFormControl
             variant="outlined"
-            sx={{ m: 1, minWidth: 80, maxHeight: 40 }}
+            sx={{ m: 1, minWidth: 80, maxHeight: 40, justifyContent: 'center' }}
             disabled={props.disabled ?? false}
         >
             <Select

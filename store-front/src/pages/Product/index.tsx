@@ -50,12 +50,12 @@ const StyledMetadataStack = styled(Stack)`
 
 const StyledCardMedia = styled(CardMedia) <{ component?: string; alt: string }>`
     object-fit: contain;
-
+    max-height: 75vh;
     /* min-height: 35rem; */
 
     @media (max-width: 847px) {
         min-height: 0;
-        max-height: 100%;
+        max-height: 100% !important;
     }
 
     @media (min-width: 1440px) {
