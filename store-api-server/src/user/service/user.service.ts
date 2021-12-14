@@ -1,7 +1,7 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Logger, Injectable, Inject } from '@nestjs/common';
 import { UserEntity, ProfileEntity, UserCart } from '../entity/user.entity';
 import { NftService } from '../../nft/service/nft.service';
-import { MintService } from '../../nft/service/mint.service'
+import { MintService } from '../../nft/service/mint.service';
 import {
   PG_CONNECTION,
   CART_EXPIRATION_MILLI_SECS,
@@ -247,20 +247,37 @@ WHERE session_id = $1
   }
 
   async cartCheckout(user: UserEntity, session: string): Promise<boolean> {
-    const cartMeta = await this.getCartMeta(session);
-    if (typeof cartMeta === 'undefined') {
-      return false;
-    }
-    const nftIds = await this.getCartNftIds(cartMeta.id);
+    const nftIds = await this.#assignCartNftsToUser(user, session);
     if (nftIds.length === 0) {
       return false;
     }
 
-    const nfts = await this.nftService.findByIds(nftIds)
-    await this.mintService.mint(nfts[0], user.userAddress)
-    return true
+    const nfts = await this.nftService.findByIds(nftIds);
+    let allSuccess = true;
+    for (const nft of nfts) {
+      try {
+        await this.mintService.transfer(nft, user.userAddress);
+      } catch (err: any) {
+        Logger.error(
+          `failed to transfer nft (id=${nft.id}) to ${user.userAddress}, err: ${err}`,
+        );
+        allSuccess = false;
+      }
+    }
+    return allSuccess;
+  }
 
-    /*
+  async #assignCartNftsToUser(
+    user: UserEntity,
+    session: string,
+  ): Promise<number[]> {
+    const cartMeta = await this.getCartMeta(session);
+    if (typeof cartMeta === 'undefined') {
+      return [];
+    }
+
+    const nftIds = await this.getCartNftIds(cartMeta.id);
+
     const tx = await this.conn.connect();
     try {
       tx.query(`BEGIN`);
@@ -288,8 +305,7 @@ WHERE session_id = $1`,
       tx.release();
     }
 
-    return true;
-*/
+    return nftIds;
   }
 
   async getCartNftIds(cartId: number): Promise<number[]> {
