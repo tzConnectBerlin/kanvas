@@ -195,6 +195,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
     };
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         const comfortTrigger = setTimeout(() => {
             getNft();
             setComfortLoader(false);

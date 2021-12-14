@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { Animated } from 'react-animated-css';
 import { Stack, Theme, useMediaQuery, useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -68,6 +68,10 @@ const HomePage: FC<HomePageProps> = () => {
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [])
 
     const [sliderNftResponse] = useAxios({
         url: process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts?',
