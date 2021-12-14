@@ -15,6 +15,7 @@ import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
 import { FilterParams } from 'src/types';
 import { NftDto } from './dto/nft.dto';
 import { NftService } from './nft.service';
+import { UpdateNftGuard } from './update-nft.guard';
 
 @Controller('nft')
 export class NftController {
@@ -38,19 +39,19 @@ export class NftController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.nftService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.nftService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard, UpdateNftGuard)
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() updateNftDto: NftDto) {
-    return this.nftService.update(+id, updateNftDto);
+  update(@Param('id') id: number, @Body() updateNftDto: NftDto) {
+    return this.nftService.update(id, updateNftDto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  remove(@Param('id') id: string) {
-    return this.nftService.remove(+id);
+  remove(@Param('id') id: number) {
+    return this.nftService.remove(id);
   }
 }
