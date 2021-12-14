@@ -76,9 +76,10 @@ export class UserService {
 
   async findAll({ range, sort, filter }: QueryParams) {
     const { query: whereClause, params } = prepareFilterClause(filter);
-    const limitClause = range
-      ? `LIMIT ${range[1] - range[0]} OFFSET ${range[0]}`
-      : undefined;
+    const limitClause =
+      range.length === 2
+        ? `LIMIT ${range[1] - range[0]} OFFSET ${range[0]}`
+        : undefined;
     const sortField = sort && sort[0] ? sort[0] : 'id';
     const sortDirection = sort && sort[1] ? sort[1] : 'ASC';
     const countResult = await this.db.query(
@@ -137,10 +138,7 @@ export class UserService {
     } catch (e) {
       await client.query('ROLLBACK');
       console.log(e);
-      throw new HttpException(
-        'Unable to update new user',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('Unable to update user', HttpStatus.BAD_REQUEST);
     } finally {
       client.release();
     }
