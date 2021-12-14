@@ -66,6 +66,7 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
 
 const StyledMenuItem = styled(MenuItem)<{theme?: Theme}>`
     font-family: 'Poppins' !important;
+    font-size: 1.05rem !important;
     border-radius: 0.5rem;
     margin-left: 0.5rem;
     margin-right: 0.5rem;
@@ -80,6 +81,7 @@ const StyledExpandMoreIcon = styled(ExpandMoreIcon) <{theme?: Theme }>`
     margin-left: 0.5rem;
     color: ${props => props.theme.palette.text.primary};
 
+    font-size: 1.8rem;
     transition: transform 0.3s;
 `
 

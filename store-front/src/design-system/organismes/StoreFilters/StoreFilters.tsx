@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import FlexSpacer from '../../atoms/FlexSpacer';
 import Typography from '../../atoms/Typography';
 import TreeView from '../../molecules/TreeView/TreeView';
+import CircularProgress from '../../atoms/CircularProgress';
 
 import { Checkbox, Stack, Theme, useMediaQuery } from '@mui/material';
 import { FC, useCallback, useEffect, useState } from 'react';
@@ -14,6 +15,7 @@ import { IParamsNFTs, ITreeCategory } from '../../../pages/StorePage';
 
 interface FilterProps {
     name: string;
+    loading: boolean;
     collapsed: boolean;
     setCollapsed: Function;
     active: boolean;
@@ -53,15 +55,18 @@ const Filter: FC<FilterProps> = ({ ...props }) => {
 
             <FlexSpacer />
 
-            {props.collapsed ? (
-                <Typography size="h5" weight="Light" color={props.active ? 'contrastText' : ''}>
-                    +
-                </Typography>
-            ) : (
-                <Typography size="h5" weight="Light" color={props.active ? 'contrastText' : ''}>
-                    -
-                </Typography>
-            )}
+            {props.loading ?
+                <CircularProgress height={1}/>
+                :
+                props.collapsed ? (
+                    <Typography size="h5" weight="Light" color={props.active ? 'contrastText' : ''}>
+                        +
+                    </Typography>
+                ) : (
+                    <Typography size="h5" weight="Light" color={props.active ? 'contrastText' : ''}>
+                        -
+                    </Typography>
+                )}
         </StyledStack>
     );
 };
@@ -335,10 +340,11 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                     >
                         <Filter
                             name="Categories"
-                            collapsed={activeRef.indexOf('Categories') !== -1}
-                            active={props.selectedFilters.length > 0}
+                            loading={props.loading}
+                            collapsed={!props.loading && activeRef.indexOf('Categories') !== -1}
+                            active={!props.loading && props.selectedFilters.length > 0}
                             setCollapsed={handleListItemClick}
-                            sx={{paddingTop: '0 !important'}}
+                            sx={{ paddingTop: '0 !important' }}
                         />
                         <TreeView
                             loading={props.loading}
@@ -357,12 +363,13 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                     >
                         <Filter
                             name="Availability"
-                            active={props.availabilityFilter.length > 0}
-                            collapsed={activeRef.indexOf('Availability') !== -1}
+                            loading={props.loading}
+                            active={!props.loading && props.availabilityFilter.length > 0}
+                            collapsed={!props.loading && activeRef.indexOf('Availability') !== -1}
                             setCollapsed={handleListItemClick}
                         />
 
-                        {activeRef.indexOf('Availability') === -1 && (
+                        {!props.loading && activeRef.indexOf('Availability') === -1 && (
                             <Stack
                                 direction="column"
                                 sx={{ marginBottom: '1rem' }}
@@ -442,12 +449,13 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                     <StyledLi openFilters={props.openFilters}>
                         <Filter
                             name="Price"
-                            active={JSON.stringify(props.priceFilterRange) !== JSON.stringify([props.minRange, props.maxRange])}
-                            collapsed={activeRef.indexOf('Price') !== -1}
+                            loading={props.loading}
+                            active={!props.loading && JSON.stringify(props.priceFilterRange) !== JSON.stringify([props.minRange, props.maxRange])}
+                            collapsed={!props.loading && activeRef.indexOf('Price') !== -1}
                             setCollapsed={handleListItemClick}
                         />
 
-                        {activeRef.indexOf('Price') === -1 && (
+                        {!props.loading && activeRef.indexOf('Price') === -1 && (
                             <PriceFilter
                                 minRange={props.minRange}
                                 maxRange={props.maxRange}

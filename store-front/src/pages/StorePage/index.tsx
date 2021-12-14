@@ -387,7 +387,7 @@ const StorePage = () => {
                             }`}
                     </Typography>
                     {
-                        (selectedAvailability.length > 0 || selectedCategories.length > 0 || JSON.stringify(priceFilterRange) !== JSON.stringify([nftsResponse.data?.lowerPriceBound, nftsResponse.data?.upperPriceBound])) &&
+                        (selectedAvailability.length > 0 || selectedCategories.length > 0 || (JSON.stringify(priceFilterRange) !== JSON.stringify([nftsResponse.data?.lowerPriceBound, nftsResponse.data?.upperPriceBound])) && !categoriesResponse.loading && !nftsResponse.loading ) &&
                             <StyledChip label="Clear all" variant="outlined" onDelete={() => {
                                     setSelectedCategories([]);
                                     setSelectedAvailability([]);

@@ -28,7 +28,7 @@ const StyledDiv = styled.div<StyledTreeViewProps>`
     min-height: 1.5rem;
 
     @media (min-width: 900px) {
-        min-height: 3rem;
+        min-height: 2.7rem;
     }
 `
 
@@ -41,7 +41,7 @@ const StyledLi = styled.li<StyledTreeViewProps>`
     min-height: 1.5rem;
 
     @media (min-width: 900px) {
-        min-height: 3rem;
+        min-height: 2.7rem;
     }
 `
 
