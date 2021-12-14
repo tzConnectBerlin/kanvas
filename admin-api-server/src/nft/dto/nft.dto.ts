@@ -58,7 +58,7 @@ export class NftDto {
   @JoiSchema(Joi.string().optional())
   nftContract?: string;
 
-  @JoiSchema(Joi.date().forbidden())
+  @JoiSchema(Joi.number().forbidden())
   createdBy: number;
 
   @JoiSchema(Joi.string().optional())
