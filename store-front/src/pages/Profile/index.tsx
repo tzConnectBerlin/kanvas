@@ -97,6 +97,8 @@ const Profile: FC<ProfileProps> = () => {
     );
 
     useEffect(() => {
+        window.scrollTo(0, 0);
+        
         if (!userAddress) {
             history.push('/404');
         }

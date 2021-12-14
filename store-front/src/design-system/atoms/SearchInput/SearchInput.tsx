@@ -30,7 +30,7 @@ const Search = styled.div<{ theme?: Theme; searchOpen: boolean }>`
     display: flex;
     align-items: center;
 
-    min-width: ${(props) => (props.searchOpen ? '35rem' : '2.5rem')};
+    min-width: ${(props) => (props.searchOpen ? '30rem' : '2.5rem')};
 
     flex-direction: row;
 
@@ -81,7 +81,12 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
     height: 100%;
 
     padding-left: 2.5rem !important;
-    border-radius: 2rem;
+
+    border-bottom: ${(props) =>
+        props.searchOpen
+            ? `1px solid ${props.theme.palette.text.primary}`
+            : ''};
+
 
     &.MuiInputBase-root {
         font-family: 'Poppins Medium' !important;

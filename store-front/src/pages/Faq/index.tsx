@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import PageWrapper from '../../design-system/commons/PageWrapper';
 import FlexSpacer from '../../design-system/atoms/FlexSpacer';
@@ -67,11 +67,11 @@ const StyledStack = styled(Stack)<{ theme?: Theme }>`
       font-family: Poppins Light;
       padding: .5rem 0 .4rem 1rem;
     }
-    
+
     .navItemClass.sub {
-      margin-left: 10px;    
+      margin-left: 10px;
     }
-    
+
     .scrollNavContainer {
         padding: 0;
 
@@ -81,7 +81,7 @@ const StyledStack = styled(Stack)<{ theme?: Theme }>`
             right: 0;
             padding: 8px;
         }
-        
+
         .MuiTypography-root.MuiTypography-h2 {
             font-size: .85rem;
             font-family: Poppins Light;
@@ -104,7 +104,7 @@ const StyledStack = styled(Stack)<{ theme?: Theme }>`
     .faq-content {
         @media (max-width:400px) {
             padding: 0 2.2rem;
-        }                  
+        }
     }
   }
 `;
@@ -153,6 +153,10 @@ const Faq: FC<FaqProps> = () => {
     const onClickToggler = () => {
         setOpen(!open);
     };
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [])
 
     const faqItems = [
         {
