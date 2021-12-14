@@ -53,10 +53,8 @@ const StyledCardMedia = styled(CardMedia) <{ component?: string; alt: string }>`
     max-height: 75vh;
     min-height: 35rem;
 
-    @media (max-width: 900px) {
-
-        max-height: 100%;
-        /* width: 70%; */
+    @media (max-width: 847px) {
+        min-height: 0;
     }
 
     @media (min-width: 1440px) {
