@@ -1,15 +1,17 @@
 import * as React from 'react';
 import styled from '@emotion/styled';
-import { Grid, Paper, useMediaQuery, useTheme } from '@mui/material';
+import { Grid, Paper, Stack, useMediaQuery, useTheme } from '@mui/material';
 import { CustomButton } from '../../atoms/Button';
 import { Typography } from '../../atoms/Typography';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Theme } from '@mui/material';
 import FlexSpacer from '../../atoms/FlexSpacer';
+import ProfilePopoverStories from '../ProfilePopover/ProfilePopover.stories';
 
 interface StyledPaperProps {
     backgroundColor?: string;
+    theme?: Theme;
 }
 
 export interface CookiesBannerProps {
@@ -32,16 +34,16 @@ export interface CookiesBannerProps {
     handleClose?: (title: string) => void | Promise<void>;
 }
 
-const StyledLink = styled(Link)<{ theme?: Theme }>`
+const StyledLink = styled(Link) <{ theme?: Theme }>`
     color: inherit;
     text-decoration: none;
     font-family: inherit;
     display: inline;
     text-decoration: underline;
 `;
-const StyledPaper = styled(Paper)<StyledPaperProps>`
-    background-color: #ccc;
-    border-radius: 0.25rem;
+const StyledPaper = styled(Paper) <StyledPaperProps>`
+    background-color: ${propos => propos.theme.palette.background.paper};
+    border-radius: 0 !important;
     color: #fff;
     position: sticky;
     left: 0;
@@ -51,22 +53,12 @@ const StyledPaper = styled(Paper)<StyledPaperProps>`
     box-shadow: 0 -4px 6px -2px rgba(9, 9, 9, 0.2);
 `;
 
-const StyledGrid = styled(Grid)<{ isMobile: boolean }>`
-    justify-content: ${({ isMobile }) => (isMobile ? 'center' : 'flex-start')};
-    align-items: center;
+const StyledStack = styled(Stack)`
 
-    > * {
-        width: fit-content;
-        &:not(:last-child) {
-            margin-right: ${({ isMobile }) => (isMobile ? 'initial' : '2rem')};
-        }
-
-        &:not(:first-child) {
-            margin-bottom: ${({ isMobile }) =>
-                isMobile ? '1.5rem' : 'initial'};
-        }
-    }
-`;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 2.5rem;
+`
 
 const defaultCookies = {
     necessary: true,
@@ -75,12 +67,18 @@ const defaultCookies = {
     marketing: false,
 };
 
-const fullCookies = {
-    necessary: true,
-    preferences: true,
-    statistics: true,
-    marketing: true,
-};
+const StyledBackgroundDiv = styled.div<{theme?: Theme}>`
+    z-index: 30;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    opacity: 0.75;
+    background-color: ${props => props.theme.palette.background.default };
+`
 
 export const CookiesBanner: React.FC<CookiesBannerProps> = ({
     title = 'Privacy Policy',
@@ -91,31 +89,31 @@ export const CookiesBanner: React.FC<CookiesBannerProps> = ({
     const { t } = useTranslation(['translation']);
 
     const { primary } = theme.palette;
-    const isMobile = useMediaQuery('(max-width:600px)');
+    const isMobile = useMediaQuery('(max-width:874px)');
     const isDesktop = useMediaQuery('(min-width:1150px)');
     const [cookie, setCookie] = React.useState(standard);
     const addCookie = (cookies: { [name: string]: boolean }) => {
         document.cookie = `user=${JSON.stringify(cookies)}; max-age=8640000;}`;
     };
 
+    React.useEffect(()  => {
+        document.body.style.overflow = 'hidden';
+    }, [])
+
     const handleSubmit = () => {
+        document.body.style.overflow = '';
         addCookie(cookie);
         handleClose && handleClose(title);
     };
 
     return (
-        <StyledPaper elevation={0} backgroundColor={primary.main}>
-            <Grid container direction="row" width="100%">
-                <Grid
-                    item
-                    xs={12}
-                    container
-                    direction={isMobile ? 'column' : 'row'}
-                    padding={isMobile ? '1rem' : '3rem 3rem 2rem'}
-                    flexGrow={1}
-                >
+        <>
+            <StyledBackgroundDiv></StyledBackgroundDiv>
+            <StyledPaper elevation={0} backgroundColor={primary.main}>
+                <StyledStack direction={{ xs: "column", md: "row" }} spacing={2}>
                     <Typography
-                        size={isMobile ? 'body' : 'h4'}
+                        width={isMobile ? '90%' : '45%'}
+                        size='body2'
                         weight="Light"
                         display="inline"
                         style={{
@@ -130,21 +128,13 @@ export const CookiesBanner: React.FC<CookiesBannerProps> = ({
                         </StyledLink>
                         {' .'}
                     </Typography>
-
                     <CustomButton
-                        fullWidth={!!isMobile}
-                        variant="text"
-                        color="secondary"
-                        type="submit"
+                        size='small'
                         onClick={handleSubmit}
                         label={t('cookies.button')}
-                        style={{
-                            order: isMobile ? 99 : 0,
-                            color: theme.palette.primary.main,
-                        }}
-                    ></CustomButton>
-                </Grid>
-            </Grid>
-        </StyledPaper>
+                    />
+                </StyledStack>
+            </StyledPaper>
+        </>
     );
 };

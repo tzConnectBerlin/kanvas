@@ -47,7 +47,7 @@ interface StyledButtonProps {
 }
 
 const StyledButton = styled(MButton)<StyledButtonProps>`
-    border-radius: 0;
+    border-radius: 2rem;
 
     height: ${({ size }) =>
         size === 'large' ? '44px' : size === 'medium' ? '40px' : '38px'};
@@ -66,13 +66,13 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
             ? 'transparent'
             : props.theme.button.background};
 
-    outline: ${(props) => `solid 1px ${props.theme.palette.text.primary}`};
+    border: solid 1px #c4c4c4;
     margin: 1px;
     text-transform: none;
     transition: outline 0.6s linear;
 
     &:hover {
-        outline: ${(props) => `solid 2px ${props.theme.palette.text.primary}`};
+        border: ${(props) => `solid 1px ${props.theme.palette.primary.contrastText}`};
         box-shadow: none;
         background-color: ${(props) =>
             props.verified
@@ -83,7 +83,7 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
     }
 
     &:active {
-        outline: 2px solid #c4c4c4;
+        border: 1px solid #c4c4c4;
         transition: outline 0.1s;
 
         box-shadow: none;
@@ -116,7 +116,7 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
             size === 'large' ? '0.975rem' : size === 'medium' ? '0.8' : '0.8'};
     }
 
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         height: 38px;
         font-size: 0.8rem;
     }

@@ -15,13 +15,6 @@ export const initWallet = (): BeaconWallet => {
         name: 'D /a:rt/',
         iconUrl: 'https://tezostaquito.io/img/favicon.png',
         preferredNetwork: NetworkType[NETWORK],
-        eventHandlers: {
-            PERMISSION_REQUEST_SUCCESS: {
-                handler: async (data: any) => {
-                    console.log('permission data:', data);
-                },
-            },
-        },
     };
 
     return new BeaconWallet(options);

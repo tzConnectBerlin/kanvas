@@ -26,13 +26,15 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
     margin-top: -0.2rem;
     color: ${(props) => props.theme.palette.text.primary};
 
-    background-color: ${(props) => props.theme.footer.background};
+    background-color: ${(props) => props.theme.palette.background.default};
 
     position: sticky;
     top: 0;
     z-index: 10;
     transition: padding-left 0.2s, padding-right 0.2s;
     padding: 3rem 3rem 1rem;
+
+    filter: ${(props) => props.theme.dropShadow.default};
 
     @media (max-width: 900px) {
         padding-left: 1.5rem;
@@ -51,11 +53,11 @@ const LinkStyled = styled(Link)`
 const LogoStyled = styled.img<{ theme?: Theme }>`
     filter: ${(props) => props.theme.logo.filter ?? 'invert(0%)'};
     display: block;
-    height: 1.8rem;
+    height: 1rem;
     transition: height 0.2s;
 
-    @media (max-width: 650px) {
-        height: 1.8rem;
+    @media (max-width: 600px) {
+        height: 0.9rem;
         transition: height 0.2s;
     }
 `;
