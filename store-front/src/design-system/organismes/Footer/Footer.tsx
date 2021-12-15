@@ -212,7 +212,7 @@ export const Footer: FC<FooterProps> = () => {
                     >
                         <Box
                             component="a"
-                            href="https://facebbok.com/tzconnect"
+                            href="https://facebook.com/tzconnect"
                             sx={iconStyle}
                         >
                             <FacebookStyled
@@ -229,27 +229,7 @@ export const Footer: FC<FooterProps> = () => {
                                 src={'/img/twitter.jpeg'}
                                 alt="Twitter"
                             />
-                        </Box>
-                        <Box
-                            component="a"
-                            href="https://facebbok.com/tzconnect"
-                            sx={iconStyle}
-                        >
-                            <FacebookStyled
-                                src={'/img/facebook.png'}
-                                alt="Facebook"
-                            />
-                        </Box>
-                        <Box
-                            component="a"
-                            href="https://twitter.com/tzconnect"
-                            sx={iconStyle}
-                        >
-                            <TwitterStyled
-                                src={'/img/twitter.jpeg'}
-                                alt="Twitter"
-                            />
-                        </Box>
+                        </Box>                         
                     </Box>
 
                     <Box sx={{ marginTop: '2.5rem' }}>
