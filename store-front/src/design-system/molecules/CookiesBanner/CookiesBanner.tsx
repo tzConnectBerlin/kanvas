@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Theme } from '@mui/material';
 import FlexSpacer from '../../atoms/FlexSpacer';
+import ProfilePopoverStories from '../ProfilePopover/ProfilePopover.stories';
 
 interface StyledPaperProps {
     backgroundColor?: string;
@@ -66,6 +67,19 @@ const defaultCookies = {
     marketing: false,
 };
 
+const StyledBackgroundDiv = styled.div<{theme?: Theme}>`
+    z-index: 30;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    opacity: 0.75;
+    background-color: ${props => props.theme.palette.background.default };
+`
+
 export const CookiesBanner: React.FC<CookiesBannerProps> = ({
     title = 'Privacy Policy',
     standard = defaultCookies,
@@ -82,37 +96,45 @@ export const CookiesBanner: React.FC<CookiesBannerProps> = ({
         document.cookie = `user=${JSON.stringify(cookies)}; max-age=8640000;}`;
     };
 
+    React.useEffect(()  => {
+        document.body.style.overflow = 'hidden';
+    }, [])
+
     const handleSubmit = () => {
+        document.body.style.overflow = '';
         addCookie(cookie);
         handleClose && handleClose(title);
     };
 
     return (
-        <StyledPaper elevation={0} backgroundColor={primary.main}>
-            <StyledStack direction={{ xs:"column", md:"row" }} spacing={2}>
-                <Typography
-                    width={isMobile ? '90%' : '45%' }
-                    size='body2'
-                    weight="Light"
-                    display="inline"
-                    style={{
-                        alignSelf: 'center',
-                        marginBottom: !isDesktop ? '2rem' : 0,
-                        marginRight: isDesktop ? 'auto' : '2rem',
-                    }}
-                >
-                    {t('cookies.text')}
-                    <StyledLink to="/privacy">
-                        {t('cookies.link')}
-                    </StyledLink>
-                    {' .'}
-                </Typography>
-                <CustomButton
-                    size='small'
-                    onClick={handleSubmit}
-                    label={t('cookies.button')}
-                />
-            </StyledStack>
-        </StyledPaper>
+        <>
+            <StyledBackgroundDiv></StyledBackgroundDiv>
+            <StyledPaper elevation={0} backgroundColor={primary.main}>
+                <StyledStack direction={{ xs: "column", md: "row" }} spacing={2}>
+                    <Typography
+                        width={isMobile ? '90%' : '45%'}
+                        size='body2'
+                        weight="Light"
+                        display="inline"
+                        style={{
+                            alignSelf: 'center',
+                            marginBottom: !isDesktop ? '2rem' : 0,
+                            marginRight: isDesktop ? 'auto' : '2rem',
+                        }}
+                    >
+                        {t('cookies.text')}
+                        <StyledLink to="/privacy">
+                            {t('cookies.link')}
+                        </StyledLink>
+                        {' .'}
+                    </Typography>
+                    <CustomButton
+                        size='small'
+                        onClick={handleSubmit}
+                        label={t('cookies.button')}
+                    />
+                </StyledStack>
+            </StyledPaper>
+        </>
     );
 };

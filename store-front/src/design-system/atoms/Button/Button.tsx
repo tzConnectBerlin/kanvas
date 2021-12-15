@@ -66,13 +66,13 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
             ? 'transparent'
             : props.theme.button.background};
 
-    outline: solid 1px #c4c4c4;
+    border: solid 1px #c4c4c4;
     margin: 1px;
     text-transform: none;
     transition: outline 0.6s linear;
 
     &:hover {
-        outline: ${(props) => `solid 1px ${props.theme.palette.primary.contrastText}`};
+        border: ${(props) => `solid 1px ${props.theme.palette.primary.contrastText}`};
         box-shadow: none;
         background-color: ${(props) =>
             props.verified
@@ -83,7 +83,7 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
     }
 
     &:active {
-        outline: 1px solid #c4c4c4;
+        border: 1px solid #c4c4c4;
         transition: outline 0.1s;
 
         box-shadow: none;

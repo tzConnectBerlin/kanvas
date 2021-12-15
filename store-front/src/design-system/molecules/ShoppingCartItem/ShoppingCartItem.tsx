@@ -34,10 +34,6 @@ const StyledDiv = styled.div<{ theme?: Theme }>`
     }
 `;
 
-const StyledClearIcon = styled(ClearIcon)<{ theme?: Theme }>`
-    color: ${(props) => props.theme.palette.text.primary};
-`;
-
 export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
     nft,
     ...props

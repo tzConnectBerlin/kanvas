@@ -37,7 +37,7 @@ const StyledStack = styled(Stack)`
 
 const StyledMetadataStack = styled(Stack)`
     min-width: 30%;
-    max-width: 50%;
+    max-width: 30%;
 
     @media (min-width: 900px) {
         /* width: 30%; */
@@ -49,7 +49,7 @@ const StyledMetadataStack = styled(Stack)`
     }
 `;
 
-const StyledCardMedia = styled(CardMedia)<{ component?: string; alt: string }>`
+const StyledCardMedia = styled(CardMedia) <{ component?: string; alt: string }>`
     object-fit: contain;
     max-height: 75vh;
     /* min-height: 35rem; */
@@ -90,7 +90,7 @@ const StyledWrapperIcon = styled.div<{ theme?: Theme }>`
     }
 `;
 
-const StyledFullscreenIcon = styled(FullscreenIcon)<{ theme?: Theme }>`
+const StyledFullscreenIcon = styled(FullscreenIcon) <{ theme?: Theme }>`
     margin: 0 !important;
     height: 1.8rem;
     width: 1.8rem;
@@ -106,7 +106,7 @@ const WrapperFullScreen = styled.div<{ open: boolean }>`
     left: 0;
     width: 100vw;
     height: 100vh;
-    position: absolute;
+    position: fixed;
     z-index: 20;
 
     transition: visibility 0.3s;
@@ -206,7 +206,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
         if (nftResponse.data) {
             setLaunchTime(
                 new Date(nftResponse.data.launchAt * 1000).getTime() -
-                    new Date().getTime(),
+                new Date().getTime(),
             );
         }
         if (nftResponse.error) {
@@ -218,7 +218,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
             setTimeout(() => {
                 setLaunchTime(
                     new Date(nftResponse.data.launchAt! * 1000).getTime() -
-                        new Date().getTime(),
+                    new Date().getTime(),
                 );
             }, 1000);
         }
@@ -230,8 +230,9 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                 <StyledImage
                     src={nftResponse.data?.dataUri}
                     alt="random"
-                    onClick={() =>
-                        fullScreenView ? setFullScreenView(false) : {}
+                    onClick={fullScreenView
+                        ? () => { setFullScreenView(false); document.body.style.overflow = ''; }
+                        : () => { }
                     }
                     open={fullScreenView}
                 />
@@ -287,10 +288,10 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 alt="random"
                             />
                             <StyledWrapperIcon
-                                onClick={() =>
+                                onClick={
                                     !fullScreenView
-                                        ? setFullScreenView(true)
-                                        : {}
+                                        ? () => { setFullScreenView(true); document.body.style.overflow = 'hidden'; }
+                                        : () => { }
                                 }
                             >
                                 <StyledFullscreenIcon />
@@ -359,8 +360,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     color="#757575"
                                 >
                                     {nftResponse.loading ||
-                                    (comfortLoader &&
-                                        (!launchTime || launchTime < 0))
+                                        (comfortLoader &&
+                                            (!launchTime || launchTime < 0))
                                         ? undefined
                                         : t('product.description.part_3')}
                                 </Typography>
@@ -405,7 +406,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             sx={{ pt: 2, mb: 1 }}
                         >
                             {nftResponse.loading ||
-                            comfortLoader ? undefined : (
+                                comfortLoader ? undefined : (
                                 <>
                                     {nftResponse.data?.categories.map(
                                         (category: ICategory) => (
@@ -452,8 +453,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     {nftResponse.loading || comfortLoader
                                         ? undefined
                                         : nftResponse.data?.editionsAvailable +
-                                          '/' +
-                                          nftResponse.data?.editionsSize}
+                                        '/' +
+                                        nftResponse.data?.editionsSize}
                                 </Typography>
                             </Stack>
                             <Stack direction="column">
@@ -474,7 +475,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     sx={{ pt: 2, mb: 1 }}
                                 >
                                     {nftResponse.loading ||
-                                    comfortLoader ? undefined : (
+                                        comfortLoader ? undefined : (
                                         <>{nftResponse.data?.price} ꜩ</>
                                     )}
                                 </Typography>
@@ -489,12 +490,12 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 launchTime! > 0
                                     ? 'Not dropped yet'
                                     : props.nftsInCart.filter(
-                                          (nft) =>
-                                              Number(nft.id) ===
-                                              nftResponse.data?.id,
-                                      ).length > 0
-                                    ? 'Already in cart'
-                                    : t('product.button_1')
+                                        (nft) =>
+                                            Number(nft.id) ===
+                                            nftResponse.data?.id,
+                                    ).length > 0
+                                        ? 'Already in cart'
+                                        : t('product.button_1')
                             }
                             disabled={
                                 nftResponse.loading ||
@@ -504,7 +505,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                         Number(nft.id) === nftResponse.data?.id,
                                 ).length > 0 ||
                                 Number(nftResponse.data?.editionsAvailable) ===
-                                    0 ||
+                                0 ||
                                 launchTime! > 0
                             }
                             sx={{ marginTop: '3rem !important' }}
