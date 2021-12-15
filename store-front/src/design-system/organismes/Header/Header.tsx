@@ -144,7 +144,7 @@ export const Header: FC<HeaderProps> = ({
     return (
         <StyledBox
             sx={{
-                height: '5rem',
+                height: '4.5rem',
                 display: 'flex',
                 alignItems: 'center',
                 paddingRight: '2rem',

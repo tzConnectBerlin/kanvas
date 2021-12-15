@@ -237,7 +237,7 @@ const StyledFilterStack = styled(Stack)`
 
     @media (max-width: 874px) {
         position: relative;
-        top: 5rem;
+        top: 4.5rem;
     }
 `;
 
