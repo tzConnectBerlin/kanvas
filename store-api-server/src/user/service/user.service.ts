@@ -1,6 +1,7 @@
 import { Logger, Injectable, Inject } from '@nestjs/common';
 import { UserEntity, ProfileEntity, UserCart } from '../entity/user.entity';
 import { NftService } from '../../nft/service/nft.service';
+import { NftEntity } from '../../nft/entity/nft.entity';
 import { MintService } from '../../nft/service/mint.service';
 import {
   PG_CONNECTION,
@@ -247,27 +248,36 @@ WHERE session_id = $1
   }
 
   async cartCheckout(user: UserEntity, session: string): Promise<boolean> {
-    const nftIds = await this.#assignCartNftsToUser(user, session);
-    if (nftIds.length === 0) {
-      return false;
-    }
+    const dbTx = await this.conn.connect();
+    try {
+      await dbTx.query(`BEGIN`);
 
-    const nfts = await this.nftService.findByIds(nftIds);
-    let allSuccess = true;
-    for (const nft of nfts) {
-      try {
-        await this.mintService.transfer(nft, user.userAddress);
-      } catch (err: any) {
-        Logger.error(
-          `failed to transfer nft (id=${nft.id}) to ${user.userAddress}, err: ${err}`,
-        );
-        allSuccess = false;
+      const nftIds = await this.#assignCartNftsToUser(dbTx, user, session);
+      if (nftIds.length === 0) {
+        return false;
       }
+      const nfts = await this.nftService.findByIds(nftIds);
+
+      console.log(nfts);
+
+      await Promise.all(
+        nfts.map((nft: NftEntity) => {
+          return this.mintService.transfer(dbTx, nft, user.userAddress);
+        }),
+      );
+      await dbTx.query(`COMMIT`);
+    } catch (err: any) {
+      await dbTx.query(`ROLLBACK`);
+      Logger.error(`failed to checkout cart=${session}, err: ${err}`);
+      throw err;
+    } finally {
+      dbTx.release();
     }
-    return allSuccess;
+    return true;
   }
 
   async #assignCartNftsToUser(
+    dbTx: any,
     user: UserEntity,
     session: string,
   ): Promise<number[]> {
@@ -278,32 +288,23 @@ WHERE session_id = $1
 
     const nftIds = await this.getCartNftIds(cartMeta.id);
 
-    const tx = await this.conn.connect();
-    try {
-      tx.query(`BEGIN`);
-      await tx.query(
-        `
+    console.log(nftIds);
+    await dbTx.query(
+      `
 INSERT INTO mtm_kanvas_user_nft (
   kanvas_user_id, nft_id
 )
 SELECT $1, nft.id
 FROM nft
 WHERE nft.id = ANY($2)`,
-        [user.id, nftIds],
-      );
-      await tx.query(
-        `
+      [user.id, nftIds],
+    );
+    await dbTx.query(
+      `
 DELETE FROM cart_session
 WHERE session_id = $1`,
-        [session],
-      );
-      await tx.query(`COMMIT`);
-    } catch (err: any) {
-      await tx.query(`ROLLBACK`);
-      throw err;
-    } finally {
-      tx.release();
-    }
+      [session],
+    );
 
     return nftIds;
   }
@@ -321,10 +322,10 @@ WHERE cart_session_id = $1`,
 
   async cartAdd(session: string, nftId: number): Promise<Result<null, string>> {
     const cartMeta = await this.touchCart(session);
-    const tx = await this.conn.connect();
+    const dbTx = await this.conn.connect();
     try {
-      tx.query('BEGIN');
-      await tx.query(
+      await dbTx.query('BEGIN');
+      await dbTx.query(
         `
 INSERT INTO mtm_cart_session_nft(
   cart_session_id, nft_id
@@ -333,7 +334,7 @@ VALUES ($1, $2)`,
         [cartMeta.id, nftId],
       );
 
-      const qryRes = await tx.query(
+      const qryRes = await dbTx.query(
         `
 SELECT
   (SELECT reserved + owned FROM nft_editions_locked($1)) AS editions_locked,
@@ -344,19 +345,19 @@ WHERE nft.id = $1`,
         [nftId],
       );
       if (qryRes.rows[0]['editions_locked'] > qryRes.rows[0]['editions_size']) {
-        tx.query('ROLLBACK');
+        dbTx.query('ROLLBACK');
         return Err('All editions of this nft have been reserved/bought');
       }
       if (qryRes.rows[0]['launch_at'] > new Date()) {
         return Err('This nft is not yet for sale');
       }
 
-      await tx.query('COMMIT');
+      await dbTx.query('COMMIT');
     } catch (err) {
-      await tx.query('ROLLBACK');
+      await dbTx.query('ROLLBACK');
       throw err;
     } finally {
-      tx.release();
+      dbTx.release();
     }
 
     await this.resetCartExpiration(cartMeta.id);

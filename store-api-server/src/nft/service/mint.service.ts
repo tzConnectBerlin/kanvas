@@ -20,13 +20,13 @@ interface Command {
 export class MintService {
   ipfsService: IpfsService;
 
-  constructor(@Inject(PG_CONNECTION) private conn: any) {
+  constructor() {
     this.ipfsService = new IpfsService();
   }
 
-  async transfer(nft: NftEntity, buyer: string) {
-    if (!(await this.#isNftSubmitted(nft))) {
-      await this.#mint(nft);
+  async transfer(dbTx: any, nft: NftEntity, buyer: string) {
+    if (!(await this.#isNftSubmitted(dbTx, nft))) {
+      await this.#mint(dbTx, nft);
     }
     const cmd = {
       handler: 'nft',
@@ -38,10 +38,10 @@ export class MintService {
         amount: 1,
       },
     };
-    await this.#insertCommand(cmd);
+    await this.#insertCommand(dbTx, cmd);
   }
 
-  async #mint(nft: NftEntity) {
+  async #mint(dbTx: any, nft: NftEntity) {
     const metadataIpfs = await this.ipfsService.uploadNft(nft);
     const cmd = {
       handler: 'nft',
@@ -54,11 +54,11 @@ export class MintService {
       },
     };
 
-    await this.#insertCommand(cmd);
+    await this.#insertCommand(dbTx, cmd);
   }
 
-  async #insertCommand(cmd: Command) {
-    await this.conn.query(
+  async #insertCommand(dbTx: any, cmd: Command) {
+    await dbTx.query(
       `
 INSERT INTO peppermint.operations (
   originator, command
@@ -71,18 +71,24 @@ VALUES (
     );
   }
 
-  async #isNftSubmitted(nft: NftEntity): Promise<boolean> {
-    const qryRes = await this.conn.query(
+  async #isNftSubmitted(dbTx: any, nft: NftEntity): Promise<boolean> {
+    const qryRes = await dbTx.query(
       `
 SELECT 1
+FROM onchain_kanvas."storage.token_metadata_live"
+WHERE idx_assets_nat::INTEGER = $1
+
+UNION ALL
+
+SELECT 1
 FROM peppermint.operations
-WHERE command->'handler'::TEXT = 'nft'
-  AND command->'name'::TEXT = 'create_and_mint'
-  AND command->'args'->'token_id'::INTEGER = $1
+WHERE (command->'handler')::TEXT = 'nft'
+  AND (command->'name')::TEXT = 'create_and_mint'
+  AND (command->'args'->'token_id')::INTEGER = $1
   AND state != 'rejected'
 `,
       [nft.id],
     );
-    return qryRes.rowCount === 1;
+    return qryRes.rowCount > 0;
   }
 }
