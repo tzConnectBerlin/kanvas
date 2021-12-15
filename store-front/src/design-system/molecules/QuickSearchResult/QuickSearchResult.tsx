@@ -60,7 +60,7 @@ const StyledPaper = styled(Paper)<{ theme?: Theme }>`
         width: 100% !important;
 
         outline: none;
-        top: 5rem !important;
+        top: 4.5rem !important;
 
         :hover {
             outline: none;

@@ -39,8 +39,8 @@ const StyledMetadataStack = styled(Stack)`
     min-width: 30%;
     max-width: 30%;
 
-    @media (min-width: 900px) {
-        /* width: 30%; */
+    @media (max-width: 874px) {
+        max-width: 100%;
     }
 
     @media (min-width: 1440px) {
@@ -54,7 +54,7 @@ const StyledCardMedia = styled(CardMedia) <{ component?: string; alt: string }>`
     max-height: 75vh;
     /* min-height: 35rem; */
 
-    @media (max-width: 847px) {
+    @media (max-width: 874px) {
         min-height: 0;
         max-height: 100% !important;
     }

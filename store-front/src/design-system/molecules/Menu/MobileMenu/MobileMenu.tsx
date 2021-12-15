@@ -133,7 +133,7 @@ const MobileStyledMenuContent = styled(Stack)<MenuIconProps>`
         left: 0;
         bottom: 0;
         z-index: 999999;
-        top: 5rem;
+        top: 4.5rem;
 
         overflow: auto;
 

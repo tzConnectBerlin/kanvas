@@ -44,7 +44,7 @@ const ContainerPopupStyled = styled.div<{ open: boolean }>`
 
     @media (max-width: 600px) {
         width: ${(props) => (props.open ? 100 : 0)}%;
-        height: 5rem;
+        height: 4.5rem;
     }
 `;
 
@@ -63,7 +63,7 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
 
     overflow: auto;
 
-    margin-top: 5rem;
+    margin-top: 4.5rem;
 
     padding-bottom: 2.5rem;
 
