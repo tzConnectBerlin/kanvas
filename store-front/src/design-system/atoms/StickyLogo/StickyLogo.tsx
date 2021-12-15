@@ -10,11 +10,12 @@ interface StickyLogoProps {
 
 const ImgStyled = styled.img<{ theme?: Theme }>`
     filter: ${(props) => props.theme.logo.filter ?? 'invert(0%)'};
-    height: 2.8rem;
+    height: 1rem;
+    z-index: 90;
     transition: height 0.2s;
 
-    @media (max-width: 650px) {
-        height: 2.8rem;
+    @media (max-width: 600px) {
+        height: 0.6rem;
         transition: height 0.2s;
     }
 `;
@@ -26,7 +27,8 @@ const LinkStyled = styled(Link)<StickyLogoProps>`
 
     transition: 0.2s;
     position: absolute;
-
+    display: flex;
+    justify-content: center;
     align-items: center;
 `;
 

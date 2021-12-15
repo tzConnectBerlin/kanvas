@@ -25,12 +25,8 @@ const StyledDiv = styled.div<StyledTreeViewProps>`
     padding-left: 1.5rem;
     width: ${(props) => (props.open ? 'auto' : '0')};
     transition: width 0.2s;
-    min-height: 1.5rem;
-
-    @media (min-width: 900px) {
-        min-height: 3rem;
-    }
-`
+    min-height: 2.7rem;
+`;
 
 const StyledLi = styled.li<StyledTreeViewProps>`
     cursor: pointer;
@@ -38,27 +34,38 @@ const StyledLi = styled.li<StyledTreeViewProps>`
     transition: width 0.2s;
     align-items: center;
     transition: width 0.2s, height 0.2s;
-    min-height: 1.5rem;
+    min-height: 2.7rem;
+`;
 
-    @media (min-width: 900px) {
-        min-height: 3rem;
-    }
-`
-
-const StyledCheckBox = styled(Checkbox) <{ theme?: Theme }>`
+const StyledCheckBox = styled(Checkbox)<{ theme?: Theme }>`
     @media (max-width: 900px) {
-        padding: .5rem;
+        padding: 0.5rem;
 
         &:lastchild {
-            padding: .5rem;
+            padding: 0.5rem;
         }
     }
 
     &.Mui-checked {
-        color: ${(props) => props.theme.palette.text.primary} !important;
+        color: ${(props) =>
+            props.theme.palette.primary.contrastText} !important;
     }
-`
 
+    &.MuiCheckbox-indeterminate {
+        color: ${(props) =>
+            props.theme.palette.primary.contrastText} !important;
+    }
+`;
+
+const StyledStack = styled(Stack)<{ theme?: Theme; selected: boolean }>`
+    align-items: center;
+    width: 100%;
+    /* border-left: ${(props) =>
+        props.selected
+            ? `2px solid ${props.theme.palette.primary.contrastText}`
+            : 'none'}; */
+    height: 2rem;
+`;
 
 interface recurseRes {
     flipNodes: number[];
@@ -66,8 +73,8 @@ interface recurseRes {
 }
 
 interface TreeState {
-    selectedNodes: any[]
-    highlightedParents: any[]
+    selectedNodes: any[];
+    highlightedParents: any[];
 }
 
 const TreeView: FC<TreeViewProps> = ({
@@ -79,21 +86,31 @@ const TreeView: FC<TreeViewProps> = ({
 }) => {
     const [newCategorySelected, setNewCategorySelected] =
         useState<boolean>(false);
-    const [highlightedParents, setHighlightedParents] = useState<number[]>(
-        [],
-    );
+    const [highlightedParents, setHighlightedParents] = useState<number[]>([]);
 
-    const recurseChildrens = (node: any, isActionSelect: boolean, previouslySelectedNodes: any[]): recurseRes => {
+    const recurseChildrens = (
+        node: any,
+        isActionSelect: boolean,
+        previouslySelectedNodes: any[],
+    ): recurseRes => {
         const wasSelected = previouslySelectedNodes.indexOf(node.id) !== -1;
 
         let res: recurseRes = {
-            flipNodes: (isActionSelect && !wasSelected) || (!isActionSelect && wasSelected) ? [node.id] : [],
-            deltaHighlightParents: []
-        }
+            flipNodes:
+                (isActionSelect && !wasSelected) ||
+                (!isActionSelect && wasSelected)
+                    ? [node.id]
+                    : [],
+            deltaHighlightParents: [],
+        };
 
         if (node.children?.length > 0) {
             for (const child of node.children) {
-                const childRes = recurseChildrens(child, isActionSelect, previouslySelectedNodes);
+                const childRes = recurseChildrens(
+                    child,
+                    isActionSelect,
+                    previouslySelectedNodes,
+                );
                 res.flipNodes = [...res.flipNodes, ...childRes.flipNodes];
 
                 res.deltaHighlightParents = [
@@ -101,28 +118,46 @@ const TreeView: FC<TreeViewProps> = ({
                     ...childRes.deltaHighlightParents,
                 ];
             }
-            res.deltaHighlightParents = [...res.deltaHighlightParents, ...Array(res.flipNodes.length).fill(node.id)];
+            res.deltaHighlightParents = [
+                ...res.deltaHighlightParents,
+                ...Array(res.flipNodes.length).fill(node.id),
+            ];
         }
         return res;
     };
 
-    const handleFlip = (node: ITreeCategory, treeState?: TreeState): TreeState => {
+    const handleFlip = (
+        node: ITreeCategory,
+        treeState?: TreeState,
+    ): TreeState => {
         let newTreeState;
-        const isActionSelect = selectedFilters.indexOf(node.id as number) === -1;
+        const isActionSelect =
+            selectedFilters.indexOf(node.id as number) === -1;
 
         if (!treeState) {
-            newTreeState = select(node, isActionSelect, { selectedNodes: selectedFilters, highlightedParents: highlightedParents })
-            setSelectedFilters(newTreeState.selectedNodes)
-            setHighlightedParents(newTreeState.highlightedParents)
+            newTreeState = select(node, isActionSelect, {
+                selectedNodes: selectedFilters,
+                highlightedParents: highlightedParents,
+            });
+            setSelectedFilters(newTreeState.selectedNodes);
+            setHighlightedParents(newTreeState.highlightedParents);
         } else {
-            newTreeState = select(node, isActionSelect, treeState)
+            newTreeState = select(node, isActionSelect, treeState);
         }
 
-        return newTreeState
-    }
+        return newTreeState;
+    };
 
-    const select = (node: ITreeCategory, isActionSelect: boolean, treeState: TreeState): TreeState => {
-        const recRes = recurseChildrens(node, isActionSelect, treeState.selectedNodes);
+    const select = (
+        node: ITreeCategory,
+        isActionSelect: boolean,
+        treeState: TreeState,
+    ): TreeState => {
+        const recRes = recurseChildrens(
+            node,
+            isActionSelect,
+            treeState.selectedNodes,
+        );
 
         let incrAboveHighlightCount = recRes.flipNodes.length;
 
@@ -130,7 +165,7 @@ const TreeView: FC<TreeViewProps> = ({
             if (!isActionSelect) {
                 recRes.flipNodes.push(parent);
                 if (treeState.selectedNodes.indexOf(parent) > -1) {
-                    incrAboveHighlightCount += 1
+                    incrAboveHighlightCount += 1;
                 }
             }
             recRes.deltaHighlightParents = [
@@ -145,20 +180,23 @@ const TreeView: FC<TreeViewProps> = ({
                     (id) => recRes.flipNodes.indexOf(id) === -1,
                 ),
                 ...recRes.flipNodes,
-            ]
+            ];
 
             treeState.highlightedParents = [
                 ...treeState.highlightedParents,
-                ...recRes.deltaHighlightParents
-            ]
+                ...recRes.deltaHighlightParents,
+            ];
         } else {
             treeState.selectedNodes = treeState.selectedNodes.filter(
                 (filterId) => recRes.flipNodes.indexOf(filterId) === -1,
-            )
+            );
 
-            treeState.highlightedParents = listDifference(treeState.highlightedParents, recRes.deltaHighlightParents);
+            treeState.highlightedParents = listDifference(
+                treeState.highlightedParents,
+                recRes.deltaHighlightParents,
+            );
         }
-        return treeState
+        return treeState;
     };
 
     const listDifference = (dadList: any[], babyList: any[]): any[] => {
@@ -183,28 +221,33 @@ const TreeView: FC<TreeViewProps> = ({
         return parents;
     };
 
-    const getNodeById = (node: ITreeCategory, nodeId: number, concernedNode: ITreeCategory | undefined = undefined, parent?: ITreeCategory) => {
+    const getNodeById = (
+        node: ITreeCategory,
+        nodeId: number,
+        concernedNode: ITreeCategory | undefined = undefined,
+        parent?: ITreeCategory,
+    ) => {
         if (parent) {
-            node.parent = parent
+            node.parent = parent;
         }
         if (node.id === nodeId) {
-            concernedNode = node
+            concernedNode = node;
         }
 
         if (node.children) {
             node.children.map((child: ITreeCategory) => {
                 if (child.id === nodeId) {
-                    child.parent = node
-                    concernedNode = child
-                    return child
+                    child.parent = node;
+                    concernedNode = child;
+                    return child;
                 }
-                concernedNode = getNodeById(child, nodeId, concernedNode, node)
-            })
+                concernedNode = getNodeById(child, nodeId, concernedNode, node);
+            });
         }
         if (concernedNode) {
-            return concernedNode
+            return concernedNode;
         }
-    }
+    };
 
     // Open or close childrens
     const handleListItemClick = (concernedRef: any) => {
@@ -231,22 +274,25 @@ const TreeView: FC<TreeViewProps> = ({
 
             const treeState: TreeState = {
                 selectedNodes: [],
-                highlightedParents: []
-            }
+                highlightedParents: [],
+            };
 
-            const concernedNodes: any[] = []
-            preSelectedFilters.map(nodeId => concernedNodes.push(getNodeById(props.nodes![0], nodeId)))
+            const concernedNodes: any[] = [];
+            preSelectedFilters.map((nodeId) =>
+                concernedNodes.push(getNodeById(props.nodes![0], nodeId)),
+            );
 
-            concernedNodes.map(node => {
+            concernedNodes.map((node) => {
                 if (treeState.selectedNodes.indexOf(node.id) === -1) {
-                    const newTreeState = handleFlip(node, treeState)
-                    treeState.selectedNodes = newTreeState.selectedNodes
-                    treeState.highlightedParents = newTreeState.highlightedParents
+                    const newTreeState = handleFlip(node, treeState);
+                    treeState.selectedNodes = newTreeState.selectedNodes;
+                    treeState.highlightedParents =
+                        newTreeState.highlightedParents;
                 }
-            })
+            });
 
-            setSelectedFilters(treeState.selectedNodes)
-            setHighlightedParents(treeState.highlightedParents)
+            setSelectedFilters(treeState.selectedNodes);
+            setHighlightedParents(treeState.highlightedParents);
         }
     }, [props.nodes]);
 
@@ -264,15 +310,24 @@ const TreeView: FC<TreeViewProps> = ({
                     }}
                 >
                     <StyledLi open={props.open} key={node.id}>
-                        <Stack
+                        <StyledStack
                             direction="row"
-                            sx={{ alignItems: 'center', width: '100%' }}
+                            selected={
+                                highlightedParents.indexOf(node.id) !== -1 &&
+                                selectedFilters.indexOf(node.id) === -1
+                            }
                         >
                             <StyledCheckBox
                                 checked={
                                     selectedFilters.indexOf(node.id) !== -1
                                 }
-                                onClick={() => { handleFlip(node); setNewCategorySelected(true); }}
+                                indeterminate={
+                                    highlightedParents.indexOf(node.id) !== -1
+                                }
+                                onClick={() => {
+                                    handleFlip(node);
+                                    setNewCategorySelected(true);
+                                }}
                                 inputProps={{ 'aria-label': 'controlled' }}
                                 disableRipple
                             />
@@ -284,14 +339,14 @@ const TreeView: FC<TreeViewProps> = ({
                             >
                                 <Typography
                                     size="h5"
-                                    weight="Light"
-                                    color={
-                                        highlightedParents.indexOf(
-                                            node.id,
-                                        ) !== -1 &&
-                                            selectedFilters.indexOf(node.id) === -1
-                                            ? 'contrastText'
-                                            : ''
+                                    weight={
+                                        (highlightedParents.indexOf(node.id) !==
+                                            -1 &&
+                                            selectedFilters.indexOf(node.id) ===
+                                                -1) ||
+                                        selectedFilters.indexOf(node.id) !== -1
+                                            ? 'SemiBold'
+                                            : 'Light'
                                     }
                                 >
                                     {node.name}
@@ -300,7 +355,7 @@ const TreeView: FC<TreeViewProps> = ({
                                 <FlexSpacer />
 
                                 {node.children?.length &&
-                                    node.children?.length > 0 ? (
+                                node.children?.length > 0 ? (
                                     activeRef.indexOf(node.id) !== -1 ? (
                                         <Typography size="h5" weight="Light">
                                             -
@@ -312,7 +367,7 @@ const TreeView: FC<TreeViewProps> = ({
                                     )
                                 ) : undefined}
                             </Stack>
-                        </Stack>
+                        </StyledStack>
                     </StyledLi>
                     {activeRef.indexOf(node.id) !== -1
                         ? renderTree(node, node.children)

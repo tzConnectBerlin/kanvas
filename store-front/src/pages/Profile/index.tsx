@@ -5,7 +5,7 @@ import NftGrid from '../../design-system/organismes/NftGrid';
 import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
 
-import { Pagination, Stack } from '@mui/material';
+import { Pagination, Stack, useMediaQuery, useTheme } from '@mui/material';
 import { IUser } from '../../interfaces/user';
 import { Animated } from 'react-animated-css';
 import { FC, useEffect, useState } from 'react';
@@ -21,7 +21,7 @@ interface ParamTypes {
 interface ProfileProps {}
 
 const StyledStack = styled(Stack)`
-    width: 100vw;
+    width: 100%;
     max-width: 100rem;
 `;
 
@@ -29,7 +29,7 @@ const StyledAnimated = styled(Animated)`
     display: 'initial';
     height: auto;
 
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         padding-left: 0rem !important;
         padding-right: 0rem !important;
     }
@@ -38,7 +38,7 @@ const StyledAnimated = styled(Animated)`
 const StyledDiv = styled.div`
     transition: max-height 0.5s, min-height 0.5s;
 
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         padding-top: 2rem;
     }
 `;
@@ -97,6 +97,8 @@ const Profile: FC<ProfileProps> = () => {
     );
 
     useEffect(() => {
+        window.scrollTo(0, 0);
+        
         if (!userAddress) {
             history.push('/404');
         }
@@ -162,10 +164,13 @@ const Profile: FC<ProfileProps> = () => {
         });
     };
 
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
     return (
         <PageWrapper>
             <StyledStack direction="column">
-                <FlexSpacer minHeight={10} />
+                <FlexSpacer minHeight={isMobile ? 4 : 10} />
 
                 <StyledDiv>
                     <StyledAnimated
@@ -201,6 +206,7 @@ const Profile: FC<ProfileProps> = () => {
                     nfts={userNftsResponse.data?.nfts}
                     emptyMessage={'No Nfts in collection yet'}
                     emptyLink={'Click here to buy some in the store.'}
+                    nftCardMode="user"
                 />
 
                 <FlexSpacer minHeight={2} />

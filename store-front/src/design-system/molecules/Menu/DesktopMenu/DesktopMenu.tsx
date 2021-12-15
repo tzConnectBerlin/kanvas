@@ -81,7 +81,10 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
 
                         {/* Quick Search controlling the opacity and position of the links above */}
 
-                        <QuickSearch setSearchOpen={props.setSearchOpen} />
+                        <QuickSearch
+                            searchOpen={props.isSearchOpen ?? false}
+                            setSearchOpen={props.setSearchOpen}
+                        />
                     </>
                 )}
 

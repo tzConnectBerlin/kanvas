@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { Theme } from '@mui/material';
 
 export const PageWrapper = styled.div<{ theme?: Theme }>`
-    min-height: calc(102vh - 224px);
+    min-height: 102vh;
 
     display: flex;
     align-items: flex-start;
@@ -19,13 +19,8 @@ export const PageWrapper = styled.div<{ theme?: Theme }>`
         padding-right: 4em;
     }
 
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         padding-left: 2rem;
         padding-right: 2rem;
-    }
-
-    @media (max-width: 650px) {
-        padding-left: 0;
-        padding-right: 0;
     }
 `;

@@ -6,6 +6,7 @@ import * as Joi from 'joi';
 })
 export class UserDto {
   @JoiSchema(Joi.number().optional())
+  @JoiSchema([UPDATE], Joi.number().required())
   id: number;
 
   @JoiSchema(Joi.string().required().email())

@@ -16,7 +16,7 @@ import {
     Stack,
     Theme,
     useMediaQuery,
-} from '@mui/material'
+} from '@mui/material';
 
 interface QuickSearResultProps {
     error: boolean;
@@ -35,19 +35,18 @@ interface BoxProps extends MBoxProps {
 
 const StyledBox = styled(Box)<BoxProps>`
     display: ${(props) => (props.open ? 'flex' : 'none')};
-    max-width: 35rem;
-    
+    max-width: 30rem;
+
     @media (max-width: 874px) {
-        right: 5%;
-        max-width: 100vw;
+        left: 0;
+        right: 0;
+        max-width: 100rem;
     }
-`
+`;
 
 const StyledPaper = styled(Paper)<{ theme?: Theme }>`
     box-shadow: none;
-    border-radius: 0;
-
-    outline: ${(props) => `solid 1px ${props.theme.palette.text.primary}`};
+    border-radius: 2rem;
 
     :hover {
         outline: ${(props) => `solid 2px ${props.theme.palette.text.primary}`};
@@ -58,15 +57,16 @@ const StyledPaper = styled(Paper)<{ theme?: Theme }>`
 
     @media (max-width: 874px) {
         margin-left: initial;
+        width: 100% !important;
 
         outline: none;
-        top: 5rem;
+        top: 4.5rem !important;
 
         :hover {
             outline: none;
         }
     }
-`
+`;
 
 const StyledHeaderStack = styled(Stack)`
     padding: 1em 1.5em;
@@ -155,7 +155,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                         animation="wave"
                                         width={65}
                                         height={65}
-                                        sx={{ borderRadius: 0 }}
+                                        sx={{ borderRadius: 2 }}
                                     />
                                     <Skeleton
                                         animation="wave"
@@ -174,15 +174,6 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                 <Typography size="h4" weight="SemiBold">
                                     Nfts
                                 </Typography>
-                                <FlexSpacer />
-                                <Typography
-                                    size="inherit"
-                                    weight="Light"
-                                    color="#0088a7 !important"
-                                    sx={{ cursor: 'pointer' }}
-                                >
-                                    See all
-                                </Typography>
                             </StyledHeaderStack>
                             <StyledContentStack spacing={1}>
                                 {props.artworksSearchResult.map((nft: any) => (
@@ -197,7 +188,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                             src={nft?.dataUri}
                                             height={65}
                                             width={65}
-                                            borderRadius={0}
+                                            borderRadius={2}
                                         />
                                         <Typography
                                             size="h4"
@@ -252,14 +243,6 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                         Categories
                                     </Typography>
                                     <FlexSpacer />
-                                    <Typography
-                                        size="inherit"
-                                        weight="Light"
-                                        color="#0088a7 !important"
-                                        sx={{ cursor: 'pointer' }}
-                                    >
-                                        See all
-                                    </Typography>
                                 </StyledHeaderStack>
                                 <StyledContentStack sx={{ marginLeft: '1em' }}>
                                     <StyledGrid container spacing={2}>
