@@ -31,7 +31,7 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
 
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 1;
     transition: padding-left 0.2s, padding-right 0.2s;
     padding: 3rem 3rem 1rem;
 
