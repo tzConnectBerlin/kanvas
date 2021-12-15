@@ -30,6 +30,7 @@
     "@nestjs/platform-express": "^8.2.3",
     "@types/bcrypt": "^5.0.0",
     "@types/passport-local": "^1.0.34",
+    "aws-sdk": "^2.1046.0",
     "bcrypt": "^5.0.1",
     "cookie-session": "^1.4.0",
     "dotenv": "^10.0.0",
