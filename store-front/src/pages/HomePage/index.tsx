@@ -44,9 +44,9 @@ const LinkStyled = styled(CustomButton)<{ theme?: Theme }>`
     min-width: 0;
     font-size: 1.15rem;
     color: ${(props) => props.theme.palette.text.primary};
+    border: none !important;
 
     &:hover {
-        outline: none !important;
         background: transparent;
         text-decoration: underline;
         text-decoration-color: currentcolor;
