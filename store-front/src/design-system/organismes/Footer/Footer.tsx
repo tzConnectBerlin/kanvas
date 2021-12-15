@@ -234,7 +234,7 @@ export const Footer: FC<FooterProps> = () => {
                         </Box>                         
                     </Box>
 
-                    <Box sx={{ marginTop: '2.5rem' }}>
+                    <Box sx={{ marginTop: '1.5rem' }}>
                         <LanguageSwitcher />
                     </Box>
                 </Grid>
