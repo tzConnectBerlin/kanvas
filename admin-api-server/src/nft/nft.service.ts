@@ -1,11 +1,12 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { PG_CONNECTION } from 'src/constants';
+import { NFT_IMAGE_PREFIX, PG_CONNECTION } from 'src/constants';
 import { DbPool } from 'src/db.module';
 import { QueryParams } from 'src/types';
 import { User } from 'src/user/entities/user.entity';
-import { prepareFilterClause } from 'src/utils';
+import { convertToSnakeCase, prepareFilterClause } from 'src/utils';
 import { NftDto } from './dto/nft.dto';
 import { Nft } from './entities/nft.entity';
+import { S3Service } from './s3.service';
 
 const getSelectStatement = (
   whereClause = '',
@@ -40,11 +41,24 @@ const getUpdateStatement = (nft: Nft) => {
 
 @Injectable()
 export class NftService {
-  constructor(@Inject(PG_CONNECTION) private db: DbPool) {}
+  constructor(
+    @Inject(S3Service) private s3Service: S3Service,
+    @Inject(PG_CONNECTION) private db: DbPool,
+  ) {}
 
-  async create(creator: User, createNftDto: NftDto) {
+  async create(creator: User, createNftDto: NftDto, picture: any) {
     try {
-      const nftEntity = new Nft({ ...createNftDto, createdBy: creator.id });
+      const metadata = createNftDto.metadata ?? {};
+      const dataUri = await this.s3Service.uploadFile(
+        picture,
+        `${NFT_IMAGE_PREFIX}${createNftDto.nftName}`,
+      );
+      const nftEntity = new Nft({
+        ...createNftDto,
+        createdBy: creator.id,
+        dataUri,
+        metadata,
+      });
       const params = Object.values(nftEntity).filter((item) => Boolean(item));
       const query = getInsertStatement(nftEntity);
       const result = await this.db.query(query, params);
@@ -64,7 +78,7 @@ export class NftService {
       range.length === 2
         ? `LIMIT ${range[1] - range[0]} OFFSET ${range[0]}`
         : undefined;
-    const sortField = sort && sort[0] ? sort[0] : 'id';
+    const sortField = sort && sort[0] ? convertToSnakeCase(sort[0]) : 'id';
     const sortDirection = sort && sort[1] ? sort[1] : 'ASC';
     const countResult = await this.db.query(
       getSelectCountStatement(whereClause, sortField),
@@ -88,8 +102,15 @@ export class NftService {
     return new NftDto(result.rows[0]);
   }
 
-  async update(id: number, updateNftDto: NftDto) {
-    const nft = new Nft(updateNftDto);
+  async update(id: number, updateNftDto: NftDto, picture: any) {
+    let dataUri;
+    if (picture) {
+      dataUri = await this.s3Service.uploadFile(
+        picture,
+        `${NFT_IMAGE_PREFIX}${updateNftDto.nftName}`,
+      );
+    }
+    const nft = new Nft({ ...updateNftDto, dataUri });
     const query = getUpdateStatement(nft);
     const params = Object.values(nft).filter((item) => Boolean(item));
     const result = await this.db.query(query, [...params, id]);

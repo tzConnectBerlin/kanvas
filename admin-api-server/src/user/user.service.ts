@@ -80,7 +80,7 @@ export class UserService {
       range.length === 2
         ? `LIMIT ${range[1] - range[0]} OFFSET ${range[0]}`
         : undefined;
-    const sortField = sort && sort[0] ? sort[0] : 'id';
+    const sortField = sort && sort[0] ? convertToSnakeCase(sort[0]) : 'id';
     const sortDirection = sort && sort[1] ? sort[1] : 'ASC';
     const countResult = await this.db.query(
       getSelectCountStatement(whereClause),
