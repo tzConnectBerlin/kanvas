@@ -21,7 +21,7 @@ interface LanguageSwitcherProps {
 }
 
 const useStyles = makeStyles({
-    root: {    
+    root: {
         '& .MuiOutlinedInput-input': {
             color: 'currentColor',
         },
@@ -47,8 +47,7 @@ const useStyles = makeStyles({
     },
 });
 
-const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`   
-
+const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
     .MuiTextField-root {
         max-width: 7rem;
     }
@@ -56,7 +55,7 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
 
 export const LanguageSwitcher: FC<LanguageSwitcherProps> = ({ ...props }) => {
     const { t } = useTranslation(['translation']);
-    const [language, setLanguage] = useState('');
+    const [language, setLanguage] = useState('en');
     const classes = useStyles();
 
     const handleTextfield = (event: any) => {
@@ -69,15 +68,14 @@ export const LanguageSwitcher: FC<LanguageSwitcherProps> = ({ ...props }) => {
             <TextField
                 className={classes.root}
                 id="simple-select"
-                value={language}
+                value={language}                
                 variant="outlined"
+                label={t('common.language')}
                 onChange={handleTextfield}
+                placeholder="English"
                 select
             >
-                <MenuItem value="">
-                    <em>None</em>
-                </MenuItem>
-                <MenuItem value="en">English</MenuItem>
+                <MenuItem value="en" selected>English</MenuItem>
                 <MenuItem value="fr">French</MenuItem>
                 <MenuItem value="ab">Arabic</MenuItem>
             </TextField>
