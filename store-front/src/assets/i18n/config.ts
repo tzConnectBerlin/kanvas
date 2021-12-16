@@ -25,6 +25,4 @@ i18n.use(Backend)
         resources,
     });
 
-    export default i18n;
-
 // export default i18n.changeLanguage('fr');
