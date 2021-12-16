@@ -12,7 +12,7 @@ export const initTezos = (url = RPC_URL): void => {
 
 export const initWallet = (): BeaconWallet => {
     const options: DAppClientOptions = {
-        name: 'D /a:rt/',
+        name: 'Kanvas',
         iconUrl: 'https://tezostaquito.io/img/favicon.png',
         preferredNetwork: NetworkType[NETWORK],
     };
