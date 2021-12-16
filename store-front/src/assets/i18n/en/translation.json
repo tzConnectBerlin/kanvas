@@ -36,12 +36,7 @@
     "headline_4": "Social",
     "language": {
       "label": "Language",
-      "select": "Select",
-      "name": {
-        "ab": "Arab",
-        "en": "English",
-        "fr": "French"
-      }
+      "select": "Select"
     }
   },
   "faq": {

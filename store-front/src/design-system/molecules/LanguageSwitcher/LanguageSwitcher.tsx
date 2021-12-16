@@ -22,7 +22,7 @@ interface LanguageSwitcherProps {
 
 const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
     .MuiTextField-root {
-        min-width: 7rem
+        min-width: 7rem;
     }
 `;
 
@@ -75,10 +75,12 @@ export const LanguageSwitcher: FC<LanguageSwitcherProps> = ({ ...props }) => {
                 onChange={handleTextfield}
                 select
             >
-                <MenuItem value="" style={{ pointerEvents: 'none'}}>{t('footer.language.select')}</MenuItem>
-                <MenuItem value="en">{t('footer.language.name.en')}</MenuItem>
-                <MenuItem value="fr">{t('footer.language.name.fr')}</MenuItem>
-                <MenuItem value="ab">{t('footer.language.name.ab')}</MenuItem>
+                <MenuItem value="" style={{ pointerEvents: 'none' }}>
+                    {t('footer.language.select')}
+                </MenuItem>
+                <MenuItem value="en">English</MenuItem>
+                <MenuItem value="fr">Français</MenuItem>
+                <MenuItem value="ab">عرب</MenuItem>
             </TextField>
         </StyledFormControl>
     );
