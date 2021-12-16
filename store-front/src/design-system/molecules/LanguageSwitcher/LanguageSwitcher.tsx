@@ -20,33 +20,6 @@ interface LanguageSwitcherProps {
     theme?: Theme;
 }
 
-const useStyles = makeStyles({
-    root: {
-        '& .MuiOutlinedInput-input': {
-            color: 'currentColor',
-        },
-        '& .MuiInputLabel-root': {
-            color: 'currentColor',
-        },
-        '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'currentColor',
-        },
-        '&:hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'currentColor',
-        },
-        '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-input': {
-            color: 'purple',
-        },
-        '& .MuiInputLabel-root.Mui-focused': {
-            color: 'purple',
-        },
-        '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
-            {
-                borderColor: 'purple',
-            },
-    },
-});
-
 const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
     .MuiTextField-root {
         max-width: 7rem;
@@ -56,6 +29,34 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
 export const LanguageSwitcher: FC<LanguageSwitcherProps> = ({ ...props }) => {
     const { t } = useTranslation(['translation']);
     const [language, setLanguage] = useState('en');
+
+    const useStyles = makeStyles({
+        root: {
+            '& .MuiOutlinedInput-input': {
+                color: `grey`,
+            },
+            '& .MuiInputLabel-root': {
+                color: 'grey',
+            },
+            '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'grey',
+            },
+            '&:hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'grey',
+            },
+            '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-input': {
+                color: 'purple',
+            },
+            '& .MuiInputLabel-root.Mui-focused': {
+                color: 'purple',
+            },
+            '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
+                {
+                    borderColor: 'purple',
+                },
+        },
+    });
+
     const classes = useStyles();
 
     const handleTextfield = (event: any) => {
@@ -68,13 +69,15 @@ export const LanguageSwitcher: FC<LanguageSwitcherProps> = ({ ...props }) => {
             <TextField
                 className={classes.root}
                 id="simple-select"
-                value={language}                
+                value={language}
                 variant="outlined"
                 label={t('common.language')}
                 onChange={handleTextfield}
                 select
             >
-                <MenuItem value="en" selected>English</MenuItem>
+                <MenuItem value="en" selected>
+                    English
+                </MenuItem>
                 <MenuItem value="fr">French</MenuItem>
                 <MenuItem value="ab">Arabic</MenuItem>
             </TextField>
