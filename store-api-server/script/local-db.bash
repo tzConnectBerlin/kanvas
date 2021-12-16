@@ -1,11 +1,11 @@
 #!/bin/bash
 cd $(git rev-parse --show-toplevel)/store-api-server
 
-[ -z $DB_PORT ] && export DB_PORT=5432
+[ -z $DB_PORT ] && export DB_PORT=4322
 [ -z $DB_PASSWORD ] && export DB_PASSWORD=dev_password
 [ -z $DB_USERNAME ] && export DB_USERNAME=dev_user
 [ -z $DB_DATABASE ] && export DB_DATABASE=dev_database
-[ -z $DB_HOST ] && export DB_HOST=localhost
+[ -z $DB_HOST ] && export DB_HOST=0.0.0.0
 
 BOOT_TIME=3s
 (

@@ -1,13 +1,15 @@
 import { Box } from '@mui/system';
 import Grid from '@mui/material/Grid';
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
-import { Stack, Theme, useMediaQuery, useTheme } from '@mui/material';
+import { SelectChangeEvent, Stack, Theme, useMediaQuery, useTheme } from '@mui/material';
 import Typography from '../../atoms/Typography';
 import { Copyright } from '../../atoms/Copyright';
 import { useTranslation } from 'react-i18next';
 import { lightTheme as theme } from '../../../theme';
+import CustomSelect from '../../atoms/Select';
+import i18next from 'i18next';
 
 export interface FooterProps {
     selectedTheme?: string;
@@ -92,6 +94,8 @@ const StyledLink = styled(Link)<{ theme?: Theme }>`
 
 export const Footer: FC<FooterProps> = () => {
     const { t } = useTranslation(['translation']);
+
+    const [selectedLanguage, setSelectedLanguage] = useState<string>('en')
 
     return (
         <StyledBox>
@@ -249,6 +253,32 @@ export const Footer: FC<FooterProps> = () => {
                             />
                         </Box>
                     </Box>
+
+                    <Typography weight="SemiBold" size="h5" gutterBottom>
+                        Languages
+                    </Typography>
+
+                    <CustomSelect
+                        id="Language selection - footer"
+                        availableOptions={[{
+                            value: 'fr',
+                            label: 'Francais'
+                        },{
+                            value: 'en',
+                            label: 'English'
+                        },{
+                            value: 'de',
+                            label: 'Deutsch'
+                        },
+                        ]}
+                        selectedOption={selectedLanguage ?? 'en'}
+                        triggerFunction={(event: SelectChangeEvent) => {
+                            setSelectedLanguage(event.target.value)
+                            i18next.changeLanguage(event.target.value);
+                        }}
+                        disabled={false}
+                        customSize='small'
+                    />
 
                     <Box sx={{ marginTop: '2.5rem' }}>
                         <Copyright />
