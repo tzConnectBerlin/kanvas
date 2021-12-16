@@ -7,6 +7,9 @@ import French from './fr/translation.json';
 import Arabic from './ab/translation.json';
 
 const resources = {
+    '': {
+        translation: English,
+    },
     en: {
         translation: English,
     },
@@ -18,8 +21,7 @@ const resources = {
     },
 };
 
-i18n.use(Backend)
-    .use(LanguageDetector)
+i18n.use(LanguageDetector)
     .use(initReactI18next) // passes i18n down to react-i18next
     .init({
         resources,

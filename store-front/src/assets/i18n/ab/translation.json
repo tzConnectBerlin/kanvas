@@ -10,8 +10,7 @@
     "notifications": "الاعلامات",
     "button": {
       "backToHome": "العودة إلى الوطن"
-    },
-    "language": "لغة"
+    }
   },
   "menu": {
     "home": "الصفحة الرئيسية",
@@ -34,7 +33,16 @@
     "headline_1": "خريطة الموقع",
     "headline_2": "المزيد عنا",
     "headline_3": "قانوني",
-    "headline_4": "الشؤون الاجتماعية"
+    "headline_4": "الشؤون الاجتماعية",
+    "language": {
+      "label": "لغة",
+      "select": "تحديد",
+      "name": {
+        "ab": "عرب",
+        "en": "إنجليزي",
+        "fr": "فرنسي"
+      }
+    }
   },
   "faq": {
     "headline": "FAQ",

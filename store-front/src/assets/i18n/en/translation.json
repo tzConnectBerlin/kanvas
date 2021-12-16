@@ -10,8 +10,7 @@
     "notifications": "Notifications",
     "button": {
       "backToHome": "Back to home"
-    },
-    "language": "language"
+    }
   },
   "menu": {
     "home": "Home",
@@ -34,7 +33,16 @@
     "headline_1": "Sitemap",
     "headline_2": "More About us",
     "headline_3": "Legal",
-    "headline_4": "Social"
+    "headline_4": "Social",
+    "language": {
+      "label": "Language",
+      "select": "Select",
+      "name": {
+        "ab": "Arab",
+        "en": "English",
+        "fr": "French"
+      }
+    }
   },
   "faq": {
     "headline": "FAQ",

@@ -22,13 +22,13 @@ interface LanguageSwitcherProps {
 
 const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
     .MuiTextField-root {
-        max-width: 7rem;
+        min-width: 7rem
     }
 `;
 
 export const LanguageSwitcher: FC<LanguageSwitcherProps> = ({ ...props }) => {
     const { t } = useTranslation(['translation']);
-    const [language, setLanguage] = useState('en');
+    const [language, setLanguage] = useState('');
 
     const useStyles = makeStyles({
         root: {
@@ -45,14 +45,14 @@ export const LanguageSwitcher: FC<LanguageSwitcherProps> = ({ ...props }) => {
                 borderColor: 'grey',
             },
             '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-input': {
-                color: 'purple',
+                color: 'rgb(151, 113, 255)',
             },
             '& .MuiInputLabel-root.Mui-focused': {
-                color: 'purple',
+                color: 'rgb(151, 113, 255)',
             },
             '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
                 {
-                    borderColor: 'purple',
+                    borderColor: 'rgb(151, 113, 255)',
                 },
         },
     });
@@ -71,15 +71,14 @@ export const LanguageSwitcher: FC<LanguageSwitcherProps> = ({ ...props }) => {
                 id="simple-select"
                 value={language}
                 variant="outlined"
-                label={t('common.language')}
+                label={t('footer.language.label')}
                 onChange={handleTextfield}
                 select
             >
-                <MenuItem value="en" selected>
-                    English
-                </MenuItem>
-                <MenuItem value="fr">French</MenuItem>
-                <MenuItem value="ab">Arabic</MenuItem>
+                <MenuItem value="" style={{ pointerEvents: 'none'}}>{t('footer.language.select')}</MenuItem>
+                <MenuItem value="en">{t('footer.language.name.en')}</MenuItem>
+                <MenuItem value="fr">{t('footer.language.name.fr')}</MenuItem>
+                <MenuItem value="ab">{t('footer.language.name.ab')}</MenuItem>
             </TextField>
         </StyledFormControl>
     );

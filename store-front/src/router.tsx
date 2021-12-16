@@ -155,7 +155,7 @@ const Router = () => {
                                 />
                             )}
                         />
-                        <Route path="/faq" component={Faq} />
+                        <Route path="/faq" component={Faq} />{' '}
                         <Route path="/privacy" component={Privacy} />
                         <Route
                             path="/create-nft"

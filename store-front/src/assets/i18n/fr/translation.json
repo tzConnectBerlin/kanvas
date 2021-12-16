@@ -11,7 +11,8 @@
     "button": {
       "backToHome": "Retour à la maison"
     },
-    "language": "Langue"
+    "language": "Langue",
+    "select": "Sélectionner"
   },
   "menu": {
     "home": "Accueil",
@@ -34,7 +35,16 @@
     "headline_1": "Carte du site",
     "headline_2": "Plus À propos de nous",
     "headline_3": "Juridien",
-    "headline_4": "Social"
+    "headline_4": "Social",
+    "language": {
+      "label": "Langue",
+      "select": "Choisir",
+      "name": {
+        "ab": "Arabe",
+        "en": "Anglais",
+        "fr": "Français"
+      }
+    }
   },
   "faq": {
     "headline": "FAQ",
