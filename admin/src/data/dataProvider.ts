@@ -45,7 +45,6 @@ const dataProvider = (
 
     const rangeStart = (page - 1) * perPage;
     const rangeEnd = page * perPage - 1;
-
     const query = {
       sort: JSON.stringify([field, order]),
       range: JSON.stringify([rangeStart, rangeEnd]),
@@ -187,22 +186,25 @@ const dataProvider = (
 });
 
 const toFormData = (data: any) => {
-  const formData = new FormData();
-  const keys = Object.keys(data);
-  keys.forEach((key) => {
-    if (data[key]) {
-      if (key === 'image') {
-        formData.append(key, data[key].rawFile);
-      } else {
-        if (typeof data[key] === 'object') {
-          formData.append(key, JSON.stringify(data[key]));
+  if (data.image) {
+    const formData = new FormData();
+    const keys = Object.keys(data);
+    keys.forEach((key) => {
+      if (data[key]) {
+        if (key === 'image') {
+          formData.append(key, data[key].rawFile);
         } else {
-          formData.append(key, data[key]);
+          if (typeof data[key] === 'object') {
+            formData.append(key, JSON.stringify(data[key]));
+          } else {
+            formData.append(key, data[key]);
+          }
         }
       }
-    }
-  });
-  return formData;
+    });
+    return formData;
+  }
+  return JSON.stringify(data);
 };
 
 export default dataProvider;
