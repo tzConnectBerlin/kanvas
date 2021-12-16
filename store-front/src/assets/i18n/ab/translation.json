@@ -1,0 +1,112 @@
+{
+  "common": {
+    "lorenIpsumLong": "لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لورم ipsum dollat limit, conssecetاور adiphering eit, edosiddune methidount it alida et dolem magna et ally, conssecetاور adiphiscing elit, dlieusmod atherideunt methor labort و dolore maglaque alqualia. لورم ipsum dollat limit, conssecetاور adiphering eit, edosiddune methidount it alida et dolem magna et ally, conssecetاور adiphiscing elit, dlieusmod atherideunt methor labort و dolore maglaque alqualia. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita.",
+    "lorenIpsum": "لورم ipsum dolor samet, labore et dolore magaa, conssecretaur adipiscusing elit, dorosze inciledidt ut laboridt ut et dout magna calqua.",
+    "lorenIpsumShort": "(Lorem ipsum dollot liet amet, labore et doore magna) alia.",
+    "description": "سوق NFT الجديد وحلول العلامة المميزة البيضاء من Tezos. ",
+    "signIn": "تسجيل الدخول",
+    "signOut": "انهاء الاتصال",
+    "profile": " اذهب الى ملف المواصفات",
+    "notifications": "الاعلامات",
+    "button": {
+      "backToHome": "العودة إلى الوطن"
+    }
+  },
+  "menu": {
+    "home": "الصفحة الرئيسية",
+    "store": "تخزين"
+  },
+  "product": {
+    "description": {
+      "part_1": "حول الفنان",
+      "part_2": "الوصف",
+      "part_3": "ستسقط في",
+      "editions": "الاتاحة",
+      "categories": "قصص متعطسة",
+      "price": "السعر",
+      "button": "اضافة الى عربة التسوق"
+    },
+    "button_1": "اضافة الى عربة التسوق",
+    "button_2": "تم الاضافة الى عربة التسوق"
+  },
+  "footer": {
+    "headline_1": "خريطة الموقع",
+    "headline_2": "المزيد عنا",
+    "headline_3": "قانوني",
+    "headline_4": "الشؤون الاجتماعية",
+    "language": {
+      "label": "لغة",
+      "select": "تحديد"
+    }
+  },
+  "faq": {
+    "headline": "FAQ",
+    "01_headline": "أولا-مقدمة",
+    "01_text": "حل TZconnect WL. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita.",
+    "01_text2": "النص الثانوي هو اختياري ويبدأ مثل هذا ... لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita.",
+    "01_1_headline": "كيف يعمل ؟",
+    "01_1_text": "يمكنك النعناع وبيع النعناع كما يمكنك شراء نشونات. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. ",
+    "01_2_headline": "ما هي العلامة المميزة لوصلة TZ ؟",
+    "01_2_text": "الحل هو الحل لإنشاء تجارة متعددة المتاجر. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. ",
+    "02_headline": "ما هي التكاليف الضريبية لبيع NFT ؟",
+    "02_text": "قيمة Apromper 0.01269 لكل معاملة. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita.",
+    "03_headline": "ما هي التكاليف لشراء NFT ؟",
+    "03_text": "AprotAer 0.00269 tz لكل معاملة. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لورم ipsum dollat limit, conssecetاور adiphering eit, edosiddune methidount it alida et dolem magna et ally, conssecetاور adiphiscing elit, dlieusmod atherideunt methor labort و dolore maglaque alqualia. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita.",
+    "03_1_headline": "كيف يمكنني الانتقال إلى محفظتي ؟",
+    "03_1_text": "التحويل هو أمر سهل ، كل ما عليك القيام به : لوريم ipsum dollot limet ، consintactur adipiscing elot, diveridee coultidnarict ut laborior ut et dollaore magna alita. لورم ipsum dollat limit, conssecetاور adiphering eit, edosiddune methidount it alida et dolem magna et ally, conssecetاور adiphiscing elit, dlieusmod atherideunt methor labort و dolore maglaque alqualia. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita.",
+    "03_1_text2": "النص الثانوي هو اختياري ويبدأ مثل هذا ... لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita."
+  },
+  "privacy": {
+    "headline": "سياسة الخصوصية",
+    "01_headline": "أولا-مقدمة",
+    "01_text": "حل TZconnect WL. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita.",
+    "01_text2": "النص الثانوي هو اختياري ويبدأ مثل هذا ... لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita.",
+    "01_1_headline": "كيف يعمل ؟",
+    "01_1_text": "يمكنك النعناع وبيع النعناع كما يمكنك شراء نشونات. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. ",
+    "01_2_headline": "ما هي العلامة المميزة لوصلة TZ ؟",
+    "01_2_text": "الحل هو الحل لإنشاء تجارة متعددة المتاجر. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. ",
+    "02_headline": "ما هي التكاليف الضريبية لبيع NFT ؟",
+    "02_text": "قيمة Apromper 0.01269 لكل معاملة. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita.",
+    "03_headline": "ما هي التكاليف لشراء NFT ؟",
+    "03_text": "AprotAer 0.00269 tz لكل معاملة. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لورم ipsum dollat limit, conssecetاور adiphering eit, edosiddune methidount it alida et dolem magna et ally, conssecetاور adiphiscing elit, dlieusmod atherideunt methor labort و dolore maglaque alqualia. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita.",
+    "03_1_headline": "كيف يمكنني الانتقال إلى محفظتي ؟",
+    "03_1_text": "التحويل هو أمر سهل ، كل ما عليك القيام به : لوريم ipsum dollot limet ، consintactur adipiscing elot, diveridee coultidnarict ut laborior ut et dollaore magna alita. لورم ipsum dollat limit, conssecetاور adiphering eit, edosiddune methidount it alida et dolem magna et ally, conssecetاور adiphiscing elit, dlieusmod atherideunt methor labort و dolore maglaque alqualia. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita.",
+    "03_1_text2": "النص الثانوي هو اختياري ويبدأ مثل هذا ... لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita. لولم ipsum dolor samet, consintactor adippiscing elit, dlieusmod atherideunt metheridee ut labore meetor et dolore magna alita."
+  },
+  "modal": {
+    "signIn": {
+      "headline": "تسجيل الدخول",
+      "text_1": "مرحبا بكم في كانفاس !  ",
+      "text_2": "دعينا نبدأ بربط محفظتك",
+      "text_3": "أو",
+      "text_4": "ما هي المحفظة ؟",
+      "button_1": "محفظة الاتصال",
+      "button_2": "علامة اجتماعية في"
+    }
+  },
+  "home": {
+    "hero": {
+      "headline": "TFN Kanalas",
+      "description_1": "سوق NFT الجديد وحلول العلامة المميزة البيضاء من Tezos. ",
+      "description_2": "النعناع ، شراء وبيع NFTs الخاصة بك على الأوكتات لدينا أو يمكنك إنشاء المنبر الخاص بك معنا الآن.",
+      "button_1": "مشاهدة المجموعة",
+      "button_2": "تسجيل الدخول",
+      "button_3": "مشاهدة"
+    },
+    "nfts": {
+      "headline": "المفرولات المتميزة",
+      "link": "مشاهدة كل"
+    }
+  },
+  "cookies": {
+    "text": "بالاستمرار في استخدام هذا الموقع ، يمكنك الموافقة على استخدام cookies. تعلم المزيد في حياتنا ",
+    "button": "الموافقة والاغلاق",
+    "link": "سياسة الخصوصية"
+  },
+  "filters": {
+    "button": {
+      "results": "مشاهدة النتائج",
+      "reset": "ارجاع"
+    }
+  }
+}

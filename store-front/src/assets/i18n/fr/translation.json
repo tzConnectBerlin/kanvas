@@ -1,0 +1,114 @@
+{
+  "common": {
+    "lorenIpsumLong": "Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "lorenIpsum": "Lorem ipsum dolor sit amet, labore et dolore magna aliqua, consacrtetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "lorenIpsumShort": "Lorem ipsum dolor sit amet, labore et dolore magna aliqua.",
+    "description": "Le nouveau marché NFT et la solution de marque blanche de Tezos. ",
+    "signIn": "Se connecter",
+    "signOut": "Désigner",
+    "profile": " Accéder au profil",
+    "notifications": "Notifications",
+    "button": {
+      "backToHome": "Retour à la maison"
+    },
+    "language": "Langue",
+    "select": "Sélectionner"
+  },
+  "menu": {
+    "home": "Accueil",
+    "store": "Magasin"
+  },
+  "product": {
+    "description": {
+      "part_1": "À propos de l'artiste",
+      "part_2": "Description",
+      "part_3": "La baisse sera",
+      "editions": "Disponibilité",
+      "categories": "Les catagories joints",
+      "price": "Prix",
+      "button": "Ajouter au panier"
+    },
+    "button_1": "Ajouter au panier",
+    "button_2": "Ajouté au panier"
+  },
+  "footer": {
+    "headline_1": "Carte du site",
+    "headline_2": "Plus À propos de nous",
+    "headline_3": "Juridien",
+    "headline_4": "Social",
+    "language": {
+      "label": "Langue",
+      "select": "Choisir"
+    }
+  },
+  "faq": {
+    "headline": "FAQ",
+    "01_headline": "A. Introduction",
+    "01_text": "TZconnect WL solution. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "01_text2": "Le texte secondaire est facultatif et commence ainsi ... Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "01_1_headline": "Comment ça fonctionne?",
+    "01_1_text": "Vous pouvez vendre et vendre comme vous pouvez aussi acheter des vols. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+    "01_2_headline": "Qu'est -ce que TZ branchez l'étiquette blanche?",
+    "01_2_text": "Tt est une solution pour créer le commerce multimagasin. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+    "02_headline": "Quels sont les coûts de la vente d'une NFT?",
+    "02_text": "Aproximément 0,01269 tz par transaction. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "03_headline": "Quels sont les coûts d'achat d'une NFT?",
+    "03_text": "Aproximément 0,00269 tz par transaction. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "03_1_headline": "Comment puis-je transférer à mon portefeuille?",
+    "03_1_text": "Le transfert est facile, tout ce que vous devez faire: Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "03_1_text2": "Le texte secondaire est facultatif et commence ainsi ... Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+  },
+  "privacy": {
+    "headline": "Politique de confidentialité",
+    "01_headline": "A. Introduction",
+    "01_text": "TZconnect WL solution. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "01_text2": "Le texte secondaire est facultatif et commence ainsi ... Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "01_1_headline": "Comment ça fonctionne?",
+    "01_1_text": "Vous pouvez vendre et vendre comme vous pouvez aussi acheter des vols. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+    "01_2_headline": "Qu'est -ce que TZ branchez l'étiquette blanche?",
+    "01_2_text": "Tt est une solution pour créer le commerce multimagasin. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+    "02_headline": "Quels sont les coûts de la vente d'une NFT?",
+    "02_text": "Aproximément 0,01269 tz par transaction. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "03_headline": "Quels sont les coûts d'achat d'une NFT?",
+    "03_text": "Aproximément 0,00269 tz par transaction. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "03_1_headline": "Comment puis-je transférer à mon portefeuille?",
+    "03_1_text": "Le transfert est facile, tout ce que vous devez faire: Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "03_1_text2": "Le texte secondaire est facultatif et commence ainsi ... Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consactetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+  },
+  "modal": {
+    "signIn": {
+      "headline": "Se connecter",
+      "text_1": "Bienvenue à Kanvas !  ",
+      "text_2": "Commençons par connecter votre portefeuille.",
+      "text_3": "Ou",
+      "text_4": "Qu'est-ce qu'un portefeuille?",
+      "button_1": "Connecter le portefeuille",
+      "button_2": "Signe social dans"
+    }
+  },
+  "home": {
+    "hero": {
+      "headline": "NFT Kanvas",
+      "description_1": "Le nouveau marché NFT et la solution de marque blanche de Tezos. ",
+      "description_2": "Mint, Buy and sell your NFTs on our Auctions or you can create your platform with us now.",
+      "button_1": "Afficher la collection",
+      "button_2": "Se connecter",
+      "button_3": "Afficher"
+    },
+    "nfts": {
+      "headline": "NFT présentées",
+      "link": "Voir tous les"
+    }
+  },
+  "cookies": {
+    "text": "En continuant à utiliser ce site, vous acceptez l'utilisation de cookies. En savoir plus dans notre ",
+    "button": "D'accord et de fermeture",
+    "link": "Politique de confidentialité"
+  },
+  "filters": {
+    "button": {
+      "results": "Afficher les résultats",
+      "reset": "Réinitialiser"
+    }
+  }
+}

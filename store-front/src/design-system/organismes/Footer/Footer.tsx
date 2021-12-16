@@ -3,14 +3,19 @@ import Grid from '@mui/material/Grid';
 import { FC, useState } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
-import { SelectChangeEvent, Stack, Theme, useMediaQuery, useTheme } from '@mui/material';
+import {
+    SelectChangeEvent,
+    Stack,
+    Theme,
+    useMediaQuery,
+    useTheme,
+} from '@mui/material';
 import Typography from '../../atoms/Typography';
 import { Copyright } from '../../atoms/Copyright';
 import { useTranslation } from 'react-i18next';
 import { lightTheme as theme } from '../../../theme';
 import CustomSelect from '../../atoms/Select';
 import i18next from 'i18next';
-
 export interface FooterProps {
     selectedTheme?: string;
     theme?: Theme;
@@ -32,7 +37,7 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
 
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 1;
     transition: padding-left 0.2s, padding-right 0.2s;
     padding: 3rem 3rem 1rem;
 
@@ -95,7 +100,7 @@ const StyledLink = styled(Link)<{ theme?: Theme }>`
 export const Footer: FC<FooterProps> = () => {
     const { t } = useTranslation(['translation']);
 
-    const [selectedLanguage, setSelectedLanguage] = useState<string>('en')
+    const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
 
     return (
         <StyledBox>
@@ -127,6 +132,9 @@ export const Footer: FC<FooterProps> = () => {
                 >
                     {t('home.hero.description_1')}
                 </Typography>
+                <Box sx={{ marginTop: '.5rem' }}>
+                    <Copyright />
+                </Box>
             </Grid>
 
             <Grid
@@ -214,27 +222,7 @@ export const Footer: FC<FooterProps> = () => {
                     >
                         <Box
                             component="a"
-                            href="https://facebbok.com/tzconnect"
-                            sx={iconStyle}
-                        >
-                            <FacebookStyled
-                                src={'/img/facebook.png'}
-                                alt="Facebook"
-                            />
-                        </Box>
-                        <Box
-                            component="a"
-                            href="https://twitter.com/tzconnect"
-                            sx={iconStyle}
-                        >
-                            <TwitterStyled
-                                src={'/img/twitter.jpeg'}
-                                alt="Twitter"
-                            />
-                        </Box>
-                        <Box
-                            component="a"
-                            href="https://facebbok.com/tzconnect"
+                            href="https://facebook.com/tzconnect"
                             sx={iconStyle}
                         >
                             <FacebookStyled
@@ -260,24 +248,31 @@ export const Footer: FC<FooterProps> = () => {
 
                     <CustomSelect
                         id="Language selection - footer"
-                        availableOptions={[{
-                            value: 'fr',
-                            label: 'Francais'
-                        },{
-                            value: 'en',
-                            label: 'English'
-                        },{
-                            value: 'de',
-                            label: 'Deutsch'
-                        },
+                        availableOptions={[                           
+                            {
+                                value: 'en',
+                                label: 'English',
+                            },
+                            {
+                                value: 'fr',
+                                label: 'Français',
+                            },
+                            {
+                                value: 'de',
+                                label: 'Deutsch',
+                            },
+                            {
+                                value: 'ab',
+                                label: 'عرب',
+                            },
                         ]}
                         selectedOption={selectedLanguage ?? 'en'}
                         triggerFunction={(event: SelectChangeEvent) => {
-                            setSelectedLanguage(event.target.value)
+                            setSelectedLanguage(event.target.value);
                             i18next.changeLanguage(event.target.value);
                         }}
                         disabled={false}
-                        customSize='small'
+                        customSize="small"
                     />
 
                     <Box sx={{ marginTop: '2.5rem' }}>

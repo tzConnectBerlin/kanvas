@@ -1,0 +1,112 @@
+{
+  "common": {
+    "lorenIpsumLong": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "lorenIpsum": "Lorem ipsum dolor sit amet, labore et dolore magna aliqua, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "lorenIpsumShort": "Lorem ipsum dolor sit amet, labore et dolore magna aliqua.",
+    "description": "Die neue NFT-Marktplatz-und White-Label-Lösung von Tezos. ",
+    "signIn": "Anmelden",
+    "signOut": "Abmelden",
+    "profile": " Zum Profil wechseln",
+    "notifications": "Benachrichtigungen",
+    "button": {
+      "backToHome": "Zurück zu Hause"
+    }
+  },
+  "menu": {
+    "home": "Startseite",
+    "store": "Speicher"
+  },
+  "product": {
+    "description": {
+      "part_1": "Über den Künstler",
+      "part_2": "Beschreibung",
+      "part_3": "Wird in",
+      "editions": "Verfügbarkeit",
+      "categories": "Angehängte Katagorien",
+      "price": "Preis",
+      "button": "Zum Warenkorb hinzufügen"
+    },
+    "button_1": "Zum Warenkorb hinzufügen",
+    "button_2": "Zu Warenkorb hinzugefügt"
+  },
+  "footer": {
+    "headline_1": "Sitemap",
+    "headline_2": "Mehr über uns",
+    "headline_3": "Legal",
+    "headline_4": "Soziales",
+    "language": {
+      "label": "Sprache",
+      "select": "Auswählen"
+    }
+  },
+  "faq": {
+    "headline": "FAQ",
+    "01_headline": "Einleitung",
+    "01_text": "TZconnect WL Lösung. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "01_text2": "Der sekundäre Text ist optional und beginnt wie folgt ... Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "01_1_headline": "Wie funktioniert das?",
+    "01_1_text": "Sie können Mint und verkaufen, wie Sie auch nfts kaufen können. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+    "01_2_headline": "Was ist TZ-connect-White-Label?",
+    "01_2_text": "Tt' s eine Lösung, um nft multi store commerce zu schaffen. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+    "02_headline": "Was sind die Steuerkosten für den Verkauf einer NFT?",
+    "02_text": "Aproximat 0.01269 tz pro Transaktion. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "03_headline": "Was sind die Kosten für den Kauf einer NFT?",
+    "03_text": "Aproximat 0,00269 tz pro Transaktion. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "03_1_headline": "Wie kann ich in mein Portemonnaie übertragen?",
+    "03_1_text": "Transfering ist einfach, alles, was Sie tun müssen: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "03_1_text2": "Der sekundäre Text ist optional und beginnt wie folgt ... Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+  },
+  "privacy": {
+    "headline": "Datenschutzrichtlinie",
+    "01_headline": "Einleitung",
+    "01_text": "TZconnect WL Lösung. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "01_text2": "Der sekundäre Text ist optional und beginnt wie folgt ... Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "01_1_headline": "Wie funktioniert das?",
+    "01_1_text": "Sie können Mint und verkaufen, wie Sie auch nfts kaufen können. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+    "01_2_headline": "Was ist TZ-connect-White-Label?",
+    "01_2_text": "Tt' s eine Lösung, um nft multi store commerce zu schaffen. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+    "02_headline": "Was sind die Steuerkosten für den Verkauf einer NFT?",
+    "02_text": "Aproximat 0.01269 tz pro Transaktion. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "03_headline": "Was sind die Kosten für den Kauf einer NFT?",
+    "03_text": "Aproximat 0,00269 tz pro Transaktion. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "03_1_headline": "Wie kann ich in mein Portemonnaie übertragen?",
+    "03_1_text": "Transfering ist einfach, alles, was Sie tun müssen: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "03_1_text2": "Der sekundäre Text ist optional und beginnt wie folgt ... Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+  },
+  "modal": {
+    "signIn": {
+      "headline": "Anmelden",
+      "text_1": "Willkommen in Kanvas!  ",
+      "text_2": "Let' s beginnen, indem Sie Ihre Brieftasche verbinden.",
+      "text_3": "Oder",
+      "text_4": "Was ist ein Portemonnaie?",
+      "button_1": "Wallet verbinden",
+      "button_2": "Soziales Zeichen in"
+    }
+  },
+  "home": {
+    "hero": {
+      "headline": "Kanvas NFT",
+      "description_1": "Die neue White-Label-NFT-Marktplatz-Lösung von Tezos. ",
+      "description_2": "Mint, Kaufen und verkaufen NFTs mühelos",
+      "button_1": "Sammlung anzeigen",
+      "button_2": "Anmelden",
+      "button_3": "Anzeigen"
+    },
+    "nfts": {
+      "headline": "Vorgestellte NFTs",
+      "link": "Alle anzeigen"
+    }
+  },
+  "cookies": {
+    "text": "Durch Klicken auf \"Alle Cookies akzeptieren\" stimmen Sie der Speicherung von Cookies auf Ihrem Gerät zu. Wir verwenden diese Cookies, um die Navigation in der Website zu verbessern.",
+    "button": "Alle Coookies akzeptieren",
+    "link": "Datenschutzrichtlinie"
+  },
+  "filters": {
+    "button": {
+      "results": "Ergebnisse anzeigen",
+      "reset": "Zurücksetzen"
+    }
+  }
+}
