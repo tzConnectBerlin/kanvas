@@ -32,13 +32,27 @@
     "button_2": "Ajouté au panier"
   },
   "footer": {
-    "headline_1": "Carte du site",
-    "headline_2": "Plus À propos de nous",
-    "headline_3": "Juridien",
-    "headline_4": "Social",
-    "language": {
-      "label": "Langue",
-      "select": "Choisir"
+    "headline_1": {
+      "title": "Plan du site",
+      "link_1": "Magasin",
+      "link_2": "Produit"
+    },
+    "headline_2": {
+      "title": "Mehr über uns",
+      "link_2": "Vision",
+      "link_1": "historique NFT"
+    },
+    "headline_3": {
+      "title": "Légal",
+      "link_1": "Conditions générales",
+      "link_2": "Politique de confidentialité",
+      "link_3": "F.A.Q"
+    },
+    "headline_4": {
+      "title": "Soziales"   
+    },
+    "headline_5": {
+      "title": "Langue"
     }
   },
   "faq": {

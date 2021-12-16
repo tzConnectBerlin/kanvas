@@ -152,15 +152,19 @@ export const Footer: FC<FooterProps> = () => {
                         gutterBottom
                         sx={{ marginTop: '1rem' }}
                     >
-                        {t('footer.headline_1')}
+                        {t('footer.headline_1.title')}
                     </Typography>
 
                     <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/store/">Store</StyledLink>
+                            <StyledLink to="/store/">
+                                {t('footer.headline_1.link_1')}
+                            </StyledLink>
                         </Box>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/product/">Product</StyledLink>
+                            <StyledLink to="/product/">
+                                {t('footer.headline_1.link_2')}
+                            </StyledLink>
                         </Box>
                     </Box>
                 </Grid>
@@ -171,15 +175,19 @@ export const Footer: FC<FooterProps> = () => {
                         gutterBottom
                         sx={{ marginTop: '1rem' }}
                     >
-                        {t('footer.headline_2')}
+                        {t('footer.headline_2.title')}
                     </Typography>
 
                     <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/vision/">Vision</StyledLink>
+                            <StyledLink to="/vision/">
+                                {t('footer.headline_2.link_1')}
+                            </StyledLink>
                         </Box>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/privacy/">NFT history</StyledLink>
+                            <StyledLink to="/privacy/">
+                                {t('footer.headline_2.link_2')}
+                            </StyledLink>
                         </Box>
                     </Box>
                 </Grid>
@@ -191,25 +199,31 @@ export const Footer: FC<FooterProps> = () => {
                     sx={{ height: '7rem', marginTop: '1rem' }}
                 >
                     <Typography weight="SemiBold" size="h5" gutterBottom>
-                        {t('footer.headline_3')}
+                        {t('footer.headline_3.title')}
                     </Typography>
 
                     <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/terms/">Terms</StyledLink>
+                            <StyledLink to="/terms/">
+                                {t('footer.headline_3.link_1')}
+                            </StyledLink>
                         </Box>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/privacy/">Privacy</StyledLink>
+                            <StyledLink to="/privacy/">
+                                {t('footer.headline_3.link_2')}
+                            </StyledLink>
                         </Box>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/faq/">F.A.Q</StyledLink>
+                            <StyledLink to="/faq/">
+                                {t('footer.headline_3.link_3')}
+                            </StyledLink>
                         </Box>
                     </Box>
                 </Grid>
 
                 <Grid item xs={6} md={3} sx={{ marginTop: '1rem' }}>
                     <Typography weight="SemiBold" size="h5" gutterBottom>
-                        {t('footer.headline_4')}
+                        {t('footer.headline_4.title')}
                     </Typography>
 
                     <Box
@@ -243,12 +257,12 @@ export const Footer: FC<FooterProps> = () => {
                     </Box>
 
                     <Typography weight="SemiBold" size="h5" gutterBottom>
-                        Languages
+                        {t('footer.headline_5.title')}
                     </Typography>
 
                     <CustomSelect
                         id="Language selection - footer"
-                        availableOptions={[                           
+                        availableOptions={[
                             {
                                 value: 'en',
                                 label: 'English',
@@ -274,10 +288,6 @@ export const Footer: FC<FooterProps> = () => {
                         disabled={false}
                         customSize="small"
                     />
-
-                    <Box sx={{ marginTop: '2.5rem' }}>
-                        <Copyright />
-                    </Box>
                 </Grid>
             </Grid>
         </StyledBox>

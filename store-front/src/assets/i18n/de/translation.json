@@ -30,13 +30,27 @@
     "button_2": "Zu Warenkorb hinzugefügt"
   },
   "footer": {
-    "headline_1": "Sitemap",
-    "headline_2": "Mehr über uns",
-    "headline_3": "Legal",
-    "headline_4": "Soziales",
-    "language": {
-      "label": "Sprache",
-      "select": "Auswählen"
+    "headline_1": {
+      "title": "Sitemap",
+      "link_1": "Shop",
+      "link_2": "Produkt"
+    },
+    "headline_2": {
+      "title": "Mehr über uns",
+      "link_2": "Vision",
+      "link_1": "NFT-Verlauf"
+    },
+    "headline_3": {
+      "title": "Rechtliches",
+      "link_1": "Geschäftsbedingungen",
+      "link_2": "Datenschutzerklärung",
+      "link_3": "FAQ"
+    },
+    "headline_4": {
+      "title": "Soziales"
+    },
+    "headline_5": {
+      "title": "Sprache"
     }
   },
   "faq": {
