@@ -10,7 +10,6 @@ import {
   ImageField,
   DateField,
   AutocompleteInput,
-  BooleanInput,
 } from 'react-admin';
 import { JsonInput, JsonField } from 'react-admin-json-view';
 
@@ -53,7 +52,6 @@ export const NftList = ({ ...props }) => (
       <DateField source="createdAt" label="Created at" showTime />
       <DateField source="updatedAt" label="Last updated at" showTime />
       <JsonField source="metadata" />
-      <TextField source="disabled" label="Disabled" />
     </Datagrid>
   </List>
 );
@@ -69,7 +67,6 @@ export const NftEdit = ({ ...props }) => {
         <TextInput source="nftContract" />
         <TextInput source="tokenId" />
         <JsonInput source="metadata" />
-        <BooleanInput source="disabled" />
         <ImageInput source="image" accept="image/*">
           <ImageField source="src" title="title" />
         </ImageInput>
