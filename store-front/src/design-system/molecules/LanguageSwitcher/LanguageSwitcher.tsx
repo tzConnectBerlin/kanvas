@@ -72,7 +72,6 @@ export const LanguageSwitcher: FC<LanguageSwitcherProps> = ({ ...props }) => {
                 variant="outlined"
                 label={t('common.language')}
                 onChange={handleTextfield}
-                placeholder="English"
                 select
             >
                 <MenuItem value="en" selected>English</MenuItem>

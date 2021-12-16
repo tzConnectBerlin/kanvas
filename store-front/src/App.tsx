@@ -30,10 +30,10 @@ export const fade = cssTransition({
 
 function App() {
     return (
-        <Suspense fallback={<p>loading...</p>}>
+        <>
             <Router />
             <StyledToastContainer transition={fade} />
-        </Suspense>
+        </>
     );
 }
 
