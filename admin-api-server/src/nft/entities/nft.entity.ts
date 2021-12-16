@@ -32,6 +32,23 @@ export class Nft {
   disabled?: boolean;
 
   getFieldsWithValues() {
-    return Object.keys(this).filter((key: string) => Boolean(this[key]));
+    return Object.keys(this).filter((key: string) => {
+      if (typeof this[key] !== 'undefined' || typeof this[key] !== null) {
+        if (key === 'disabled') {
+          return true;
+        }
+        return Boolean(this[key]);
+      }
+      return false;
+    });
+  }
+
+  getValidValues() {
+    return Object.values(this).filter((value: any) => {
+      if (typeof value === 'boolean') {
+        return true;
+      }
+      return Boolean(value);
+    });
   }
 }

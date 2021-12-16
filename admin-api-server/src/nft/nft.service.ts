@@ -59,7 +59,7 @@ export class NftService {
         dataUri,
         metadata,
       });
-      const params = Object.values(nftEntity).filter((item) => Boolean(item));
+      const params = nftEntity.getValidValues();
       const query = getInsertStatement(nftEntity);
       const result = await this.db.query(query, params);
       return { id: result.rows[0].id, ...createNftDto };
@@ -112,7 +112,7 @@ export class NftService {
     }
     const nft = new Nft({ ...updateNftDto, dataUri });
     const query = getUpdateStatement(nft);
-    const params = Object.values(nft).filter((item) => Boolean(item));
+    const params = nft.getValidValues();
     const result = await this.db.query(query, [...params, id]);
     if (result.rowCount >= 1) {
       return this.findOne(id);
