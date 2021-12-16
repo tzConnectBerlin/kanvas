@@ -94,6 +94,13 @@
       "link": "See all"
     }
   },
+  "checkout": {
+    "headline_0": "Summary",
+    "headline_1": "Choose payment method",
+    "headline_2": "Proceed payment",
+    "back_button": "Back"
+
+  },
   "cookies": {
     "text": "By clicking “Accept All Cookies”, you agree to the storing of cookies on your device. We use these cookies to enhance site navigation.",
     "button": "Accept all coookies",

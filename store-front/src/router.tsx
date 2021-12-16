@@ -26,6 +26,7 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import { INft } from './interfaces/artwork';
 import { toast } from 'react-toastify';
+import { Checkout } from './pages/Checkout';
 
 const StyledBrowserRouter = styled(BrowserRouter)<{ theme?: Theme }>`
     display: block;
@@ -165,6 +166,7 @@ const Router = () => {
                             path="/nft/:id"
                             render={(props) => <CreateNFT {...props} />}
                         />
+                        <Route path="/checkout" component={Checkout} />
                         <Route path="/404" component={NotFound} />
                         <Redirect from="*" to="/404" />
                     </Switch>
