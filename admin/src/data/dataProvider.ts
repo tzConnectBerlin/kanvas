@@ -131,12 +131,14 @@ const dataProvider = (
     });
   },
 
-  update: (resource, params) =>
-    httpClient(`${apiUrl}/${resource}/${params.id}`, {
+  update: (resource, params) => {
+    console.log(params);
+    return httpClient(`${apiUrl}/${resource}/${params.id}`, {
       method: 'PATCH',
-      body: JSON.stringify(params.data),
+      body: toFormData(params.data),
       headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
-    }).then(({ json }) => ({ data: json })),
+    }).then(({ json }) => ({ data: json }));
+  },
 
   // simple-rest doesn't handle provide an updateMany route, so we fallback to calling update n times instead
   updateMany: (resource, params) =>
@@ -152,7 +154,7 @@ const dataProvider = (
   create: (resource, params) =>
     httpClient(`${apiUrl}/${resource}`, {
       method: 'POST',
-      body: JSON.stringify(params.data),
+      body: toFormData(params.data),
       headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
     }).then(({ json }) => ({
       data: { ...params.data, id: json.id },
@@ -183,5 +185,24 @@ const dataProvider = (
       data: responses.map(({ json }) => json.id),
     })),
 });
+
+const toFormData = (data: any) => {
+  const formData = new FormData();
+  const keys = Object.keys(data);
+  keys.forEach((key) => {
+    if (data[key]) {
+      if (key === 'image') {
+        formData.append(key, data[key].rawFile);
+      } else {
+        if (typeof data[key] === 'object') {
+          formData.append(key, JSON.stringify(data[key]));
+        } else {
+          formData.append(key, data[key]);
+        }
+      }
+    }
+  });
+  return formData;
+};
 
 export default dataProvider;

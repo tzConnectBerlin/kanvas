@@ -9,8 +9,14 @@ import {
   Request,
   Query,
   UseGuards,
+  UploadedFile,
+  UseInterceptors,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { NFT_IMAGE_MAX_BYTES } from 'src/constants';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
 import { FilterParams } from 'src/types';
 import { NftDto } from './dto/nft.dto';
@@ -23,8 +29,27 @@ export class NftController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  create(@Request() req, @Body() createNftDto: NftDto) {
-    return this.nftService.create(req.user, createNftDto);
+  @UseInterceptors(
+    FileInterceptor('image', {
+      limits: { fileSize: NFT_IMAGE_MAX_BYTES },
+    }),
+  )
+  create(
+    @Request() req,
+    @Body(new ParseJSONArrayPipe()) createNftDto: NftDto,
+    @UploadedFile() image: any,
+  ) {
+    if (!image) {
+      throw new HttpException(
+        'NFT image required when creating an NFT',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return this.nftService.create(
+      req.user,
+      { ...createNftDto, nftState: 'proposal' },
+      image,
+    );
   }
 
   @Get()
@@ -44,9 +69,18 @@ export class NftController {
   }
 
   @UseGuards(JwtAuthGuard, UpdateNftGuard)
+  @UseInterceptors(
+    FileInterceptor('image', {
+      limits: { fileSize: NFT_IMAGE_MAX_BYTES },
+    }),
+  )
   @Patch(':id')
-  update(@Param('id') id: number, @Body() updateNftDto: NftDto) {
-    return this.nftService.update(id, updateNftDto);
+  update(
+    @Param('id') id: number,
+    @Body(new ParseJSONArrayPipe()) updateNftDto: NftDto,
+    @UploadedFile() image,
+  ) {
+    return this.nftService.update(id, updateNftDto, image);
   }
 
   @Delete(':id')
