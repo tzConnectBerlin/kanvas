@@ -17,6 +17,7 @@ export interface NftEntity {
   editionsSize: number;
   editionsAvailable: number;
   launchAt: number;
+  ownerStatuses?: string[];
 }
 
 export interface NftEntityPage {

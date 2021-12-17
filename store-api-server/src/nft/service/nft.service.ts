@@ -163,6 +163,9 @@ FROM price_bounds($1, $2, $3)`,
         orderBy,
         params.orderDirection,
       );
+      if (typeof params.userAddress !== 'undefined') {
+        await this.#addNftOwnerStatus(params.userAddress, res.nfts);
+      }
       return res;
     } catch (err) {
       Logger.error('Error on nft filtered query, err: ' + err);
@@ -181,11 +184,11 @@ FROM price_bounds($1, $2, $3)`,
         HttpStatus.BAD_REQUEST,
       );
     }
-    this.incrementNftViewCount(id);
+    this.#incrementNftViewCount(id);
     return nfts[0];
   }
 
-  async incrementNftViewCount(id: number) {
+  async #incrementNftViewCount(id: number) {
     this.conn.query(
       `
 UPDATE nft
@@ -194,6 +197,52 @@ WHERE id = $1
 `,
       [id],
     );
+  }
+
+  async #addNftOwnerStatus(address: string, nfts: NftEntity[]) {
+    const qryRes = await this.conn.query(
+      `
+SELECT
+  idx_assets_nat AS nft_id,
+  'owned' AS owner_status,
+  COUNT(1) AS num_editions
+FROM onchain_kanvas."storage.ledger_live" AS ledger_now
+WHERE ledger_now.idx_assets_address = $1
+  AND ledger_now.idx_assets_nat = ANY($2)
+GROUP BY 1
+
+UNION ALL
+
+SELECT
+  mtm.nft_id AS nft_id,
+  'pending' AS owner_status,
+  COUNT(1) AS num_editions
+FROM kanvas_user AS usr
+JOIN mtm_kanvas_user_nft AS mtm
+  ON  mtm.kanvas_user_id = usr.id
+  AND mtm.nft_id = ANY($2)
+LEFT JOIN onchain_kanvas."storage.ledger_ordered" AS ledger_history
+  ON  ledger_history.idx_assets_address = $1
+  AND ledger_history.idx_assets_nat = mtm.nft_id
+WHERE usr.address = $1
+  AND ledger_history IS NULL
+GROUP BY 1
+
+ORDER BY 1
+`,
+      [address, nfts.map((nft: NftEntity) => nft.id)],
+    );
+    const ownerStatuses: any = {};
+    for (const row of qryRes.rows) {
+      ownerStatuses[row.nft_id] = [
+        ...(ownerStatuses[row.nft_id] || []),
+        ...Array(row.num_editions).fill(row.owner_status),
+      ];
+    }
+
+    for (const nft of nfts) {
+      nft.ownerStatuses = ownerStatuses[nft.id];
+    }
   }
 
   async findByIds(
