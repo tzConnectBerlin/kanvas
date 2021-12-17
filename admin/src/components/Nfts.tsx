@@ -44,14 +44,13 @@ const defaultMetadata = {
 
 export const NftList = ({ ...props }) => (
   <List {...props} filter={{ disabled: false }}>
-    <Datagrid rowClick="edit">
+    <Datagrid rowClick="edit" expand={<JsonField source="metadata" />}>
       <TextField source="id" />
       <TextField source="nftName" label="Name" />
       <TextField source="nftState" label="Current State" />
       <ImageField source="dataUri" label="Image" />
       <DateField source="createdAt" label="Created at" showTime />
       <DateField source="updatedAt" label="Last updated at" showTime />
-      <JsonField source="metadata" />
     </Datagrid>
   </List>
 );
