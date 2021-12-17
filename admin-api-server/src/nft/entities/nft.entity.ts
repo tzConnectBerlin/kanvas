@@ -14,7 +14,8 @@ export class Nft {
       this.data_uri = nftDto.dataUri;
       this.ipfs_hash = nftDto.ipfsHash;
       this.created_by = nftDto.createdBy;
-      this.disabled = nftDto.disabled;
+      this.disabled =
+        typeof nftDto.disabled === 'undefined' ? false : nftDto.disabled;
     }
   }
 
