@@ -30,10 +30,28 @@
     "button_2": "Added to cart"
   },
   "footer": {
-    "headline_1": "Sitemap",
-    "headline_2": "More About us",
-    "headline_3": "Legal",
-    "headline_4": "Social"
+    "headline_1": {
+      "title": "Sitemap",
+      "link_1": "Store",
+      "link_2": "Product"
+    },
+    "headline_2": {
+      "title": "About",
+      "link_2": "Vision",
+      "link_1": "NFT history"
+    },
+    "headline_3": {
+      "title": "Legal",
+      "link_1": "Terms & Conditions",
+      "link_2": "Privacy Policy",
+      "link_3": "F.A.Q"
+    },
+    "headline_4": {
+      "title": "Social"
+    },    
+    "headline_5": {
+      "title": "Language"
+    }
   },
   "faq": {
     "headline": "FAQ",
