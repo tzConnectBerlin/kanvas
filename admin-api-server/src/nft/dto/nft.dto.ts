@@ -39,10 +39,9 @@ export class NftDto {
       .optional()
       .custom((value) => {
         try {
-          JSON.parse(value);
-          return true;
+          return typeof value === 'object' ? value : JSON.parse(value);
         } catch (error) {
-          return false;
+          return {};
         }
       }),
   )
