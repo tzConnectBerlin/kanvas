@@ -14,8 +14,7 @@ export class Nft {
       this.data_uri = nftDto.dataUri;
       this.ipfs_hash = nftDto.ipfsHash;
       this.created_by = nftDto.createdBy;
-      this.disabled =
-        typeof nftDto.disabled === 'undefined' ? false : nftDto.disabled;
+      this.disabled = nftDto.disabled || false;
     }
   }
 
@@ -44,7 +43,7 @@ export class Nft {
     });
   }
 
-  getValidValues() {
+  filterDefinedValues() {
     return Object.values(this).filter((value: any) => {
       if (typeof value === 'boolean') {
         return true;
