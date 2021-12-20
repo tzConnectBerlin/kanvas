@@ -258,8 +258,6 @@ WHERE session_id = $1
       }
       const nfts = await this.nftService.findByIds(nftIds);
 
-      console.log(nfts);
-
       await Promise.all(
         nfts.map((nft: NftEntity) => {
           return this.mintService.transfer(dbTx, nft, user.userAddress);
@@ -287,8 +285,6 @@ WHERE session_id = $1
     }
 
     const nftIds = await this.getCartNftIds(cartMeta.id);
-
-    console.log(nftIds);
     await dbTx.query(
       `
 INSERT INTO mtm_kanvas_user_nft (
