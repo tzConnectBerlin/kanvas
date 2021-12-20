@@ -13,6 +13,5 @@ export const SEARCH_SIMILARITY_LIMIT = 0.4;
 
 export const MINTER_ADDRESS = 'tz1YZh7rTPxf6EAmw7dkNszRGPpoN2ZFxuku';
 export const STORE_SYMBOL = 'KANVAS';
-export const IPFS_NODE: string = 'https://d-art.mypinata.cloud/ipfs';
 
 export const STORE_PUBLISHERS = ['Tezos'];

@@ -1,12 +1,6 @@
 import { Logger, Injectable, Inject } from '@nestjs/common';
-import {
-  IPFS_NODE,
-  STORE_SYMBOL,
-  STORE_PUBLISHERS,
-  MINTER_ADDRESS,
-} from 'src/constants';
+import { STORE_SYMBOL, STORE_PUBLISHERS, MINTER_ADDRESS } from 'src/constants';
 import { NftEntity } from 'src/nft/entity/nft.entity';
-import { create } from 'ipfs-http-client';
 import axios from 'axios';
 import { createReadStream, createWriteStream } from 'fs';
 import * as FormData from 'form-data';

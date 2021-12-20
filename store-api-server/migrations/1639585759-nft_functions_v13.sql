@@ -5,7 +5,7 @@
 BEGIN;
 
 -- Diff between previous and this version:
---   -
+--   - take into account onchain state wrt nfts owned by address
 ALTER FUNCTION nft_ids_filtered RENAME TO __nft_ids_filtered_v12;
 CREATE FUNCTION nft_ids_filtered(
     address TEXT, categories INTEGER[],
