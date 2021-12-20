@@ -1,7 +1,8 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Logger, Injectable, Inject } from '@nestjs/common';
 import { PG_CONNECTION, MINTER_ADDRESS } from '../../constants';
 import { NftEntity } from 'src/nft/entity/nft.entity';
 import { IpfsService } from 'src/nft/service/ipfs.service';
+import { Lock } from 'async-await-mutex-lock';
 
 interface Command {
   handler: string;
@@ -19,22 +20,30 @@ interface Command {
 @Injectable()
 export class MintService {
   ipfsService: IpfsService;
+  nftLock: Lock<number>;
 
   constructor() {
     this.ipfsService = new IpfsService();
+    this.nftLock = new Lock<number>();
   }
 
   async transfer(dbTx: any, nft: NftEntity, buyer: string) {
-    if (!(await this.#isNftSubmitted(dbTx, nft))) {
-      await this.#mint(dbTx, nft);
+    await this.nftLock.acquire(nft.id);
+    try {
+      if (!(await this.#isNftSubmitted(dbTx, nft))) {
+        await this.#mint(dbTx, nft);
+      }
+    } finally {
+      await this.nftLock.release(nft.id);
     }
+
     const cmd = {
       handler: 'nft',
       name: 'transfer',
       args: {
         token_id: nft.id,
         from_address: MINTER_ADDRESS,
-        to_address: 'tz1QyKEvd16HRssMJdBXxDLrtV7uQUR7EYjk', // buyer,
+        to_address: buyer,
         amount: 1,
       },
     };

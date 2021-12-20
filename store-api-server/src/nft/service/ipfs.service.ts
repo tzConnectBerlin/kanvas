@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Logger, Injectable, Inject } from '@nestjs/common';
 import {
   IPFS_NODE,
   STORE_SYMBOL,
@@ -6,12 +6,11 @@ import {
   MINTER_ADDRESS,
 } from 'src/constants';
 import { NftEntity } from 'src/nft/entity/nft.entity';
-import { create, urlSource } from 'ipfs-http-client';
-const axios = require('axios');
+import { create } from 'ipfs-http-client';
+import axios from 'axios';
 import { createReadStream, createWriteStream } from 'fs';
-const https = require('https');
-const FormData = require('form-data');
-const tmp = require('tmp');
+import * as FormData from 'form-data';
+import * as tmp from 'tmp';
 import { assertEnv } from 'src/utils';
 
 async function downloadFile(uri: string, targetFile: string) {
@@ -28,78 +27,22 @@ async function downloadFile(uri: string, targetFile: string) {
   });
 }
 
-async function pinUriToIPFS(
-  pinataApiKey: string,
-  pinataSecretApiKey: string,
-  uri: string,
-): Promise<string> {
-  const tmpFile = tmp.fileSync();
-  const tmpFileName = tmpFile.name;
-  console.log(tmpFile);
-
-  await downloadFile(uri, tmpFileName);
-
-  const form = new FormData();
-  form.append('file', createReadStream(tmpFileName));
-
-  return axios
-    .post('https://api.pinata.cloud/pinning/pinFileToIPFS', form, {
-      headers: {
-        pinata_api_key: pinataApiKey,
-        pinata_secret_api_key: pinataSecretApiKey,
-        ...form.getHeaders(),
-      },
-    })
-    .then(function (response: any) {
-      tmpFile.removeCallback();
-      return 'ipfs://' + response.data.IpfsHash;
-    })
-    .catch(function (error: any) {
-      tmpFile.removeCallback();
-      throw error;
-    });
-}
-
 @Injectable()
 export class IpfsService {
   PINATA_API_KEY = assertEnv('PINATA_API_KEY');
   PINATA_API_SECRET = assertEnv('PINATA_API_SECRET');
 
   async uploadNft(nft: NftEntity): Promise<string> {
-    const url = nft.dataUri; // .split('?')[0];
-    console.log('url: {}', url);
-
-    const [/*thumbnailIpfs, */ displayIpfs] = await Promise.all([
-      pinUriToIPFS(this.PINATA_API_KEY, this.PINATA_API_SECRET, url),
-      // ipfsCli.add(urlSource(url)), // todo: insert thumbnailUri here instead
+    const [displayIpfs, thumbnailIpfs] = await Promise.all([
+      this.#pinUri(nft.dataUri),
+      this.#pinUri(nft.dataUri), // TODO: insert thumbnailUri here instead
     ]);
 
-    const metadata = this.#nftMetadataJSON(
-      nft,
-      displayIpfs,
-      displayIpfs,
-      //thumbnailIpfs.cid.toString(),
-    );
-    console.log(metadata);
-    //process.exit();
-
-    return axios
-      .post('https://api.pinata.cloud/pinning/pinJSONToIPFS', metadata, {
-        headers: {
-          pinata_api_key: this.PINATA_API_KEY,
-          pinata_secret_api_key: this.PINATA_API_SECRET,
-        },
-      })
-      .then(function (response: any) {
-        return 'ipfs://' + response.data.IpfsHash;
-      })
-      .catch(function (error: any) {
-        console.log(error);
-        throw error;
-      });
+    const metadata = this.#nftMetadataJson(nft, displayIpfs, thumbnailIpfs);
+    return await this.#pinJson(metadata);
   }
 
-  #nftMetadataJSON(
+  #nftMetadataJson(
     nft: NftEntity,
     imageUri: string,
     thumbnailUri: string,
@@ -119,9 +62,56 @@ export class IpfsService {
       thumbnailUri: thumbnailUri,
 
       minter: MINTER_ADDRESS,
-      creators: [],
-      contributors: [],
+      creators: [], // TODO
+      contributors: [], // TODO
       publishers: STORE_PUBLISHERS,
     };
+  }
+
+  async #pinUri(uri: string): Promise<string> {
+    const tmpFile = tmp.fileSync();
+    const tmpFileName = tmpFile.name;
+
+    await downloadFile(uri, tmpFileName);
+
+    const form = new FormData();
+    form.append('file', createReadStream(tmpFileName));
+
+    return axios
+      .post('https://api.pinata.cloud/pinning/pinFileToIPFS', form, {
+        headers: {
+          pinata_api_key: this.PINATA_API_KEY,
+          pinata_secret_api_key: this.PINATA_API_SECRET,
+          ...form.getHeaders(),
+        },
+      })
+      .then(function (response: any) {
+        tmpFile.removeCallback();
+        return 'ipfs://' + response.data.IpfsHash;
+      })
+      .catch(function (error: any) {
+        Logger.error(`failed to pin content from uri to ipfs, err: ${error}`);
+        tmpFile.removeCallback();
+        throw error;
+      });
+  }
+
+  async #pinJson(jsonData: string): Promise<string> {
+    return axios
+      .post('https://api.pinata.cloud/pinning/pinJSONToIPFS', jsonData, {
+        headers: {
+          pinata_api_key: this.PINATA_API_KEY,
+          pinata_secret_api_key: this.PINATA_API_SECRET,
+        },
+      })
+      .then(function (response: any) {
+        return 'ipfs://' + response.data.IpfsHash;
+      })
+      .catch(function (error: any) {
+        Logger.error(
+          `failed to pin JSON to IPFS (JSON=${jsonData}), err: ${error}`,
+        );
+        throw error;
+      });
   }
 }
