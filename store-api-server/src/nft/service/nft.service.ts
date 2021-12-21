@@ -216,7 +216,9 @@ UNION ALL
 SELECT
   mtm.nft_id AS nft_id,
   'pending' AS owner_status,
-  COUNT(mtm) - SUM((mint.command->'args'->>'amount')::integer) AS num_editions
+  COUNT(mtm) -
+    COALESCE(SUM((mint.command->'args'->>'amount')::integer), 0)
+    AS num_editions
 FROM kanvas_user AS usr
 JOIN mtm_kanvas_user_nft AS mtm
   ON  mtm.kanvas_user_id = usr.id
