@@ -91,10 +91,10 @@ UNION ALL
 
 SELECT 1
 FROM peppermint.operations
-WHERE (command->'handler')::TEXT = 'nft'
-  AND (command->'name')::TEXT = 'create_and_mint'
-  AND (command->'args'->'token_id')::INTEGER = $1
-  AND state != 'rejected'
+WHERE command->>'handler' = 'nft'
+  AND command->>'name' = 'create_and_mint'
+  AND (command->'args'->>'token_id')::INTEGER = $1
+  AND state IN ('pending', 'processing', 'waiting')
 `,
       [nft.id],
     );

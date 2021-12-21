@@ -14,6 +14,7 @@ import { CategoryEntity } from 'src/category/entity/category.entity';
 import { FilterParams, PaginationParams } from '../params';
 import {
   PG_CONNECTION,
+  MINTER_ADDRESS,
   SEARCH_MAX_NFTS,
   SEARCH_MAX_CATEGORIES,
   SEARCH_SIMILARITY_LIMIT,
@@ -205,10 +206,10 @@ WHERE id = $1
 SELECT
   idx_assets_nat AS nft_id,
   'owned' AS owner_status,
-  COUNT(1) AS num_editions
+  assets_nat AS num_editions
 FROM onchain_kanvas."storage.ledger_live" AS ledger_now
-WHERE ledger_now.idx_assets_address = $1
-  AND ledger_now.idx_assets_nat = ANY($2)
+WHERE ledger_now.idx_assets_address = $2
+  AND ledger_now.idx_assets_nat = ANY($3)
 GROUP BY 1
 
 UNION ALL
@@ -216,21 +217,23 @@ UNION ALL
 SELECT
   mtm.nft_id AS nft_id,
   'pending' AS owner_status,
-  COUNT(1) AS num_editions
+  COUNT(mtm) - SUM((mint.command->'args'->>'amount')::integer) AS num_editions
 FROM kanvas_user AS usr
 JOIN mtm_kanvas_user_nft AS mtm
   ON  mtm.kanvas_user_id = usr.id
-  AND mtm.nft_id = ANY($2)
-LEFT JOIN onchain_kanvas."storage.ledger_ordered" AS ledger_history
-  ON  ledger_history.idx_assets_address = $1
-  AND ledger_history.idx_assets_nat = mtm.nft_id
-WHERE usr.address = $1
-  AND ledger_history IS NULL
+  AND mtm.nft_id = ANY($3)
+LEFT JOIN peppermint.operations mint
+  ON  mint.command->>'handler' = 'nft'
+  AND mint.command->>'name'::TEXT = 'transfer'
+  AND (mint.command->'args'->'token_id')::INTEGER = mtm.nft_id
+  AND mint.command->'args'->>'from_address' = $1
+  AND mint.command->'args'->>'to_address' = $2
+WHERE usr.address = $2
 GROUP BY 1
 
 ORDER BY 1
 `,
-      [address, nfts.map((nft: NftEntity) => nft.id)],
+      [MINTER_ADDRESS, address, nfts.map((nft: NftEntity) => nft.id)],
     );
     const ownerStatuses: any = {};
     for (const row of qryRes.rows) {
