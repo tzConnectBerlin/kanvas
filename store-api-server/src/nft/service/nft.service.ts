@@ -238,7 +238,7 @@ ORDER BY 1
     for (const row of qryRes.rows) {
       ownerStatuses[row.nft_id] = [
         ...(ownerStatuses[row.nft_id] || []),
-        ...Array(row.num_editions).fill(row.owner_status),
+        ...Array(Number(row.num_editions)).fill(row.owner_status),
       ];
     }
 
