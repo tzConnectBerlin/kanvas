@@ -123,7 +123,7 @@ LIMIT $3
       const nftIds = await this.conn.query(
         `
 SELECT nft_id, total_nft_count
-FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [
           params.userAddress,
           params.categories,
@@ -135,6 +135,7 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
           offset,
           limit,
           untilNft,
+          MINTER_ADDRESS,
         ],
       );
       const priceBounds = await this.conn.query(
@@ -214,23 +215,10 @@ WHERE ledger_now.idx_assets_address = $2
 UNION ALL
 
 SELECT
-  mtm.nft_id AS nft_id,
+  nft_id,
   'pending' AS owner_status,
-  COUNT(mtm) -
-    COALESCE(SUM((mint.command->'args'->>'amount')::integer), 0)
-    AS num_editions
-FROM kanvas_user AS usr
-JOIN mtm_kanvas_user_nft AS mtm
-  ON  mtm.kanvas_user_id = usr.id
-  AND mtm.nft_id = ANY($3)
-LEFT JOIN peppermint.operations mint
-  ON  mint.command->>'handler' = 'nft'
-  AND mint.command->>'name'::TEXT = 'transfer'
-  AND (mint.command->'args'->'token_id')::INTEGER = mtm.nft_id
-  AND mint.command->'args'->>'from_address' = $1
-  AND mint.command->'args'->>'to_address' = $2
-WHERE usr.address = $2
-GROUP BY 1
+  purchased_editions_pending_transfer(nft_id, $2, $1) as num_editions
+FROM UNNEST($3::integer[]) as nft_id
 
 ORDER BY 1
 `,
