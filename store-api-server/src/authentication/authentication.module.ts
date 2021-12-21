@@ -7,6 +7,7 @@ import { AuthenticationController } from 'src/authentication/controller/authenti
 import { JwtStrategy } from './strategy/jwt-auth.strategy';
 import { DbModule } from 'src/db.module';
 import { S3Service } from 'src/s3.service';
+import { MintService } from 'src/nft/service/mint.service'
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { S3Service } from 'src/s3.service';
     AuthenticationService,
     JwtStrategy,
     S3Service,
+    MintService,
   ],
   exports: [AuthenticationService, JwtStrategy],
 })
