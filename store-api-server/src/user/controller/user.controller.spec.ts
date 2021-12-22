@@ -1,9 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
-import { DbMockModule } from '../../db_mock.module';
 import { UserService } from '../service/user.service';
-import { NftService } from '../../nft/service/nft.service';
-import { S3Service } from '../../s3.service';
+import { NftService } from 'src/nft/service/nft.service';
+import { MintService } from 'src/nft/service/mint.service';
+import { IpfsService } from 'src/nft/service/ipfs.service';
+import { S3Service } from 'src/s3.service';
+import { DbMockModule } from 'src/db_mock.module';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -12,7 +14,7 @@ describe('UserController', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DbMockModule],
       controllers: [UserController],
-      providers: [UserService, NftService, S3Service],
+      providers: [UserService, NftService, MintService, IpfsService, S3Service],
     }).compile();
 
     controller = module.get<UserController>(UserController);
