@@ -6,7 +6,6 @@ import axiosRetry from 'axios-retry';
 import { createReadStream, createWriteStream } from 'fs';
 import * as FormData from 'form-data';
 import * as tmp from 'tmp';
-import { assertEnv } from 'src/utils';
 
 axiosRetry(axios, {
   retries: 3,
@@ -28,15 +27,18 @@ async function downloadFile(uri: string, targetFile: string) {
 
 @Injectable()
 export class IpfsService {
-  PINATA_API_KEY = assertEnv('PINATA_API_KEY');
-  PINATA_API_SECRET = assertEnv('PINATA_API_SECRET');
+  PINATA_API_KEY = process.env['PINATA_API_KEY'];
+  PINATA_API_SECRET = process.env['PINATA_API_SECRET'];
 
   async uploadNft(nft: NftEntity): Promise<string> {
+    if (!this.#serviceEnabled()) {
+      throw `IpfsService not enabled`;
+    }
     const [displayIpfs /*, thumbnailIpfs*/] = await Promise.all([
       this.#pinUri(nft.dataUri),
-      //  this.#pinUri(nft.thumbnailUri),
+      // this.#pinUri(nft.thumbnailUri),
     ]);
-    const thumbnailIpfs = displayIpfs;
+    const thumbnailIpfs = displayIpfs; // TODO: insert thumbnailUri here instead
 
     const metadata = this.#nftMetadataJson(nft, displayIpfs, thumbnailIpfs);
     return await this.#pinJson(metadata);
@@ -93,7 +95,7 @@ export class IpfsService {
         Logger.error(
           `failed to pin content from uri (downloaded to file: ${tmpFileName})to ipfs, err: ${error}`,
         );
-        //tmpFile.removeCallback();
+        tmpFile.removeCallback();
         throw error;
       });
   }
@@ -115,5 +117,21 @@ export class IpfsService {
         );
         throw error;
       });
+  }
+
+  #serviceEnabled(): boolean {
+    if (typeof this.PINATA_API_KEY === 'undefined') {
+      Logger.warn(
+        `failed to upload NFT to IPFS, IpfsService not enabled: PINATA_API_KEY env var not set`,
+      );
+      return false;
+    }
+    if (typeof this.PINATA_API_SECRET === 'undefined') {
+      Logger.warn(
+        `failed to upload NFT to IPFS, IpfsService not enabled: PINATA_API_SECRET env var not set`,
+      );
+      return false;
+    }
+    return true;
   }
 }
