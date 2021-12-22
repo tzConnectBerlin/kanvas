@@ -19,7 +19,6 @@ interface ShoppingCartProps {
     open: boolean;
     listCart: Function;
     expiresAt: string;
-    setOpenLogin: Function;
 }
 
 const ContainerPopupStyled = styled.div<{ open: boolean }>`
@@ -331,10 +330,8 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                     {props.open && (
                         <CustomButton
                             size="medium"
-                            label="Checkout"
-                            onClick={() =>
-                                !checkoutResponse.loading && checkout()
-                            }
+                            label="Go to checkout"
+                            onClick={() => { props.closeCart(); history.push('/checkout')} }
                             disabled={props.nftsInCart.length === 0}
                             loading={checkoutResponse.loading}
                             sx={{

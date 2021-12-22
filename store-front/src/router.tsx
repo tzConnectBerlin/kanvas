@@ -28,7 +28,7 @@ import { INft } from './interfaces/artwork';
 import { toast } from 'react-toastify';
 import { Checkout } from './pages/Checkout';
 
-const StyledBrowserRouter = styled(BrowserRouter)<{ theme?: Theme }>`
+const StyledBrowserRouter = styled(BrowserRouter) <{ theme?: Theme }>`
     display: block;
 
     #root {
@@ -166,7 +166,16 @@ const Router = () => {
                             path="/nft/:id"
                             render={(props) => <CreateNFT {...props} />}
                         />
-                        <Route path="/checkout" component={Checkout} />
+                        <Route path="/checkout" render={() =>
+                            <Checkout
+                                nftsInCart={nftsInCart}
+                                setNftsInCart={setNftsInCart}
+                                listCart={listCart}
+                                setLoginOpen={setLoginOpen}
+                                expiresAt={listCartResponse.data?.expiresAt}
+                                loading={listCartResponse.loading && !listCalled}
+                            />}
+                        />
                         <Route path="/404" component={NotFound} />
                         <Redirect from="*" to="/404" />
                     </Switch>
@@ -174,7 +183,6 @@ const Router = () => {
 
                 <ShoppingCart
                     open={cartOpen}
-                    setOpenLogin={setLoginOpen}
                     nftsInCart={nftsInCart}
                     setNftsInCart={setNftsInCart}
                     listCart={listCart}
