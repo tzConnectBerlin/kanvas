@@ -301,7 +301,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
 
                     <StyledMetadataStack
                         direction="column"
-                        sx={{ position: 'relative', padding: '1rem' }}
+                        sx={{ position: 'relative' }}
                     >
                         {/* Headline */}
                         <FlexSpacer />

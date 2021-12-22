@@ -255,8 +255,6 @@ export const SignInModal: FC<SignInModalProps> = ({
                 'Kanvas - address',
                 signUserResponse.data.userAddress,
             );
-
-            history.push(`/store`);
         }
     }, [signUserResponse.data]);
 
