@@ -1,11 +1,16 @@
-import { Logger, Injectable, Inject } from '@nestjs/common';
+import { Logger, Injectable } from '@nestjs/common';
 import { STORE_SYMBOL, STORE_PUBLISHERS, MINTER_ADDRESS } from 'src/constants';
 import { NftEntity } from 'src/nft/entity/nft.entity';
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import { createReadStream, createWriteStream } from 'fs';
 import * as FormData from 'form-data';
 import * as tmp from 'tmp';
 import { assertEnv } from 'src/utils';
+
+axiosRetry(axios, {
+  retries: 3,
+});
 
 async function downloadFile(uri: string, targetFile: string) {
   const writer = createWriteStream(targetFile);
@@ -27,10 +32,11 @@ export class IpfsService {
   PINATA_API_SECRET = assertEnv('PINATA_API_SECRET');
 
   async uploadNft(nft: NftEntity): Promise<string> {
-    const [displayIpfs, thumbnailIpfs] = await Promise.all([
+    const [displayIpfs /*, thumbnailIpfs*/] = await Promise.all([
       this.#pinUri(nft.dataUri),
-      this.#pinUri(nft.dataUri), // TODO: insert thumbnailUri here instead
+      //  this.#pinUri(nft.thumbnailUri),
     ]);
+    const thumbnailIpfs = displayIpfs;
 
     const metadata = this.#nftMetadataJson(nft, displayIpfs, thumbnailIpfs);
     return await this.#pinJson(metadata);
@@ -84,8 +90,10 @@ export class IpfsService {
         return 'ipfs://' + response.data.IpfsHash;
       })
       .catch(function (error: any) {
-        Logger.error(`failed to pin content from uri to ipfs, err: ${error}`);
-        tmpFile.removeCallback();
+        Logger.error(
+          `failed to pin content from uri (downloaded to file: ${tmpFileName})to ipfs, err: ${error}`,
+        );
+        //tmpFile.removeCallback();
         throw error;
       });
   }

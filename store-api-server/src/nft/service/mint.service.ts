@@ -22,35 +22,50 @@ export class MintService {
   ipfsService: IpfsService;
   nftLock: Lock<number>;
 
-  constructor() {
+  constructor(@Inject(PG_CONNECTION) private conn: any) {
     this.ipfsService = new IpfsService();
     this.nftLock = new Lock<number>();
   }
 
-  async transfer(dbTx: any, nft: NftEntity, buyer: string) {
-    await this.nftLock.acquire(nft.id);
-    try {
-      if (!(await this.#isNftSubmitted(dbTx, nft))) {
-        await this.#mint(dbTx, nft);
+  async transfer_nfts(nfts: NftEntity[], buyer_address: string) {
+    for (const nft of nfts) {
+      try {
+        await this.#transfer_nft(nft, buyer_address);
+        Logger.log(
+          `transfer created for nft (id=${nft.id}) to buyer (address=${buyer_address})`,
+        );
+      } catch (err: any) {
+        Logger.error(
+          `failed to transfer nft (id=${nft.id}) to buyer (address=${buyer_address}), err: ${err}`,
+        );
       }
-    } finally {
-      await this.nftLock.release(nft.id);
     }
-
-    const cmd = {
-      handler: 'nft',
-      name: 'transfer',
-      args: {
-        token_id: nft.id,
-        from_address: MINTER_ADDRESS,
-        to_address: buyer,
-        amount: 1,
-      },
-    };
-    await this.#insertCommand(dbTx, cmd);
   }
 
-  async #mint(dbTx: any, nft: NftEntity) {
+  async #transfer_nft(nft: NftEntity, buyer_address: string) {
+    await this.nftLock.acquire(nft.id);
+    try {
+      if (!(await this.#isNftSubmitted(nft))) {
+        await this.#mint(nft);
+      }
+
+      const cmd = {
+        handler: 'nft',
+        name: 'transfer',
+        args: {
+          token_id: nft.id,
+          from_address: MINTER_ADDRESS,
+          to_address: buyer_address,
+          amount: 1,
+        },
+      };
+      await this.#insertCommand(cmd);
+    } finally {
+      this.nftLock.release(nft.id);
+    }
+  }
+
+  async #mint(nft: NftEntity) {
     const metadataIpfs = await this.ipfsService.uploadNft(nft);
     const cmd = {
       handler: 'nft',
@@ -63,11 +78,11 @@ export class MintService {
       },
     };
 
-    await this.#insertCommand(dbTx, cmd);
+    await this.#insertCommand(cmd);
   }
 
-  async #insertCommand(dbTx: any, cmd: Command) {
-    await dbTx.query(
+  async #insertCommand(cmd: Command) {
+    await this.conn.query(
       `
 INSERT INTO peppermint.operations (
   originator, command
@@ -80,8 +95,8 @@ VALUES (
     );
   }
 
-  async #isNftSubmitted(dbTx: any, nft: NftEntity): Promise<boolean> {
-    const qryRes = await dbTx.query(
+  async #isNftSubmitted(nft: NftEntity): Promise<boolean> {
+    const qryRes = await this.conn.query(
       `
 SELECT 1
 FROM onchain_kanvas."storage.token_metadata_live"

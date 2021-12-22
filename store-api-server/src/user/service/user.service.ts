@@ -258,11 +258,10 @@ WHERE session_id = $1
       }
       const nfts = await this.nftService.findByIds(nftIds);
 
-      await Promise.all(
-        nfts.map((nft: NftEntity) => {
-          return this.mintService.transfer(dbTx, nft, user.userAddress);
-        }),
-      );
+      // Don't await results of the transfers. Finish the checkout, any issues
+      // should be solved asynchronously to the checkout process itself.
+      this.mintService.transfer_nfts(nfts, user.userAddress);
+
       await dbTx.query(`COMMIT`);
     } catch (err: any) {
       await dbTx.query(`ROLLBACK`);
