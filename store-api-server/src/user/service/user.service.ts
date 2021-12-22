@@ -13,6 +13,21 @@ const generate = require('meaningful-string');
 interface CartMeta {
   id: number;
   expiresAt: number;
+  locked: boolean;
+}
+
+interface NftOrder {
+  id: number;
+  userId: number;
+  orderAt: number;
+}
+
+export enum PaymentStatus {
+  CREATED = 'created',
+  PROCESSING = 'processing',
+  CANCELED = 'canceled',
+  SUCCEEDED = 'succeeded',
+  FAILED = 'failed'
 }
 
 @Injectable()
@@ -27,7 +42,7 @@ export class UserService {
     @Inject(PG_CONNECTION) private conn: any,
     private readonly s3Service: S3Service,
     public readonly nftService: NftService,
-  ) {}
+  ) { }
 
   async create(user: UserEntity): Promise<UserEntity> {
     const generateRandomName = typeof user.userName === 'undefined';
@@ -228,6 +243,7 @@ WHERE session_id = $1
       return {
         nfts: [],
         expiresAt: undefined,
+        locked: false
       };
     }
 
@@ -236,11 +252,58 @@ WHERE session_id = $1
       return {
         nfts: [],
         expiresAt: undefined,
+        locked: false
       };
     }
     return {
       nfts: await this.nftService.findByIds(nftIds, 'nft_id', 'asc'),
       expiresAt: cartMeta.expiresAt,
+      locked: cartMeta.locked
+    };
+  }
+
+  async isCartLocked(session: string): Promise<boolean> {
+    const cartMeta = await this.getCartMeta(session);
+    console.log(cartMeta)
+    if (typeof cartMeta === 'undefined') {
+      return false;
+    }
+
+    return cartMeta.locked
+  }
+
+  async cartLock(lock: boolean, session: string): Promise<UserCart> {
+    const cartMeta = await this.getCartMeta(session);
+    if (typeof cartMeta === 'undefined') {
+      return {
+        nfts: [],
+        expiresAt: undefined,
+        locked: false
+      };
+    }
+
+    const tx = await this.conn.connect();
+    try {
+      tx.query(`BEGIN`);
+      await tx.query(
+        `
+UPDATE cart_session
+SET locked = $2
+WHERE id = $1;
+`, [cartMeta.id, lock]
+      );
+      await tx.query(`COMMIT`);
+    } catch (err: any) {
+      await tx.query(`ROLLBACK`);
+      throw err;
+    } finally {
+      tx.release();
+    }
+
+    return {
+      nfts: [],
+      expiresAt: undefined,
+      locked: lock // Working, though not sure it s the way to go
     };
   }
 
@@ -296,6 +359,7 @@ WHERE cart_session_id = $1`,
 
   async cartAdd(session: string, nftId: number): Promise<Result<null, string>> {
     const cartMeta = await this.touchCart(session);
+
     const tx = await this.conn.connect();
     try {
       tx.query('BEGIN');
@@ -340,6 +404,9 @@ WHERE nft.id = $1`,
 
   async cartRemove(session: string, nftId: number): Promise<boolean> {
     const cartMeta = await this.touchCart(session);
+    if (cartMeta.locked) {
+      return false
+    }
     const qryRes = await this.conn.query(
       `
 DELETE FROM mtm_cart_session_nft
@@ -380,12 +447,13 @@ INSERT INTO cart_session (
   session_id, expires_at
 )
 VALUES ($1, $2)
-RETURNING id, expires_at`,
+RETURNING id, expires_at, locked`,
       [session, expiresAt.toUTCString()],
     );
     return {
       id: qryRes.rows[0]['id'],
       expiresAt: qryRes.rows[0]['expires_at'],
+      locked: qryRes.rows[0]['locked']
     };
   }
 
@@ -397,7 +465,7 @@ RETURNING id, expires_at`,
 
     const qryRes = await this.conn.query(
       `
-SELECT id, expires_at
+SELECT id, expires_at, locked
 FROM cart_session
 WHERE session_id = $1
       `,
@@ -409,6 +477,7 @@ WHERE session_id = $1
     return <CartMeta>{
       id: qryRes.rows[0]['id'],
       expiresAt: qryRes.rows[0]['expires_at'],
+      locked: qryRes.rows[0]['locked']
     };
   }
 
@@ -425,4 +494,114 @@ WHERE expires_at < now() AT TIME ZONE 'UTC'`,
     expiresAt.setTime(expiresAt.getTime() + CART_EXPIRATION_MILLI_SECS);
     return expiresAt;
   }
+
+  async createPayment(paymentId: string, nftOrderId: number, provider: string): Promise<boolean> {
+
+    const tx = await this.conn.connect();
+    try {
+      tx.query('BEGIN');
+
+      await tx.query(
+        `
+  INSERT INTO payment (
+    payment_id, status, nft_order_id, provider
+  )
+  VALUES ($1, $2, $3, $4)
+  RETURNING id`,
+        [paymentId, PaymentStatus.CREATED, nftOrderId, provider],
+      );
+
+      await tx.query('COMMIT');
+    } catch (err) {
+      await tx.query('ROLLBACK');
+      throw err;
+    } finally {
+      tx.release();
+    }
+
+    return true
+  }
+
+  async editPaymentStatus(status: PaymentStatus, paymentId: string) {
+    const tx = await this.conn.connect();
+    try {
+      tx.query('BEGIN');
+
+      await tx.query(
+        `
+  UPDATE payment
+  SET status = $1
+  WHERE payment_id = $2`,
+        [status, paymentId],
+      );
+
+      await tx.query('COMMIT');
+    } catch (err) {
+      await tx.query('ROLLBACK');
+      throw err;
+    } finally {
+      tx.release();
+    }
+  }
+
+  async createNftOrder(session: string, userId: number): Promise<NftOrder> {
+    const cartMeta = await this.getCartMeta(session);
+
+    if (typeof cartMeta === 'undefined') {
+      throw Err(
+        `createNftOrder err: cart should not be empty`,
+      );
+    }
+
+    if (!cartMeta.locked) {
+      throw Err(
+        `createNftOrder err: cart should be locked`,
+      );
+    }
+
+    const tx = await this.conn.connect();
+    let nftOrderId: number;
+    let orderAt = new Date();
+
+    try {
+      tx.query('BEGIN');
+      const nftQryRes = await tx.query(
+        `
+  INSERT INTO nft_order (
+    user_id, order_at
+  )
+  VALUES ($1, $2)
+  RETURNING id`,
+        [userId, orderAt.toUTCString()],
+      );
+
+      nftOrderId = nftQryRes.rows[0]['id'];
+
+      await tx.query(
+        `
+INSERT INTO mtm_nft_order_nft (
+  nft_order_id, nft_id
+)
+SELECT $1, nft_id FROM mtm_cart_session_nft
+WHERE cart_session_id = $2
+        `,
+        [nftOrderId, cartMeta.id],
+      );
+
+      await tx.query('COMMIT');
+    } catch (err) {
+      console.log(err)
+      await tx.query('ROLLBACK');
+      throw err;
+    } finally {
+      tx.release();
+    }
+
+    return <NftOrder>{
+      id: nftOrderId,
+      orderAt: orderAt.getTime(),
+      userId: userId,
+    }
+  }
+
 }

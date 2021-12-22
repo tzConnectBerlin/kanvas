@@ -5,6 +5,8 @@ import {
   HttpStatus,
   Body,
   Param,
+  Headers,
+  Req,
   Controller,
   Post,
   UseInterceptors,
@@ -16,7 +18,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserEntity } from '../entity/user.entity';
-import { UserService } from '../service/user.service';
+import { PaymentStatus, UserService } from '../service/user.service';
 import { CurrentUser } from '../../decoraters/user.decorator';
 import {
   JwtAuthGuard,
@@ -27,14 +29,18 @@ import {
   PG_FOREIGN_KEY_VIOLATION_ERRCODE,
   PROFILE_PICTURE_MAX_BYTES,
 } from '../../constants';
+import { assertEnv } from 'src/utils';
 
 interface EditProfile {
   userName?: string;
 }
 
+const stripe = require("stripe")(assertEnv('STRIPE_SECRET'));
+const endpointSecret = assertEnv('STRIPE_WEBHOOK_SECRET')
+
 @Controller('users')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService) { }
 
   @Get('/profile')
   @UseGuards(JwtFailableAuthGuard)
@@ -103,6 +109,91 @@ export class UserController {
     }
   }
 
+  @Post('/stripe-webhook')
+  async stripeWebhook(@Headers('stripe-signature') signature: string, @Req() request: any) {
+    if (endpointSecret) {
+      // Get the signature sent by Stripe
+      let constructedEvent;
+
+      try {
+        constructedEvent = await stripe.webhooks.constructEvent(
+          request.body,
+          signature,
+          endpointSecret
+        );
+
+      } catch (err) {
+        throw new HttpException(
+          'Webhook signature verification failed',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      switch (constructedEvent.type) {
+        case 'payment_intent.succeeded':
+          const paymentIntentSucceeded = constructedEvent.data.object;
+          await this.userService.editPaymentStatus(PaymentStatus.SUCCEEDED, paymentIntentSucceeded.id)
+          console.log('payment_intent.succeeded')
+          // Mint or transfer the token ...
+
+          break;
+        case 'payment_intent.processing':
+          const paymentIntentProcessing = constructedEvent.data.object;
+          await this.userService.editPaymentStatus(PaymentStatus.PROCESSING, paymentIntentProcessing.id)
+          break;
+        case 'payment_intent.canceled':
+          const paymentIntentCanceled = constructedEvent.data.object;
+          await this.userService.editPaymentStatus(PaymentStatus.CANCELED, paymentIntentCanceled.id)
+
+          break;
+        case 'payment_intent.payment_failed':
+          const paymentIntentPaymentFailed = constructedEvent.data.object;
+          await this.userService.editPaymentStatus(PaymentStatus.FAILED, paymentIntentPaymentFailed.id)
+          console.log('payment_intent.payment_failed')
+
+          break;
+        default:
+          console.log(`Unhandled event type ${constructedEvent.type}`);
+      }
+    }
+
+    throw new HttpException('', HttpStatus.NO_CONTENT);
+  }
+
+  @Post('/create-payment-intent')
+  @UseGuards(JwtAuthGuard)
+  async createPayment(
+    @Session() cookieSession: any,
+    @CurrentUser() user: UserEntity,
+  ) {
+
+    const cartSession = await this.getCartSession(cookieSession, user);
+
+    const cartList = await this.userService.cartList(cartSession)
+    const amount = cartList.nfts.reduce((sum, nft) => sum + nft.price, 0)
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount * 100,
+      currency: "eur", // Have to change this to handle different currencies
+      automatic_payment_methods: {
+        enabled: false,
+      },
+    });
+
+    const nftOrder = await this.userService.createNftOrder(cartSession, user.id)
+      .catch(err => {
+        console.log(err)
+        throw new HttpException(
+          err.val,
+          HttpStatus.BAD_REQUEST,
+        );
+      })
+
+    await this.userService.createPayment(paymentIntent.id, nftOrder.id, 'stripe')
+
+    return { clientSecret: paymentIntent.client_secret }
+  }
+
   @Get('/profile/edit/check')
   @UseGuards(JwtAuthGuard)
   async checkAllowedEdit(@Query('userName') userName: string) {
@@ -121,6 +212,14 @@ export class UserController {
     @Param('nftId') nftId: number,
   ) {
     const cartSession = await this.getCartSession(cookieSession, user);
+    const cartLocked = await this.userService.isCartLocked(cartSession);
+    if (cartLocked) {
+      throw new HttpException(
+        'No actions allowed on this cart',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const addedRes = await this.userService
       .cartAdd(cartSession, nftId)
       .catch((err: any) => {
@@ -159,6 +258,14 @@ export class UserController {
     @Param('nftId') nftId: number,
   ) {
     const cartSession = await this.getCartSession(cookieSession, user);
+    const cartLocked = await this.userService.isCartLocked(cartSession);
+    if (cartLocked) {
+      throw new HttpException(
+        'No actions allowed on this cart',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const removed = await this.userService.cartRemove(cartSession, nftId);
     if (!removed) {
       throw new HttpException(
@@ -167,7 +274,7 @@ export class UserController {
       );
     }
     // return 204 (successful delete, returning nothing)
-    throw new HttpException('', HttpStatus.NO_CONTENT);
+    throw new HttpException('', HttpStatus.ACCEPTED);
   }
 
   @Post('cart/list')
@@ -178,6 +285,18 @@ export class UserController {
   ) {
     const cartSession = await this.getCartSession(cookieSession, user);
     return await this.userService.cartList(cartSession);
+  }
+
+  // To verify
+  @Post('cart/lock/:willLock')
+  @UseGuards(JwtFailableAuthGuard)
+  async cartValidate(
+    @Session() cookieSession: any,
+    @CurrentUser() user: UserEntity,
+    @Param('willLock') willLock: boolean,
+  ) {
+    const cartSession = await this.getCartSession(cookieSession, user);
+    return await this.userService.cartLock(willLock, cartSession);
   }
 
   @Post('cart/checkout')
