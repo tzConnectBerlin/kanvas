@@ -274,7 +274,7 @@ export class UserController {
       );
     }
     // return 204 (successful delete, returning nothing)
-    throw new HttpException('', HttpStatus.ACCEPTED);
+    throw new HttpException('', HttpStatus.NO_CONTENT);
   }
 
   @Post('cart/list')
@@ -289,7 +289,7 @@ export class UserController {
 
   // To verify
   @Post('cart/lock/:willLock')
-  @UseGuards(JwtFailableAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async cartValidate(
     @Session() cookieSession: any,
     @CurrentUser() user: UserEntity,
