@@ -24,7 +24,7 @@ export class NftController {
   @Get()
   async getFiltered(@Query() params: FilterParams): Promise<NftEntityPage> {
     this.validateFilterParams(params);
-    return this.nftService.findNftsWithFilter(params);
+    return await this.nftService.findNftsWithFilter(params);
   }
 
   @Get('/search')
@@ -34,7 +34,7 @@ export class NftController {
 
   @Post('/:id')
   async byId(@Param('id') id: number): Promise<NftEntity> {
-    return this.nftService.byId(id);
+    return await this.nftService.byId(id);
   }
 
   validateFilterParams(params: FilterParams): void {

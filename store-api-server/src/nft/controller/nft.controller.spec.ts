@@ -1,9 +1,8 @@
-require('dotenv').config();
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { NftController } from './nft.controller';
 import { DbMockModule } from '../../db_mock.module';
-import { NftService } from '../service/nft.service';
+import { NftServiceMock } from '../service/nft_mock.service';
 import { PaginationParams } from '../params';
 
 describe('NftController', () => {
@@ -13,7 +12,12 @@ describe('NftController', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DbMockModule],
       controllers: [NftController],
-      providers: [NftService],
+      providers: [
+        {
+          provide: 'NftService',
+          useClass: NftServiceMock,
+        },
+      ],
     }).compile();
 
     controller = module.get<NftController>(NftController);
@@ -25,22 +29,44 @@ describe('NftController', () => {
 
   const expHttpStatusTests = [
     {
-      name: '',
-      params: <PaginationParams>{ page: 0 },
-      expStatusCode: 401,
+      name: 'bad page number (< 1)',
+      params: { ...new PaginationParams(), page: 0 },
+      expStatusCode: 400,
+    },
+    {
+      name: 'bad page number (< 1), part 2',
+      params: { ...new PaginationParams(), page: -1 },
+      expStatusCode: 400,
+    },
+    {
+      name: 'bad page size (< 1)',
+      params: { ...new PaginationParams(), pageSize: 0 },
+      expStatusCode: 400,
+    },
+    {
+      name: 'empty order direction',
+      params: { ...new PaginationParams(), orderDirection: '' },
+      expStatusCode: 400,
+    },
+    {
+      name: 'empty order by',
+      params: { ...new PaginationParams(), orderBy: '' },
+      expStatusCode: 400,
+    },
+    {
+      name: 'all default values is OK (note: expecting 500, due to mock throwing an err after params checks)',
+      params: new PaginationParams(),
+      expStatusCode: 500,
     },
   ];
 
   for (const { name, params, expStatusCode } of expHttpStatusTests) {
-    it(`should return ${expStatusCode} for .get(${params})`, async () => {
-      //expectErrWithHttpStatus(expStatusCode, async () => {
-      //await controller.getFiltered(params).rejects;
-      //try {
-      //  await controller.getFiltered(params);
-      //} catch (err: any) {
-      //  throw err;
-      //}
-      //});
+    it(`${name}: should return ${expStatusCode} for .get(${JSON.stringify(
+      params,
+    )})`, async () => {
+      await expectErrWithHttpStatus(expStatusCode, () =>
+        controller.getFiltered(params),
+      );
     });
   }
 });
@@ -52,15 +78,12 @@ async function expectErrWithHttpStatus(
   try {
     await f();
   } catch (err: any) {
-    if (!(err instanceof HttpException)) {
-      throw `expected HttpException, got: ${err}`;
-    }
+    //Logger.error(err);
+    expect(err instanceof HttpException).toBe(true);
+
     const gotStatusCode = err.getStatus();
     expect(gotStatusCode).toEqual(expStatusCode);
-    if (gotStatusCode !== expStatusCode) {
-      throw `expected HttpException with status=${expStatusCode}, got ${gotStatusCode} with err: ${err}`;
-    }
     return;
   }
-  throw `expected HttpException, got no error`;
+  expect('expected HttpException').toBe('got no error');
 }
