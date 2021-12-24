@@ -1,4 +1,5 @@
 import { Ok, Err } from 'ts-results';
+import { Logger, HttpException, HttpStatus } from '@nestjs/common';
 
 class AssertionError extends Error {
   constructor(message: string) {
@@ -33,4 +34,25 @@ export function findOne(predicate: any, xs: any[]) {
   } else {
     return new Err('findOne found multiple results');
   }
+}
+
+//
+// testing utils
+//
+
+export async function expectErrWithHttpStatus(
+  expStatusCode: number,
+  f: () => Promise<any>,
+): Promise<void> {
+  try {
+    await f();
+  } catch (err: any) {
+    //Logger.error(err);
+    expect(err instanceof HttpException).toBe(true);
+
+    const gotStatusCode = err.getStatus();
+    expect(gotStatusCode).toEqual(expStatusCode);
+    return;
+  }
+  expect('expected HttpException').toBe('got no error');
 }

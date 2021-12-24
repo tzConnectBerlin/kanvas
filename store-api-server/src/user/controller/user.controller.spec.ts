@@ -6,6 +6,7 @@ import { MintService } from 'src/nft/service/mint.service';
 import { IpfsService } from 'src/nft/service/ipfs.service';
 import { S3Service } from 'src/s3.service';
 import { DbMockModule } from 'src/db_mock.module';
+import { expectErrWithHttpStatus } from 'src/utils';
 
 describe('UserController', () => {
   let controller: UserController;

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { NftController } from './nft.controller';
-import { DbMockModule } from '../../db_mock.module';
+import { DbMockModule } from 'src/db_mock.module';
 import { NftServiceMock } from '../service/nft_mock.service';
 import { PaginationParams } from '../params';
 
@@ -27,7 +27,7 @@ describe('NftController', () => {
     expect(controller).toBeDefined();
   });
 
-  const expHttpStatusTests = [
+  const getFilteredHttpStatusTests = [
     {
       name: 'bad page number (< 1)',
       params: { ...new PaginationParams(), page: 0 },
@@ -49,8 +49,29 @@ describe('NftController', () => {
       expStatusCode: 400,
     },
     {
+      name: 'nonsense order direction',
+      params: {
+        ...new PaginationParams(),
+        orderDirection: 'nonsense direction',
+      },
+      expStatusCode: 400,
+    },
+    {
       name: 'empty order by',
       params: { ...new PaginationParams(), orderBy: '' },
+      expStatusCode: 400,
+    },
+    {
+      name: 'nonsense order by',
+      params: { ...new PaginationParams(), orderBy: 'nonsense order by' },
+      expStatusCode: 400,
+    },
+    {
+      name: 'nonsense availability entry',
+      params: {
+        ...new PaginationParams(),
+        availability: ['soldOut', 'nonsense'],
+      },
       expStatusCode: 400,
     },
     {
@@ -60,7 +81,7 @@ describe('NftController', () => {
     },
   ];
 
-  for (const { name, params, expStatusCode } of expHttpStatusTests) {
+  for (const { name, params, expStatusCode } of getFilteredHttpStatusTests) {
     it(`${name}: should return ${expStatusCode} for .get(${JSON.stringify(
       params,
     )})`, async () => {
