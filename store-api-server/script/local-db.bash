@@ -24,9 +24,11 @@ BOOT_TIME=3s
     ./script/shmig -t postgresql -d postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_DATABASE up || exit 1
 
     psql < script/populate-testdb.sql
-) &
+) >/dev/null &
 
-docker run -ti \
+[ -z $DOCKER_ARGS ] && export DOCKER_ARGS='-t'
+
+docker run ${DOCKER_ARGS} \
     -p $DB_PORT:5432 \
     -e POSTGRES_PASSWORD=$DB_PASSWORD \
     -e POSTGRES_USER=$DB_USERNAME \

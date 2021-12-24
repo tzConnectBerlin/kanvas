@@ -28,4 +28,11 @@ describe('AppController (e2e)', () => {
     const res = await request(app.getHttpServer()).get('/users/profile');
     expect(res.statusCode).toEqual(400);
   });
+
+  it('/users/profile: non existing userAddress provided => BAD REQUEST', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/users/profile')
+      .query({ userAddress: 'nonsense address' });
+    expect(res.statusCode).toEqual(400);
+  });
 });
