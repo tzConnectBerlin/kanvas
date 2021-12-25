@@ -1,7 +1,9 @@
 #!/bin/bash
-cd $(git rev-parse --show-toplevel)/store-api-server
+REPO_ROOT=$(git rev-parse --show-toplevel)
+cd "$REPO_ROOT"/store-api-server
 
-# Note: this script expects peppermint repo to be in repo-root/../peppermint
+# Note: this script expects
+# - peppermint repo to be in repo-root/../peppermint
 
 [ -z $DB_PORT ] && export DB_PORT=5432
 [ -z $DB_PASSWORD ] && export DB_PASSWORD=dev_password
@@ -9,7 +11,9 @@ cd $(git rev-parse --show-toplevel)/store-api-server
 [ -z $DB_DATABASE ] && export DB_DATABASE=dev_database
 [ -z $DB_HOST ] && export DB_HOST=localhost
 
-BOOT_TIME=3s
+docker image pull ghcr.io/tzconnectberlin/que-pasa:1.0.7 >/dev/null || exit 1
+
+BOOT_TIME=3
 (
     sleep $BOOT_TIME;
 
@@ -18,6 +22,18 @@ BOOT_TIME=3s
     export PGHOST=$DB_HOST
     export PGPORT=$DB_PORT
     export PGDATABASE=$DB_DATABASE
+
+    # to set up the database schema of onchain_kanvas:
+    (
+        source "$REPO_ROOT"/config/.env-kanvas
+        export DATABASE_URL="host=$PGHOST dbname=$PGDATABASE user=$PGUSER password=$PGPASSWORD port=$PGPORT"
+        docker run \
+            --network host \
+            -e NODE_URL=$NODE_URL \
+            -e DATABASE_URL="$DATABASE_URL" \
+            ghcr.io/tzconnectberlin/que-pasa:1.0.7 \
+            --contracts onchain_kanvas=KT1D9iJmbwoDcJUTvRuktHXEMgEZscLMjtuR -l 0
+    ) 2>&1 >/dev/null &
 
     psql < ../../peppermint/database/schema.sql
 

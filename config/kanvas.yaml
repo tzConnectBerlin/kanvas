@@ -1,0 +1,4 @@
+# PMM (on granada testnet)
+contracts:
+- name: "onchain_kanvas"
+  address: "KT1D9iJmbwoDcJUTvRuktHXEMgEZscLMjtuR"

@@ -1,7 +1,7 @@
 #!/bin/bash
 cd $(git rev-parse --show-toplevel)/store-api-server
 
-WAIT_TESTDB=3
+WAIT_TESTDB=10
 
 export DB_PORT=15431
 export DB_HOST=localhost
@@ -22,4 +22,4 @@ trap "docker kill $db_docker" EXIT
 echo "sleeping for $WAIT_TESTDB seconds before starting tests for testdb setup.."
 sleep $WAIT_TESTDB
 
-jest --detectOpenHandles
+jest "$@" # --detectOpenHandles

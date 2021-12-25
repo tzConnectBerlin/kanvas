@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { Logger, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
 
@@ -24,6 +24,10 @@ describe('AppController (e2e)', () => {
       .expect('Hello World!');
   });
 
+  // Note:
+  // - these tests expect responses related to a database that has been filled
+  //   with data in store-api-server/script/populate-testdb.sql
+
   it('/users/profile: not logged in and no userAddress provided => BAD REQUEST', async () => {
     const res = await request(app.getHttpServer()).get('/users/profile');
     expect(res.statusCode).toEqual(400);
@@ -34,5 +38,28 @@ describe('AppController (e2e)', () => {
       .get('/users/profile')
       .query({ userAddress: 'nonsense address' });
     expect(res.statusCode).toEqual(400);
+  });
+
+  it('/users/profile: existing userAddress provided => OK', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/users/profile')
+      .query({ userAddress: 'addr' });
+    expect(res.statusCode).toEqual(200);
+
+    // cannot test this accurately because currently the testdb is populated
+    // with now() timestamps
+    expect(res.body.user?.createdAt).toBeGreaterThan(0);
+    delete res.body.user?.createdAt;
+
+    expect(res.body).toStrictEqual({
+      nftCount: 0,
+      user: {
+        id: 1,
+        userName: 'admin',
+        userAddress: 'addr',
+        profilePicture: null,
+        roles: [],
+      },
+    });
   });
 });
