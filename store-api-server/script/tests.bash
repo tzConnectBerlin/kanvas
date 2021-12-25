@@ -22,4 +22,4 @@ trap "docker kill $db_docker" EXIT
 echo "sleeping for $WAIT_TESTDB seconds before starting tests for testdb setup.."
 sleep $WAIT_TESTDB
 
-jest "$@" # --detectOpenHandles
+jest "$@" --coverage --coverageReporters="text-summary" # --detectOpenHandles
