@@ -66,9 +66,6 @@ describe('AppController (e2e)', () => {
   it('/users/profile: no userAddress provied and logged in => OK, return profile of logged in user', async () => {
     const bearer = await loginUser(app, 'addr', 'admin');
 
-    // const cookie = login.headers['set-cookie'];
-    // console.log(cookie);
-
     const res = await request(app.getHttpServer())
       .get('/users/profile')
       .set('authorization', bearer);
@@ -94,9 +91,6 @@ describe('AppController (e2e)', () => {
   it('/users/profile: userAddress provied and logged in => OK, return profile of provided userAddress', async () => {
     const bearer = await loginUser(app, 'addr', 'admin');
 
-    // const cookie = login.headers['set-cookie'];
-    // console.log(cookie);
-
     const res = await request(app.getHttpServer())
       .get('/users/profile')
       .set('authorization', bearer)
@@ -120,22 +114,24 @@ describe('AppController (e2e)', () => {
     });
   });
 
-  it('/users/cart (logged in)', async () => {
-    const login = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({ userAddress: 'addr', signedPayload: 'admin' });
-    expect(login.statusCode).toEqual(201);
-
+  it('/users/cart (not logged in)', async () => {
     const add1 = await request(app.getHttpServer()).post('/users/cart/add/4');
     expect(add1.statusCode).toEqual(201);
 
-    const add2 = await request(app.getHttpServer()).post('/users/cart/add/12');
+    const cookie = add1.headers['set-cookie'];
+
+    const add2 = await request(app.getHttpServer())
+      .post('/users/cart/add/12')
+      .set('cookie', cookie);
     expect(add2.statusCode).toEqual(201);
 
-    const list = await request(app.getHttpServer()).post('/users/cart/list');
+    const list = await request(app.getHttpServer())
+      .post('/users/cart/list')
+      .set('cookie', cookie);
     expect(list.statusCode).toEqual(201);
 
-    console.log(JSON.stringify(list.body));
+    const idList = list.body.nfts.map((nft: any) => nft.id);
+    expect(idList).toEqual([4, 12]);
   });
 });
 
@@ -146,7 +142,7 @@ async function loginUser(
 ): Promise<string> {
   const login = await request(app.getHttpServer())
     .post('/auth/login')
-    .send({ userAddress: 'addr', signedPayload: 'admin' });
+    .send({ userAddress: address, signedPayload: password });
   expect(login.statusCode).toEqual(201);
 
   return `Bearer ${login.body.token}`;
