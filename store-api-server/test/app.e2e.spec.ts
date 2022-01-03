@@ -88,7 +88,7 @@ describe('AppController (e2e)', () => {
     });
   });
 
-  it('/users/profile: userAddress provied and logged in => OK, return profile of provided userAddress', async () => {
+  it('/users/profile: userAddress provided and logged in => OK, return profile of provided userAddress', async () => {
     const bearer = await loginUser(app, 'addr', 'admin');
 
     const res = await request(app.getHttpServer())
