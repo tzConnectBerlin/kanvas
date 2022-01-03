@@ -56,22 +56,18 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
     );
 
     useEffect(() => {
-        if (inputValue.length >= 2) {
-            const delaySearch = setTimeout(() => {
-                setLoading(false);
-                getSearch({
-                    params: {
-                        searchString: inputValue,
-                    },
-                });
-            }, 800);
-
-            return () => {
-                clearTimeout(delaySearch);
-            };
-        } else {
+        const delaySearch = setTimeout(() => {
             setLoading(false);
-        }
+            getSearch({
+                params: {
+                    searchString: inputValue,
+                },
+            });
+        }, 800);
+
+        return () => {
+            clearTimeout(delaySearch);
+        };
     }, [inputValue]);
 
     const handleChange = () => {
