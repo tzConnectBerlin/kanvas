@@ -32,7 +32,7 @@ BOOT_TIME=3
             -e NODE_URL=$NODE_URL \
             -e DATABASE_URL="$DATABASE_URL" \
             ghcr.io/tzconnectberlin/que-pasa:1.0.7 \
-            --contracts onchain_kanvas=KT1D9iJmbwoDcJUTvRuktHXEMgEZscLMjtuR -l 0
+            --contract-settings "$REPO_ROOT"/config/kanvas.yaml -l 0
     ) 2>&1 >/dev/null &
 
     psql < ../../peppermint/database/schema.sql

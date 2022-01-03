@@ -24,7 +24,7 @@ export class MintService {
 
   constructor(@Inject(PG_CONNECTION) private conn: any) {
     this.ipfsService = new IpfsService();
-    //this.nftLock = new Lock<number>();
+    this.nftLock = new Lock<number>();
   }
 
   async transfer_nfts(nfts: NftEntity[], buyer_address: string) {
