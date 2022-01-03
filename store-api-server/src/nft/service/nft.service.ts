@@ -11,6 +11,7 @@ import {
   SearchResult,
 } from 'src/nft/entity/nft.entity';
 import { CategoryEntity } from 'src/category/entity/category.entity';
+import { CategoryService } from 'src/category/service/category.service';
 import { FilterParams, PaginationParams } from '../params';
 import {
   PG_CONNECTION,
@@ -22,7 +23,10 @@ import {
 
 @Injectable()
 export class NftService {
-  constructor(@Inject(PG_CONNECTION) private conn: any) {}
+  constructor(
+    @Inject(PG_CONNECTION) private conn: any,
+    private readonly categoryService: CategoryService,
+  ) {}
 
   async create(_nft: NftEntity): Promise<NftEntity> {
     throw new Error(
@@ -30,7 +34,7 @@ export class NftService {
     );
   }
 
-  async search(str: string): Promise<SearchResult> {
+  async search(str: string): Promise<NftEntity[]> {
     const nftIds = await this.conn.query(
       `
 SELECT id
@@ -51,43 +55,15 @@ LIMIT $3
       [str, SEARCH_SIMILARITY_LIMIT, SEARCH_MAX_NFTS],
     );
 
-    const categoryIds = await this.conn.query(
-      `
-SELECT id, category AS name, description
-FROM (
-  SELECT
-    id,
-    category,
-    description,
-    GREATEST(
-      word_similarity($1, category),
-      word_similarity($1, description)
-    ) AS similarity
-  FROM nft_category
-) AS inner_query
-WHERE similarity >= $2
-ORDER BY similarity DESC, id
-LIMIT $3
-    `,
-      [str, SEARCH_SIMILARITY_LIMIT, SEARCH_MAX_CATEGORIES],
-    );
-
     const nfts = await this.findByIds(
       nftIds.rows.map((row: any) => row.id),
       'nft_id',
       'asc',
     );
 
-    return {
-      nfts: nftIds.rows
-        .map((row: any) => nfts.find((nft) => nft.id === row.id))
-        .filter(Boolean),
-      categories: categoryIds.rows.map((row: any) => ({
-        id: row.id,
-        name: row.name,
-        description: row.description,
-      })),
-    };
+    return nftIds.rows
+      .map((row: any) => nfts.find((nft) => nft.id === row.id))
+      .filter(Boolean);
   }
 
   async findNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {

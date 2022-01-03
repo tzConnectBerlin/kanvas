@@ -9,12 +9,16 @@ import {
   Post,
 } from '@nestjs/common';
 import { NftService } from '../service/nft.service';
+import { CategoryService } from 'src/category/service/category.service';
 import { NftEntity, NftEntityPage, SearchResult } from '../entity/nft.entity';
 import { FilterParams, PaginationParams, SearchParam } from '../params';
 
 @Controller('nfts')
 export class NftController {
-  constructor(private nftService: NftService) {}
+  constructor(
+    private nftService: NftService,
+    private categoryService: CategoryService,
+  ) {}
 
   @Post()
   async create(@Body() nft: NftEntity): Promise<NftEntity> {
@@ -29,7 +33,14 @@ export class NftController {
 
   @Get('/search')
   async search(@Query() params: SearchParam): Promise<SearchResult> {
-    return await this.nftService.search(params.searchString);
+    const [nfts, categories] = await Promise.all([
+      this.nftService.search(params.searchString),
+      this.categoryService.search(params.searchString),
+    ]);
+    return {
+      nfts: nfts,
+      categories: categories,
+    };
   }
 
   @Post('/:id')
