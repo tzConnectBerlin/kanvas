@@ -12,7 +12,6 @@ import { Typography } from '../../design-system/atoms/Typography';
 import { INft } from '../../interfaces/artwork';
 import { useHistory, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import TezosLogo from '../../design-system/atoms/TezosLogo/TezosLogo';
 import { ICategory } from '../../interfaces/category';
 import CircularProgress from '../../design-system/atoms/CircularProgress';
 

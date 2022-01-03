@@ -10,7 +10,7 @@ async function bootstrap() {
     cors: process.env.LOCAL_CORS === 'true'
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-  app.use('/users/stripe-webhook', raw({type: 'application/json'}))
+  app.use('/payment/stripe-webhook', raw({type: 'application/json'}))
 
   await app.listen(process.env['KANVAS_API_PORT'] || 3000);
 }

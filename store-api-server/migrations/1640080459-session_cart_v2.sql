@@ -4,8 +4,6 @@
 
 BEGIN;
 
-ALTER TABLE cart_session ADD COLUMN locked BOOLEAN NOT NULL DEFAULT FALSE;
-
 CREATE TABLE nft_order (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL REFERENCES kanvas_user(id),
@@ -33,8 +31,6 @@ COMMIT;
 -- ==== DOWN ====
 
 BEGIN;
-
-ALTER TABLE cart_session DROP COLUMN locked;
 
 DROP TABLE order;
 DROP TABLE mtm_order_nft;

@@ -19,5 +19,4 @@ export interface ProfileEntity {
 export interface UserCart {
   expiresAt?: number;
   nfts: NftEntity[];
-  locked: boolean;
 }

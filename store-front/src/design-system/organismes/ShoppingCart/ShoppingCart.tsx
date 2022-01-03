@@ -134,7 +134,6 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
             );
         } else if (checkoutResponse.error?.response?.status === 401) {
             props.listCart();
-            props.setOpenLogin(true);
         }
     }, [checkoutResponse]);
 

@@ -170,7 +170,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
     };
 
     useEffect(() => {
-        if (isExpiredError && (timeLeft === 0 || (timeLeft && timeLeft < 0))) {
+        if (isExpiredError && timeLeft && timeLeft < 0) {
             setIsExpiredError(true);
             toast.error('Your cart has expired');
             props.listCart();
@@ -214,7 +214,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
     const [paymentIntentSecret, getPaymentIntentSecret] = useAxios({
         url:
             process.env.REACT_APP_API_SERVER_BASE_URL +
-            '/users/create-payment-intent',
+            '/payment/create-payment-intent',
         method: 'POST',
         withCredentials: true,
         headers: {
@@ -227,10 +227,11 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
             manual: true,
         })
 
-    const [lockCart, getLockCart] = useAxios({
+
+    const [unlockCartResponse, unlockCart] = useAxios({
         url:
             process.env.REACT_APP_API_SERVER_BASE_URL +
-            '/users/cart/lock/',
+            '/users/cart/unlock',
         method: 'POST',
         withCredentials: true,
         headers: {
@@ -239,30 +240,33 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
             )}`,
         },
     },
-        {
-            manual: true,
-        })
+    {
+        manual: true,
+    })
 
     const handleBackwardStep = () => {
         if (activeStep === 0) {
             history.push('/store')
         }
 
-        if (activeStep === 1) {
-            getLockCart({
-                url: process.env.REACT_APP_API_SERVER_BASE_URL +
-                    '/users/cart/lock/false',
-            })
+        if (activeStep === 2    ) {
+            unlockCart()
         }
         setActiveStep(activeStep - 1)
     }
 
     const handleForwardStep = () => {
         if (activeStep === 0) {
-            getLockCart({
-                url: process.env.REACT_APP_API_SERVER_BASE_URL +
-                    '/users/cart/lock/true',
-            }).then(() => {
+            setActiveStep(activeStep + 1)
+        }
+
+        if (activeStep === 1 && !selectedPaymentMethod) {
+            setErrorMessagePaymenMethod('You need to select at least one payment method to continue')
+            return false
+        }
+
+        if (activeStep === 1 && selectedPaymentMethod === 'stripe') {
+            getPaymentIntentSecret().then(() => {
                 setActiveStep(activeStep + 1)
             }).catch(err => {
                 if (err.response.status === 401) {
@@ -272,20 +276,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
             })
         }
 
-        if (activeStep === 1 && !selectedPaymentMethod) {
-            setErrorMessagePaymenMethod('You need to select at least one payment method to continue')
-            setActiveStep(activeStep + 1)
-            return false
-        }
-
-        if (activeStep === 1 && selectedPaymentMethod === 'stripe') {
-            getPaymentIntentSecret()
-            setActiveStep(activeStep + 1)
-        }
-
         if (activeStep === 3) {
-
-
             history.push(`/profile/${localStorage.getItem('Kanvas - address')}}`)
         }
     }
@@ -540,21 +531,23 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                 <FlexSpacer minHeight={1} />
 
                 <Stack direction="row">
-                    {activeStep < 2 &&
-                        <CustomButton
-                            size='small'
-                            onClick={() => handleBackwardStep()}
-                            label={t('checkout.back_button')}
-                            sx={{ marginRight: '2rem' }}
-                        />
+                    {activeStep <= 2 &&
+                        <>
+                            <CustomButton
+                                size='small'
+                                onClick={() => handleBackwardStep()}
+                                label={t('checkout.back_button')}
+                            />
+                            <FlexSpacer minWidth={2} />
+                        </>
                     }
 
-                    {activeStep < 2 || activeStep === 3 &&
+                    {(activeStep < 2 || activeStep === 3) &&
                         <CustomButton
                             size='small'
                             onClick={() => handleForwardStep()}
                             label={t(`checkout.next_button_${activeStep}`)}
-                            loading={lockCart.loading}
+                            loading={paymentIntentSecret.loading}
                             disabled={props.nftsInCart.length === 0}
                         />
                     }
