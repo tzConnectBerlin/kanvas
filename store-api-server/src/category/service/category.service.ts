@@ -6,7 +6,11 @@ import {
   Inject,
 } from '@nestjs/common';
 import { CategoryEntity } from '../entity/category.entity';
-import { PG_CONNECTION } from '../../constants';
+import {
+  PG_CONNECTION,
+  SEARCH_SIMILARITY_LIMIT,
+  SEARCH_MAX_CATEGORIES,
+} from '../../constants';
 
 interface CategoryQueryResponse {
   id: number;
@@ -21,6 +25,59 @@ export class CategoryService {
 
   async create(_category: CategoryEntity): Promise<CategoryEntity> {
     throw new Error('Not implemented yet');
+  }
+
+  async search(str: string): Promise<CategoryEntity[]> {
+    if (str === '') {
+      return await this.getMostPopular();
+    }
+
+    const qryRes = await this.conn.query(
+      `
+SELECT id, category AS name, description
+FROM (
+  SELECT
+    id,
+    category,
+    description,
+    GREATEST(
+      word_similarity($1, category),
+      word_similarity($1, description)
+    ) AS similarity
+  FROM nft_category
+) AS inner_query
+WHERE similarity >= $2
+ORDER BY similarity DESC, id
+LIMIT $3
+    `,
+      [str, SEARCH_SIMILARITY_LIMIT, SEARCH_MAX_CATEGORIES],
+    );
+
+    return qryRes.rows;
+  }
+
+  async getMostPopular(): Promise<CategoryEntity[]> {
+    const qryRes = await this.conn.query(
+      `
+SELECT cat.id, cat.category, cat.description
+FROM (
+  SELECT cat.id as cat_id, SUM(nft.view_count) AS view_count
+  FROM nft_category AS cat
+  JOIN mtm_nft_category AS mtm
+    ON mtm.nft_category_id = cat.id
+  JOIN nft
+    ON nft.id = mtm.nft_id
+  GROUP BY 1
+  ORDER BY 2 DESC
+  LIMIT $1
+) AS view_counts
+JOIN nft_category AS cat
+  on cat.id = view_counts.cat_id
+ORDER BY view_count
+`,
+      [SEARCH_MAX_CATEGORIES],
+    );
+    return qryRes.rows;
   }
 
   async findAll(): Promise<CategoryEntity[]> {

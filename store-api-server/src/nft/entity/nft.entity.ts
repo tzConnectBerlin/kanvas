@@ -31,5 +31,5 @@ export interface NftEntityPage {
 
 export interface SearchResult {
   nfts: NftEntity[];
-  categories: number[];
+  categories: CategoryEntity[];
 }
