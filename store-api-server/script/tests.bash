@@ -21,4 +21,6 @@ echo "waiting for testdb setup.."
 ./script/wait-db.bash
 sleep 1  # sleeping for 1 more second, for db migrations to finish
 
+echo "running with '$@'"
+
 jest "$@" --coverage --coverageReporters="text-summary" # --detectOpenHandles
