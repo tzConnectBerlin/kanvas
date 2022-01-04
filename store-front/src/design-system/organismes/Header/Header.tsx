@@ -35,7 +35,7 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
     margin-bottom: -6rem;
     color: ${(props) => props.theme.palette.text.primary};
 
-    filter: ${(props) => props.theme.dropShadow.default};
+    box-shadow: 0 0 1rem #C4C4C4;
 
     background-color: ${(props) => props.theme.palette.background.default};
     position: sticky;
