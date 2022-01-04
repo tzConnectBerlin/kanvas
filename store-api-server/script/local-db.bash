@@ -13,7 +13,7 @@ cd "$REPO_ROOT"/store-api-server
 
 docker image pull ghcr.io/tzconnectberlin/que-pasa:1.0.7 >/dev/null || exit 1
 
-BOOT_TIME=3
+BOOT_TIME=4
 (
     sleep $BOOT_TIME;
 
@@ -36,7 +36,7 @@ BOOT_TIME=3
             --contract-settings /config/kanvas.yaml -l 0
     ) 2>&1 >/dev/null &
 
-    psql < ../../peppermint/database/schema.sql
+    curl 'https://raw.githubusercontent.com/tzConnectBerlin/peppermint/ee538be4d156ffb456107587eb71f14671afb1c7/database/schema.sql' 2>/dev/null | psql || exit 1
 
     ./script/shmig -t postgresql -d postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_DATABASE up || exit 1
 
