@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 REPO_ROOT=$(git rev-parse --show-toplevel)
 cd "$REPO_ROOT"/store-api-server
 
@@ -29,10 +29,11 @@ BOOT_TIME=3
         export DATABASE_URL="host=$PGHOST dbname=$PGDATABASE user=$PGUSER password=$PGPASSWORD port=$PGPORT"
         docker run \
             --network host \
+            -v "$REPO_ROOT"/config:/config \
             -e NODE_URL=$NODE_URL \
             -e DATABASE_URL="$DATABASE_URL" \
             ghcr.io/tzconnectberlin/que-pasa:1.0.7 \
-            --contract-settings "$REPO_ROOT"/config/kanvas.yaml -l 0
+            --contract-settings /config/kanvas.yaml -l 0
     ) 2>&1 >/dev/null &
 
     psql < ../../peppermint/database/schema.sql
