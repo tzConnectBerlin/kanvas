@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 cd $(git rev-parse --show-toplevel)/store-api-server
 
-WAIT_TESTDB=10
-
-export DB_PORT=15431
-export DB_HOST=localhost
-export DB_USERNAME=testusr
-export DB_PASSWORD=testpass
-export DB_DATABASE=test
+export PGPORT=15431
+export PGHOST=localhost
+export PGUSER=testusr
+export PGPASSWORD=testpass
+export PGDATABASE=test
 
 export JWT_EXPIRATION_TIME=86400000
 export JWT_SECRET='wPK-TfcjDSjztKrb4SUnfRPQ1YIovrooYQaX4h-EnU4'
@@ -19,7 +17,8 @@ if [[ "$?" != "0" ]]; then
 fi
 trap "docker kill $db_docker" EXIT
 
-echo "sleeping for $WAIT_TESTDB seconds before starting tests for testdb setup.."
-sleep $WAIT_TESTDB
+echo "waiting for testdb setup.."
+./script/wait-db.bash
+sleep 1  # sleeping for 1 more second, for db migrations to finish
 
 jest "$@" --coverage --coverageReporters="text-summary" # --detectOpenHandles
