@@ -2,26 +2,17 @@
 REPO_ROOT=$(git rev-parse --show-toplevel)
 cd "$REPO_ROOT"/store-api-server
 
-# Note: this script expects
-# - peppermint repo to be in repo-root/../peppermint
-
-[ -z $DB_PORT ] && export DB_PORT=5432
-[ -z $DB_PASSWORD ] && export DB_PASSWORD=dev_password
-[ -z $DB_USERNAME ] && export DB_USERNAME=dev_user
-[ -z $DB_DATABASE ] && export DB_DATABASE=dev_database
-[ -z $DB_HOST ] && export DB_HOST=localhost
+PEPPERMINT_VERSION=ee538be4d156ffb456107587eb71f14671afb1c7
+[ -z $PGPORT ] && export PGPORT=5432
+[ -z $PGPASSWORD ] && export PGPASSWORD=dev_password
+[ -z $PGUSER ] && export PGUSER=dev_user
+[ -z $PGDATABASE ] && export PGDATABASE=dev_database
+[ -z $PGHOST ] && export PGHOST=localhost
 
 docker image pull ghcr.io/tzconnectberlin/que-pasa:1.0.7 >/dev/null || exit 1
 
-BOOT_TIME=3
 (
-    sleep $BOOT_TIME;
-
-    export PGUSER=$DB_USERNAME
-    export PGPASSWORD=$DB_PASSWORD
-    export PGHOST=$DB_HOST
-    export PGPORT=$DB_PORT
-    export PGDATABASE=$DB_DATABASE
+    ./script/wait-db.bash
 
     # to set up the database schema of onchain_kanvas:
     (
@@ -36,9 +27,9 @@ BOOT_TIME=3
             --contract-settings /config/kanvas.yaml -l 0
     ) 2>&1 >/dev/null &
 
-    psql < ../../peppermint/database/schema.sql
+    curl "https://raw.githubusercontent.com/tzConnectBerlin/peppermint/${PEPPERMINT_VERSION}/database/schema.sql" 2>/dev/null | psql || exit 1
 
-    ./script/shmig -t postgresql -d postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_DATABASE up || exit 1
+    ./script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1
 
     psql < script/populate-testdb.sql
 ) >/dev/null &
@@ -46,8 +37,8 @@ BOOT_TIME=3
 [ -z $DOCKER_ARGS ] && export DOCKER_ARGS='-t'
 
 docker run ${DOCKER_ARGS} \
-    -p $DB_PORT:5432 \
-    -e POSTGRES_PASSWORD=$DB_PASSWORD \
-    -e POSTGRES_USER=$DB_USERNAME \
-    -e POSTGRES_DB=$DB_DATABASE \
+    -p $PGPORT:5432 \
+    -e POSTGRES_PASSWORD=$PGPASSWORD \
+    -e POSTGRES_USER=$PGUSER \
+    -e POSTGRES_DB=$PGDATABASE \
     postgres "$@"

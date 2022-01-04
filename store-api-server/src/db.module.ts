@@ -14,11 +14,11 @@ types.setTypeParser(
 const dbProvider = {
   provide: PG_CONNECTION,
   useValue: new Pool({
-    host: assertEnv('DB_HOST'),
-    port: Number(assertEnv('DB_PORT')),
-    user: assertEnv('DB_USERNAME'),
-    password: assertEnv('DB_PASSWORD'),
-    database: assertEnv('DB_DATABASE'),
+    host: assertEnv('PGHOST'),
+    port: Number(assertEnv('PGPORT')),
+    user: assertEnv('PGUSER'),
+    password: assertEnv('PGPASSWORD'),
+    database: assertEnv('PGDATABASE'),
   }),
 };
 
