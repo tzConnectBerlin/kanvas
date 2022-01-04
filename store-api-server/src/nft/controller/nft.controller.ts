@@ -27,8 +27,8 @@ export class NftController {
 
   @Get()
   async getFiltered(@Query() params: FilterParams): Promise<NftEntityPage> {
-    this.validateFilterParams(params);
-    return this.nftService.findNftsWithFilter(params);
+    this.#validateFilterParams(params);
+    return await this.nftService.findNftsWithFilter(params);
   }
 
   @Get('/search')
@@ -45,10 +45,10 @@ export class NftController {
 
   @Post('/:id')
   async byId(@Param('id') id: number): Promise<NftEntity> {
-    return this.nftService.byId(id);
+    return await this.nftService.byId(id);
   }
 
-  validateFilterParams(params: FilterParams): void {
+  #validateFilterParams(params: FilterParams): void {
     if (typeof params.availability !== 'undefined') {
       if (
         params.availability.some(
@@ -65,10 +65,10 @@ export class NftController {
       }
     }
 
-    this.validatePaginationParams(params);
+    this.#validatePaginationParams(params);
   }
 
-  validatePaginationParams(params: PaginationParams): void {
+  #validatePaginationParams(params: PaginationParams): void {
     if (params.page < 1 || params.pageSize < 1) {
       throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST);
     }
