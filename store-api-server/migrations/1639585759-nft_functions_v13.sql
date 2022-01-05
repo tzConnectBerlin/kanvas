@@ -1,11 +1,12 @@
--- Migration: nft_functions_v11
--- Created at: 2021-12-01 17:48:12
+-- Migration: nft_functions_v13
+-- Created at: 2021-12-15 17:29:19
 -- ====  UP  ====
+
 BEGIN;
 
 -- Diff between previous and this version:
---   bugfix (took v7->v9, instead of v8->v9)
-ALTER FUNCTION nft_ids_filtered RENAME TO __nft_ids_filtered_v10;
+--   - take into account onchain state wrt nfts owned by address
+ALTER FUNCTION nft_ids_filtered RENAME TO __nft_ids_filtered_v12;
 CREATE FUNCTION nft_ids_filtered(
     address TEXT, categories INTEGER[],
     price_at_least NUMERIC, price_at_most NUMERIC,
@@ -38,22 +39,37 @@ BEGIN
         ON mtm_kanvas_user_nft.nft_id = nft.id
       LEFT JOIN kanvas_user
         ON mtm_kanvas_user_nft.kanvas_user_id = kanvas_user.id
+      LEFT JOIN onchain_kanvas."storage.ledger_ordered" ledger
+        ON ledger.idx_assets_nat = nft.id
       WHERE ($1 IS NULL OR nft.created_at <= $1)
-        AND ($2 IS NULL OR kanvas_user.address = $2)
+        AND ($2 IS NULL OR (
+              (kanvas_user.address = $2 AND NOT EXISTS (
+                SELECT 1
+                FROM onchain_kanvas."storage.ledger_ordered"
+                WHERE idx_assets_address = $2
+                  AND idx_assets_nat = nft.id
+              )) OR
+              EXISTS (
+                SELECT 1
+                FROM onchain_kanvas."storage.ledger_live"
+                WHERE idx_assets_address = $2
+                  AND idx_assets_nat = nft.id
+              )
+            ))
         AND ($3 IS NULL OR nft_category_id = ANY($3))
         AND ($4 IS NULL OR nft.price >= $4)
         AND ($5 IS NULL OR nft.price <= $5)
         AND ($6 IS NULL OR (
               (' || quote_literal('onSale') || ' = ANY($6) AND (
-                  nft.launch_at <= now() AT TIME ZONE ' || quote_literal('UTC') || '
-                  AND (
-                     SELECT reserved + owned FROM nft_editions_locked(nft.id)
-                  ) < nft.editions_size
+                nft.launch_at <= now() AT TIME ZONE ' || quote_literal('UTC') || '
+                AND (
+                   SELECT reserved + owned FROM nft_editions_locked(nft.id)
+                ) < nft.editions_size
               )) OR
               (' || quote_literal('soldOut') || ' = ANY($6) AND (
-                  (
-                    SELECT reserved + owned FROM nft_editions_locked(nft.id)
-                  ) >= nft.editions_size
+                (
+                  SELECT reserved + owned FROM nft_editions_locked(nft.id)
+                ) >= nft.editions_size
               )) OR
               (' || quote_literal('upcoming') || ' = ANY($6) AND (
                 nft.launch_at > now() AT TIME ZONE ' || quote_literal('UTC') || '
@@ -82,6 +98,6 @@ DROP FUNCTION nft_ids_filtered(
     TEXT, TEXT,
     INTEGER, INTEGER,
     TIMESTAMP WITHOUT TIME ZONE);
-ALTER FUNCTION __nft_ids_filtered_v10 RENAME TO nft_ids_filtered;
+ALTER FUNCTION __nft_ids_filtered_v12 RENAME TO nft_ids_filtered;
 
 COMMIT;

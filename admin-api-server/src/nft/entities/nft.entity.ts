@@ -14,7 +14,7 @@ export class Nft {
       this.data_uri = nftDto.dataUri;
       this.ipfs_hash = nftDto.ipfsHash;
       this.created_by = nftDto.createdBy;
-      this.disabled = nftDto.disabled;
+      this.disabled = nftDto.disabled || false;
     }
   }
 
@@ -32,6 +32,23 @@ export class Nft {
   disabled?: boolean;
 
   getFieldsWithValues() {
-    return Object.keys(this).filter((key: string) => Boolean(this[key]));
+    return Object.keys(this).filter((key: string) => {
+      if (typeof this[key] !== 'undefined' || typeof this[key] !== null) {
+        if (key === 'disabled') {
+          return true;
+        }
+        return Boolean(this[key]);
+      }
+      return false;
+    });
+  }
+
+  filterDefinedValues() {
+    return Object.values(this).filter((value: any) => {
+      if (typeof value === 'boolean') {
+        return true;
+      }
+      return Boolean(value);
+    });
   }
 }
