@@ -13,6 +13,7 @@ const generate = require('meaningful-string');
 interface CartMeta {
   id: number;
   expiresAt: number;
+  orderId?: number;
 }
 
 @Injectable()
@@ -399,7 +400,7 @@ RETURNING id, expires_at`,
 
     const qryRes = await this.conn.query(
       `
-SELECT id, expires_at
+SELECT id, expires_at, order_id
 FROM cart_session
 WHERE session_id = $1
       `,
@@ -410,16 +411,19 @@ WHERE session_id = $1
     }
     return <CartMeta>{
       id: qryRes.rows[0]['id'],
-      expiresAt: qryRes.rows[0]['expires_at']
+      expiresAt: qryRes.rows[0]['expires_at'],
+      orderId: qryRes.rows[0]['order_id']
     };
   }
 
   async deleteExpiredCarts() {
-    //TODO : Check if expired cart have an open or processing order
     await this.conn.query(
       `
-DELETE FROM cart_session
-WHERE expires_at < now() AT TIME ZONE 'UTC'`,
+DELETE FROM cart_session AS sess
+WHERE expires_at < now() AT TIME ZONE 'UTC'
+  AND (
+    sess.order_id IS NULL OR (SELECT status FROM payment where payment.nft_order_id = sess.order_id) NOT IN ('processing')
+  )`,
     );
   }
 

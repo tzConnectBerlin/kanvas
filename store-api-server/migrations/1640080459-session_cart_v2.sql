@@ -4,6 +4,8 @@
 
 BEGIN;
 
+
+
 CREATE TABLE nft_order (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL REFERENCES kanvas_user(id),
@@ -26,6 +28,8 @@ CREATE TABLE payment (
     provider payment_provider NOT NULL
 );
 
+ALTER TABLE cart_session ADD COLUMN order_id INT REFERENCES nft_order(id);
+
 COMMIT;
 
 -- ==== DOWN ====
@@ -39,5 +43,7 @@ DROP TYPE payment_status;
 DROP TYPE payment_provider;
 
 DROP TABLE payment;
+
+ALTER TABLE cart_session DROP COLUMN order_id;
 
 COMMIT;

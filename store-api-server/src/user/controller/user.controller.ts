@@ -120,13 +120,6 @@ export class UserController {
     @Param('nftId') nftId: number,
   ) {
     const cartSession = await this.userService.getCartSession(cookieSession, user);
-    const cartLocked = await this.userService.isCartLocked(cartSession);
-    if (cartLocked) {
-      throw new HttpException(
-        'No actions allowed on this cart',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
 
     const addedRes = await this.userService
       .cartAdd(cartSession, nftId)
@@ -166,13 +159,6 @@ export class UserController {
     @Param('nftId') nftId: number,
   ) {
     const cartSession = await this.userService.getCartSession(cookieSession, user);
-    const cartLocked = await this.userService.isCartLocked(cartSession);
-    if (cartLocked) {
-      throw new HttpException(
-        'No actions allowed on this cart',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
 
     const removed = await this.userService.cartRemove(cartSession, nftId);
     if (!removed) {
@@ -193,19 +179,6 @@ export class UserController {
   ) {
     const cartSession = await this.userService.getCartSession(cookieSession, user);
     return await this.userService.cartList(cartSession);
-  }
-
-  // To verify
-  @Post('cart/unlock')
-  @UseGuards(JwtAuthGuard)
-  async cartValidate(
-    @Session() cookieSession: any,
-    @CurrentUser() user: UserEntity,
-  ) {
-    const cartSession = await this.userService.getCartSession(cookieSession, user);
-    // Cancel the order on unluck
-
-    return await this.userService.cartLock(false, cartSession);
   }
 
   @Post('cart/checkout')

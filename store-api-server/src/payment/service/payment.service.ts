@@ -48,6 +48,11 @@ export class PaymentService {
       },
     });
 
+    
+    // Fetch
+    // if order and payment not yet set:
+    // else create
+
     const nftOrder = await this.createNftOrder(cartSession, user.id)
 
     await this.createPayment(paymentIntent.id, nftOrder.id, 'stripe')
@@ -116,6 +121,7 @@ export class PaymentService {
     }
 
     const tx = await this.conn.connect();
+
     let nftOrderId: number;
     let orderAt = new Date();
 
@@ -143,6 +149,14 @@ WHERE cart_session_id = $2
         `,
         [nftOrderId, cartMeta.id],
       );
+
+      await tx.query(
+        `
+  UPDATE cart_session
+  SET order_id = $1
+  WHERE id = $2
+        `
+      , [nftOrderId, cartMeta.id])
 
       await tx.query('COMMIT');
     } catch (err) {
