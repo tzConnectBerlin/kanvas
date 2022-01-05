@@ -9,7 +9,7 @@ export enum PaymentStatus {
   PROCESSING = 'processing',
   CANCELED = 'canceled',
   SUCCEEDED = 'succeeded',
-  FAILED = 'failed'
+  FAILED = 'failed',
 }
 
 interface NftOrder {
@@ -22,51 +22,47 @@ export interface StripePaymentIntent {
   clientSecret: string;
 }
 
-const stripe = require("stripe")(process.env.STRIPE_SECRET);
+const stripe = process.env.STRIPE_SECRET
+  ? require('stripe')(process.env.STRIPE_SECRET)
+  : undefined;
 
 @Injectable()
 export class PaymentService {
-
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
     private userService: UserService,
-  ) { }
+  ) {}
 
-  async createStripePayment(cookieSession: any, user: UserEntity): Promise<StripePaymentIntent> {
+  async createStripePayment(
+    user: UserEntity,
+    cartSession: string,
+  ): Promise<StripePaymentIntent> {
+    const nftOrder = await this.createNftOrder(cartSession, user.id);
 
-    const cartSession = await this.userService.getCartSession(cookieSession, user);
-
-    const cartList = await this.userService.cartList(cartSession)
-
-    const amount = cartList.nfts.reduce((sum, nft) => sum + nft.price, 0)
+    const cartList = await this.userService.cartList(cartSession);
+    const amount = cartList.nfts.reduce((sum, nft) => sum + nft.price, 0);
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount * 100,
-      currency: "eur", // Have to change this to handle different currencies
+      currency: 'eur', // Have to change this to handle different currencies
       automatic_payment_methods: {
         enabled: false,
       },
     });
 
-    
+
     // Fetch
     // if order and payment not yet set:
     // else create
 
-    const nftOrder = await this.createNftOrder(cartSession, user.id)
+    await this.createPayment('stripe', paymentIntent.id, nftOrder.id);
 
-    await this.createPayment(paymentIntent.id, nftOrder.id, 'stripe')
-
-    return { clientSecret: paymentIntent.client_secret }
+    return { clientSecret: paymentIntent.client_secret };
   }
 
-  async createPayment(paymentId: string, nftOrderId: number, provider: string): Promise<boolean> {
-
-    const tx = await this.conn.connect();
+  async createPayment(provider: string, paymentId: string, nftOrderId: number) {
     try {
-      tx.query('BEGIN');
-
-      await tx.query(
+      await this.conn.query(
         `
   INSERT INTO payment (
     payment_id, status, nft_order_id, provider
@@ -75,68 +71,55 @@ export class PaymentService {
   RETURNING id`,
         [paymentId, PaymentStatus.CREATED, nftOrderId, provider],
       );
-
-      await tx.query('COMMIT');
-    } catch (err) {
-      await tx.query('ROLLBACK');
+    } catch (err: any) {
+      Logger.error(
+        `Err on storing payment intent in db (provider='stripe', paymentId=${paymentId}, nftOrderId=${nftOrderId}), err: ${err}`,
+      );
       throw err;
-    } finally {
-      tx.release();
     }
-
-    return true
   }
 
   async editPaymentStatus(status: PaymentStatus, paymentId: string) {
-    const tx = await this.conn.connect();
     try {
-      tx.query('BEGIN');
-
       // Add check to verify if status is created or processing
 
-      await tx.query(
+      await this.conn.query(
         `
   UPDATE payment
   SET status = $1
   WHERE payment_id = $2`,
         [status, paymentId],
       );
-
-      await tx.query('COMMIT');
     } catch (err) {
-      await tx.query('ROLLBACK');
+      Logger.error(
+        `Err on updating payment status in db (paymentId=${paymentId}, newStatus=${status}), err: ${err}`,
+      );
       throw err;
-    } finally {
-      tx.release();
     }
   }
 
   async createNftOrder(session: string, userId: number): Promise<NftOrder> {
     const cartMeta = await this.userService.getCartMeta(session);
-
     if (typeof cartMeta === 'undefined') {
-      throw Err(
-        `createNftOrder err: cart should not be empty`,
-      );
+      throw Err(`createNftOrder err: cart should not be empty`);
     }
 
-    const tx = await this.conn.connect();
 
     let nftOrderId: number;
-    let orderAt = new Date();
+    const orderAt = new Date();
 
+    const tx = await this.conn.connect();
     try {
       tx.query('BEGIN');
       const nftQryRes = await tx.query(
         `
-  INSERT INTO nft_order (
-    user_id, order_at
-  )
-  VALUES ($1, $2)
-  RETURNING id`,
+INSERT INTO nft_order (
+  user_id, order_at
+)
+VALUES ($1, $2)
+RETURNING id`,
         [userId, orderAt.toUTCString()],
       );
-
       nftOrderId = nftQryRes.rows[0]['id'];
 
       await tx.query(
@@ -144,7 +127,8 @@ export class PaymentService {
 INSERT INTO mtm_nft_order_nft (
   nft_order_id, nft_id
 )
-SELECT $1, nft_id FROM mtm_cart_session_nft
+SELECT $1, nft_id
+FROM mtm_cart_session_nft
 WHERE cart_session_id = $2
         `,
         [nftOrderId, cartMeta.id],
@@ -152,15 +136,17 @@ WHERE cart_session_id = $2
 
       await tx.query(
         `
-  UPDATE cart_session
-  SET order_id = $1
-  WHERE id = $2
+UPDATE cart_session
+SET order_id = $1
+WHERE id = $2
         `
       , [nftOrderId, cartMeta.id])
 
       await tx.query('COMMIT');
     } catch (err) {
-      console.log(err)
+      Logger.error(
+        `Err on creating nft order (userId=${userId}, cartSession=${session}), err: ${err}`,
+      );
       await tx.query('ROLLBACK');
       throw err;
     } finally {
@@ -171,6 +157,6 @@ WHERE cart_session_id = $2
       id: nftOrderId,
       orderAt: Math.floor(orderAt.getTime() / 1000),
       userId: userId,
-    }
+    };
   }
 }

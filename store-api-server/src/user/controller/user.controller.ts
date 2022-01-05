@@ -34,7 +34,7 @@ interface EditProfile {
 
 @Controller('users')
 export class UserController {
-  constructor(private userService: UserService) { }
+  constructor(private userService: UserService) {}
 
   @Get('/profile')
   @UseGuards(JwtFailableAuthGuard)
@@ -119,7 +119,10 @@ export class UserController {
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    const cartSession = await this.userService.getCartSession(cookieSession, user);
+    const cartSession = await this.userService.getCartSession(
+      cookieSession,
+      user,
+    );
 
     const addedRes = await this.userService
       .cartAdd(cartSession, nftId)
@@ -158,7 +161,10 @@ export class UserController {
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    const cartSession = await this.userService.getCartSession(cookieSession, user);
+    const cartSession = await this.userService.getCartSession(
+      cookieSession,
+      user,
+    );
 
     const removed = await this.userService.cartRemove(cartSession, nftId);
     if (!removed) {
@@ -177,7 +183,10 @@ export class UserController {
     @Session() cookieSession: any,
     @CurrentUser() user: UserEntity | undefined,
   ) {
-    const cartSession = await this.userService.getCartSession(cookieSession, user);
+    const cartSession = await this.userService.getCartSession(
+      cookieSession,
+      user,
+    );
     return await this.userService.cartList(cartSession);
   }
 
