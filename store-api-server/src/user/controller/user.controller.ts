@@ -226,7 +226,7 @@ export class UserController {
       );
     }
 
-    const success = await this.userService.cartCheckout(user.id, cartSession);
+    const success = await this.userService.cartCheckout(user, cartSession);
     if (!success) {
       throw new HttpException(
         'Empty cart cannot be checked out',

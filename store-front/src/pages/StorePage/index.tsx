@@ -15,6 +15,7 @@ import {
     useMediaQuery,
     useTheme,
     Chip,
+    SelectChangeEvent,
 } from '@mui/material';
 
 import { CustomSelect } from '../../design-system/atoms/Select';
@@ -23,6 +24,11 @@ import { useHistory } from 'react-router';
 
 interface ParamTypes {
     width?: any;
+}
+
+interface SortProps {
+    orderBy: 'price' | 'name' | 'createdAt';
+    orderDirection: 'asc' | 'desc';
 }
 
 const StyledStack = styled(Stack)`
@@ -438,10 +444,64 @@ const StorePage = () => {
 
                     <CustomSelect
                         id="Sort filter - store page"
-                        selectedOption={selectedSort}
-                        setSelectedOption={setSelectedSort}
-                        callNFTsEndpoint={callNFTsEndpoint}
+                        availableOptions={[{
+                            value: JSON.stringify({
+                                orderBy: 'name',
+                                orderDirection: 'asc',
+                            }),
+                            label: 'Name: A - Z'
+                        },
+                        {
+                            value: JSON.stringify({
+                                orderBy: 'name',
+                                orderDirection: 'desc',
+                            }),
+                            label: 'Name: Z - A'
+                        },
+                        {
+                            value: JSON.stringify({
+                                orderBy: 'price',
+                                orderDirection: 'desc',
+                            }),
+                            label: 'Price: High - Low'
+                        },
+                        {
+                            value: JSON.stringify({orderBy: 'price',orderDirection: 'asc'}),
+                            label: 'Price: Low - High'
+                        },
+                        {
+                            value: JSON.stringify({
+                                orderBy: 'createdAt',
+                                orderDirection: 'desc',
+                            }),
+                            label: 'Created: New - Old'
+                        },
+                        {
+                            value: JSON.stringify({
+                                orderBy: 'createdAt',
+                                orderDirection: 'asc',
+                            }),
+                            label: 'Created: Old - New'
+                        }
+                        ]}
+                        selectedOption={JSON.stringify(selectedSort) ?? JSON.stringify({
+                            orderBy: 'createdAt',
+                            orderDirection: 'desc',
+                        })}
+                        triggerFunction={(event: SelectChangeEvent) => {
+                            const sort: SortProps = {
+                                orderBy: JSON.parse(event.target.value).orderBy,
+                                orderDirection: JSON.parse(event.target.value).orderDirection,
+                            };
+                            callNFTsEndpoint({
+                                handlePriceRange: true,
+                                orderBy: sort.orderBy,
+                                orderDirection: sort.orderDirection,
+                            });
+                            setSelectedSort(JSON.parse(event.target.value));
+                        }}
                         disabled={nftsResponse.loading}
+                        customSize='big'
                     />
                 </Stack>
 

@@ -1,32 +1,32 @@
 import * as React from 'react';
 import styled from '@emotion/styled';
-import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { FC } from 'react';
-import { Theme, useMediaQuery } from '@mui/material';
+import { Theme } from '@mui/material';
 import Select, {
     SelectProps as MuiSelectProps,
     SelectChangeEvent,
 } from '@mui/material/Select';
-import { IParamsNFTs } from '../../../pages/StorePage';
 
-interface SortProps {
-    orderBy: 'price' | 'name' | 'createdAt';
-    orderDirection: 'asc' | 'desc';
+interface selectOption {
+    label: string;
+    value: string;
 }
 
 interface SelectedProps extends MuiSelectProps {
     id: string;
-    selectedOption?: SortProps;
-    setSelectedOption: (input: SortProps) => void;
-    callNFTsEndpoint: (input: IParamsNFTs) => void;
+    availableOptions: selectOption[];
+    selectedOption: string;
+    triggerFunction: (input: SelectChangeEvent) => void;
+    customSize: 'small' | 'big';
 }
 
-const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
+const StyledFormControl = styled(FormControl) <{ theme?: Theme, customSize: 'small' | 'big' }>`
     margin: 0;
+
 
     .MuiOutlinedInput-root.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-formControl:after {
         border: none;
@@ -51,13 +51,12 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
 
     .MuiSelect-select {
         border-radius: 2rem !important;
-        /* padding-top: 0.6rem !important;
-        padding-bottom: 0.7rem !important; */
         min-height: 0 !important;
-        font-family: 'Poppins SemiBold' !important;
-        font-size: 1.1rem;
+        font-family: ${ props => props.customSize === 'small' ?  'Poppins' : props.customSize === 'big' ? 'Poppins SemiBold' : 'Poppins' } !important ;
+        font-size: ${ props => props.customSize === 'small' ?  0.8 : props.customSize === 'big' ? 1.1 : 0.8 }rem !important ;
         padding-right: 3rem !important;
-
+        
+        padding-left: ${ props => props.customSize === 'small' ? 0 : 0.5}rem !important;
         @media (max-width: 874px) {
             width: 4.5rem;
         }
@@ -68,22 +67,22 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
     }
 `;
 
-const StyledMenuItem = styled(MenuItem)<{ theme?: Theme }>`
+const StyledMenuItem = styled(MenuItem) <{ theme?: Theme, customSize: 'small' | 'big' }>`
     font-family: 'Poppins' !important;
-    font-size: 1.1rem !important;
+    font-size: ${ props => props.customSize === 'small' ?  0.8 : props.customSize === 'big' ? 1.1 : 0.8 }rem !important ;
     border-radius: 0.5rem;
     margin-left: 0.5rem;
     margin-right: 0.5rem;
 
     &.Mui-selected {
         background-color: ${(props) =>
-            props.theme.palette.primary.contrastText} !important;
+        props.theme.palette.primary.contrastText} !important;
     }
 `;
 
-const StyledExpandMoreIcon = styled(ExpandMoreIcon)<{ theme?: Theme }>`
-    width: 1.8rem;
-    margin-left: 0.5rem;
+const StyledExpandMoreIcon = styled(ExpandMoreIcon) <{ theme?: Theme, customSize: 'small' | 'big' }>`
+    width: ${ props => props.customSize === 'small' ?  1.4 : props.customSize === 'big' ? 1.8 : 1.4 }rem !important ;
+    margin-left: ${ props => props.customSize === 'small' ? 0 : 0.5}rem;
     color: ${(props) => props.theme.palette.text.primary};
 
     font-size: 1.8rem;
@@ -91,99 +90,42 @@ const StyledExpandMoreIcon = styled(ExpandMoreIcon)<{ theme?: Theme }>`
 `;
 
 export const CustomSelect: FC<SelectedProps> = ({
-    callNFTsEndpoint,
     ...props
 }) => {
-    const handleChange = (event: SelectChangeEvent) => {
-        const sort: SortProps = {
-            orderBy: JSON.parse(event.target.value).orderBy,
-            orderDirection: JSON.parse(event.target.value).orderDirection,
-        };
-        callNFTsEndpoint({
-            handlePriceRange: true,
-            orderBy: sort.orderBy,
-            orderDirection: sort.orderDirection,
-        });
-        props.setSelectedOption(JSON.parse(event.target.value));
-    };
 
-    const isMobile = useMediaQuery('(max-width:900px)');
+    React.useEffect(() => {
+        console.log(JSON.stringify(props.selectedOption))
+        console.log(props.selectedOption)
+        console.log(props.availableOptions)
+        console.log(props.availableOptions.filter(option => option.value === JSON.stringify(props.selectedOption)))
+    }, [props.selectedOption])
 
     return (
         <StyledFormControl
             variant="outlined"
             sx={{ m: 1, minWidth: 80, maxHeight: 40, justifyContent: 'center' }}
-            disabled={props.disabled ?? false}
+            customSize={props.customSize}
         >
             <Select
                 id={props.id}
                 labelId={`${props.id}-label"`}
-                value={
-                    JSON.stringify(props.selectedOption) ??
-                    JSON.stringify({
-                        orderBy: 'createdAt',
-                        orderDirection: 'desc',
-                    })
-                }
-                onChange={handleChange}
+                value={props.selectedOption}
+                onChange={props.triggerFunction}
                 IconComponent={StyledExpandMoreIcon}
                 autoWidth
             >
-                <StyledMenuItem
-                    disableRipple
-                    value={JSON.stringify({
-                        orderBy: 'name',
-                        orderDirection: 'asc',
-                    })}
-                >
-                    Name: A - Z
-                </StyledMenuItem>
-                <StyledMenuItem
-                    disableRipple
-                    value={JSON.stringify({
-                        orderBy: 'name',
-                        orderDirection: 'desc',
-                    })}
-                >
-                    Name: Z - A
-                </StyledMenuItem>
-                <StyledMenuItem
-                    disableRipple
-                    value={JSON.stringify({
-                        orderBy: 'price',
-                        orderDirection: 'desc',
-                    })}
-                >
-                    Price: High - Low
-                </StyledMenuItem>
-                <StyledMenuItem
-                    disableRipple
-                    value={JSON.stringify({
-                        orderBy: 'price',
-                        orderDirection: 'asc',
-                    })}
-                >
-                    Price: Low - High
-                </StyledMenuItem>
-                <StyledMenuItem
-                    disableRipple
-                    value={JSON.stringify({
-                        orderBy: 'createdAt',
-                        orderDirection: 'desc',
-                    })}
-                >
-                    Created: New - Old
-                </StyledMenuItem>
-                <StyledMenuItem
-                    disableRipple
-                    value={JSON.stringify({
-                        orderBy: 'createdAt',
-                        orderDirection: 'asc',
-                    })}
-                >
-                    {' '}
-                    Created: Old - New
-                </StyledMenuItem>
+                {
+                    props.availableOptions.map((item: selectOption) =>
+                        <StyledMenuItem
+                            disableRipple
+                            value={item.value}
+                            customSize={props.customSize}
+                        >
+                            {item.label}
+                        </StyledMenuItem>
+                    )
+                }
+
             </Select>
         </StyledFormControl>
     );

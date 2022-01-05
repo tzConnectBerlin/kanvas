@@ -17,11 +17,11 @@ $ yarn install
 For development, you also need to add file `.env`, with the following contents:
 
 ```
-DB_PORT=5432
-DB_USERNAME=dev_user
-DB_PASSWORD=dev_password
-DB_DATABASE=dev_database
-DB_HOST=localhost
+PGPORT=5432
+PGUSER=dev_user
+PGPASSWORD=dev_password
+PGDATABASE=dev_database
+PGHOST=localhost
 
 JWT_EXPIRATION_TIME=86400000
 JWT_SECRET='wPK-TfcjDSjztKrb4SUnfRPQ1YIovrooYQaX4h-EnU4'
