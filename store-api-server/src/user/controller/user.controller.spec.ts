@@ -7,6 +7,7 @@ import { IpfsService } from 'src/nft/service/ipfs.service';
 import { S3Service } from 'src/s3.service';
 import { DbMockModule } from 'src/db_mock.module';
 import { expectErrWithHttpStatus } from 'src/utils';
+import { CategoryService } from 'src/category/service/category.service';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -15,7 +16,14 @@ describe('UserController', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DbMockModule],
       controllers: [UserController],
-      providers: [UserService, NftService, MintService, IpfsService, S3Service],
+      providers: [
+        UserService,
+        CategoryService,
+        NftService,
+        MintService,
+        IpfsService,
+        S3Service,
+      ],
     }).compile();
 
     controller = module.get<UserController>(UserController);
