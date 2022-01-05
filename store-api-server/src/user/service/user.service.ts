@@ -10,6 +10,7 @@ import {
 } from '../../constants';
 import { Result, Err, Ok } from 'ts-results';
 import { S3Service } from '../../s3.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 const generate = require('meaningful-string');
 
 interface CartMeta {
@@ -31,7 +32,7 @@ export class UserService {
     private readonly s3Service: S3Service,
     private readonly mintService: MintService,
     public readonly nftService: NftService,
-  ) { }
+  ) {}
 
   async create(user: UserEntity): Promise<UserEntity> {
     const generateRandomName = typeof user.userName === 'undefined';
@@ -231,7 +232,7 @@ WHERE session_id = $1
     if (typeof cartMeta === 'undefined') {
       return {
         nfts: [],
-        expiresAt: undefined
+        expiresAt: undefined,
       };
     }
 
@@ -239,70 +240,13 @@ WHERE session_id = $1
     if (nftIds.length === 0) {
       return {
         nfts: [],
-        expiresAt: undefined
+        expiresAt: undefined,
       };
     }
     return {
       nfts: await this.nftService.findByIds(nftIds, 'nft_id', 'asc'),
-      expiresAt: cartMeta.expiresAt
+      expiresAt: cartMeta.expiresAt,
     };
-  }
-
-  async cartCheckout(user: UserEntity, session: string): Promise<boolean> {
-    const dbTx = await this.conn.connect();
-    try {
-      await dbTx.query(`BEGIN`);
-
-      const nftIds = await this.#assignCartNftsToUser(dbTx, user, session);
-      if (nftIds.length === 0) {
-        return false;
-      }
-      const nfts = await this.nftService.findByIds(nftIds);
-
-      // Don't await results of the transfers. Finish the checkout, any issues
-      // should be solved asynchronously to the checkout process itself.
-      this.mintService.transfer_nfts(nfts, user.userAddress);
-
-      await dbTx.query(`COMMIT`);
-    } catch (err: any) {
-      await dbTx.query(`ROLLBACK`);
-      Logger.error(`failed to checkout cart=${session}, err: ${err}`);
-      throw err;
-    } finally {
-      dbTx.release();
-    }
-    return true;
-  }
-
-  async #assignCartNftsToUser(
-    dbTx: any,
-    user: UserEntity,
-    session: string,
-  ): Promise<number[]> {
-    const cartMeta = await this.getCartMeta(session);
-    if (typeof cartMeta === 'undefined') {
-      return [];
-    }
-
-    const nftIds = await this.getCartNftIds(cartMeta.id);
-    await dbTx.query(
-      `
-INSERT INTO mtm_kanvas_user_nft (
-  kanvas_user_id, nft_id
-)
-SELECT $1, nft.id
-FROM nft
-WHERE nft.id = ANY($2)`,
-      [user.id, nftIds],
-    );
-    await dbTx.query(
-      `
-DELETE FROM cart_session
-WHERE session_id = $1`,
-      [session],
-    );
-
-    return nftIds;
   }
 
   async getCartNftIds(cartId: number): Promise<number[]> {
@@ -409,16 +353,11 @@ RETURNING id, expires_at`,
     );
     return {
       id: qryRes.rows[0]['id'],
-      expiresAt: qryRes.rows[0]['expires_at']
+      expiresAt: qryRes.rows[0]['expires_at'],
     };
   }
 
   async getCartMeta(session: string): Promise<CartMeta | undefined> {
-    // TODO: might want to do this deleteExpiredCarts() in a garbage collector
-    // (at eg an interval of 30 seconds), instead of at every cart access
-    // because it might result in excessive database load
-    await this.deleteExpiredCarts();
-
     const qryRes = await this.conn.query(
       `
 SELECT id, expires_at, order_id
@@ -433,18 +372,29 @@ WHERE session_id = $1
     return <CartMeta>{
       id: qryRes.rows[0]['id'],
       expiresAt: qryRes.rows[0]['expires_at'],
-      orderId: qryRes.rows[0]['order_id']
+      orderId: qryRes.rows[0]['order_id'],
     };
   }
 
+  @Cron(CronExpression.EVERY_MINUTE)
   async deleteExpiredCarts() {
-    await this.conn.query(
+    const deletedSessions = await this.conn.query(
       `
 DELETE FROM cart_session AS sess
 WHERE expires_at < now() AT TIME ZONE 'UTC'
   AND (
     sess.order_id IS NULL OR (SELECT status FROM payment where payment.nft_order_id = sess.order_id) NOT IN ('processing')
-  )`,
+  )
+RETURNING session_id`,
+    );
+    if (deletedSessions.rows.length === 0) {
+      return;
+    }
+
+    Logger.warn(
+      `deleted following expired cart sessions: ${deletedSessions.rows.map(
+        (row: any) => row.session_id,
+      )}`,
     );
   }
 
@@ -461,9 +411,6 @@ WHERE expires_at < now() AT TIME ZONE 'UTC'
     if (typeof user === 'undefined') {
       return cookieSession.uuid;
     }
-    return await this.ensureUserCartSession(
-      user.id,
-      cookieSession.uuid,
-    );
+    return await this.ensureUserCartSession(user.id, cookieSession.uuid);
   }
 }

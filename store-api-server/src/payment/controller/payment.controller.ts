@@ -17,11 +17,14 @@ import {
 } from 'src/payment/service/payment.service';
 import { UserService } from 'src/user/service/user.service';
 import { UserEntity } from 'src/user/entity/user.entity';
+import { Lock } from 'async-await-mutex-lock';
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 @Controller('payment')
 export class PaymentController {
+  nftLock: Lock<number>;
+
   constructor(
     private userService: UserService,
     private paymentService: PaymentService,
@@ -46,6 +49,7 @@ export class PaymentController {
           endpointSecret,
         );
     } catch (err) {
+      Logger.error(`Err on payment webhook signature verification: ${err}`);
       throw new HttpException(
         'Webhook signature verification failed',
         HttpStatus.BAD_REQUEST,
@@ -78,6 +82,13 @@ export class PaymentController {
       constructedEvent.data.object.id,
     );
 
+    if (paymentStatus === PaymentStatus.SUCCEEDED) {
+      const orderId = await this.paymentService.getPaymentOrderId(
+        constructedEvent.data.object.id,
+      );
+      await this.paymentService.orderCheckout(orderId);
+    }
+
     throw new HttpException('', HttpStatus.NO_CONTENT);
   }
 
@@ -86,17 +97,21 @@ export class PaymentController {
   async createPayment(
     @CurrentUser() user: UserEntity,
   ): Promise<StripePaymentIntent> {
-    // const createStripePayment (cookieSession, user)
-    const stripePaymentIntent = this.paymentService
-      .createStripePayment(user)
-      .catch((err: any) => {
-        Logger.error(err);
-        throw new HttpException(
-          'Unable to place the order',
-          HttpStatus.BAD_REQUEST,
-        );
-      });
+    await this.nftLock.acquire(user.id);
 
+    let stripePaymentIntent: StripePaymentIntent;
+    try {
+      // const createStripePayment (cookieSession, user)
+      stripePaymentIntent = await this.paymentService.createStripePayment(user);
+    } catch (err: any) {
+      Logger.error(err);
+      throw new HttpException(
+        'Unable to place the order',
+        HttpStatus.BAD_REQUEST,
+      );
+    } finally {
+      this.nftLock.release(user.id);
+    }
     return stripePaymentIntent;
   }
 }

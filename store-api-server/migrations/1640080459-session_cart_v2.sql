@@ -17,7 +17,7 @@ CREATE TABLE mtm_nft_order_nft (
     nft_id INT NOT NULL REFERENCES nft(id)
 );
 
-CREATE TYPE payment_status AS ENUM ('created', 'processing', 'canceled', 'succeeded', 'failed' );
+CREATE TYPE payment_status AS ENUM ('created', 'processing', 'canceled', 'succeeded', 'failed', 'timedOut' );
 CREATE TYPE payment_provider AS ENUM ('stripe', 'tezos' );
 
 CREATE TABLE payment (
@@ -25,7 +25,8 @@ CREATE TABLE payment (
     payment_id TEXT NOT NULL,
     status payment_status NOT NULL,
     nft_order_id INT NOT NULL REFERENCES nft_order(id),
-    provider payment_provider NOT NULL
+    provider payment_provider NOT NULL,
+    expires_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
 
 ALTER TABLE cart_session ADD COLUMN order_id INT REFERENCES nft_order(id);
