@@ -22,34 +22,35 @@ export interface StripePaymentIntent {
   clientSecret: string;
 }
 
-const stripe = process.env.STRIPE_SECRET
-  ? require('stripe')(process.env.STRIPE_SECRET)
-  : undefined;
-
 @Injectable()
 export class PaymentService {
+  stripe = process.env.STRIPE_SECRET
+    ? require('stripe')(process.env.STRIPE_SECRET)
+    : undefined;
+
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
     private userService: UserService,
   ) {}
 
-  async createStripePayment(
-    user: UserEntity,
-    cartSession: string,
-  ): Promise<StripePaymentIntent> {
+  async createStripePayment(user: UserEntity): Promise<StripePaymentIntent> {
+    const cartSessionRes = await this.userService.getUserCartSession(user.id);
+    if (!cartSessionRes.ok || cartSessionRes.val !== 'string') {
+      throw cartSessionRes.val;
+    }
+    const cartSession: string = cartSessionRes.val;
     const nftOrder = await this.createNftOrder(cartSession, user.id);
 
     const cartList = await this.userService.cartList(cartSession);
     const amount = cartList.nfts.reduce((sum, nft) => sum + nft.price, 0);
 
-    const paymentIntent = await stripe.paymentIntents.create({
+    const paymentIntent = await this.stripe.paymentIntents.create({
       amount: amount * 100,
       currency: 'eur', // Have to change this to handle different currencies
       automatic_payment_methods: {
         enabled: false,
       },
     });
-
 
     // Fetch
     // if order and payment not yet set:
@@ -104,7 +105,6 @@ export class PaymentService {
       throw Err(`createNftOrder err: cart should not be empty`);
     }
 
-
     let nftOrderId: number;
     const orderAt = new Date();
 
@@ -139,8 +139,9 @@ WHERE cart_session_id = $2
 UPDATE cart_session
 SET order_id = $1
 WHERE id = $2
-        `
-      , [nftOrderId, cartMeta.id])
+        `,
+        [nftOrderId, cartMeta.id],
+      );
 
       await tx.query('COMMIT');
     } catch (err) {

@@ -1,62 +1,64 @@
--------------------------------|---------|----------|---------|---------|-------------------------------
-File                           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s             
--------------------------------|---------|----------|---------|---------|-------------------------------
-All files                      |   21.81 |     11.6 |   13.98 |   19.97 |                               
- src                           |   35.51 |        0 |   30.76 |   31.57 |                               
-  app.controller.ts            |     100 |      100 |     100 |     100 |                               
-  app.module.ts                |       0 |      100 |       0 |       0 | 1-29                          
-  app.service.ts               |     100 |      100 |     100 |     100 |                               
-  constants.ts                 |     100 |      100 |     100 |     100 |                               
-  db.module.ts                 |       0 |      100 |       0 |       0 | 1-29                          
-  db_mock.module.ts            |     100 |      100 |     100 |     100 |                               
-  main.ts                      |       0 |        0 |       0 |       0 | 1-17                          
-  s3.service.ts                |   53.33 |        0 |      50 |   46.15 | 15-35                         
-  utils.ts                     |       0 |        0 |       0 |       0 | 1-57                          
- src/auth-provider             |       0 |      100 |     100 |       0 |                               
-  auth-provider.module.ts      |       0 |      100 |     100 |       0 | 1-9                           
- src/auth-provider/entity      |     100 |      100 |     100 |     100 |                               
-  auth-provider.entity.ts      |     100 |      100 |     100 |     100 |                               
- src/auth-provider/service     |   66.66 |      100 |       0 |      50 |                               
-  auth-provider.service.ts     |   66.66 |      100 |       0 |      50 | 7-10                          
- src/authentication            |       0 |      100 |     100 |       0 |                               
-  authentication.module.ts     |       0 |      100 |     100 |       0 | 1-32                          
- src/authentication/controller |       0 |        0 |       0 |       0 |                               
-  authentication.controller.ts |       0 |        0 |       0 |       0 | 1-71                          
- src/authentication/guards     |       0 |        0 |       0 |       0 |                               
-  jwt-auth.guard.ts            |       0 |        0 |       0 |       0 | 1-24                          
-  roles.guard.ts               |       0 |        0 |       0 |       0 | 1-29                          
- src/authentication/service    |       0 |        0 |       0 |       0 |                               
-  authentication.service.ts    |       0 |        0 |       0 |       0 | 1-131                         
- src/authentication/strategy   |       0 |      100 |       0 |       0 |                               
-  jwt-auth.strategy.ts         |       0 |      100 |       0 |       0 | 1-18                          
- src/category                  |       0 |      100 |     100 |       0 |                               
-  category.module.ts           |       0 |      100 |     100 |       0 | 1-11                          
- src/category/controller       |      80 |      100 |   33.33 |      75 |                               
-  category.controller.ts       |      80 |      100 |   33.33 |      75 | 11,16                         
- src/category/service          |   61.29 |    85.71 |   33.33 |   58.62 |                               
-  category.service.ts          |   61.29 |    85.71 |   33.33 |   58.62 | 27-95                         
- src/decoraters                |       0 |      100 |       0 |       0 |                               
-  user.decorator.ts            |       0 |      100 |       0 |       0 | 1-6                           
- src/middleware                |       0 |        0 |       0 |       0 |                               
-  cookie_session.ts            |       0 |        0 |       0 |       0 | 1-18                          
-  logger.ts                    |       0 |        0 |       0 |       0 | 2-27                          
- src/nft                       |   51.28 |        0 |      10 |   48.48 |                               
-  nft.module.ts                |       0 |      100 |     100 |       0 | 1-12                          
-  params.ts                    |   64.51 |        0 |      10 |   59.25 | 12,17,30,38-39,50,55,60,71-74 
- src/nft/controller            |   88.23 |      100 |   72.72 |   87.09 |                               
-  nft.controller.ts            |   88.23 |      100 |   72.72 |   87.09 | 25,36-40,48                   
- src/nft/service               |   24.28 |        0 |    8.82 |   21.05 |                               
-  ipfs.service.ts              |   27.45 |        0 |    7.69 |   24.48 | 15-24,34-44,52-135            
-  mint.service.ts              |   37.93 |        0 |   16.66 |   33.33 | 31-38,46-116                  
-  nft.service.ts               |      15 |        0 |    6.66 |   12.28 | 32-166,170-268                
- src/payment                   |       0 |      100 |     100 |       0 |                               
-  payment.module.ts            |       0 |      100 |     100 |       0 | 1-14                          
- src/payment/controller        |       0 |        0 |       0 |       0 |                               
-  payment.controller.ts        |       0 |        0 |       0 |       0 | 1-89                          
- src/payment/service           |       0 |        0 |       0 |       0 |                               
-  payment.service.ts           |       0 |        0 |       0 |       0 | 1-156                         
- src/user                      |       0 |      100 |     100 |       0 |                               
-  user.module.ts               |       0 |      100 |     100 |       0 | 1-15                          
- src/user/service              |   12.31 |        0 |    4.34 |   11.19 |                               
-  user.service.ts              |   12.31 |        0 |    4.34 |   11.19 | 36-273,281-460                
--------------------------------|---------|----------|---------|---------|-------------------------------
+-------------------------------|---------|----------|---------|---------|-------------------------------------------
+File                           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                         
+-------------------------------|---------|----------|---------|---------|-------------------------------------------
+All files                      |   61.87 |    40.54 |   48.02 |   59.24 |                                           
+ src                           |   68.22 |       10 |   53.84 |   64.21 |                                           
+  app.controller.ts            |     100 |      100 |     100 |     100 |                                           
+  app.module.ts                |     100 |      100 |     100 |     100 |                                           
+  app.service.ts               |     100 |      100 |     100 |     100 |                                           
+  constants.ts                 |     100 |      100 |     100 |     100 |                                           
+  db.module.ts                 |     100 |      100 |     100 |     100 |                                           
+  db_mock.module.ts            |     100 |      100 |     100 |     100 |                                           
+  main.ts                      |       0 |        0 |       0 |       0 | 1-17                                      
+  s3.service.ts                |   53.33 |        0 |      50 |   46.15 | 15-35                                     
+  utils.ts                     |   34.61 |    14.28 |      20 |   34.61 | 6,11-12,21,29-35,47-57                    
+ src/auth-provider             |     100 |      100 |     100 |     100 |                                           
+  auth-provider.module.ts      |     100 |      100 |     100 |     100 |                                           
+ src/auth-provider/entity      |     100 |      100 |     100 |     100 |                                           
+  auth-provider.entity.ts      |     100 |      100 |     100 |     100 |                                           
+ src/auth-provider/service     |   66.66 |      100 |       0 |      50 |                                           
+  auth-provider.service.ts     |   66.66 |      100 |       0 |      50 | 7-10                                      
+ src/authentication            |     100 |      100 |     100 |     100 |                                           
+  authentication.module.ts     |     100 |      100 |     100 |     100 |                                           
+ src/authentication/controller |   65.38 |    33.33 |      50 |    62.5 |                                           
+  authentication.controller.ts |   65.38 |    33.33 |      50 |    62.5 | 25-34,60-71                               
+ src/authentication/guards     |   43.33 |       20 |   28.57 |   42.85 |                                           
+  jwt-auth.guard.ts            |   92.85 |       25 |     100 |      90 | 19                                        
+  roles.guard.ts               |       0 |        0 |       0 |       0 | 1-29                                      
+ src/authentication/service    |   70.73 |    58.33 |      75 |   69.23 |                                           
+  authentication.service.ts    |   70.73 |    58.33 |      75 |   69.23 | 34,59-64,75,85-96,108,131                 
+ src/authentication/strategy   |     100 |      100 |     100 |     100 |                                           
+  jwt-auth.strategy.ts         |     100 |      100 |     100 |     100 |                                           
+ src/category                  |     100 |      100 |     100 |     100 |                                           
+  category.module.ts           |     100 |      100 |     100 |     100 |                                           
+ src/category/controller       |      80 |      100 |   33.33 |      75 |                                           
+  category.controller.ts       |      80 |      100 |   33.33 |      75 | 11,16                                     
+ src/category/service          |   61.29 |    85.71 |   33.33 |   58.62 |                                           
+  category.service.ts          |   61.29 |    85.71 |   33.33 |   58.62 | 27-95                                     
+ src/decoraters                |     100 |      100 |     100 |     100 |                                           
+  user.decorator.ts            |     100 |      100 |     100 |     100 |                                           
+ src/middleware                |     100 |    81.81 |     100 |     100 |                                           
+  cookie_session.ts            |     100 |      100 |     100 |     100 |                                           
+  logger.ts                    |     100 |       80 |     100 |     100 | 11                                        
+ src/nft                       |   71.79 |        0 |      10 |   66.66 |                                           
+  nft.module.ts                |     100 |      100 |     100 |     100 |                                           
+  params.ts                    |   64.51 |        0 |      10 |   59.25 | 12,17,30,38-39,50,55,60,71-74             
+ src/nft/controller            |   88.23 |      100 |   72.72 |   87.09 |                                           
+  nft.controller.ts            |   88.23 |      100 |   72.72 |   87.09 | 25,36-40,48                               
+ src/nft/service               |   37.14 |     7.69 |   20.58 |   34.58 |                                           
+  ipfs.service.ts              |   27.45 |        0 |    7.69 |   24.48 | 15-24,34-44,52-135                        
+  mint.service.ts              |   37.93 |        0 |   16.66 |   33.33 | 31-38,46-116                              
+  nft.service.ts               |      45 |    11.11 |   33.33 |   43.85 | 32-65,80-84,95,136-166,170-212,267-268    
+ src/payment                   |     100 |      100 |     100 |     100 |                                           
+  payment.module.ts            |     100 |      100 |     100 |     100 |                                           
+ src/payment/controller        |   36.11 |        0 |      25 |   32.35 |                                           
+  payment.controller.ts        |   36.11 |        0 |      25 |   32.35 | 35-81,90-100                              
+ src/payment/service           |   30.76 |     37.5 |   28.57 |   28.57 |                                           
+  payment.service.ts           |   30.76 |     37.5 |   28.57 |   28.57 | 37-157                                    
+ src/user                      |     100 |      100 |     100 |     100 |                                           
+  user.module.ts               |     100 |      100 |     100 |     100 |                                           
+ src/user/controller           |    62.9 |    45.16 |   66.66 |   61.66 |                                           
+  user.controller.ts           |    62.9 |    45.16 |   66.66 |   61.66 | 58,83-98,108-109,131,143-146,153,196-219  
+ src/user/service              |   65.21 |    33.33 |   78.26 |   64.92 |                                           
+  user.service.ts              |   65.21 |    33.33 |   78.26 |   64.92 | 37-94,180,240,252-274,282-305,345-346,349 
+-------------------------------|---------|----------|---------|---------|-------------------------------------------
