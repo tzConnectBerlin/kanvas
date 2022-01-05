@@ -1,6 +1,7 @@
 require('dotenv').config();
 import { Test, TestingModule } from '@nestjs/testing';
 import { NftService } from './nft.service';
+import { CategoryService } from 'src/category/service/category.service';
 import { DbMockModule } from '../../db_mock.module';
 
 describe('NftService', () => {
@@ -9,7 +10,7 @@ describe('NftService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DbMockModule],
-      providers: [NftService],
+      providers: [NftService, CategoryService],
     }).compile();
 
     service = module.get<NftService>(NftService);

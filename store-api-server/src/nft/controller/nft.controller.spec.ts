@@ -3,6 +3,7 @@ import { Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { NftController } from './nft.controller';
 import { DbMockModule } from 'src/db_mock.module';
 import { NftServiceMock } from '../service/nft_mock.service';
+import { CategoryService } from 'src/category/service/category.service';
 import { PaginationParams } from '../params';
 
 describe('NftController', () => {
@@ -17,6 +18,7 @@ describe('NftController', () => {
           provide: 'NftService',
           useClass: NftServiceMock,
         },
+        CategoryService,
       ],
     }).compile();
 
