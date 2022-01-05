@@ -177,7 +177,7 @@ const Router = () => {
                             />}
                         />
                         <Route path="/404" component={NotFound} />
-                        <Redirect from="*" to="/404" />
+                        {/* <Redirect from="*" to="/404" /> */}
                     </Switch>
                 </ScrollToTop>
 

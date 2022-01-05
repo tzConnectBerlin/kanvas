@@ -293,8 +293,9 @@ const TreeView: FC<TreeViewProps> = ({
 
             setSelectedFilters(treeState.selectedNodes);
             setHighlightedParents(treeState.highlightedParents);
+            setNewCategorySelected(true)
         }
-    }, [props.nodes]);
+    }, [props.nodes, preSelectedFilters]);
 
     const [activeRef, setActiveRef] = useState<any[]>([]);
 
