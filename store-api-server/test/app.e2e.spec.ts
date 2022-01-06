@@ -399,6 +399,16 @@ describe('AppController (e2e)', () => {
       expect(remove.statusCode).toEqual(400);
     },
   );
+
+  skipOnPriorFail('stripe payment: basic', async () => {
+    const bearer = await loginUser(app, 'addr', 'admin');
+
+    const add1 = await request(app.getHttpServer())
+      .post('/users/cart/add/4')
+      .set('authorization', bearer);
+    expect(add1.statusCode).toEqual(201);
+    const cookie = add1.headers['set-cookie'];
+  });
 });
 
 async function loginUser(

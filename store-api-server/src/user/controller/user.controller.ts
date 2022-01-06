@@ -189,33 +189,4 @@ export class UserController {
     );
     return await this.userService.cartList(cartSession);
   }
-
-  @Post('cart/checkout')
-  @UseGuards(JwtAuthGuard)
-  async cartCheckout(@CurrentUser() user: UserEntity) {
-    const cartSessionRes = await this.userService.getUserCartSession(user.id);
-    if (!cartSessionRes.ok) {
-      throw new HttpException(
-        'Something went wrong',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-    const cartSession: string | undefined = cartSessionRes.val;
-    if (typeof cartSession === 'undefined') {
-      throw new HttpException(
-        'User has no active cart',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const success = await this.userService.cartCheckout(user, cartSession);
-    if (!success) {
-      throw new HttpException(
-        'Empty cart cannot be checked out',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    // return 204 (applied, returning nothing)
-    throw new HttpException('', HttpStatus.NO_CONTENT);
-  }
 }
