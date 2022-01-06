@@ -22,9 +22,9 @@ interface State {
   ];
 }
 
-export enum STMResultStatus {
-  Ok,
-  NotAllowed,
+export const enum STMResultStatus {
+  OK,
+  NOT_ALLOWED
 }
 
 export interface STMResult {
@@ -87,7 +87,7 @@ export class StateTransitionMachine {
       ) !== -1;
     if (!isAllowed) {
       return <STMResult>{
-        status: STMResultStatus.NotAllowed,
+        status: STMResultStatus.NOT_ALLOWED,
         message: `attribute '${attr}' is not allowed to be set by user with roles '${actor.roles}' for nft with state '${nft.state}'`,
       };
     }
@@ -109,7 +109,7 @@ export class StateTransitionMachine {
     this.tryMoveNft(nft);
 
     return <STMResult>{
-      status: STMResultStatus.Ok,
+      status: STMResultStatus.OK,
     };
   }
 

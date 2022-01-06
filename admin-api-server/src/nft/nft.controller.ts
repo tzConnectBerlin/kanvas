@@ -1,4 +1,5 @@
 import {
+  Logger,
   Controller,
   Get,
   Post,
@@ -23,11 +24,11 @@ import { NftDto } from './dto/nft.dto';
 import { NftService } from './nft.service';
 import { UpdateNftGuard } from './update-nft.guard';
 import { CurrentUser } from '../decoraters/user.decorator';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { User } from 'src/user/entities/user.entity';
 
 interface UpdateNft {
-  attribute: string
-  value?: string
+  attribute: string;
+  value?: string;
 }
 
 @Controller('nft')
@@ -83,25 +84,26 @@ export class NftController {
   )
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  update(@CurrentUser() user?: UserEntity,@Param('id') nftId: number, @Body() updateNft: UpdateNft) {
+  async update(
+    @Param('id') nftId: number,
+    @Body() updateNft: UpdateNft,
+    @CurrentUser() user: User,
+  ): Promise<NftDto> {
     try {
-      const stmRes = await this.nftService.update(nftId, updateNft.attribute, updateNft.value);
-      switch (stmRes.status) {
-        case STMStatusResult.NotAllowed:
-          throw new HttpException(
-            stmRes.message || '',
-            HttpStatus.NOT_AUTHORIZED,
-          );
-      }
+      const updatedNft = await this.nftService.apply(
+        user,
+        nftId,
+        updateNft.attribute,
+        updateNft.value,
+      );
+      return updatedNft;
     } catch (err: any) {
-      logger.error(`failed to update nft state, err: ${err}`)
-        throw new HttpException(
-          'failed to update nft state,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+      Logger.error(`failed to update nft state, err: ${err}`);
+      throw new HttpException(
+        'failed to update nft state',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-  }
-
   }
 
   @Delete(':id')

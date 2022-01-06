@@ -1,9 +1,9 @@
 require('log-node')();
-import { StateTransitionMachine } from './stm';
+import { STMResultStatus, StateTransitionMachine } from './stm';
 import { Actor } from './types';
 import * as log from 'log';
 
-export { StateTransitionMachine, Actor };
+export { STMResultStatus, StateTransitionMachine, Actor };
 
 // Note: set log level through env variable LOG_LEVEL to one of:
 // - debug

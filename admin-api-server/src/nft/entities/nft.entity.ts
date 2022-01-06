@@ -43,7 +43,7 @@ export class Nft {
     });
   }
 
-  filterDefinedValues() {
+  filterDefinedValues(): any {
     return Object.values(this).filter((value: any) => {
       if (typeof value === 'boolean') {
         return true;
