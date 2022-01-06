@@ -6,7 +6,6 @@ import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
 
 import { Pagination, Stack, useMediaQuery, useTheme } from '@mui/material';
-import { IUser } from '../../interfaces/user';
 import { Animated } from 'react-animated-css';
 import { FC, useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router';
@@ -75,6 +74,8 @@ const Profile: FC<ProfileProps> = () => {
 
     // Using the useState hook in case adding more tabs in the future
     const [selectedTab, setSelectedTab] = useState('Collection');
+    const [userDomain, setUserDomain] = useState('');
+    const [userDomainLoading, setUserDomainLoading] = useState(false);
 
     const [userResponse, getUser] = useAxios(
         {
@@ -96,9 +97,41 @@ const Profile: FC<ProfileProps> = () => {
         { manual: true },
     );
 
+    const loadTezosDomain = async (userAddress: string) => {
+        setUserDomainLoading(true)
+        const response = await fetch('https://api.tezos.domains/graphql', {
+           method:'POST',
+           headers:{'content-type':'application/json'},
+           body:JSON.stringify({query:`{
+            reverseRecords(
+              where: {
+                address: {
+                  in: [
+                    "${userAddress}"
+                  ]
+                }
+              }
+            ) {
+              items {
+                address
+                owner
+                domain {
+                  name
+                }
+              }
+            }
+          }`})
+        })
+
+        const responseBody =  await response.json();
+        setTimeout(() => setUserDomainLoading(false), 600);
+        setUserDomain(responseBody.data.reverseRecords.items[0].domain.name)
+        debugger
+     }
+
     useEffect(() => {
         window.scrollTo(0, 0);
-        
+
         if (!userAddress) {
             history.push('/404');
         }
@@ -132,6 +165,8 @@ const Profile: FC<ProfileProps> = () => {
     useEffect(() => {
         if (userResponse.error?.code === '404') {
             history.push('/404');
+        } else {
+            loadTezosDomain(userAddress)
         }
     }, [userResponse]);
 
@@ -180,6 +215,8 @@ const Profile: FC<ProfileProps> = () => {
                     >
                         <HeaderProfile
                             user={userResponse.data?.user}
+                            userDomain={userDomain}
+                            userDomainLoading={userDomainLoading}
                             loading={userResponse.loading}
                             editProfile={editProfile}
                             nftsCount={userResponse.data?.nftCount}

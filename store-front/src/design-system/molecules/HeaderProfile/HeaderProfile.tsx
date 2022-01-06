@@ -16,6 +16,8 @@ interface HeaderProfileProps {
     theme?: Theme;
     nftsCount: number;
     editProfile: Function;
+    userDomain: string;
+    userDomainLoading: boolean
 }
 
 const FiCopyStyled = styled(FiCopy)<{ theme?: Theme; loading: boolean }>`
@@ -157,15 +159,15 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                             weight="Light"
                             color="#C4C4C4"
                             noWrap={true}
-                            align="center"
+                            align="left"
                             display="initial !important"
-                            width="16rem"
+                            maxWidth="16rem"
                         >
                             {' '}
-                            {props.loading ? (
+                            {props.loading || props.userDomainLoading ? (
                                 <Skeleton width="5rem" />
                             ) : (
-                                props.user?.userAddress
+                                props.userDomain !== '' ? props.userDomain : props.user?.userAddress
                             )}{' '}
                         </Typography>
                         <FiCopyStyled
