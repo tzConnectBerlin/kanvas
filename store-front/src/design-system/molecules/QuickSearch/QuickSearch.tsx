@@ -1,11 +1,12 @@
-import styled from '@emotion/styled'
-import { Stack, Theme, useMediaQuery } from '@mui/material'
-import useAxios from 'axios-hooks'
-import { FC, useEffect, useRef, useState } from 'react'
+import styled from '@emotion/styled';
+import { Stack, Theme, useMediaQuery } from '@mui/material';
+import useAxios from 'axios-hooks';
+import { FC, useEffect, useRef, useState } from 'react';
 import { SearchInput } from '../../atoms/SearchInput';
 import { QuickSearchResult } from '../../molecules/QuickSearchResult';
 
 interface QuickSearchProps {
+    searchOpen?: boolean;
     setSearchOpen: Function;
 }
 
@@ -20,7 +21,7 @@ const StyledBackground = styled.div<{ theme?: Theme; open: boolean }>`
     opacity: ${(props) => (props.open ? '1' : '0')};
     height: ${(props) => (props.open ? '100vh' : '0')} !important;
 
-    transition: opacity 0.3s;
+    transition: opacity 0.2s;
 
     height: 100vh;
     width: 100vw;
@@ -32,14 +33,13 @@ const StyledBackground = styled.div<{ theme?: Theme; open: boolean }>`
 
     @media (max-width: 874px) {
         opacity: 1;
-
         background-color: ${(props) => props.theme.palette.background.paper};
     }
-`
+`;
 
 export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
-    const inputRef = useRef<HTMLInputElement>(null)
-    const isMobile = useMediaQuery('(max-width:600px)')
+    const inputRef = useRef<HTMLInputElement>(null);
+    const isMobile = useMediaQuery('(max-width:874px)');
 
     const [openSearchResult, setOpenSearchresult] = useState(false);
 
@@ -56,22 +56,18 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
     );
 
     useEffect(() => {
-        if (inputValue.length >= 2) {
-            const delaySearch = setTimeout(() => {
-                setLoading(false);
-                getSearch({
-                    params: {
-                        searchString: inputValue,
-                    },
-                });
-            }, 800);
-
-            return () => {
-                clearTimeout(delaySearch);
-            };
-        } else {
+        const delaySearch = setTimeout(() => {
             setLoading(false);
-        }
+            getSearch({
+                params: {
+                    searchString: inputValue,
+                },
+            });
+        }, 800);
+
+        return () => {
+            clearTimeout(delaySearch);
+        };
     }, [inputValue]);
 
     const handleChange = () => {
@@ -90,9 +86,7 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
         }
         inputRef?.current?.blur();
 
-        setTimeout(() => {
-            props.setSearchOpen(false);
-        }, 300);
+        props.setSearchOpen(false);
         setInputValue('');
     };
 
@@ -111,11 +105,13 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
                 <SearchInput
                     open={openSearchResult}
                     ref={inputRef}
+                    isMobile={isMobile}
+                    searchOpen={props.searchOpen ?? false}
                     onChange={handleChange}
                     closeResult={handleCloseInput}
-                    onFocus={() => {
-                        inputRef?.current?.focus();
-                        setTimeout(() => setOpenSearchresult(true), 200);
+                    onClick={() => {
+                        inputRef.current?.focus();
+                        setOpenSearchresult(true);
                         props.setSearchOpen(true);
                     }}
                 />

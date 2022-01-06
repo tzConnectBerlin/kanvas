@@ -1,10 +1,8 @@
 import styled from '@emotion/styled';
 import Avatar from '../../atoms/Avatar';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
-import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 
 import { FC } from 'react';
-import { CustomBadge } from '../../atoms/Badge';
 import { Typography } from '../../atoms/Typography';
 import { Menu, MenuProps, MenuItem, Stack, Theme } from '@mui/material';
 
@@ -20,12 +18,12 @@ const StyledMenuItem = styled(MenuItem)`
     margin-left: 0.5em !important;
     margin-right: 0.5em !important;
     padding-left: 0.5em;
-    border-radius: 0;
+    border-radius: 1rem;
 `;
 
 const paperProps = {
     sx: {
-        borderRadius: '0',
+        borderRadius: '1rem',
         overflow: 'visible',
         border: 'none',
         boxShadow: 'none',
@@ -53,8 +51,7 @@ const paperProps = {
 
 const StyledMenu = styled(Menu)<{ theme?: Theme }>`
     .MuiPaper-root {
-        border: 1px solid ${(props) => props.theme.palette.text.primary};
-
+        filter: ${(props) => props.theme.dropShadow.default};
         background-color: ${(props) =>
             props.theme.palette.background.paper} !important;
         background-image: none !important;

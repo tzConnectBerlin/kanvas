@@ -1,14 +1,21 @@
 import { Box } from '@mui/system';
 import Grid from '@mui/material/Grid';
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
-import { Stack, Theme, useMediaQuery, useTheme } from '@mui/material';
+import {
+    SelectChangeEvent,
+    Stack,
+    Theme,
+    useMediaQuery,
+    useTheme,
+} from '@mui/material';
 import Typography from '../../atoms/Typography';
 import { Copyright } from '../../atoms/Copyright';
 import { useTranslation } from 'react-i18next';
 import { lightTheme as theme } from '../../../theme';
-
+import CustomSelect from '../../atoms/Select';
+import i18next from 'i18next';
 export interface FooterProps {
     selectedTheme?: string;
     theme?: Theme;
@@ -26,13 +33,15 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
     margin-top: -0.2rem;
     color: ${(props) => props.theme.palette.text.primary};
 
-    background-color: ${(props) => props.theme.footer.background};
+    background-color: ${(props) => props.theme.palette.background.default};
 
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 1;
     transition: padding-left 0.2s, padding-right 0.2s;
     padding: 3rem 3rem 1rem;
+
+    filter: ${(props) => props.theme.dropShadow.default};
 
     @media (max-width: 900px) {
         padding-left: 1.5rem;
@@ -51,11 +60,11 @@ const LinkStyled = styled(Link)`
 const LogoStyled = styled.img<{ theme?: Theme }>`
     filter: ${(props) => props.theme.logo.filter ?? 'invert(0%)'};
     display: block;
-    height: 1.8rem;
+    height: 1rem;
     transition: height 0.2s;
 
-    @media (max-width: 650px) {
-        height: 1.8rem;
+    @media (max-width: 600px) {
+        height: 0.9rem;
         transition: height 0.2s;
     }
 `;
@@ -91,6 +100,8 @@ const StyledLink = styled(Link)<{ theme?: Theme }>`
 export const Footer: FC<FooterProps> = () => {
     const { t } = useTranslation(['translation']);
 
+    const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
+
     return (
         <StyledBox>
             <Grid
@@ -121,6 +132,9 @@ export const Footer: FC<FooterProps> = () => {
                 >
                     {t('home.hero.description_1')}
                 </Typography>
+                <Box sx={{ marginTop: '.5rem' }}>
+                    <Copyright />
+                </Box>
             </Grid>
 
             <Grid
@@ -138,15 +152,19 @@ export const Footer: FC<FooterProps> = () => {
                         gutterBottom
                         sx={{ marginTop: '1rem' }}
                     >
-                        {t('footer.headline_1')}
+                        {t('footer.headline_1.title')}
                     </Typography>
 
                     <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/store/">Store</StyledLink>
+                            <StyledLink to="/store/">
+                                {t('footer.headline_1.link_1')}
+                            </StyledLink>
                         </Box>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/product/">Product</StyledLink>
+                            <StyledLink to="/product/">
+                                {t('footer.headline_1.link_2')}
+                            </StyledLink>
                         </Box>
                     </Box>
                 </Grid>
@@ -157,15 +175,19 @@ export const Footer: FC<FooterProps> = () => {
                         gutterBottom
                         sx={{ marginTop: '1rem' }}
                     >
-                        {t('footer.headline_2')}
+                        {t('footer.headline_2.title')}
                     </Typography>
 
                     <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/vision/">Vision</StyledLink>
+                            <StyledLink to="/vision/">
+                                {t('footer.headline_2.link_1')}
+                            </StyledLink>
                         </Box>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/privacy/">NFT history</StyledLink>
+                            <StyledLink to="/privacy/">
+                                {t('footer.headline_2.link_2')}
+                            </StyledLink>
                         </Box>
                     </Box>
                 </Grid>
@@ -177,25 +199,31 @@ export const Footer: FC<FooterProps> = () => {
                     sx={{ height: '7rem', marginTop: '1rem' }}
                 >
                     <Typography weight="SemiBold" size="h5" gutterBottom>
-                        {t('footer.headline_3')}
+                        {t('footer.headline_3.title')}
                     </Typography>
 
                     <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/terms/">Terms</StyledLink>
+                            <StyledLink to="/terms/">
+                                {t('footer.headline_3.link_1')}
+                            </StyledLink>
                         </Box>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/privacy/">Privacy</StyledLink>
+                            <StyledLink to="/privacy/">
+                                {t('footer.headline_3.link_2')}
+                            </StyledLink>
                         </Box>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/faq/">F.A.Q</StyledLink>
+                            <StyledLink to="/faq/">
+                                {t('footer.headline_3.link_3')}
+                            </StyledLink>
                         </Box>
                     </Box>
                 </Grid>
 
                 <Grid item xs={6} md={3} sx={{ marginTop: '1rem' }}>
                     <Typography weight="SemiBold" size="h5" gutterBottom>
-                        {t('footer.headline_4')}
+                        {t('footer.headline_4.title')}
                     </Typography>
 
                     <Box
@@ -208,27 +236,7 @@ export const Footer: FC<FooterProps> = () => {
                     >
                         <Box
                             component="a"
-                            href="https://facebbok.com/tzconnect"
-                            sx={iconStyle}
-                        >
-                            <FacebookStyled
-                                src={'/img/facebook.png'}
-                                alt="Facebook"
-                            />
-                        </Box>
-                        <Box
-                            component="a"
-                            href="https://twitter.com/tzconnect"
-                            sx={iconStyle}
-                        >
-                            <TwitterStyled
-                                src={'/img/twitter.jpeg'}
-                                alt="Twitter"
-                            />
-                        </Box>
-                        <Box
-                            component="a"
-                            href="https://facebbok.com/tzconnect"
+                            href="https://facebook.com/tzconnect"
                             sx={iconStyle}
                         >
                             <FacebookStyled
@@ -248,9 +256,38 @@ export const Footer: FC<FooterProps> = () => {
                         </Box>
                     </Box>
 
-                    <Box sx={{ marginTop: '2.5rem' }}>
-                        <Copyright />
-                    </Box>
+                    <Typography weight="SemiBold" size="h5" gutterBottom>
+                        {t('footer.headline_5.title')}
+                    </Typography>
+
+                    <CustomSelect
+                        id="Language selection - footer"
+                        availableOptions={[
+                            {
+                                value: 'en',
+                                label: 'English',
+                            },
+                            {
+                                value: 'fr',
+                                label: 'Français',
+                            },
+                            {
+                                value: 'de',
+                                label: 'Deutsch',
+                            },
+                            {
+                                value: 'ab',
+                                label: 'عرب',
+                            },
+                        ]}
+                        selectedOption={selectedLanguage ?? 'en'}
+                        triggerFunction={(event: SelectChangeEvent) => {
+                            setSelectedLanguage(event.target.value);
+                            i18next.changeLanguage(event.target.value);
+                        }}
+                        disabled={false}
+                        customSize="small"
+                    />
                 </Grid>
             </Grid>
         </StyledBox>

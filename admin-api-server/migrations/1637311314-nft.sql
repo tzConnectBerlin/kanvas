@@ -3,15 +3,23 @@
 -- ====  UP  ====
 
 BEGIN;
+-- NFT table
 CREATE TABLE nft (
        id SERIAL PRIMARY KEY,
+       nft_state TEXT NOT NULL,
        nft_name TEXT NOT NULL,
-       ipfs_hash TEXT NOT NULL,
        metadata JSONB NOT NULL,	--can be empty though, but not NULL
-       data_uri TEXT,
-       contract TEXT,
-       token_id TEXT
+       data_uri TEXT NOT NULL,
+       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+       updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+       ipfs_hash TEXT,
+       nft_contract TEXT,
+       token_id TEXT,
+       disabled boolean DEFAULT false,
+       created_by INT REFERENCES kanvas_user(id)
+       
 );
+
 COMMIT;
 
 -- ==== DOWN ====

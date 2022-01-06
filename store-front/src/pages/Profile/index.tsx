@@ -5,8 +5,7 @@ import NftGrid from '../../design-system/organismes/NftGrid';
 import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
 
-import { Pagination, Stack } from '@mui/material';
-import { IUser } from '../../interfaces/user';
+import { Pagination, Stack, useMediaQuery, useTheme } from '@mui/material';
 import { Animated } from 'react-animated-css';
 import { FC, useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router';
@@ -21,7 +20,7 @@ interface ParamTypes {
 interface ProfileProps {}
 
 const StyledStack = styled(Stack)`
-    width: 100vw;
+    width: 100%;
     max-width: 100rem;
 `;
 
@@ -29,7 +28,7 @@ const StyledAnimated = styled(Animated)`
     display: 'initial';
     height: auto;
 
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         padding-left: 0rem !important;
         padding-right: 0rem !important;
     }
@@ -38,7 +37,7 @@ const StyledAnimated = styled(Animated)`
 const StyledDiv = styled.div`
     transition: max-height 0.5s, min-height 0.5s;
 
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         padding-top: 2rem;
     }
 `;
@@ -75,6 +74,8 @@ const Profile: FC<ProfileProps> = () => {
 
     // Using the useState hook in case adding more tabs in the future
     const [selectedTab, setSelectedTab] = useState('Collection');
+    const [userDomain, setUserDomain] = useState('');
+    const [userDomainLoading, setUserDomainLoading] = useState(false);
 
     const [userResponse, getUser] = useAxios(
         {
@@ -96,7 +97,41 @@ const Profile: FC<ProfileProps> = () => {
         { manual: true },
     );
 
+    const loadTezosDomain = async (userAddress: string) => {
+        setUserDomainLoading(true)
+        const response = await fetch('https://api.tezos.domains/graphql', {
+           method:'POST',
+           headers:{'content-type':'application/json'},
+           body:JSON.stringify({query:`{
+            reverseRecords(
+              where: {
+                address: {
+                  in: [
+                    "${userAddress}"
+                  ]
+                }
+              }
+            ) {
+              items {
+                address
+                owner
+                domain {
+                  name
+                }
+              }
+            }
+          }`})
+        })
+
+        const responseBody =  await response.json();
+        setTimeout(() => setUserDomainLoading(false), 600);
+        setUserDomain(responseBody.data.reverseRecords.items[0].domain.name)
+        debugger
+     }
+
     useEffect(() => {
+        window.scrollTo(0, 0);
+
         if (!userAddress) {
             history.push('/404');
         }
@@ -130,6 +165,8 @@ const Profile: FC<ProfileProps> = () => {
     useEffect(() => {
         if (userResponse.error?.code === '404') {
             history.push('/404');
+        } else {
+            loadTezosDomain(userAddress)
         }
     }, [userResponse]);
 
@@ -162,10 +199,13 @@ const Profile: FC<ProfileProps> = () => {
         });
     };
 
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
     return (
         <PageWrapper>
             <StyledStack direction="column">
-                <FlexSpacer minHeight={10} />
+                <FlexSpacer minHeight={isMobile ? 4 : 10} />
 
                 <StyledDiv>
                     <StyledAnimated
@@ -175,6 +215,8 @@ const Profile: FC<ProfileProps> = () => {
                     >
                         <HeaderProfile
                             user={userResponse.data?.user}
+                            userDomain={userDomain}
+                            userDomainLoading={userDomainLoading}
                             loading={userResponse.loading}
                             editProfile={editProfile}
                             nftsCount={userResponse.data?.nftCount}
@@ -201,6 +243,7 @@ const Profile: FC<ProfileProps> = () => {
                     nfts={userNftsResponse.data?.nfts}
                     emptyMessage={'No Nfts in collection yet'}
                     emptyLink={'Click here to buy some in the store.'}
+                    nftCardMode="user"
                 />
 
                 <FlexSpacer minHeight={2} />

@@ -9,7 +9,7 @@ html {
 .App-logo {
   height: 40vmin;
   pointer-events: none;
-  
+
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -164,3 +164,7 @@ ul {
 .Carousel-indicators-2 {
   margin-top: -2rem !important;
 }
+.MuiPaper-root {
+  border-radius: 1rem !important;
+}
+

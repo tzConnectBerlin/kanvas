@@ -9,12 +9,16 @@ import {
   Post,
 } from '@nestjs/common';
 import { NftService } from '../service/nft.service';
+import { CategoryService } from 'src/category/service/category.service';
 import { NftEntity, NftEntityPage, SearchResult } from '../entity/nft.entity';
 import { FilterParams, PaginationParams, SearchParam } from '../params';
 
 @Controller('nfts')
 export class NftController {
-  constructor(private nftService: NftService) {}
+  constructor(
+    private nftService: NftService,
+    private categoryService: CategoryService,
+  ) {}
 
   @Post()
   async create(@Body() nft: NftEntity): Promise<NftEntity> {
@@ -23,21 +27,28 @@ export class NftController {
 
   @Get()
   async getFiltered(@Query() params: FilterParams): Promise<NftEntityPage> {
-    this.validateFilterParams(params);
-    return this.nftService.findNftsWithFilter(params);
+    this.#validateFilterParams(params);
+    return await this.nftService.findNftsWithFilter(params);
   }
 
   @Get('/search')
   async search(@Query() params: SearchParam): Promise<SearchResult> {
-    return await this.nftService.search(params.searchString);
+    const [nfts, categories] = await Promise.all([
+      this.nftService.search(params.searchString),
+      this.categoryService.search(params.searchString),
+    ]);
+    return {
+      nfts: nfts,
+      categories: categories,
+    };
   }
 
   @Post('/:id')
   async byId(@Param('id') id: number): Promise<NftEntity> {
-    return this.nftService.byId(id);
+    return await this.nftService.byId(id);
   }
 
-  validateFilterParams(params: FilterParams): void {
+  #validateFilterParams(params: FilterParams): void {
     if (typeof params.availability !== 'undefined') {
       if (
         params.availability.some(
@@ -54,10 +65,10 @@ export class NftController {
       }
     }
 
-    this.validatePaginationParams(params);
+    this.#validatePaginationParams(params);
   }
 
-  validatePaginationParams(params: PaginationParams): void {
+  #validatePaginationParams(params: PaginationParams): void {
     if (params.page < 1 || params.pageSize < 1) {
       throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST);
     }

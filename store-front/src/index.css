@@ -3,7 +3,7 @@ body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  position: relative;  
+  position: relative;
   padding: 0 !important;
 }
 
@@ -14,4 +14,9 @@ code {
 
 #root {
   min-height: 100vh !important;
+}
+
+
+.MuiButtonBase-root-MuiMenuItem-root.Mui-selected:hover {
+  background-color: green !important;
 }

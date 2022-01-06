@@ -11,9 +11,11 @@ import {
   SearchResult,
 } from 'src/nft/entity/nft.entity';
 import { CategoryEntity } from 'src/category/entity/category.entity';
+import { CategoryService } from 'src/category/service/category.service';
 import { FilterParams, PaginationParams } from '../params';
 import {
   PG_CONNECTION,
+  MINTER_ADDRESS,
   SEARCH_MAX_NFTS,
   SEARCH_MAX_CATEGORIES,
   SEARCH_SIMILARITY_LIMIT,
@@ -21,7 +23,10 @@ import {
 
 @Injectable()
 export class NftService {
-  constructor(@Inject(PG_CONNECTION) private conn: any) {}
+  constructor(
+    @Inject(PG_CONNECTION) private conn: any,
+    private readonly categoryService: CategoryService,
+  ) {}
 
   async create(_nft: NftEntity): Promise<NftEntity> {
     throw new Error(
@@ -29,7 +34,7 @@ export class NftService {
     );
   }
 
-  async search(str: string): Promise<SearchResult> {
+  async search(str: string): Promise<NftEntity[]> {
     const nftIds = await this.conn.query(
       `
 SELECT id
@@ -50,43 +55,15 @@ LIMIT $3
       [str, SEARCH_SIMILARITY_LIMIT, SEARCH_MAX_NFTS],
     );
 
-    const categoryIds = await this.conn.query(
-      `
-SELECT id, category AS name, description
-FROM (
-  SELECT
-    id,
-    category,
-    description,
-    GREATEST(
-      word_similarity($1, category),
-      word_similarity($1, description)
-    ) AS similarity
-  FROM nft_category
-) AS inner_query
-WHERE similarity >= $2
-ORDER BY similarity DESC, id
-LIMIT $3
-    `,
-      [str, SEARCH_SIMILARITY_LIMIT, SEARCH_MAX_CATEGORIES],
-    );
-
     const nfts = await this.findByIds(
       nftIds.rows.map((row: any) => row.id),
       'nft_id',
       'asc',
     );
 
-    return {
-      nfts: nftIds.rows
-        .map((row: any) => nfts.find((nft) => nft.id === row.id))
-        .filter(Boolean),
-      categories: categoryIds.rows.map((row: any) => ({
-        id: row.id,
-        name: row.name,
-        description: row.description,
-      })),
-    };
+    return nftIds.rows
+      .map((row: any) => nfts.find((nft) => nft.id === row.id))
+      .filter(Boolean);
   }
 
   async findNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {
@@ -122,7 +99,7 @@ LIMIT $3
       const nftIds = await this.conn.query(
         `
 SELECT nft_id, total_nft_count
-FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [
           params.userAddress,
           params.categories,
@@ -134,6 +111,7 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
           offset,
           limit,
           untilNft,
+          MINTER_ADDRESS,
         ],
       );
       const priceBounds = await this.conn.query(
@@ -163,6 +141,9 @@ FROM price_bounds($1, $2, $3)`,
         orderBy,
         params.orderDirection,
       );
+      if (typeof params.userAddress !== 'undefined') {
+        await this.#addNftOwnerStatus(params.userAddress, res.nfts);
+      }
       return res;
     } catch (err) {
       Logger.error('Error on nft filtered query, err: ' + err);
@@ -181,11 +162,11 @@ FROM price_bounds($1, $2, $3)`,
         HttpStatus.BAD_REQUEST,
       );
     }
-    this.incrementNftViewCount(id);
+    this.#incrementNftViewCount(id);
     return nfts[0];
   }
 
-  async incrementNftViewCount(id: number) {
+  async #incrementNftViewCount(id: number) {
     this.conn.query(
       `
 UPDATE nft
@@ -196,10 +177,46 @@ WHERE id = $1
     );
   }
 
+  async #addNftOwnerStatus(address: string, nfts: NftEntity[]) {
+    const qryRes = await this.conn.query(
+      `
+SELECT
+  idx_assets_nat AS nft_id,
+  'owned' AS owner_status,
+  assets_nat AS num_editions
+FROM onchain_kanvas."storage.ledger_live" AS ledger_now
+WHERE ledger_now.idx_assets_address = $2
+  AND ledger_now.idx_assets_nat = ANY($3)
+
+UNION ALL
+
+SELECT
+  nft_id,
+  'pending' AS owner_status,
+  purchased_editions_pending_transfer(nft_id, $2, $1) as num_editions
+FROM UNNEST($3::integer[]) as nft_id
+
+ORDER BY 1
+`,
+      [MINTER_ADDRESS, address, nfts.map((nft: NftEntity) => nft.id)],
+    );
+    const ownerStatuses: any = {};
+    for (const row of qryRes.rows) {
+      ownerStatuses[row.nft_id] = [
+        ...(ownerStatuses[row.nft_id] || []),
+        ...Array(Number(row.num_editions)).fill(row.owner_status),
+      ];
+    }
+
+    for (const nft of nfts) {
+      nft.ownerStatuses = ownerStatuses[nft.id];
+    }
+  }
+
   async findByIds(
     nftIds: number[],
-    orderBy: string,
-    orderDirection: string,
+    orderBy: string = 'nft_id',
+    orderDirection: string = 'asc',
   ): Promise<NftEntity[]> {
     try {
       const nftsQryRes = await this.conn.query(
