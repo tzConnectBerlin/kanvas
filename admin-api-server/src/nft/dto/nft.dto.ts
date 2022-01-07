@@ -12,14 +12,14 @@ export class NftDto {
       this.createdAt = nftEntity.created_at;
       this.updatedAt = nftEntity.updated_at;
       this.dataUri = nftEntity.data_uri;
-      this.ipfsHash = nftEntity.ipfs_hash;
       this.metadata = nftEntity.metadata;
-      this.nftContract = nftEntity.nft_contract;
-      this.tokenId = nftEntity.token_id;
       this.nftState = nftEntity.nft_state;
       this.nftName = nftEntity.nft_name;
       this.createdBy = nftEntity.created_by;
       this.disabled = nftEntity.disabled;
+
+      this.price = nftEntity.price;
+      this.editionsSize = nftEntity.editions_size;
     }
   }
 
@@ -47,15 +47,6 @@ export class NftDto {
   )
   metadata: unknown;
 
-  @JoiSchema(Joi.string().optional().allow(null))
-  ipfsHash?: string;
-
-  @JoiSchema(Joi.string().optional().allow(null))
-  nftContract?: string;
-
-  @JoiSchema(Joi.string().optional().allow(null))
-  tokenId?: string;
-
   @JoiSchema(Joi.boolean().optional().allow(null))
   disabled?: boolean;
 
@@ -73,4 +64,10 @@ export class NftDto {
 
   @JoiSchema(Joi.any().optional().allow(null))
   image?: any;
+
+  @JoiSchema(Joi.number().optional().allow(null))
+  price: number;
+
+  @JoiSchema(Joi.number().optional().allow(null))
+  editionsSize: number;
 }

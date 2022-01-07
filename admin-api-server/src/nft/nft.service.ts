@@ -1,12 +1,20 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  Logger,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Inject,
+} from '@nestjs/common';
 import { NFT_IMAGE_PREFIX, PG_CONNECTION } from 'src/constants';
 import { DbPool } from 'src/db.module';
-import { QueryParams } from 'src/types';
+import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
 import { User } from 'src/user/entities/user.entity';
-import { convertToSnakeCase, prepareFilterClause } from 'src/utils';
-import { NftDto } from './dto/nft.dto';
 import { Nft } from './entities/nft.entity';
+import { NftDto } from './dto/nft.dto';
+import { RoleService } from 'src/role/role.service';
 import { S3Service } from './s3.service';
+import { QueryParams } from 'src/types';
+import { convertToSnakeCase, prepareFilterClause } from 'src/utils';
 
 const getSelectStatement = (
   whereClause = '',
@@ -41,30 +49,35 @@ const getUpdateStatement = (nft: Nft) => {
 
 @Injectable()
 export class NftService {
+  stm: StateTransitionMachine;
+
   constructor(
     @Inject(S3Service) private s3Service: S3Service,
     @Inject(PG_CONNECTION) private db: DbPool,
-  ) {}
+    private readonly roleService: RoleService,
+  ) {
+    this.stm = new StateTransitionMachine('./config/redacted_redacted.yaml');
+  }
 
   async create(creator: User, createNftDto: NftDto, picture: any) {
     try {
       const metadata = createNftDto.metadata ?? {};
-      const dataUri = await this.s3Service.uploadFile(
-        picture,
-        `${NFT_IMAGE_PREFIX}${createNftDto.nftName}`,
-      );
+      //const dataUri = await this.s3Service.uploadFile(
+      //  picture,
+      //  `${NFT_IMAGE_PREFIX}${createNftDto.nftName}`,
+      //);
       const nftEntity = new Nft({
         ...createNftDto,
         createdBy: creator.id,
-        dataUri,
+        dataUri: 'todo', // dataUri,
         metadata,
       });
       const params = nftEntity.filterDefinedValues();
       const query = getInsertStatement(nftEntity);
       const result = await this.db.query(query, params);
       return { id: result.rows[0].id, ...createNftDto };
-    } catch (error) {
-      console.log('Unable to create new nft', error);
+    } catch (err: any) {
+      Logger.error(`Unable to create new nft, err: ${err}`);
       throw new HttpException(
         'Unable to create new nft',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -94,28 +107,71 @@ export class NftService {
     };
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<NftDto | undefined> {
     const result = await this.db.query<Nft>(
       getSelectStatement('WHERE id = $1'),
       [id],
     );
+    if (result.rowCount === 0) {
+      return undefined;
+    }
     return new NftDto(result.rows[0]);
   }
 
-  async update(id: number, updateNftDto: NftDto, picture: any) {
-    let dataUri;
-    if (picture) {
-      dataUri = await this.s3Service.uploadFile(
-        picture,
-        `${NFT_IMAGE_PREFIX}${updateNftDto.nftName}`,
-      );
+  async apply(
+    user: User,
+    nftId: number,
+    attr: string,
+    value?: string,
+  ): Promise<NftDto> {
+    const roles = await this.roleService.getLabels(user.roles);
+    const actor = new Actor(user.id, roles);
+    const nft = await this.findOne(nftId);
+    if (typeof nft === 'undefined') {
+      throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
     }
-    const nft = new Nft({ ...updateNftDto, dataUri });
+
+    const nft_state = {
+      id: nft.id,
+      state: nft.nftState,
+      attributes: {
+        ...new Nft({ ...nft }).filterDefinedValues(),
+      },
+    };
+    delete nft_state.attributes.id;
+    delete nft_state.attributes.nftState;
+
+    const stmRes = this.stm.tryAttributeApply(actor, nft_state, attr, value);
+    if (stmRes.status != STMResultStatus.OK) {
+      switch (stmRes.status) {
+        case STMResultStatus.NOT_ALLOWED:
+          throw new HttpException(
+            stmRes.message || '',
+            HttpStatus.UNAUTHORIZED,
+          );
+        default:
+          throw new HttpException(
+            stmRes.message || '',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+      }
+    }
+    const updatedNft = {
+      ...nft_state.attributes,
+      id: nft_state.id,
+      state: nft_state.state,
+    };
+
+    return await this.update(updatedNft);
+  }
+
+  async update(updateNftDto: NftDto): Promise<NftDto> {
+    const nft = new Nft({ ...updateNftDto });
     const query = getUpdateStatement(nft);
     const params = nft.filterDefinedValues();
-    const result = await this.db.query(query, [...params, id]);
+    const result = await this.db.query(query, [...params, nft.id]);
     if (result.rowCount >= 1) {
-      return this.findOne(id);
+      return this.findOne(nft.id);
     }
     throw new HttpException('Unable to update nft', HttpStatus.BAD_REQUEST);
   }

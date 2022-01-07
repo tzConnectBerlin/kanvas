@@ -1,0 +1,55 @@
+attributes:
+  price: number
+  editions_size: number
+  categories: number[]
+  proposed: boolean
+  proposal_pass: votes
+  proposal_reject: votes
+  prototype_pass: votes
+  prototype_reject: votes
+
+
+states:
+  setup_nft:
+    state_transitions:
+    - next_state: proposed
+      when: |
+        nft.proposed &&
+        nft.editions_size > 0 &&
+        nft.price > 0 &&
+        nft.categories.length > 0
+    mutables:
+    - attributes: [price, editions_size, proposed, categories]
+      by_roles: [editor, creator, admin]
+
+
+  proposed:
+    state_transitions:
+    - next_state: setup_nft
+      when: |
+        nft.proposal_reject.length > 0
+      do: |
+        {
+          nft.proposed = false
+        }
+
+    - next_state: prototype
+      when: |
+        nft.proposal_pass.length == 3
+
+    mutables:
+    - attributes: [proposal_pass, proposal_reject]
+      by_roles: [moderator]
+
+
+  prototype:
+    state_transitions:
+    - new_state: finish
+      when: 'nft.prototype_pass.length == 3'
+
+    - new_state: setup_nft
+      when: 'nft.prototype_reject.length > 0'
+
+    mutables:
+    - attributes: [prototype_pass, prototype_reject]
+      by_roles: [moderator]

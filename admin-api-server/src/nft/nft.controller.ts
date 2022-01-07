@@ -1,4 +1,5 @@
 import {
+  Logger,
   Controller,
   Get,
   Post,
@@ -22,6 +23,13 @@ import { FilterParams } from 'src/types';
 import { NftDto } from './dto/nft.dto';
 import { NftService } from './nft.service';
 import { UpdateNftGuard } from './update-nft.guard';
+import { CurrentUser } from '../decoraters/user.decorator';
+import { User } from 'src/user/entities/user.entity';
+
+interface UpdateNft {
+  attribute: string;
+  value?: string;
+}
 
 @Controller('nft')
 export class NftController {
@@ -35,19 +43,22 @@ export class NftController {
     }),
   )
   create(
-    @Request() req,
+    @CurrentUser() user: User,
     @Body(new ParseJSONArrayPipe()) createNftDto: NftDto,
     @UploadedFile() image: any,
   ) {
+    /*
+     * TODO
     if (!image) {
       throw new HttpException(
         'NFT image required when creating an NFT',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+    */
     return this.nftService.create(
-      req.user,
-      { ...createNftDto, nftState: 'proposal' },
+      user,
+      { ...createNftDto, nftState: 'setup_nft' },
       image,
     );
   }
@@ -75,12 +86,18 @@ export class NftController {
     }),
   )
   @Patch(':id')
-  update(
-    @Param('id') id: number,
-    @Body(new ParseJSONArrayPipe()) updateNftDto: NftDto,
-    @UploadedFile() image,
-  ) {
-    return this.nftService.update(id, updateNftDto, image);
+  @UseGuards(JwtAuthGuard)
+  async update(
+    @Param('id') nftId: number,
+    @Body() updateNft: UpdateNft,
+    @CurrentUser() user: User,
+  ): Promise<NftDto> {
+    return await this.nftService.apply(
+      user,
+      nftId,
+      updateNft.attribute,
+      updateNft.value,
+    );
   }
 
   @Delete(':id')
