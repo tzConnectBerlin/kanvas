@@ -20,7 +20,6 @@ export class AuthService {
 
   async validateUser(email: string, pass: string): Promise<User | null> {
     const user = await this.usersService.findOneByEmail(email);
-    console.log(user);
     if (user && !user.disabled) {
       const hasValidPassword = await this.validatePassword(pass, user.password);
       if (hasValidPassword) {
