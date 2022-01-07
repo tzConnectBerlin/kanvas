@@ -20,6 +20,8 @@ export class NftDto {
 
       this.price = nftEntity.price;
       this.editionsSize = nftEntity.editions_size;
+      this.categories = nftEntity.categories;
+      this.proposed = nftEntity.proposed;
     }
   }
 
@@ -66,8 +68,11 @@ export class NftDto {
   image?: any;
 
   @JoiSchema(Joi.number().optional().allow(null))
-  price: number;
-
+  price?: number;
   @JoiSchema(Joi.number().optional().allow(null))
-  editionsSize: number;
+  editionsSize?: number;
+  @JoiSchema(Joi.array().items(Joi.number()).optional().allow(null))
+  categories?: number[];
+  @JoiSchema(Joi.boolean().optional().allow(null))
+  proposed?: boolean;
 }

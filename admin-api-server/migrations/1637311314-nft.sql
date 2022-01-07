@@ -16,7 +16,9 @@ CREATE TABLE nft (
       created_by INT REFERENCES kanvas_user(id),
 
       price NUMERIC,
-      editions_size INTEGER
+      editions_size INTEGER,
+      categories INTEGER[],
+      proposed BOOLEAN
 );
 
 COMMIT;

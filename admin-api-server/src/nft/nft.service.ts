@@ -115,6 +115,8 @@ export class NftService {
       getSelectStatement('WHERE id = $1'),
       [id],
     );
+    console.log(result);
+    console.log(result.rows[0].categories);
     if (result.rowCount === 0) {
       return undefined;
     }
@@ -185,11 +187,7 @@ export class NftService {
             );
         }
       }
-      console.log(
-        `nft state: ${JSON.stringify(nft_state)}, ${
-          nft_state.attributes.price
-        }`,
-      );
+      console.log(nft_state);
       const updatedNft = {
         ...nft_state.attributes,
         id: nft_state.id,

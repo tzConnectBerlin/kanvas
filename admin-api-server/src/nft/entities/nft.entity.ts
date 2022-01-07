@@ -15,6 +15,8 @@ export class Nft {
 
       this.price = nftDto.price;
       this.editions_size = nftDto.editionsSize;
+      this.categories = nftDto.categories;
+      this.proposed = nftDto.proposed;
     }
   }
 
@@ -30,6 +32,8 @@ export class Nft {
 
   price?: number;
   editions_size?: number;
+  categories?: number[];
+  proposed?: boolean;
 
   getFieldsWithValues() {
     return Object.keys(this).filter((key: string) =>
