@@ -4,10 +4,9 @@ import { assertEnv } from './utils';
 import { PG_CONNECTION } from './constants';
 import { Client, types } from 'pg';
 import * as Pool from 'pg-pool';
+export type DbPool = Pool<Client>;
 
 dotenv.config();
-
-export type DbPool = Pool<Client>;
 
 // Read postgres TIMESTAMP WITHOUT TIME ZONE values as UTC+0 Date
 types.setTypeParser(

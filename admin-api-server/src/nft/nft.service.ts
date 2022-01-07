@@ -9,44 +9,11 @@ import { NFT_IMAGE_PREFIX, PG_CONNECTION } from 'src/constants';
 import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
 import { User } from 'src/user/entities/user.entity';
-import { Nft } from './entities/nft.entity';
-import { NftDto } from './dto/nft.dto';
+import { NftEntity, NftAttribute } from './entities/nft.entity';
 import { RoleService } from 'src/role/role.service';
 import { S3Service } from './s3.service';
 import { QueryParams } from 'src/types';
-import { convertToSnakeCase, prepareFilterClause } from 'src/utils';
 import { Lock } from 'async-await-mutex-lock';
-
-const getSelectStatement = (
-  whereClause = '',
-  sortField = 'id',
-  sortDirection = 'ASC',
-  limitClause = '',
-): string =>
-  `SELECT * FROM nft ${whereClause} ORDER BY ${sortField} ${sortDirection} ${limitClause}`;
-
-const getSelectCountStatement = (
-  whereClause = '',
-  sortField = 'id',
-  sortDirection = 'ASC',
-): string =>
-  `SELECT COUNT(*) FROM nft ${whereClause} GROUP BY nft.id ORDER BY ${sortField} ${sortDirection}`;
-
-const DELETE_NFT_QUERY = 'UPDATE nft SET disabled = true WHERE id = $1';
-
-const getInsertStatement = (nft: Nft) => {
-  const keys = nft.getFieldsWithValues();
-  return `INSERT INTO nft (${keys.join(',')}) VALUES (${keys
-    .map((key, index) => `$${index + 1}`)
-    .join(',')}) RETURNING id;`;
-};
-
-const getUpdateStatement = (nft: Nft) => {
-  const keys = nft.getFieldsWithValues();
-  return `UPDATE nft set (${keys.join(',')}) = (${keys
-    .map((key, index) => `$${index + 1}`)
-    .join(',')}) WHERE id = $${keys.length + 1};`;
-};
 
 @Injectable()
 export class NftService {
@@ -62,23 +29,19 @@ export class NftService {
     this.nftLock = new Lock<number>();
   }
 
-  async create(creator: User, createNftDto: NftDto, picture: any) {
+  async create(creator: User) {
     try {
-      const metadata = createNftDto.metadata ?? {};
-      //const dataUri = await this.s3Service.uploadFile(
-      //  picture,
-      //  `${NFT_IMAGE_PREFIX}${createNftDto.nftName}`,
-      //);
-      const nftEntity = new Nft({
-        ...createNftDto,
-        createdBy: creator.id,
-        dataUri: 'todo', // dataUri,
-        metadata,
-      });
-      const params = nftEntity.filterDefinedValues();
-      const query = getInsertStatement(nftEntity);
-      const result = await this.db.query(query, params);
-      return { id: result.rows[0].id, ...createNftDto };
+      const qryRes = await this.db.query(
+        `
+INSERT INTO nft (
+  created_by, state
+)
+VALUES ($1, 'creation')
+RETURNING id
+    `,
+        [creator.id],
+      );
+      return { id: qryRes.rows[0].id };
     } catch (err: any) {
       Logger.error(`Unable to create new nft, err: ${err}`);
       throw new HttpException(
@@ -88,6 +51,7 @@ export class NftService {
     }
   }
 
+  /*
   async findAll({ range, sort, filter }: QueryParams) {
     const { query: whereClause, params } = prepareFilterClause(filter);
     const limitClause =
@@ -109,18 +73,48 @@ export class NftService {
       count: countResult.rowCount ?? 0,
     };
   }
+*/
 
-  async findOne(id: number): Promise<NftDto | undefined> {
-    const result = await this.db.query<Nft>(
-      getSelectStatement('WHERE id = $1'),
+  async findOne(id: number): Promise<NftEntity | undefined> {
+    const qryRes = await this.db.query(
+      `
+SELECT
+  nft.id AS nft_id,
+  nft.created_by,
+  nft.created_at,
+  nft.updated_at,
+  nft.state,
+  COALESCE((
+    SELECT
+      ARRAY_AGG(ARRAY[name, value]) AS attributes
+    FROM nft_attribute
+    WHERE nft_id = $1
+  ), ARRAY[]::TEXT[][]
+  ) AS attributes
+FROM nft
+WHERE id = $1
+    `,
       [id],
     );
-    console.log(result);
-    console.log(result.rows[0].categories);
-    if (result.rowCount === 0) {
+    if (qryRes.rowCount === 0) {
       return undefined;
     }
-    return new NftDto(result.rows[0]);
+    console.log(qryRes);
+    const row = qryRes.rows[0];
+    return <NftEntity>{
+      id: row['nft_id'],
+      createdBy: row['created_by'],
+      createdAt: Math.floor(row['created_at'].getTime() / 1000),
+      updatedAt: Math.floor(row['updated_at'].getTime() / 1000),
+      state: row['state'],
+      attributes: row['attributes'].map(
+        (attrRow: any) =>
+          <NftAttribute>{
+            name: attrRow['name'],
+            value: attrRow['value'],
+          },
+      ),
+    };
   }
 
   async getNft(user: User, nftId: number) {
@@ -131,19 +125,9 @@ export class NftService {
       throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
     }
 
-    const nft_state = {
-      id: nft.id,
-      state: nft.nftState,
-      attributes: {
-        ...nft,
-      },
-    };
-    delete nft_state.attributes.id;
-    delete nft_state.attributes.nftState;
-
     return {
       ...nft,
-      allowedActions: this.stm.getAllowedActions(actor, nft_state),
+      allowedActions: this.stm.getAllowedActions(actor, nft),
     };
   }
 
@@ -152,7 +136,7 @@ export class NftService {
     nftId: number,
     attr: string,
     value?: string,
-  ): Promise<NftDto> {
+  ): Promise<NftEntity> {
     await this.nftLock.acquire(nftId);
     try {
       const roles = await this.roleService.getLabels(user.roles);
@@ -162,17 +146,7 @@ export class NftService {
         throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
       }
 
-      const nft_state = {
-        id: nft.id,
-        state: nft.nftState,
-        attributes: {
-          ...nft,
-        },
-      };
-      delete nft_state.attributes.id;
-      delete nft_state.attributes.nftState;
-
-      const stmRes = this.stm.tryAttributeApply(actor, nft_state, attr, value);
+      const stmRes = this.stm.tryAttributeApply(actor, nft, attr, value);
       if (stmRes.status != STMResultStatus.OK) {
         switch (stmRes.status) {
           case STMResultStatus.NOT_ALLOWED:
@@ -187,14 +161,10 @@ export class NftService {
             );
         }
       }
-      console.log(nft_state);
-      const updatedNft = {
-        ...nft_state.attributes,
-        id: nft_state.id,
-        nftState: nft_state.state,
-      };
+      console.log(nft);
 
-      return await this.update(updatedNft);
+      await this.update(nft);
+      return this.findOne(nft.id);
     } catch (err: any) {
       throw err;
     } finally {
@@ -202,22 +172,41 @@ export class NftService {
     }
   }
 
-  async update(updateNftDto: NftDto): Promise<NftDto> {
-    const nft = new Nft({ ...updateNftDto });
-    const query = getUpdateStatement(nft);
-    const params = nft.filterDefinedValues();
-    const result = await this.db.query(query, [...params, nft.id]);
-    if (result.rowCount >= 1) {
-      return this.findOne(nft.id);
-    }
-    throw new HttpException('Unable to update nft', HttpStatus.BAD_REQUEST);
-  }
+  async update(nft: NftEntity) {
+    console.log(`updating nft: ${JSON.stringify(nft)}`);
+    const dbTx = await this.db.connect();
+    try {
+      await dbTx.query(`BEGIN`);
+      dbTx.query(
+        `
+DELETE FROM nft_attribute
+WHERE nft_id = $1
+      `,
+        [nft.id],
+      );
 
-  async remove(id: number) {
-    const result = await this.db.query(DELETE_NFT_QUERY, [id]);
-    if (result.rowCount === 1) {
-      return this.findOne(id);
+      await dbTx.query(
+        `
+INSERT INTO nft_attribute (
+  nft_id, name, value
+)
+SELECT $1, attr.name, attr.value
+FROM UNNEST($2) attr(name, value)
+      `,
+        [
+          nft.id,
+          nft.attributes.map((k: any) => {
+            k.name, k.value;
+          }),
+        ],
+      );
+      await dbTx.query(`COMMIT`);
+    } catch (err: any) {
+      Logger.error(`failed to update nft (id=${nft.id}), err: ${err}`);
+      await dbTx.query(`ROLLBACK`);
+      throw err;
+    } finally {
+      dbTx.release();
     }
-    throw Error('Unable to disable/delete nft');
   }
 }

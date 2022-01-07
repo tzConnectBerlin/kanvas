@@ -20,7 +20,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { NFT_IMAGE_MAX_BYTES } from 'src/constants';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
 import { FilterParams } from 'src/types';
-import { NftDto } from './dto/nft.dto';
+import { NftEntity } from './entities/nft.entity';
 import { NftService } from './nft.service';
 import { UpdateNftGuard } from './update-nft.guard';
 import { CurrentUser } from '../decoraters/user.decorator';
@@ -37,32 +37,11 @@ export class NftController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(
-    FileInterceptor('image', {
-      limits: { fileSize: NFT_IMAGE_MAX_BYTES },
-    }),
-  )
-  create(
-    @CurrentUser() user: User,
-    @Body(new ParseJSONArrayPipe()) createNftDto: NftDto,
-    @UploadedFile() image: any,
-  ) {
-    /*
-     * TODO
-    if (!image) {
-      throw new HttpException(
-        'NFT image required when creating an NFT',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-    */
-    return this.nftService.create(
-      user,
-      { ...createNftDto, nftState: 'setup_nft' },
-      image,
-    );
+  create(@CurrentUser() user: User) {
+    return this.nftService.create(user);
   }
 
+  /*
   @Get()
   findAll(
     @Query('sort', new ParseJSONArrayPipe())
@@ -73,6 +52,7 @@ export class NftController {
   ) {
     return this.nftService.findAll({ sort, filter, range });
   }
+  */
 
   @UseGuards(JwtAuthGuard, UpdateNftGuard)
   @Get(':id')
@@ -93,18 +73,12 @@ export class NftController {
     @Param('id') nftId: number,
     @Body() updateNft: UpdateNft,
     @CurrentUser() user: User,
-  ): Promise<NftDto> {
+  ): Promise<NftEntity> {
     return await this.nftService.apply(
       user,
       nftId,
       updateNft.attribute,
       updateNft.value,
     );
-  }
-
-  @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-  remove(@Param('id') id: number) {
-    return this.nftService.remove(id);
   }
 }

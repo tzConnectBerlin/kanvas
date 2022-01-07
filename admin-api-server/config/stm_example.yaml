@@ -1,25 +1,34 @@
 attributes:
   price: number
-  editionsSize: number
+  editions_size: number
   categories: number[]
   proposed: boolean
-  proposal_pass: votes
+  proposal_accept: votes
   proposal_reject: votes
-  prototype_pass: votes
+  prototype_accept: votes
   prototype_reject: votes
 
 
 states:
+  creation:
+    state_transitions:
+    - next_state: setup_nft
+      when: |
+        nft.name
+    mutables:
+    - attributes: [name]
+      by_roles: [creator, admin]
+
   setup_nft:
     state_transitions:
     - next_state: proposed
       when: |
         nft.proposed &&
-        nft.editionsSize > 0 &&
+        nft.editions_size > 0 &&
         nft.price > 0 &&
         nft.categories.length > 0
     mutables:
-    - attributes: [price, editionsSize, proposed, categories]
+    - attributes: [price, editions_size, proposed, categories]
       by_roles: [editor, creator, admin]
 
 
@@ -35,21 +44,21 @@ states:
 
     - next_state: prototype
       when: |
-        nft.proposal_pass.length == 3
+        nft.proposal_accept.length == 3
 
     mutables:
-    - attributes: [proposal_pass, proposal_reject]
-      by_roles: [moderator]
+    - attributes: [proposal_accept, proposal_reject]
+      by_roles: [moderator, admin]
 
 
   prototype:
     state_transitions:
     - new_state: finish
-      when: 'nft.prototype_pass.length == 3'
+      when: 'nft.prototype_accept.length == 3'
 
     - new_state: setup_nft
       when: 'nft.prototype_reject.length > 0'
 
     mutables:
-    - attributes: [prototype_pass, prototype_reject]
+    - attributes: [prototype_accept, prototype_reject]
       by_roles: [moderator]

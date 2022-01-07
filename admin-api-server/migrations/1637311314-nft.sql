@@ -5,20 +5,17 @@
 BEGIN;
 -- NFT table
 CREATE TABLE nft (
-      id SERIAL PRIMARY KEY,
-      nft_state TEXT NOT NULL,
-      nft_name TEXT NOT NULL,
-      metadata JSONB NOT NULL,	--can be empty though, but not NULL
-      data_uri TEXT NOT NULL,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-      disabled boolean DEFAULT false,
-      created_by INT REFERENCES kanvas_user(id),
+  id SERIAL PRIMARY KEY,
+  state TEXT NOT NULL,
+  created_by INT REFERENCES kanvas_user(id),
+  created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT (now() AT TIME ZONE 'UTC'),
+  updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT (now() AT TIME ZONE 'UTC')
+);
 
-      price NUMERIC,
-      editions_size INTEGER,
-      categories INTEGER[],
-      proposed BOOLEAN
+CREATE TABLE nft_attribute (
+  nft_id INTEGER NOT NULL REFERENCES nft(id),
+  name TEXT NOT NULL,
+  value TEXT
 );
 
 COMMIT;
@@ -27,4 +24,5 @@ COMMIT;
 
 BEGIN;
 DROP TABLE nft;
+DROP TABLE nft_attribute;
 COMMIT;
