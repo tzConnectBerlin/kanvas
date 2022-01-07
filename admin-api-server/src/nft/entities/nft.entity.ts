@@ -32,7 +32,10 @@ export class Nft {
   editions_size?: number;
 
   getFieldsWithValues() {
-    return Object.keys(this).filter((key: string) => {
+    return Object.keys(this).filter((key: string) =>
+      this.#valueDefined(this[key]),
+    );
+    /*{
       if (typeof this[key] !== 'undefined' || typeof this[key] !== null) {
         if (key === 'disabled') {
           return true;
@@ -40,15 +43,20 @@ export class Nft {
         return Boolean(this[key]);
       }
       return false;
-    });
+    });*/
   }
 
   filterDefinedValues(): any {
-    return Object.values(this).filter((value: any) => {
-      if (typeof value === 'boolean') {
-        return true;
-      }
-      return Boolean(value);
-    });
+    return Object.values(this).filter((v: any) => this.#valueDefined(v));
+  }
+
+  #valueDefined(v: any): boolean {
+    if (v === null) {
+      return true;
+    }
+    if (typeof v === 'boolean') {
+      return true;
+    }
+    return Boolean(v);
   }
 }

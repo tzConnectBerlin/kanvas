@@ -1,6 +1,6 @@
 attributes:
   price: number
-  editions_size: number
+  editionsSize: number
   categories: number[]
   proposed: boolean
   proposal_pass: votes
@@ -15,11 +15,11 @@ states:
     - next_state: proposed
       when: |
         nft.proposed &&
-        nft.editions_size > 0 &&
+        nft.editionsSize > 0 &&
         nft.price > 0 &&
         nft.categories.length > 0
     mutables:
-    - attributes: [price, editions_size, proposed, categories]
+    - attributes: [price, editionsSize, proposed, categories]
       by_roles: [editor, creator, admin]
 
 

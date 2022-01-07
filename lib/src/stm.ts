@@ -115,7 +115,8 @@ export class StateTransitionMachine {
 
   #attributeSet(nft: Nft, attr: string, v?: string) {
     if (typeof v === 'undefined') {
-      delete nft.attributes[attr];
+      console.log('test')
+      nft.attributes[attr] = null;
       return;
     }
     nft.attributes[attr] = JSON.parse(v);

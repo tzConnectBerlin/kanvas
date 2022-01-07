@@ -15,6 +15,7 @@ import { RoleService } from 'src/role/role.service';
 import { S3Service } from './s3.service';
 import { QueryParams } from 'src/types';
 import { convertToSnakeCase, prepareFilterClause } from 'src/utils';
+import { Lock } from 'async-await-mutex-lock';
 
 const getSelectStatement = (
   whereClause = '',
@@ -50,6 +51,7 @@ const getUpdateStatement = (nft: Nft) => {
 @Injectable()
 export class NftService {
   stm: StateTransitionMachine;
+  nftLock: Lock<number>;
 
   constructor(
     @Inject(S3Service) private s3Service: S3Service,
@@ -57,6 +59,7 @@ export class NftService {
     private readonly roleService: RoleService,
   ) {
     this.stm = new StateTransitionMachine('./config/redacted_redacted.yaml');
+    this.nftLock = new Lock<number>();
   }
 
   async create(creator: User, createNftDto: NftDto, picture: any) {
@@ -124,45 +127,57 @@ export class NftService {
     attr: string,
     value?: string,
   ): Promise<NftDto> {
-    const roles = await this.roleService.getLabels(user.roles);
-    const actor = new Actor(user.id, roles);
-    const nft = await this.findOne(nftId);
-    if (typeof nft === 'undefined') {
-      throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
-    }
-
-    const nft_state = {
-      id: nft.id,
-      state: nft.nftState,
-      attributes: {
-        ...new Nft({ ...nft }).filterDefinedValues(),
-      },
-    };
-    delete nft_state.attributes.id;
-    delete nft_state.attributes.nftState;
-
-    const stmRes = this.stm.tryAttributeApply(actor, nft_state, attr, value);
-    if (stmRes.status != STMResultStatus.OK) {
-      switch (stmRes.status) {
-        case STMResultStatus.NOT_ALLOWED:
-          throw new HttpException(
-            stmRes.message || '',
-            HttpStatus.UNAUTHORIZED,
-          );
-        default:
-          throw new HttpException(
-            stmRes.message || '',
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
+    await this.nftLock.acquire(nftId);
+    try {
+      const roles = await this.roleService.getLabels(user.roles);
+      const actor = new Actor(user.id, roles);
+      const nft = await this.findOne(nftId);
+      if (typeof nft === 'undefined') {
+        throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
       }
-    }
-    const updatedNft = {
-      ...nft_state.attributes,
-      id: nft_state.id,
-      state: nft_state.state,
-    };
 
-    return await this.update(updatedNft);
+      const nft_state = {
+        id: nft.id,
+        state: nft.nftState,
+        attributes: {
+          ...nft, // new Nft({ ...nft }).filterDefinedValues(),
+        },
+      };
+      delete nft_state.attributes.id;
+      delete nft_state.attributes.nftState;
+
+      const stmRes = this.stm.tryAttributeApply(actor, nft_state, attr, value);
+      if (stmRes.status != STMResultStatus.OK) {
+        switch (stmRes.status) {
+          case STMResultStatus.NOT_ALLOWED:
+            throw new HttpException(
+              stmRes.message || '',
+              HttpStatus.UNAUTHORIZED,
+            );
+          default:
+            throw new HttpException(
+              stmRes.message || '',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+      }
+      console.log(
+        `nft state: ${JSON.stringify(nft_state)}, ${
+          nft_state.attributes.price
+        }`,
+      );
+      const updatedNft = {
+        ...nft_state.attributes,
+        id: nft_state.id,
+        nftState: nft_state.state,
+      };
+
+      return await this.update(updatedNft);
+    } catch (err: any) {
+      throw err;
+    } finally {
+      this.nftLock.release(nftId);
+    }
   }
 
   async update(updateNftDto: NftDto): Promise<NftDto> {
