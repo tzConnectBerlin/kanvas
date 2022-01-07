@@ -64,5 +64,4 @@ function test() {
 
   stm.tryAttributeApply(moderator2, nft, 'proposal_pass', 'true');
 }
-
 // test();

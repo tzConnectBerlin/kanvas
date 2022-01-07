@@ -43,19 +43,22 @@ export class NftController {
     }),
   )
   create(
-    @Request() req,
+    @CurrentUser() user: User,
     @Body(new ParseJSONArrayPipe()) createNftDto: NftDto,
     @UploadedFile() image: any,
   ) {
+    /*
+     * TODO
     if (!image) {
       throw new HttpException(
         'NFT image required when creating an NFT',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+    */
     return this.nftService.create(
-      req.user,
-      { ...createNftDto, nftState: 'proposal' },
+      user,
+      { ...createNftDto, nftState: 'setup_nft' },
       image,
     );
   }
@@ -89,21 +92,12 @@ export class NftController {
     @Body() updateNft: UpdateNft,
     @CurrentUser() user: User,
   ): Promise<NftDto> {
-    try {
-      const updatedNft = await this.nftService.apply(
-        user,
-        nftId,
-        updateNft.attribute,
-        updateNft.value,
-      );
-      return updatedNft;
-    } catch (err: any) {
-      Logger.error(`failed to update nft state, err: ${err}`);
-      throw new HttpException(
-        'failed to update nft state',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    return await this.nftService.apply(
+      user,
+      nftId,
+      updateNft.attribute,
+      updateNft.value,
+    );
   }
 
   @Delete(':id')

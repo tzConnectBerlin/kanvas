@@ -5,6 +5,7 @@ mkShell {
     nodejs
     ripgrep
     postgresql
+    jq
     httpie
   ];
 

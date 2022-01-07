@@ -5,16 +5,16 @@ export class Nft {
     if (nftDto) {
       this.id = nftDto.id;
       this.metadata = nftDto.metadata;
-      this.nft_contract = nftDto.nftContract;
-      this.token_id = nftDto.tokenId;
       this.nft_state = nftDto.nftState;
       this.nft_name = nftDto.nftName;
       this.created_at = nftDto.createdAt;
       this.updated_at = nftDto.updatedAt;
       this.data_uri = nftDto.dataUri;
-      this.ipfs_hash = nftDto.ipfsHash;
       this.created_by = nftDto.createdBy;
       this.disabled = nftDto.disabled || false;
+
+      this.price = nftDto.price;
+      this.editions_size = nftDto.editionsSize;
     }
   }
 
@@ -26,10 +26,10 @@ export class Nft {
   data_uri: string;
   created_at: Date;
   updated_at: Date;
-  ipfs_hash?: string;
-  nft_contract?: string;
-  token_id?: string;
   disabled?: boolean;
+
+  price?: number;
+  editions_size?: number;
 
   getFieldsWithValues() {
     return Object.keys(this).filter((key: string) => {

@@ -20,7 +20,7 @@ states:
         nft.categories.length > 0
     mutables:
     - attributes: [price, editions_size, proposed, categories]
-      by_roles: [editor, creator]
+      by_roles: [editor, creator, admin]
 
 
   proposed:

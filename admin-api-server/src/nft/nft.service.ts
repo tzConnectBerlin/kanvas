@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
+import {
+  Logger,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Inject,
+} from '@nestjs/common';
 import { NFT_IMAGE_PREFIX, PG_CONNECTION } from 'src/constants';
 import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
@@ -43,32 +49,35 @@ const getUpdateStatement = (nft: Nft) => {
 
 @Injectable()
 export class NftService {
+  stm: StateTransitionMachine;
+
   constructor(
     @Inject(S3Service) private s3Service: S3Service,
     @Inject(PG_CONNECTION) private db: DbPool,
     private readonly roleService: RoleService,
-    private stm: StateTransitionMachine,
-  ) {}
+  ) {
+    this.stm = new StateTransitionMachine('./config/redacted_redacted.yaml');
+  }
 
   async create(creator: User, createNftDto: NftDto, picture: any) {
     try {
       const metadata = createNftDto.metadata ?? {};
-      const dataUri = await this.s3Service.uploadFile(
-        picture,
-        `${NFT_IMAGE_PREFIX}${createNftDto.nftName}`,
-      );
+      //const dataUri = await this.s3Service.uploadFile(
+      //  picture,
+      //  `${NFT_IMAGE_PREFIX}${createNftDto.nftName}`,
+      //);
       const nftEntity = new Nft({
         ...createNftDto,
         createdBy: creator.id,
-        dataUri,
+        dataUri: 'todo', // dataUri,
         metadata,
       });
       const params = nftEntity.filterDefinedValues();
       const query = getInsertStatement(nftEntity);
       const result = await this.db.query(query, params);
       return { id: result.rows[0].id, ...createNftDto };
-    } catch (error) {
-      console.log('Unable to create new nft', error);
+    } catch (err: any) {
+      Logger.error(`Unable to create new nft, err: ${err}`);
       throw new HttpException(
         'Unable to create new nft',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -98,11 +107,14 @@ export class NftService {
     };
   }
 
-  async findOne(id: number): Promise<NftDto> {
+  async findOne(id: number): Promise<NftDto | undefined> {
     const result = await this.db.query<Nft>(
       getSelectStatement('WHERE id = $1'),
       [id],
     );
+    if (result.rowCount === 0) {
+      return undefined;
+    }
     return new NftDto(result.rows[0]);
   }
 
@@ -115,6 +127,9 @@ export class NftService {
     const roles = await this.roleService.getLabels(user.roles);
     const actor = new Actor(user.id, roles);
     const nft = await this.findOne(nftId);
+    if (typeof nft === 'undefined') {
+      throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
+    }
 
     const nft_state = {
       id: nft.id,
