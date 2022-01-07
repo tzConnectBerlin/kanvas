@@ -74,9 +74,11 @@ export class NftController {
     return this.nftService.findAll({ sort, filter, range });
   }
 
+  @UseGuards(JwtAuthGuard, UpdateNftGuard)
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.nftService.findOne(id);
+  @UseGuards(JwtAuthGuard)
+  findOne(@Param('id') id: number, @CurrentUser() user: User) {
+    return this.nftService.getNft(user, id);
   }
 
   @UseGuards(JwtAuthGuard, UpdateNftGuard)

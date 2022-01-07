@@ -121,6 +121,30 @@ export class NftService {
     return new NftDto(result.rows[0]);
   }
 
+  async getNft(user: User, nftId: number) {
+    const roles = await this.roleService.getLabels(user.roles);
+    const actor = new Actor(user.id, roles);
+    const nft = await this.findOne(nftId);
+    if (typeof nft === 'undefined') {
+      throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
+    }
+
+    const nft_state = {
+      id: nft.id,
+      state: nft.nftState,
+      attributes: {
+        ...nft,
+      },
+    };
+    delete nft_state.attributes.id;
+    delete nft_state.attributes.nftState;
+
+    return {
+      ...nft,
+      allowedActions: this.stm.getAllowedActions(actor, nft_state),
+    };
+  }
+
   async apply(
     user: User,
     nftId: number,
@@ -140,7 +164,7 @@ export class NftService {
         id: nft.id,
         state: nft.nftState,
         attributes: {
-          ...nft, // new Nft({ ...nft }).filterDefinedValues(),
+          ...nft,
         },
       };
       delete nft_state.attributes.id;
