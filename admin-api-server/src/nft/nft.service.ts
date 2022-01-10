@@ -111,7 +111,6 @@ WHERE id = $1
       attributes: {},
     };
     for (const [name, value] of row['attributes']) {
-      console.log(value);
       nft.attributes[name] = JSON.parse(value);
     }
     return nft;
@@ -148,7 +147,6 @@ WHERE id = $1
       }
 
       const stmRes = this.stm.tryAttributeApply(actor, nft, attr, value);
-      console.log(nft);
       if (stmRes.status != STMResultStatus.OK) {
         switch (stmRes.status) {
           case STMResultStatus.NOT_ALLOWED:

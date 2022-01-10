@@ -32,7 +32,6 @@ states:
     - attributes: [price, editions_size, proposed, categories]
       by_roles: [editor, creator, admin]
 
-
   proposed:
     state_transitions:
     - next_state: setup_nft
@@ -40,26 +39,28 @@ states:
         nft.proposal_reject.length > 0
       do: |
         {
-          nft.proposed = false
-        }
+          nft.proposed = false;
 
+          idx = 0;
+          while (nft.hasOwnProperty('proposal_reject_' + idx)) {
+            idx++;
+          }
+          nft['proposal_reject_' + idx] = nft.proposal_reject;
+          nft.proposal_reject = null;
+        }
     - next_state: prototype
       when: |
         nft.proposal_accept.length == 3
-
     mutables:
     - attributes: [proposal_accept, proposal_reject]
       by_roles: [moderator, admin]
-
 
   prototype:
     state_transitions:
     - new_state: finish
       when: 'nft.prototype_accept.length == 3'
-
     - new_state: setup_nft
       when: 'nft.prototype_reject.length > 0'
-
     mutables:
     - attributes: [prototype_accept, prototype_reject]
       by_roles: [moderator]
