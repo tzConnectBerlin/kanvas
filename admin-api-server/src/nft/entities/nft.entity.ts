@@ -1,8 +1,3 @@
-export interface NftAttribute {
-  name: string;
-  value?: string; // nullable
-}
-
 export interface NftEntity {
   id: number;
   createdBy: number;
@@ -10,5 +5,5 @@ export interface NftEntity {
   updatedAt: number;
 
   state: string;
-  attributes: NftAttribute[];
+  attributes: any;
 }

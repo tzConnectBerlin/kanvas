@@ -22,7 +22,6 @@ import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
 import { FilterParams } from 'src/types';
 import { NftEntity } from './entities/nft.entity';
 import { NftService } from './nft.service';
-import { UpdateNftGuard } from './update-nft.guard';
 import { CurrentUser } from '../decoraters/user.decorator';
 import { User } from 'src/user/entities/user.entity';
 
@@ -54,14 +53,14 @@ export class NftController {
   }
   */
 
-  @UseGuards(JwtAuthGuard, UpdateNftGuard)
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: number, @CurrentUser() user: User) {
-    return this.nftService.getNft(user, id);
+  async findOne(@Param('id') id: number, @CurrentUser() user: User) {
+    return await this.nftService.getNft(user, id);
   }
 
-  @UseGuards(JwtAuthGuard, UpdateNftGuard)
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileInterceptor('image', {
       limits: { fileSize: NFT_IMAGE_MAX_BYTES },

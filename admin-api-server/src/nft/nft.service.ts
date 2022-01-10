@@ -9,7 +9,7 @@ import { NFT_IMAGE_PREFIX, PG_CONNECTION } from 'src/constants';
 import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
 import { User } from 'src/user/entities/user.entity';
-import { NftEntity, NftAttribute } from './entities/nft.entity';
+import { NftEntity } from './entities/nft.entity';
 import { RoleService } from 'src/role/role.service';
 import { S3Service } from './s3.service';
 import { QueryParams } from 'src/types';
@@ -84,12 +84,13 @@ SELECT
   nft.created_at,
   nft.updated_at,
   nft.state,
-  COALESCE((
-    SELECT
-      ARRAY_AGG(ARRAY[name, value]) AS attributes
-    FROM nft_attribute
-    WHERE nft_id = $1
-  ), ARRAY[]::TEXT[][]
+  COALESCE(
+    (
+      SELECT
+        ARRAY_AGG(ARRAY[name, value]) AS attributes
+      FROM nft_attribute
+      WHERE nft_id = $1
+    ), ARRAY[]::TEXT[][]
   ) AS attributes
 FROM nft
 WHERE id = $1
@@ -99,22 +100,20 @@ WHERE id = $1
     if (qryRes.rowCount === 0) {
       return undefined;
     }
-    console.log(qryRes);
     const row = qryRes.rows[0];
-    return <NftEntity>{
+
+    const nft = <NftEntity>{
       id: row['nft_id'],
       createdBy: row['created_by'],
       createdAt: Math.floor(row['created_at'].getTime() / 1000),
       updatedAt: Math.floor(row['updated_at'].getTime() / 1000),
       state: row['state'],
-      attributes: row['attributes'].map(
-        (attrRow: any) =>
-          <NftAttribute>{
-            name: attrRow['name'],
-            value: attrRow['value'],
-          },
-      ),
+      attributes: {},
     };
+    for (const [name, value] of row['attributes']) {
+      nft.attributes[name] = value;
+    }
+    return nft;
   }
 
   async getNft(user: User, nftId: number) {
@@ -124,6 +123,7 @@ WHERE id = $1
     if (typeof nft === 'undefined') {
       throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
     }
+    console.log(`actor: ${JSON.stringify(actor)}, nft: ${JSON.stringify(nft)}`);
 
     return {
       ...nft,
@@ -161,7 +161,6 @@ WHERE id = $1
             );
         }
       }
-      console.log(nft);
 
       await this.update(nft);
       return this.findOne(nft.id);
@@ -173,10 +172,20 @@ WHERE id = $1
   }
 
   async update(nft: NftEntity) {
-    console.log(`updating nft: ${JSON.stringify(nft)}`);
+    const attrNames = Object.keys(nft.attributes);
+    const attrValues = attrNames.map((name: string) => nft.attributes[name]);
+
     const dbTx = await this.db.connect();
     try {
       await dbTx.query(`BEGIN`);
+      dbTx.query(
+        `
+UPDATE nft
+SET state = $2
+WHERE id = $1
+      `,
+        [nft.id, nft.state],
+      );
       dbTx.query(
         `
 DELETE FROM nft_attribute
@@ -184,21 +193,15 @@ WHERE nft_id = $1
       `,
         [nft.id],
       );
-
       await dbTx.query(
         `
 INSERT INTO nft_attribute (
   nft_id, name, value
 )
 SELECT $1, attr.name, attr.value
-FROM UNNEST($2) attr(name, value)
+FROM UNNEST($2::text[], $3::text[]) attr(name, value)
       `,
-        [
-          nft.id,
-          nft.attributes.map((k: any) => {
-            k.name, k.value;
-          }),
-        ],
+        [nft.id, attrNames, attrValues],
       );
       await dbTx.query(`COMMIT`);
     } catch (err: any) {
