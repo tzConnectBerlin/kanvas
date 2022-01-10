@@ -111,7 +111,8 @@ WHERE id = $1
       attributes: {},
     };
     for (const [name, value] of row['attributes']) {
-      nft.attributes[name] = value;
+      console.log(value);
+      nft.attributes[name] = JSON.parse(value);
     }
     return nft;
   }
@@ -119,11 +120,11 @@ WHERE id = $1
   async getNft(user: User, nftId: number) {
     const roles = await this.roleService.getLabels(user.roles);
     const actor = new Actor(user.id, roles);
+
     const nft = await this.findOne(nftId);
     if (typeof nft === 'undefined') {
       throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
     }
-    console.log(`actor: ${JSON.stringify(actor)}, nft: ${JSON.stringify(nft)}`);
 
     return {
       ...nft,
@@ -147,6 +148,7 @@ WHERE id = $1
       }
 
       const stmRes = this.stm.tryAttributeApply(actor, nft, attr, value);
+      console.log(nft);
       if (stmRes.status != STMResultStatus.OK) {
         switch (stmRes.status) {
           case STMResultStatus.NOT_ALLOWED:
@@ -162,8 +164,8 @@ WHERE id = $1
         }
       }
 
-      await this.update(nft);
-      return this.findOne(nft.id);
+      await this.update(user, nft);
+      return this.getNft(user, nft.id);
     } catch (err: any) {
       throw err;
     } finally {
@@ -171,9 +173,11 @@ WHERE id = $1
     }
   }
 
-  async update(nft: NftEntity) {
+  async update(setBy: User, nft: NftEntity) {
     const attrNames = Object.keys(nft.attributes);
-    const attrValues = attrNames.map((name: string) => nft.attributes[name]);
+    const attrValues = attrNames.map((name: string) =>
+      JSON.stringify(nft.attributes[name]),
+    );
 
     const dbTx = await this.db.connect();
     try {
@@ -186,22 +190,20 @@ WHERE id = $1
       `,
         [nft.id, nft.state],
       );
-      dbTx.query(
-        `
-DELETE FROM nft_attribute
-WHERE nft_id = $1
-      `,
-        [nft.id],
-      );
       await dbTx.query(
         `
-INSERT INTO nft_attribute (
-  nft_id, name, value
+INSERT INTO nft_attribute AS TARGET (
+  nft_id, set_by, name, value
 )
-SELECT $1, attr.name, attr.value
-FROM UNNEST($2::text[], $3::text[]) attr(name, value)
+SELECT $1, $2, attr.name, attr.value
+FROM UNNEST($3::text[], $4::text[]) attr(name, value)
+ON CONFLICT ON CONSTRAINT nft_attribute_pkey DO UPDATE
+SET
+  value = EXCLUDED.value,
+  set_at = now() AT TIME ZONE 'UTC'
+WHERE TARGET.value != EXCLUDED.value
       `,
-        [nft.id, attrNames, attrValues],
+        [nft.id, setBy.id, attrNames, attrValues],
       );
       await dbTx.query(`COMMIT`);
     } catch (err: any) {
