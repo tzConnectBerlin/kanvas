@@ -133,18 +133,24 @@ WHERE id = $1
   }
 
   async getNft(user: User, nftId: number) {
-    const roles = await this.roleService.getLabels(user.roles);
-    const actor = new Actor(user.id, roles);
-
     const nft = await this.findOne(nftId);
     if (typeof nft === 'undefined') {
       throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
     }
+    const actor = await this.getActorForNft(user, nft);
 
     return {
       ...nft,
       allowedActions: this.stm.getAllowedActions(actor, nft),
     };
+  }
+
+  async getActorForNft(user: User, nft: NftEntity): Promise<Actor> {
+    const roles = await this.roleService.getLabels(user.roles);
+    if (nft.createdBy === user.id) {
+      roles.push('creator');
+    }
+    return new Actor(user.id, roles);
   }
 
   async apply(
@@ -155,12 +161,12 @@ WHERE id = $1
   ): Promise<NftEntity> {
     await this.nftLock.acquire(nftId);
     try {
-      const roles = await this.roleService.getLabels(user.roles);
-      const actor = new Actor(user.id, roles);
       const nft = await this.findOne(nftId);
       if (typeof nft === 'undefined') {
         throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
       }
+
+      const actor = await this.getActorForNft(user, nft);
 
       const stmRes = this.stm.tryAttributeApply(actor, nft, attr, value);
       if (stmRes.status != STMResultStatus.OK) {

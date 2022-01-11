@@ -18,7 +18,7 @@ states:
         nft.name.length > 0
     mutables:
     - attributes: [name]
-      by_roles: [creator, admin]
+      by_roles: [creator]
 
   setup_nft:
     state_transitions:
