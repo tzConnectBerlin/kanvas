@@ -109,6 +109,7 @@ const Router = () => {
 
     const [cartOpen, setCartOpen] = useState(false);
     const [loginOpen, setLoginOpen] = useState(false);
+    const [redirectAfterSignIn, setRedirectAfterSignIn] = useState(true);
 
     return (
         <ThemeProvider
@@ -131,6 +132,8 @@ const Router = () => {
                     listCart={listCart}
                     loginOpen={loginOpen}
                     setLoginOpen={setLoginOpen}
+                    redirectAfterSignIn={redirectAfterSignIn}
+                    setRedirectAfterSignIn={setRedirectAfterSignIn}
                 />
 
                 <ScrollToTop>
@@ -172,6 +175,7 @@ const Router = () => {
                                 setNftsInCart={setNftsInCart}
                                 listCart={listCart}
                                 setLoginOpen={setLoginOpen}
+
                                 expiresAt={listCartResponse.data?.expiresAt}
                                 loading={listCartResponse.loading && !listCalled}
                             />}

@@ -33,6 +33,8 @@ interface SignInModalProps {
     open: boolean;
     setCurrentLoggedUser: Function;
     listCart: Function;
+    redirectAfterSignIn: boolean;
+    setRedirectAfterSignIn: (input: boolean) => void;
 }
 
 interface IUserParams {
@@ -283,7 +285,10 @@ export const SignInModal: FC<SignInModalProps> = ({
                 registerUserResponse.data.userAddress,
             );
 
-            history.push(`/store`);
+            if (props.redirectAfterSignIn)
+                history.push(`/store`);
+
+            props.setRedirectAfterSignIn(true)
         }
     }, [registerUserResponse.data]);
 

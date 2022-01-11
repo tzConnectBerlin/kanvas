@@ -24,7 +24,7 @@ interface CheckoutProps {
     expiresAt: string;
     nftsInCart: INft[];
     listCart: Function;
-    setNftsInCart: Function;
+    setNftsInCart: (input: INft[]) => void;
     setLoginOpen: (input: boolean) => void;
 }
 
@@ -227,31 +227,11 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
             manual: true,
         })
 
-
-    const [unlockCartResponse, unlockCart] = useAxios({
-        url:
-            process.env.REACT_APP_API_SERVER_BASE_URL +
-            '/users/cart/unlock',
-        method: 'POST',
-        withCredentials: true,
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem(
-                'Kanvas - Bearer',
-            )}`,
-        },
-    },
-    {
-        manual: true,
-    })
-
     const handleBackwardStep = () => {
         if (activeStep === 0) {
             history.push('/store')
         }
 
-        if (activeStep === 2    ) {
-            unlockCart()
-        }
         setActiveStep(activeStep - 1)
     }
 
@@ -277,7 +257,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
         }
 
         if (activeStep === 3) {
-            history.push(`/profile/${localStorage.getItem('Kanvas - address')}}`)
+            history.push(`/profile/${localStorage.getItem('Kanvas - address')}`)
         }
     }
 
@@ -498,7 +478,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                                                 {
                                                     stripeOptions.clientSecret !== undefined &&
                                                     <Elements stripe={stripePromise} options={stripeOptions}>
-                                                        <StripeCheckoutForm activeStep={activeStep} setActiveStep={setActiveStep} />
+                                                        <StripeCheckoutForm activeStep={activeStep} setActiveStep={setActiveStep} setNftsInCart={props.setNftsInCart}/>
                                                     </Elements>
                                                 }
                                             </Stack>
@@ -548,7 +528,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                             onClick={() => handleForwardStep()}
                             label={t(`checkout.next_button_${activeStep}`)}
                             loading={paymentIntentSecret.loading}
-                            disabled={props.nftsInCart.length === 0}
+                            disabled={props.nftsInCart.length === 0 && activeStep < 3}
                         />
                     }
                 </Stack>
