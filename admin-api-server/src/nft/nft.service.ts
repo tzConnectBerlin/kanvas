@@ -20,6 +20,7 @@ const fs = require('fs');
 export class NftService {
   stm: StateTransitionMachine;
   nftLock: Lock<number>;
+  CONTENT_KEYWORD = 'content_uri';
 
   constructor(
     @Inject(S3Service) private s3Service: S3Service,
@@ -45,7 +46,7 @@ export class NftService {
     });
   }
 
-  async create(creator: User) {
+  async create(creator: User): Promise<NftEntity> {
     try {
       const qryRes = await this.db.query(
         `
@@ -57,7 +58,7 @@ RETURNING id
     `,
         [creator.id],
       );
-      return { id: qryRes.rows[0].id };
+      return this.getNft(creator, qryRes.rows[0].id);
     } catch (err: any) {
       Logger.error(`Unable to create new nft, err: ${err}`);
       throw new HttpException(
@@ -153,13 +154,52 @@ WHERE id = $1
     return new Actor(user.id, roles);
   }
 
+  async setContent(
+    user: User,
+    nftId: number,
+    picture: any,
+  ): Promise<NftEntity> {
+    await this.nftLock.acquire(nftId);
+    try {
+      // verify first that we are allowed to change the content, before uploading
+      // to S3 (and potentially overwriting an earlier set content)
+      const nft = await this.getNft(user, nftId);
+      if (typeof nft === 'undefined') {
+        throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
+      }
+      if (!nft.allowedActions.hasOwnProperty(this.CONTENT_KEYWORD)) {
+        throw new HttpException(
+          `attribute '${this.CONTENT_KEYWORD}' is not allowed to be set by you for nft with state '${nft.state}'`,
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      const fileName = `nft_${nftId}`;
+      // we'll simply store the uri as a pointer to the image in our own db
+      const contentUri = await this.s3Service.uploadFile(picture, fileName);
+
+      return await this.apply(
+        user,
+        nftId,
+        this.CONTENT_KEYWORD,
+        JSON.stringify(contentUri),
+        false,
+      );
+    } finally {
+      this.nftLock.release(nftId);
+    }
+  }
+
   async apply(
     user: User,
     nftId: number,
     attr: string,
-    value?: string,
+    value?: any, // value is of type string? | picture
+    lockNft = true,
   ): Promise<NftEntity> {
-    await this.nftLock.acquire(nftId);
+    if (lockNft) {
+      await this.nftLock.acquire(nftId);
+    }
     try {
       const nft = await this.findOne(nftId);
       if (typeof nft === 'undefined') {
@@ -185,11 +225,13 @@ WHERE id = $1
       }
 
       await this.update(user, nft);
-      return this.getNft(user, nft.id);
+      return await this.getNft(user, nft.id);
     } catch (err: any) {
       throw err;
     } finally {
-      this.nftLock.release(nftId);
+      if (lockNft) {
+        this.nftLock.release(nftId);
+      }
     }
   }
 

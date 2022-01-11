@@ -1,5 +1,7 @@
 attributes:
   name: string
+  content_uri: content
+  create_ready: boolean
   price: number
   editions_size: number
   categories: number[]
@@ -15,9 +17,11 @@ states:
     state_transitions:
     - next_state: setup_nft
       when: |
-        nft.name.length > 0
+        nft.name.length > 0 &&
+        nft.content_uri.length > 0 &&
+        nft.create_ready
     mutables:
-    - attributes: [name]
+    - attributes: [name, content_uri, create_ready]
       by_roles: [creator]
 
   setup_nft:
