@@ -26,6 +26,7 @@ const StyledZone = styled.div<StyledDropZoneProps>`
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 2rem;
 
     min-height: ${(props) => (props.height ? props.height : 11)}rem;
     width: 100%;

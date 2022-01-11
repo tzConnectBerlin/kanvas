@@ -76,7 +76,7 @@ export const Slider: FC<SliderProps> = ({ ...props }) => {
                     <Card
                         sx={{
                             display: 'flex',
-                            borderRadius: '0',
+                            borderRadius: '1rem',
                             height: '100%',
                         }}
                         key={nft.id}

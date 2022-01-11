@@ -35,11 +35,11 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
     margin-bottom: -6rem;
     color: ${(props) => props.theme.palette.text.primary};
 
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    filter: ${(props) => props.theme.dropShadow.default};
 
-    background-color: ${(props) => props.theme.header.background};
+    background-color: ${(props) => props.theme.palette.background.default};
     position: sticky;
+
     top: 0;
     z-index: 10;
     transition: padding-left 0.2s, padding-right 0.2s;
@@ -49,6 +49,9 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
         padding-left: 1.5rem;
         padding-right: 1rem !important;
         transition: padding-left 0.2s, padding-right 0.2s;
+        position: absolute;
+        left: 0;
+        right: 0;
     }
 `;
 
@@ -135,13 +138,13 @@ export const Header: FC<HeaderProps> = ({
     }, [loggedUser]);
 
     useEffect(() => {
-        getLoggedUser().catch(err => console.log(err));
+        getLoggedUser().catch((err) => console.log(err));
     }, []);
 
     return (
         <StyledBox
             sx={{
-                height: '5rem',
+                height: '4.5rem',
                 display: 'flex',
                 alignItems: 'center',
                 paddingRight: '2rem',

@@ -25,7 +25,6 @@ export interface MenuProps {
 const StyledMenuStack = styled(Stack)`
     align-items: end !important;
 
-
     @media (max-width: 874px) {
         height: 3rem;
         padding-left: 0rem;
@@ -59,6 +58,10 @@ export const StyledLink = styled(NavLink)<SearchProps>`
 
 export const StyledShoppingCartRoundedIcon = styled(ShoppingCartRoundedIcon)`
     cursor: pointer;
+
+    @media (max-width: 874px) {
+        height: 1.4rem;
+    }
 `;
 
 export const Menu: FC<MenuProps> = ({

@@ -85,13 +85,3 @@ DROP FUNCTION nft_ids_filtered(
 ALTER FUNCTION __nft_ids_filtered_v10 RENAME TO nft_ids_filtered;
 
 COMMIT;
-
-BEGIN;
-
-COMMIT;
-
--- ==== DOWN ====
-
-BEGIN;
-
-COMMIT;

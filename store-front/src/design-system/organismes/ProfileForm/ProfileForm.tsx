@@ -36,7 +36,7 @@ const StyledStack = styled(Stack)`
         width: 80%;
     }
 
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
         width: 100%;
     }
 `;

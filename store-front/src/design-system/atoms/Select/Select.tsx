@@ -1,8 +1,8 @@
 import * as React from 'react';
 import styled from '@emotion/styled';
-import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { FC } from 'react';
 import { Theme } from '@mui/material';
@@ -10,51 +10,56 @@ import Select, {
     SelectProps as MuiSelectProps,
     SelectChangeEvent,
 } from '@mui/material/Select';
-import { IParamsNFTs } from '../../../pages/StorePage';
 
-interface SortProps {
-    orderBy: 'price' | 'name' | 'createdAt';
-    orderDirection: 'asc' | 'desc';
+interface selectOption {
+    label: string;
+    value: string;
 }
 
 interface SelectedProps extends MuiSelectProps {
     id: string;
-    selectedOption?: SortProps;
-    setSelectedOption: (input: SortProps) => void;
-    callNFTsEndpoint: (input: IParamsNFTs) => void;
+    availableOptions: selectOption[];
+    selectedOption: string;
+    triggerFunction: (input: SelectChangeEvent) => void;
+    customSize: 'small' | 'big';
 }
 
-const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
+const StyledFormControl = styled(FormControl) <{ theme?: Theme, customSize: 'small' | 'big' }>`
     margin: 0;
+
 
     .MuiOutlinedInput-root.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-formControl:after {
         border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .MuiOutlinedInput-root.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-formControl {
-        border-radius: 0 !important;
-        border: 1px solid ${(props) => props.theme.palette.text.primary};
-        font-size: 0.9rem;
+        border-radius: 2rem !important;
+
         transition: outline 0.2s;
 
         fieldset {
             display: none !important;
         }
 
-        :hover {
-            outline: 1px solid ${(props) => props.theme.palette.text.primary};
-        }
-
         &.Mui-focused {
             color: ${(props) => props.theme.palette.text.primary} !important;
-            outline: 1px solid ${(props) => props.theme.palette.text.primary} !important;
         }
     }
 
     .MuiSelect-select {
-        background-color: ${props => props.theme.palette.background.paper};
-        padding-top: 0.6rem !important;
-        padding-bottom: 0.7rem !important;
+        border-radius: 2rem !important;
+        min-height: 0 !important;
+        font-family: ${ props => props.customSize === 'small' ?  'Poppins' : props.customSize === 'big' ? 'Poppins SemiBold' : 'Poppins' } !important ;
+        font-size: ${ props => props.customSize === 'small' ?  0.8 : props.customSize === 'big' ? 1.1 : 0.8 }rem !important ;
+        padding-right: 3rem !important;
+        
+        padding-left: ${ props => props.customSize === 'small' ? 0 : 0.5}rem !important;
+        @media (max-width: 874px) {
+            width: 4.5rem;
+        }
     }
 
     svg {
@@ -62,83 +67,65 @@ const StyledFormControl = styled(FormControl)<{ theme?: Theme }>`
     }
 `;
 
+const StyledMenuItem = styled(MenuItem) <{ theme?: Theme, customSize: 'small' | 'big' }>`
+    font-family: 'Poppins' !important;
+    font-size: ${ props => props.customSize === 'small' ?  0.8 : props.customSize === 'big' ? 1.1 : 0.8 }rem !important ;
+    border-radius: 0.5rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+
+    &.Mui-selected {
+        background-color: ${(props) =>
+        props.theme.palette.primary.contrastText} !important;
+    }
+`;
+
+const StyledExpandMoreIcon = styled(ExpandMoreIcon) <{ theme?: Theme, customSize: 'small' | 'big' }>`
+    width: ${ props => props.customSize === 'small' ?  1.4 : props.customSize === 'big' ? 1.8 : 1.4 }rem !important ;
+    margin-left: ${ props => props.customSize === 'small' ? 0 : 0.5}rem;
+    color: ${(props) => props.theme.palette.text.primary};
+
+    font-size: 1.8rem;
+    transition: transform 0.3s;
+`;
+
 export const CustomSelect: FC<SelectedProps> = ({
-    callNFTsEndpoint,
     ...props
 }) => {
-    const handleChange = (event: SelectChangeEvent) => {
-        callNFTsEndpoint({ handlePriceRange: true });
-        props.setSelectedOption(JSON.parse(event.target.value));
-    };
+
+    React.useEffect(() => {
+        console.log(JSON.stringify(props.selectedOption))
+        console.log(props.selectedOption)
+        console.log(props.availableOptions)
+        console.log(props.availableOptions.filter(option => option.value === JSON.stringify(props.selectedOption)))
+    }, [props.selectedOption])
 
     return (
         <StyledFormControl
             variant="outlined"
-            sx={{ m: 1, minWidth: 80, maxHeight: 40 }}
-            disabled={props.disabled ?? false}
+            sx={{ m: 1, minWidth: 80, maxHeight: 40, justifyContent: 'center' }}
+            customSize={props.customSize}
         >
             <Select
-                labelId={`${props.id}-label"`}
                 id={props.id}
-                value={
-                    JSON.stringify(props.selectedOption) ??
-                    JSON.stringify({
-                        orderBy: 'createdAt',
-                        orderDirection: 'desc',
-                    })
-                }
-                onChange={handleChange}
+                labelId={`${props.id}-label"`}
+                value={props.selectedOption}
+                onChange={props.triggerFunction}
+                IconComponent={StyledExpandMoreIcon}
                 autoWidth
             >
-                <MenuItem
-                    value={JSON.stringify({
-                        orderBy: 'name',
-                        orderDirection: 'asc',
-                    })}
-                >
-                    Name: A - Z
-                </MenuItem>
-                <MenuItem
-                    value={JSON.stringify({
-                        orderBy: 'name',
-                        orderDirection: 'desc',
-                    })}
-                >
-                    Name: Z - A
-                </MenuItem>
-                <MenuItem
-                    value={JSON.stringify({
-                        orderBy: 'price',
-                        orderDirection: 'desc',
-                    })}
-                >
-                    Price: High - Low
-                </MenuItem>
-                <MenuItem
-                    value={JSON.stringify({
-                        orderBy: 'price',
-                        orderDirection: 'asc',
-                    })}
-                >
-                    Price: Low - High
-                </MenuItem>
-                <MenuItem
-                    value={JSON.stringify({
-                        orderBy: 'createdAt',
-                        orderDirection: 'desc',
-                    })}
-                >
-                    Created: New - Old
-                </MenuItem>
-                <MenuItem
-                    value={JSON.stringify({
-                        orderBy: 'createdAt',
-                        orderDirection: 'asc',
-                    })}
-                >
-                    {' '}
-                    Created: Old - New
-                </MenuItem>
+                {
+                    props.availableOptions.map((item: selectOption) =>
+                        <StyledMenuItem
+                            disableRipple
+                            value={item.value}
+                            customSize={props.customSize}
+                        >
+                            {item.label}
+                        </StyledMenuItem>
+                    )
+                }
+
             </Select>
         </StyledFormControl>
     );

@@ -5,6 +5,7 @@ import NftGrid from '../../design-system/organismes/NftGrid';
 import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
 import StoreFilters from '../../design-system/organismes/StoreFilters';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 
 import { useEffect, useState } from 'react';
 import {
@@ -13,8 +14,10 @@ import {
     Pagination,
     useMediaQuery,
     useTheme,
+    Chip,
+    SelectChangeEvent,
 } from '@mui/material';
-import { CustomButton } from '../../design-system/atoms/Button';
+
 import { CustomSelect } from '../../design-system/atoms/Select';
 import { Typography } from '../../design-system/atoms/Typography';
 import { useHistory } from 'react-router';
@@ -23,25 +26,28 @@ interface ParamTypes {
     width?: any;
 }
 
+interface SortProps {
+    orderBy: 'price' | 'name' | 'createdAt';
+    orderDirection: 'asc' | 'desc';
+}
+
 const StyledStack = styled(Stack)`
     max-width: 100rem;
-    width: 100vw;
+    width: 100%;
     height: 100%;
 `;
-const StyledContentStack = styled(Stack) <ParamTypes>`
+
+const StyledContentStack = styled(Stack)<ParamTypes>`
     flex-direction: row;
     width: 100%;
+    margin-top: 2.5rem !important;
 
     @media (max-width: 900px) {
         flex-direction: column;
     }
 `;
-const StyledListIcon = styled(ListIcon) <{ theme?: Theme }>`
-    color: ${(props) => props.theme.palette.text.primary};
-    padding-right: 1rem;
-`;
 
-const StyledPagination = styled(Pagination) <{
+const StyledPagination = styled(Pagination)<{
     theme?: Theme;
     display: boolean;
 }>`
@@ -55,7 +61,7 @@ const StyledPagination = styled(Pagination) <{
 
     .MuiPaginationItem-root.Mui-selected {
         background-color: ${(props) =>
-        props.theme.palette.background.default} !important;
+            props.theme.palette.background.default} !important;
         border: 1px solid ${(props) => props.theme.palette.text.primary} !important;
     }
 
@@ -63,6 +69,25 @@ const StyledPagination = styled(Pagination) <{
         display: flex;
         align-items: center !important;
     }
+`;
+
+const StyledChevronLeftIcon = styled(ChevronLeftIcon)<{
+    opened: boolean;
+    theme?: Theme;
+}>`
+    height: 1.8rem;
+    width: 1.8rem;
+    color: ${(props) => props.theme.palette.text.primary};
+    transform: ${(props) => (props.opened ? '' : 'rotate(180deg)')};
+
+    transition: transform 0.3s;
+
+    cursor: pointer;
+`;
+
+const StyledChip = styled(Chip)<{ theme?: Theme }>`
+    margin-left: 1.5rem;
+    border: 1px solid #c4c4c4;
 `;
 
 export interface IParamsNFTs {
@@ -100,7 +125,9 @@ const StorePage = () => {
 
     // Categories state
     const [selectedCategories, setSelectedCategories] = useState<any[]>([]);
-    const [preSelectedCategories, setPreSelectedCategories] = useState<any[]>([])
+    const [preSelectedCategories, setPreSelectedCategories] = useState<any[]>(
+        [],
+    );
     // Availability state
     const [selectedAvailability, setSelectedAvailability] = useState<string[]>(
         [],
@@ -115,7 +142,7 @@ const StorePage = () => {
 
     const [filterSliding, setFilterSliding] = useState<boolean>(false);
     const [comfortLoader, setComfortLoader] = useState<boolean>(false);
-    const [onInit, setOnInit] = useState(true)
+    const [onInit, setOnInit] = useState(true);
 
     // Api calls for the categories and the nfts
     const [nftsResponse, getNfts] = useAxios(
@@ -166,6 +193,13 @@ const StorePage = () => {
                             ? 'onSale,soldOut,upcoming'
                             : selectedAvailability.join(',')),
                 },
+            }).then((response) => {
+                if (!params.handlePriceRange) {
+                    setPriceFilterRange([
+                        response.data.lowerPriceBound,
+                        response.data.upperPriceBound,
+                    ]);
+                }
             });
             setComfortLoader(false);
         }, 400);
@@ -224,7 +258,7 @@ const StorePage = () => {
         }
 
         callNFTsEndpoint({
-            handlePriceRange: true,
+            handlePriceRange: priceAtLeast !== null && priceAtMost !== null,
             page: page ? Number(page) : 1,
             categories: categories
                 ?.split(',')
@@ -282,6 +316,7 @@ const StorePage = () => {
         setSelectedPage(page);
         setPageParams('page', page.toString());
         callNFTsEndpoint({ handlePriceRange: true, page: page });
+        window.scrollTo(0, 0);
     };
 
     const triggerPriceFilter = () => {
@@ -338,40 +373,135 @@ const StorePage = () => {
     return (
         <PageWrapper>
             <StyledStack direction="column" spacing={3}>
-                <FlexSpacer minHeight={10} />
+                <FlexSpacer minHeight={isMobile ? 6 : 10} />
 
-                <Typography
-                    size="h1"
-                    weight="SemiBold"
-                    sx={{ justifyContent: 'center' }}
-                >
-                    Store front
-                </Typography>
+                {!isMobile && (
+                    <Typography
+                        size="h1"
+                        weight="SemiBold"
+                        sx={{ justifyContent: 'center' }}
+                    >
+                        The Store
+                    </Typography>
+                )}
 
-                <FlexSpacer minHeight={1} />
+                <FlexSpacer />
 
                 {/* Toggle options */}
-                <Stack direction="row">
-                    <CustomButton
-                        size="medium"
+                <Stack
+                    direction="row"
+                    sx={{ justifyContent: 'center', alignItems: 'center' }}
+                >
+                    <StyledChevronLeftIcon
+                        opened={isMobile ? false : filterOpen}
                         onClick={() => setFilterOpen(!filterOpen)}
-                        aria-label="loading"
-                        icon={<StyledListIcon />}
-                        label={`Filters ${selectedCategories.length > 0
-                            ? `  - ${selectedCategories.length}`
-                            : ''
-                            }`}
-                        disabled={nftsResponse.loading}
                     />
-
+                    <Typography
+                        size="h4"
+                        weight="SemiBold"
+                        onClick={() => setFilterOpen(!filterOpen)}
+                        sx={{
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            paddingLeft: '0.5rem',
+                        }}
+                    >
+                        {`Filters ${
+                            selectedCategories.length > 0
+                                ? `  - ${selectedCategories.length}`
+                                : ''
+                        }`}
+                    </Typography>
+                    {(selectedAvailability.length > 0 ||
+                        selectedCategories.length > 0 ||
+                        (JSON.stringify(priceFilterRange) !==
+                            JSON.stringify([
+                                nftsResponse.data?.lowerPriceBound,
+                                nftsResponse.data?.upperPriceBound,
+                            ]) &&
+                            !categoriesResponse.loading &&
+                            !nftsResponse.loading)) && (
+                        <StyledChip
+                            label="Clear all"
+                            variant="outlined"
+                            onDelete={() => {
+                                setSelectedCategories([]);
+                                setSelectedAvailability([]);
+                                setPriceFilterRange([
+                                    nftsResponse.data?.lowerPriceBound,
+                                    nftsResponse.data?.upperPriceBound,
+                                ]);
+                                callNFTsEndpoint({
+                                    handlePriceRange: false,
+                                    categories: [],
+                                    availability: [],
+                                });
+                            }}
+                            sx={{ display: `${isMobile ? 'none' : 'flex'}` }}
+                        />
+                    )}
                     <FlexSpacer />
 
                     <CustomSelect
                         id="Sort filter - store page"
-                        selectedOption={selectedSort}
-                        setSelectedOption={setSelectedSort}
-                        callNFTsEndpoint={callNFTsEndpoint}
+                        availableOptions={[{
+                            value: JSON.stringify({
+                                orderBy: 'name',
+                                orderDirection: 'asc',
+                            }),
+                            label: 'Name: A - Z'
+                        },
+                        {
+                            value: JSON.stringify({
+                                orderBy: 'name',
+                                orderDirection: 'desc',
+                            }),
+                            label: 'Name: Z - A'
+                        },
+                        {
+                            value: JSON.stringify({
+                                orderBy: 'price',
+                                orderDirection: 'desc',
+                            }),
+                            label: 'Price: High - Low'
+                        },
+                        {
+                            value: JSON.stringify({orderBy: 'price',orderDirection: 'asc'}),
+                            label: 'Price: Low - High'
+                        },
+                        {
+                            value: JSON.stringify({
+                                orderBy: 'createdAt',
+                                orderDirection: 'desc',
+                            }),
+                            label: 'Created: New - Old'
+                        },
+                        {
+                            value: JSON.stringify({
+                                orderBy: 'createdAt',
+                                orderDirection: 'asc',
+                            }),
+                            label: 'Created: Old - New'
+                        }
+                        ]}
+                        selectedOption={JSON.stringify(selectedSort) ?? JSON.stringify({
+                            orderBy: 'createdAt',
+                            orderDirection: 'desc',
+                        })}
+                        triggerFunction={(event: SelectChangeEvent) => {
+                            const sort: SortProps = {
+                                orderBy: JSON.parse(event.target.value).orderBy,
+                                orderDirection: JSON.parse(event.target.value).orderDirection,
+                            };
+                            callNFTsEndpoint({
+                                handlePriceRange: true,
+                                orderBy: sort.orderBy,
+                                orderDirection: sort.orderDirection,
+                            });
+                            setSelectedSort(JSON.parse(event.target.value));
+                        }}
                         disabled={nftsResponse.loading}
+                        customSize='big'
                     />
                 </Stack>
 
@@ -386,7 +516,9 @@ const StorePage = () => {
                         setSelectedFilters={setSelectedCategories}
                         priceFilterRange={priceFilterRange}
                         setPriceFilterRange={setPriceFilterRange}
-                        loading={categoriesResponse.loading}
+                        loading={
+                            categoriesResponse.loading && nftsResponse.loading
+                        }
                         minRange={nftsResponse.data?.lowerPriceBound ?? 0}
                         maxRange={nftsResponse.data?.upperPriceBound ?? 100}
                         triggerPriceFilter={triggerPriceFilter}

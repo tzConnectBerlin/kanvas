@@ -274,10 +274,10 @@ EOF
 postgresql_cli(){
   export PGOPTIONS="-c client_min_messages=WARNING"
   local args="-q -X -v VERBOSITY=terse -v ON_ERROR_STOP=1 -A -t -w -d $DATABASE $ARGS"
-  LOGIN=$DB_USERNAME
+  LOGIN=$PGUSER
   HOST=localhost
-  PORT=$DB_PORT
-  PASSWORD=$DB_PASSWORD
+  PORT=$PGPORT
+  PASSWORD=$PGPASSWORD
   [[ -n $LOGIN    ]] && args="-U $LOGIN    $args"
   [[ -n $HOST     ]] && args="-h $HOST     $args"
   [[ -n $PORT     ]] && args="-p $PORT     $args"
@@ -435,7 +435,7 @@ migration_section(){
   local fname="$1"
   local since="^-- $(sed_quote "$2")\$"
   local till="^-- $(sed_quote "$3")\$"
-  local tmpfile="${TMPDIR:-/tmp/}shmig-migration-section.$$.${RANDOM}.sql"
+  local tmpfile="${TMPDIR:-/tmp}/shmig-migration-section.$$.${RANDOM}.sql"
   local result="0"
 
   sed -n -e '/'"$since"'/,/'"$till"'/p' "$fname"\
@@ -601,7 +601,7 @@ migrate(){
       esac
     fi
 
-    local error_tmpfile="${TMPDIR:-/tmp/}shmig-migration-error.${RANDOM}.tmp"
+    local error_tmpfile="${TMPDIR:-/tmp}/shmig-migration-error.${RANDOM}.tmp"
     # pipe section from migration and version change SQL into CLI client of specified type
     (
       echo -en "$ME: $message '${LMAGENTA}${name}${CLEAR}'\t(${LBLUE}$version${LBLUE}${CLEAR})... " >&2
