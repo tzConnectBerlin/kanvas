@@ -12,6 +12,8 @@ export JWT_SECRET='wPK-TfcjDSjztKrb4SUnfRPQ1YIovrooYQaX4h-EnU4'
 
 db_docker=`DOCKER_ARGS='-d' ./script/local-db.bash 2>/dev/null`
 if [[ "$?" != "0" ]]; then
+    process=docker ps | grep $PGPORT | awk '{print $1}'
+    docker kill $process
     echo failed to start testdb, cannot run tests
     exit 1
 fi

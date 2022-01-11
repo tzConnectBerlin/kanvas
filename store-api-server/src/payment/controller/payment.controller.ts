@@ -15,9 +15,9 @@ import {
   PaymentStatus,
   StripePaymentIntent,
 } from 'src/payment/service/payment.service';
-import { UserService } from 'src/user/service/user.service';
 import { UserEntity } from 'src/user/entity/user.entity';
 import { Lock } from 'async-await-mutex-lock';
+import { UserService } from 'src/user/service/user.service';
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -26,9 +26,11 @@ export class PaymentController {
   nftLock: Lock<number>;
 
   constructor(
-    private userService: UserService,
     private paymentService: PaymentService,
-  ) {}
+    private userService: UserService
+  ) {
+    this.nftLock = new Lock<number>();
+  }
 
   @Post('/stripe-webhook')
   async stripeWebhook(
@@ -56,37 +58,10 @@ export class PaymentController {
       );
     }
 
-    let paymentStatus: PaymentStatus;
-
-    switch (constructedEvent.type) {
-      case 'payment_intent.succeeded':
-        paymentStatus = PaymentStatus.SUCCEEDED;
-        break;
-      case 'payment_intent.processing':
-        paymentStatus = PaymentStatus.PROCESSING;
-        break;
-      case 'payment_intent.canceled':
-        paymentStatus = PaymentStatus.CANCELED;
-        console.log('cancelled');
-        break;
-      case 'payment_intent.payment_failed':
-        paymentStatus = PaymentStatus.FAILED;
-        break;
-      default:
-        Logger.error(`Unhandled event type ${constructedEvent.type}`);
-        throw new HttpException('', HttpStatus.UNPROCESSABLE_ENTITY);
-    }
-
-    await this.paymentService.editPaymentStatus(
-      paymentStatus,
-      constructedEvent.data.object.id,
-    );
-
-    if (paymentStatus === PaymentStatus.SUCCEEDED) {
-      const orderId = await this.paymentService.getPaymentOrderId(
-        constructedEvent.data.object.id,
-      );
-      await this.paymentService.orderCheckout(orderId);
+    try {
+      await this.paymentService.webhookHandler(constructedEvent)
+    } catch (error) {
+      new HttpException('', HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     throw new HttpException('', HttpStatus.NO_CONTENT);
@@ -101,7 +76,6 @@ export class PaymentController {
 
     let stripePaymentIntent: StripePaymentIntent;
     try {
-      // const createStripePayment (cookieSession, user)
       stripePaymentIntent = await this.paymentService.createStripePayment(user);
     } catch (err: any) {
       Logger.error(err);

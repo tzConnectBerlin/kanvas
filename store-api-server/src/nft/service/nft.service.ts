@@ -8,7 +8,6 @@ import {
 import {
   NftEntity,
   NftEntityPage,
-  SearchResult,
 } from 'src/nft/entity/nft.entity';
 import { CategoryEntity } from 'src/category/entity/category.entity';
 import { CategoryService } from 'src/category/service/category.service';

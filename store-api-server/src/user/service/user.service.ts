@@ -1,16 +1,15 @@
 import { Logger, Injectable, Inject } from '@nestjs/common';
 import { UserEntity, ProfileEntity, UserCart } from '../entity/user.entity';
 import { NftService } from '../../nft/service/nft.service';
-import { NftEntity } from '../../nft/entity/nft.entity';
 import { MintService } from '../../nft/service/mint.service';
 import {
   PG_CONNECTION,
-  CART_EXPIRATION_MILLI_SECS,
   PG_UNIQUE_VIOLATION_ERRCODE,
 } from '../../constants';
 import { Result, Err, Ok } from 'ts-results';
 import { S3Service } from '../../s3.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { assertEnv } from 'src/utils';
 const generate = require('meaningful-string');
 
 interface CartMeta {
@@ -243,6 +242,7 @@ WHERE session_id = $1
         expiresAt: undefined,
       };
     }
+    Logger.log(nftIds)
     return {
       nfts: await this.nftService.findByIds(nftIds, 'nft_id', 'asc'),
       expiresAt: cartMeta.expiresAt,
@@ -357,6 +357,14 @@ RETURNING id, expires_at`,
     };
   }
 
+  async deleteCartSession(orderId: number) {
+    await this.conn.query(`
+      DELETE FROM
+      cart_session
+      WHERE order_id = $1
+    `, [orderId])
+  }
+
   async getCartMeta(session: string): Promise<CartMeta | undefined> {
     const qryRes = await this.conn.query(
       `
@@ -400,7 +408,9 @@ RETURNING session_id`,
 
   newCartExpiration(): Date {
     const expiresAt = new Date();
-    expiresAt.setTime(expiresAt.getTime() + CART_EXPIRATION_MILLI_SECS);
+    Logger.log(assertEnv('CART_EXPIRATION_MILLI_SECS'))
+
+    expiresAt.setTime(expiresAt.getTime() + Number(assertEnv('CART_EXPIRATION_MILLI_SECS')));
     return expiresAt;
   }
 

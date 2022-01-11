@@ -11,9 +11,11 @@ import { PaymentModule } from './payment/payment.module';
 import { LoggerMiddleware } from './middleware/logger';
 import { CookieSessionMiddleware } from './middleware/cookie_session';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EasyconfigModule } from 'nestjs-easyconfig';
 
 @Module({
   imports: [
+    EasyconfigModule.register({}),
     ScheduleModule.forRoot(),
     AuthenticationModule,
     CategoryModule,
