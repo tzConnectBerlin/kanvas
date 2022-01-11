@@ -39,18 +39,28 @@ states:
         nft.proposal_reject.length > 0
       do: |
         {
-          nft.proposed = false;
+          // Storing rejected state for future reference inside 'proposal_reject_x',
+          // where x equals the reject count of this nft
 
-          idx = 0;
+          let idx = 0;
           while (nft.hasOwnProperty('proposal_reject_' + idx)) {
             idx++;
           }
-          nft['proposal_reject_' + idx] = nft.proposal_reject;
-          nft.proposal_reject = null;
+          let reject_name = 'proposal_reject_' + idx;
+
+          nft[reject_name] = {};
+          for (let key of Object.keys(nft)) {
+            if (!key.startsWith('proposal_reject_')) {
+              nft[reject_name][key] = structuredClone(nft[key]);
+            }
+          }
+
+          nft.proposal_reject = [];
+          nft.proposed = false;
         }
     - next_state: prototype
       when: |
-        nft.proposal_accept.length == 3
+        nft.proposal_accept.length == 1
     mutables:
     - attributes: [proposal_accept, proposal_reject]
       by_roles: [moderator, admin]

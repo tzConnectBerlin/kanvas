@@ -14,6 +14,7 @@ import { RoleService } from 'src/role/role.service';
 import { S3Service } from './s3.service';
 import { QueryParams } from 'src/types';
 import { Lock } from 'async-await-mutex-lock';
+const fs = require('fs');
 
 @Injectable()
 export class NftService {
@@ -25,8 +26,23 @@ export class NftService {
     @Inject(PG_CONNECTION) private db: DbPool,
     private readonly roleService: RoleService,
   ) {
-    this.stm = new StateTransitionMachine('./config/redacted_redacted.yaml');
+    const stmConfigFile = './config/redacted_redacted.yaml';
+    this.stm = new StateTransitionMachine(stmConfigFile);
     this.nftLock = new Lock<number>();
+    fs.watch(stmConfigFile, (event, filename) => {
+      if (event !== 'change') {
+        return;
+      }
+      try {
+        Logger.log('State transition machine config changed, reloading..');
+        this.stm = new StateTransitionMachine(stmConfigFile);
+        Logger.log('State transition machine config reloaded');
+      } catch (err: any) {
+        Logger.warn(
+          `State transition machine config reload failed, err: ${err}`,
+        );
+      }
+    });
   }
 
   async create(creator: User) {
