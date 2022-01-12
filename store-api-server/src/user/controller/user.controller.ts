@@ -130,7 +130,6 @@ export class UserController {
         HttpStatus.BAD_REQUEST,
       );
     }
-    console.log(nftIds);
     return await this.userService.getNftOwnershipStatuses(user, nftIds);
   }
 
