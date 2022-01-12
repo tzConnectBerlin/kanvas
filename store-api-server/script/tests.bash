@@ -27,4 +27,4 @@ echo "running tests.."
 
 mkdir -p test/coverage
 jest "$@" --coverage > test/coverage/summary.txt || exit 1
-#head test/coverage/summary.txt -n 4 | awk -F '|' '{print $2 $3 $4 $5}'
+head test/coverage/summary.txt -n 4 | awk -F '|' '{print $2 $3 $4 $5}'
