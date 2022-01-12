@@ -94,7 +94,7 @@ const ClearContentWrapper = styled.div<{ theme?: Theme }>`
     }
 
     :active {
-        box-shadow: 0 0 1rem #C4C4C4;
+        box-shadow: ${(props) => props.theme.boxShadow.default};
     }
 `;
 
