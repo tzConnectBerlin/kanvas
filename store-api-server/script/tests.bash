@@ -26,5 +26,6 @@ sleep 1  # sleeping for 1 more second, for db migrations to finish
 echo "running tests.."
 
 mkdir -p test/coverage
-jest "$@" --coverage > test/coverage/summary.txt || exit 1
-sed -n '/^-----/ { :a; n; p; ba; }' test/coverage/summary.txt | head -n 3 | awk -F '|' '{print $2 $3 $4 $5}'
+jest "$@" --coverage | tee test/coverage/summary.txt || exit 1
+sed -i -n '/^-----/,$p' test/coverage/summary.txt
+head -n 4 test/coverage/summary.txt | awk -F '|' '{print $2 $3 $4 $5}'
