@@ -37,14 +37,14 @@ COMMIT;
 
 BEGIN;
 
-DROP TABLE order;
-DROP TABLE mtm_order_nft;
+ALTER TABLE cart_session DROP COLUMN order_id;
 
-DROP TYPE payment_status;
-DROP TYPE payment_provider;
+DROP TABLE mtm_nft_order_nft;
+DROP TABLE nft_order;
 
 DROP TABLE payment;
 
-ALTER TABLE cart_session DROP COLUMN order_id;
+DROP TYPE payment_status;
+DROP TYPE payment_provider;
 
 COMMIT;
