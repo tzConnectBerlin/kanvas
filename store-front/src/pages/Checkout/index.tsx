@@ -46,7 +46,6 @@ const StyledLink = styled.a<{ theme?: Theme }>`
 
 const StyledStepper = styled(Stepper) <{ theme?: Theme }>`
     width: 100%;
-
     .MuiStepIcon-text {
         fill: white !important;
     }
@@ -54,7 +53,11 @@ const StyledStepper = styled(Stepper) <{ theme?: Theme }>`
     .MuiSvgIcon-root.Mui-active {
         color: ${props => props.theme.palette.primary.contrastText} !important;
     }
-    `
+
+    @media(max-width: 874px) {
+        display: none;
+    }
+`
 
 const StyledStep = styled(Step) <{ theme?: Theme, previousStepValid: boolean }>`
     .MuiStepConnector-line {
@@ -73,12 +76,18 @@ const StyledPaper = styled(Paper) <{ theme?: Theme, translateX: boolean, disable
     filter: ${props => props.theme.dropShadow.avatar};
     box-shadow: none;
     width: 50%;
+    background-image: none;
 
     pointer-events: ${props => props.disabled ? 'none' : ''};
     opacity: ${props => props.disabled ? '0.4' : '1'};
 
     transition: opacity 0.2s;
     padding: 2rem;
+
+    @media(max-width: 874px) {
+        width: 90%;
+        padding: 1.2rem !important;
+    }
 `
 
 const StyledPaymentStack = styled(Stack) <{ theme?: Theme, selected: boolean, disabled?: boolean }>`
@@ -170,8 +179,6 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
             setShowExitPrompt(false)
         }
       }, [])
-
-
 
     const handleDeleteFromBasket = (nftId: number) => {
 
@@ -315,7 +322,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
     return (
         <PageWrapper>
             <Stack direction="column" ref={wrapperRefSlide} spacing={3} style={{ maxWidth: '100rem', width: '100%', alignItems: 'center' }}>
-                <FlexSpacer minHeight={isMobile ? 6 : 10} />
+                <FlexSpacer minHeight={isMobile ? 6 : 8} />
 
                 <StyledStepper activeStep={activeStep} alternativeLabel>
                     {steps.map((label, index) => (
@@ -325,12 +332,13 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                     ))}
                 </StyledStepper>
 
-                <FlexSpacer minHeight={3} />
+                <FlexSpacer minHeight={1} />
 
 
                 <Slide direction="right" in={activeStep < 3} container={wrapperRefSlide.current} mountOnEnter unmountOnExit>
-                    <Stack direction="row" ref={wrapperRef} spacing={3} style={{ width: '100%', justifyContent: 'center' }}>
+                    <Stack direction={{ md: "row", xs:"column" }} ref={wrapperRef} spacing={3} style={{ width: '100%', justifyContent: 'center' }}>
 
+                        {/* Summary */}
                         <StyledPaper translateX={activeStep > 0} disabled={activeStep > 0}>
                             <Stack
                                 direction="column"
@@ -420,6 +428,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                             </Stack>
                         </StyledPaper>
 
+                        {/* Slider with select payment method */}
                         <Slide direction="left" in={activeStep >= 1} container={wrapperRef.current} mountOnEnter unmountOnExit>
 
                             <StyledPaper translateX={false} disabled={false}>
@@ -524,6 +533,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                     </Stack>
                 </Slide>
 
+                {/* Success paper */}
                 {
                     activeStep === 3 &&
                     <Animated animationIn="fadeIn" animationOut="fadeOut" isVisible={activeStep === 3} style={{ display: 'flex', justifyContent: 'center' }}>
