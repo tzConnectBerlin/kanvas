@@ -119,7 +119,10 @@ const Router = () => {
                     : lightThemeResponsive
             }
         >
-            <StyledBrowserRouter>
+            <StyledBrowserRouter getUserConfirmation={(message, callback) => {
+                const allowTransition = window.confirm(message)
+                callback(allowTransition);
+            }}>
                 <Header
                     beaconWallet={beaconWallet}
                     embedKukai={embedKukai}

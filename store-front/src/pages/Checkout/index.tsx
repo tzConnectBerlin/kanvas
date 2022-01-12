@@ -1,6 +1,6 @@
 import { t } from 'i18next';
 import { toast } from 'react-toastify';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, Prompt, useHistory } from 'react-router-dom';
 import { INft } from '../../interfaces/artwork';
 import { FC, useEffect, useRef, useState } from 'react';
 import { Paper, Slide, Stack, Step, StepLabel, Stepper, Theme, useMediaQuery } from '@mui/material';
@@ -138,6 +138,40 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
     });
 
     const [concernedDeletedNFT, setConcernedDeletedNft] = useState<number>();
+
+    const [showExitPrompt, setShowExitPrompt] = useState(false);
+
+    const initBeforeUnLoad = (showExitPrompt = false) => {
+        window.onbeforeunload = (event) => {
+            // Show prompt based on state
+            if (showExitPrompt && history.location.pathname === '/checkout') {
+                const e = event || window.event;
+                e.preventDefault();
+                if (e) {
+                    e.returnValue = ''
+                }
+                return '';
+            }
+        };
+    };
+
+    window.onload = function () {
+        initBeforeUnLoad(showExitPrompt);
+    };
+
+    // Re-Initialize the onbeforeunload event listener
+    useEffect(() => {
+        initBeforeUnLoad(showExitPrompt);
+    }, [showExitPrompt]);
+
+    useEffect(() => {
+        setShowExitPrompt(true)
+        return () => {
+            setShowExitPrompt(false)
+        }
+      }, [])
+
+
 
     const handleDeleteFromBasket = (nftId: number) => {
 
@@ -478,7 +512,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                                                 {
                                                     stripeOptions.clientSecret !== undefined &&
                                                     <Elements stripe={stripePromise} options={stripeOptions}>
-                                                        <StripeCheckoutForm activeStep={activeStep} setActiveStep={setActiveStep} setNftsInCart={props.setNftsInCart}/>
+                                                        <StripeCheckoutForm activeStep={activeStep} setActiveStep={setActiveStep} setNftsInCart={props.setNftsInCart} />
                                                     </Elements>
                                                 }
                                             </Stack>
@@ -541,6 +575,10 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                 </Typography>
             </Stack >
 
+            <Prompt
+                when={activeStep < 3}
+                message="Are you sure you want to leave?"
+            />
 
             {/* Button validate step or go bvack to profile */}
         </PageWrapper >

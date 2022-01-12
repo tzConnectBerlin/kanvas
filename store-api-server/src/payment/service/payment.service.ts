@@ -70,6 +70,8 @@ export class PaymentService {
     );
 
     if (previousStatus !==  PaymentStatus.FAILED && paymentStatus === PaymentStatus.SUCCEEDED) {
+      Logger.error('dfeowiuhf ewilpou fhwqoli fug')
+      Logger.error(previousStatus)
       const orderId = await this.getPaymentOrderId(
         constructedEvent.data.object.id,
       );
