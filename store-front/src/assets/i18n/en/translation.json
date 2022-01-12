@@ -48,7 +48,7 @@
     },
     "headline_4": {
       "title": "Social"
-    },    
+    },
     "headline_5": {
       "title": "Language"
     }
@@ -119,7 +119,7 @@
     "back_button": "Back",
     "next_button_0": "Validate cart",
     "next_button_1": "Proceed to payment",
-    "next_button_3": "Got to profile",
+    "next_button_3": "Go to profile",
     "headline_payment_method": "Payment method:",
     "headline_payment_method_2": "Payment:",
     "link_payment_method": "Learn more",
