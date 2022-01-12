@@ -5,10 +5,7 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import {
-  NftEntity,
-  NftEntityPage,
-} from 'src/nft/entity/nft.entity';
+import { NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity';
 import { CategoryEntity } from 'src/category/entity/category.entity';
 import { CategoryService } from 'src/category/service/category.service';
 import { FilterParams, PaginationParams } from '../params';
@@ -176,7 +173,7 @@ WHERE id = $1
     );
   }
 
-  async #addNftOwnerStatus(address: string, nfts: NftEntity[]) {
+  async getNftOwnerStatus(address: string, nftIds: number[]) {
     const qryRes = await this.conn.query(
       `
 SELECT
@@ -197,7 +194,7 @@ FROM UNNEST($3::integer[]) as nft_id
 
 ORDER BY 1
 `,
-      [MINTER_ADDRESS, address, nfts.map((nft: NftEntity) => nft.id)],
+      [MINTER_ADDRESS, address, nftIds],
     );
     const ownerStatuses: any = {};
     for (const row of qryRes.rows) {
@@ -206,7 +203,14 @@ ORDER BY 1
         ...Array(Number(row.num_editions)).fill(row.owner_status),
       ];
     }
+    return ownerStatuses;
+  }
 
+  async #addNftOwnerStatus(address: string, nfts: NftEntity[]) {
+    const ownerStatuses = await this.getNftOwnerStatus(
+      address,
+      nfts.map((nft: NftEntity) => nft.id),
+    );
     for (const nft of nfts) {
       nft.ownerStatuses = ownerStatuses[nft.id];
     }

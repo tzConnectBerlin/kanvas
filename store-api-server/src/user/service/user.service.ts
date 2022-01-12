@@ -1,11 +1,13 @@
 import { Logger, Injectable, Inject } from '@nestjs/common';
-import { UserEntity, ProfileEntity, UserCart } from '../entity/user.entity';
+import {
+  NftOwnershipStatus,
+  UserEntity,
+  ProfileEntity,
+  UserCart,
+} from '../entity/user.entity';
 import { NftService } from '../../nft/service/nft.service';
 import { MintService } from '../../nft/service/mint.service';
-import {
-  PG_CONNECTION,
-  PG_UNIQUE_VIOLATION_ERRCODE,
-} from '../../constants';
+import { PG_CONNECTION, PG_UNIQUE_VIOLATION_ERRCODE } from '../../constants';
 import { Result, Err, Ok } from 'ts-results';
 import { S3Service } from '../../s3.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -166,6 +168,22 @@ WHERE address = $1
     });
   }
 
+  async getNftOwnershipStatuses(
+    user: UserEntity,
+    nftIds: number[],
+  ): Promise<NftOwnershipStatus[]> {
+    const statuses = await this.nftService.getNftOwnerStatus(
+      user.userAddress,
+      nftIds,
+    );
+    return Object.keys(statuses).map((nftId: any) => {
+      return {
+        nftId: nftId,
+        ownerStatuses: statuses[nftId],
+      };
+    });
+  }
+
   async getUserCartSession(
     userId: number,
   ): Promise<Result<string | undefined, string>> {
@@ -242,7 +260,6 @@ WHERE session_id = $1
         expiresAt: undefined,
       };
     }
-    Logger.log(nftIds)
     return {
       nfts: await this.nftService.findByIds(nftIds, 'nft_id', 'asc'),
       expiresAt: cartMeta.expiresAt,
@@ -358,11 +375,14 @@ RETURNING id, expires_at`,
   }
 
   async deleteCartSession(orderId: number) {
-    await this.conn.query(`
+    await this.conn.query(
+      `
       DELETE FROM
       cart_session
       WHERE order_id = $1
-    `, [orderId])
+    `,
+      [orderId],
+    );
   }
 
   async getCartMeta(session: string): Promise<CartMeta | undefined> {
@@ -409,9 +429,11 @@ RETURNING session_id`,
 
   newCartExpiration(): Date {
     const expiresAt = new Date();
-    Logger.log(assertEnv('CART_EXPIRATION_MILLI_SECS'))
+    Logger.log(assertEnv('CART_EXPIRATION_MILLI_SECS'));
 
-    expiresAt.setTime(expiresAt.getTime() + Number(assertEnv('CART_EXPIRATION_MILLI_SECS')));
+    expiresAt.setTime(
+      expiresAt.getTime() + Number(assertEnv('CART_EXPIRATION_MILLI_SECS')),
+    );
     return expiresAt;
   }
 

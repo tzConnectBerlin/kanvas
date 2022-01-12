@@ -112,6 +112,28 @@ export class UserController {
     };
   }
 
+  @Post('nftOwnership')
+  @UseGuards(JwtAuthGuard)
+  async nftOwnershipStatus(
+    @CurrentUser() user: UserEntity,
+    @Query('nftIds') nftIdsQuery: string,
+  ) {
+    let nftIds: number[];
+    try {
+      nftIds = nftIdsQuery.split(',').map((v: string) => Number(v));
+      if (nftIds.some((id: number) => Number.isNaN(id))) {
+        throw `one or more requested nftIds is NaN`;
+      }
+    } catch (err: any) {
+      throw new HttpException(
+        'Bad nftIds query parameter, expected comma separated nft id numbers',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    console.log(nftIds);
+    return await this.userService.getNftOwnershipStatuses(user, nftIds);
+  }
+
   @Post('cart/add/:nftId')
   @UseGuards(JwtFailableAuthGuard)
   async cartAdd(
