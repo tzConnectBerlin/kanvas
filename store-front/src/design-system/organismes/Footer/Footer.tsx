@@ -41,7 +41,7 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
     transition: padding-left 0.2s, padding-right 0.2s;
     padding: 3rem 3rem 1rem;
 
-    box-shadow: 0 0 1rem #C4C4C4;
+    box-shadow: ${(props) => props.theme.boxShadow.default};
 
     @media (max-width: 900px) {
         padding-left: 1.5rem;
