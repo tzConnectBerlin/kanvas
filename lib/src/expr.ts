@@ -30,7 +30,10 @@ return ((nft, ext) => ${s})(this.nft, this.ext)`).bind({
     }
     return res;
   } catch (err: any) {
-    log.info(err);
+    log.debug(err);
+    if (typeof defaultOnErr === 'undefined') {
+      throw err;
+    }
     return defaultOnErr;
   }
 }
