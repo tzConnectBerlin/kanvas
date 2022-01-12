@@ -371,6 +371,7 @@ RETURNING id, expires_at`,
 SELECT id, expires_at, order_id
 FROM cart_session
 WHERE session_id = $1
+ORDER BY expires_at DESC
       `,
       [session],
     );

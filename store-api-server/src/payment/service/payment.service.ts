@@ -55,7 +55,6 @@ export class PaymentService {
         break;
       case 'payment_intent.canceled':
         paymentStatus = PaymentStatus.CANCELED;
-        console.log('cancelled');
         break;
       case 'payment_intent.payment_failed':
         paymentStatus = PaymentStatus.FAILED;
@@ -65,12 +64,12 @@ export class PaymentService {
         throw Err('')
     }
 
-    await this.editPaymentStatus(
+    const previousStatus = await this.editPaymentStatus(
       paymentStatus,
       constructedEvent.data.object.id,
     );
 
-    if (paymentStatus === PaymentStatus.SUCCEEDED) {
+    if (previousStatus !==  PaymentStatus.FAILED && paymentStatus === PaymentStatus.SUCCEEDED) {
       const orderId = await this.getPaymentOrderId(
         constructedEvent.data.object.id,
       );
@@ -88,9 +87,9 @@ export class PaymentService {
     }
     const cartSession: string = cartSessionRes.val;
 
+    const cartList = await this.userService.cartList(cartSession);
     const nftOrder = await this.createNftOrder(cartSession, user.id);
 
-    const cartList = await this.userService.cartList(cartSession);
     const amount = cartList.nfts.reduce((sum, nft) => sum + nft.price, 0);
 
     const paymentIntent = await this.stripe.paymentIntents.create({
@@ -141,14 +140,16 @@ export class PaymentService {
 
   async editPaymentStatus(status: PaymentStatus, paymentId: string) {
     try {
-      await this.conn.query(
+      const qryRes = await this.conn.query(
         `
   UPDATE payment
   SET status = $1
   WHERE payment_id = $2
-  AND status NOT IN ($3, $4)`,
+  AND status NOT IN ($3, $4)
+  RETURNING status`,
         [status, paymentId, PaymentStatus.SUCCEEDED, PaymentStatus.FAILED],
       );
+      return qryRes.rows[0] ? qryRes.rows[0]['status'] : undefined
     } catch (err) {
       Logger.error(
         `Err on updating payment status in db (paymentId=${paymentId}, newStatus=${status}), err: ${err}`,
@@ -162,16 +163,16 @@ export class PaymentService {
     const canceledPaymentsIds = await this.conn.query(`
       UPDATE payment
       SET status = $1
-      WHERE expires_at < now() AT TIME ZONE 'UTC'
+      WHERE expires_at < now()::timestamp AT TIME ZONE 'UTC'
         AND status IN ($2, $3)
-      RETURNING payment_id
+      RETURNING payment_id, expires_at
     `, [PaymentStatus.TIMED_OUT, PaymentStatus.CREATED, PaymentStatus.PROCESSING]);
 
     for (const row of canceledPaymentsIds.rows) {
       try {
         await this.stripe.paymentIntents.cancel(row['payment_id']);
         Logger.warn(
-          `cancelled following expired order session: ${row['payment_id']}`,
+          `canceled following expired order session: ${row['payment_id']}`,
         );
       } catch (err: any) {
         Logger.error(
@@ -187,11 +188,15 @@ export class PaymentService {
     UPDATE payment
     SET status = $2
     WHERE nft_order_id = $1
-    AND status NOT IN ($3, $4)
+    AND status NOT IN ($2, $3, $4, $5)
     RETURNING payment_id
       `,
-      [orderId, PaymentStatus.CANCELED, PaymentStatus.SUCCEEDED, PaymentStatus.PROCESSING],
+      [orderId, PaymentStatus.CANCELED, PaymentStatus.SUCCEEDED, PaymentStatus.PROCESSING, PaymentStatus.TIMED_OUT],
     );
+
+    if (typeof paymentIntentId.rows[0] === 'undefined') {
+      return;
+    }
 
     try {
       await this.stripe.paymentIntents.cancel(paymentIntentId.rows[0]['payment_id']);
@@ -207,7 +212,6 @@ export class PaymentService {
     }
 
     if (cartMeta.orderId && typeof cartMeta.orderId !== 'undefined') {
-      Logger.log(cartMeta.orderId)
       await this.cancelNftOrderId(cartMeta.orderId);
     }
 
@@ -354,10 +358,10 @@ WHERE nft_order_id = (
   SELECT nft_order.id as order_id
   FROM nft_order
   WHERE user_id = $1
-  ORDER BY order_at DESC
+  ORDER BY nft_order.id DESC
   LIMIT 1
 )
-ORDER BY expires_at DESC
+ORDER BY payment.id DESC
       `, [userId])
 
     return { payment_id: qryRes.rows[0]['payment_id'], order_id: qryRes.rows[0]['order_id'], status: qryRes.rows[0]['status'] }
