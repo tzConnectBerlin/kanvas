@@ -194,7 +194,7 @@ WHERE id = $1
     user: User,
     nftId: number,
     attr: string,
-    value?: any, // value is of type string? | picture
+    value?: any,
     lockNft = true,
   ): Promise<NftEntity> {
     if (lockNft) {
