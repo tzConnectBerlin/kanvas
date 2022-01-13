@@ -49,6 +49,9 @@ declare module '@mui/material/styles' {
             avatar: string;
             shoppingCart: string;
         };
+        boxShadow: {
+            default: string;
+        };
     }
     // allow configuration using `createTheme`
     interface ThemeOptions {
@@ -69,6 +72,9 @@ declare module '@mui/material/styles' {
             hover: string;
             avatar: string;
             shoppingCart: string;
+        };
+        boxShadow: {
+            default: string;
         };
     }
 }
@@ -248,6 +254,9 @@ export const lightTheme = createTheme({
         avatar: 'drop-shadow(0 0 0.25rem #e0e0e0)',
         shoppingCart: 'drop-shadow(0 1rem 0.55rem #C4C4C4)',
     },
+    boxShadow: {
+        default: '0 0 1rem #C4C4C4',
+    },
 });
 
 export const darkTheme = createTheme({
@@ -325,5 +334,8 @@ export const darkTheme = createTheme({
         hover: 'drop-shadow(0 0 0.45rem #0e0e0e9b)',
         avatar: 'drop-shadow(0 0 0.25rem black)',
         shoppingCart: 'drop-shadow(0 1rem 0.55rem black)',
+    },
+    boxShadow: {
+        default: '0 0 1rem black',
     },
 });

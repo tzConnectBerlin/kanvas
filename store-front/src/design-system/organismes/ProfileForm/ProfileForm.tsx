@@ -94,7 +94,7 @@ const ClearContentWrapper = styled.div<{ theme?: Theme }>`
     }
 
     :active {
-        filter: drop-shadow(0px 0px 6px #98989833);
+        box-shadow: ${(props) => props.theme.boxShadow.default};
     }
 `;
 
