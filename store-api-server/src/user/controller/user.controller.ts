@@ -80,7 +80,6 @@ export class UserController {
     @Body() editFields: EditProfile,
     @UploadedFile() picture: any,
   ) {
-    console.log(editFields);
     try {
       await this.userService.edit(
         currentUser.id,
@@ -111,6 +110,11 @@ export class UserController {
       userName: userName,
       available: available,
     };
+  }
+
+  @Get('topBuyers')
+  async topBuyers() {
+    return await this.userService.getTopBuyers();
   }
 
   @Post('cart/add/:nftId')

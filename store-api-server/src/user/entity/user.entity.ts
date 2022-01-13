@@ -20,3 +20,10 @@ export interface UserCart {
   expiresAt?: number;
   nfts: NftEntity[];
 }
+
+export interface UserTotalPaid {
+  userId: number;
+  userName: string;
+  userPicture?: string;
+  totalPaid: number;
+}

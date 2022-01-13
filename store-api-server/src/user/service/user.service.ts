@@ -1,5 +1,10 @@
 import { Logger, Injectable, Inject } from '@nestjs/common';
-import { UserEntity, ProfileEntity, UserCart } from '../entity/user.entity';
+import {
+  UserEntity,
+  ProfileEntity,
+  UserCart,
+  UserTotalPaid,
+} from '../entity/user.entity';
 import { NftService } from '../../nft/service/nft.service';
 import { NftEntity } from '../../nft/entity/nft.entity';
 import { MintService } from '../../nft/service/mint.service';
@@ -7,6 +12,7 @@ import {
   PG_CONNECTION,
   CART_EXPIRATION_MILLI_SECS,
   PG_UNIQUE_VIOLATION_ERRCODE,
+  NUM_TOP_BUYERS,
 } from '../../constants';
 import { Result, Err, Ok } from 'ts-results';
 import { S3Service } from '../../s3.service';
@@ -181,6 +187,37 @@ WHERE id = $1`,
       );
     }
     return Ok(qryRes.rows[0]['cart_session']);
+  }
+
+  async getTopBuyers(): Promise<UserTotalPaid[]> {
+    const qryRes = await this.conn.query(
+      `
+SELECT
+  usr.id AS user_id,
+  usr.user_name,
+  usr.picture_url AS profile_pic_url,
+  SUM(nft.price) AS total_paid
+FROM mtm_kanvas_user_nft AS mtm
+JOIN nft
+  ON nft.id = mtm.nft_id
+join kanvas_user AS usr
+  ON usr.id = mtm.kanvas_user_id
+GROUP BY 1, 2, 3
+ORDER BY 4 DESC
+LIMIT $1
+      `,
+      [NUM_TOP_BUYERS],
+    );
+
+    return qryRes.rows.map(
+      (row: any) =>
+        <UserTotalPaid>{
+          userId: row['user_id'],
+          userName: row['user_name'],
+          userPicture: row['profile_pic_url'],
+          totalPaid: row['total_paid'],
+        },
+    );
   }
 
   async ensureUserCartSession(
