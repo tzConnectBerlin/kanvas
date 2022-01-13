@@ -429,7 +429,6 @@ RETURNING session_id`,
 
   newCartExpiration(): Date {
     const expiresAt = new Date();
-    Logger.log(assertEnv('CART_EXPIRATION_MILLI_SECS'));
 
     expiresAt.setTime(
       expiresAt.getTime() + Number(assertEnv('CART_EXPIRATION_MILLI_SECS')),

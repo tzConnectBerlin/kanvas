@@ -17,6 +17,11 @@ export enum PaymentStatus {
   FAILED = 'failed',
 }
 
+export enum PaymentProviderEnum {
+  STRIPE = 'stripe',
+  TEST = 'test_provider'
+}
+
 interface NftOrder {
   id: number;
   userId: number;
@@ -27,6 +32,7 @@ export interface StripePaymentIntent {
   amount: number;
   currency: string;
   clientSecret: string;
+  id: string;
 }
 
 @Injectable()
@@ -69,20 +75,18 @@ export class PaymentService {
       constructedEvent.data.object.id,
     );
 
-    if (previousStatus !==  PaymentStatus.FAILED && paymentStatus === PaymentStatus.SUCCEEDED) {
-      Logger.error('dfeowiuhf ewilpou fhwqoli fug')
-      Logger.error(previousStatus)
+    if (previousStatus !== PaymentStatus.FAILED && paymentStatus === PaymentStatus.SUCCEEDED) {
       const orderId = await this.getPaymentOrderId(
         constructedEvent.data.object.id,
       );
       await this.orderCheckout(orderId);
       await this.userService.deleteCartSession(orderId);
     }
-
   }
 
-  async createStripePayment(user: UserEntity): Promise<StripePaymentIntent> {
-    const cartSessionRes = await this.userService.getUserCartSession(user.id);
+  // Prepare the cart, order and amount for payment
+  async preparePayment(userId: number, provider: PaymentProviderEnum): Promise<{ amount: number, nftOrder: NftOrder }> {
+    const cartSessionRes = await this.userService.getUserCartSession(userId);
 
     if (!cartSessionRes.ok || typeof cartSessionRes.val !== 'string') {
       throw cartSessionRes.val;
@@ -90,9 +94,14 @@ export class PaymentService {
     const cartSession: string = cartSessionRes.val;
 
     const cartList = await this.userService.cartList(cartSession);
-    const nftOrder = await this.createNftOrder(cartSession, user.id);
+    const nftOrder = await this.createNftOrder(cartSession, userId, provider);
 
     const amount = cartList.nfts.reduce((sum, nft) => sum + nft.price, 0);
+
+    return { amount: amount, nftOrder: nftOrder }
+  }
+
+  async createStripePayment(amount: number, user: UserEntity): Promise<StripePaymentIntent> {
 
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount: amount * 100,
@@ -102,10 +111,8 @@ export class PaymentService {
       },
     });
 
-    await this.createPayment('stripe', paymentIntent.id, nftOrder.id);
-
     // add multiple currency later on
-    return { amount: amount * 100, currency: 'eur', clientSecret: paymentIntent.client_secret };
+    return { amount: amount * 100, currency: 'eur', clientSecret: paymentIntent.client_secret, id: paymentIntent.id };
   }
 
   newOrderExpiration(): Date {
@@ -114,7 +121,7 @@ export class PaymentService {
     return expiresAt;
   }
 
-  async createPayment(provider: string, paymentId: string, nftOrderId: number) {
+  async createPayment(provider: PaymentProviderEnum, paymentId: string, nftOrderId: number) {
     try {
       const expireAt = this.newOrderExpiration();
       await this.conn.query(
@@ -134,7 +141,7 @@ export class PaymentService {
       );
     } catch (err: any) {
       Logger.error(
-        `Err on storing payment intent in db (provider='stripe', paymentId=${paymentId}, nftOrderId=${nftOrderId}), err: ${err}`,
+        `Err on storing payment intent in db (provider=${provider}, paymentId=${paymentId}, nftOrderId=${nftOrderId}), err: ${err}`,
       );
       throw err;
     }
@@ -184,14 +191,14 @@ export class PaymentService {
     }
   }
 
-  async cancelNftOrderId(orderId: number) {
+  async cancelNftOrderId(orderId: number, provider: PaymentProviderEnum) {
     const paymentIntentId = await this.conn.query(
       `
-    UPDATE payment
-    SET status = $2
-    WHERE nft_order_id = $1
-    AND status NOT IN ($2, $3, $4, $5)
-    RETURNING payment_id
+UPDATE payment
+SET status = $2
+WHERE nft_order_id = $1
+AND status NOT IN ($2, $3, $4, $5)
+RETURNING payment_id
       `,
       [orderId, PaymentStatus.CANCELED, PaymentStatus.SUCCEEDED, PaymentStatus.PROCESSING, PaymentStatus.TIMED_OUT],
     );
@@ -201,20 +208,22 @@ export class PaymentService {
     }
 
     try {
-      await this.stripe.paymentIntents.cancel(paymentIntentId.rows[0]['payment_id']);
+      if (provider === PaymentProviderEnum.STRIPE) {
+        await this.stripe.paymentIntents.cancel(paymentIntentId.rows[0]['payment_id']);
+      }
     } catch (err: any) {
       throw Err(`paymentIntentCancel failed (orderId=${orderId}), err: ${err}`);
     }
   }
 
-  async createNftOrder(session: string, userId: number): Promise<NftOrder> {
+  async createNftOrder(session: string, userId: number, provider: PaymentProviderEnum): Promise<NftOrder> {
     const cartMeta = await this.userService.getCartMeta(session);
     if (typeof cartMeta === 'undefined') {
       throw Err(`createNftOrder err: cart should not be empty`);
     }
 
     if (cartMeta.orderId && typeof cartMeta.orderId !== 'undefined') {
-      await this.cancelNftOrderId(cartMeta.orderId);
+      await this.cancelNftOrderId(cartMeta.orderId, provider);
     }
 
     let nftOrderId: number;

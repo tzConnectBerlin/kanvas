@@ -18,7 +18,7 @@ CREATE TABLE mtm_nft_order_nft (
 );
 
 CREATE TYPE payment_status AS ENUM ('created', 'processing', 'canceled', 'succeeded', 'failed', 'timedOut' );
-CREATE TYPE payment_provider AS ENUM ('stripe', 'tezos', 'test_provider');
+CREATE TYPE payment_provider AS ENUM ('stripe', 'tezos' );
 
 CREATE TABLE payment (
     id SERIAL PRIMARY KEY,

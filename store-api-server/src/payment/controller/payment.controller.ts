@@ -11,6 +11,7 @@ import {
 import { CurrentUser } from 'src/decoraters/user.decorator';
 import { JwtAuthGuard } from 'src/authentication/guards/jwt-auth.guard';
 import {
+  PaymentProviderEnum,
   PaymentService,
   PaymentStatus,
   StripePaymentIntent,
@@ -76,7 +77,9 @@ export class PaymentController {
 
     let stripePaymentIntent: StripePaymentIntent;
     try {
-      stripePaymentIntent = await this.paymentService.createStripePayment(user);
+      const preparedPayment = await this.paymentService.preparePayment(user.id, PaymentProviderEnum.STRIPE)
+      stripePaymentIntent = await this.paymentService.createStripePayment(preparedPayment.amount, user);
+      await this.paymentService.createPayment(PaymentProviderEnum.STRIPE, stripePaymentIntent.id, preparedPayment.nftOrder.id)
     } catch (err: any) {
       Logger.error(err);
       throw new HttpException(
