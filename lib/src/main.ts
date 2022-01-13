@@ -19,7 +19,7 @@ function test() {
     attributes: {},
   };
 
-  let stm = new StateTransitionMachine('./redacted_redacted.yaml');
+  let stm = new StateTransitionMachine('./stm_example.yaml');
 
   const editor = new Actor(0, ['editor', 'something']);
   const moderator1 = new Actor(1, ['moderator']);
