@@ -8,10 +8,12 @@ import PageWrapper from '../../design-system/commons/PageWrapper';
 import { Pagination, Stack, useMediaQuery, useTheme } from '@mui/material';
 import { IUser } from '../../interfaces/user';
 import { Animated } from 'react-animated-css';
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router';
 import { HeaderProfile } from '../../design-system/molecules/HeaderProfile/HeaderProfile';
 import { Theme } from '@mui/material';
+import { INft } from '../../interfaces/artwork';
+import { LensTwoTone } from '@mui/icons-material';
 
 interface ParamTypes {
     userAddress: string;
@@ -71,7 +73,6 @@ const Profile: FC<ProfileProps> = () => {
     let { userAddress } = useParams<ParamTypes>();
 
     const history = useHistory();
-    const location = useLocation<{ refresh: boolean }>();
 
     // Using the useState hook in case adding more tabs in the future
     const [selectedTab, setSelectedTab] = useState('Collection');
@@ -96,9 +97,78 @@ const Profile: FC<ProfileProps> = () => {
         { manual: true },
     );
 
+    const [checkPendingNftsResponse, checkPendingNfts] = useAxios(
+        {
+            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/nftOwnership`,
+            withCredentials: true,
+            params: {
+                nftIds: []
+            },
+        },
+        { manual: true },
+    );
+
+    const fetchPendingNfts = () => {
+        if (userNftsResponse.data?.nfts.length > 0) {
+            const pendingNfts = userNftsResponse.data.nfts.map((nft: INft) => nft.ownerStatuses?.map(status => status === "pending" ) ? nft : undefined)
+            checkPendingNfts({
+                url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/nftOwnership`,
+                withCredentials: true,
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem(
+                        'Kanvas - Bearer',
+                    )}`,
+                },
+                params: {
+                    nftIds: pendingNfts.map((nft: INft) => nft.id).join(',')
+                },
+            })
+
+        }
+    }
+
+    const updateNFTsStatuses = (newStatuses: any[], nfts: INft[]) => {
+        if (newStatuses.length === 0 || nfts.length === 0) return;
+
+        newStatuses.map(nftNewStatuses => {
+            nfts.map(nft => {
+                if (nft.id === Number(nftNewStatuses.nftId)) {
+                    nft.ownerStatuses = nftNewStatuses.ownerStatuses
+                }
+            })
+        })
+    }
+
+    // Updating nft state
+    useEffect(() => {
+        if (checkPendingNftsResponse.data && userNftsResponse.data) {
+            updateNFTsStatuses(checkPendingNftsResponse.data, userNftsResponse.data.nfts)
+        }
+    }, [checkPendingNftsResponse])
+
+    // Calling checking status if any nfts are pending in the profile
+    useEffect(() => {
+        if(userNftsResponse.data ) {
+            if (userNftsResponse.data.nfts.length === 0) return;
+
+            const pendingNfts = userNftsResponse.data.nfts.map((nft: INft) => nft.ownerStatuses?.map(status => status === "pending" ) ? nft : undefined)
+
+            if (pendingNfts.length === 0) return;
+
+            let timer = setInterval(() => {
+                fetchPendingNfts()
+            }, 2500)
+
+            return () => {
+                clearInterval(timer)
+            }
+        }
+    }, [userNftsResponse])
+
     useEffect(() => {
         window.scrollTo(0, 0);
-        
+
         if (!userAddress) {
             history.push('/404');
         }

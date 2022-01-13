@@ -101,7 +101,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                     sx={{ maxWidth: 200, justifyContent: 'center' }}
                 >
                     <Avatar
-                        src={`${props.user?.profilePicture}?${Date.now()}`}
+                        src={`${props.user?.profilePicture}`}
                         height={150}
                         width={150}
                         loading={props.loading}
