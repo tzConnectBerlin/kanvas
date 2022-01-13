@@ -401,7 +401,7 @@ describe('AppController (e2e)', () => {
     },
   );
   skipOnPriorFail(
-    '/users/cart (BAD REQUEST on remove of item not in cart)',
+    'Rate limiter test (requesting 1 more time than is allowed, should result in exactly 1 429)',
     async () => {
       const server = app.getHttpServer();
       const respPromises = [];
