@@ -1,4 +1,6 @@
+import { APP_GUARD } from '@nestjs/core';
 import { Module, MiddlewareConsumer } from '@nestjs/common';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CategoryModule } from './category/category.module';
@@ -9,6 +11,8 @@ import { AuthenticationModule } from './authentication/authentication.module';
 import { DbModule } from './db.module';
 import { LoggerMiddleware } from './middleware/logger';
 import { CookieSessionMiddleware } from './middleware/cookie_session';
+import { ProxiedThrottlerGuard } from './decoraters/proxied_throttler';
+import { RATE_LIMIT_WINDOW_SECS, RATE_LIMIT } from 'src/constants';
 
 @Module({
   imports: [
@@ -18,9 +22,16 @@ import { CookieSessionMiddleware } from './middleware/cookie_session';
     UserModule,
     AuthProviderModule,
     DbModule,
+    ThrottlerModule.forRoot({
+      ttl: RATE_LIMIT_WINDOW_SECS,
+      limit: RATE_LIMIT,
+    }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: ProxiedThrottlerGuard },
+  ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer): void {

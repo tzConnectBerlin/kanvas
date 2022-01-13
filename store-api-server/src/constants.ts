@@ -14,3 +14,6 @@ export const SEARCH_SIMILARITY_LIMIT = 0.4;
 export const MINTER_ADDRESS = 'tz1YZh7rTPxf6EAmw7dkNszRGPpoN2ZFxuku';
 export const STORE_SYMBOL = 'KANVAS';
 export const STORE_PUBLISHERS = ['Tezos'];
+
+export const RATE_LIMIT_WINDOW_SECS = 60; // rate limiter window
+export const RATE_LIMIT = 300;

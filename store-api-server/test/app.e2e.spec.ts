@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
+import { RATE_LIMIT } from 'src/constants';
 
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {
@@ -397,6 +398,20 @@ describe('AppController (e2e)', () => {
         .post('/users/cart/remove/5')
         .set('cookie', cookie);
       expect(remove.statusCode).toEqual(400);
+    },
+  );
+  skipOnPriorFail(
+    '/users/cart (BAD REQUEST on remove of item not in cart)',
+    async () => {
+      const server = app.getHttpServer();
+      const respPromises = [];
+      for (let i = 0; i < RATE_LIMIT + 1; i++) {
+        respPromises.push(request(server).post('/nfts/0'));
+      }
+      const resp = await Promise.all(respPromises);
+      expect(
+        resp.filter((resp: any) => resp.statusCode === 429).length,
+      ).toEqual(1);
     },
   );
 });
