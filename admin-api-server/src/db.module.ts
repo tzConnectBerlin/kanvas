@@ -4,10 +4,9 @@ import { assertEnv } from './utils';
 import { PG_CONNECTION } from './constants';
 import { Client, types } from 'pg';
 import * as Pool from 'pg-pool';
+export type DbPool = Pool<Client>;
 
 dotenv.config();
-
-export type DbPool = Pool<Client>;
 
 // Read postgres TIMESTAMP WITHOUT TIME ZONE values as UTC+0 Date
 types.setTypeParser(
@@ -16,14 +15,14 @@ types.setTypeParser(
     return new Date(stringValue + '+0000');
   },
 );
-console.debug('PORT IS', Number(assertEnv('DB_PORT')));
+console.debug('PORT IS', Number(assertEnv('PGPORT')));
 
 export const dbPool = new Pool({
-  host: assertEnv('DB_HOST'),
-  port: Number(assertEnv('DB_PORT')),
-  user: assertEnv('DB_USERNAME'),
-  password: assertEnv('DB_PASSWORD'),
-  database: assertEnv('DB_DATABASE'),
+  host: assertEnv('PGHOST'),
+  port: Number(assertEnv('PGPORT')),
+  user: assertEnv('PGUSER'),
+  password: assertEnv('PGPASSWORD'),
+  database: assertEnv('PGDATABASE'),
 });
 
 const dbProvider = {

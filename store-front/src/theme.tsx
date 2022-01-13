@@ -50,6 +50,9 @@ declare module '@mui/material/styles' {
             paper: string;
             shoppingCart: string;
         };
+        boxShadow: {
+            default: string;
+        };
     }
     // allow configuration using `createTheme`
     interface ThemeOptions {
@@ -73,7 +76,7 @@ declare module '@mui/material/styles' {
             shoppingCart: string;
         };
         boxShadow: {
-            default: string
+            default: string;
         };
     }
 }
@@ -255,8 +258,8 @@ export const lightTheme = createTheme({
         shoppingCart: 'drop-shadow(0 1rem 0.55rem #C4C4C4)',
     },
     boxShadow: {
-        default: '#C4C4C4'
-    }
+        default: '#C4C4C4',
+    },
 });
 
 export const darkTheme = createTheme({

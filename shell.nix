@@ -1,9 +1,9 @@
 with (import <nixpkgs> {});
 mkShell {
   buildInputs = [
-    yarn
     ripgrep
     postgresql
+    jq
     httpie
   ];
 

@@ -1,19 +1,22 @@
-#!/bin/bash
-
-set -ex
-
+#!/usr/bin/env bash
 cd $(git rev-parse --show-toplevel)/admin-api-server
 
-[ -z $DB_PORT ] && export DB_PORT=5433
-[ -z $DB_PASSWORD ] && export DB_PASSWORD=dev_password
-[ -z $DB_PASSWORD ] && export PASSWORD=dev_password
-[ -z $DB_USERNAME ] && export DB_USERNAME=dev_user
-[ -z $DB_DATABASE ] && export DB_DATABASE=dev_database
+trap "kill 0" EXIT
 
-echo Starting Admin DB at port $DB_PORT
+[ -z $PGPORT ] && export PGPORT=5433
+[ -z $PGUSER ] && export PGUSER=dev_user
+[ -z $PGPASSWORD ] && export PGPASSWORD=dev_password
+[ -z $PGDATABASE ] && export PGDATABASE=dev_database
+
+(
+    ./script/wait-db.bash
+    ./script/migrate up
+) &
+
+echo Starting Admin DB at port $PGPORT
 docker run -ti \
-    -p $DB_PORT:5432 \
-    -e POSTGRES_PASSWORD=$DB_PASSWORD \
-    -e POSTGRES_USER=$DB_USERNAME \
-    -e POSTGRES_DB=$DB_DATABASE \
+    -p $PGPORT:5432 \
+    -e POSTGRES_USER=$PGUSER \
+    -e POSTGRES_PASSWORD=$PGPASSWORD \
+    -e POSTGRES_DB=$PGDATABASE \
     postgres "$@"

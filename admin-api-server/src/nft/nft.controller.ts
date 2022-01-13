@@ -1,4 +1,5 @@
 import {
+  Logger,
   Controller,
   Get,
   Post,
@@ -19,9 +20,15 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { NFT_IMAGE_MAX_BYTES } from 'src/constants';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
 import { FilterParams } from 'src/types';
-import { NftDto } from './dto/nft.dto';
+import { NftEntity } from './entities/nft.entity';
 import { NftService } from './nft.service';
-import { UpdateNftGuard } from './update-nft.guard';
+import { CurrentUser } from '../decoraters/user.decorator';
+import { User } from 'src/user/entities/user.entity';
+
+interface UpdateNft {
+  attribute: string;
+  value?: string;
+}
 
 @Controller('nft')
 export class NftController {
@@ -29,29 +36,11 @@ export class NftController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(
-    FileInterceptor('image', {
-      limits: { fileSize: NFT_IMAGE_MAX_BYTES },
-    }),
-  )
-  create(
-    @Request() req,
-    @Body(new ParseJSONArrayPipe()) createNftDto: NftDto,
-    @UploadedFile() image: any,
-  ) {
-    if (!image) {
-      throw new HttpException(
-        'NFT image required when creating an NFT',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-    return this.nftService.create(
-      req.user,
-      { ...createNftDto, nftState: 'proposal' },
-      image,
-    );
+  create(@CurrentUser() user: User) {
+    return this.nftService.create(user);
   }
 
+  /*
   @Get()
   findAll(
     @Query('sort', new ParseJSONArrayPipe())
@@ -62,30 +51,50 @@ export class NftController {
   ) {
     return this.nftService.findAll({ sort, filter, range });
   }
+  */
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.nftService.findOne(id);
+  async findOne(@Param('id') id: number, @CurrentUser() user: User) {
+    return await this.nftService.getNft(user, id);
   }
 
-  @UseGuards(JwtAuthGuard, UpdateNftGuard)
   @UseInterceptors(
-    FileInterceptor('image', {
+    FileInterceptor('data', {
       limits: { fileSize: NFT_IMAGE_MAX_BYTES },
     }),
   )
-  @Patch(':id')
-  update(
-    @Param('id') id: number,
-    @Body(new ParseJSONArrayPipe()) updateNftDto: NftDto,
-    @UploadedFile() image,
-  ) {
-    return this.nftService.update(id, updateNftDto, image);
+  @Patch(':id/setContent')
+  @UseGuards(JwtAuthGuard)
+  async setContent(
+    @Param('id') nftId: number,
+    @CurrentUser() user: User,
+    @UploadedFile() picture: any,
+  ): Promise<NftEntity> {
+    if (typeof picture === 'undefined') {
+      throw new HttpException(`expected file upload`, HttpStatus.BAD_REQUEST);
+    }
+    return await this.nftService.setContent(user, nftId, picture);
   }
 
-  @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  remove(@Param('id') id: number) {
-    return this.nftService.remove(id);
+  @Patch(':id')
+  async update(
+    @Param('id') nftId: number,
+    @Body() updateNft: UpdateNft,
+    @CurrentUser() user: User,
+  ): Promise<NftEntity> {
+    if (updateNft.attribute === this.nftService.CONTENT_KEYWORD) {
+      throw new HttpException(
+        `attribute=${this.nftService.CONTENT_KEYWORD} is a reserved attribute that is not allowed to be set through this endpoint`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return await this.nftService.apply(
+      user,
+      nftId,
+      updateNft.attribute,
+      updateNft.value,
+    );
   }
 }
