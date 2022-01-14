@@ -101,8 +101,7 @@ const HomePage: FC<HomePageProps> = () => {
     });
 
     const [topBuyersResponse] = useAxios({
-        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/users/topBuyers',
-        withCredentials: true
+        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/users/topBuyers'
     });
 
     return (
@@ -137,7 +136,7 @@ const HomePage: FC<HomePageProps> = () => {
                     </Stack>
 
                     <UsersGrid
-                        users={topBuyersResponse.data.topBuyers}
+                        users={topBuyersResponse.data ? topBuyersResponse.data.topBuyers : []}
                         loading={topBuyersResponse.loading}
                         emptyMessage={'No top Buyers yet'}
                     />
