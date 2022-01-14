@@ -49,7 +49,7 @@
       "link_3": "F.A.Q"
     },
     "headline_4": {
-      "title": "Soziales"   
+      "title": "Soziales"
     },
     "headline_5": {
       "title": "Langue"
@@ -108,6 +108,10 @@
       "button_1": "Afficher la collection",
       "button_2": "Se connecter",
       "button_3": "Afficher"
+    },
+    "topSellers": {
+      "headline": "Top Achteurs",
+      "link": "Voir tous les"
     },
     "nfts": {
       "headline": "NFT présentées",

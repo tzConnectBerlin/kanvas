@@ -15,6 +15,7 @@ import { CustomButton } from '../../design-system/atoms/Button';
 import useAxios from 'axios-hooks';
 
 import { useHistory } from 'react-router';
+import UsersGrid from '../../design-system/organismes/UsersGrid';
 
 interface HomePageProps {
     theme?: Theme;
@@ -37,7 +38,7 @@ const StyledStack = styled(Stack)`
     }
 `;
 
-const LinkStyled = styled(CustomButton)<{ theme?: Theme }>`
+const LinkStyled = styled(CustomButton) <{ theme?: Theme }>`
     outline: none;
     background: transparent;
     padding: 0;
@@ -99,6 +100,11 @@ const HomePage: FC<HomePageProps> = () => {
         },
     });
 
+    const [topBuyersResponse] = useAxios({
+        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/users/topBuyers',
+        withCredentials: true
+    });
+
     return (
         <PageWrapper>
             <StyledStack>
@@ -115,6 +121,30 @@ const HomePage: FC<HomePageProps> = () => {
                     />
 
                     <FlexSpacer minHeight={isMobile ? 5 : 7} />
+
+                    {/* Top Sellers Grid */}
+                    <Stack
+                        direction="row"
+                        sx={{ alignItems: 'end', marginBottom: '1.5rem' }}
+                    >
+                        <Typography
+                            size="h2"
+                            weight="SemiBold"
+                            sx={{ pt: 2, mb: 1 }}
+                        >
+                            {t('home.topSellers.headline')}
+                        </Typography>
+                    </Stack>
+
+                    <UsersGrid
+                        users={topBuyersResponse.data.topBuyers}
+                        loading={topBuyersResponse.loading}
+                        emptyMessage={'No top Buyers yet'}
+                    />
+
+                    <FlexSpacer minHeight={4} />
+
+                    {/* Gallery Grid */}
 
                     <Stack
                         direction="row"

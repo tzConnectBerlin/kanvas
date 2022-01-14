@@ -107,6 +107,10 @@
       "button_2": "Sign in",
       "button_3": "View"
     },
+    "topSellers": {
+      "headline": "Top Buyers",
+      "link": "See all"
+    },
     "nfts": {
       "headline": "Featured NFTs",
       "link": "See all"
