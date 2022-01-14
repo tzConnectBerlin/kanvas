@@ -7,6 +7,7 @@ import { MintService } from '../../nft/service/mint.service';
 import { Err } from 'ts-results';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { assertEnv } from 'src/utils';
+import { Lock } from 'async-await-mutex-lock';
 
 export enum PaymentStatus {
   CREATED = 'created',
@@ -86,6 +87,7 @@ export class PaymentService {
 
   // Prepare the cart, order and amount for payment
   async preparePayment(userId: number, provider: PaymentProviderEnum): Promise<{ amount: number, nftOrder: NftOrder }> {
+
     const cartSessionRes = await this.userService.getUserCartSession(userId);
 
     if (!cartSessionRes.ok || typeof cartSessionRes.val !== 'string') {
@@ -147,7 +149,7 @@ export class PaymentService {
     }
   }
 
-  async editPaymentStatus(status: PaymentStatus, paymentId: string) {
+  async editPaymentStatus(status: PaymentStatus, paymentId: string): Promise<string | undefined> {
     try {
       const qryRes = await this.conn.query(
         `
@@ -203,7 +205,7 @@ RETURNING payment_id
       [orderId, PaymentStatus.CANCELED, PaymentStatus.SUCCEEDED, PaymentStatus.PROCESSING, PaymentStatus.TIMED_OUT],
     );
 
-    if (typeof paymentIntentId.rows[0] === 'undefined') {
+    if (!paymentIntentId.rowCount) {
       return;
     }
 
