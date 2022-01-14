@@ -75,20 +75,20 @@ export class PaymentController {
   ): Promise<StripePaymentIntent> {
     await this.nftLock.acquire(user.id);
 
-    let stripePaymentIntent: StripePaymentIntent;
     try {
       const preparedPayment = await this.paymentService.preparePayment(user.id, PaymentProviderEnum.STRIPE)
-      stripePaymentIntent = await this.paymentService.createStripePayment(preparedPayment.amount, user);
+      const stripePaymentIntent = await this.paymentService.createStripePayment(preparedPayment.amount, user);
       await this.paymentService.createPayment(PaymentProviderEnum.STRIPE, stripePaymentIntent.id, preparedPayment.nftOrder.id)
+
+      return stripePaymentIntent;
     } catch (err: any) {
       Logger.error(err);
       throw new HttpException(
         'Unable to place the order',
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     } finally {
       this.nftLock.release(user.id);
     }
-    return stripePaymentIntent;
   }
 }
