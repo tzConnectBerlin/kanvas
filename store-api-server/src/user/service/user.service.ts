@@ -10,7 +10,6 @@ import { NftService } from '../../nft/service/nft.service';
 import { MintService } from '../../nft/service/mint.service';
 import {
   PG_CONNECTION,
-  CART_EXPIRATION_MILLI_SECS,
   PG_UNIQUE_VIOLATION_ERRCODE,
   NUM_TOP_BUYERS,
 } from '../../constants';
@@ -33,6 +32,7 @@ export class UserService {
     joinBy: '_',
   };
   RANDOM_NAME_MAX_RETRIES = 5;
+  CART_EXPIRATION_MILLI_SECS = Number(assertEnv('CART_EXPIRATION_MILLI_SECS'));
 
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
@@ -214,6 +214,7 @@ WHERE id = $1`,
 SELECT
   usr.id AS user_id,
   usr.user_name,
+  usr.address AS user_address,
   usr.picture_url AS profile_pic_url,
   SUM(nft.price) AS total_paid
 FROM mtm_kanvas_user_nft AS mtm
@@ -233,6 +234,7 @@ LIMIT $1
         <UserTotalPaid>{
           userId: row['user_id'],
           userName: row['user_name'],
+          userAddress: row['user_address'],
           userPicture: row['profile_pic_url'],
           totalPaid: row['total_paid'],
         },
@@ -467,9 +469,7 @@ RETURNING session_id`,
   newCartExpiration(): Date {
     const expiresAt = new Date();
 
-    expiresAt.setTime(
-      expiresAt.getTime() + Number(assertEnv('CART_EXPIRATION_MILLI_SECS')),
-    );
+    expiresAt.setTime(expiresAt.getTime() + this.CART_EXPIRATION_MILLI_SECS);
     return expiresAt;
   }
 

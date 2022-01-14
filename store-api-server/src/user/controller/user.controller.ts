@@ -114,8 +114,11 @@ export class UserController {
 
   @Get('topBuyers')
   async topBuyers() {
-    return await this.userService.getTopBuyers();
-    
+    return {
+      topBuyers: await this.userService.getTopBuyers(),
+    };
+  }
+
   @Post('nftOwnership')
   @UseGuards(JwtAuthGuard)
   async nftOwnershipStatus(

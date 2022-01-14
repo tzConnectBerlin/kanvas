@@ -26,6 +26,7 @@ export interface UserTotalPaid {
   userName: string;
   userPicture?: string;
   totalPaid: number;
+}
 
 export interface NftOwnershipStatus {
   nftId: number;
