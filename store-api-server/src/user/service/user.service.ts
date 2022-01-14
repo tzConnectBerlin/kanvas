@@ -1,13 +1,18 @@
 import { Logger, Injectable, Inject } from '@nestjs/common';
 import {
-  NftOwnershipStatus,
   UserEntity,
   ProfileEntity,
   UserCart,
+  UserTotalPaid,
+  NftOwnershipStatus,
 } from '../entity/user.entity';
 import { NftService } from '../../nft/service/nft.service';
 import { MintService } from '../../nft/service/mint.service';
-import { PG_CONNECTION, PG_UNIQUE_VIOLATION_ERRCODE } from '../../constants';
+import {
+  PG_CONNECTION,
+  PG_UNIQUE_VIOLATION_ERRCODE,
+  NUM_TOP_BUYERS,
+} from '../../constants';
 import { Result, Err, Ok } from 'ts-results';
 import { S3Service } from '../../s3.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -27,6 +32,7 @@ export class UserService {
     joinBy: '_',
   };
   RANDOM_NAME_MAX_RETRIES = 5;
+  CART_EXPIRATION_MILLI_SECS = Number(assertEnv('CART_EXPIRATION_MILLI_SECS'));
 
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
@@ -200,6 +206,39 @@ WHERE id = $1`,
       );
     }
     return Ok(qryRes.rows[0]['cart_session']);
+  }
+
+  async getTopBuyers(): Promise<UserTotalPaid[]> {
+    const qryRes = await this.conn.query(
+      `
+SELECT
+  usr.id AS user_id,
+  usr.user_name,
+  usr.address AS user_address,
+  usr.picture_url AS profile_pic_url,
+  SUM(nft.price) AS total_paid
+FROM mtm_kanvas_user_nft AS mtm
+JOIN nft
+  ON nft.id = mtm.nft_id
+join kanvas_user AS usr
+  ON usr.id = mtm.kanvas_user_id
+GROUP BY 1, 2, 3
+ORDER BY 4 DESC
+LIMIT $1
+      `,
+      [NUM_TOP_BUYERS],
+    );
+
+    return qryRes.rows.map(
+      (row: any) =>
+        <UserTotalPaid>{
+          userId: row['user_id'],
+          userName: row['user_name'],
+          userAddress: row['user_address'],
+          userPicture: row['profile_pic_url'],
+          totalPaid: row['total_paid'],
+        },
+    );
   }
 
   async ensureUserCartSession(
@@ -430,9 +469,7 @@ RETURNING session_id`,
   newCartExpiration(): Date {
     const expiresAt = new Date();
 
-    expiresAt.setTime(
-      expiresAt.getTime() + Number(assertEnv('CART_EXPIRATION_MILLI_SECS')),
-    );
+    expiresAt.setTime(expiresAt.getTime() + this.CART_EXPIRATION_MILLI_SECS);
     return expiresAt;
   }
 
