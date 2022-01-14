@@ -127,7 +127,7 @@ const steps = [
     'Proceed payment',
 ];
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIP_PK_KEY!);
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PK_KEY!);
 
 export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
     const history = useHistory();
