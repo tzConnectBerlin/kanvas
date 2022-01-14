@@ -6,7 +6,7 @@ dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
-  const port = process.env['KANVAS_API_PORT'] || 3001;
+  const port = process.env['ADMIN_API_PORT'] || 3001;
   await app.listen(port);
   console.log('Listening on ', port);
 }
