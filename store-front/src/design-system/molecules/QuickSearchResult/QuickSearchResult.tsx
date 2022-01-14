@@ -106,9 +106,9 @@ const StyledGrid = styled(Grid)`
 export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
     const history = useHistory();
 
-    const navigateTo = (path: string) => {
+    const navigateTo = (path: string, categoryId?: number) => {
         props.closeResult();
-        history.push(path);
+        history.push(path, {refresh: true, category: categoryId });
     };
 
     return (
@@ -254,10 +254,12 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                                         textSize="Light"
                                                         primary={false}
                                                         label={category.name}
-                                                        onMouseDown={() =>
+                                                        onMouseDown={() => {
                                                             navigateTo(
                                                                 `/store?categories=${category.id}`,
-                                                            )
+                                                                category.id
+                                                                )
+                                                            }
                                                         }
                                                     />
                                                 </Grid>

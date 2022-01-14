@@ -82,13 +82,13 @@ export class AuthenticationService {
   }
 
   public async register(user: UserEntity): Promise<any> {
-    const hashedSignedDartPayload: string = await bcrypt.hash(
+    const hashedsignedKanvasPayload: string = await bcrypt.hash(
       user.signedPayload,
       10,
     );
     const createdUser = await this.userService.create({
       ...user,
-      signedPayload: hashedSignedDartPayload,
+      signedPayload: hashedsignedKanvasPayload,
     });
 
     createdUser.signedPayload = undefined;
@@ -97,14 +97,14 @@ export class AuthenticationService {
   }
 
   private async verifyPassword(
-    signedDartPayload: string,
-    hashedSignedDartPayload: string,
+    signedKanvasPayload: string,
+    hashedsignedKanvasPayload: string,
   ) {
-    const isSignedDartPayloadMatching = await bcrypt.compare(
-      signedDartPayload,
-      hashedSignedDartPayload,
+    const issignedKanvasPayloadMatching = await bcrypt.compare(
+      signedKanvasPayload,
+      hashedsignedKanvasPayload,
     );
-    if (!isSignedDartPayloadMatching) {
+    if (!issignedKanvasPayloadMatching) {
       throw new HttpException(
         'Wrong credentials provided',
         HttpStatus.UNAUTHORIZED,

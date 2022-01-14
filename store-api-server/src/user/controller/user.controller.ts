@@ -80,7 +80,6 @@ export class UserController {
     @Body() editFields: EditProfile,
     @UploadedFile() picture: any,
   ) {
-    console.log(editFields);
     try {
       await this.userService.edit(
         currentUser.id,
@@ -113,6 +112,27 @@ export class UserController {
     };
   }
 
+  @Post('nftOwnership')
+  @UseGuards(JwtAuthGuard)
+  async nftOwnershipStatus(
+    @CurrentUser() user: UserEntity,
+    @Query('nftIds') nftIdsQuery: string,
+  ) {
+    let nftIds: number[];
+    try {
+      nftIds = nftIdsQuery.split(',').map((v: string) => Number(v));
+      if (nftIds.some((id: number) => Number.isNaN(id))) {
+        throw `one or more requested nftIds is NaN`;
+      }
+    } catch (err: any) {
+      throw new HttpException(
+        'Bad nftIds query parameter, expected comma separated nft id numbers',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return await this.userService.getNftOwnershipStatuses(user, nftIds);
+  }
+
   @Post('cart/add/:nftId')
   @UseGuards(JwtFailableAuthGuard)
   async cartAdd(
@@ -120,7 +140,11 @@ export class UserController {
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    const cartSession = await this.getCartSession(cookieSession, user);
+    const cartSession = await this.userService.getCartSession(
+      cookieSession,
+      user,
+    );
+
     const addedRes = await this.userService
       .cartAdd(cartSession, nftId)
       .catch((err: any) => {
@@ -158,7 +182,11 @@ export class UserController {
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    const cartSession = await this.getCartSession(cookieSession, user);
+    const cartSession = await this.userService.getCartSession(
+      cookieSession,
+      user,
+    );
+
     const removed = await this.userService.cartRemove(cartSession, nftId);
     if (!removed) {
       throw new HttpException(
@@ -176,49 +204,10 @@ export class UserController {
     @Session() cookieSession: any,
     @CurrentUser() user: UserEntity | undefined,
   ) {
-    const cartSession = await this.getCartSession(cookieSession, user);
-    return await this.userService.cartList(cartSession);
-  }
-
-  @Post('cart/checkout')
-  @UseGuards(JwtAuthGuard)
-  async cartCheckout(@CurrentUser() user: UserEntity) {
-    const cartSessionRes = await this.userService.getUserCartSession(user.id);
-    if (!cartSessionRes.ok) {
-      throw new HttpException(
-        'Something went wrong',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-    const cartSession: string | undefined = cartSessionRes.val;
-    if (typeof cartSession === 'undefined') {
-      throw new HttpException(
-        'User has no active cart',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const success = await this.userService.cartCheckout(user, cartSession);
-    if (!success) {
-      throw new HttpException(
-        'Empty cart cannot be checked out',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    // return 204 (applied, returning nothing)
-    throw new HttpException('', HttpStatus.NO_CONTENT);
-  }
-
-  async getCartSession(
-    cookieSession: any,
-    user: UserEntity | undefined,
-  ): Promise<string> {
-    if (typeof user === 'undefined') {
-      return cookieSession.uuid;
-    }
-    return await this.userService.ensureUserCartSession(
-      user.id,
-      cookieSession.uuid,
+    const cartSession = await this.userService.getCartSession(
+      cookieSession,
+      user,
     );
+    return await this.userService.cartList(cartSession);
   }
 }

@@ -3,7 +3,7 @@ import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
 import { FC } from 'react';
 import { Grid, Stack } from '@mui/material';
-import { CreatNFTForm } from '../../design-system/organismes/CreateNFTForm';
+
 import { Link } from 'react-router-dom';
 import { Animated } from 'react-animated-css';
 import Typography from '../../design-system/atoms/Typography';

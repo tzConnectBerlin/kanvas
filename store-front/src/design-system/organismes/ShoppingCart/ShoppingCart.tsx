@@ -19,7 +19,6 @@ interface ShoppingCartProps {
     open: boolean;
     listCart: Function;
     expiresAt: string;
-    setOpenLogin: Function;
 }
 
 const ContainerPopupStyled = styled.div<{ open: boolean }>`
@@ -135,7 +134,6 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
             );
         } else if (checkoutResponse.error?.response?.status === 401) {
             props.listCart();
-            props.setOpenLogin(true);
         }
     }, [checkoutResponse]);
 
@@ -181,6 +179,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         if (isExpiredError && (timeLeft === 0 || (timeLeft && timeLeft < 0))) {
             setIsExpiredError(true);
             toast.error('Your cart has expired');
+            props.listCart();
         }
 
         if (!timeLeft) return;
@@ -331,10 +330,8 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                     {props.open && (
                         <CustomButton
                             size="medium"
-                            label="Checkout"
-                            onClick={() =>
-                                !checkoutResponse.loading && checkout()
-                            }
+                            label="Go to checkout"
+                            onClick={() => { props.closeCart(); history.push('/checkout')} }
                             disabled={props.nftsInCart.length === 0}
                             loading={checkoutResponse.loading}
                             sx={{
