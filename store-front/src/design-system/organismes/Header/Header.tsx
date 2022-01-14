@@ -28,7 +28,9 @@ export interface HeaderProps {
     nftsInCartNumber: number;
     listCart: Function;
     loginOpen: boolean;
-    setLoginOpen: Function;
+    setLoginOpen: (input: boolean) => void;
+    redirectAfterSignIn: boolean;
+    setRedirectAfterSignIn: (input: boolean) => void;
 }
 
 const StyledBox = styled(Box)<{ theme?: Theme }>`
@@ -175,6 +177,8 @@ export const Header: FC<HeaderProps> = ({
                 handleCloseModal={handleCloseModal}
                 open={props.loginOpen}
                 listCart={listCart}
+                redirectAfterSignIn={props.redirectAfterSignIn}
+                setRedirectAfterSignIn={props.setRedirectAfterSignIn}
             />
         </StyledBox>
     );

@@ -7,16 +7,20 @@ import { UserModule } from './user/user.module';
 import { AuthProviderModule } from './auth-provider/auth-provider.module';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { DbModule } from './db.module';
+import { PaymentModule } from './payment/payment.module';
 import { LoggerMiddleware } from './middleware/logger';
 import { CookieSessionMiddleware } from './middleware/cookie_session';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     AuthenticationModule,
     CategoryModule,
     NftModule,
     UserModule,
     AuthProviderModule,
+    PaymentModule,
     DbModule,
   ],
   controllers: [AppController],

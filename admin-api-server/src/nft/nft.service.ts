@@ -27,7 +27,7 @@ export class NftService {
     @Inject(PG_CONNECTION) private db: DbPool,
     private readonly roleService: RoleService,
   ) {
-    const stmConfigFile = './config/redacted_redacted.yaml';
+    const stmConfigFile = './config/stm_example.yaml';
     this.stm = new StateTransitionMachine(stmConfigFile);
     this.nftLock = new Lock<number>();
     fs.watch(stmConfigFile, (event, filename) => {
