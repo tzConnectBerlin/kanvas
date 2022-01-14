@@ -107,6 +107,10 @@
       "button_2": "Anmelden",
       "button_3": "Anzeigen"
     },
+    "topSellers": {
+      "headline": "Bestkaufer",
+      "link": "Alle anzeigen"
+    },
     "nfts": {
       "headline": "Vorgestellte NFTs",
       "link": "Alle anzeigen"
