@@ -222,12 +222,14 @@ JOIN nft
   ON nft.id = mtm.nft_id
 join kanvas_user AS usr
   ON usr.id = mtm.kanvas_user_id
-GROUP BY 1, 2, 3
-ORDER BY 4 DESC
+GROUP BY 1, 2, 3, 4
+ORDER BY 5 DESC
 LIMIT $1
       `,
       [NUM_TOP_BUYERS],
     );
+
+    console.log(qryRes);
 
     return qryRes.rows.map(
       (row: any) =>
