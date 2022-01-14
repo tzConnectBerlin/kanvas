@@ -38,20 +38,6 @@ export const UsersGrid: FC<UsersGridProps> = ({ ...props }) => {
         }
     }, [props.loading]);
 
-    props.users.sort((a, b) => (b.amountBought > a.amountBought ? 1 : -1));
-
-    const len = props.users.length;
-    const index = new Array(len);
-
-    for (var i = 0; i < len; ++i) index[i] = i;
-
-    index.sort(function (a, b) {
-        return props.users[a] < props.users[b] ? -1
-            : props.users[a] > props.users[b]
-            ? 1
-            : 0;
-    });
-
     return (
         <StyledDiv>
             {props.users && props.users.length > 0 ? (
