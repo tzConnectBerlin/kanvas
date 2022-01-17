@@ -1,0 +1,1 @@
+export { CardWithIcon as default } from './CardWithIcon';

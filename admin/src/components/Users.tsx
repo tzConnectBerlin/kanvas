@@ -13,8 +13,10 @@ import {
   PasswordInput,
 } from 'react-admin';
 import { getDecodedToken } from '../auth/authUtils';
+import { CustomDeleteButton } from './Buttons/CustomDeleteButton';
 
 import { TextArrayField } from './TextArrayField';
+import ToolbarActions from './ToolbarActions';
 
 const rolesEnum = {
   1: 'superadmin',
@@ -24,7 +26,11 @@ const rolesEnum = {
 
 export const UserList = ({ ...props }) => {
   return (
-    <List {...props}>
+    <List
+      actions={<ToolbarActions />}
+      bulkActionButtons={<CustomDeleteButton {...props} />}
+      {...props}
+    >
       <Datagrid rowClick="edit">
         <TextField source="id" />
         <TextField source="disabled" />

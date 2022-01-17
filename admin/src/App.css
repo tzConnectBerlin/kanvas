@@ -36,3 +36,43 @@
     transform: rotate(360deg);
   }
 }
+
+header {
+  padding: 0.3rem 0;
+  box-shadow: none !important;
+  filter: drop-shadow(rgb(196, 196, 196) 0px 0px 0.45rem);
+}
+
+.layout > div {
+  margin-top: 5rem;
+}
+
+.list-page .MuiSvgIcon-root {
+  color: #9771ff;
+}
+
+/* Semi-SemiBold */
+
+@font-face {
+  font-family: 'Poppins SemiBold';
+  src: url('../public/fonts/Poppins-SemiBold.woff2') format('woff2');
+}
+
+/* Medium */
+
+@font-face {
+  font-family: 'Poppins Medium';
+  src: url('../public/fonts/Poppins-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('../public/fonts/Poppins-Medium.woff2') format('woff2');
+}
+
+/* Light */
+
+@font-face {
+  font-family: 'Poppins Light';
+  src: url('../public/fonts/Poppins-Light.woff2') format('woff2');
+}

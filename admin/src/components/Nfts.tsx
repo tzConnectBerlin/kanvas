@@ -10,8 +10,13 @@ import {
   ImageField,
   DateField,
   AutocompleteInput,
+  TopToolbar,
 } from 'react-admin';
 import { JsonInput, JsonField } from 'react-admin-json-view';
+import { CustomCreateButton } from './Buttons/CustomCreateButton';
+import { CustomDeleteButton } from './Buttons/CustomDeleteButton';
+import { CustomExportButton } from './Buttons/CustomExportButton';
+import ToolbarActions from './ToolbarActions';
 
 const NFT_STATES = [
   {
@@ -43,7 +48,11 @@ const defaultMetadata = {
 };
 
 export const NftList = ({ ...props }) => (
-  <List {...props} filter={{ disabled: false }}>
+  <List {...props}
+    filter={{ disabled: false }}
+    actions={<ToolbarActions />}
+    bulkActionButtons={<CustomDeleteButton {...props} />}
+  >
     <Datagrid rowClick="edit" expand={<JsonField source="metadata" />}>
       <TextField source="id" />
       <TextField source="nftName" label="Name" />

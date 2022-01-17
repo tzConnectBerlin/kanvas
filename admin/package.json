@@ -21,6 +21,7 @@
     "history": "^4",
     "jwt-decode": "^3.1.2",
     "kukai-embed": "^0.6.7-beta.0",
+    "lodash": "^4.17.21",
     "query-string": "^7.0.1",
     "ra-data-json-server": "^3.19.0",
     "react": "^17.0.2",
@@ -59,6 +60,8 @@
   },
   "devDependencies": {
     "@types/history": "^4.7.9",
+    "@types/lodash": "^4.14.178",
+    "@types/react-router-dom": "^5.3.2",
     "prettier": "2.4.1"
   }
 }
