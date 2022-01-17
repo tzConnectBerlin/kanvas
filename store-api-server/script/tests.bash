@@ -28,5 +28,6 @@ echo "running tests.."
 mkdir -p test/coverage
 jest "$@" --coverage | tee test/coverage/summary.txt || exit 1
 sed -n '/^-----/,$p' test/coverage/summary.txt > test/coverage/summary_.txt
-mv test/coverage/summary_.txt test/coverage/summary.txt
-head -n 4 test/coverage/summary.txt | awk -F '|' '{print $2 $3 $4 $5}'
+head -n 4 test/coverage/summary_.txt | awk -F '|' '{print $2 $3 $4 $5}'
+sed 's/^/\n/' test/coverage/summary_.txt > test/coverage/summary.txt
+rm test/coverage/summary_.txt
