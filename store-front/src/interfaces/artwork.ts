@@ -19,4 +19,5 @@ export interface INft {
     editionsSize: string;
     launchAt: number;
     categories: ICategory[];
+    ownerStatuses?: ('pending' | 'owned')[]
 }

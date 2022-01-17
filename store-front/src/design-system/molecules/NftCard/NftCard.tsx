@@ -9,6 +9,8 @@ import TezosLogo from '../../atoms/TezosLogo/TezosLogo';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import CircularProgress from '../../atoms/CircularProgress';
+import CustomCircularProgress from '../../atoms/CircularProgress';
+import FlexSpacer from '../../atoms/FlexSpacer';
 
 export interface NftCardProps {
     loading?: boolean;
@@ -22,9 +24,10 @@ export interface NftCardProps {
     launchAt?: number;
     editionsAvailable?: number;
     nftCardMode?: 'user';
+    ownerStatus?: 'pending' | 'owned';
 }
 
-const StyledCard = styled(Card)<{ theme?: Theme }>`
+const StyledCard = styled(Card) <{ theme?: Theme }>`
     &.MuiPaper-root {
         background-image: none !important;
         background-color: ${(props) => props.theme.palette.background.default};
@@ -91,14 +94,14 @@ const StyledImg = styled.img<{ theme?: Theme; willDrop: boolean }>`
     opacity: ${(props) => (props.willDrop ? '0.4' : '1')} !important;
 `;
 
-const AvailabilityWrapper = styled.div<{ inStock: boolean; willDrop: boolean }>`
+const AvailabilityWrapper = styled.div<{ inStock: boolean; willDrop: boolean; pending?: boolean }>`
     position: absolute;
 
     top: 1rem;
     right: 1rem;
 
     background-color: ${(props) =>
-        props.inStock ? (props.willDrop ? '#136dff' : '#00ca00') : 'red'};
+        props.pending ? '#dadd10' : props.inStock ? (props.willDrop ? '#136dff' : '#00ca00') :  'red'};
 
     padding-left: 0.5rem;
     padding-right: 0.5rem;
@@ -119,7 +122,7 @@ const StyledWapper = styled.div`
     align-items: center;
 `;
 
-const StyledCardContent = styled(CardContent)<{ theme?: Theme }>`
+const StyledCardContent = styled(CardContent) <{ theme?: Theme }>`
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -222,26 +225,30 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     flexGrow: 1,
                 }}
             >
-                {props.nftCardMode !== 'user' && (
+                {(props.nftCardMode !== 'user' || props.ownerStatus === 'pending') &&
                     <AvailabilityWrapper
                         inStock={(props.editionsAvailable ?? 0) > 0}
                         willDrop={!launchTime ? false : launchTime > 0}
+                        pending={props.ownerStatus === 'pending'}
                     >
                         <Typography
                             weight="SemiBold"
                             size="body2"
                             color="white"
                         >
-                            {(props.editionsAvailable ?? 0) > 0
-                                ? !launchTime
-                                    ? false
-                                    : launchTime > 0
-                                    ? 'Drop'
-                                    : 'In stock'
-                                : 'Sold out'}
+                            {props.ownerStatus === 'pending' ?
+                                'Pending'
+                                :
+                                (props.editionsAvailable ?? 0) > 0
+                                    ? !launchTime
+                                        ? false
+                                        : launchTime > 0
+                                            ? 'Drop'
+                                            : 'In stock'
+                                    : 'Sold out'}
                         </Typography>
                     </AvailabilityWrapper>
-                )}
+                }
                 <Stack
                     direction="row"
                     sx={{
@@ -278,7 +285,20 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                         </Typography>
                     </Stack>
 
-                    {props.nftCardMode !== 'user' && (
+                    {props.nftCardMode === 'user' && props.ownerStatus === 'pending' ?
+                        <Stack
+                            direction="column"
+                            sx={{
+                                width: '30%',
+                                marginTop: '0.6rem',
+                                flexFlow: 'wrap',
+                            }}
+                        >
+                            <FlexSpacer />
+                            <CustomCircularProgress height={1.2} />
+
+                        </Stack>
+                    :
                         <Box
                             display="flex"
                             flexDirection="row"
@@ -301,7 +321,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                                 <TezosLogo width="18px" margin="0 0.2rem" />
                             </Typography>
                         </Box>
-                    )}
+                    }
                 </Stack>
 
                 <Box
@@ -313,8 +333,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     <Typography weight="Light" size="body">
                         {launchTime &&
                             launchTime > 0 &&
-                            `${new Date(launchTime).getDate() - 1} day${
-                                new Date(launchTime).getDate() > 2 ? 's' : ''
+                            `${new Date(launchTime).getDate() - 1} day${new Date(launchTime).getDate() > 2 ? 's' : ''
                             } - ${format(
                                 new Date(launchTime),
                                 'HH : mm : ss',

@@ -48,7 +48,7 @@
     },
     "headline_4": {
       "title": "Social"
-    },    
+    },
     "headline_5": {
       "title": "Language"
     }
@@ -107,10 +107,28 @@
       "button_2": "Sign in",
       "button_3": "View"
     },
+    "topSellers": {
+      "headline": "Top Buyers",
+      "link": "See all"
+    },
     "nfts": {
       "headline": "Featured NFTs",
       "link": "See all"
     }
+  },
+  "checkout": {
+    "headline_0": "Summary",
+    "headline_1": "Choose payment method",
+    "headline_2": "Proceed payment",
+    "back_button": "Back",
+    "next_button_0": "Validate cart",
+    "next_button_1": "Proceed to payment",
+    "next_button_3": "Go to profile",
+    "headline_payment_method": "Payment method:",
+    "headline_payment_method_2": "Payment:",
+    "link_payment_method": "Learn more",
+    "upcoming_payment_method": "Soon available ",
+    "iframe_not_supported": "Your browser does not support iframes."
   },
   "cookies": {
     "text": "By clicking “Accept All Cookies”, you agree to the storing of cookies on your device. We use these cookies to enhance site navigation.",

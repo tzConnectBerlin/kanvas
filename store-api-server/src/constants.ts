@@ -4,7 +4,6 @@ export const PG_CONNECTION = 'PG_CONNECTION';
 export const PG_FOREIGN_KEY_VIOLATION_ERRCODE = '23503';
 export const PG_UNIQUE_VIOLATION_ERRCODE = '23505';
 
-export const CART_EXPIRATION_MILLI_SECS: number = 30 * 60 * 1000; // 30 minutes
 export const PROFILE_PICTURE_MAX_BYTES: number = 1000 * 1000 * 2; // 2MB
 
 export const SEARCH_MAX_NFTS = 3;
@@ -17,3 +16,5 @@ export const STORE_PUBLISHERS = ['Tezos'];
 
 export const RATE_LIMIT_WINDOW_SECS = 60; // rate limiter window
 export const RATE_LIMIT = 300;
+
+export const NUM_TOP_BUYERS = 12;

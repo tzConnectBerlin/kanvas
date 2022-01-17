@@ -86,6 +86,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                                 )}
                                 nftCardMode={props.nftCardMode}
                                 launchAt={nft.launchAt * 1000}
+                                ownerStatus={nft.ownerStatuses ? nft.ownerStatuses[0] : undefined}
                             />
                         </Grid>
                     ))}

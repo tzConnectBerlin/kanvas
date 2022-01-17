@@ -59,7 +59,7 @@ Suggestion.args = {
                 name: '#illustration',
             },
             {
-                name: '#dArtPick',
+                name: '#Pick',
             },
             {
                 name: '#landscape',

@@ -47,6 +47,7 @@ declare module '@mui/material/styles' {
             default: string;
             hover: string;
             avatar: string;
+            paper: string;
             shoppingCart: string;
         };
         boxShadow: {
@@ -71,6 +72,7 @@ declare module '@mui/material/styles' {
             default: string;
             hover: string;
             avatar: string;
+            paper: string;
             shoppingCart: string;
         };
         boxShadow: {
@@ -249,13 +251,14 @@ export const lightTheme = createTheme({
         background: 'rgba(255, 255, 255, 1)',
     },
     dropShadow: {
+        paper: 'drop-shadow(0 0 6rem #fafafa)',
         default: 'drop-shadow(0 0 0.45rem #C4C4C4)',
         hover: 'drop-shadow(0 0 0.55rem #C4C4C4)',
         avatar: 'drop-shadow(0 0 0.25rem #e0e0e0)',
         shoppingCart: 'drop-shadow(0 1rem 0.55rem #C4C4C4)',
     },
     boxShadow: {
-        default: '0 0 1rem #C4C4C4',
+        default: '#C4C4C4',
     },
 });
 
@@ -330,12 +333,13 @@ export const darkTheme = createTheme({
         background: 'rgba(0, 0, 0, 1)',
     },
     dropShadow: {
+        paper: 'drop-shadow(0 0 1rem black)',
         default: 'drop-shadow(0 0 0.45rem black)',
         hover: 'drop-shadow(0 0 0.45rem #0e0e0e9b)',
         avatar: 'drop-shadow(0 0 0.25rem black)',
         shoppingCart: 'drop-shadow(0 1rem 0.55rem black)',
     },
     boxShadow: {
-        default: '0 0 1rem black',
-    },
+        default: 'black'
+    }
 });

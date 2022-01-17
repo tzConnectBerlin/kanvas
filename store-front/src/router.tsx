@@ -26,8 +26,9 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import { INft } from './interfaces/artwork';
 import { toast } from 'react-toastify';
+import { Checkout } from './pages/Checkout';
 
-const StyledBrowserRouter = styled(BrowserRouter)<{ theme?: Theme }>`
+const StyledBrowserRouter = styled(BrowserRouter) <{ theme?: Theme }>`
     display: block;
 
     #root {
@@ -108,6 +109,7 @@ const Router = () => {
 
     const [cartOpen, setCartOpen] = useState(false);
     const [loginOpen, setLoginOpen] = useState(false);
+    const [redirectAfterSignIn, setRedirectAfterSignIn] = useState(true);
 
     return (
         <ThemeProvider
@@ -117,7 +119,10 @@ const Router = () => {
                     : lightThemeResponsive
             }
         >
-            <StyledBrowserRouter>
+            <StyledBrowserRouter getUserConfirmation={(message, callback) => {
+                const allowTransition = window.confirm(message)
+                callback(allowTransition);
+            }}>
                 <Header
                     beaconWallet={beaconWallet}
                     embedKukai={embedKukai}
@@ -130,6 +135,8 @@ const Router = () => {
                     listCart={listCart}
                     loginOpen={loginOpen}
                     setLoginOpen={setLoginOpen}
+                    redirectAfterSignIn={redirectAfterSignIn}
+                    setRedirectAfterSignIn={setRedirectAfterSignIn}
                 />
 
                 <ScrollToTop>
@@ -165,14 +172,24 @@ const Router = () => {
                             path="/nft/:id"
                             render={(props) => <CreateNFT {...props} />}
                         />
+                        <Route path="/checkout" render={() =>
+                            <Checkout
+                                nftsInCart={nftsInCart}
+                                setNftsInCart={setNftsInCart}
+                                listCart={listCart}
+                                setLoginOpen={setLoginOpen}
+
+                                expiresAt={listCartResponse.data?.expiresAt}
+                                loading={listCartResponse.loading && !listCalled}
+                            />}
+                        />
                         <Route path="/404" component={NotFound} />
-                        <Redirect from="*" to="/404" />
+                        {/* <Redirect from="*" to="/404" /> */}
                     </Switch>
                 </ScrollToTop>
 
                 <ShoppingCart
                     open={cartOpen}
-                    setOpenLogin={setLoginOpen}
                     nftsInCart={nftsInCart}
                     setNftsInCart={setNftsInCart}
                     listCart={listCart}
