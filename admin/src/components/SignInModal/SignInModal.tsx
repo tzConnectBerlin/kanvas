@@ -3,7 +3,6 @@ import { Box } from '@mui/system';
 import { Stack, Theme, Button, Typography } from '@mui/material';
 import { char2Bytes } from '@taquito/utils';
 import { FC, useEffect, useState } from 'react';
-import { setWalletProvider } from '../../contracts/init';
 import {
   SigningType,
   RequestSignPayloadInput,
@@ -157,11 +156,6 @@ export const SignInModal: FC<SignInModalProps> = ({ ...props }) => {
     }
   };
 
-  useEffect(() => {
-    if (beacon) {
-      setWalletProvider(beacon);
-    }
-  }, [beacon]);
 
   useEffect(() => {
     if (getToken()) {

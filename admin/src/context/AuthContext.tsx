@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { KukaiEmbed, Networks } from 'kukai-embed';
 import { BeaconWallet } from '@taquito/beacon-wallet';
-import { initTezos, initWallet } from '../contracts/init';
 import { RPC_URL } from '../global';
 
 interface WalletProps {
@@ -46,10 +45,6 @@ const ContextProvider = ({ children }: ContextProviderProps) => {
     }
   }, [embedKukai]);
 
-  React.useEffect(() => {
-    initTezos(RPC_URL);
-    setBeaconWallet(initWallet());
-  }, []);
 
   return (
     <WalletContext.Provider value={value}>{children}</WalletContext.Provider>

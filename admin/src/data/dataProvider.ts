@@ -61,6 +61,7 @@ const dataProvider = (
         ? {
             // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
             headers: new Headers({
+              Authorization: `Bearer ${getToken()}`,
               Range: `${resource}=${rangeStart}-${rangeEnd}`,
             }),
           }
@@ -74,6 +75,7 @@ const dataProvider = (
 
   getOne: (resource, params) =>
     httpClient(`${apiUrl}/${resource}/${params.id}`).then(({ json }) => ({
+      headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
       data: json,
     })),
 
@@ -82,7 +84,7 @@ const dataProvider = (
       filter: JSON.stringify({ id: params.ids }),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    return httpClient(url).then(({ json }) => ({ data: json }));
+    return httpClient(url).then(({ json }) => ({ data: json, headers: new Headers({ Authorization: `Bearer ${getToken()}` }) }));
   },
 
   getManyReference: (resource, params) => {

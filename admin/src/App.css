@@ -51,6 +51,11 @@ header {
   color: #9771ff;
 }
 
+.MuiTable-root {
+  border-collapse: inherit !important;
+  border-spacing: 3px !important;
+}
+
 /* Semi-SemiBold */
 
 @font-face {

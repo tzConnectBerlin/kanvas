@@ -64,6 +64,7 @@ export const NftList = ({ ...props }) => (
   </List>
 );
 
+// Add authorization for allowedActions
 export const NftEdit = ({ ...props }) => {
   return (
     <Edit {...props}>
@@ -83,6 +84,7 @@ export const NftEdit = ({ ...props }) => {
   );
 };
 
+// Add authorization for allowedActions
 export const NftCreate = ({ ...props }) => {
   return (
     <Create {...props}>
