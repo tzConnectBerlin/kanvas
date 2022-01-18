@@ -1,3 +1,4 @@
+import { Typography } from '@mui/material';
 import {
   List,
   Datagrid,
@@ -44,16 +45,25 @@ const defaultMetadata = {
   minter: '',
   creators: [],
   contributors: [],
-  publishers: [],
+  publishers: []
 };
 
+const Aside = () => (
+  <div style={{ width: 200, margin: '1em' }}>
+      <Typography variant="h6">NFTs details</Typography>
+      <Typography variant="body2">
+          Posts will only be published once an editor approves them
+      </Typography>
+  </div>
+);
+
 export const NftList = ({ ...props }) => (
-  <List {...props}
+  <List aside={<Aside />} {...props}
     filter={{ disabled: false }}
     actions={<ToolbarActions />}
     bulkActionButtons={<CustomDeleteButton {...props} />}
   >
-    <Datagrid rowClick="edit" expand={<JsonField source="metadata" />}>
+    <Datagrid  rowClick="edit" expand={<JsonField source="metadata" />}>
       <TextField source="id" />
       <TextField source="nftName" label="Name" />
       <TextField source="nftState" label="Current State" />
@@ -63,6 +73,9 @@ export const NftList = ({ ...props }) => (
     </Datagrid>
   </List>
 );
+
+
+
 
 // Add authorization for allowedActions
 export const NftEdit = ({ ...props }) => {
