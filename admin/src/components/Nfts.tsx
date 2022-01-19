@@ -1,24 +1,40 @@
-import { Typography } from '@mui/material';
+import { Card, CardContent, Typography, IconButton } from '@mui/material';
+import CloseIcon from '@material-ui/icons/Close';
 import {
   List,
   Datagrid,
   TextField,
   Edit,
-  SimpleForm,
-  TextInput,
   Create,
   ImageInput,
   ImageField,
-  DateField,
   AutocompleteInput,
   TopToolbar,
+  useEditController,
+  EditContextProvider,
+  useTranslate,
+  TextInput,
+  SimpleForm,
+  DateField,
+  EditProps,
 } from 'react-admin';
 import { JsonInput, JsonField } from 'react-admin-json-view';
 import { CustomCreateButton } from './Buttons/CustomCreateButton';
 import { CustomDeleteButton } from './Buttons/CustomDeleteButton';
 import { CustomExportButton } from './Buttons/CustomExportButton';
+// import ProductReferenceField from '../products/ProductReferenceField';
+// import CustomerReferenceField from '../visitors/CustomerReferenceField';
 import ToolbarActions from './ToolbarActions';
-
+import {
+  LastVisitedFilter,
+  HasOrderedFilter,
+  HasNewsletterFilter,
+  SegmentFilter,
+} from './filters';
+import { makeStyles } from '@material-ui/core/styles';
+import { Review } from '../type';
+import StarRatingField from './StarRatingField';
+ 
 const NFT_STATES = [
   {
     name: 'Proposal',
@@ -45,25 +61,40 @@ const defaultMetadata = {
   minter: '',
   creators: [],
   contributors: [],
-  publishers: []
+  publishers: [],
 };
 
-const Aside = () => (
-  <div style={{ width: 200, margin: '1em' }}>
-      <Typography variant="h6">NFTs details</Typography>
-      <Typography variant="body2">
+const Aside = () => 
+ (
+  
+  <div style={{ width: 300, margin: '0 2rem' }}>
+    <Card>
+      <CardContent>
+        <div style={{display: 'flex', justifyContent: 'space-between'}}>
+          <Typography variant="h6">Review detail</Typography>
+          <CloseIcon />
+        </div>      
+        <LastVisitedFilter />
+        <HasOrderedFilter />
+        <HasNewsletterFilter />
+        <SegmentFilter />
+        <Typography variant="body2">
           Posts will only be published once an editor approves them
-      </Typography>
+        </Typography>
+      </CardContent>
+    </Card>
   </div>
 );
 
 export const NftList = ({ ...props }) => (
-  <List aside={<Aside />} {...props}
+  <List
+    aside={<Aside />}
+    {...props}
     filter={{ disabled: false }}
     actions={<ToolbarActions />}
     bulkActionButtons={<CustomDeleteButton {...props} />}
   >
-    <Datagrid  rowClick="edit" expand={<JsonField source="metadata" />}>
+    <Datagrid rowClick="edit" expand={<JsonField source="metadata" />}>
       <TextField source="id" />
       <TextField source="nftName" label="Name" />
       <TextField source="nftState" label="Current State" />
@@ -73,9 +104,6 @@ export const NftList = ({ ...props }) => (
     </Datagrid>
   </List>
 );
-
-
-
 
 // Add authorization for allowedActions
 export const NftEdit = ({ ...props }) => {
@@ -112,3 +140,7 @@ export const NftCreate = ({ ...props }) => {
     </Create>
   );
 };
+function props<T>(props: any) {
+  throw new Error('Function not implemented.');
+}
+
