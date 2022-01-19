@@ -12,7 +12,7 @@ import { User } from 'src/user/entities/user.entity';
 import { NftEntity } from './entities/nft.entity';
 import { RoleService } from 'src/role/role.service';
 import { S3Service } from './s3.service';
-import { NftPaginationParams } from './params';
+import { NftFilterParams } from './params';
 import { Lock } from 'async-await-mutex-lock';
 const fs = require('fs');
 
@@ -68,11 +68,9 @@ RETURNING id
     }
   }
 
-  async findAll(params: NftPaginationParams): Promise<NftEntity[]> {
+  async findAll(params: NftFilterParams): Promise<NftEntity[]> {
     const offset = (params.page - 1) * params.pageSize;
     const limit = params.pageSize;
-
-    console.log(params.page);
 
     const dbTx = await this.db.connect();
     try {

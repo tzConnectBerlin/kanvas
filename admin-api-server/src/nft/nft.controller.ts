@@ -22,7 +22,7 @@ import { NftEntity } from './entities/nft.entity';
 import { NftService } from './nft.service';
 import { CurrentUser } from '../decoraters/user.decorator';
 import { User } from 'src/user/entities/user.entity';
-import { NftPaginationParams } from './params';
+import { NftPaginationParams, NftFilterParams } from './params';
 
 interface UpdateNft {
   attribute: string;
@@ -40,7 +40,7 @@ export class NftController {
   }
 
   @Get()
-  async findAll(@Query() params: NftPaginationParams) {
+  async findAll(@Query() params: NftFilterParams) {
     this.#validatePaginationParams(params);
     return this.nftService.findAll(params);
   }
@@ -88,10 +88,6 @@ export class NftController {
       updateNft.attribute,
       updateNft.value,
     );
-  }
-
-  #validateFilterParams(params: NftPaginationParams): void {
-    this.#validatePaginationParams(params);
   }
 
   #validatePaginationParams(params: NftPaginationParams): void {
