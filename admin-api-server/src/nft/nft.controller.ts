@@ -40,21 +40,8 @@ export class NftController {
     return this.nftService.create(user);
   }
 
-  /*
-  @Get()
-  findAll(
-    @Query('sort', new ParseJSONArrayPipe())
-    sort?: string[],
-    @Query('filter', new ParseJSONArrayPipe()) filter?: FilterParams,
-    @Query('range', new ParseJSONArrayPipe())
-    range?: number[],
-  ) {
-    return this.nftService.findAll({ sort, filter, range });
-  }
-  */
-
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   async findOne(@Param('id') id: number, @CurrentUser() user: User) {
     return await this.nftService.getNft(user, id);
   }
