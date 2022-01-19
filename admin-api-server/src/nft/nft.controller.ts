@@ -47,7 +47,6 @@ export class NftController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
   async findOne(@Param('id') id: number, @CurrentUser() user: User) {
     return await this.nftService.getNft(user, id);
   }
