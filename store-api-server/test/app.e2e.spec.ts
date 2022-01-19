@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
+import { RATE_LIMIT } from 'src/constants';
 import { PaymentProviderEnum, PaymentService, PaymentStatus } from 'src/payment/service/payment.service';
 import { UserService } from 'src/user/service/user.service';
 
@@ -405,6 +406,21 @@ describe('AppController (e2e)', () => {
         .post('/users/cart/remove/5')
         .set('cookie', cookie);
       expect(remove.statusCode).toEqual(400);
+    },
+  );
+  
+  skipOnPriorFail(
+    'Rate limiter test (requesting 1 more time than is allowed, should result in exactly 1 429)',
+    async () => {
+      const server = app.getHttpServer();
+      const respPromises = [];
+      for (let i = 0; i < RATE_LIMIT + 1; i++) {
+        respPromises.push(request(server).post('/nfts/0'));
+      }
+      const resp = await Promise.all(respPromises);
+      expect(
+        resp.filter((resp: any) => resp.statusCode === 429).length,
+      ).toEqual(1);
     },
   );
 
