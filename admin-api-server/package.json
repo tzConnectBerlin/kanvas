@@ -28,6 +28,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-express": "^8.2.3",
+    "@nestjs/throttler": "^2.0.0",
     "@types/bcrypt": "^5.0.0",
     "@types/passport-local": "^1.0.34",
     "async-await-mutex-lock": "^1.0.7",
