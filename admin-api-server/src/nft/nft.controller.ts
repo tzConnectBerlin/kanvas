@@ -18,12 +18,11 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { NFT_IMAGE_MAX_BYTES } from 'src/constants';
-import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
-import { FilterParams } from 'src/types';
 import { NftEntity } from './entities/nft.entity';
 import { NftService } from './nft.service';
 import { CurrentUser } from '../decoraters/user.decorator';
 import { User } from 'src/user/entities/user.entity';
+import { NftPaginationParams, NftFilterParams } from './params';
 
 interface UpdateNft {
   attribute: string;
@@ -40,18 +39,11 @@ export class NftController {
     return this.nftService.create(user);
   }
 
-  /*
   @Get()
-  findAll(
-    @Query('sort', new ParseJSONArrayPipe())
-    sort?: string[],
-    @Query('filter', new ParseJSONArrayPipe()) filter?: FilterParams,
-    @Query('range', new ParseJSONArrayPipe())
-    range?: number[],
-  ) {
-    return this.nftService.findAll({ sort, filter, range });
+  async findAll(@Query() params: NftFilterParams) {
+    this.#validatePaginationParams(params);
+    return this.nftService.findAll(params);
   }
-  */
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
@@ -96,5 +88,11 @@ export class NftController {
       updateNft.attribute,
       updateNft.value,
     );
+  }
+
+  #validatePaginationParams(params: NftPaginationParams): void {
+    if (params.page < 1 || params.pageSize < 1) {
+      throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST);
+    }
   }
 }

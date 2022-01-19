@@ -12,7 +12,7 @@ import { User } from 'src/user/entities/user.entity';
 import { NftEntity } from './entities/nft.entity';
 import { RoleService } from 'src/role/role.service';
 import { S3Service } from './s3.service';
-import { QueryParams } from 'src/types';
+import { NftFilterParams } from './params';
 import { Lock } from 'async-await-mutex-lock';
 const fs = require('fs');
 
@@ -30,13 +30,13 @@ export class NftService {
     const stmConfigFile = './config/stm_example.yaml';
     this.stm = new StateTransitionMachine(stmConfigFile);
     this.nftLock = new Lock<number>();
-    fs.watch(stmConfigFile, (event, filename) => {
+    fs.watch(stmConfigFile, (event: any, filename: any) => {
       if (event !== 'change') {
         return;
       }
       try {
         Logger.log('State transition machine config changed, reloading..');
-        this.stm = new StateTransitionMachine(stmConfigFile);
+        this.stm = new StateTransitionMachine(filename);
         Logger.log('State transition machine config reloaded');
       } catch (err: any) {
         Logger.warn(
@@ -68,76 +68,86 @@ RETURNING id
     }
   }
 
-  /*
-  async findAll({ range, sort, filter }: QueryParams) {
-    const { query: whereClause, params } = prepareFilterClause(filter);
-    const limitClause =
-      range.length === 2
-        ? `LIMIT ${range[1] - range[0]} OFFSET ${range[0]}`
-        : undefined;
-    const sortField = sort && sort[0] ? convertToSnakeCase(sort[0]) : 'id';
-    const sortDirection = sort && sort[1] ? sort[1] : 'ASC';
-    const countResult = await this.db.query(
-      getSelectCountStatement(whereClause, sortField),
-      params,
-    );
-    const result = await this.db.query<Nft>(
-      getSelectStatement(whereClause, sortField, sortDirection, limitClause),
-      params,
-    );
-    return {
-      data: result.rows.map((nft: Nft) => new NftDto(nft)),
-      count: countResult.rowCount ?? 0,
-    };
-  }
-*/
+  async findAll(params: NftFilterParams): Promise<NftEntity[]> {
+    const offset = (params.page - 1) * params.pageSize;
+    const limit = params.pageSize;
 
-  async findOne(id: number): Promise<NftEntity | undefined> {
-    const qryRes = await this.db.query(
+    const dbTx = await this.db.connect();
+    try {
+      await dbTx.query('BEGIN');
+      const nftIds = await dbTx.query(
+        `
+SELECT nft.id AS nft_id
+FROM nft
+WHERE ($1::TEXT[] IS NULL OR state = ANY($1::TEXT[]))
+OFFSET ${offset}
+LIMIT  ${limit}
+      `,
+        [params.nftStates],
+      );
+
+      return await this.findByIds(
+        nftIds.rows.map((row: any) => row['nft_id']),
+        dbTx,
+      );
+    } finally {
+      dbTx.release();
+    }
+  }
+
+  async findByIds(ids: number[], dbTx?: any): Promise<NftEntity[]> {
+    const dbconn = dbTx || this.db;
+    const qryRes = await dbconn.query(
       `
+WITH attr AS (
+  SELECT
+    nft_id,
+    ARRAY_AGG(ARRAY[name, value]) AS attributes
+  FROM nft_attribute
+  WHERE nft_id = ANY($1)
+  GROUP BY nft_id
+)
 SELECT
   nft.id AS nft_id,
   nft.created_by,
   nft.created_at,
   nft.updated_at,
   nft.state,
-  COALESCE(
-    (
-      SELECT
-        ARRAY_AGG(ARRAY[name, value]) AS attributes
-      FROM nft_attribute
-      WHERE nft_id = $1
-    ), ARRAY[]::TEXT[][]
-  ) AS attributes
+  COALESCE(attr.attributes, ARRAY[]::TEXT[][]) AS attributes
 FROM nft
-WHERE id = $1
+LEFT JOIN attr
+  ON nft.id = attr.nft_id
+WHERE id = ANY($1)
+ORDER BY id
     `,
-      [id],
+      [ids],
     );
     if (qryRes.rowCount === 0) {
       return undefined;
     }
-    const row = qryRes.rows[0];
-
-    const nft = <NftEntity>{
-      id: row['nft_id'],
-      createdBy: row['created_by'],
-      createdAt: Math.floor(row['created_at'].getTime() / 1000),
-      updatedAt: Math.floor(row['updated_at'].getTime() / 1000),
-      state: row['state'],
-      attributes: {},
-    };
-    for (const [name, value] of row['attributes']) {
-      nft.attributes[name] = JSON.parse(value);
-    }
-    return nft;
+    return qryRes.rows.map((row: any) => {
+      const nft = <NftEntity>{
+        id: row['nft_id'],
+        createdBy: row['created_by'],
+        createdAt: Math.floor(row['created_at'].getTime() / 1000),
+        updatedAt: Math.floor(row['updated_at'].getTime() / 1000),
+        state: row['state'],
+        attributes: {},
+      };
+      for (const [name, value] of row['attributes']) {
+        nft.attributes[name] = JSON.parse(value);
+      }
+      return nft;
+    });
   }
 
   async getNft(user: User, nftId: number) {
-    const nft = await this.findOne(nftId);
-    if (typeof nft === 'undefined') {
+    const nfts = await this.findByIds([nftId]);
+    if (nfts.length === 0) {
       throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
     }
+    const nft = nfts[0];
+
     const actor = await this.getActorForNft(user, nft);
 
     return {
@@ -201,10 +211,11 @@ WHERE id = $1
       await this.nftLock.acquire(nftId);
     }
     try {
-      const nft = await this.findOne(nftId);
-      if (typeof nft === 'undefined') {
+      const nfts = await this.findByIds([nftId]);
+      if (nfts.length === 0) {
         throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
       }
+      const nft = nfts[0];
 
       const actor = await this.getActorForNft(user, nft);
 
