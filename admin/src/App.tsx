@@ -11,6 +11,8 @@ import CustomLayout from './components/CustomLayout';
 import { theme } from './theme';
 import UsersIcon from '@material-ui/icons/Group';
 import NftIcon from '@material-ui/icons/BurstMode';
+import { ActivityList } from './components/Activities';
+import EqualizerIcon from '@mui/icons-material/Equalizer';
 
 //for data from the nest admin api
 const DataProvider = dataProvider('http://localhost:3001');
@@ -42,6 +44,11 @@ function App() {
         edit={NftEdit}
         create={NftCreate}
         icon={NftIcon}
+      />
+      <Resource
+        name="activity"
+        list={ActivityList}
+        icon={EqualizerIcon}
       />
     </Admin>
   );

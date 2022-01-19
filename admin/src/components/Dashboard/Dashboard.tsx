@@ -17,10 +17,10 @@ import {
 } from '@material-ui/core';
 
 import { Grid } from '@material-ui/core';
-import { ListItemIcon, Paper, Stack, Theme, useMediaQuery } from '@mui/material';
-import { ClassNames } from '@emotion/react';
+import { Theme, useMediaQuery } from '@mui/material';
 import { makeStyles } from '@material-ui/core/styles';
-import { Masonry } from '@mui/lab';
+import NftThumbnail from '../NftThumbnail';
+import ListNftThumbnail from '../ListNftThumbnail';
 
 
 const useStyles = makeStyles({
@@ -36,7 +36,8 @@ const useStyles = makeStyles({
   },
   alignRight: {
     textAlign: 'right'
-  }
+  },
+
 })
 
 const styles = {
@@ -49,6 +50,59 @@ const styles = {
 
 const Spacer = () => <span style={{ width: '1em' }} />;
 const VerticalSpacer = () => <span style={{ height: '1em' }} />;
+
+// Mock
+const nfts = [
+  {
+      image: 'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+      price: 3421,
+      description: '',
+      state: 'pending',
+      name: 'Nft 1'
+  },
+  {
+      image: 'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+      price: 789,
+      description: '',
+      state: 'pending',
+      name: 'Nft 1'
+  },
+  {
+      image: 'https://images.unsplash.com/photo-1578321926534-133bb2a9f080?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2568&q=80',
+      price: 234,
+      description: '',
+      state: 'pending',
+      name: 'Nft 1'
+  },
+  {
+      image: 'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+      price: 35,
+      description: '',
+      state: 'pending',
+      name: 'Nft 1'
+  },
+  {
+      image: 'https://images.unsplash.com/photo-1543857778-c4a1a3e0b2eb?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTJ8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+      price: 443,
+      description: '',
+      state: 'pending',
+      name: 'Nft 1'
+  },
+  {
+      image: 'https://images.unsplash.com/photo-1625014618427-fbc980b974f5?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3764&q=80',
+      price: 934,
+      description: '',
+      state: 'pending',
+      name: 'Nft 1'
+  },
+  {
+      image: 'https://images.unsplash.com/photo-1633957897986-70e83293f3ff?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1986&q=80',
+      price: 28,
+      description: '',
+      state: 'pending',
+      name: 'Nft 1'
+  },
+]
 
 export const Dashboard = () => {
   const classes = useStyles()
@@ -189,29 +243,9 @@ export const Dashboard = () => {
               to="/"
               icon={InsertPhotoIcon}
               title="Latest sold (24h)"
-              subtitle='20'
+              subtitle={nfts.length}
             >
-              <List>
-                {
-                  [...Array(12)].map((user: any, index: number) =>
-                    <ListItem >
-                      <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.address ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
-                        <ListItemAvatar >
-                          <Avatar src="https://kanvas-files.s3.amazonaws.com/profilePicture_7" />
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={`username - ${index}`}
-                        />
-                        <div className={classes.spacer} />
-                        <ListItemText
-                          primary={`33 ꜩ`}
-                          className={classes.alignRight}
-                        />
-                      </a>
-                    </ListItem>
-                  )
-                }
-              </List>
+              <ListNftThumbnail nfts={nfts} />
             </CardWithIcon>
           </div>
         </div>
@@ -220,7 +254,7 @@ export const Dashboard = () => {
             <CardWithIcon
               to="/"
               icon={PeopleAltRoundedIcon}
-              title="Latest"
+              title="Top buyers"
               subtitle='12'
             >
               <List>

@@ -22,6 +22,14 @@ export interface Product extends Record {
     width: number;
 }
 
+export interface Nft {
+    name: string;
+    description: string;
+    image: string;
+    price: number;
+    state: string;
+}
+
 export interface Customer extends Record {
     first_name: string;
     last_name: string;
