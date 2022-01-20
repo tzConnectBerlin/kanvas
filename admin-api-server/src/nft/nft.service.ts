@@ -5,16 +5,36 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import { NFT_IMAGE_PREFIX, PG_CONNECTION } from 'src/constants';
+import { PG_CONNECTION } from 'src/constants';
 import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
 import { User } from 'src/user/entities/user.entity';
 import { NftEntity } from './entities/nft.entity';
 import { RoleService } from 'src/role/role.service';
 import { S3Service } from './s3.service';
-import { NftFilterParams } from './params';
 import { Lock } from 'async-await-mutex-lock';
+import { QueryParams } from 'src/types';
+import { convertToSnakeCase, prepareFilterClause, prepareNftFilterClause } from 'src/utils';
+import { UpdateNft } from './nft.controller';
 const fs = require('fs');
+
+const getSelectStatement = (
+  whereClause = '',
+  limitClause = '',
+  sortField = 'id',
+  sortDirection = 'ASC',
+): string => `SELECT id, state, created_by, created_at, updated_at, json_agg(json_build_object('name', nftattr.name, 'value', nftattr.value)) as attributes
+FROM nft
+INNER JOIN nft_attribute nftattr on nftattr.nft_id = nft.id ${whereClause}
+GROUP BY nft.id
+ORDER BY ${sortField} ${sortDirection} ${limitClause}`;
+
+const getSelectCountStatement = (
+  whereClause = '',
+): string => `SELECT COUNT(id) FROM nft
+       inner join nft_attribute nftattr on nftattr.nft_id = nft.id ${whereClause}
+       GROUP BY nft.id
+       ORDER BY $1`;
 
 @Injectable()
 export class NftService {
@@ -58,7 +78,7 @@ RETURNING id
     `,
         [creator.id],
       );
-      return this.getNft(creator, qryRes.rows[0].id);
+      return await this.getNft(creator, qryRes.rows[0].id);
     } catch (err: any) {
       Logger.error(`Unable to create new nft, err: ${err}`);
       throw new HttpException(
@@ -68,31 +88,26 @@ RETURNING id
     }
   }
 
-  async findAll(params: NftFilterParams): Promise<NftEntity[]> {
-    const offset = (params.page - 1) * params.pageSize;
-    const limit = params.pageSize;
+  async findAll({ range, sort, filter }: QueryParams): Promise<{ data: NftEntity[][]; count: any; }> {
+    const { query: whereClause, params } = prepareFilterClause(filter)
+    const limitClause =
+      range.length === 2
+        ? `LIMIT ${range[1] - range[0]} OFFSET ${range[0]}`
+        : undefined;
+    const sortField = sort && sort[0] ? convertToSnakeCase(sort[0]) : 'id';
+    const sortDirection = sort && sort[1] ? sort[1] : 'ASC';
 
-    const dbTx = await this.db.connect();
-    try {
-      await dbTx.query('BEGIN');
-      const nftIds = await dbTx.query(
-        `
-SELECT nft.id AS nft_id
-FROM nft
-WHERE ($1::TEXT[] IS NULL OR state = ANY($1::TEXT[]))
-OFFSET ${offset}
-LIMIT  ${limit}
-      `,
-        [params.nftStates],
-      );
+    const countResult = await this.db.query(
+      getSelectCountStatement(whereClause),
+      [sortField, ...params],
+    );
 
-      return await this.findByIds(
-        nftIds.rows.map((row: any) => row['nft_id']),
-        dbTx,
-      );
-    } finally {
-      dbTx.release();
-    }
+    const result = await this.db.query<NftEntity[]>(
+      getSelectStatement(whereClause, limitClause, sortField, sortDirection),
+      params,
+    );
+
+    return { data: result.rows, count: countResult?.rows[0]?.count ?? 0 };
   }
 
   async findByIds(ids: number[], dbTx?: any): Promise<NftEntity[]> {
@@ -188,11 +203,15 @@ ORDER BY id
       // we'll simply store the uri as a pointer to the image in our own db
       const contentUri = await this.s3Service.uploadFile(picture, fileName);
 
+      const updatableNft = {
+        attribute: this.CONTENT_KEYWORD,
+        value: JSON.stringify(contentUri)
+      }
+
       return await this.apply(
         user,
         nftId,
-        this.CONTENT_KEYWORD,
-        JSON.stringify(contentUri),
+        [updatableNft],
         false,
       );
     } finally {
@@ -200,11 +219,26 @@ ORDER BY id
     }
   }
 
+  transformFormDataToUpdatableNft(attrArray: string[], valueArray: any | any[]) {
+    if (attrArray.length !== valueArray.length) {
+      throw new HttpException('attribute and value should have the same length', HttpStatus.BAD_REQUEST)
+    }
+    let updatableNft: UpdateNft[] = [];
+
+    for (const index in attrArray) {
+      updatableNft.push({
+        attribute: attrArray[index],
+        value: valueArray[index]
+      })
+    }
+
+    return updatableNft
+  }
+
   async apply(
     user: User,
     nftId: number,
-    attr: string,
-    value?: any,
+    keyValuePairs: UpdateNft[],
     lockNft = true,
   ): Promise<NftEntity> {
     if (lockNft) {
@@ -216,22 +250,39 @@ ORDER BY id
         throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
       }
       const nft = nfts[0];
-
       const actor = await this.getActorForNft(user, nft);
 
-      const stmRes = this.stm.tryAttributeApply(actor, nft, attr, value);
-      if (stmRes.status != STMResultStatus.OK) {
-        switch (stmRes.status) {
-          case STMResultStatus.NOT_ALLOWED:
+      for (let { attribute, value } of keyValuePairs) {
+        // Check if attribute is of type content in order to upload to ipfs
+        if (attribute === this.CONTENT_KEYWORD) {
+          const nft = await this.getNft(user, nftId);
+          if (!nft.allowedActions.hasOwnProperty(this.CONTENT_KEYWORD)) {
             throw new HttpException(
-              stmRes.message || '',
+              `attribute '${this.CONTENT_KEYWORD}' is not allowed to be set by you for nft with state '${nft.state}'`,
               HttpStatus.UNAUTHORIZED,
             );
-          default:
-            throw new HttpException(
-              stmRes.message || '',
-              HttpStatus.INTERNAL_SERVER_ERROR,
-            );
+          }
+          const fileName = `nft_${nftId}`;
+          // we'll simply store the uri as a pointer to the image in our own db
+          const contentUri = await this.s3Service.uploadFile(value, fileName);
+          attribute = contentUri
+        }
+
+        const stmRes = this.stm.tryAttributeApply(actor, nft, attribute, value);
+
+        if (stmRes.status != STMResultStatus.OK) {
+          switch (stmRes.status) {
+            case STMResultStatus.NOT_ALLOWED:
+              throw new HttpException(
+                stmRes.message || '',
+                HttpStatus.UNAUTHORIZED,
+              );
+            default:
+              throw new HttpException(
+                stmRes.message || '',
+                HttpStatus.INTERNAL_SERVER_ERROR,
+              );
+          }
         }
       }
 

@@ -33,6 +33,7 @@
     "async-await-mutex-lock": "^1.0.7",
     "aws-sdk": "^2.1046.0",
     "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.1",
     "class-transformer": "0.4.0",
     "class-validator": "^0.13.1",
     "cookie-session": "^1.4.0",

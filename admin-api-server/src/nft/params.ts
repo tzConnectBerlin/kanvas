@@ -13,11 +13,11 @@ export class NftPaginationParams {
   pageSize = 10;
 }
 
-export class NftFilterParams extends NftPaginationParams {
+export class NftFilterParams {
   @IsArray()
   @Transform(({ value }) => (value ? parseStringArray(value, ',') : undefined))
   @IsOptional()
-  nftStates: string[];
+  nftStates?: string[];
 }
 
 function parseStringArray(v: string | string[], sep: string): string[] {
