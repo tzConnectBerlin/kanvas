@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+psql -c "
+CREATE SUBSCRIPTION store_sub
+CONNECTION 'host=$PGHOST_STORE port=$PGPORT_STORE dbname=$PGDATABASE_STORE user=$PGUSER_STORE password=$PGPASSWORD_STORE'
+PUBLICATION store_pub;"

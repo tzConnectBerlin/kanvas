@@ -8,17 +8,25 @@ trap "kill 0" EXIT
 [ -z $PGUSER ] && export PGUSER=dev_user
 [ -z $PGPASSWORD ] && export PGPASSWORD=dev_password
 [ -z $PGDATABASE ] && export PGDATABASE=dev_database
+export PGDATABASE_STORE_REPL=store_replication
+
+[ -z $PGHOST_STORE ] && export PGHOST_STORE=localhost
+[ -z $PGPORT_STORE ] && export PGPORT_STORE=15432
+[ -z $PGUSER_STORE ] && export PGUSER_STORE=dev_user
+[ -z $PGPASS_STORE ] && export PGPASS_STORE=dev_password
+[ -z $PGDATABASE_STORE ] && export PGDATABASE_STORE=dev_database
 
 (
     ./script/wait-db
     ./script/migrate up
+
+    PGDATABASE=$PGDATABASE_STORE_REPL ./script/setup-replication-sub
 ) &
 
 echo Starting Admin DB at $PGUSER@$PGHOST:$PGPORT/$PGDATABASE
 
 [ -z $DOCKER_ARGS ] && export DOCKER_ARGS='-t'
-docker run $DOCKER_ARGS \
-    -p $PGPORT:5432 \
+docker run --net=host $DOCKER_ARGS \
     -e POSTGRES_USER=$PGUSER \
     -e POSTGRES_PASSWORD=$PGPASSWORD \
     -e POSTGRES_DB=$PGDATABASE \

@@ -41,4 +41,6 @@ docker run ${DOCKER_ARGS} \
     -e POSTGRES_PASSWORD=$PGPASSWORD \
     -e POSTGRES_USER=$PGUSER \
     -e POSTGRES_DB=$PGDATABASE \
-    postgres "$@"
+    postgres \
+        -c wal_level=logical \
+        "$@"
