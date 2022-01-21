@@ -21,10 +21,10 @@ services:
     entrypoint: |-
       bash -c '
         set -e
-        ./script/wait-db.bash
-        ./script/migrate.bash up
+        ./script/wait-db
+        ./script/migrate up
         if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
-          ./script/setup-replication-pub.bash
+          ./script/setup-replication-pub
           psql < script/populate-testdb.sql
         fi
         yarn start

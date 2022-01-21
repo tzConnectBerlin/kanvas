@@ -10,9 +10,8 @@ trap "kill 0" EXIT
 [ -z $PGPASSWORD ] && export PGPASSWORD=dev_password
 [ -z $PGDATABASE ] && export PGDATABASE=dev_database
 
-env
 (
-    ./script/wait-db here
+    ./script/wait-db
     ./script/migrate up
 ) &
 

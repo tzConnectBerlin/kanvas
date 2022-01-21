@@ -18,8 +18,9 @@ COMMIT;
 
 BEGIN;
 
-  TODO
-
-DROP PUBLICATION kanvas_pub;
+ALTER TABLE mtm_kanvas_user_nft DROP COLUMN id;
+ALTER TABLE mtm_kanvas_user_user_role DROP COLUMN id;
+ALTER TABLE mtm_nft_category DROP COLUMN id;
+ALTER TABLE mtm_nft_order_nft DROP COLUMN id;
 
 COMMIT;
