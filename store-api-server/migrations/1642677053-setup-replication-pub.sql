@@ -4,13 +4,21 @@
 
 BEGIN;
 
-CREATE PUBLICATION kanvas_pub FOR ALL TABLES;
+-- Must alter all tables that dont have a PRIMARY KEY yet, it's needed for
+-- logical replication to work
+
+ALTER TABLE mtm_kanvas_user_nft ADD COLUMN id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY;
+ALTER TABLE mtm_kanvas_user_user_role ADD COLUMN id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY;
+ALTER TABLE mtm_nft_category ADD COLUMN id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY;
+ALTER TABLE mtm_nft_order_nft ADD COLUMN id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY;
 
 COMMIT;
 
 -- ==== DOWN ====
 
 BEGIN;
+
+  TODO
 
 DROP PUBLICATION kanvas_pub;
 

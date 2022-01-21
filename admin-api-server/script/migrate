@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 echo Running migrations on DB $PGDATABASE at port $PGPORT
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR/..
 
 [ -z $PGHOST ] && export PGHOST=localhost
 [ -z $PGPORT ] && export PGPORT=5433
@@ -8,3 +10,7 @@ echo Running migrations on DB $PGDATABASE at port $PGPORT
 [ -z $PGDATABASE ] && export PGDATABASE=dev_database
 
 ./script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE $@ || exit 1
+
+cd ../store-api-server
+#./script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/store_replication up || exit 1
+cd $SCRIPT_DIR

@@ -1,6 +1,32 @@
 #!/usr/bin/env bash
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR
 
-psql -c "
-CREATE SUBSCRIPTION store_sub
-CONNECTION 'host=$PGHOST_STORE port=$PGPORT_STORE dbname=$PGDATABASE_STORE user=$PGUSER_STORE password=$PGPASSWORD_STORE'
-PUBLICATION store_pub;"
+echo waiting for subscription target database to be up..
+(
+    export PGUSER=$STORE_PGUSER
+    export PGPASSWORD=$STORE_PGPASSWORD
+    export PGDATABASE=$STORE_PGDATABASE
+    export PGHOST=$STORE_PGHOST
+    export PGPORT=$STORE_PGPORT
+    ./wait-db
+
+    while [[ "`psql -c \"select count(1) from pg_stat_replication where application_name = 'store_sub'\"`" == "0" ]] ; do
+        echo store pub not ready yet..
+        sleep 1
+    done
+)
+
+# must copy over table, enum definitions, etc first. Otherwise the
+# subscription will not work (it will not bring over these definitions, unfortunately)
+
+store_schema_file=`mktemp`
+PGPASSWORD=$STORE_PGPASSWORD pg_dump --host=$STORE_PGHOST --port=$STORE_PGPORT --dbname=$STORE_PGDATABASE --username=$STORE_PGUSER --schema-only --format c --no-privileges --no-owner > $store_schema_file
+
+pg_restore --host=$PGHOST --port=$PGPOR --username=$PGUSERNAME --schema-only --clean --dbname=store_replication < $store_schema_file
+
+PGDATABASE=store_replication psql -c "
+    CREATE SUBSCRIPTION store_sub
+    CONNECTION 'host=$STORE_PGHOST port=$STORE_PGPORT dbname=$STORE_PGDATABASE user=$STORE_PGUSER password=$STORE_PGPASSWORD'
+    PUBLICATION store_pub;
+"

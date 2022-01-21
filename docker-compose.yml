@@ -3,42 +3,111 @@
 
 
 services:
-  api-server-db:
-    image: postgres
+  store-db:
+    image: postgres:13
+    command:
+      - postgres
+      - -c
+      - wal_level=logical  # <- required for logical replication
     ports:
       - 54320:5432
     environment:
-      POSTGRES_USER: POSTGRES_USER
-      POSTGRES_PASSWORD: POSTGRES_PASSWORD
-  api-server:
+      POSTGRES_USER: store_pguser
+      POSTGRES_PASSWORD: store_pgpass
+      POSTGRES_DB: dev_database
+
+  store-api:
     build: ./store-api-server
+    entrypoint: |-
+      bash -c '
+        set -e
+        ./script/wait-db.bash
+        ./script/migrate.bash up
+        if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
+          ./script/setup-replication-pub.bash
+          psql < script/populate-testdb.sql
+        fi
+        yarn start
+      '
     ports:
       - 3005:3000
     links:
-      - api-server-db
+      - store-db
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      POSTGRES_HOST: api-server-db
-      POSTGRES_USER: POSTGRES_USER
-      POSTGRES_PASSWORD: POSTGRES_PASSWORD
-      #POSTGRES_PORT: 54320
+      PGHOST: store-db
+      PGPORT: 5432
+      PGUSER: store_pguser
+      PGPASSWORD: store_pgpass
+      PGDATABASE: dev_database
+
+      JWT_SECRET: some_random_string
+      JWT_EXPIRATION_TIME: 86400000
+
+      CART_EXPIRATION_MILLI_SECS: 1800000
+
+      QUEPASA_DOCKER_ARGS: "\
+        --network kanvas_default \
+        --mount type=bind,source=$PWD/store-api-server/config,target=/config"
+
+      #AWS_S3_BUCKET: ..
+      #AWS_S3_ACCESS_KEY: ..
+      #AWS_S3_KEY_SECRET: ..
+
+      #PINATA_API_KEY: ..
+      #PINATA_API_SECRET: ..
+  admin-db:
+    image: postgres:13
+    ports:
+      - 54321:5432
+    environment:
+      POSTGRES_USER: admin_pguser
+      POSTGRES_PASSWORD: admin_pgpass
+      POSTGRES_DB: dev_database
+
+  admin-api:
+    build:
+      context: .
+      dockerfile: ./admin-api-server/Dockerfile
+    entrypoint: |-
+      bash -c '
+        set -e -x
+        ./script/wait-db
+        ./script/migrate up
+        if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
+          yarn seed
+          ./script/setup-replication-sub
+        fi
+        yarn start
+      '
+    ports:
+      - 3006:3001
+    links:
+      - admin-db
+      - store-db
+    environment:
+      POSTGRES_USER: admin_pguser
+      POSTGRES_PASSWORD: admin_pgpass
+      POSTGRES_DB: dev_database
+
+      PGHOST: admin-db
+      PGPORT: 5432
+      PGUSER: admin_pguser
+      PGPASSWORD: admin_pgpass
+      PGDATABASE: dev_database
+
+      STORE_PGHOST: store-db
+      STORE_PGPORT: 5432
+      STORE_PGUSER: store_pguser
+      STORE_PGPASSWORD: store_pgpass
+      STORE_PGDATABASE: dev_database
+
+      JWT_SECRET: another_random_string
+      JWT_EXPIRATION_TIME: 86400000
+
   # store_frontend:
   #   build: ./kanvas.front
   #   ports:
   #     - 3010:3000
-  admin-api-server-db:
-    image: postgres
-    ports:
-      - 54321:5433
-    environment:
-      POSTGRES_USER: POSTGRES_USER
-      POSTGRES_PASSWORD: POSTGRES_PASSWORD
-  admin-api-server:
-    build: ./admin-api-server
-    ports:
-      - 3006:3001
-    links:
-      - admin-api-server-db
-    environment:
-      POSTGRES_USER: POSTGRES_USER
-      POSTGRES_PASSWORD: POSTGRES_PASSWORD
-      POSTGRES_HOST: admin-api-server-db
+

@@ -26,7 +26,7 @@ export PGDATABASE_STORE_REPL=store_replication
 echo Starting Admin DB at $PGUSER@$PGHOST:$PGPORT/$PGDATABASE
 
 [ -z $DOCKER_ARGS ] && export DOCKER_ARGS='-t'
-docker run --net=host $DOCKER_ARGS \
+docker run $DOCKER_ARGS \
     -e POSTGRES_USER=$PGUSER \
     -e POSTGRES_PASSWORD=$PGPASSWORD \
     -e POSTGRES_DB=$PGDATABASE \
