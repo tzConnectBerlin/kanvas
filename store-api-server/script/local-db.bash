@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-REPO_ROOT=$(git rev-parse --show-toplevel)
-cd "$REPO_ROOT"/store-api-server
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR/..
 
 PEPPERMINT_VERSION=ee538be4d156ffb456107587eb71f14671afb1c7
 [ -z $PGPORT ] && export PGPORT=5432

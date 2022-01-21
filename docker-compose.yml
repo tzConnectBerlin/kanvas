@@ -47,6 +47,8 @@ services:
 
       CART_EXPIRATION_MILLI_SECS: 1800000
 
+      KANVAS_API_PORT: 3000
+
       QUEPASA_DOCKER_ARGS: "\
         --network kanvas_default \
         --mount type=bind,source=$PWD/store-api-server/config,target=/config"
@@ -57,6 +59,7 @@ services:
 
       #PINATA_API_KEY: ..
       #PINATA_API_SECRET: ..
+
   admin-db:
     image: postgres:13
     ports:
@@ -67,9 +70,7 @@ services:
       POSTGRES_DB: dev_database
 
   admin-api:
-    build:
-      context: .
-      dockerfile: ./admin-api-server/Dockerfile
+    build: ./admin-api-server
     entrypoint: |-
       bash -c '
         set -e -x
@@ -105,9 +106,3 @@ services:
 
       JWT_SECRET: another_random_string
       JWT_EXPIRATION_TIME: 86400000
-
-  # store_frontend:
-  #   build: ./kanvas.front
-  #   ports:
-  #     - 3010:3000
-
