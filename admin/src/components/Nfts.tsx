@@ -17,24 +17,35 @@ import {
   SimpleForm,
   DateField,
   EditProps,
+  EditButton,
+  Button,
 } from 'react-admin';
 import { JsonInput, JsonField } from 'react-admin-json-view';
 import { CustomCreateButton } from './Buttons/CustomCreateButton';
+import HomeIcon from '@mui/icons-material/Home';
 import { CustomDeleteButton } from './Buttons/CustomDeleteButton';
 import { CustomExportButton } from './Buttons/CustomExportButton';
 // import ProductReferenceField from '../products/ProductReferenceField';
 // import CustomerReferenceField from '../visitors/CustomerReferenceField';
 import ToolbarActions from './ToolbarActions';
 import {
-  LastVisitedFilter,
   HasOrderedFilter,
   HasNewsletterFilter,
   SegmentFilter,
+  Name,
+  Description,
+  DropDateFilter,
+  Price,
+  State,
+  Creator,
+  UpdatedAt,
+  CreatedAt,
 } from './filters';
 import { makeStyles } from '@material-ui/core/styles';
 import { Review } from '../type';
 import StarRatingField from './StarRatingField';
- 
+import { useState } from 'react';
+
 const NFT_STATES = [
   {
     name: 'Proposal',
@@ -64,46 +75,66 @@ const defaultMetadata = {
   publishers: [],
 };
 
-const Aside = () => 
- (
-  
+const Aside = ({ ...props }) => (
   <div style={{ width: 300, margin: '0 2rem' }}>
     <Card>
       <CardContent>
-        <div style={{display: 'flex', justifyContent: 'space-between'}}>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography variant="h6">Review detail</Typography>
           <CloseIcon />
-        </div>      
-        <LastVisitedFilter />
+        </div>
+        <Name />
+   
+        <Price />
+        <Creator />
+        <CreatedAt />
+        <UpdatedAt />
+        <State />
         <HasOrderedFilter />
-        <HasNewsletterFilter />
+        <DropDateFilter />
+        <Description />
         <SegmentFilter />
-        <Typography variant="body2">
+        <EditButton variant="contained" label="Edit" style={{marginRight: '.5rem'}} />
+        <Button variant="contained"
+          href="https://kanvas.tzconnect.berlin"
+          className='MuiButton-containedPrimary'
+          startIcon={<HomeIcon />} 
+          label="Preview"  
+        />
+        {/* tags  */}
+        {/* <Typography variant="body2">
           Posts will only be published once an editor approves them
-        </Typography>
+        </Typography> */}
       </CardContent>
     </Card>
   </div>
 );
 
-export const NftList = ({ ...props }) => (
-  <List
-    aside={<Aside />}
-    {...props}
-    filter={{ disabled: false }}
-    actions={<ToolbarActions />}
-    bulkActionButtons={<CustomDeleteButton {...props} />}
-  >
-    <Datagrid rowClick="edit" expand={<JsonField source="metadata" />}>
-      <TextField source="id" />
-      <TextField source="nftName" label="Name" />
-      <TextField source="nftState" label="Current State" />
-      <ImageField source="dataUri" label="Image" />
-      <DateField source="createdAt" label="Created at" showTime />
-      <DateField source="updatedAt" label="Last updated at" showTime />
-    </Datagrid>
-  </List>
-);
+export const NftList = ({ ...props }) => {
+  const [openAside, setOpenAside] = useState(false);
+
+  const handleClick = () => {
+    setOpenAside(!openAside);
+  };
+  return (
+    <List
+      aside={<Aside />}
+      {...props}
+      filter={{ disabled: false }}
+      actions={<ToolbarActions />}
+      bulkActionButtons={<CustomDeleteButton {...props} />}
+    >
+      <Datagrid rowClick="edit" expand={<JsonField source="metadata" />}>
+        <TextField source="id" />
+        <TextField source="nftName" label="Name" />
+        <TextField source="nftState" label="Current State" />
+        <ImageField source="dataUri" label="Image" />
+        <DateField source="createdAt" label="Created at" showTime />
+        <DateField source="updatedAt" label="Last updated at" showTime />
+      </Datagrid>
+    </List>
+  );
+};
 
 // Add authorization for allowedActions
 export const NftEdit = ({ ...props }) => {
@@ -143,4 +174,3 @@ export const NftCreate = ({ ...props }) => {
 function props<T>(props: any) {
   throw new Error('Function not implemented.');
 }
-
