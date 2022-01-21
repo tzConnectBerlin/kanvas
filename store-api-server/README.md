@@ -27,7 +27,7 @@ JWT_EXPIRATION_TIME=86400000
 JWT_SECRET='wPK-TfcjDSjztKrb4SUnfRPQ1YIovrooYQaX4h-EnU4'
 ```
 
-With Docker you can also run a development version of the database with `./script/local-db.bash`.
+With Docker you can also run a development version of the database with `./script/local-db`.
 
 ## Running the app
 

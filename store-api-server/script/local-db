@@ -10,7 +10,7 @@ PEPPERMINT_VERSION=ee538be4d156ffb456107587eb71f14671afb1c7
 [ -z $PGHOST ] && export PGHOST=localhost
 
 (
-    ./script/migrate.bash || exit 1
+    ./script/migrate || exit 1
 
     psql < script/populate-testdb.sql
 ) &
@@ -24,4 +24,4 @@ docker run ${DOCKER_ARGS} \
     -e POSTGRES_DB=$PGDATABASE \
     postgres \
         -c wal_level=logical \
-        "$@" 2>&1 >/dev/null
+        "$@"

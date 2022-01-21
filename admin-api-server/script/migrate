@@ -10,7 +10,3 @@ cd $SCRIPT_DIR/..
 [ -z $PGDATABASE ] && export PGDATABASE=dev_database
 
 ./script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE $@ || exit 1
-
-cd ../store-api-server
-#./script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/store_replication up || exit 1
-cd $SCRIPT_DIR
