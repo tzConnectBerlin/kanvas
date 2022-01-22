@@ -11,7 +11,7 @@ echo waiting for subscription target database to be up..
     export PGPORT=$STORE_PGPORT
     ./wait-db
 
-    while [[ "`psql -c \"select count(1) from pg_stat_replication where application_name = 'store_sub'\"`" == "0" ]] ; do
+    while [[ "`psql -c \"select count(1) from pg_publication where pubname = 'store_pub'\" -tA`" == "0" ]] ; do
         echo store pub not ready yet..
         sleep 1
     done
