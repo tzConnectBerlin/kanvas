@@ -39,7 +39,9 @@ export class NftController {
     @Query('range', new ParseJSONArrayPipe())
     range?: number[],
   ) {
-    // this.#validatePaginationParams(params);
+    const params = this.#queryParamsToNftFilterParams(filter, sort, range);
+
+    this.#validatePaginationParams(params);
     return await this.nftService.findAll({
       sort,
       filter,
@@ -77,8 +79,29 @@ export class NftController {
   }
 
   #validatePaginationParams(params: NftPaginationParams): void {
-    if (params.page < 1 || params.pageSize < 1) {
+    if (params.pageOffset < 0 || params.pageSize < 1) {
       throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST);
+    }
+
+    if (
+      !['nft_id'].some(
+        (allowedSortKey: string) => params.orderBy == allowedSortKey,
+      )
+    ) {
+      throw new HttpException(
+        `${params.orderBy} is not one of the allowed sort keys`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (
+      !['asc', 'desc'].some(
+        (allowedOrderDir: string) => params.orderDirection == allowedOrderDir,
+      )
+    ) {
+      throw new HttpException(
+        `${params.orderDirection} is not one of the allowed sort directions`,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -99,5 +122,42 @@ export class NftController {
     }
 
     return nftUpdates;
+  }
+
+  #queryParamsToFilterParams(
+    filter?: FilterParams,
+    sort?: string[],
+    range?: number[],
+  ) {
+    const res = new NftFilterParams();
+
+    if (typeof sort !== 'undefined' && sort.length > 0) {
+      res.orderBy = sort[0];
+      if (sort.length > 1) {
+        res.orderDirection = sort[1];
+      }
+    }
+
+    if (typeof range !== 'undefined' && range.length === 2) {
+      res.pageOffset = range[0];
+      res.pageSize = range[1] - range[0];
+    }
+
+    if (typeof filter !== 'undefined') {
+      for (const key of Object.keys(filter)) {
+        switch (key) {
+          case 'nftStates':
+            res.nftStates = filter[key];
+            break;
+          default:
+            throw new HttpException(
+              `${key} is not one of the allowed filters`,
+              HttpStatus.BAD_REQUEST,
+            );
+        }
+      }
+    }
+
+    return res;
   }
 }

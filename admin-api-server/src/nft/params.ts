@@ -1,6 +1,11 @@
+import { QueryParams, FilterParams } from 'src/types';
+
 export class NftPaginationParams {
-  page = 1;
+  pageOffset = 0;
   pageSize = 10;
+
+  orderBy = 'nft_id';
+  orderDirection = 'asc';
 }
 
 export class NftFilterParams extends NftPaginationParams {

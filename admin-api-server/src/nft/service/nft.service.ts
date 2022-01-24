@@ -53,9 +53,6 @@ export class NftService {
   }
 
   async findAll(params: NftFilterParams): Promise<NftEntity[]> {
-    const offset = (params.page - 1) * params.pageSize;
-    const limit = params.pageSize;
-
     const dbTx = await this.db.connect();
     try {
       await dbTx.query('BEGIN');
@@ -64,8 +61,9 @@ export class NftService {
 SELECT nft.id AS nft_id
 FROM nft
 WHERE ($1::TEXT[] IS NULL OR state = ANY($1::TEXT[]))
-OFFSET ${offset}
-LIMIT  ${limit}
+OFFSET ${params.pageOffset}
+LIMIT  ${params.pageSize}
+ORDER BY ${params.orderBy} ${params.orderDirection}
       `,
         [params.nftStates],
       );
