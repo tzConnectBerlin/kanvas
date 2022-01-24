@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR/..
+
+PEPPERMINT_VERSION=ee538be4d156ffb456107587eb71f14671afb1c7
+
+./script/wait-db || exit 1
+
+# to set up the database schema of onchain_kanvas:
+source config/.env-kanvas
+export DATABASE_URL="host=$PGHOST dbname=$PGDATABASE user=$PGUSER password=$PGPASSWORD port=$PGPORT"
+
+DOCKER_ARGS_DEFAULT="-v $SCRIPT_DIR/../config:/config --network host"
+docker run ${QUEPASA_DOCKER_ARGS:-$DOCKER_ARGS_DEFAULT} \
+    -e NODE_URL=$NODE_URL \
+    -e DATABASE_URL="$DATABASE_URL" \
+    ghcr.io/tzconnectberlin/que-pasa:1.0.7 \
+    --contract-settings /config/kanvas.yaml -l 0 \
+    || exit 1 # >/dev/null 2>&1 || exit 1
+
+curl "https://raw.githubusercontent.com/tzConnectBerlin/peppermint/${PEPPERMINT_VERSION}/database/schema.sql" 2>/dev/null | psql || exit 1
+
+./script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1

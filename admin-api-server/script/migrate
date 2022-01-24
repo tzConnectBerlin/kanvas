@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 echo Running migrations on DB $PGDATABASE at port $PGPORT
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR/..
 
 [ -z $PGHOST ] && export PGHOST=localhost
 [ -z $PGPORT ] && export PGPORT=5433

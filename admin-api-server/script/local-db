@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-cd $(git rev-parse --show-toplevel)/admin-api-server
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR/..
 
 trap "kill 0" EXIT
 
@@ -14,9 +15,7 @@ trap "kill 0" EXIT
     ./script/migrate up
 ) &
 
-echo Starting Admin DB at $PGUSER@$PGHOST:$PGPORT/$PGDATABASE
-
-[ -z $DOCKER_ARGS ] && export DOCKER_ARGS='-t'
+[ -z $DOCKER_ARGS ] && export DOCKER_ARGS="-t"
 docker run $DOCKER_ARGS \
     -p $PGPORT:5432 \
     -e POSTGRES_USER=$PGUSER \
