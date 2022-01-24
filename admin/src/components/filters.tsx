@@ -19,6 +19,7 @@ import {
   subMonths,
 } from 'date-fns';
 import { Typography } from '@mui/material';
+import styled from '@emotion/styled';
 
 const segments = [
   { id: 'compulsive', name: 'Compulsive' },
@@ -29,6 +30,10 @@ const segments = [
   { id: 'reviewer', name: 'Reviewer' },
 ];
 
+const StyledTypography = styled(Typography) `
+  padding-left: 2em;
+`
+
 export const DropDateFilter = () => (
   <FilterList label="Last visited" icon={<AccessTimeIcon />}>
     <FilterListItem
@@ -38,7 +43,7 @@ export const DropDateFilter = () => (
         last_seen_lte: undefined,
       }}
     />
-    <FilterListItem
+    {/* <FilterListItem
       label="This week"
       value={{
         last_seen_gte: startOfWeek(new Date()).toISOString(),
@@ -72,50 +77,49 @@ export const DropDateFilter = () => (
         last_seen_gte: undefined,
         last_seen_lte: subMonths(startOfMonth(new Date()), 1).toISOString(),
       }}
-    />
+    /> */}
   </FilterList>
 );
 
 export const Name = () => (
   <FilterList label="Name" icon={<AccountBoxIcon />}>
-
-      <Typography>Nft #1</Typography>
+      <StyledTypography>Nft #1</StyledTypography>
   </FilterList>
 );
 
 
 export const Description = () => (
     <FilterList label="Description" icon={<DescriptionIcon />}>
-        <Typography>Full Description here</Typography>
+        <StyledTypography>Full Description here</StyledTypography>
     </FilterList>
   );
 
 export const Price = () => (
   <FilterList label="Price" icon={<SellIcon />}>
-      <Typography>1235,00</Typography>
+      <StyledTypography>1235,00</StyledTypography>
   </FilterList>
 );
 
 export const Creator = () => (
   <FilterList label="Creator" icon={<AccessibilityNewIcon />}>
-    <Typography>creator name</Typography>
+    <StyledTypography>creator name</StyledTypography>
   </FilterList>
 );
 
 export const CreatedAt = () => (
   <FilterList label="Created at" icon={<CreateNewFolderIcon />}>
-      <Typography>01.01.2022</Typography>
+      <StyledTypography>01.01.2022</StyledTypography>
   </FilterList>
 );
 export const UpdatedAt = () => (
   <FilterList label="Updated at" icon={<CachedIcon />}>
-      <Typography>03.01.2022</Typography>
+      <StyledTypography>03.01.2022</StyledTypography>
   </FilterList>
 );
 
 export const State = () => (
   <FilterList label="State" icon={<QueryStatsIcon />}>
-      <Typography>minted</Typography>
+      <StyledTypography>minted</StyledTypography>
   </FilterList>
 );
 
@@ -128,20 +132,13 @@ export const HasOrderedFilter = () => (
         nb_commands_lte: undefined,
       }}
     />
-    <FilterListItem
-      label="False"
-      value={{
-        nb_commands_gte: undefined,
-        nb_commands_lte: 0,
-      }}
-    />
+   
   </FilterList>
 );
 export const HasNewsletterFilter = () => (
   <FilterList label="Has newsletter" icon={<MailIcon />}>
     <FilterListItem label="True" value={{ has_newsletter: true }} />
-    <FilterListItem label="False" value={{ has_newsletter: false }} />
-  </FilterList>
+   </FilterList>
 );
 export const SegmentFilter = () => (
   <FilterList label="Categories" icon={<LocalOfferIcon />}>

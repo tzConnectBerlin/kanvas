@@ -83,8 +83,9 @@ const Aside = ({ ...props }) => (
           <Typography variant="h6">Review detail</Typography>
           <CloseIcon />
         </div>
+        
         <Name />
-   
+        <Description />
         <Price />
         <Creator />
         <CreatedAt />
@@ -92,7 +93,6 @@ const Aside = ({ ...props }) => (
         <State />
         <HasOrderedFilter />
         <DropDateFilter />
-        <Description />
         <SegmentFilter />
         <EditButton variant="contained" label="Edit" style={{marginRight: '.5rem'}} />
         <Button variant="contained"
