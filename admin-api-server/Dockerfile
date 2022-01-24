@@ -1,4 +1,3 @@
-# this must be built with context at git root directory
 FROM node
 
 ENV DEBIAN_FRONTEND=noninteractive

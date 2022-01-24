@@ -4,8 +4,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV NODE_OPTIONS --openssl-legacy-provider
 ENV TZ=UTC
 
+# need psql
 RUN apt update && apt upgrade -y
-RUN apt install -y postgresql git
+RUN apt install -y postgresql
 
 # Need docker inside, so we can run migrate.bash
 # (which itself does a docker run to perform que-pasa migrations)
