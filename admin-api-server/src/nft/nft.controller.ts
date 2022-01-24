@@ -35,12 +35,6 @@ export interface UpdateNft {
 export class NftController {
   constructor(private readonly nftService: NftService) { }
 
-  @Post()
-  @UseGuards(JwtAuthGuard)
-  async create(@CurrentUser() user: User) {
-    return await this.nftService.create(user);
-  }
-
   @Get()
   @UseGuards(JwtAuthGuard)
   async findAll(
@@ -72,17 +66,13 @@ export class NftController {
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
-    @Param('id') nftId: number,
     @Body() updateNft: UpdateNft,
     @CurrentUser() user: User,
-    @UploadedFile() picture: any
+    @UploadedFile() picture: any,
+    @Param('id') nftId?: number,
   ): Promise<NftEntity> {
 
-    if (updateNft.attribute === this.nftService.CONTENT_KEYWORD) {
-      await this.nftService.setContent(user, nftId, updateNft.value);
-    }
-
-    const updatablaNft = this.nftService.transformFormDataToUpdatableNft(
+   const updatablaNft = this.nftService.transformFormDataToUpdatableNft(
       typeof updateNft.attribute === 'string' ? [updateNft.attribute] : updateNft.attribute,
       typeof updateNft.value === 'string' ? [updateNft.value] : updateNft.value
     )

@@ -34,6 +34,7 @@ import { getToken } from '../auth/authUtils';
  *
  * export default App;
  */
+
 const dataProvider = (
   apiUrl: string,
   httpClient = fetchUtils.fetchJson,
@@ -59,12 +60,12 @@ const dataProvider = (
     const options =
       countHeader === 'Content-Range'
         ? {
-            // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
-            headers: new Headers({
-              Authorization: `Bearer ${getToken()}`,
-              Range: `${resource}=${rangeStart}-${rangeEnd}`,
-            }),
-          }
+          // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
+          headers: new Headers({
+            Authorization: `Bearer ${getToken()}`,
+            Range: `${resource}=${rangeStart}-${rangeEnd}`,
+          }),
+        }
         : {};
 
     return httpClient(url, options).then(({ headers, json }) => ({
@@ -74,7 +75,7 @@ const dataProvider = (
   },
 
   getOne: (resource, params) =>
-    httpClient(`${apiUrl}/${resource}/${params.id}`).then(({ json }) => ({
+    httpClient(`${apiUrl}/${resource}/${params.id}`, { headers: new Headers({ Authorization: `Bearer ${getToken()}` }) }).then(({ json }) => ({
       headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
       data: json,
     })),
@@ -106,11 +107,11 @@ const dataProvider = (
     const options =
       countHeader === 'Content-Range'
         ? {
-            // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
-            headers: new Headers({
-              Range: `${resource}=${rangeStart}-${rangeEnd}`,
-            }),
-          }
+          // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
+          headers: new Headers({
+            Range: `${resource}=${rangeStart}-${rangeEnd}`,
+          }),
+        }
         : {};
 
     return httpClient(url, options).then(({ headers, json }) => {
@@ -124,19 +125,18 @@ const dataProvider = (
         total:
           countHeader === 'Content-Range'
             ? parseInt(
-                (headers.get('content-range') ?? '').split('/').pop() ?? '',
-                10,
-              )
+              (headers.get('content-range') ?? '').split('/').pop() ?? '',
+              10,
+            )
             : parseInt(headers.get(countHeader.toLowerCase()) ?? ''),
       };
     });
   },
 
   update: (resource, params) => {
-    console.log(params);
     return httpClient(`${apiUrl}/${resource}/${params.id}`, {
       method: 'PATCH',
-      body: toFormData(params.data),
+      body: toFormData(params.data, 'nft'),
       headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
     }).then(({ json }) => ({ data: json }));
   },
@@ -152,14 +152,25 @@ const dataProvider = (
       ),
     ).then((responses) => ({ data: responses.map(({ json }) => json.id) })),
 
-  create: (resource, params) =>
-    httpClient(`${apiUrl}/${resource}`, {
+  create: (resource, params) => {
+    if (resource === 'nft') {
+      return httpClient(`${apiUrl}/${resource}/0`, {
+        method: 'PATCH',
+        body: toFormData(params.data, 'nft'),
+        headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
+      }).then(({ json }) => ({
+        data: { ...params.data, id: json.id },
+      }))
+    }
+    // fallback to the default implementation
+    return httpClient(`${apiUrl}/${resource}`, {
       method: 'POST',
       body: toFormData(params.data),
       headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
     }).then(({ json }) => ({
       data: { ...params.data, id: json.id },
-    })),
+    }))
+  },
 
   delete: (resource, params) =>
     httpClient(`${apiUrl}/${resource}/${params.id}`, {
@@ -187,13 +198,13 @@ const dataProvider = (
     })),
 });
 
-const toFormData = (data: any) => {
-  if (data.image) {
+const toFormData = (data: any, resource = '') => {
+  if (data.picture) {
     const formData = new FormData();
     const keys = Object.keys(data);
     keys.forEach((key) => {
       if (data[key]) {
-        if (key === 'image') {
+        if (key === 'picture') {
           formData.append(key, data[key].rawFile);
         } else {
           if (typeof data[key] === 'object') {
@@ -206,6 +217,19 @@ const toFormData = (data: any) => {
     });
     return formData;
   }
+  if (resource === 'nft') {
+    const formData= new FormData();
+    const keys = Object.keys(data.attribute)
+
+    keys.forEach((key) => {
+      if (!data.attribute[key]) return
+
+      formData.append('attribute', key)
+      formData.append('value', JSON.stringify(data.attribute[key]))
+    })
+    return formData
+  }
+
   return JSON.stringify(data);
 };
 

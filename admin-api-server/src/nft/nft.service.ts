@@ -23,10 +23,10 @@ const getSelectStatement = (
   limitClause = '',
   sortField = 'id',
   sortDirection = 'ASC',
-): string => `SELECT id, state, created_by, created_at, updated_at, json_agg(json_build_object('name', nftattr.name, 'value', nftattr.value)) as attributes
+): string => `SELECT id, state, created_by, created_at, updated_at, json_agg(json_build_object( nftattr.name, nftattr.value)) as attributes
 FROM nft
 INNER JOIN nft_attribute nftattr on nftattr.nft_id = nft.id ${whereClause}
-GROUP BY nft.id
+GROUP BY nft.id, nftattr.name, nftattr.value
 ORDER BY ${sortField} ${sortDirection} ${limitClause}`;
 
 const getSelectCountStatement = (
@@ -158,6 +158,7 @@ ORDER BY id
 
   async getNft(user: User, nftId: number) {
     const nfts = await this.findByIds([nftId]);
+
     if (nfts.length === 0) {
       throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
     }
@@ -245,11 +246,15 @@ ORDER BY id
       await this.nftLock.acquire(nftId);
     }
     try {
-      const nfts = await this.findByIds([nftId]);
-      if (nfts.length === 0) {
-        throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
+      let nfts = await this.findByIds([nftId]);
+
+      if (typeof nfts === 'undefined') {
+        nfts = [await this.create(user)]
       }
       const nft = nfts[0];
+      console.log('nft')
+      console.log(nft)
+      console.log(keyValuePairs)
       const actor = await this.getActorForNft(user, nft);
 
       for (let { attribute, value } of keyValuePairs) {
