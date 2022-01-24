@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-cd $(git rev-parse --show-toplevel)/store-api-server
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR/..
 
 command=${1-start}
 
