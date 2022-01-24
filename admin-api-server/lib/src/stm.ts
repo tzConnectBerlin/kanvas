@@ -24,7 +24,7 @@ interface State {
 
 export const enum STMResultStatus {
   OK,
-  NOT_ALLOWED
+  NOT_ALLOWED,
 }
 
 export interface STMResult {
@@ -51,6 +51,10 @@ export class StateTransitionMachine {
         mutables: st.mutables,
       };
     }
+  }
+
+  getAttributeType(attr: string): string {
+    return this.attrTypes[attr];
   }
 
   getAllowedActions(actor: Actor, nft: Nft): any {

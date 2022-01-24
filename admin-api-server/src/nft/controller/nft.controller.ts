@@ -18,22 +18,17 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { NFT_IMAGE_MAX_BYTES } from 'src/constants';
-import { NftEntity } from './entities/nft.entity';
-import { NftService } from './nft.service';
-import { CurrentUser } from '../decoraters/user.decorator';
+import { NftEntity, NftUpdate } from '../entities/nft.entity';
+import { NftService } from '../service/nft.service';
+import { CurrentUser } from 'src/decoraters/user.decorator';
 import { User } from 'src/user/entities/user.entity';
-import { NftPaginationParams, NftFilterParams } from './params';
+import { NftPaginationParams, NftFilterParams } from '../params';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
 import { FilterParams } from 'src/types';
 
-export interface UpdateNft {
-  attribute: string;
-  value?: string;
-}
-
 @Controller('nft')
 export class NftController {
-  constructor(private readonly nftService: NftService) { }
+  constructor(private readonly nftService: NftService) {}
 
   @Get()
   @UseGuards(JwtAuthGuard)
@@ -45,10 +40,10 @@ export class NftController {
     range?: number[],
   ) {
     // this.#validatePaginationParams(params);
-    return this.nftService.findAll({
+    return await this.nftService.findAll({
       sort,
       filter,
-      range
+      range,
     });
   }
 
@@ -66,27 +61,43 @@ export class NftController {
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
-    @Body() updateNft: UpdateNft,
+    @Body() updateNft: NftUpdate,
     @CurrentUser() user: User,
     @UploadedFile() picture: any,
     @Param('id') nftId?: number,
   ): Promise<NftEntity> {
-
-   const updatablaNft = this.nftService.transformFormDataToUpdatableNft(
-      typeof updateNft.attribute === 'string' ? [updateNft.attribute] : updateNft.attribute,
-      typeof updateNft.value === 'string' ? [updateNft.value] : updateNft.value
-    )
-
-    return await this.nftService.apply(
-      user,
-      nftId,
-      updatablaNft,
+    const nftUpdates = this.#transformFormDataToNftUpdates(
+      typeof updateNft.attribute === 'string'
+        ? [updateNft.attribute]
+        : updateNft.attribute,
+      typeof updateNft.value === 'string' ? [updateNft.value] : updateNft.value,
     );
+
+    return await this.nftService.apply(user, nftId, nftUpdates);
   }
 
   #validatePaginationParams(params: NftPaginationParams): void {
     if (params.page < 1 || params.pageSize < 1) {
       throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST);
     }
+  }
+
+  #transformFormDataToNftUpdates(attrArray: string[], valueArray: any | any[]) {
+    if (attrArray.length !== valueArray.length) {
+      throw new HttpException(
+        'attribute and value should have the same length',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const nftUpdates: NftUpdate[] = [];
+
+    for (const index in attrArray) {
+      nftUpdates.push({
+        attribute: attrArray[index],
+        value: valueArray[index],
+      });
+    }
+
+    return nftUpdates;
   }
 }

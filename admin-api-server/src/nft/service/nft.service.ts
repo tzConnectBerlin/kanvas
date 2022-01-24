@@ -9,38 +9,24 @@ import { PG_CONNECTION } from 'src/constants';
 import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
 import { User } from 'src/user/entities/user.entity';
-import { NftEntity } from './entities/nft.entity';
+import { NftEntity, NftUpdate } from '../entities/nft.entity';
+import { NftFilterParams, parseStringArray } from '../params';
 import { RoleService } from 'src/role/role.service';
 import { S3Service } from './s3.service';
 import { Lock } from 'async-await-mutex-lock';
 import { QueryParams } from 'src/types';
-import { convertToSnakeCase, prepareFilterClause, prepareNftFilterClause } from 'src/utils';
-import { UpdateNft } from './nft.controller';
+import {
+  convertToSnakeCase,
+  prepareFilterClause,
+  prepareNftFilterClause,
+} from 'src/utils';
 const fs = require('fs');
-
-const getSelectStatement = (
-  whereClause = '',
-  limitClause = '',
-  sortField = 'id',
-  sortDirection = 'ASC',
-): string => `SELECT id, state, created_by, created_at, updated_at, json_agg(json_build_object( nftattr.name, nftattr.value)) as attributes
-FROM nft
-INNER JOIN nft_attribute nftattr on nftattr.nft_id = nft.id ${whereClause}
-GROUP BY nft.id, nftattr.name, nftattr.value
-ORDER BY ${sortField} ${sortDirection} ${limitClause}`;
-
-const getSelectCountStatement = (
-  whereClause = '',
-): string => `SELECT COUNT(id) FROM nft
-       inner join nft_attribute nftattr on nftattr.nft_id = nft.id ${whereClause}
-       GROUP BY nft.id
-       ORDER BY $1`;
 
 @Injectable()
 export class NftService {
   stm: StateTransitionMachine;
   nftLock: Lock<number>;
-  CONTENT_KEYWORD = 'content_uri';
+  CONTENT_TYPE = 'content_uri';
 
   constructor(
     @Inject(S3Service) private s3Service: S3Service,
@@ -66,30 +52,40 @@ export class NftService {
     });
   }
 
-  async create(creator: User): Promise<NftEntity> {
+  async findAll(params: NftFilterParams): Promise<NftEntity[]> {
+    const offset = (params.page - 1) * params.pageSize;
+    const limit = params.pageSize;
+
+    const dbTx = await this.db.connect();
     try {
-      const qryRes = await this.db.query(
+      await dbTx.query('BEGIN');
+      const nftIds = await dbTx.query(
         `
-INSERT INTO nft (
-  created_by, state
-)
-VALUES ($1, 'creation')
-RETURNING id
-    `,
-        [creator.id],
+SELECT nft.id AS nft_id
+FROM nft
+WHERE ($1::TEXT[] IS NULL OR state = ANY($1::TEXT[]))
+OFFSET ${offset}
+LIMIT  ${limit}
+      `,
+        [params.nftStates],
       );
-      return await this.getNft(creator, qryRes.rows[0].id);
-    } catch (err: any) {
-      Logger.error(`Unable to create new nft, err: ${err}`);
-      throw new HttpException(
-        'Unable to create new nft',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+
+      return await this.findByIds(
+        nftIds.rows.map((row: any) => row['nft_id']),
+        dbTx,
       );
+    } finally {
+      dbTx.release();
     }
   }
 
-  async findAll({ range, sort, filter }: QueryParams): Promise<{ data: NftEntity[][]; count: any; }> {
-    const { query: whereClause, params } = prepareFilterClause(filter)
+  /*
+  async findAll({
+    range,
+    sort,
+    filter,
+  }: QueryParams): Promise<{ data: NftEntity[][]; count: any }> {
+    const { query: whereClause, params } = prepareFilterClause(filter);
     const limitClause =
       range.length === 2
         ? `LIMIT ${range[1] - range[0]} OFFSET ${range[0]}`
@@ -109,6 +105,7 @@ RETURNING id
 
     return { data: result.rows, count: countResult?.rows[0]?.count ?? 0 };
   }
+  */
 
   async findByIds(ids: number[], dbTx?: any): Promise<NftEntity[]> {
     const dbconn = dbTx || this.db;
@@ -163,7 +160,6 @@ ORDER BY id
       throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
     }
     const nft = nfts[0];
-
     const actor = await this.getActorForNft(user, nft);
 
     return {
@@ -180,66 +176,10 @@ ORDER BY id
     return new Actor(user.id, roles);
   }
 
-  async setContent(
-    user: User,
-    nftId: number,
-    picture: any,
-  ): Promise<NftEntity> {
-    await this.nftLock.acquire(nftId);
-    try {
-      // verify first that we are allowed to change the content, before uploading
-      // to S3 (and potentially overwriting an earlier set content)
-      const nft = await this.getNft(user, nftId);
-      if (typeof nft === 'undefined') {
-        throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
-      }
-      if (!nft.allowedActions.hasOwnProperty(this.CONTENT_KEYWORD)) {
-        throw new HttpException(
-          `attribute '${this.CONTENT_KEYWORD}' is not allowed to be set by you for nft with state '${nft.state}'`,
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-
-      const fileName = `nft_${nftId}`;
-      // we'll simply store the uri as a pointer to the image in our own db
-      const contentUri = await this.s3Service.uploadFile(picture, fileName);
-
-      const updatableNft = {
-        attribute: this.CONTENT_KEYWORD,
-        value: JSON.stringify(contentUri)
-      }
-
-      return await this.apply(
-        user,
-        nftId,
-        [updatableNft],
-        false,
-      );
-    } finally {
-      this.nftLock.release(nftId);
-    }
-  }
-
-  transformFormDataToUpdatableNft(attrArray: string[], valueArray: any | any[]) {
-    if (attrArray.length !== valueArray.length) {
-      throw new HttpException('attribute and value should have the same length', HttpStatus.BAD_REQUEST)
-    }
-    let updatableNft: UpdateNft[] = [];
-
-    for (const index in attrArray) {
-      updatableNft.push({
-        attribute: attrArray[index],
-        value: valueArray[index]
-      })
-    }
-
-    return updatableNft
-  }
-
   async apply(
     user: User,
     nftId: number,
-    keyValuePairs: UpdateNft[],
+    nftUpdates: NftUpdate[],
     lockNft = true,
   ): Promise<NftEntity> {
     if (lockNft) {
@@ -247,33 +187,29 @@ ORDER BY id
     }
     try {
       let nfts = await this.findByIds([nftId]);
-
       if (typeof nfts === 'undefined') {
-        nfts = [await this.create(user)]
+        nfts = [await this.#createNft(user)];
       }
       const nft = nfts[0];
-      console.log('nft')
-      console.log(nft)
-      console.log(keyValuePairs)
       const actor = await this.getActorForNft(user, nft);
 
-      for (let { attribute, value } of keyValuePairs) {
+      for (let nftUpdate of nftUpdates) {
         // Check if attribute is of type content in order to upload to ipfs
-        if (attribute === this.CONTENT_KEYWORD) {
-          const nft = await this.getNft(user, nftId);
-          if (!nft.allowedActions.hasOwnProperty(this.CONTENT_KEYWORD)) {
-            throw new HttpException(
-              `attribute '${this.CONTENT_KEYWORD}' is not allowed to be set by you for nft with state '${nft.state}'`,
-              HttpStatus.UNAUTHORIZED,
-            );
-          }
-          const fileName = `nft_${nftId}`;
-          // we'll simply store the uri as a pointer to the image in our own db
-          const contentUri = await this.s3Service.uploadFile(value, fileName);
-          attribute = contentUri
+        if (this.stm.getAttrType(nftUpdate.attribute) === 'contentUri') {
+          nftUpdate = await this.#uploadContent(
+            user,
+            nft.id,
+            nftUpdate.attribute,
+            nftUpdate.value,
+          );
         }
 
-        const stmRes = this.stm.tryAttributeApply(actor, nft, attribute, value);
+        const stmRes = this.stm.tryAttributeApply(
+          actor,
+          nft,
+          nftUpdate.attribute,
+          nftUpdate.value,
+        );
 
         if (stmRes.status != STMResultStatus.OK) {
           switch (stmRes.status) {
@@ -291,7 +227,7 @@ ORDER BY id
         }
       }
 
-      await this.update(user, nft);
+      await this.#updateNft(user, nft);
       return await this.getNft(user, nft.id);
     } catch (err: any) {
       throw err;
@@ -302,7 +238,64 @@ ORDER BY id
     }
   }
 
-  async update(setBy: User, nft: NftEntity) {
+  async #uploadContent(
+    user: User,
+    nftId: number,
+    attribute: string,
+    picture: any,
+  ): Promise<NftUpdate> {
+    // verify first that we are allowed to change the content, before uploading
+    // to S3 (and potentially overwriting an earlier set content)
+    const nft = await this.getNft(user, nftId);
+    if (typeof nft === 'undefined') {
+      throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
+    }
+    if (!nft.allowedActions.hasOwnProperty(attribute)) {
+      throw new HttpException(
+        `attribute '${attribute}' is not allowed to be set by you for nft with state '${nft.state}'`,
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    if (nft.allowedActions[attribute] != this.CONTENT_TYPE) {
+      throw new HttpException(
+        `attribute '${attribute}' is not of type ${this.CONTENT_TYPE}`,
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const fileName = `nft_${nftId}_${attribute}`;
+    // we'll simply store the uri as a pointer to the image in our own db
+    const contentUri = await this.s3Service.uploadFile(picture, fileName);
+
+    return <NftUpdate>{
+      attribute: attribute,
+      value: JSON.stringify(contentUri),
+    };
+  }
+
+  async #createNft(creator: User): Promise<NftEntity> {
+    try {
+      const qryRes = await this.db.query(
+        `
+INSERT INTO nft (
+  created_by, state
+)
+VALUES ($1, 'creation')
+RETURNING id
+    `,
+        [creator.id],
+      );
+      return await this.getNft(creator, qryRes.rows[0].id);
+    } catch (err: any) {
+      Logger.error(`Unable to create new nft, err: ${err}`);
+      throw new HttpException(
+        'Unable to create new nft',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async #updateNft(setBy: User, nft: NftEntity) {
     const attrNames = Object.keys(nft.attributes);
     const attrValues = attrNames.map((name: string) =>
       JSON.stringify(nft.attributes[name]),

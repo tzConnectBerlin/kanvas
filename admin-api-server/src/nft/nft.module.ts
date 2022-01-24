@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { NftService } from './nft.service';
-import { NftController } from './nft.controller';
+import { NftService } from './service/nft.service';
+import { NftController } from './controller/nft.controller';
 import { DbModule } from 'src/db.module';
-import { S3Service } from './s3.service';
+import { S3Service } from './service/s3.service';
 import { RoleService } from 'src/role/role.service';
 
 @Module({

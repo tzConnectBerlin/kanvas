@@ -7,3 +7,8 @@ export interface NftEntity {
   state: string;
   attributes: any;
 }
+
+export interface NftUpdate {
+  attribute: string;
+  value?: string;
+}

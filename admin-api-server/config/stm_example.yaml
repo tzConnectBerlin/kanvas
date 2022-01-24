@@ -1,6 +1,6 @@
 attributes:
   name: string
-  content_uri: content
+  content: content_uri
   create_ready: boolean
   price: number
   editions_size: number
