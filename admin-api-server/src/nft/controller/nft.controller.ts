@@ -94,9 +94,9 @@ export class NftController {
     }
 
     if (
-      !['nft_id'].some(
-        (allowedSortKey: string) => params.orderBy == allowedSortKey,
-      )
+      !this.nftService
+        .getSortableFields()
+        .some((allowedSortKey: string) => params.orderBy == allowedSortKey)
     ) {
       throw new HttpException(
         `${params.orderBy} is not one of the allowed sort keys`,

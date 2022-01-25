@@ -27,6 +27,7 @@ export class NftService {
   stm: StateTransitionMachine;
   nftLock: Lock<number>;
   CONTENT_TYPE = 'content_uri';
+  TOP_LEVEL_IDENTIFIERS = ['id', 'state', 'created_at', 'updated_at'];
 
   constructor(
     @Inject(S3Service) private s3Service: S3Service,
@@ -52,75 +53,71 @@ export class NftService {
     });
   }
 
-  async findAll(params: NftFilterParams): Promise<NftEntity[]> {
-    const dbTx = await this.db.connect();
-    try {
-      await dbTx.query('BEGIN');
-      const nftIds = await dbTx.query(
-        `
-SELECT nft.id AS nft_id
-FROM nft
-WHERE ($1::TEXT[] IS NULL OR state = ANY($1::TEXT[]))
-OFFSET ${params.pageOffset}
-LIMIT  ${params.pageSize}
-ORDER BY ${params.orderBy} ${params.orderDirection}
-      `,
-        [params.filters.nftStates],
-      );
-
-      return await this.findByIds(
-        nftIds.rows.map((row: any) => row['nft_id']),
-        dbTx,
-      );
-    } finally {
-      dbTx.release();
-    }
+  getSortableFields(): string[] {
+    return [
+      ...this.TOP_LEVEL_IDENTIFIERS,
+      ...Object.keys(this.stm.getAttributes()),
+    ];
   }
 
-  async findByIds(ids: number[], dbTx?: any): Promise<NftEntity[]> {
-    const dbconn = dbTx || this.db;
-    const qryRes = await dbconn.query(
+  async findAll(params: NftFilterParams): Promise<NftEntity[]> {
+    let orderBy = params.orderBy;
+    if (
+      Object.keys(this.stm.getAttributes()).some(
+        (ident: string) => ident === orderBy,
+      )
+    ) {
+      orderBy = `attributes->>'${orderBy}'`;
+    }
+    console.log(orderBy);
+    const qryRes = await this.db.query(
       `
 WITH attr AS (
   SELECT
     nft_id,
-    ARRAY_AGG(ARRAY[name, value]) AS attributes
+    JSONB_OBJECT(ARRAY_AGG(name), ARRAY_AGG(value)) AS attributes
   FROM nft_attribute
-  WHERE nft_id = ANY($1)
+  WHERE ($2::INTEGER[] IS NULL OR nft_id = ANY($2::INTEGER[]))
   GROUP BY nft_id
 )
 SELECT
-  nft.id AS nft_id,
+  nft.id,
+  nft.state,
   nft.created_by,
   nft.created_at,
   nft.updated_at,
-  nft.state,
-  COALESCE(attr.attributes, ARRAY[]::TEXT[][]) AS attributes
+  attr.attributes
 FROM nft
 LEFT JOIN attr
   ON nft.id = attr.nft_id
-WHERE id = ANY($1)
-ORDER BY id
-    `,
-      [ids],
+WHERE ($1::TEXT[] IS NULL OR state = ANY($1::TEXT[]))
+  AND ($2::INTEGER[] IS NULL OR id = ANY($2::INTEGER[]))
+ORDER BY ${orderBy} ${params.orderDirection}
+OFFSET ${params.pageOffset}
+LIMIT  ${params.pageSize}
+      `,
+      [params.filters.nftStates, params.filters.nftIds],
     );
+
     if (qryRes.rowCount === 0) {
       return undefined;
     }
     return qryRes.rows.map((row: any) => {
-      const nft = <NftEntity>{
-        id: row['nft_id'],
+      return <NftEntity>{
+        id: row['id'],
+        state: row['state'],
         createdBy: row['created_by'],
         createdAt: Math.floor(row['created_at'].getTime() / 1000),
         updatedAt: Math.floor(row['updated_at'].getTime() / 1000),
-        state: row['state'],
-        attributes: {},
+        attributes: row['attributes'],
       };
-      for (const [name, value] of row['attributes']) {
-        nft.attributes[name] = JSON.parse(value);
-      }
-      return nft;
     });
+  }
+
+  async findByIds(nftIds: number[]): Promise<NftEntity[]> {
+    const filterParams = new NftFilterParams();
+    filterParams.filters.nftIds = nftIds;
+    return await this.findAll(filterParams);
   }
 
   async getNft(user: User, nftId: number) {

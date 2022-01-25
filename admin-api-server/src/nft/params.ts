@@ -2,16 +2,17 @@ export class NftPaginationParams {
   pageOffset = 0;
   pageSize = 10;
 
-  orderBy = 'nft_id';
+  orderBy = 'id';
   orderDirection = 'asc';
 }
 
 export interface NftFilters {
   nftStates?: string[];
+  nftIds?: number[];
 }
 
 export class NftFilterParams extends NftPaginationParams {
-  filters: NftFilters;
+  filters: NftFilters = <NftFilters>{};
 }
 
 export function parseStringArray(v: string | string[], sep: string): string[] {

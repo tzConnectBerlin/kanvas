@@ -53,6 +53,10 @@ export class StateTransitionMachine {
     }
   }
 
+  getAttributes(): any {
+    return this.attrTypes;
+  }
+
   getAttributeType(attr: string): string {
     return this.attrTypes[attr];
   }
