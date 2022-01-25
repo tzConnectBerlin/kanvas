@@ -42,7 +42,7 @@ export class NftService {
       }
       try {
         Logger.log('State transition machine config changed, reloading..');
-        this.stm = new StateTransitionMachine(filename);
+        this.stm = new StateTransitionMachine(stmConfigFile);
         Logger.log('State transition machine config reloaded');
       } catch (err: any) {
         Logger.warn(
