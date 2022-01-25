@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { ICategory } from './components/PreviewPage/category';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import customRoutes from './routes';
+import createHistory from 'history/createBrowserHistory';
 
 export interface INft {
   id: number;
@@ -55,12 +56,16 @@ export interface INft {
   ownerStatuses?: ('pending' | 'owned')[]
 }
 
-function App() {
 
+const history = createHistory();
+
+function App() {
   const [nftsInCart, setNftsInCart] = useState<INft[]>([]);
+
 
   return (
     <Admin
+      history={history}
       title="Kanvas - Admin"
       layout={CustomLayout}
       catchAll={NotFound}
