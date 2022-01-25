@@ -21,7 +21,7 @@ states:
         nft.content_uri.length > 0 &&
         nft.create_ready
     mutables:
-    - attributes: [name, content_uri, create_ready]
+    - attributes: [name, image.png, create_ready]
       by_roles: [creator]
 
   setup_nft:
