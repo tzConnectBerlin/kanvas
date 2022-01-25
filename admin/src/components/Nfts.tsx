@@ -101,10 +101,7 @@ const Aside = ({ ...props }) => (
           startIcon={<HomeIcon />} 
           label="Preview"  
         />
-        {/* tags  */}
-        {/* <Typography variant="body2">
-          Posts will only be published once an editor approves them
-        </Typography> */}
+         
       </CardContent>
     </Card>
   </div>
