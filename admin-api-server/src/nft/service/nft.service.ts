@@ -103,14 +103,18 @@ LIMIT  ${params.pageSize}
       return undefined;
     }
     return qryRes.rows.map((row: any) => {
-      return <NftEntity>{
+      const nft = <NftEntity>{
         id: row['id'],
         state: row['state'],
         createdBy: row['created_by'],
         createdAt: Math.floor(row['created_at'].getTime() / 1000),
         updatedAt: Math.floor(row['updated_at'].getTime() / 1000),
-        attributes: row['attributes'],
+        attributes: {},
       };
+      for (const key of Object.keys(row['attributes'])) {
+        nft.attributes[key] = JSON.parse(row['attributes'][key]);
+      }
+      return nft;
     });
   }
 
