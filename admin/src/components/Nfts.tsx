@@ -94,7 +94,7 @@ const Aside = ({ ...props }) => (
         <HasOrderedFilter />
         <DropDateFilter />
         <SegmentFilter />
-        <EditButton variant="contained" label="Edit" style={{marginRight: '.5rem'}} />
+        <EditButton variant="contained" href="/preview" label="Preview" style={{marginRight: '.5rem'}} />
         <Button variant="contained"
           href="https://kanvas.tzconnect.berlin"
           className='MuiButton-containedPrimary'
