@@ -16,7 +16,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import {
   FILE_MAX_BYTES,
   MAX_FILE_UPLOADS_PER_CALL,
-  ALLOWED_FILE_EXTENSIONS,
+  ALLOWED_FILE_MIMETYPES,
 } from 'src/constants';
 import { NftEntity, NftUpdate } from '../entities/nft.entity';
 import { NftService } from '../service/nft.service';
@@ -27,10 +27,10 @@ import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
 import { extname } from 'path';
 
 function pngFileFilter(req: any, file: any, callback: any) {
-  const ext = extname(file.originalname);
-
   if (
-    !ALLOWED_FILE_EXTENSIONS.some((extAllowed: string) => ext === extAllowed)
+    !ALLOWED_FILE_MIMETYPES.some(
+      (mimeAllowed: string) => file.mimetype === mimeAllowed,
+    )
   ) {
     req.fileValidationError = 'Invalid file type';
     return callback(new Error('Invalid file type'), false);
@@ -94,9 +94,9 @@ export class NftController {
     }
 
     if (
-      !['nft_id'].some(
-        (allowedSortKey: string) => params.orderBy == allowedSortKey,
-      )
+      !this.nftService
+        .getSortableFields()
+        .some((allowedSortKey: string) => params.orderBy == allowedSortKey)
     ) {
       throw new HttpException(
         `${params.orderBy} is not one of the allowed sort keys`,
