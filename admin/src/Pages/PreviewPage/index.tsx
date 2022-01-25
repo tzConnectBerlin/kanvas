@@ -4,6 +4,9 @@ import { Paper, Slide, Stack, Step, StepLabel, Stepper, Theme, useMediaQuery } f
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
 import { toast } from 'react-toastify';
+import {
+  Button,
+} from 'react-admin';
 
 import styled from '@emotion/styled';
 import Typography from '../../components/Typography';
@@ -149,7 +152,7 @@ export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
   const initBeforeUnLoad = (showExitPrompt = false) => {
       window.onbeforeunload = (event) => {
           // Show prompt based on state
-          if (showExitPrompt && history.location.pathname === '/checkout') {
+          if (showExitPrompt && history.location.pathname === '/preview') {
               const e = event || window.event;
               e.preventDefault();
               if (e) {
@@ -473,7 +476,7 @@ export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
                         selected={selectedPaymentMethod === 'stripe'}
                         onClick={() => selectPaymentMethod('stripe')}
                       >
-                        <StyledImage src="img/stripe-logo.png" />
+                        <StyledImage src="/stripe-logo.png" />
                         <Stack direction="column">
                           <Typography
                             size="h5"
@@ -508,7 +511,7 @@ export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
                         selected={selectedPaymentMethod === 'tezos'}
                         onClick={() => {}}
                       >
-                        <StyledImage src="img/tezos-logo.png" />
+                        <StyledImage src="/tezos-logo.png" />
                         <Stack direction="column">
                           <Typography
                             size="h5"
@@ -623,22 +626,21 @@ export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
         <Stack direction="row">
           {activeStep <= 2 && (
             <>
-              <button
+            <Button variant="contained"
                 onClick={() => handleBackwardStep()}
-                
-              >Back</button>
+                className='MuiButton-containedPrimary'
+                label="Back"  
+        />
               <FlexSpacer minWidth={2} />
             </>
           )}
 
           {(activeStep < 2 || activeStep === 3) && (
-            <button
-              onClick={() => handleForwardStep()}
-              // label={t(`checkout.next_button_${activeStep}`)}
-              
-              // loading={paymentIntentSecret.loading}
-             // disabled={props.nftsInCart.length === 0 && activeStep < 3}
-            >Next</button>
+           <Button variant="contained"
+            onClick={() => handleForwardStep()}
+            className='MuiButton-containedPrimary'
+            label="Next"  
+          />
           )}
         </Stack>
         <Typography size="h5" weight="Light" color="error">

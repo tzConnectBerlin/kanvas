@@ -61,10 +61,10 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
 
     background-color: ${(props) =>
         props.verified
-            ? props.theme.palette.text.primary
-            : !props.primary
-            ? 'transparent'
-            : props.theme.button.background};
+            ? ' #c4c4c4 '
+            : ' #c4c4c4 '
+            &&  'transparent'
+           };
 
     border: solid 1px #c4c4c4;
     margin: 1px;
@@ -72,14 +72,13 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
     transition: outline 0.6s linear;
 
     &:hover {
-        border: ${(props) => `solid 1px ${props.theme.palette.primary.contrastText}`};
+        border: ${(props) => `solid 1px  #c4c4c4 `};
         box-shadow: none;
         background-color: ${(props) =>
             props.verified
-                ? props.theme.palette.text.primary
-                : !props.primary
-                ? 'transparent'
-                : props.theme.button.background};
+                ? ' #c4c4c4 '
+                : ' #c4c4c4 '
+                && 'transparent'
     }
 
     &:active {
@@ -89,14 +88,12 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
         box-shadow: none;
         background-color: ${(props) =>
             props.verified
-                ? props.theme.palette.text.primary
-                : !props.primary
-                ? 'transparent'
-                : props.theme.button.background};
+            ? ' #c4c4c4 '
+            : ' #c4c4c4 '
+            && 'transparent'
     }
 
     &:disabled {
-        background-color: ${(props) => props.theme.palette.background.default};
         border-color: transparent;
         outline: 1px solid #c4c4c4;
 
@@ -122,10 +119,7 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
     }
 
     p {
-        color: ${(props) =>
-            props.verified
-                ? props.theme.palette.background.default
-                : props.theme.palette.text.primary} !important;
+        color:  #c4c4c4  !important;
     }
 
     transition: all 0.1s linear;
@@ -149,7 +143,7 @@ export const CustomButton: FC<CustomButtonProps> = ({
     return (
         <StyledButton
             variant={variant}
-            bordercolor={primary ? '' : '#e1e1e1'}
+            bordercolor={'#e1e1e1'}
             size={size}
             verified={props.verified}
             {...props}
