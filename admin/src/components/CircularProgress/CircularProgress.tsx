@@ -12,7 +12,7 @@ interface CircularProgressProps {
 const StyledCircularProgress = styled(CircularProgress)<CircularProgressProps>`
     height: ${(props) => props.height}rem !important;
     width: ${(props) => props.height}rem !important;
-    color: ${(props) => props.theme.palette.primary.dark} !important;
+    color: #9771ff !important;
 `;
 
 export const CustomCircularProgress: FC<CircularProgressProps> = ({
