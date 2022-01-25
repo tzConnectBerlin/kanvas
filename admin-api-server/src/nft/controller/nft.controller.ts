@@ -1,30 +1,43 @@
 import {
-  Logger,
   Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
-  Delete,
-  Request,
   Query,
   UseGuards,
-  UploadedFile,
+  UploadedFiles,
   UseInterceptors,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { NFT_IMAGE_MAX_BYTES } from 'src/constants';
+import {
+  FILE_MAX_BYTES,
+  MAX_FILE_UPLOADS_PER_CALL,
+  ALLOWED_FILE_EXTENSIONS,
+} from 'src/constants';
 import { NftEntity, NftUpdate } from '../entities/nft.entity';
 import { NftService } from '../service/nft.service';
 import { CurrentUser } from 'src/decoraters/user.decorator';
 import { User } from 'src/user/entities/user.entity';
-import { NftPaginationParams, NftFilterParams } from '../params';
+import { NftPaginationParams, NftFilterParams, NftFilters } from '../params';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
-import { FilterParams } from 'src/types';
+import { extname } from 'path';
+
+function pngFileFilter(req: any, file: any, callback: any) {
+  const ext = extname(file.originalname);
+
+  if (
+    !ALLOWED_FILE_EXTENSIONS.some((extAllowed: string) => ext === extAllowed)
+  ) {
+    req.fileValidationError = 'Invalid file type';
+    return callback(new Error('Invalid file type'), false);
+  }
+
+  return callback(null, true);
+}
 
 @Controller('nft')
 export class NftController {
@@ -35,18 +48,14 @@ export class NftController {
   async findAll(
     @Query('sort', new ParseJSONArrayPipe())
     sort?: string[],
-    @Query('filter', new ParseJSONArrayPipe()) filter?: FilterParams,
+    @Query('filter') filters?: NftFilters,
     @Query('range', new ParseJSONArrayPipe())
     range?: number[],
   ) {
-    const params = this.#queryParamsToNftFilterParams(filter, sort, range);
+    const params = this.#queryParamsToFilterParams(filters, sort, range);
 
     this.#validatePaginationParams(params);
-    return await this.nftService.findAll({
-      sort,
-      filter,
-      range,
-    });
+    return await this.nftService.findAll(params);
   }
 
   @Get(':id')
@@ -56,26 +65,27 @@ export class NftController {
   }
 
   @UseInterceptors(
-    FileInterceptor('picture', {
-      limits: { fileSize: NFT_IMAGE_MAX_BYTES },
+    FilesInterceptor('files[]', MAX_FILE_UPLOADS_PER_CALL, {
+      fileFilter: pngFileFilter,
+      limits: {
+        fileSize: FILE_MAX_BYTES,
+      },
     }),
   )
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
-    @Body() updateNft: NftUpdate,
+    @Body() nftUpdatesBody: any,
     @CurrentUser() user: User,
-    @UploadedFile() picture: any,
+    @UploadedFiles() filesArray?: any[],
     @Param('id') nftId?: number,
   ): Promise<NftEntity> {
     const nftUpdates = this.#transformFormDataToNftUpdates(
-      typeof updateNft.attribute === 'string'
-        ? [updateNft.attribute]
-        : updateNft.attribute,
-      typeof updateNft.value === 'string' ? [updateNft.value] : updateNft.value,
+      nftUpdatesBody,
+      filesArray,
     );
 
-    return await this.nftService.apply(user, nftId, nftUpdates);
+    return await this.nftService.applyNftUpdates(user, nftId, nftUpdates);
   }
 
   #validatePaginationParams(params: NftPaginationParams): void {
@@ -105,27 +115,29 @@ export class NftController {
     }
   }
 
-  #transformFormDataToNftUpdates(attrArray: string[], valueArray: any | any[]) {
-    if (attrArray.length !== valueArray.length) {
-      throw new HttpException(
-        'attribute and value should have the same length',
-        HttpStatus.BAD_REQUEST,
-      );
+  #transformFormDataToNftUpdates(nftUpdatesBody: any, filesArray?: any[]) {
+    const files = {};
+    if (typeof filesArray !== 'undefined') {
+      for (const file of filesArray) {
+        files[file.originalname] = file;
+      }
     }
-    const nftUpdates: NftUpdate[] = [];
 
-    for (const index in attrArray) {
-      nftUpdates.push({
-        attribute: attrArray[index],
-        value: valueArray[index],
+    const res: NftUpdate[] = [];
+    console.log(nftUpdatesBody);
+    for (const attr of Object.keys(nftUpdatesBody)) {
+      res.push({
+        attribute: attr,
+        value: files.hasOwnProperty(attr) ? undefined : nftUpdatesBody[attr],
+        file: files[attr],
       });
     }
 
-    return nftUpdates;
+    return res;
   }
 
   #queryParamsToFilterParams(
-    filter?: FilterParams,
+    filters?: NftFilters,
     sort?: string[],
     range?: number[],
   ) {
@@ -143,19 +155,8 @@ export class NftController {
       res.pageSize = range[1] - range[0];
     }
 
-    if (typeof filter !== 'undefined') {
-      for (const key of Object.keys(filter)) {
-        switch (key) {
-          case 'nftStates':
-            res.nftStates = filter[key];
-            break;
-          default:
-            throw new HttpException(
-              `${key} is not one of the allowed filters`,
-              HttpStatus.BAD_REQUEST,
-            );
-        }
-      }
+    if (typeof filters !== 'undefined') {
+      res.filters.nftStates = filters.nftStates;
     }
 
     return res;

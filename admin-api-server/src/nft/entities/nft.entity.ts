@@ -11,4 +11,5 @@ export interface NftEntity {
 export interface NftUpdate {
   attribute: string;
   value?: string;
+  file?: any;
 }

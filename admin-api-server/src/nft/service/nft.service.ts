@@ -5,7 +5,7 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import { PG_CONNECTION } from 'src/constants';
+import { PG_CONNECTION, FILE_PREFIX } from 'src/constants';
 import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
 import { User } from 'src/user/entities/user.entity';
@@ -65,7 +65,7 @@ OFFSET ${params.pageOffset}
 LIMIT  ${params.pageSize}
 ORDER BY ${params.orderBy} ${params.orderDirection}
       `,
-        [params.nftStates],
+        [params.filters.nftStates],
       );
 
       return await this.findByIds(
@@ -76,34 +76,6 @@ ORDER BY ${params.orderBy} ${params.orderDirection}
       dbTx.release();
     }
   }
-
-  /*
-  async findAll({
-    range,
-    sort,
-    filter,
-  }: QueryParams): Promise<{ data: NftEntity[][]; count: any }> {
-    const { query: whereClause, params } = prepareFilterClause(filter);
-    const limitClause =
-      range.length === 2
-        ? `LIMIT ${range[1] - range[0]} OFFSET ${range[0]}`
-        : undefined;
-    const sortField = sort && sort[0] ? convertToSnakeCase(sort[0]) : 'id';
-    const sortDirection = sort && sort[1] ? sort[1] : 'ASC';
-
-    const countResult = await this.db.query(
-      getSelectCountStatement(whereClause),
-      [sortField, ...params],
-    );
-
-    const result = await this.db.query<NftEntity[]>(
-      getSelectStatement(whereClause, limitClause, sortField, sortDirection),
-      params,
-    );
-
-    return { data: result.rows, count: countResult?.rows[0]?.count ?? 0 };
-  }
-  */
 
   async findByIds(ids: number[], dbTx?: any): Promise<NftEntity[]> {
     const dbconn = dbTx || this.db;
@@ -174,15 +146,12 @@ ORDER BY id
     return new Actor(user.id, roles);
   }
 
-  async apply(
+  async applyNftUpdates(
     user: User,
     nftId: number,
     nftUpdates: NftUpdate[],
-    lockNft = true,
   ): Promise<NftEntity> {
-    if (lockNft) {
-      await this.nftLock.acquire(nftId);
-    }
+    await this.nftLock.acquire(nftId);
     try {
       let nfts = await this.findByIds([nftId]);
       if (typeof nfts === 'undefined') {
@@ -193,12 +162,12 @@ ORDER BY id
 
       for (let nftUpdate of nftUpdates) {
         // Check if attribute is of type content in order to upload to ipfs
-        if (this.stm.getAttrType(nftUpdate.attribute) === 'contentUri') {
+        if (typeof nftUpdate.file !== 'undefined') {
           nftUpdate = await this.#uploadContent(
             user,
             nft.id,
             nftUpdate.attribute,
-            nftUpdate.value,
+            nftUpdate.file,
           );
         }
 
@@ -230,9 +199,7 @@ ORDER BY id
     } catch (err: any) {
       throw err;
     } finally {
-      if (lockNft) {
-        this.nftLock.release(nftId);
-      }
+      this.nftLock.release(nftId);
     }
   }
 
@@ -240,7 +207,7 @@ ORDER BY id
     user: User,
     nftId: number,
     attribute: string,
-    picture: any,
+    file: any,
   ): Promise<NftUpdate> {
     // verify first that we are allowed to change the content, before uploading
     // to S3 (and potentially overwriting an earlier set content)
@@ -261,9 +228,9 @@ ORDER BY id
       );
     }
 
-    const fileName = `nft_${nftId}_${attribute}`;
+    const fileName = `${FILE_PREFIX}_${nftId}_${attribute}`;
     // we'll simply store the uri as a pointer to the image in our own db
-    const contentUri = await this.s3Service.uploadFile(picture, fileName);
+    const contentUri = await this.s3Service.uploadFile(file, fileName);
 
     return <NftUpdate>{
       attribute: attribute,

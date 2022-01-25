@@ -1,6 +1,6 @@
 attributes:
   name: string
-  content: content_uri
+  image.png: content_uri
   create_ready: boolean
   price: number
   editions_size: number

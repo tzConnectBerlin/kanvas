@@ -1,5 +1,3 @@
-import { QueryParams, FilterParams } from 'src/types';
-
 export class NftPaginationParams {
   pageOffset = 0;
   pageSize = 10;
@@ -8,8 +6,12 @@ export class NftPaginationParams {
   orderDirection = 'asc';
 }
 
-export class NftFilterParams extends NftPaginationParams {
+export interface NftFilters {
   nftStates?: string[];
+}
+
+export class NftFilterParams extends NftPaginationParams {
+  filters: NftFilters;
 }
 
 export function parseStringArray(v: string | string[], sep: string): string[] {
