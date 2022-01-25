@@ -24,7 +24,6 @@ import { CurrentUser } from 'src/decoraters/user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { NftPaginationParams, NftFilterParams, NftFilters } from '../params';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
-import { extname } from 'path';
 
 function pngFileFilter(req: any, file: any, callback: any) {
   if (
@@ -116,21 +115,22 @@ export class NftController {
   }
 
   #transformFormDataToNftUpdates(nftUpdatesBody: any, filesArray?: any[]) {
-    const files = {};
-    if (typeof filesArray !== 'undefined') {
-      for (const file of filesArray) {
-        files[file.originalname] = file;
-      }
-    }
+    const res: NftUpdate[] = nftUpdatesBody;
 
-    const res: NftUpdate[] = [];
-    console.log(nftUpdatesBody);
     for (const attr of Object.keys(nftUpdatesBody)) {
       res.push({
         attribute: attr,
-        value: files.hasOwnProperty(attr) ? undefined : nftUpdatesBody[attr],
-        file: files[attr],
+        value: nftUpdatesBody[attr],
       });
+    }
+
+    if (typeof filesArray !== 'undefined') {
+      for (const file of filesArray) {
+        res.push(<NftUpdate>{
+          attribute: file.originalname,
+          file: file,
+        });
+      }
     }
 
     return res;
