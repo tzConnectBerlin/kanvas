@@ -54,7 +54,7 @@ export class NftController {
     const params = this.#queryParamsToFilterParams(filters, sort, range);
 
     this.#validatePaginationParams(params);
-    return await this.nftService.findAll(params);
+    return { data: await this.nftService.findAll(params) };
   }
 
   @Get(':id')
