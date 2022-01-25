@@ -1,3 +1,4 @@
+import { reject } from 'lodash';
 import { stringify } from 'query-string';
 import { fetchUtils, DataProvider } from 'ra-core';
 import { getToken } from '../auth/authUtils';
@@ -134,11 +135,12 @@ const dataProvider = (
   },
 
   update: (resource, params) => {
+    debugger
     return httpClient(`${apiUrl}/${resource}/${params.id}`, {
       method: 'PATCH',
-      body: toFormData(params.data, 'nft'),
+      body: toFormData(params.data, resource),
       headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
-    }).then(({ json }) => ({ data: json }));
+    }).then(({ json }) => ( { data: json }))
   },
 
   // simple-rest doesn't handle provide an updateMany route, so we fallback to calling update n times instead
@@ -156,7 +158,7 @@ const dataProvider = (
     if (resource === 'nft') {
       return httpClient(`${apiUrl}/${resource}/0`, {
         method: 'PATCH',
-        body: toFormData(params.data, 'nft'),
+        body: toFormData(params.data, resource),
         headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
       }).then(({ json }) => ({
         data: { ...params.data, id: json.id },
@@ -219,13 +221,13 @@ const toFormData = (data: any, resource = '') => {
   }
   if (resource === 'nft') {
     const formData= new FormData();
-    const keys = Object.keys(data.attribute)
+    const keys = Object.keys(data.attributes)
 
     keys.forEach((key) => {
-      if (!data.attribute[key]) return
+      if (!data.attributes[key]) return
 
-      formData.append('attribute', key)
-      formData.append('value', JSON.stringify(data.attribute[key]))
+      formData.append('attributes', key)
+      formData.append('value', JSON.stringify(data.attributes[key]))
     })
     return formData
   }
