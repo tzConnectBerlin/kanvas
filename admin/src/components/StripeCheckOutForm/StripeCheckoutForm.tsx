@@ -6,7 +6,7 @@ import Typography from "../Typography";
 import { Stack } from "@mui/material";
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { FC, useEffect, useState } from 'react';
-import { INft } from '../Interfaces/artwork';
+import { INft } from '../../Interfaces/artwork';
 
 const StyledForm = styled.form`
     display: flex;

@@ -1,12 +1,19 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { Prompt, useHistory } from 'react-router-dom';
-import { Paper, Slide, Stack, Step, StepLabel, Stepper, Theme, useMediaQuery } from '@mui/material';
+import {
+  Paper,
+  Slide,
+  Stack,
+  Step,
+  StepLabel,
+  Stepper,
+  Theme,
+  useMediaQuery,
+} from '@mui/material';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
 import { toast } from 'react-toastify';
-import {
-  Button,
-} from 'react-admin';
+import { Button } from 'react-admin';
 
 import styled from '@emotion/styled';
 import Typography from '../../components/Typography';
@@ -19,7 +26,7 @@ import DoneIcon from '@mui/icons-material/Done';
 import { Animated } from 'react-animated-css';
 import Success from '../../components/Success';
 import StripeCheckoutForm from '../../components/StripeCheckOutForm';
-import { INft } from '../../components/Interfaces/artwork';
+import { INft } from '../../Interfaces/artwork';
 
 interface PreviewPageProps {
   loading: boolean;
@@ -32,117 +39,121 @@ interface PreviewPageProps {
 
 const StyledAnimated = styled(Animated)`
   height: 100%;
-`
+`;
 
 const StyledLink = styled.a<{ theme?: Theme }>`
-  color:  #c4c4c4;
+  color: #787878;
   text-decoration: none;
 
   &.active {
-      p {
-          font-family: 'Poppins Medium' !important;
-          color:  #c4c4c4  !important;
-      }
+    p {
+      font-family: 'Poppins Medium' !important;
+      color: #9771ff !important;
+    }
   }
 `;
 
-const StyledStepper = styled(Stepper) <{ theme?: Theme }>`
+const StyledStepper = styled(Stepper)<{ theme?: Theme }>`
   width: 100%;
   .MuiStepIcon-text {
-      fill: white !important;
+    fill: white !important;
   }
 
   .MuiSvgIcon-root.Mui-active {
-      color:  #c4c4c4  !important;
+    color: #9771ff !important;
   }
 
-  @media(max-width: 874px) {
-      display: none;
+  @media (max-width: 874px) {
+    display: none;
   }
-`
+`;
 
-const StyledStep = styled(Step) <{ theme?: Theme, previousStepValid: boolean }>`
+const StyledStep = styled(Step)<{ theme?: Theme; previousStepValid: boolean }>`
   .MuiStepConnector-line {
-      border-color:  #c4c4c4 !important;
-      transition: color 0.2s;
+    border-color: #787878 !important;
+    transition: color 0.2s;
   }
-`
+`;
 
-const StyledStepLabel = styled(StepLabel) <{ theme?: Theme }>`
+const StyledStepLabel = styled(StepLabel)<{ theme?: Theme }>`
   .MuiSvgIcon-root.Mui-completed {
-      color:  #c4c4c4 !important;
+    color: #9771ff !important;
   }
-`
+`;
 
-const StyledPaper = styled(Paper) <{ theme?: Theme, translateX: boolean, disabled: boolean }>`
+const StyledPaper = styled(Paper)<{
+  theme?: Theme;
+  translateX: boolean;
+  disabled: boolean;
+}>`
   box-shadow: none;
   width: 50%;
   background-image: none;
 
-  pointer-events: ${props => props.disabled ? 'none' : ''};
-  opacity: ${props => props.disabled ? '0.4' : '1'};
+  pointer-events: ${(props) => (props.disabled ? 'none' : '')};
+  opacity: ${(props) => (props.disabled ? '0.4' : '1')};
 
   transition: opacity 0.2s;
   padding: 2rem;
 
-  @media(max-width: 874px) {
-      width: 90%;
-      padding: 1.2rem !important;
+  @media (max-width: 874px) {
+    width: 90%;
+    padding: 1.2rem !important;
   }
-`
+`;
 
-const StyledPaymentStack = styled(Stack) <{ theme?: Theme, selected: boolean, disabled?: boolean }>`
+const StyledPaymentStack = styled(Stack)<{
+  theme?: Theme;
+  selected: boolean;
+  disabled?: boolean;
+}>`
   cursor: pointer;
-   
+
   border-radius: 1rem;
   padding-left: 1rem;
   padding-right: 1rem;
   align-items: center;
   transition: border 0.2s;
   height: 5rem;
-  opacity: ${props => props.disabled ? 0.5 : 1};
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
 
   :hover {
-      border: 1px solid #c4c4c4;
+    border: 1px solid #787878;
   }
 
   :active {
-      border: 1px solid #c4c4c4;
+    border: 1px solid #787878;
   }
-`
+`;
 
 const StyledImage = styled.img<{ theme?: Theme }>`
-  filter: ${props => props.theme.logo};
+  filter: ${(props) => props.theme.logo};
   max-height: 2.5rem;
   width: 2.5rem;
   margin-right: 2rem;
-`
+`;
 
-const StyledDoneIcon = styled(DoneIcon) <{ theme?: Theme }>`
+const StyledDoneIcon = styled(DoneIcon)<{ theme?: Theme }>`
   color: #000;
-`
+`;
 
-const steps = [
-  'Summary',
-  'Choose payment method',
-  'Proceed payment',
-];
+const steps = ['Summary', 'Choose payment method', 'Proceed payment'];
 
 export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
   const history = useHistory();
   const isMobile = useMediaQuery('(max-width: 874px)');
 
-  const [activeStep, setActiveStep] = useState<number>(0)
+  const [activeStep, setActiveStep] = useState<number>(0);
 
-  const wrapperRef = useRef()
-  const wrapperRefSlide = useRef()
+  const wrapperRef = useRef();
+  const wrapperRefSlide = useRef();
 
   const [timeLeft, setTimeLeft] = useState<number>();
   const [isWarned, setIsWarned] = useState(false);
   const [isExpiredError, setIsExpiredError] = useState(false);
 
   const [deleteFromCartResponse, deleteFromCart] = useAxios('', {
-      manual: true,
+    manual: true,
   });
 
   const [concernedDeletedNFT, setConcernedDeletedNft] = useState<number>();
@@ -150,168 +161,165 @@ export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
   const [showExitPrompt, setShowExitPrompt] = useState(false);
 
   const initBeforeUnLoad = (showExitPrompt = false) => {
-      window.onbeforeunload = (event) => {
-          // Show prompt based on state
-          if (showExitPrompt && history.location.pathname === '/preview') {
-              const e = event || window.event;
-              e.preventDefault();
-              if (e) {
-                  e.returnValue = ''
-              }
-              return '';
-          }
-      };
+    window.onbeforeunload = (event) => {
+      // Show prompt based on state
+      if (showExitPrompt && history.location.pathname === '/preview') {
+        const e = event || window.event;
+        e.preventDefault();
+        if (e) {
+          e.returnValue = '';
+        }
+        return '';
+      }
+    };
   };
 
   window.onload = function () {
-      initBeforeUnLoad(showExitPrompt);
+    initBeforeUnLoad(showExitPrompt);
   };
 
   // Re-Initialize the onbeforeunload event listener
   useEffect(() => {
-      initBeforeUnLoad(showExitPrompt);
+    initBeforeUnLoad(showExitPrompt);
   }, [showExitPrompt]);
 
   useEffect(() => {
-      setShowExitPrompt(true)
-      return () => {
-          setShowExitPrompt(false)
-      }
-    }, [])
+    setShowExitPrompt(true);
+    return () => {
+      setShowExitPrompt(false);
+    };
+  }, []);
 
   const handleDeleteFromBasket = (nftId: number) => {
+    if (activeStep > 1) {
+      return false;
+    }
 
-      if (activeStep > 1) {
-          return false
-      }
-
-      setConcernedDeletedNft(nftId);
-      deleteFromCart({
-          url:
-              process.env.REACT_APP_API_SERVER_BASE_URL +
-              '/users/cart/remove/' +
-              nftId,
-          method: 'POST',
-          withCredentials: true,
-          headers: {
-              Authorization: `Bearer ${localStorage.getItem(
-                  'Kanvas - Bearer',
-              )}`,
-          },
-      })
-          .then((res: any) => {
-              if (res.status === 204) {
-                  props.listCart();
-              }
-          })
-          .catch((err: any) => {
-              toast.error(err.response?.data?.message ?? 'An error occured');
-          });
-  };
-
-  useEffect(() => {
-      if (isExpiredError && timeLeft && timeLeft < 0) {
-          setIsExpiredError(true);
-          toast.error('Your cart has expired');
-          props.listCart();
-      }
-
-      if (!timeLeft) return;
-      setInterval(() => {
-          setTimeLeft(
-              new Date(props.expiresAt).getTime() - new Date().getTime(),
-          );
-      }, 60000);
-
-      if (timeLeft < 300000 && !isWarned) {
-          toast.warning(
-              `Your card will expire in ${new Date(
-                  timeLeft,
-              ).getMinutes()} minutes`,
-          );
-          setIsWarned(true);
-      }
-  }, [timeLeft]);
-
-  useEffect(() => {
-      setTimeLeft(new Date(props.expiresAt).getTime() - new Date().getTime());
-  }, [props.expiresAt]);
-
-  const calculateTotal = (priceArray: number[]) =>
-      priceArray.reduce(
-          (total: number, price: number) => (total += price),
-          0,
-      );
-
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'stripe' | 'tezos'>()
-  const [errorMessagePaymentMethod, setErrorMessagePaymenMethod] = useState<string>()
-
-  const selectPaymentMethod = (input: 'stripe' | 'tezos') => {
-      setErrorMessagePaymenMethod(undefined)
-      setSelectedPaymentMethod(input)
-  }
-
-  const [paymentIntentSecret, getPaymentIntentSecret] = useAxios({
+    setConcernedDeletedNft(nftId);
+    deleteFromCart({
       url:
-          process.env.REACT_APP_API_SERVER_BASE_URL +
-          '/payment/create-payment-intent',
+        process.env.REACT_APP_API_SERVER_BASE_URL +
+        '/users/cart/remove/' +
+        nftId,
       method: 'POST',
       withCredentials: true,
       headers: {
-          Authorization: `Bearer ${localStorage.getItem(
-              'Kanvas - Bearer',
-          )}`,
+        Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,
       },
-  },
-      {
-          manual: true,
+    })
+      .then((res: any) => {
+        if (res.status === 204) {
+          props.listCart();
+        }
       })
-
-  const handleBackwardStep = () => {
-      if (activeStep === 0) {
-          history.push('/store')
-      }
-
-      setActiveStep(activeStep - 1)
-  }
-
-  const handleForwardStep = () => {
-      if (activeStep === 0) {
-          setActiveStep(activeStep + 1)
-      }
-
-      if (activeStep === 1 && !selectedPaymentMethod) {
-          setErrorMessagePaymenMethod('You need to select at least one payment method to continue')
-          return false
-      }
-
-      if (activeStep === 1 && selectedPaymentMethod === 'stripe') {
-          getPaymentIntentSecret().then(() => {
-              setActiveStep(activeStep + 1)
-          })
-      }
-
-      if (activeStep === 3) {
-          history.push(`/profile/${localStorage.getItem('Kanvas - address')}`)
-      }
-  }
+      .catch((err: any) => {
+        toast.error(err.response?.data?.message ?? 'An error occured');
+      });
+  };
 
   useEffect(() => {
-      if (paymentIntentSecret.data) {
-          const appearance = {
-              theme: 'flat' as 'flat',
-          };
-          setStripeOptions({
-              appearance: appearance,
-              clientSecret: paymentIntentSecret.data.clientSecret
-          })
-      }
-      if (paymentIntentSecret.error) {
-          toast.error('Something went wrong with the cart, please refresh')
-      }
-  }, [paymentIntentSecret])
+    if (isExpiredError && timeLeft && timeLeft < 0) {
+      setIsExpiredError(true);
+      toast.error('Your cart has expired');
+      props.listCart();
+    }
 
-  const [stripeOptions, setStripeOptions] = useState<StripeElementsOptions>({ clientSecret: undefined })
+    if (!timeLeft) return;
+    setInterval(() => {
+      setTimeLeft(new Date(props.expiresAt).getTime() - new Date().getTime());
+    }, 60000);
+
+    if (timeLeft < 300000 && !isWarned) {
+      toast.warning(
+        `Your card will expire in ${new Date(timeLeft).getMinutes()} minutes`,
+      );
+      setIsWarned(true);
+    }
+  }, [timeLeft]);
+
+  useEffect(() => {
+    setTimeLeft(new Date(props.expiresAt).getTime() - new Date().getTime());
+  }, [props.expiresAt]);
+
+  const calculateTotal = (priceArray: number[]) =>
+    priceArray.reduce((total: number, price: number) => (total += price), 0);
+
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
+    'stripe' | 'tezos'
+  >();
+  const [errorMessagePaymentMethod, setErrorMessagePaymenMethod] =
+    useState<string>();
+
+  const selectPaymentMethod = (input: 'stripe' | 'tezos') => {
+    setErrorMessagePaymenMethod(undefined);
+    setSelectedPaymentMethod(input);
+  };
+
+  const [paymentIntentSecret, getPaymentIntentSecret] = useAxios(
+    {
+      url:
+        process.env.REACT_APP_API_SERVER_BASE_URL +
+        '/payment/create-payment-intent',
+      method: 'POST',
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,
+      },
+    },
+    {
+      manual: true,
+    },
+  );
+
+  const handleBackwardStep = () => {
+    if (activeStep === 0) {
+      history.push('/store');
+    }
+
+    setActiveStep(activeStep - 1);
+  };
+
+  const handleForwardStep = () => {
+    if (activeStep === 0) {
+      setActiveStep(activeStep + 1);
+    }
+
+    if (activeStep === 1 && !selectedPaymentMethod) {
+      setErrorMessagePaymenMethod(
+        'You need to select at least one payment method to continue',
+      );
+      return false;
+    }
+
+    if (activeStep === 1 && selectedPaymentMethod === 'stripe') {
+      getPaymentIntentSecret().then(() => {
+        setActiveStep(activeStep + 1);
+      });
+    }
+
+    if (activeStep === 3) {
+      history.push(`/profile/${localStorage.getItem('Kanvas - address')}`);
+    }
+  };
+
+  useEffect(() => {
+    if (paymentIntentSecret.data) {
+      const appearance = {
+        theme: 'flat' as 'flat',
+      };
+      setStripeOptions({
+        appearance: appearance,
+        clientSecret: paymentIntentSecret.data.clientSecret,
+      });
+    }
+    if (paymentIntentSecret.error) {
+      toast.error('Something went wrong with the cart, please refresh');
+    }
+  }, [paymentIntentSecret]);
+
+  const [stripeOptions, setStripeOptions] = useState<StripeElementsOptions>({
+    clientSecret: undefined,
+  });
 
   const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PK_KEY!);
 
@@ -350,6 +358,17 @@ export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
           >
             {/* Summary */}
             <StyledPaper translateX={activeStep > 0} disabled={activeStep > 0}>
+              <Typography
+                size="h4"
+                weight="SemiBold"
+                display="initial !important"
+                align="right"
+              >
+                {/* {`${calculateTotal(
+                        props.nftsInCart.map((nft) => nft.price),
+                      )} ꜩ`} */}
+                NFT in cart
+              </Typography>
               <Stack
                 direction="column"
                 spacing={4}
@@ -362,57 +381,56 @@ export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
                   [...new Array(3)].map(() => (
                     <ShoppingCartItem loading={true} removeNft={() => {}} />
                   ))
-                ) 
-                // : props.nftsInCart.length > 0 ? (
-                //   <>
-                //     {props.nftsInCart.map((nft) => (
-                //       <ShoppingCartItem
-                //         loading={false}
-                //         nft={nft}
-                //         removeNftLoading={
-                //           deleteFromCartResponse.loading &&
-                //           concernedDeletedNFT === nft.id
-                //         }
-                //         removeNft={handleDeleteFromBasket}
-                //       />
-                //     ))}
+                ) : (
+                  // : props.nftsInCart.length > 0 ? (
+                  //   <>
+                  //     {props.nftsInCart.map((nft) => (
+                  //       <ShoppingCartItem
+                  //         loading={false}
+                  //         nft={nft}
+                  //         removeNftLoading={
+                  //           deleteFromCartResponse.loading &&
+                  //           concernedDeletedNFT === nft.id
+                  //         }
+                  //         removeNft={handleDeleteFromBasket}
+                  //       />
+                  //     ))}
 
-                //     <FlexSpacer />
+                  //     <FlexSpacer />
 
-                //     <Stack direction="row">
-                //       <Typography
-                //         size="h4"
-                //         weight="SemiBold"
-                //         display="initial !important"
-                //         align="left"
-                //       >
-                //         Total
-                //       </Typography>
+                  //     <Stack direction="row">
+                  //       <Typography
+                  //         size="h4"
+                  //         weight="SemiBold"
+                  //         display="initial !important"
+                  //         align="left"
+                  //       >
+                  //         Total
+                  //       </Typography>
 
-                //       <FlexSpacer />
+                  //       <FlexSpacer />
 
-                //       <Typography
-                //         size="h4"
-                //         weight="SemiBold"
-                //         display="initial !important"
-                //         align="right"
-                //       >
-                //         {/* {`${calculateTotal(
-                //           props.nftsInCart.map((nft) => nft.price),
-                //         )} ꜩ`} */}
+                  //       <Typography
+                  //         size="h4"
+                  //         weight="SemiBold"
+                  //         display="initial !important"
+                  //         align="right"
+                  //       >
+                  //         {/* {`${calculateTotal(
+                  //           props.nftsInCart.map((nft) => nft.price),
+                  //         )} ꜩ`} */}
 
-                //         NFT in cart
-                //       </Typography>
-                //     </Stack>
-                //   </>
-                // ) 
-                : (
+                  //         NFT in cart
+                  //       </Typography>
+                  //     </Stack>
+                  //   </>
+                  // )
                   <Typography
                     size="Subtitle1"
                     weight="Medium"
                     display="initial !important"
                     align="center"
-                    color="#C4C4C4"
+                    color="#787878"
                   >
                     {'Empty Shopping Cart..'}
                   </Typography>
@@ -424,7 +442,7 @@ export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
                     weight="Medium"
                     display="initial !important"
                     align="left"
-                    color="#C4C4C4"
+                    color="#787878"
                   >
                     {timeLeft && timeLeft > 0
                       ? `Your cart will expire in ${Math.round(
@@ -435,13 +453,16 @@ export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
                   </Typography>
                 )} */}
 
-<Typography
-                    size="subtitle2"
-                    weight="Medium"
-                    display="initial !important"
-                    align="left"
-                    color="#C4C4C4"
-                  >  Cart Expired </Typography>
+                <Typography
+                  size="subtitle2"
+                  weight="Medium"
+                  display="initial !important"
+                  align="left"
+                  color="#787878"
+                >
+                  {' '}
+                  Cart Expired{' '}
+                </Typography>
               </Stack>
             </StyledPaper>
 
@@ -465,7 +486,7 @@ export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
                       weight="SemiBold"
                       display="initial !important"
                     >
-                     Payment
+                      Payment
                     </Typography>
 
                     <FlexSpacer minHeight={2} />
@@ -496,7 +517,7 @@ export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
                               href="https://stripe.com/"
                               target="_blank"
                             >
-                               Link payment
+                              Link payment
                             </StyledLink>
                           </Typography>
                         </Stack>
@@ -531,7 +552,7 @@ export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
                               href="https://tezos.com/"
                               target="_blank"
                             >
-                             Payment link 2
+                              Payment link 2
                             </StyledLink>
                           </Typography>
                         </Stack>
@@ -544,9 +565,9 @@ export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
                             size="h5"
                             weight="Light"
                             display="initial !important"
-                            color="#c4c4c4"
+                            color="#787878"
                           >
-                           Upcoming method
+                            Upcoming method
                           </Typography>
                         }
                       </StyledPaymentStack>
@@ -563,7 +584,7 @@ export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
                       weight="SemiBold"
                       display="initial !important"
                     >
-                    Method 2
+                      Method 2
                     </Typography>
                     <Stack
                       direction="row"
@@ -626,21 +647,23 @@ export const PreviewPage: FC<PreviewPageProps> = ({ ...props }) => {
         <Stack direction="row">
           {activeStep <= 2 && (
             <>
-            <Button variant="contained"
+              <Button
+                variant="contained"
                 onClick={() => handleBackwardStep()}
-                className='MuiButton-containedPrimary'
-                label="Back"  
-        />
+                className="MuiButton-containedPrimary"
+                label="Back"
+              />
               <FlexSpacer minWidth={2} />
             </>
           )}
 
           {(activeStep < 2 || activeStep === 3) && (
-           <Button variant="contained"
-            onClick={() => handleForwardStep()}
-            className='MuiButton-containedPrimary'
-            label="Next"  
-          />
+            <Button
+              variant="contained"
+              onClick={() => handleForwardStep()}
+              className="MuiButton-containedPrimary"
+              label="Next"
+            />
           )}
         </Stack>
         <Typography size="h5" weight="Light" color="error">

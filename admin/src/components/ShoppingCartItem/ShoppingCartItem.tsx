@@ -5,7 +5,7 @@ import ImageNotSupportedOutlinedIcon from '@mui/icons-material/ImageNotSupported
 
 import { FC } from 'react';
 import { Skeleton, Stack, Theme } from '@mui/material';
-import { INft } from '../Interfaces/artwork';
+import { INft } from '../../Interfaces/artwork';
 import Typography from '../Typography';
 import CustomCircularProgress from '../CircularProgress';
 import { useHistory } from 'react-router-dom';
@@ -110,7 +110,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     weight="Light"
                     display="initial !important"
                     noWrap
-                    color="#C4C4C4"
+                    color="#787878"
                     sx={{ cursor: 'pointer', maxWidth: '70%' }}
                 >
                     {nft!.ipfsHash}

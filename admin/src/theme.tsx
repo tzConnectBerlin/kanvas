@@ -117,10 +117,10 @@ export const theme = createTheme(
 
       dropShadow: {
         paper: 'drop-shadow(0 0 6rem #fafafa)',
-        default: 'drop-shadow(0 0 0.45rem #C4C4C4)',
-        hover: 'drop-shadow(0 0 0.55rem #C4C4C4)',
+        default: 'drop-shadow(0 0 0.45rem #787878)',
+        hover: 'drop-shadow(0 0 0.55rem #787878)',
         avatar: 'drop-shadow(0 0 0.25rem #e0e0e0)',
-        shoppingCart: 'drop-shadow(0 1rem 0.55rem #C4C4C4)',
+        shoppingCart: 'drop-shadow(0 1rem 0.55rem #787878)',
     },
 
       MuiButtonBase: {

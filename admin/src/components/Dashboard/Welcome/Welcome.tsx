@@ -7,7 +7,7 @@ import { Box, Card, CardActions, Button, Typography } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
     root: {
-        boxShadow: '2px 4px 10px #c4c4c4 !important',
+        boxShadow: '2px 4px 10px #787878 !important',
         borderRadius: '1rem',
         background:
             theme.palette.type === 'dark'

@@ -182,7 +182,7 @@ export const SignInModal: FC<SignInModalProps> = ({ ...props }) => {
           </Typography>
 
           <Typography
-            color={'#C4C4C4'}
+            color={'#787878'}
             sx={{
               textAlign: 'center',
               justifyContent: 'center',

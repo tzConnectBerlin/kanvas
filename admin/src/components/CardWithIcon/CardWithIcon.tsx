@@ -16,7 +16,7 @@ interface Props {
 
 const useStyles = makeStyles(theme => ({
     card: {
-        boxShadow: '2px 4px 10px #c4c4c4 !important',
+        boxShadow: '2px 4px 10px #787878 !important',
         borderRadius: '1rem',
         minHeight: 52,
         display: 'flex',

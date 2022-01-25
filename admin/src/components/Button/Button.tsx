@@ -61,48 +61,48 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
 
     background-color: ${(props) =>
         props.verified
-            ? ' #c4c4c4 '
-            : ' #c4c4c4 '
+            ? ' #787878 '
+            : ' #787878 '
             &&  'transparent'
            };
 
-    border: solid 1px #c4c4c4;
+    border: solid 1px #787878;
     margin: 1px;
     text-transform: none;
     transition: outline 0.6s linear;
 
     &:hover {
-        border: ${(props) => `solid 1px  #c4c4c4 `};
+        border: ${(props) => `solid 1px  #787878 `};
         box-shadow: none;
         background-color: ${(props) =>
             props.verified
-                ? ' #c4c4c4 '
-                : ' #c4c4c4 '
+                ? ' #787878 '
+                : ' #787878 '
                 && 'transparent'
     }
 
     &:active {
-        border: 1px solid #c4c4c4;
+        border: 1px solid #787878;
         transition: outline 0.1s;
 
         box-shadow: none;
         background-color: ${(props) =>
             props.verified
-            ? ' #c4c4c4 '
-            : ' #c4c4c4 '
+            ? ' #787878 '
+            : ' #787878 '
             && 'transparent'
     }
 
     &:disabled {
         border-color: transparent;
-        outline: 1px solid #c4c4c4;
+        outline: 1px solid #787878;
 
         svg {
-            color: #c4c4c4 !important;
+            color: #9771ff !important;
         }
 
         p {
-            color: #c4c4c4 !important;
+            color: #787878 !important;
         }
     }
 
@@ -119,7 +119,7 @@ const StyledButton = styled(MButton)<StyledButtonProps>`
     }
 
     p {
-        color:  #c4c4c4  !important;
+        color:  #787878  !important;
     }
 
     transition: all 0.1s linear;

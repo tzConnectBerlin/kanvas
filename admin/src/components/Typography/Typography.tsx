@@ -50,9 +50,9 @@ const StyledTypography = styled(MTypography)<IStyledTypography>`
     color: ${(props) =>
         props.color
             ? props.color === 'contrastText'
-                ? '#c4c4c4'
+                ? '#787878'
                 : props.color
-            : '#c4c4c4' ?? 'black'} !important;
+            : '#787878' ?? 'black'} !important;
 
     &.truncate {
         overflow: hidden;
