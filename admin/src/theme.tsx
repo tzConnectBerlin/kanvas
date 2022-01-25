@@ -2,7 +2,61 @@ import { defaultTheme } from 'react-admin';
 import { createTheme } from '@material-ui/core/styles';
 import merge from 'lodash/merge';
 
+
+declare module '@mui/material/styles' {
+  interface Theme {
+      logo: {
+          filter: string;
+      };
+      button: {
+          background: string;
+      };
+      header: {
+          background: string;
+      };
+      footer: {
+          background: string;
+      };
+      dropShadow: {
+          default: string;
+          hover: string;
+          avatar: string;
+          paper: string;
+          shoppingCart: string;
+      };
+      boxShadow: {
+          default: string;
+      };
+  }
+  // allow configuration using `createTheme`
+  interface ThemeOptions {
+      logo: {
+          filter: string;
+      };
+      button: {
+          background: string;
+      };
+      header: {
+          background: string;
+      };
+      footer: {
+          background: string;
+      };
+      dropShadow: {
+          default: string;
+          hover: string;
+          avatar: string;
+          paper: string;
+          shoppingCart: string;
+      };
+      boxShadow: {
+          default: string;
+      };
+  }
+}
+
 export const theme = createTheme(
+  
   merge({}, defaultTheme, {
     palette: {
       type: 'light',
@@ -61,7 +115,13 @@ export const theme = createTheme(
         },
       },
 
-
+      dropShadow: {
+        paper: 'drop-shadow(0 0 6rem #fafafa)',
+        default: 'drop-shadow(0 0 0.45rem #C4C4C4)',
+        hover: 'drop-shadow(0 0 0.55rem #C4C4C4)',
+        avatar: 'drop-shadow(0 0 0.25rem #e0e0e0)',
+        shoppingCart: 'drop-shadow(0 1rem 0.55rem #C4C4C4)',
+    },
 
       MuiButtonBase: {
         root: {
