@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import Avatar from '../Avatar';
+// import Avatar from '../Avatar';
 import ClearIcon from '@mui/icons-material/Clear';
 import ImageNotSupportedOutlinedIcon from '@mui/icons-material/ImageNotSupportedOutlined';
 
@@ -85,14 +85,14 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
             spacing={4}
             sx={{ width: 'auto', alignItems: 'center' }}
         >
-            <Avatar
+            {/* <Avatar
                 src={nft!.dataUri ? nft!.dataUri : undefined}
                 height={62}
                 width={62}
                 borderRadius={2}
             >
                 <ImageNotSupportedOutlinedIcon />
-            </Avatar>
+            </Avatar> */}
             <Stack direction="column" sx={{ width: 'auto', minWidth: '40%' }}>
                 <Typography
                     size="h4"
