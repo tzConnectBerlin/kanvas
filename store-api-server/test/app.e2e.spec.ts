@@ -1,9 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ValidationPipe } from '@nestjs/common';
 import { Logger, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { RATE_LIMIT } from 'src/constants';
-import { PaymentProviderEnum, PaymentService, PaymentStatus } from 'src/payment/service/payment.service';
+import {
+  PaymentProviderEnum,
+  PaymentService,
+  PaymentStatus,
+} from 'src/payment/service/payment.service';
 import { UserService } from 'src/user/service/user.service';
 
 let anyTestFailed = false;
@@ -31,13 +36,13 @@ describe('AppController (e2e)', () => {
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    })
-      .compile();
+    }).compile();
 
-    paymentService = await moduleFixture.get(PaymentService)
-    userService = await moduleFixture.get(UserService)
+    paymentService = await moduleFixture.get(PaymentService);
+    userService = await moduleFixture.get(UserService);
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
   });
 
@@ -53,6 +58,81 @@ describe('AppController (e2e)', () => {
   // Note:
   // - these tests expect responses related to a database that has been filled
   //   with data in store-api-server/script/populate-testdb.sql
+
+  skipOnPriorFail(
+    '/nfts?orderBy=view is determined by number of POST /nfts/:id per id',
+    async () => {
+      await Promise.all([
+        request(app.getHttpServer()).post('/nfts/1'),
+        request(app.getHttpServer()).post('/nfts/23'),
+        request(app.getHttpServer()).post('/nfts/23'),
+        request(app.getHttpServer()).post('/nfts/23'),
+        request(app.getHttpServer()).post('/nfts/3'),
+        request(app.getHttpServer()).post('/nfts/3'),
+      ]);
+
+      const res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ orderBy: 'views', orderDirection: 'desc', pageSize: '3' });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.nfts.map((elem: any) => elem.id)).toStrictEqual([
+        23, 3, 1,
+      ]);
+    },
+  );
+
+  skipOnPriorFail('/nfts/:id (non existing id => BAD REQUEST)', async () => {
+    const res = await request(app.getHttpServer()).post('/nfts/0');
+    expect(res.statusCode).toEqual(400);
+  });
+
+  skipOnPriorFail('/nfts/:id (existing id => OK)', async () => {
+    const res = await request(app.getHttpServer()).post('/nfts/1');
+    expect(res.statusCode).toEqual(201);
+
+    // cannot test this accurately because currently the testdb is populated
+    // with now() timestamps
+    expect(res.body.createdAt).toBeGreaterThan(0);
+    delete res.body.createdAt;
+    expect(res.body.launchAt).toBeGreaterThan(0);
+    delete res.body.launchAt;
+
+    expect(res.body).toStrictEqual({
+      id: 1,
+      name: 'Cartoon',
+      description:
+        'Hey guys, here s the WL team ready to write some more code !',
+      ipfsHash: 'ipfs://.....',
+      metadata: {},
+      dataUri:
+        'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+      price: 1,
+      contract: null,
+      tokenId: null,
+      editionsSize: 4,
+      editionsAvailable: 4,
+      categories: [
+        { id: 4, name: 'Drawing', description: 'Sub fine art category' },
+      ],
+    });
+  });
+
+  skipOnPriorFail(
+    '/nfts without any filter is OK, becames a paginated nfts browser without any filter',
+    async () => {
+      const PAGE_SIZE = 10;
+      const res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ pageSize: `${PAGE_SIZE}` });
+      expect(res.statusCode).toEqual(200);
+
+      expect(res.body.nfts.length).toEqual(PAGE_SIZE);
+
+      expect(res.body.nfts.map((elem: any) => elem.id)).toStrictEqual([
+        23, 3, 1,
+      ]);
+    },
+  );
 
   skipOnPriorFail(
     '/users/profile: not logged in and no userAddress provided => BAD REQUEST',
@@ -408,7 +488,7 @@ describe('AppController (e2e)', () => {
       expect(remove.statusCode).toEqual(400);
     },
   );
-  
+
   skipOnPriorFail(
     'Rate limiter test (requesting 1 more time than is allowed, should result in exactly 1 429)',
     async () => {
@@ -424,473 +504,610 @@ describe('AppController (e2e)', () => {
     },
   );
 
-  skipOnPriorFail('stripe payment: create a correct intent payment method', async () => {
-    const { bearer, id } = await loginUser(app, 'addr', 'admin');
+  skipOnPriorFail(
+    'stripe payment: create a correct intent payment method',
+    async () => {
+      const { bearer, id } = await loginUser(app, 'addr', 'admin');
 
-    // nft price: 43
-    const add1 = await request(app.getHttpServer())
-      .post('/users/cart/add/4')
-      .set('authorization', bearer);
-    expect(add1.statusCode).toEqual(201);
+      // nft price: 43
+      const add1 = await request(app.getHttpServer())
+        .post('/users/cart/add/4')
+        .set('authorization', bearer);
+      expect(add1.statusCode).toEqual(201);
 
-    // nft price: 104
-    const add2 = await request(app.getHttpServer())
-      .post('/users/cart/add/1')
-      .set('authorization', bearer);
-    expect(add2.statusCode).toEqual(201);
+      // nft price: 104
+      const add2 = await request(app.getHttpServer())
+        .post('/users/cart/add/1')
+        .set('authorization', bearer);
+      expect(add2.statusCode).toEqual(201);
 
-    const preparedPayment = await paymentService.preparePayment(id, PaymentProviderEnum.TEST)
-    expect(preparedPayment.amount).toEqual(44);
+      const preparedPayment = await paymentService.preparePayment(
+        id,
+        PaymentProviderEnum.TEST,
+      );
+      expect(preparedPayment.amount).toEqual(44);
 
-    const remove1 = await request(app.getHttpServer())
-      .post('/users/cart/remove/4')
-      .set('authorization', bearer);
-    expect(remove1.statusCode).toEqual(204);
+      const remove1 = await request(app.getHttpServer())
+        .post('/users/cart/remove/4')
+        .set('authorization', bearer);
+      expect(remove1.statusCode).toEqual(204);
 
-    // nft price: 104
-    const remove2 = await request(app.getHttpServer())
-      .post('/users/cart/remove/1')
-      .set('authorization', bearer);
-    expect(remove2.statusCode).toEqual(204);
-  });
+      // nft price: 104
+      const remove2 = await request(app.getHttpServer())
+        .post('/users/cart/remove/1')
+        .set('authorization', bearer);
+      expect(remove2.statusCode).toEqual(204);
+    },
+  );
 
+  skipOnPriorFail(
+    'stripe payment: Payment status should change to succeeded if payment is successfull',
+    async () => {
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
 
-  skipOnPriorFail('stripe payment: Payment status should change to succeeded if payment is successfull', async () => {
-    const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      // nft price: 43 id: 4
+      const add1 = await request(app.getHttpServer())
+        .post('/users/cart/add/4')
+        .set('authorization', bearer);
+      expect(add1.statusCode).toEqual(201);
 
-    // nft price: 43 id: 4
-    const add1 = await request(app.getHttpServer())
-      .post('/users/cart/add/4')
-      .set('authorization', bearer);
-    expect(add1.statusCode).toEqual(201);
+      // nft price: 43 id: 1
+      const add2 = await request(app.getHttpServer())
+        .post('/users/cart/add/1')
+        .set('authorization', bearer);
+      expect(add2.statusCode).toEqual(201);
 
-    // nft price: 43 id: 1
-    const add2 = await request(app.getHttpServer())
-      .post('/users/cart/add/1')
-      .set('authorization', bearer);
-    expect(add2.statusCode).toEqual(201);
+      // Create one payment intent (we are not calling the stripe api)
+      const preparedPayment = await paymentService.preparePayment(
+        id,
+        PaymentProviderEnum.TEST,
+      );
+      await paymentService.createPayment(
+        PaymentProviderEnum.TEST,
+        `stripe_test_id${new Date().getTime().toString()}`,
+        preparedPayment.nftOrder.id,
+      );
 
-    // Create one payment intent (we are not calling the stripe api)
-    const preparedPayment = await paymentService.preparePayment(id, PaymentProviderEnum.TEST)
-    await paymentService.createPayment(PaymentProviderEnum.TEST, `stripe_test_id${new Date().getTime().toString()}`, preparedPayment.nftOrder.id)
+      // Give webhook handler function success event
+      const { payment_id } =
+        await paymentService.getPaymentIdForLatestUserOrder(id);
 
-    // Give webhook handler function success event
-    const { payment_id } = await paymentService.getPaymentIdForLatestUserOrder(id)
+      // reconstruct success event from stripe
+      const constructedEvent = {
+        type: 'payment_intent.succeeded',
+        data: {
+          object: {
+            id: payment_id,
+          },
+        },
+      };
 
-    // reconstruct success event from stripe
-    const constructedEvent = {
-      type: 'payment_intent.succeeded',
-      data: {
-        object: {
-          id: payment_id
-        }
+      // Calling success status
+      await paymentService.webhookHandler(constructedEvent);
+
+      // Check cart_session deleted
+      const old_cart_session = await userService.getUserCartSession(id);
+      expect(old_cart_session.val).toBeNull();
+
+      // Check payment status changed to succeeded
+      const { status } = await paymentService.getPaymentIdForLatestUserOrder(
+        id,
+      );
+      expect(status).toEqual(PaymentStatus.SUCCEEDED);
+
+      // Check NFT ownership transfer
+      const userNfts = await request(app.getHttpServer()).get(`/nfts`).query({
+        userAddress: 'addr',
+        orderDirection: 'asc',
+        orderBy: 'id',
+        page: 1,
+        pageSize: 2,
+      });
+
+      expect(userNfts.statusCode).toEqual(200);
+
+      const nftList = userNfts.body.nfts.map((nft: any) => nft.id);
+
+      expect(nftList).toContain(4);
+      expect(nftList).toContain(1);
+    },
+  );
+
+  skipOnPriorFail(
+    'stripe payment: Payment status should change to cancel if payment is canceled, nft should not be transferred',
+    async () => {
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+
+      // nft price: 43 id: 4
+      const add1 = await request(app.getHttpServer())
+        .post('/users/cart/add/5')
+        .set('authorization', bearer);
+      expect(add1.statusCode).toEqual(201);
+
+      // nft price: 43 id: 4
+      const add2 = await request(app.getHttpServer())
+        .post('/users/cart/add/2')
+        .set('authorization', bearer);
+      expect(add2.statusCode).toEqual(201);
+
+      // Create one payment intent (we are not calling the stripe api)
+      const preparedPayment = await paymentService.preparePayment(
+        id,
+        PaymentProviderEnum.TEST,
+      );
+      await paymentService.createPayment(
+        PaymentProviderEnum.TEST,
+        `stripe_test_id${new Date().getTime().toString()}`,
+        preparedPayment.nftOrder.id,
+      );
+
+      // Give webhook handler function success event
+      const { payment_id } =
+        await paymentService.getPaymentIdForLatestUserOrder(id);
+
+      // reconstruct success event from stripe
+      const constructedEvent = {
+        type: 'payment_intent.canceled',
+        data: {
+          object: {
+            id: payment_id,
+          },
+        },
+      };
+
+      // Changing to canceled status
+      await paymentService.webhookHandler(constructedEvent);
+
+      // Check cart_session still here
+      const old_cart_session = await userService.getUserCartSession(id);
+
+      expect(old_cart_session.val).toBeDefined();
+      expect(old_cart_session.ok).toEqual(true);
+
+      // Check payment status changed to canceled
+      const t = await paymentService.getPaymentIdForLatestUserOrder(id);
+
+      expect(t.status).toEqual(PaymentStatus.CANCELED);
+
+      const userNfts = await request(app.getHttpServer())
+        // Check that NFT has not been transfered
+        .get(`/nfts`)
+        .query({
+          userAddress: 'addr',
+          orderDirection: 'asc',
+          orderBy: 'id',
+          page: 1,
+          pageSize: 2,
+        });
+      expect(userNfts.statusCode).toEqual(200);
+
+      const nftList = userNfts.body.nfts.map((nft: any) => nft.id);
+      expect(nftList.indexOf(5)).toEqual(-1);
+      expect(nftList.indexOf(2)).toEqual(-1);
+
+      const remove1 = await request(app.getHttpServer())
+        .post('/users/cart/remove/5')
+        .set('authorization', bearer);
+      expect(remove1.statusCode).toEqual(204);
+
+      // nft price: 104
+      const remove2 = await request(app.getHttpServer())
+        .post('/users/cart/remove/2')
+        .set('authorization', bearer);
+      expect(remove2.statusCode).toEqual(204);
+    },
+  );
+
+  skipOnPriorFail(
+    'stripe payment: Payment status should change to failed if payment has failed, nft should not be transferred',
+    async () => {
+      const { bearer, id } = await loginUser(app, 'addr', 'admin');
+
+      // nft price: 43 id: 4
+      const add1 = await request(app.getHttpServer())
+        .post('/users/cart/add/7')
+        .set('authorization', bearer);
+      expect(add1.statusCode).toEqual(201);
+
+      // nft price: 43 id: 4
+      const add2 = await request(app.getHttpServer())
+        .post('/users/cart/add/6')
+        .set('authorization', bearer);
+      expect(add2.statusCode).toEqual(201);
+
+      // Create one payment intent (we are not calling the stripe api)
+      const preparedPayment = await paymentService.preparePayment(
+        id,
+        PaymentProviderEnum.TEST,
+      );
+      await paymentService.createPayment(
+        PaymentProviderEnum.TEST,
+        `stripe_test_id${new Date().getTime().toString()}`,
+        preparedPayment.nftOrder.id,
+      );
+
+      // Give webhook handler function success event
+      const { payment_id } =
+        await paymentService.getPaymentIdForLatestUserOrder(id);
+
+      // reconstruct success event from stripe
+      const constructedEvent = {
+        type: 'payment_intent.payment_failed',
+        data: {
+          object: {
+            id: payment_id,
+          },
+        },
+      };
+
+      // Calling success status
+      await paymentService.webhookHandler(constructedEvent);
+
+      // Check cart_session deleted
+      const old_cart_session = await userService.getUserCartSession(id);
+      expect(old_cart_session.val).toBeDefined();
+      expect(old_cart_session.ok).toEqual(true);
+
+      // Check payment status changed to canceled
+      const { status } = await paymentService.getPaymentIdForLatestUserOrder(
+        id,
+      );
+      expect(status).toEqual(PaymentStatus.FAILED);
+
+      const userNfts = await request(app.getHttpServer())
+        // Check that NFT has not been transfered
+        .get(`/nfts`)
+        .query({
+          userAddress: 'addr',
+          orderDirection: 'asc',
+          orderBy: 'id',
+          page: 1,
+          pageSize: 2,
+        });
+      expect(userNfts.statusCode).toEqual(200);
+
+      const nftList = userNfts.body.nfts.map((nft: any) => nft.id);
+      expect(nftList.indexOf(7)).toEqual(-1);
+      expect(nftList.indexOf(6)).toEqual(-1);
+
+      const remove1 = await request(app.getHttpServer())
+        .post('/users/cart/remove/7')
+        .set('authorization', bearer);
+      expect(remove1.statusCode).toEqual(204);
+
+      // nft price: 104
+      const remove2 = await request(app.getHttpServer())
+        .post('/users/cart/remove/6')
+        .set('authorization', bearer);
+      expect(remove2.statusCode).toEqual(204);
+    },
+  );
+
+  skipOnPriorFail(
+    'stripe payment: Payment status should change to timeout if payment has expired, and in CREATED OR PROCESSING state',
+    async () => {
+      const { bearer, id } = await loginUser(app, 'addr', 'admin');
+
+      // nft price: 43 id: 4
+      const add1 = await request(app.getHttpServer())
+        .post('/users/cart/add/4')
+        .set('authorization', bearer);
+      expect(add1.statusCode).toEqual(201);
+
+      // Create one payment intent (we are not calling the stripe api)
+      try {
+        const preparedPayment = await paymentService.preparePayment(
+          id,
+          PaymentProviderEnum.TEST,
+        );
+        await paymentService.createPayment(
+          PaymentProviderEnum.STRIPE,
+          `stripe_test_id${new Date().getTime().toString()}`,
+          preparedPayment.nftOrder.id,
+        );
+      } catch (err) {
+        Logger.log(err);
       }
-    };
-
-    // Calling success status
-    await paymentService.webhookHandler(constructedEvent)
-
-    // Check cart_session deleted
-    const old_cart_session = await userService.getUserCartSession(id)
-    expect(old_cart_session.val).toBeNull()
-
-    // Check payment status changed to succeeded
-    const { status } = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(status).toEqual(PaymentStatus.SUCCEEDED)
-
-    // Check NFT ownership transfer
-    const userNfts = await request(app.getHttpServer())
-      .get(`/nfts`)
-      .query({ userAddress: 'addr', orderDirection: 'asc', orderBy: 'id', page: 1, pageSize: 2 });
-
-    expect(userNfts.statusCode).toEqual(200)
-
-    const nftList = userNfts.body.nfts.map((nft: any) => nft.id);
-
-    expect(nftList).toContain(4)
-    expect(nftList).toContain(1)
-  });
-
-  skipOnPriorFail('stripe payment: Payment status should change to cancel if payment is canceled, nft should not be transferred', async () => {
-    const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
-
-    // nft price: 43 id: 4
-    const add1 = await request(app.getHttpServer())
-      .post('/users/cart/add/5')
-      .set('authorization', bearer);
-    expect(add1.statusCode).toEqual(201);
-
-    // nft price: 43 id: 4
-    const add2 = await request(app.getHttpServer())
-      .post('/users/cart/add/2')
-      .set('authorization', bearer);
-    expect(add2.statusCode).toEqual(201);
-
-    // Create one payment intent (we are not calling the stripe api)
-    const preparedPayment = await paymentService.preparePayment(id, PaymentProviderEnum.TEST)
-    await paymentService.createPayment(PaymentProviderEnum.TEST, `stripe_test_id${new Date().getTime().toString()}`, preparedPayment.nftOrder.id)
-
-    // Give webhook handler function success event
-    const { payment_id } = await paymentService.getPaymentIdForLatestUserOrder(id)
-
-    // reconstruct success event from stripe
-    const constructedEvent = {
-      type: 'payment_intent.canceled',
-      data: {
-        object: {
-          id: payment_id
-        }
-      }
-    };
-
-    // Changing to canceled status
-    await paymentService.webhookHandler(constructedEvent)
-
-    // Check cart_session still here
-    const old_cart_session = await userService.getUserCartSession(id)
-
-    expect(old_cart_session.val).toBeDefined()
-    expect(old_cart_session.ok).toEqual(true)
-
-    // Check payment status changed to canceled
-    const t = await paymentService.getPaymentIdForLatestUserOrder(id)
-
-    expect(t.status).toEqual(PaymentStatus.CANCELED)
-
-    const userNfts = await request(app.getHttpServer())
-      // Check that NFT has not been transfered
-      .get(`/nfts`)
-      .query({ userAddress: 'addr', orderDirection: 'asc', orderBy: 'id', page: 1, pageSize: 2 });
-    expect(userNfts.statusCode).toEqual(200)
-
-    const nftList = userNfts.body.nfts.map((nft: any) => nft.id);
-    expect(nftList.indexOf(5)).toEqual(-1)
-    expect(nftList.indexOf(2)).toEqual(-1)
-
-    const remove1 = await request(app.getHttpServer())
-      .post('/users/cart/remove/5')
-      .set('authorization', bearer);
-    expect(remove1.statusCode).toEqual(204);
-
-    // nft price: 104
-    const remove2 = await request(app.getHttpServer())
-      .post('/users/cart/remove/2')
-      .set('authorization', bearer);
-    expect(remove2.statusCode).toEqual(204);
-  });
-
-  skipOnPriorFail('stripe payment: Payment status should change to failed if payment has failed, nft should not be transferred', async () => {
-    const { bearer, id } = await loginUser(app, 'addr', 'admin');
-
-    // nft price: 43 id: 4
-    const add1 = await request(app.getHttpServer())
-      .post('/users/cart/add/7')
-      .set('authorization', bearer);
-    expect(add1.statusCode).toEqual(201);
-
-    // nft price: 43 id: 4
-    const add2 = await request(app.getHttpServer())
-      .post('/users/cart/add/6')
-      .set('authorization', bearer);
-    expect(add2.statusCode).toEqual(201);
-
-    // Create one payment intent (we are not calling the stripe api)
-    const preparedPayment = await paymentService.preparePayment(id, PaymentProviderEnum.TEST)
-    await paymentService.createPayment(PaymentProviderEnum.TEST, `stripe_test_id${new Date().getTime().toString()}`, preparedPayment.nftOrder.id)
-
-    // Give webhook handler function success event
-    const { payment_id } = await paymentService.getPaymentIdForLatestUserOrder(id)
-
-    // reconstruct success event from stripe
-    const constructedEvent = {
-      type: 'payment_intent.payment_failed',
-      data: {
-        object: {
-          id: payment_id
-        }
-      }
-    };
-
-    // Calling success status
-    await paymentService.webhookHandler(constructedEvent)
-
-    // Check cart_session deleted
-    const old_cart_session = await userService.getUserCartSession(id)
-    expect(old_cart_session.val).toBeDefined()
-    expect(old_cart_session.ok).toEqual(true)
-
-    // Check payment status changed to canceled
-    const { status } = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(status).toEqual(PaymentStatus.FAILED)
-
-    const userNfts = await request(app.getHttpServer())
-      // Check that NFT has not been transfered
-      .get(`/nfts`)
-      .query({ userAddress: 'addr', orderDirection: 'asc', orderBy: 'id', page: 1, pageSize: 2 });
-    expect(userNfts.statusCode).toEqual(200)
-
-    const nftList = userNfts.body.nfts.map((nft: any) => nft.id);
-    expect(nftList.indexOf(7)).toEqual(-1)
-    expect(nftList.indexOf(6)).toEqual(-1)
-
-    const remove1 = await request(app.getHttpServer())
-      .post('/users/cart/remove/7')
-      .set('authorization', bearer);
-    expect(remove1.statusCode).toEqual(204);
-
-    // nft price: 104
-    const remove2 = await request(app.getHttpServer())
-      .post('/users/cart/remove/6')
-      .set('authorization', bearer);
-    expect(remove2.statusCode).toEqual(204);
-  });
-
-  skipOnPriorFail('stripe payment: Payment status should change to timeout if payment has expired, and in CREATED OR PROCESSING state', async () => {
-    const { bearer, id } = await loginUser(app, 'addr', 'admin');
-
-    // nft price: 43 id: 4
-    const add1 = await request(app.getHttpServer())
-      .post('/users/cart/add/4')
-      .set('authorization', bearer);
-    expect(add1.statusCode).toEqual(201);
 
-    // Create one payment intent (we are not calling the stripe api)
-    try {
-      const preparedPayment = await paymentService.preparePayment(id, PaymentProviderEnum.TEST)
-      await paymentService.createPayment(PaymentProviderEnum.STRIPE, `stripe_test_id${new Date().getTime().toString()}`, preparedPayment.nftOrder.id)
-    } catch (err) {
-      Logger.log(err)
-    }
-
-
-    const { payment_id } = await paymentService.getPaymentIdForLatestUserOrder(id)
-
-    // reconstruct success event from stripe
-    const constructedEvent = {
-      type: 'payment_intent.payment_failed',
-      data: {
-        object: {
-          id: payment_id
-        }
-      }
-    };
-
-    await paymentService.webhookHandler(constructedEvent)
-
-    // Check failed payment don't get to timeout
-    const failed = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(failed.status).toEqual(PaymentStatus.FAILED)
-
-    await paymentService.deleteExpiredPayments()
-
-    const stillFailed = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(stillFailed.status).toEqual(PaymentStatus.FAILED)
-
-    // Check canceled payment don't get to timeout
-
-    // Create one payment intent (we are not calling the stripe api)
-    const preparedPayment2 = await paymentService.preparePayment(id, PaymentProviderEnum.TEST)
-    await paymentService.createPayment(PaymentProviderEnum.TEST, `stripe_test_id${new Date().getTime().toString()}`, preparedPayment2.nftOrder.id)
-
-    const payment3Data = await paymentService.getPaymentIdForLatestUserOrder(id)
-
-    // reconstruct success event from stripe
-    const constructedEvent3 = {
-      type: 'payment_intent.canceled',
-      data: {
-        object: {
-          id: payment3Data.payment_id
-        }
-      }
-    };
-
-    await paymentService.webhookHandler(constructedEvent3)
-
-    const canceled = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(canceled.status).toEqual(PaymentStatus.CANCELED)
-
-    await paymentService.deleteExpiredPayments()
-
-    const stillCanceled = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(stillCanceled.status).toEqual(PaymentStatus.CANCELED)
-
-    // Create one payment intent (we are not calling the stripe api)
-    const preparedPayment3 = await paymentService.preparePayment(id, PaymentProviderEnum.TEST)
-    await paymentService.createPayment(PaymentProviderEnum.TEST, `stripe_test_id${new Date().getTime().toString()}`, preparedPayment3.nftOrder.id)
-
-    const created = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(created.status).toEqual(PaymentStatus.CREATED)
-
-    await paymentService.deleteExpiredPayments()
-
-    const timedOut = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(timedOut.status).toEqual(PaymentStatus.TIMED_OUT)
-
-    // Create one payment intent (we are not calling the stripe api)
-    const preparedPayment4 = await paymentService.preparePayment(id, PaymentProviderEnum.TEST)
-    await paymentService.createPayment(PaymentProviderEnum.TEST, `stripe_test_id${new Date().getTime().toString()}`, preparedPayment4.nftOrder.id)
-
-    const payment4Data = await paymentService.getPaymentIdForLatestUserOrder(id)
-
-    // reconstruct success event from stripe
-    const constructedEvent5 = {
-      type: 'payment_intent.processing',
-      data: {
-        object: {
-          id: payment4Data.payment_id
-        }
-      }
-    };
-
-    await paymentService.webhookHandler(constructedEvent5)
-
-    const processing = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(processing.status).toEqual(PaymentStatus.PROCESSING)
-
-    await paymentService.deleteExpiredPayments()
-
-    const timedOutResponse = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(timedOutResponse.status).toEqual(PaymentStatus.TIMED_OUT)
-
-
-    // Create one payment intent (we are not calling the stripe api)
-    const preparedPayment5 = await paymentService.preparePayment(id, PaymentProviderEnum.TEST)
-    await paymentService.createPayment(PaymentProviderEnum.TEST, `stripe_test_id${new Date().getTime().toString()}`, preparedPayment5.nftOrder.id)
-
-    const payment5Data = await paymentService.getPaymentIdForLatestUserOrder(id)
-
-    // reconstruct success event from stripe
-    const constructedEvent2 = {
-      type: 'payment_intent.succeeded',
-      data: {
-        object: {
-          id: payment5Data.payment_id
-        }
-      }
-    };
-
-    await paymentService.webhookHandler(constructedEvent2)
-
-    const success = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(success.status).toEqual(PaymentStatus.SUCCEEDED)
-
-    await paymentService.deleteExpiredPayments()
-
-    const stillSuccess = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(stillSuccess.status).toEqual(PaymentStatus.SUCCEEDED)
-
-  });
-
-  skipOnPriorFail('stripe payment: Payment status should not change from FAILED', async () => {
-    const { bearer, id } = await loginUser(app, 'addr', 'admin');
-
-    // nft price: 43 id: 4
-    const add1 = await request(app.getHttpServer())
-      .post('/users/cart/add/4')
-      .set('authorization', bearer);
-    expect(add1.statusCode).toEqual(201);
-
-    // Create one payment intent (we are not calling the stripe api)
-    const preparedPayment = await paymentService.preparePayment(id, PaymentProviderEnum.TEST)
-    await paymentService.createPayment(PaymentProviderEnum.TEST, `stripe_test_id${new Date().getTime().toString()}`, preparedPayment.nftOrder.id)
-
-    // Give webhook handler function success event
-    const { payment_id } = await paymentService.getPaymentIdForLatestUserOrder(id)
-
-    // reconstruct success event from stripe
-    const constructedEvent = {
-      type: 'payment_intent.payment_failed',
-      data: {
-        object: {
-          id: payment_id
-        }
-      }
-    };
-
-    // Calling success status
-    await paymentService.webhookHandler(constructedEvent)
-
-    const failed = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(failed.status).toEqual(PaymentStatus.FAILED)
-
-    // reconstruct success event from stripe
-    const constructedEvent2 = {
-      type: 'payment_intent.succeeded',
-      data: {
-        object: {
-          id: failed.payment_id
-        }
-      }
-    };
-
-    // Calling success status
-    await paymentService.webhookHandler(constructedEvent2)
-
-    const stillFailed = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(stillFailed.status).toEqual(PaymentStatus.FAILED)
-  });
-
-
-  skipOnPriorFail('stripe payment: Payment status should not change from SUCCEEDED', async () => {
-    const { bearer, id } = await loginUser(app, 'addr', 'admin');
-
-    // nft price: 43 id: 4
-    const add1 = await request(app.getHttpServer())
-      .post('/users/cart/add/4')
-      .set('authorization', bearer);
-    expect(add1.statusCode).toEqual(201);
-
-    // Create one payment intent (we are not calling the stripe api)
-    const preparedPayment = await paymentService.preparePayment(id, PaymentProviderEnum.TEST)
-    await paymentService.createPayment(PaymentProviderEnum.TEST, `stripe_test_id${new Date().getTime().toString()}`, preparedPayment.nftOrder.id)
-
-    // Give webhook handler function success event
-    const { payment_id } = await paymentService.getPaymentIdForLatestUserOrder(id)
-
-    // reconstruct success event from stripe
-    const constructedEvent = {
-      type: 'payment_intent.succeeded',
-      data: {
-        object: {
-          id: payment_id
-        }
-      }
-    };
-
-    // Calling success status
-    await paymentService.webhookHandler(constructedEvent)
-
-    const success = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(success.status).toEqual(PaymentStatus.SUCCEEDED)
-
-    // reconstruct success event from stripe
-    const constructedEvent2 = {
-      type: 'payment_intent.payment_failed',
-      data: {
-        object: {
-          id: payment_id
-        }
-      }
-    };
-
-    // Calling success status
-    await paymentService.webhookHandler(constructedEvent2)
-
-    const stillSuccess = await paymentService.getPaymentIdForLatestUserOrder(id)
-    expect(stillSuccess.status).toEqual(PaymentStatus.SUCCEEDED)
-
-  });
+      const { payment_id } =
+        await paymentService.getPaymentIdForLatestUserOrder(id);
+
+      // reconstruct success event from stripe
+      const constructedEvent = {
+        type: 'payment_intent.payment_failed',
+        data: {
+          object: {
+            id: payment_id,
+          },
+        },
+      };
+
+      await paymentService.webhookHandler(constructedEvent);
+
+      // Check failed payment don't get to timeout
+      const failed = await paymentService.getPaymentIdForLatestUserOrder(id);
+      expect(failed.status).toEqual(PaymentStatus.FAILED);
+
+      await paymentService.deleteExpiredPayments();
+
+      const stillFailed = await paymentService.getPaymentIdForLatestUserOrder(
+        id,
+      );
+      expect(stillFailed.status).toEqual(PaymentStatus.FAILED);
+
+      // Check canceled payment don't get to timeout
+
+      // Create one payment intent (we are not calling the stripe api)
+      const preparedPayment2 = await paymentService.preparePayment(
+        id,
+        PaymentProviderEnum.TEST,
+      );
+      await paymentService.createPayment(
+        PaymentProviderEnum.TEST,
+        `stripe_test_id${new Date().getTime().toString()}`,
+        preparedPayment2.nftOrder.id,
+      );
+
+      const payment3Data = await paymentService.getPaymentIdForLatestUserOrder(
+        id,
+      );
+
+      // reconstruct success event from stripe
+      const constructedEvent3 = {
+        type: 'payment_intent.canceled',
+        data: {
+          object: {
+            id: payment3Data.payment_id,
+          },
+        },
+      };
+
+      await paymentService.webhookHandler(constructedEvent3);
+
+      const canceled = await paymentService.getPaymentIdForLatestUserOrder(id);
+      expect(canceled.status).toEqual(PaymentStatus.CANCELED);
+
+      await paymentService.deleteExpiredPayments();
+
+      const stillCanceled = await paymentService.getPaymentIdForLatestUserOrder(
+        id,
+      );
+      expect(stillCanceled.status).toEqual(PaymentStatus.CANCELED);
+
+      // Create one payment intent (we are not calling the stripe api)
+      const preparedPayment3 = await paymentService.preparePayment(
+        id,
+        PaymentProviderEnum.TEST,
+      );
+      await paymentService.createPayment(
+        PaymentProviderEnum.TEST,
+        `stripe_test_id${new Date().getTime().toString()}`,
+        preparedPayment3.nftOrder.id,
+      );
+
+      const created = await paymentService.getPaymentIdForLatestUserOrder(id);
+      expect(created.status).toEqual(PaymentStatus.CREATED);
+
+      await paymentService.deleteExpiredPayments();
+
+      const timedOut = await paymentService.getPaymentIdForLatestUserOrder(id);
+      expect(timedOut.status).toEqual(PaymentStatus.TIMED_OUT);
+
+      // Create one payment intent (we are not calling the stripe api)
+      const preparedPayment4 = await paymentService.preparePayment(
+        id,
+        PaymentProviderEnum.TEST,
+      );
+      await paymentService.createPayment(
+        PaymentProviderEnum.TEST,
+        `stripe_test_id${new Date().getTime().toString()}`,
+        preparedPayment4.nftOrder.id,
+      );
+
+      const payment4Data = await paymentService.getPaymentIdForLatestUserOrder(
+        id,
+      );
+
+      // reconstruct success event from stripe
+      const constructedEvent5 = {
+        type: 'payment_intent.processing',
+        data: {
+          object: {
+            id: payment4Data.payment_id,
+          },
+        },
+      };
+
+      await paymentService.webhookHandler(constructedEvent5);
+
+      const processing = await paymentService.getPaymentIdForLatestUserOrder(
+        id,
+      );
+      expect(processing.status).toEqual(PaymentStatus.PROCESSING);
+
+      await paymentService.deleteExpiredPayments();
+
+      const timedOutResponse =
+        await paymentService.getPaymentIdForLatestUserOrder(id);
+      expect(timedOutResponse.status).toEqual(PaymentStatus.TIMED_OUT);
+
+      // Create one payment intent (we are not calling the stripe api)
+      const preparedPayment5 = await paymentService.preparePayment(
+        id,
+        PaymentProviderEnum.TEST,
+      );
+      await paymentService.createPayment(
+        PaymentProviderEnum.TEST,
+        `stripe_test_id${new Date().getTime().toString()}`,
+        preparedPayment5.nftOrder.id,
+      );
+
+      const payment5Data = await paymentService.getPaymentIdForLatestUserOrder(
+        id,
+      );
+
+      // reconstruct success event from stripe
+      const constructedEvent2 = {
+        type: 'payment_intent.succeeded',
+        data: {
+          object: {
+            id: payment5Data.payment_id,
+          },
+        },
+      };
+
+      await paymentService.webhookHandler(constructedEvent2);
+
+      const success = await paymentService.getPaymentIdForLatestUserOrder(id);
+      expect(success.status).toEqual(PaymentStatus.SUCCEEDED);
+
+      await paymentService.deleteExpiredPayments();
+
+      const stillSuccess = await paymentService.getPaymentIdForLatestUserOrder(
+        id,
+      );
+      expect(stillSuccess.status).toEqual(PaymentStatus.SUCCEEDED);
+    },
+  );
+
+  skipOnPriorFail(
+    'stripe payment: Payment status should not change from FAILED',
+    async () => {
+      const { bearer, id } = await loginUser(app, 'addr', 'admin');
+
+      // nft price: 43 id: 4
+      const add1 = await request(app.getHttpServer())
+        .post('/users/cart/add/4')
+        .set('authorization', bearer);
+      expect(add1.statusCode).toEqual(201);
+
+      // Create one payment intent (we are not calling the stripe api)
+      const preparedPayment = await paymentService.preparePayment(
+        id,
+        PaymentProviderEnum.TEST,
+      );
+      await paymentService.createPayment(
+        PaymentProviderEnum.TEST,
+        `stripe_test_id${new Date().getTime().toString()}`,
+        preparedPayment.nftOrder.id,
+      );
+
+      // Give webhook handler function success event
+      const { payment_id } =
+        await paymentService.getPaymentIdForLatestUserOrder(id);
+
+      // reconstruct success event from stripe
+      const constructedEvent = {
+        type: 'payment_intent.payment_failed',
+        data: {
+          object: {
+            id: payment_id,
+          },
+        },
+      };
+
+      // Calling success status
+      await paymentService.webhookHandler(constructedEvent);
+
+      const failed = await paymentService.getPaymentIdForLatestUserOrder(id);
+      expect(failed.status).toEqual(PaymentStatus.FAILED);
+
+      // reconstruct success event from stripe
+      const constructedEvent2 = {
+        type: 'payment_intent.succeeded',
+        data: {
+          object: {
+            id: failed.payment_id,
+          },
+        },
+      };
+
+      // Calling success status
+      await paymentService.webhookHandler(constructedEvent2);
+
+      const stillFailed = await paymentService.getPaymentIdForLatestUserOrder(
+        id,
+      );
+      expect(stillFailed.status).toEqual(PaymentStatus.FAILED);
+    },
+  );
+
+  skipOnPriorFail(
+    'stripe payment: Payment status should not change from SUCCEEDED',
+    async () => {
+      const { bearer, id } = await loginUser(app, 'addr', 'admin');
+
+      // nft price: 43 id: 4
+      const add1 = await request(app.getHttpServer())
+        .post('/users/cart/add/4')
+        .set('authorization', bearer);
+      expect(add1.statusCode).toEqual(201);
+
+      // Create one payment intent (we are not calling the stripe api)
+      const preparedPayment = await paymentService.preparePayment(
+        id,
+        PaymentProviderEnum.TEST,
+      );
+      await paymentService.createPayment(
+        PaymentProviderEnum.TEST,
+        `stripe_test_id${new Date().getTime().toString()}`,
+        preparedPayment.nftOrder.id,
+      );
+
+      // Give webhook handler function success event
+      const { payment_id } =
+        await paymentService.getPaymentIdForLatestUserOrder(id);
+
+      // reconstruct success event from stripe
+      const constructedEvent = {
+        type: 'payment_intent.succeeded',
+        data: {
+          object: {
+            id: payment_id,
+          },
+        },
+      };
+
+      // Calling success status
+      await paymentService.webhookHandler(constructedEvent);
+
+      const success = await paymentService.getPaymentIdForLatestUserOrder(id);
+      expect(success.status).toEqual(PaymentStatus.SUCCEEDED);
+
+      // reconstruct success event from stripe
+      const constructedEvent2 = {
+        type: 'payment_intent.payment_failed',
+        data: {
+          object: {
+            id: payment_id,
+          },
+        },
+      };
+
+      // Calling success status
+      await paymentService.webhookHandler(constructedEvent2);
+
+      const stillSuccess = await paymentService.getPaymentIdForLatestUserOrder(
+        id,
+      );
+      expect(stillSuccess.status).toEqual(PaymentStatus.SUCCEEDED);
+    },
+  );
 });
 
 async function loginUser(
   app: INestApplication,
   address: string,
   password: string,
-): Promise<{ bearer: string, id: number, address: string }> {
+): Promise<{ bearer: string; id: number; address: string }> {
   const login = await request(app.getHttpServer())
     .post('/auth/login')
     .send({ userAddress: address, signedPayload: password });
   expect(login.statusCode).toEqual(201);
 
-  return { bearer: `Bearer ${login.body.token}`, id: login.body.id, address: address };
+  return {
+    bearer: `Bearer ${login.body.token}`,
+    id: login.body.id,
+    address: address,
+  };
 }
