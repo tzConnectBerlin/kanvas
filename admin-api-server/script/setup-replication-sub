@@ -21,9 +21,9 @@ echo waiting for subscription target database to be up..
 # subscription will not work (it will not bring over these definitions, unfortunately)
 
 store_schema_file=`mktemp`
-PGPASSWORD=$STORE_PGPASSWORD pg_dump --host=$STORE_PGHOST --port=$STORE_PGPORT --dbname=$STORE_PGDATABASE --username=$STORE_PGUSER --schema-only --format c --no-privileges --no-owner > $store_schema_file
+PGPASSWORD=$STORE_PGPASSWORD pg_dump --host=$STORE_PGHOST --port=$STORE_PGPORT --dbname=$STORE_PGDATABASE --username=$STORE_PGUSER --format c --no-privileges --no-owner > $store_schema_file
 
-pg_restore --host=$PGHOST --port=$PGPOR --username=$PGUSERNAME --schema-only --clean --dbname=store_replication < $store_schema_file
+pg_restore --host=$PGHOST --port=$PGPOR --username=$PGUSERNAME --clean --dbname=store_replication < $store_schema_file
 
 PGDATABASE=store_replication psql -c "
     CREATE SUBSCRIPTION store_sub
