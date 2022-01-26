@@ -4,6 +4,7 @@ import {
   Body,
   Patch,
   Param,
+  Delete,
   Query,
   UseGuards,
   UploadedFiles,
@@ -85,6 +86,12 @@ export class NftController {
     );
 
     return await this.nftService.applyNftUpdates(user, nftId, nftUpdates);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async delete(@CurrentUser() user: User, @Param('id') nftId?: number) {
+    return await this.nftService.deleteNft(user, nftId);
   }
 
   #validatePaginationParams(params: NftPaginationParams): void {

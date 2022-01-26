@@ -28,6 +28,7 @@ export class NftService {
   nftLock: Lock<number>;
   CONTENT_TYPE = 'content_uri';
   TOP_LEVEL_IDENTIFIERS = ['id', 'state', 'created_at', 'updated_at'];
+  DELETABLE_IN_STATES = ['creation', 'setup_nft'];
 
   constructor(
     @Inject(S3Service) private s3Service: S3Service,
@@ -69,7 +70,6 @@ export class NftService {
     ) {
       orderBy = `attributes->>'${orderBy}'`;
     }
-    console.log(orderBy);
     const qryRes = await this.db.query(
       `
 WITH attr AS (
@@ -124,13 +124,17 @@ LIMIT  ${params.pageSize}
     return await this.findAll(filterParams);
   }
 
-  async getNft(user: User, nftId: number) {
+  async findOne(nftId: number): Promise<NftEntity> {
     const nfts = await this.findByIds([nftId]);
 
     if (nfts.length === 0) {
       throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
     }
-    const nft = nfts[0];
+    return nfts[0];
+  }
+
+  async getNft(user: User, nftId: number) {
+    const nft = await this.findOne(nftId);
     const actor = await this.getActorForNft(user, nft);
 
     return {
@@ -198,6 +202,50 @@ LIMIT  ${params.pageSize}
       await this.#updateNft(user, nft);
       return await this.getNft(user, nft.id);
     } catch (err: any) {
+      throw err;
+    } finally {
+      this.nftLock.release(nftId);
+    }
+  }
+
+  async deleteNft(user: User, nftId: number) {
+    await this.nftLock.acquire(nftId);
+    const nft = await this.findOne(nftId);
+    if (nft.createdBy !== user.id) {
+      throw new HttpException(
+        'no permission to delete this nft (only the creator may)',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    if (
+      !this.DELETABLE_IN_STATES.some((state: string) => nft.state === state)
+    ) {
+      throw new HttpException(
+        'no permission to delete this nft (nft is not in a state where it may still be deleted)',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    const dbTx = await this.db.connect();
+    try {
+      await dbTx.query(`BEGIN`);
+      await dbTx.query(
+        `
+DELETE FROM nft_attribute
+WHERE nft_id = $1
+`,
+        [nftId],
+      );
+      await dbTx.query(
+        `
+DELETE FROM nft
+WHERE id = $1
+`,
+        [nftId],
+      );
+      await dbTx.query('COMMIT');
+    } catch (err: any) {
+      await dbTx.query('ROLLBACK');
       throw err;
     } finally {
       this.nftLock.release(nftId);
