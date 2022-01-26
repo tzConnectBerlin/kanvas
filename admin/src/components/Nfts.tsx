@@ -118,15 +118,11 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
   }
   if (props.type === 'votes') return <NullableBooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
   if (props.type === 'content_uri') {
-    debugger
-    return (
-      <>
-        <ImageInput source="files" accept="image/*">
-          <ImageField source={props.record!.attributes['image.png']}  title="title" />
-        </ImageInput>
 
-        <img src={props.record!.attributes['image.png']} />
-      </>
+    return (
+        <ImageInput value={props.record!.attributes["image.png"]} source="files" accept="image/*">
+          <ImageField source="src" title="title" />
+        </ImageInput>
       );
   }
   else return null

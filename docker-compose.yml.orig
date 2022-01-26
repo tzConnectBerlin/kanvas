@@ -1,0 +1,123 @@
+# Kanvas is a distributed system with multiple databases, servers, and web browser clients
+# For development, we can spin everything up via docker-compose
+
+
+services:
+  store-db:
+    image: postgres:13
+    command:
+      - postgres
+      - -c
+      - wal_level=logical  # <- required for logical replication
+    ports:
+      - 54320:5432
+    environment:
+      POSTGRES_USER: store_pguser
+      POSTGRES_PASSWORD: store_pgpass
+      POSTGRES_DB: dev_database
+
+  store-api:
+    build: ./store-api-server
+    entrypoint: |-
+      bash -c '
+        set -e
+        ./script/wait-db
+        ./script/migrate up
+        if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
+          ./script/setup-replication-pub
+          psql < script/populate-testdb.sql
+        fi
+        if [ "$STORE_API_ENABLED" != "false" ]; then
+          yarn start
+        fi
+      '
+    ports:
+      - 3005:3000
+    links:
+      - store-db
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      PGHOST: store-db
+      PGPORT: 5432
+      PGUSER: store_pguser
+      PGPASSWORD: store_pgpass
+      PGDATABASE: dev_database
+
+      JWT_SECRET: some_random_string
+      JWT_EXPIRATION_TIME: 86400000
+
+      CART_EXPIRATION_MILLI_SECS: 1800000
+
+      KANVAS_API_PORT: 3000
+
+      QUEPASA_DOCKER_ARGS: "\
+        --network kanvas_default \
+        --mount type=bind,source=$PWD/store-api-server/config,target=/config"
+
+      STORE_API_ENABLED: ${STORE_API_ENABLED}
+
+      #AWS_S3_BUCKET: ..
+      #AWS_S3_ACCESS_KEY: ..
+      #AWS_S3_KEY_SECRET: ..
+
+      #PINATA_API_KEY: ..
+      #PINATA_API_SECRET: ..
+
+  admin-db:
+    image: postgres:13
+    ports:
+      - 54321:5432
+    environment:
+      POSTGRES_USER: admin_pguser
+      POSTGRES_PASSWORD: admin_pgpass
+      POSTGRES_DB: dev_database
+
+  admin-api:
+    build: ./admin-api-server
+    entrypoint: |-
+      bash -c '
+        set -e -x
+        ./script/wait-db
+        ./script/migrate up
+        if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
+          yarn seed
+          ./script/setup-replication-sub
+        fi
+<<<<<<< Updated upstream
+        if [ "$ADMIN_API_ENABLED" != "false" ]; then
+=======
+        if [ADMIN_API_SERVER_ENABLE = "true"] then
+>>>>>>> Stashed changes
+          yarn start
+        fi
+      '
+    ports:
+      - 3006:3001
+    links:
+      - admin-db
+      - store-db
+    environment:
+      AWS_S3_BUCKET: $AWS_S3_BUCKET
+      AWS_S3_ACCESS_KEY: $AWS_S3_ACCESS_KEY
+      AWS_S3_KEY_SECRET: $AWS_S3_KEY_SECRET
+      POSTGRES_USER: admin_pguser
+      POSTGRES_PASSWORD: admin_pgpass
+      POSTGRES_DB: dev_database
+
+      PGHOST: admin-db
+      PGPORT: 5432
+      PGUSER: admin_pguser
+      PGPASSWORD: admin_pgpass
+      PGDATABASE: dev_database
+
+      ADMIN_API_ENABLED: ${ADMIN_API_ENABLED}
+
+      STORE_PGHOST: store-db
+      STORE_PGPORT: 5432
+      STORE_PGUSER: store_pguser
+      STORE_PGPASSWORD: store_pgpass
+      STORE_PGDATABASE: dev_database
+
+      JWT_SECRET: another_random_string
+      JWT_EXPIRATION_TIME: 86400000
