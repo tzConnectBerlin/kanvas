@@ -19,7 +19,7 @@ import { enumFromStringValue } from 'src/utils';
 export class AnalyticsController {
   constructor(private analyticsService: AnalyticsService) {}
 
-  @Get('snapshot/sales/priceVolume')
+  @Get('sales/priceVolume/snapshot')
   async salesPriceVolume(
     @Query('resolution') resolutionStr?: string,
   ): Promise<MetricEntity> {
@@ -27,7 +27,7 @@ export class AnalyticsController {
     return await this.analyticsService.getSnapshotSalesPriceVolume(params);
   }
 
-  @Get('snapshot/sales/nftCount')
+  @Get('sales/nftCount/snapshot')
   async salesNftCount(
     @Query('resolution') resolutionStr?: string,
   ): Promise<MetricEntity> {
@@ -35,7 +35,7 @@ export class AnalyticsController {
     return await this.analyticsService.getSnapshotSalesNftCount(params);
   }
 
-  @Get('timeseries/sales/priceVolume')
+  @Get('sales/priceVolume/timeseries')
   async timeseriesSalesPriceVolume(
     @Query('resolution') resolutionStr?: string,
   ): Promise<{ data: MetricEntity[] }> {
@@ -45,7 +45,7 @@ export class AnalyticsController {
     };
   }
 
-  @Get('timeseries/sales/nftCount')
+  @Get('sales/nftCount/timeseries')
   async timeseriesSalesNftCount(
     @Query('resolution') resolutionStr?: string,
   ): Promise<{ data: MetricEntity[] }> {
