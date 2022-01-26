@@ -19,20 +19,40 @@ import { enumFromStringValue } from 'src/utils';
 export class AnalyticsController {
   constructor(private analyticsService: AnalyticsService) {}
 
-  @Get('sales/priceVolume')
+  @Get('snapshot/sales/priceVolume')
   async salesPriceVolume(
     @Query('resolution') resolutionStr?: string,
-  ): Promise<MetricEntity[]> {
+  ): Promise<MetricEntity> {
     const params = this.#queryParamsToMetricParams(resolutionStr);
-    return await this.analyticsService.getSalesPriceVolume(params);
+    return await this.analyticsService.getSnapshotSalesPriceVolume(params);
   }
 
-  @Get('sales/nftCount')
+  @Get('snapshot/sales/nftCount')
   async salesNftCount(
     @Query('resolution') resolutionStr?: string,
-  ): Promise<MetricEntity[]> {
+  ): Promise<MetricEntity> {
     const params = this.#queryParamsToMetricParams(resolutionStr);
-    return await this.analyticsService.getSalesNftCount(params);
+    return await this.analyticsService.getSnapshotSalesNftCount(params);
+  }
+
+  @Get('timeseries/sales/priceVolume')
+  async timeseriesSalesPriceVolume(
+    @Query('resolution') resolutionStr?: string,
+  ): Promise<{ data: MetricEntity[] }> {
+    const params = this.#queryParamsToMetricParams(resolutionStr);
+    return {
+      data: await this.analyticsService.getTimeseriesSalesPriceVolume(params),
+    };
+  }
+
+  @Get('timeseries/sales/nftCount')
+  async timeseriesSalesNftCount(
+    @Query('resolution') resolutionStr?: string,
+  ): Promise<{ data: MetricEntity[] }> {
+    const params = this.#queryParamsToMetricParams(resolutionStr);
+    return {
+      data: await this.analyticsService.getTimeseriesSalesNftCount(params),
+    };
   }
 
   #queryParamsToMetricParams(resolutionStr?: string): MetricParams {

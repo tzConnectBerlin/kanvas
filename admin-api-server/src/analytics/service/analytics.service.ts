@@ -5,7 +5,11 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import { MetricEntity, MetricParams } from '../entity/analytics.entity';
+import {
+  Resolution,
+  MetricEntity,
+  MetricParams,
+} from '../entity/analytics.entity';
 import { PG_CONNECTION_STORE_REPLICATION } from '../../constants';
 
 @Injectable()
@@ -14,7 +18,29 @@ export class AnalyticsService {
     @Inject(PG_CONNECTION_STORE_REPLICATION) private storeRepl: any,
   ) {}
 
-  async getSalesNftCount(params: MetricParams): Promise<MetricEntity[]> {
+  async getSnapshotSalesNftCount(params: MetricParams): Promise<MetricEntity> {
+    const qryRes = await this.#snapshot(params);
+
+    return <MetricEntity>{
+      timestamp: qryRes.rows[0]['timestamp'],
+      value: qryRes.rows[0]['nft_count'],
+    };
+  }
+
+  async getSnapshotSalesPriceVolume(
+    params: MetricParams,
+  ): Promise<MetricEntity> {
+    const qryRes = await this.#snapshot(params);
+
+    return <MetricEntity>{
+      timestamp: qryRes.rows[0]['timestamp'],
+      value: qryRes.rows[0]['price_volume'],
+    };
+  }
+
+  async getTimeseriesSalesNftCount(
+    params: MetricParams,
+  ): Promise<MetricEntity[]> {
     const qryRes = await this.#timeseries(params);
 
     return qryRes.rows.map(
@@ -26,7 +52,9 @@ export class AnalyticsService {
     );
   }
 
-  async getSalesPriceVolume(params: MetricParams): Promise<MetricEntity[]> {
+  async getTimeseriesSalesPriceVolume(
+    params: MetricParams,
+  ): Promise<MetricEntity[]> {
     const qryRes = await this.#timeseries(params);
 
     return qryRes.rows.map(
@@ -57,6 +85,43 @@ GROUP BY timestamp
 ORDER BY timestamp
       `,
       [params.resolution],
+    );
+  }
+
+  async #snapshot(params: MetricParams) {
+    let intervalSeconds: number;
+    switch (params.resolution) {
+      case Resolution.Hour:
+        intervalSeconds = 60 * 60;
+        break;
+      case Resolution.Day:
+        intervalSeconds = 60 * 60 * 24;
+        break;
+      case Resolution.Week:
+        intervalSeconds = 60 * 60 * 24 * 7;
+        break;
+      case Resolution.Month:
+        intervalSeconds = 60 * 60 * 24 * 30;
+        break;
+    }
+
+    return await this.storeRepl.query(
+      `
+SELECT
+  now() AT TIME ZONE 'UTC' AS timestamp,
+  SUM(nft.price) AS price_volume,
+  COUNT(1) AS nft_count
+FROM payment
+JOIN nft_order
+  ON nft_order.id = payment.nft_order_id
+JOIN mtm_nft_order_nft AS mtm
+  ON mtm.nft_order_id = nft_order.id
+JOIN nft
+  ON nft.id = mtm.nft_id
+WHERE payment.status = 'succeeded'
+  AND nft_order.order_at >= now() - (interval '1' second)*$1
+      `,
+      [intervalSeconds],
     );
   }
 }
