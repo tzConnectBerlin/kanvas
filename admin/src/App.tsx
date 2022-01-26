@@ -15,7 +15,7 @@ import { ActivityList } from './components/Activities';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
 
 //for data from the nest admin api
-const DataProvider = dataProvider('http://localhost:3001');
+const DataProvider = dataProvider(process.env.REACT_APP_API_SERVER_BASE_URL!);
 //for data in a json format for testing
 // `npm i -g json-server` `json-server --watch __mocks__/users-nftsv1.json -p 3002`
 // const dataProvider = jsonServerProvider('http://localhost:3002');
@@ -49,6 +49,9 @@ function App() {
         name="activity"
         list={ActivityList}
         icon={EqualizerIcon}
+      />
+      <Resource
+        name="categories"
       />
     </Admin>
   );

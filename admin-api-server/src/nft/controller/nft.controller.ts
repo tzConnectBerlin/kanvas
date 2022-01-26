@@ -80,6 +80,7 @@ export class NftController {
     @UploadedFiles() filesArray?: any[],
     @Param('id') nftId?: number,
   ): Promise<NftEntity> {
+
     const nftUpdates = this.#transformFormDataToNftUpdates(
       nftUpdatesBody,
       filesArray,
@@ -122,10 +123,10 @@ export class NftController {
   }
 
   #transformFormDataToNftUpdates(nftUpdatesBody: any, filesArray?: any[]) {
-    const res: NftUpdate[] = nftUpdatesBody;
+    const res: NftUpdate[] = [];
 
     for (const attr of Object.keys(nftUpdatesBody)) {
-      res.push({
+      res.push(<NftUpdate>{
         attribute: attr,
         value: nftUpdatesBody[attr],
       });

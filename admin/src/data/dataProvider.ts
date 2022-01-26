@@ -47,10 +47,11 @@ const dataProvider = (
 
     const rangeStart = (page - 1) * perPage;
     const rangeEnd = page * perPage - 1;
+
     const query = {
-      sort: JSON.stringify([field, order]),
+      sort: JSON.stringify([field, order === 'ASC' ? 'asc' : 'desc']),
       range: JSON.stringify([rangeStart, rangeEnd]),
-      filter: JSON.stringify(params.filter),
+      filters: Object.keys(params.filter).length === 0 ? undefined : JSON.stringify(params.filter),
     };
 
     const url = `${apiUrl}/${resource}?${stringify(query, {
@@ -134,11 +135,11 @@ const dataProvider = (
     });
   },
 
-  update: (resource, params) => {
-    debugger
-    return httpClient(`${apiUrl}/${resource}/${params.id}`, {
+  update: async (resource, params) => {
+    const updatedData = diffPreviousDataToNewData(params.previousData, params.data)
+    return await httpClient(`${apiUrl}/${resource}/${params.id}`, {
       method: 'PATCH',
-      body: toFormData(params.data, resource),
+      body: toFormData(updatedData, resource),
       headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
     }).then(({ json }) => ( { data: json }))
   },
@@ -154,20 +155,24 @@ const dataProvider = (
       ),
     ).then((responses) => ({ data: responses.map(({ json }) => json.id) })),
 
-  create: (resource, params) => {
+  create: async (resource, params) => {
     if (resource === 'nft') {
-      return httpClient(`${apiUrl}/${resource}/0`, {
-        method: 'PATCH',
-        body: toFormData(params.data, resource),
-        headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
-      }).then(({ json }) => ({
-        data: { ...params.data, id: json.id },
-      }))
+      debugger
+      const updatedData = diffPreviousDataToNewData({}, params.data)
+      Promise.resolve(
+        await httpClient(`${apiUrl}/${resource}/0`, {
+          method: 'PATCH',
+          body: toFormData(updatedData, resource),
+          headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
+        }).then(({ json }) => ({
+          data: { ...params.data, id: json.id },
+        }))
+      )
     }
     // fallback to the default implementation
-    return httpClient(`${apiUrl}/${resource}`, {
+    return await httpClient(`${apiUrl}/${resource}`, {
       method: 'POST',
-      body: toFormData(params.data),
+      body: JSON.stringify(params.data),
       headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
     }).then(({ json }) => ({
       data: { ...params.data, id: json.id },
@@ -200,39 +205,55 @@ const dataProvider = (
     })),
 });
 
+const diffPreviousDataToNewData = (previousData: any, data: any) => {
+  // Attributes part
+  let diff: any = {};
+  const newKeys = Object.keys(data.attributes)
+
+  for (const key of newKeys) {
+    if (!previousData.attributes) {
+      diff[key] = data.attributes[key]
+      continue
+    }
+    if (previousData.attributes[key] !== data.attributes[key]) {
+      diff[key] = data.attributes[key]
+    }
+  }
+  // File part
+  if (data.hasOwnProperty('files')) {
+    diff['files'] = data['files'].length ? data['files'] : [data['files']]
+  }
+
+  return diff
+}
+
 const toFormData = (data: any, resource = '') => {
-  if (data.picture) {
     const formData = new FormData();
     const keys = Object.keys(data);
+
     keys.forEach((key) => {
       if (data[key]) {
-        if (key === 'picture') {
-          formData.append(key, data[key].rawFile);
+        // contains .png
+        if (key === 'files') {
+          data[key].map( (file: any) => {
+            try {
+              Object.defineProperty(file, 'name', {
+                writable: true,
+                value: 'image.png'
+              });
+              formData.append('files[]', file.rawFile, file.name);
+            } catch (error: any) {
+              console.log(error)
+            }
+          })
         } else {
-          if (typeof data[key] === 'object') {
-            formData.append(key, JSON.stringify(data[key]));
-          } else {
-            formData.append(key, data[key]);
-          }
+          formData.append(key, JSON.stringify(data[key]));
         }
       }
     });
+
     return formData;
-  }
-  if (resource === 'nft') {
-    const formData= new FormData();
-    const keys = Object.keys(data.attributes)
 
-    keys.forEach((key) => {
-      if (!data.attributes[key]) return
-
-      formData.append('attributes', key)
-      formData.append('value', JSON.stringify(data.attributes[key]))
-    })
-    return formData
-  }
-
-  return JSON.stringify(data);
 };
 
 export default dataProvider;

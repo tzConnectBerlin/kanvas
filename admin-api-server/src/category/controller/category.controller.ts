@@ -6,8 +6,8 @@ import { CategoryService } from '../service/category.service';
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
-  @Get('nftAssignable')
-  async nftAssignable(): Promise<CategoryEntity[]> {
-    return this.categoryService.getNftAssignable();
+  @Get()
+  async nftAssignable(): Promise<{ data: CategoryEntity[] }> {
+    return { data: await this.categoryService.getNftAssignable()};
   }
 }

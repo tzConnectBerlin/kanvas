@@ -18,7 +18,10 @@ import {
   useEditContext,
   useGetOne,
   BooleanInput,
-  NullableBooleanInput
+  NullableBooleanInput,
+  ReferenceArrayInput,
+  SelectArrayInput,
+  useResourceContext
 } from 'react-admin';
 import { JsonInput, JsonField } from 'react-admin-json-view';
 import { CustomCreateButton } from './Buttons/CustomCreateButton';
@@ -98,37 +101,55 @@ export const NftList = ({ ...props }) => (
 interface InbutSelectorProps {
   attributesName: string;
   label: string;
-  type: "string" | "boolean" | "number" | "content" | "number[]" | "votes";
+  type: "string" | "boolean" | "number" | "content_uri" | "number[]" | "votes";
+  record?: any;
 }
 
-const InputSelector : React.FC<InbutSelectorProps> = ({...props}) => {
+const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
   if (props.type === 'string') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} />;
   if (props.type === 'number') return <NumberInput source={`attributes.${props.attributesName}`} label={props.label} />;
   if (props.type === 'boolean') return <BooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
-  if (props.type === 'votes') return <NullableBooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
-  if (props.type === 'content') {
+  if (props.type === 'number[]') {
     return (
-      <ImageInput source="picture" accept="image/*">
-        <ImageField source="src" title="title" />
-      </ImageInput>);
+      <ReferenceArrayInput source="attributes.categories" reference="categories">
+        <SelectArrayInput optionText="name" />
+      </ReferenceArrayInput>
+    );
+  }
+  if (props.type === 'votes') return <NullableBooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
+  if (props.type === 'content_uri') {
+    debugger
+    return (
+      <>
+        <ImageInput source="files" accept="image/*">
+          <ImageField source={props.record!.attributes['image.png']}  title="title" />
+        </ImageInput>
+
+        <img src={props.record!.attributes['image.png']} />
+      </>
+      );
   }
   else return null
 }
 
 // Add authorization for allowedActions
-export const NftEdit = ({ ...props }) => {
+export const NftEdit = (props: any) => {
 
   const classes = useStyle()
+  const resource = useResourceContext();
   const concernedNft = useGetOne('nft', props.id);
 
   const [formKeys, setFormKeys] = React.useState<string[]>([])
 
   React.useEffect(() => {
+    console.log(resource)
     if (!concernedNft.data) return;
-    setFormKeys(Object.keys(concernedNft.data.allowedActions))
-  }, [concernedNft])
+    if (!concernedNft.data.allowedActions) return;
+    setFormKeys(Object.keys(concernedNft.data!.allowedActions))
+  }, [concernedNft, resource])
 
   return (
+    concernedNft &&
     <Box className={classes.boxWrapper}>
       <Typography variant="h3" component="h1" className={classes.title} style={{ fontFamily: 'Poppins SemiBold' }}>
         Update an NFT
@@ -144,7 +165,7 @@ export const NftEdit = ({ ...props }) => {
               <InputSelector
                 attributesName={key}
                 label={key[0].toUpperCase() + key.replace('_', ' ').slice(1)}
-                type={concernedNft.data!.allowedActions[key] as 'string' | 'boolean' | 'number' | 'content' | 'number[]' | 'votes'}
+                type={concernedNft.data!.allowedActions[key] as 'string' | 'boolean' | 'number' | 'content_uri' | 'number[]' | 'votes'}
               />
             )
           }
@@ -170,13 +191,6 @@ export const NftCreate = ({ ...props }) => {
       <Create {...props}>
         <SimpleForm className={classes.form}>
           <TextInput source="attributes.name" label="Name" />
-          <TextInput source="attributes.description" label="Description" />
-          <NumberInput source="attributes.price" label="Price" />
-          <NumberInput source="attributes.tokenAmount" label="Token amount" />
-          <DateInput source="attributes.dropDate" label="Drop date" />
-          <ImageInput source="picture" accept="image/*">
-            <ImageField source="src" title="title" />
-          </ImageInput>
         </SimpleForm>
       </Create>
     </Box>

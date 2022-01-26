@@ -98,7 +98,7 @@ LIMIT  ${params.pageSize}
       `,
       [params.filters.nftStates, params.filters.nftIds],
     );
-
+    console.log(qryRes)
     if (qryRes.rowCount === 0) {
       return undefined;
     }
@@ -111,7 +111,7 @@ LIMIT  ${params.pageSize}
         updatedAt: Math.floor(row['updated_at'].getTime() / 1000),
         attributes: {},
       };
-      for (const key of Object.keys(row['attributes'])) {
+      for (const key of Object.keys(row['attributes'] || [])) {
         nft.attributes[key] = JSON.parse(row['attributes'][key]);
       }
       return nft;
@@ -120,7 +120,9 @@ LIMIT  ${params.pageSize}
 
   async findByIds(nftIds: number[]): Promise<NftEntity[]> {
     const filterParams = new NftFilterParams();
+
     filterParams.filters.nftIds = nftIds;
+    console.log(filterParams)
     return await this.findAll(filterParams);
   }
 
@@ -160,12 +162,17 @@ LIMIT  ${params.pageSize}
     try {
       let nfts = await this.findByIds([nftId]);
       if (typeof nfts === 'undefined') {
+
         nfts = [await this.#createNft(user)];
       }
       const nft = nfts[0];
       const actor = await this.getActorForNft(user, nft);
+      console.log(actor)
 
       for (let nftUpdate of nftUpdates) {
+        console.log(nftUpdate)
+        console.log('nft:')
+        console.log(nft)
         // Check if attribute is of type content in order to upload to ipfs
         if (typeof nftUpdate.file !== 'undefined') {
           nftUpdate = await this.#uploadContent(
@@ -188,7 +195,7 @@ LIMIT  ${params.pageSize}
             case STMResultStatus.NOT_ALLOWED:
               throw new HttpException(
                 stmRes.message || '',
-                HttpStatus.UNAUTHORIZED,
+                HttpStatus.FORBIDDEN,
               );
             default:
               throw new HttpException(
@@ -299,7 +306,11 @@ RETURNING id
     `,
         [creator.id],
       );
-      return await this.getNft(creator, qryRes.rows[0].id);
+      console.log(creator)
+      console.log('creator')
+      const test= await this.getNft(creator, qryRes.rows[0].id);
+      console.log(test)
+      return test
     } catch (err: any) {
       Logger.error(`Unable to create new nft, err: ${err}`);
       throw new HttpException(
