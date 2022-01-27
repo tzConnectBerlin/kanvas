@@ -464,6 +464,41 @@ describe('AppController (e2e)', () => {
     expect(res.statusCode).toEqual(400);
   });
 
+  skipOnPriorFail(
+    '/nfts non number params that should be a number => BAD REQUEST',
+    async () => {
+      let res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ categories: '4,not_a_number,8,10' });
+      expect(res.statusCode).toEqual(400);
+
+      res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ page: 'not_a_number' });
+      expect(res.statusCode).toEqual(400);
+
+      res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ pageSize: 'not_a_number' });
+      expect(res.statusCode).toEqual(400);
+    },
+  );
+
+  skipOnPriorFail(
+    '/nfts invalid orderBy or orderDirection => BAD REQUEST',
+    async () => {
+      let res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ orderBy: 'notavalidorderBy' });
+      expect(res.statusCode).toEqual(400);
+
+      res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ orderDirection: `asc; select 'maliciousness'` });
+      expect(res.statusCode).toEqual(400);
+    },
+  );
+
   skipOnPriorFail('/nfts/search', async () => {
     const res = await request(app.getHttpServer())
       .get('/nfts/search')
@@ -543,6 +578,66 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail(
+    '/nfts/search (omitting searchString => BAD REQUEST)',
+    async () => {
+      const res = await request(app.getHttpServer()).get('/nfts/search');
+      expect(res.statusCode).toEqual(400);
+    },
+  );
+
+  skipOnPriorFail('/auth/register', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({ userAddress: 'someaddr', signedPayload: 'verysecret' });
+    expect(res.statusCode).toEqual(201);
+  });
+
+  skipOnPriorFail('/auth/register (existing addr => FORBIDDEN', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({ userAddress: 'someaddr', signedPayload: '...' });
+    expect(res.statusCode).toEqual(403);
+  });
+
+  skipOnPriorFail(
+    '/auth/login trying to log in for non-existing account addr => BAD REQUEST',
+    async () => {
+      const login = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          userAddress: 'this address doesnt exist',
+          signedPayload: '...',
+        });
+      expect(login.statusCode).toEqual(400);
+    },
+  );
+
+  skipOnPriorFail(
+    '/auth/login trying to log in for existing account addr with bad pass => BAD REQUEST',
+    async () => {
+      const login = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          userAddress: 'addr',
+          signedPayload: 'bad password',
+        });
+      expect(login.statusCode).toEqual(401);
+    },
+  );
+
+  skipOnPriorFail(
+    '/users/topBuyers when no one has bought anything yet',
+    async () => {
+      const res = await request(app.getHttpServer()).get('/users/topBuyers');
+      expect(res.statusCode).toEqual(200);
+
+      expect(res.body).toStrictEqual({
+        topBuyers: [],
+      });
+    },
+  );
+
+  skipOnPriorFail(
     '/users/profile: not logged in and no userAddress provided => BAD REQUEST',
     async () => {
       const res = await request(app.getHttpServer()).get('/users/profile');
@@ -580,8 +675,43 @@ describe('AppController (e2e)', () => {
           userName: 'admin',
           userAddress: 'addr',
           profilePicture: null,
-          roles: [],
         },
+      });
+    },
+  );
+
+  skipOnPriorFail(
+    '/users/profile/edit/check: non existing name => OK',
+    async () => {
+      const { bearer } = await loginUser(app, 'addr', 'admin');
+
+      const res = await request(app.getHttpServer())
+        .get('/users/profile/edit/check')
+        .set('authorization', bearer)
+        .query({ userName: 'this is available' });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toStrictEqual({
+        userName: 'this is available',
+        available: true,
+      });
+    },
+  );
+
+  skipOnPriorFail(
+    '/users/profile/edit/check: taken name => OK w/ available: false',
+    async () => {
+      const { bearer } = await loginUser(app, 'addr', 'admin');
+
+      const res = await request(app.getHttpServer())
+        .get('/users/profile/edit/check')
+        .set('authorization', bearer)
+        .query({ userName: 'admin' }); // <- not available
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toStrictEqual({
+        userName: 'admin',
+        available: false,
       });
     },
   );
@@ -608,7 +738,6 @@ describe('AppController (e2e)', () => {
           userName: 'admin',
           userAddress: 'addr',
           profilePicture: null,
-          roles: [],
         },
       });
     },
@@ -637,7 +766,6 @@ describe('AppController (e2e)', () => {
           userName: 'test user',
           userAddress: 'tz1',
           profilePicture: null,
-          roles: [],
         },
       });
     },
@@ -681,13 +809,58 @@ describe('AppController (e2e)', () => {
         .set('cookie', cookie);
       expect(add2.statusCode).toEqual(201);
 
+      // double add of same nft => BAD REQUEST. can only have 1 edition per nft per cart session
+      const add2Part2 = await request(app.getHttpServer())
+        .post('/users/cart/add/4')
+        .set('cookie', cookie);
+      expect(add2Part2.statusCode).toEqual(400);
+
+      const list = await request(app.getHttpServer())
+        .post('/users/cart/list')
+        .set('cookie', cookie);
+      expect(list.statusCode).toEqual(201);
+
+      // trigger deletion manually, because waiting for the CRON can take 60 seconds - too long for a test
+      // note: this is just here to verify that _nothing_ gets deleted, because
+      // in this test nothing should have expired
+      await userService.deleteExpiredCarts();
+
+      const idList = list.body.nfts.map((nft: any) => nft.id);
+      expect(idList).toEqual([4, 12]);
+    },
+  );
+
+  skipOnPriorFail(
+    '/users/cart verify expiration (by setting very small expiration timeout)',
+    async () => {
+      const origExpiration = process.env.CART_EXPIRATION_MILLI_SECS;
+      process.env.CART_EXPIRATION_MILLI_SECS = '0';
+      const moduleFixture: TestingModule = await Test.createTestingModule({
+        imports: [AppModule],
+      }).compile();
+      app = moduleFixture.createNestApplication();
+      app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+      await app.init();
+
+      userService.CART_EXPIRATION_MILLI_SECS = 0;
+      const add1 = await request(app.getHttpServer()).post(
+        '/users/cart/add/12',
+      );
+      expect(add1.statusCode).toEqual(201);
+
+      // trigger deletion manually, because waiting for the CRON can take 60 seconds - too long for a test
+      await userService.deleteExpiredCarts();
+
+      const cookie = add1.headers['set-cookie'];
       const list = await request(app.getHttpServer())
         .post('/users/cart/list')
         .set('cookie', cookie);
       expect(list.statusCode).toEqual(201);
 
       const idList = list.body.nfts.map((nft: any) => nft.id);
-      expect(idList).toEqual([4, 12]);
+      expect(idList).toEqual([]);
+
+      process.env.CART_EXPIRATION_MILLI_SECS = origExpiration;
     },
   );
 
@@ -1877,6 +2050,254 @@ describe('AppController (e2e)', () => {
       });
     },
   );
+
+  skipOnPriorFail(
+    '/users/nftOwnership (not logged in => UNAUTHORIZED)',
+    async () => {
+      const res = await request(app.getHttpServer())
+        .post('/users/nftOwnership')
+        .query({
+          nftIds: '4',
+        });
+      expect(res.statusCode).toEqual(401);
+    },
+  );
+
+  skipOnPriorFail('/users/nftOwnership', async () => {
+    const { bearer } = await loginUser(app, 'addr', 'admin');
+
+    const res = await request(app.getHttpServer())
+      .post('/users/nftOwnership')
+      .set('authorization', bearer)
+      .query({
+        nftIds: '4,1',
+      });
+    expect(res.statusCode).toEqual(201);
+    expect(res.body).toStrictEqual([
+      { nftId: '1', ownerStatuses: ['pending'] },
+      {
+        nftId: '4',
+        ownerStatuses: ['pending', 'pending', 'pending', 'pending'],
+      },
+    ]);
+  });
+
+  skipOnPriorFail(
+    '/users/nftOwnership (asking for not owned at all nft, not even pending, is fine)',
+    async () => {
+      const { bearer } = await loginUser(app, 'addr', 'admin');
+
+      const res = await request(app.getHttpServer())
+        .post('/users/nftOwnership')
+        .set('authorization', bearer)
+        .query({
+          nftIds: '6',
+        });
+      expect(res.statusCode).toEqual(201);
+      expect(res.body).toStrictEqual([
+        {
+          nftId: '6',
+          ownerStatuses: [],
+        },
+      ]);
+    },
+  );
+
+  skipOnPriorFail('/users/topBuyers', async () => {
+    const res = await request(app.getHttpServer()).get('/users/topBuyers');
+    expect(res.statusCode).toEqual(200);
+
+    expect(res.body).toStrictEqual({
+      topBuyers: [
+        {
+          userId: 1,
+          userName: 'admin',
+          userAddress: 'addr',
+          userPicture: null,
+          totalPaid: '173',
+        },
+      ],
+    });
+  });
+
+  skipOnPriorFail('/users/profile/edit: change username', async () => {
+    const { bearer } = await loginUser(app, 'addr', 'admin');
+
+    let res = await request(app.getHttpServer())
+      .post('/users/profile/edit')
+      .set('authorization', bearer)
+      .send({ userName: 'a beautiful username' });
+
+    expect(res.statusCode).toEqual(201);
+
+    res = await request(app.getHttpServer())
+      .get('/users/profile')
+      .set('authorization', bearer);
+
+    // cannot test this accurately because currently the testdb is populated
+    // with now() timestamps
+    expect(res.body.user?.createdAt).toBeGreaterThan(0);
+    delete res.body.user?.createdAt;
+
+    expect(res.body).toStrictEqual({
+      nftCount: 2,
+      user: {
+        id: 1,
+        userName: 'a beautiful username',
+        userAddress: 'addr',
+        profilePicture: null,
+      },
+    });
+  });
+
+  skipOnPriorFail(
+    '/users/profile/edit: change username to what it already was => its ok',
+    async () => {
+      const { bearer } = await loginUser(app, 'addr', 'admin');
+
+      const res = await request(app.getHttpServer())
+        .post('/users/profile/edit')
+        .set('authorization', bearer)
+        .send({ userName: 'a beautiful username' });
+
+      expect(res.statusCode).toEqual(201);
+    },
+  );
+
+  skipOnPriorFail(
+    '/users/profile/edit: change username to what someone else already has => FORBIDDEN',
+    async () => {
+      const { bearer } = await loginUser(app, 'addr', 'admin');
+
+      const res = await request(app.getHttpServer())
+        .post('/users/profile/edit')
+        .set('authorization', bearer)
+        .send({ userName: 'test user' });
+
+      expect(res.statusCode).toEqual(403);
+    },
+  );
+
+  skipOnPriorFail(
+    '/users/profile/edit: not changing username nor profile picture => BAD REQUEST',
+    async () => {
+      const { bearer } = await loginUser(app, 'addr', 'admin');
+
+      const res = await request(app.getHttpServer())
+        .post('/users/profile/edit')
+        .set('authorization', bearer);
+
+      expect(res.statusCode).toEqual(400);
+    },
+  );
+
+  skipOnPriorFail('/categories', async () => {
+    const res = await request(app.getHttpServer()).get('/categories');
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toStrictEqual([
+      {
+        id: 1,
+        name: 'Fine Art',
+        description: 'A collection of fine art devided in several categories',
+        children: [
+          {
+            id: 4,
+            name: 'Drawing',
+            description: 'Sub fine art category',
+            children: [],
+          },
+          {
+            id: 5,
+            name: 'Painting',
+            description: 'Sub fine art category',
+            children: [],
+          },
+          {
+            id: 6,
+            name: 'Sculpture',
+            description: 'Sub fine art category',
+            children: [],
+          },
+        ],
+      },
+      {
+        id: 2,
+        name: 'Visual Art',
+        description: 'Not actually visual',
+        children: [
+          {
+            id: 7,
+            name: 'Digital',
+            description: 'Sub visual art category',
+            children: [],
+          },
+          {
+            id: 8,
+            name: 'Photography',
+            description: 'Sub visual art category',
+            children: [
+              {
+                id: 9,
+                name: 'Abstract',
+                description: 'Sub photography category',
+                children: [],
+              },
+              {
+                id: 10,
+                name: 'Landscape',
+                description: 'Sub photography category',
+                children: [],
+              },
+              {
+                id: 11,
+                name: 'Portrait',
+                description: 'Sub photography category',
+                children: [],
+              },
+              {
+                id: 12,
+                name: 'Cities',
+                description: 'Sub photography category',
+                children: [
+                  {
+                    id: 13,
+                    name: 'Honk Kong',
+                    description: 'Sub cities category',
+                    children: [],
+                  },
+                  {
+                    id: 14,
+                    name: 'Toronto',
+                    description: 'Sub cities category',
+                    children: [],
+                  },
+                  {
+                    id: 15,
+                    name: 'London',
+                    description: 'Sub cities category',
+                    children: [],
+                  },
+                ],
+              },
+              {
+                id: 16,
+                name: 'Black & White',
+                description: 'Sub photography category',
+                children: [],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 3,
+        name: 'Applied Art',
+        description: 'Not actually visual',
+        children: [],
+      },
+    ]);
+  });
 });
 
 async function loginUser(

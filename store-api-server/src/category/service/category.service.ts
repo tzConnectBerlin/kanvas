@@ -23,10 +23,6 @@ interface CategoryQueryResponse {
 export class CategoryService {
   constructor(@Inject(PG_CONNECTION) private conn: any) {}
 
-  async create(_category: CategoryEntity): Promise<CategoryEntity> {
-    throw new Error('Not implemented yet');
-  }
-
   async search(str: string): Promise<CategoryEntity[]> {
     if (str === '') {
       return await this.getMostPopular();

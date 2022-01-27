@@ -50,7 +50,6 @@ export class UserService {
         user.userName = generate.meaningful(this.RANDOM_NAME_OPTIONS);
       }
 
-      // note: this implementation ignores user.roles here.
       try {
         const qryRes = await this.conn.query(
           `
@@ -85,11 +84,7 @@ WHERE user_name = $1
     return qryRes.rowCount === 0;
   }
 
-  async edit(
-    userId: number,
-    name: string | undefined,
-    picture: string | undefined,
-  ) {
+  async edit(userId: number, name?: string, picture?: string) {
     let profilePicture: string | undefined;
     if (typeof picture !== 'undefined') {
       const fileName = `profilePicture_${userId}`;
@@ -120,13 +115,8 @@ SELECT
   usr.address,
   usr.picture_url,
   usr.signed_payload,
-  created_at,
-  role.role_label
+  usr.created_at
 FROM kanvas_user usr
-LEFT JOIN mtm_kanvas_user_user_role mtm
-  ON mtm.kanvas_user_id = usr.id
-LEFT JOIN user_role role
-  ON mtm.user_role_id = role.id
 WHERE address = $1
 `,
       [addr],
@@ -141,9 +131,6 @@ WHERE address = $1
       createdAt: Math.floor(qryRes.rows[0]['created_at'].getTime() / 1000),
       profilePicture: qryRes.rows[0]['picture_url'],
       signedPayload: qryRes.rows[0]['signed_payload'],
-      roles: qryRes.rows
-        .map((row: any) => row['role_label'])
-        .filter((roleLabels: any[]) => typeof roleLabels === 'string'),
     };
 
     return Ok(res);
@@ -228,8 +215,6 @@ LIMIT $1
       `,
       [NUM_TOP_BUYERS],
     );
-
-    console.log(qryRes);
 
     return qryRes.rows.map(
       (row: any) =>
@@ -348,6 +333,7 @@ WHERE nft.id = $1`,
         return Err('All editions of this nft have been reserved/bought');
       }
       if (qryRes.rows[0]['launch_at'] > new Date()) {
+        dbTx.query('ROLLBACK');
         return Err('This nft is not yet for sale');
       }
 
