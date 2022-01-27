@@ -1,19 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CategoryController } from './category.controller';
-import { CategoryService } from '../service/category.service';
-import { DbMockModule } from '../../db_mock.module';
+import { AnalyticsController } from './analytics.controller';
+import { AnalyticsService } from '../service/analytics.service';
+import { DbMockModule } from 'src/db_mock.module';
 
-describe('CategoryController', () => {
-  let controller: CategoryController;
+describe('AnalyticsController', () => {
+  let controller: AnalyticsController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DbMockModule],
-      controllers: [CategoryController],
-      providers: [CategoryService],
+      controllers: [AnalyticsController],
+      providers: [AnalyticsService],
     }).compile();
 
-    controller = module.get<CategoryController>(CategoryController);
+    controller = module.get<AnalyticsController>(AnalyticsController);
   });
 
   it('should be defined', () => {
