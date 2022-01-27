@@ -69,6 +69,20 @@ describe('AppController (e2e)', () => {
         request(app.getHttpServer()).post('/nfts/23'),
         request(app.getHttpServer()).post('/nfts/3'),
         request(app.getHttpServer()).post('/nfts/3'),
+
+        request(app.getHttpServer()).post('/nfts/1'),
+        request(app.getHttpServer()).post('/nfts/23'),
+        request(app.getHttpServer()).post('/nfts/23'),
+        request(app.getHttpServer()).post('/nfts/23'),
+        request(app.getHttpServer()).post('/nfts/3'),
+        request(app.getHttpServer()).post('/nfts/3'),
+
+        request(app.getHttpServer()).post('/nfts/7'),
+        request(app.getHttpServer()).post('/nfts/18'),
+        request(app.getHttpServer()).post('/nfts/19'),
+        request(app.getHttpServer()).post('/nfts/22'),
+        request(app.getHttpServer()).post('/nfts/27'),
+        request(app.getHttpServer()).post('/nfts/28'),
       ]);
 
       const res = await request(app.getHttpServer())
@@ -449,6 +463,84 @@ describe('AppController (e2e)', () => {
       .query({ pageSize: '-1' });
     expect(res.statusCode).toEqual(400);
   });
+
+  skipOnPriorFail('/nfts/search', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/nfts/search')
+      .query({ searchString: 'honk kong festival' });
+    expect(res.statusCode).toEqual(200);
+
+    for (const i in res.body.nfts) {
+      expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+      expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
+      delete res.body.nfts[i].createdAt;
+      delete res.body.nfts[i].launchAt;
+    }
+
+    expect(res.body).toStrictEqual({
+      nfts: [
+        {
+          id: 14,
+          name: 'Light Festival - Korea',
+          description:
+            'In South Korea these sculptures are part of the light festival. Dragon vs. Tiger.',
+          ipfsHash: 'ipfs://.....',
+          metadata: {},
+          dataUri:
+            'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+          price: 3432,
+          contract: null,
+          tokenId: null,
+          editionsSize: 8,
+          editionsAvailable: 8,
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 6,
+              name: 'Sculpture',
+            },
+          ],
+        },
+      ],
+      categories: [
+        { id: 13, name: 'Honk Kong', description: 'Sub cities category' },
+      ],
+    });
+  });
+
+  skipOnPriorFail(
+    '/nfts/search (empty searchString gives most popular categories, based on POST /nfts/:id hits)',
+    async () => {
+      const res = await request(app.getHttpServer())
+        .get('/nfts/search')
+        .query({ searchString: '' });
+      expect(res.statusCode).toEqual(200);
+
+      expect(res.body).toStrictEqual({
+        nfts: [],
+        categories: [
+          { id: 13, name: 'Honk Kong', description: 'Sub cities category' },
+          {
+            id: 16,
+            name: 'Black & White',
+            description: 'Sub photography category',
+          },
+          {
+            id: 10,
+            name: 'Landscape',
+            description: 'Sub photography category',
+          },
+          { id: 15, name: 'London', description: 'Sub cities category' },
+          { id: 4, name: 'Drawing', description: 'Sub fine art category' },
+          {
+            id: 9,
+            name: 'Abstract',
+            description: 'Sub photography category',
+          },
+        ],
+      });
+    },
+  );
 
   skipOnPriorFail(
     '/users/profile: not logged in and no userAddress provided => BAD REQUEST',
