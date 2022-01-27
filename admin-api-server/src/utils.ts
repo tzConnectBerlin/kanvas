@@ -76,7 +76,6 @@ export const prepareFilterClause = (
   return { query, params: Object.values(filter) };
 };
 
-
 export const prepareNftFilterClause = (
   filter: FilterParams = {},
 ): { query: string; params: unknown[] } => {
@@ -97,3 +96,12 @@ export const prepareNftFilterClause = (
   }
   return { query, params: Object.values(filter) };
 };
+
+export function enumFromStringValue<T>(
+  enm: { [s: string]: T },
+  value: string,
+): T | undefined {
+  return (Object.values(enm) as unknown as string[]).includes(value)
+    ? (value as unknown as T)
+    : undefined;
+}
