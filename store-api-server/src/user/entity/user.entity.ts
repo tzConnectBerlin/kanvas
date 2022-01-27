@@ -8,7 +8,6 @@ export interface UserEntity {
   profilePicture: string;
   signedPayload?: string;
   cartSession?: string;
-  roles: string[];
 }
 
 export interface ProfileEntity {

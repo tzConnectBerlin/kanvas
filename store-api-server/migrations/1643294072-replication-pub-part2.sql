@@ -1,10 +1,9 @@
-#!/usr/bin/env bash
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-cd $SCRIPT_DIR
+-- Migration: replication-pub-part2
+-- Created at: 2022-01-27 15:34:32
+-- ====  UP  ====
 
-./wait-db
+BEGIN;
 
-psql -c '
 CREATE PUBLICATION store_pub FOR TABLE
   cart_session,
   kanvas_user,
@@ -18,4 +17,13 @@ CREATE PUBLICATION store_pub FOR TABLE
   nft_order,
   payment,
   user_role;
-'
+
+COMMIT;
+
+-- ==== DOWN ====
+
+BEGIN;
+
+DROP PUBLICATION store_pub;
+
+COMMIT;

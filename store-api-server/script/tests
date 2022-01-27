@@ -20,7 +20,7 @@ if [[ "$?" != "0" ]]; then
 fi
 trap "docker kill $db_docker" EXIT
 
-echo "waiting for testdb setup.."
+echo "waiting for testdb setup.. (docker: $db_docker)"
 ./script/wait-db
 sleep 1  # sleeping for 1 more second, for db migrations to finish
 

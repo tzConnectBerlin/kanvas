@@ -46,7 +46,6 @@ export class AuthenticationService {
           id: user.id,
           userName: user.userName,
           userAddress: user.userAddress,
-          roles: user.roles,
         },
         user,
       );

@@ -61,7 +61,7 @@ export class AuthenticationController {
       if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
         throw new HttpException(
           'User with these credentials already exists',
-          HttpStatus.BAD_REQUEST,
+          HttpStatus.FORBIDDEN,
         );
       }
 

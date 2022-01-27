@@ -1,3 +1,4 @@
+import { HttpException, HttpStatus } from '@nestjs/common';
 import {
   IsString,
   IsInt,
@@ -36,7 +37,7 @@ export class FilterParams extends PaginationParams {
   @IsArray()
   @Transform(({ value }) =>
     value
-      ? parseStringArray(value, ',').map((v: string) => Number(v))
+      ? parseStringArray(value, ',').map((v: string) => parseNumberParam(v))
       : undefined,
   )
   @IsOptional()
@@ -72,4 +73,12 @@ function parseStringArray(v: string | string[], sep: string): string[] {
     return v;
   }
   return v.split(sep);
+}
+
+function parseNumberParam(v: string): number {
+  const res = Number(v);
+  if (isNaN(res)) {
+    throw new HttpException(`${v} is not a number`, HttpStatus.BAD_REQUEST);
+  }
+  return res;
 }

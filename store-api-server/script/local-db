@@ -13,7 +13,7 @@ PEPPERMINT_VERSION=ee538be4d156ffb456107587eb71f14671afb1c7
     ./script/migrate || exit 1
 
     psql < script/populate-testdb.sql
-) &
+) >/dev/null 2>&1 &
 
 [ -z $DOCKER_ARGS ] && export DOCKER_ARGS='-t'
 

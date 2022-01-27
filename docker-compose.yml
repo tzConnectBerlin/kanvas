@@ -24,7 +24,6 @@ services:
         ./script/wait-db
         ./script/migrate up
         if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
-          ./script/setup-replication-pub
           psql < script/populate-testdb.sql
         fi
         if [ "$STORE_API_ENABLED" != "false" ]; then

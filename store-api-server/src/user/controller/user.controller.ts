@@ -78,19 +78,25 @@ export class UserController {
   async editProfile(
     @CurrentUser() currentUser: UserEntity,
     @Body() editFields: EditProfile,
-    @UploadedFile() picture: any,
+    @UploadedFile() picture?: any,
   ) {
-    try {
-      await this.userService.edit(
-        currentUser.id,
-        editFields?.userName,
-        picture,
+    if (
+      typeof editFields.userName === 'undefined' &&
+      typeof picture === 'undefined'
+    ) {
+      throw new HttpException(
+        'neither username nor profile picture change requested',
+        HttpStatus.BAD_REQUEST,
       );
+    }
+
+    try {
+      await this.userService.edit(currentUser.id, editFields.userName, picture);
     } catch (err: any) {
       if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
         throw new HttpException(
           'This username is already taken',
-          HttpStatus.BAD_REQUEST,
+          HttpStatus.FORBIDDEN,
         );
       }
 
