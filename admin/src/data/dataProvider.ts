@@ -87,7 +87,12 @@ const dataProvider = (
       filter: JSON.stringify({ id: params.ids }),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    return httpClient(url).then(({ json }) => ({ data: json, headers: new Headers({ Authorization: `Bearer ${getToken()}` }) }));
+    return httpClient(url, {headers: new Headers({ Authorization: `Bearer ${getToken()}`})}).then(({ json }) => {
+
+      return ({
+        data: json.data, headers: new Headers({ Authorization: `Bearer ${getToken()}` })
+      });
+    });
   },
 
   getManyReference: (resource, params) => {

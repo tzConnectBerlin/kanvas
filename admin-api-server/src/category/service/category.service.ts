@@ -39,4 +39,32 @@ ORDER BY leaf.id`,
       );
     }
   }
+
+  async getCategories(ids: number[]): Promise<CategoryEntity[]> {
+    try {
+      const qryRes = await this.conn.query(
+        `
+SELECT leaf.id, leaf.category
+FROM nft_category leaf
+WHERE NOT EXISTS (
+  SELECT 1 FROM nft_category child WHERE child.parent = leaf.id
+) AND leaf.id = ANY($1)
+ORDER BY leaf.id`,
+        [ids],
+      );
+      return qryRes.rows.map(
+        (row: any) =>
+          <CategoryEntity>{
+            id: row['id'],
+            name: row['category'],
+          },
+      );
+    } catch (err) {
+      Logger.error('Error on get categories query, err: ' + err);
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

@@ -1,5 +1,6 @@
 import { Box, Card, Paper, Stack, Typography, unstable_useEnhancedEffect } from '@mui/material';
 import {
+  Record,
   List,
   Datagrid,
   TextField,
@@ -92,7 +93,7 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
   if (props.type === 'boolean') return <BooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
   if (props.type === 'number[]') {
     return (
-      <ReferenceArrayInput source="attributes.categories" label="categories" reference="categories" >
+      <ReferenceArrayInput source="attributes.categories" label="categories" reference="categories/assignable">
         <SelectArrayInput optionText="name" className={classes.reference} />
       </ReferenceArrayInput>
     );
@@ -112,12 +113,17 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
 const NftAside = ({ ...props }) => {
 
   const dataProvider = useDataProvider()
-  const [categories, setCategories] = React.useState()
-  const { data, loading, error } = useGetMany('categories', props.record?.attributes.categories?? [], { enabled: props.record !== undefined });
+  const [categories, setCategories] = React.useState<Record[]>([])
 
   React.useEffect(() => {
-    // setCategories()
-  }, [])
+    if (!props.record) return;
+    if (!props.record.attributes) return;
+    if (categories) return;
+    dataProvider.getMany('categories', {ids: props.record.attributes.categories})
+      .then(response => {
+        setCategories(response.data)
+      })
+  }, [props])
 
   return (
     <Paper style={{ width: 750, marginLeft: '1em' }}>
@@ -128,27 +134,30 @@ const NftAside = ({ ...props }) => {
         </Typography>
         <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', color: "#c4c4c4" }}>
           Representation of the Nft
-          {JSON.stringify(props.record?.attributes.categories)}
         </Typography>
-        <Stack direction="row" sx={{ alignItems: 'flex-end', margin: '2em' }} spacing={3}>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-            <img src={props.record?.attributes["image.png"]} style={{ maxWidth: '80%', maxHeight: '80%' }} />
+        <Stack direction="row" sx={{position: 'relative', alignItems: 'flex-end', margin: '2em', height: '100%', flexGrow: 1 }} spacing={3}>
+
+          <Box sx={{minHeight: '100px', display: 'flex', flexDirection: "column", flexGrow: 1, justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
+            <img src={props.record?.attributes["image.png"]} style={{ margin: 'auto', maxWidth: '80%', maxHeight: '80%' }} />
           </Box>
+          
           <Stack direction="column" sx={{ flexStart: 'end', width: '60%' }}>
             {
               props.record &&
               Object.keys(props.record?.attributes)?.map(attrKey => {
+
+                if (attrKey === "proposal_reject_0") return;
                 if (attrKey === "image.png") return;
-                if(data && attrKey === "categories") return (
+                if (categories.length > 0 && attrKey === "categories") return (
                   <Stack direction="row">
                     <Stack direction="column">
                       <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
                         {attrKey[0].toUpperCase() + attrKey.replace('_', ' ').slice(1)}
                       </Typography>
                       <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
-                        {data.map(category => {
+                        {categories.map(category => {
                           if (!category) return;
-                          return category.name + (data.indexOf(category) === data.length -1 ? '' : ', ')
+                          return category.name + (categories.indexOf(category) === categories.length - 1 ? '' : ', ')
                         }
                         )
                         }

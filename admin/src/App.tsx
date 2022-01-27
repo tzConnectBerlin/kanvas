@@ -53,6 +53,9 @@ function App() {
       <Resource
         name="categories"
       />
+      <Resource
+        name="categories/assignable"
+      />
     </Admin>
   );
 }
