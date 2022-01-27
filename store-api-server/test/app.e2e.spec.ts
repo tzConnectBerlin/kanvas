@@ -118,7 +118,7 @@ describe('AppController (e2e)', () => {
   });
 
   skipOnPriorFail(
-    '/nfts without any filter is OK, becames a paginated nfts browser without any filter',
+    '/nfts without any filter is OK, becomes a paginated nfts browser without any filter',
     async () => {
       const PAGE_SIZE = 10;
       const res = await request(app.getHttpServer())
@@ -141,6 +141,270 @@ describe('AppController (e2e)', () => {
         .get('/nfts')
         .query({ userAddress: 'addr' });
       expect(res.statusCode).toEqual(200);
+
+      expect(res.body).toStrictEqual({
+        currentPage: 1,
+        numberOfPages: 0,
+        nfts: [],
+        lowerPriceBound: 0,
+        upperPriceBound: 0,
+      });
+    },
+  );
+
+  skipOnPriorFail(
+    '/nfts with address filter (OK address doesnt even belong to any user registered in our system))',
+    async () => {
+      const res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ userAddress: 'doesnotexist' });
+      expect(res.statusCode).toEqual(200);
+
+      expect(res.body).toStrictEqual({
+        currentPage: 1,
+        numberOfPages: 0,
+        nfts: [],
+        lowerPriceBound: 0,
+        upperPriceBound: 0,
+      });
+    },
+  );
+
+  skipOnPriorFail(
+    '/nfts with categories filter (categories is list of OR, not AND, ie an nft must belong to at least one of the given categories))',
+    async () => {
+      const res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ categories: '4,6' });
+      expect(res.statusCode).toEqual(200);
+
+      for (const i in res.body.nfts) {
+        expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
+        delete res.body.nfts[i].createdAt;
+        delete res.body.nfts[i].launchAt;
+      }
+
+      expect(res.body).toStrictEqual({
+        currentPage: 1,
+        numberOfPages: 1,
+        nfts: [
+          {
+            id: 1,
+            name: 'Cartoon',
+            description:
+              'Hey guys, here s the WL team ready to write some more code !',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            price: 1,
+            contract: null,
+            tokenId: null,
+            editionsSize: 4,
+            editionsAvailable: 4,
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 4,
+                name: 'Drawing',
+              },
+            ],
+          },
+          {
+            id: 2,
+            name: 'Framley',
+            description:
+              'Framley Parsonage - Was it not a Lie?,1860. John Everett Millais (d.1896) and Dalziel Brothers',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2202&q=80',
+            price: 78,
+            contract: null,
+            tokenId: null,
+            editionsSize: 2,
+            editionsAvailable: 2,
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 4,
+                name: 'Drawing',
+              },
+            ],
+          },
+          {
+            id: 3,
+            name: 'Internet',
+            description: 'its a mountain',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+            price: 104,
+            contract: null,
+            tokenId: null,
+            editionsSize: 6,
+            editionsAvailable: 6,
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 4,
+                name: 'Drawing',
+              },
+            ],
+          },
+          {
+            id: 4,
+            name: 'The cat & the city',
+            description: 'What s better then a cat in a city ?',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            price: 43,
+            contract: null,
+            tokenId: null,
+            editionsSize: 8,
+            editionsAvailable: 8,
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 4,
+                name: 'Drawing',
+              },
+            ],
+          },
+          {
+            id: 10,
+            name: 'Antonin DVORAK',
+            description:
+              'Bronze sculpture of Antonin DVORAK who lived from 1841 - 1904',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+            price: 92,
+            contract: null,
+            tokenId: null,
+            editionsSize: 8,
+            editionsAvailable: 8,
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 6,
+                name: 'Sculpture',
+              },
+            ],
+          },
+          {
+            id: 11,
+            name: 'Korean Language',
+            description:
+              'Inventor of the korean language. This is the statue in Seoul South Korea of him.',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1506809211073-d0785aaad75e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2656&q=80',
+            price: 41,
+            contract: null,
+            tokenId: null,
+            editionsSize: 8,
+            editionsAvailable: 8,
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 6,
+                name: 'Sculpture',
+              },
+            ],
+          },
+          {
+            id: 12,
+            name: 'TOCABI',
+            description:
+              'The humanoid robot TOCABI. I both led the design and took the photo. It is a full-size (real) humanoid robot that can also be used as an avatar for teleoperation.',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1633957897986-70e83293f3ff?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1986&q=80',
+            price: 36,
+            contract: null,
+            tokenId: null,
+            editionsSize: 8,
+            editionsAvailable: 8,
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 6,
+                name: 'Sculpture',
+              },
+            ],
+          },
+          {
+            id: 13,
+            name: 'Lost',
+            description: 'You look lost in thought.',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1599790772272-d1425cd3242e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
+            price: 642,
+            contract: null,
+            tokenId: null,
+            editionsSize: 8,
+            editionsAvailable: 8,
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 6,
+                name: 'Sculpture',
+              },
+            ],
+          },
+          {
+            id: 14,
+            name: 'Light Festival - Korea',
+            description:
+              'In South Korea these sculptures are part of the light festival. Dragon vs. Tiger.',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+            price: 3432,
+            contract: null,
+            tokenId: null,
+            editionsSize: 8,
+            editionsAvailable: 8,
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 6,
+                name: 'Sculpture',
+              },
+            ],
+          },
+        ],
+        lowerPriceBound: 1,
+        upperPriceBound: 3432,
+      });
+    },
+  );
+
+  skipOnPriorFail(
+    '/nfts with categories AND address filter (all of /nfts filters are AND, nft must belong to at least one of the requested categories AND be owned at least once by requested address)',
+    async () => {
+      const res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ categories: '4,6', userAddress: 'addr' });
+      expect(res.statusCode).toEqual(200);
+
+      for (const i in res.body.nfts) {
+        expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
+        delete res.body.nfts[i].createdAt;
+        delete res.body.nfts[i].launchAt;
+      }
 
       expect(res.body).toStrictEqual({
         currentPage: 1,
@@ -1154,14 +1418,12 @@ describe('AppController (e2e)', () => {
         .query({ userAddress: 'addr' });
       expect(res.statusCode).toEqual(200);
 
-      expect(res.body.nfts.map((nft: any) => nft.id)).toStrictEqual([1, 4]);
-
       for (const i in res.body.nfts) {
+        expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
       }
-
-      console.log(JSON.stringify(res.body));
 
       expect(res.body).toStrictEqual({
         currentPage: 1,
@@ -1190,6 +1452,311 @@ describe('AppController (e2e)', () => {
             ],
             ownerStatuses: ['pending'],
           },
+          {
+            id: 4,
+            name: 'The cat & the city',
+            description: 'What s better then a cat in a city ?',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            price: 43,
+            contract: null,
+            tokenId: null,
+            editionsSize: 8,
+            editionsAvailable: 3,
+            categories: [
+              {
+                id: 4,
+                description: 'Sub fine art category',
+                name: 'Drawing',
+              },
+            ],
+            ownerStatuses: ['pending', 'pending', 'pending', 'pending'],
+          },
+        ],
+        lowerPriceBound: 1,
+        upperPriceBound: 43,
+      });
+    },
+  );
+
+  skipOnPriorFail(
+    '/nfts with address filter (OK when >0 nfts owned, with pagination, page 1)',
+    async () => {
+      const res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ userAddress: 'addr', pageSize: '1' });
+      expect(res.statusCode).toEqual(200);
+
+      for (const i in res.body.nfts) {
+        expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
+        delete res.body.nfts[i].createdAt;
+        delete res.body.nfts[i].launchAt;
+      }
+
+      expect(res.body).toStrictEqual({
+        currentPage: 1,
+        numberOfPages: 2,
+        nfts: [
+          {
+            id: 1,
+            name: 'Cartoon',
+            description:
+              'Hey guys, here s the WL team ready to write some more code !',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            price: 1,
+            contract: null,
+            tokenId: null,
+            editionsSize: 4,
+            editionsAvailable: 3,
+            categories: [
+              {
+                id: 4,
+                description: 'Sub fine art category',
+                name: 'Drawing',
+              },
+            ],
+            ownerStatuses: ['pending'],
+          },
+        ],
+        lowerPriceBound: 1,
+        upperPriceBound: 43,
+      });
+    },
+  );
+
+  skipOnPriorFail(
+    '/nfts with address filter (OK when >0 nfts owned, with pagination, page 2)',
+    async () => {
+      const res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ userAddress: 'addr', pageSize: '1', page: '2' });
+      expect(res.statusCode).toEqual(200);
+
+      for (const i in res.body.nfts) {
+        expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
+        delete res.body.nfts[i].createdAt;
+        delete res.body.nfts[i].launchAt;
+      }
+
+      expect(res.body).toStrictEqual({
+        currentPage: 2,
+        numberOfPages: 2,
+        nfts: [
+          {
+            id: 4,
+            name: 'The cat & the city',
+            description: 'What s better then a cat in a city ?',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            price: 43,
+            contract: null,
+            tokenId: null,
+            editionsSize: 8,
+            editionsAvailable: 3,
+            categories: [
+              {
+                id: 4,
+                description: 'Sub fine art category',
+                name: 'Drawing',
+              },
+            ],
+            ownerStatuses: ['pending', 'pending', 'pending', 'pending'],
+          },
+        ],
+        lowerPriceBound: 1,
+        upperPriceBound: 43,
+      });
+    },
+  );
+
+  skipOnPriorFail(
+    '/nfts with address filter (OK when >0 nfts owned, with pagination, page 2, with sort by name ascending)',
+    async () => {
+      const res = await request(app.getHttpServer()).get('/nfts').query({
+        userAddress: 'addr',
+        pageSize: '1',
+        page: '2',
+        orderBy: 'name',
+        orderDirection: 'asc',
+      });
+      expect(res.statusCode).toEqual(200);
+
+      for (const i in res.body.nfts) {
+        expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
+        delete res.body.nfts[i].createdAt;
+        delete res.body.nfts[i].launchAt;
+      }
+
+      expect(res.body).toStrictEqual({
+        currentPage: 2,
+        numberOfPages: 2,
+        nfts: [
+          {
+            id: 4,
+            name: 'The cat & the city',
+            description: 'What s better then a cat in a city ?',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            price: 43,
+            contract: null,
+            tokenId: null,
+            editionsSize: 8,
+            editionsAvailable: 3,
+            categories: [
+              {
+                id: 4,
+                description: 'Sub fine art category',
+                name: 'Drawing',
+              },
+            ],
+            ownerStatuses: ['pending', 'pending', 'pending', 'pending'],
+          },
+        ],
+        lowerPriceBound: 1,
+        upperPriceBound: 43,
+      });
+    },
+  );
+
+  skipOnPriorFail(
+    '/nfts with address filter (OK when >0 nfts owned, with pagination, page 1, with sort by name descending)',
+    async () => {
+      const res = await request(app.getHttpServer()).get('/nfts').query({
+        userAddress: 'addr',
+        pageSize: '1',
+        page: '1',
+        orderBy: 'name',
+        orderDirection: 'desc',
+      });
+      expect(res.statusCode).toEqual(200);
+
+      for (const i in res.body.nfts) {
+        expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
+        delete res.body.nfts[i].createdAt;
+        delete res.body.nfts[i].launchAt;
+      }
+
+      expect(res.body).toStrictEqual({
+        currentPage: 1,
+        numberOfPages: 2,
+        nfts: [
+          {
+            id: 4,
+            name: 'The cat & the city',
+            description: 'What s better then a cat in a city ?',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            price: 43,
+            contract: null,
+            tokenId: null,
+            editionsSize: 8,
+            editionsAvailable: 3,
+            categories: [
+              {
+                id: 4,
+                description: 'Sub fine art category',
+                name: 'Drawing',
+              },
+            ],
+            ownerStatuses: ['pending', 'pending', 'pending', 'pending'],
+          },
+        ],
+        lowerPriceBound: 1,
+        upperPriceBound: 43,
+      });
+    },
+  );
+
+  skipOnPriorFail(
+    '/nfts with address filter (OK when >0 nfts owned, with pagination, page 2, with sort by price ascending)',
+    async () => {
+      const res = await request(app.getHttpServer()).get('/nfts').query({
+        userAddress: 'addr',
+        pageSize: '1',
+        page: '2',
+        orderBy: 'price',
+        orderDirection: 'asc',
+      });
+      expect(res.statusCode).toEqual(200);
+
+      for (const i in res.body.nfts) {
+        expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
+        delete res.body.nfts[i].createdAt;
+        delete res.body.nfts[i].launchAt;
+      }
+
+      expect(res.body).toStrictEqual({
+        currentPage: 2,
+        numberOfPages: 2,
+        nfts: [
+          {
+            id: 4,
+            name: 'The cat & the city',
+            description: 'What s better then a cat in a city ?',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            price: 43,
+            contract: null,
+            tokenId: null,
+            editionsSize: 8,
+            editionsAvailable: 3,
+            categories: [
+              {
+                id: 4,
+                description: 'Sub fine art category',
+                name: 'Drawing',
+              },
+            ],
+            ownerStatuses: ['pending', 'pending', 'pending', 'pending'],
+          },
+        ],
+        lowerPriceBound: 1,
+        upperPriceBound: 43,
+      });
+    },
+  );
+
+  skipOnPriorFail(
+    '/nfts with address filter (OK when >0 nfts owned, with pagination, page 1, with sort by price descending)',
+    async () => {
+      const res = await request(app.getHttpServer()).get('/nfts').query({
+        userAddress: 'addr',
+        pageSize: '1',
+        page: '1',
+        orderBy: 'price',
+        orderDirection: 'desc',
+      });
+      expect(res.statusCode).toEqual(200);
+
+      for (const i in res.body.nfts) {
+        expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
+        delete res.body.nfts[i].createdAt;
+        delete res.body.nfts[i].launchAt;
+      }
+
+      expect(res.body).toStrictEqual({
+        currentPage: 1,
+        numberOfPages: 2,
+        nfts: [
           {
             id: 4,
             name: 'The cat & the city',
