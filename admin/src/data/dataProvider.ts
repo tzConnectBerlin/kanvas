@@ -122,6 +122,7 @@ const dataProvider = (
           `The ${countHeader} header is missing in the HTTP Response. The simple REST data provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare ${countHeader} in the Access-Control-Expose-Headers header?`,
         );
       }
+
       return {
         data: json,
         total:
@@ -141,7 +142,7 @@ const dataProvider = (
       method: 'PATCH',
       body: toFormData(updatedData, resource),
       headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
-    }).then(({ json }) => ( { data: json }))
+    }).then(({ json }) => ({ data: json }))
   },
 
   // simple-rest doesn't handle provide an updateMany route, so we fallback to calling update n times instead
@@ -159,15 +160,14 @@ const dataProvider = (
     if (resource === 'nft') {
       debugger
       const updatedData = diffPreviousDataToNewData({}, params.data)
-      Promise.resolve(
-        await httpClient(`${apiUrl}/${resource}/0`, {
-          method: 'PATCH',
-          body: toFormData(updatedData, resource),
-          headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
-        }).then(({ json }) => ({
-          data: { ...params.data, id: json.id },
-        }))
-      )
+      return await httpClient(`${apiUrl}/${resource}/0`, {
+        method: 'PATCH',
+        body: toFormData(updatedData, resource),
+        headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
+      }).then(({ json }) => ({
+        data: { ...params.data, id: json.id },
+      }))
+
     }
     // fallback to the default implementation
     return await httpClient(`${apiUrl}/${resource}`, {
@@ -215,7 +215,7 @@ const diffPreviousDataToNewData = (previousData: any, data: any) => {
       diff[key] = data.attributes[key]
       continue
     }
-    if (previousData.attributes[key] !== data.attributes[key]) {
+    if (JSON.stringify(previousData.attributes[key]) !== JSON.stringify(data.attributes[key])) {
       diff[key] = data.attributes[key]
     }
   }
@@ -228,31 +228,31 @@ const diffPreviousDataToNewData = (previousData: any, data: any) => {
 }
 
 const toFormData = (data: any, resource = '') => {
-    const formData = new FormData();
-    const keys = Object.keys(data);
+  const formData = new FormData();
+  const keys = Object.keys(data);
 
-    keys.forEach((key) => {
-      if (data[key]) {
-        // contains .png
-        if (key === 'files') {
-          data[key].map( (file: any) => {
-            try {
-              Object.defineProperty(file, 'name', {
-                writable: true,
-                value: 'image.png'
-              });
-              formData.append('files[]', file.rawFile, file.name);
-            } catch (error: any) {
-              console.log(error)
-            }
-          })
-        } else {
-          formData.append(key, JSON.stringify(data[key]));
-        }
+  keys.forEach((key) => {
+    if (data[key]) {
+      // contains .png
+      if (key === 'files') {
+        data[key].map((file: any) => {
+          try {
+            Object.defineProperty(file, 'name', {
+              writable: true,
+              value: 'image.png'
+            });
+            formData.append('files[]', file.rawFile, file.name);
+          } catch (error: any) {
+            console.log(error)
+          }
+        })
+      } else {
+        formData.append(key, JSON.stringify(data[key]));
       }
-    });
+    }
+  });
 
-    return formData;
+  return formData;
 
 };
 

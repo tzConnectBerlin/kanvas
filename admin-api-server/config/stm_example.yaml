@@ -18,10 +18,9 @@ states:
     - next_state: setup_nft
       when: |
         nft.name.length > 0 &&
-        nft['image.png'].length > 0 &&
-        nft.create_ready
+        nft['image.png'].length > 0
     mutables:
-    - attributes: [name, image.png, create_ready]
+    - attributes: [name, image.png]
       by_roles: [creator]
 
   setup_nft:

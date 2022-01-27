@@ -1,4 +1,4 @@
-import { Box, Paper, Typography, unstable_useEnhancedEffect } from '@mui/material';
+import { Box, Card, Paper, Stack, Typography, unstable_useEnhancedEffect } from '@mui/material';
 import {
   List,
   Datagrid,
@@ -10,62 +10,33 @@ import {
   ImageInput,
   ImageField,
   DateField,
-  AutocompleteInput,
-  TopToolbar,
-  DateInput,
   NumberInput,
   NumberField,
-  useEditContext,
   useGetOne,
   BooleanInput,
   NullableBooleanInput,
   ReferenceArrayInput,
   SelectArrayInput,
-  useResourceContext
+  ReferenceManyField,
+  SingleFieldList,
+  ChipField,
+  number,
+  minValue,
+  useGetMany,
+  useDataProvider
 } from 'react-admin';
-import { JsonInput, JsonField } from 'react-admin-json-view';
-import { CustomCreateButton } from './Buttons/CustomCreateButton';
+import { JsonField } from 'react-admin-json-view';
 import { CustomDeleteButton } from './Buttons/CustomDeleteButton';
-import { CustomExportButton } from './Buttons/CustomExportButton';
 import ToolbarActions from './ToolbarActions';
 import { makeStyles } from '@material-ui/core/styles';
 import React from 'react';
 
-const NFT_STATES = [
-  {
-    name: 'Proposal',
-    id: 'proposal',
-  },
-  {
-    name: 'Accepted',
-    id: 'accepted',
-  },
-  {
-    name: 'Rejected',
-    id: 'rejected',
-  },
-];
-
-const defaultMetadata = {
-  symbol: '',
-  decimals: 0,
-  name: '',
-  description: '',
-  tags: [],
-  displayUrl: '',
-  thumbnailUri: '',
-  minter: '',
-  creators: [],
-  contributors: [],
-  publishers: [],
-};
-
 const useStyle = makeStyles({
   boxWrapper: {
-    padding: '2em'
+    paddingLeft: '1em'
   },
   title: {
-    paddingLeft: '1rem',
+    paddingBottom: '1rem',
     fontFamilly: 'Poppins SemiBold !important',
   },
   subtitle: {
@@ -76,6 +47,9 @@ const useStyle = makeStyles({
   },
   form: {
     marginTop: '1rem'
+  },
+  reference: {
+    minWidth: "16em !important"
   }
 })
 
@@ -89,11 +63,14 @@ export const NftList = ({ ...props }) => (
       <TextField source="attributes.name" label="Name" />
       <TextField source="state" label="Current State" />
       <NumberField source="attributes.price" label='Price' />
-      <NumberField source="attributes.tokenAmount" label='Token amount' />
-      <ImageField source="dataUri" label="Image" />
-      <DateField source="created_at" label="Created at" showTime />
-      <DateField source="updated_at" label="Last updated at" showTime />
-      <TextField source="created_by" label="Created by" />
+      <NumberField source="attributes.editions_size" label='Token amount' />
+      <DateField source="createdAt" label="Created at" showTime />
+      <DateField source="updatedAt" label="Last updated at" showTime />
+      <ReferenceManyField label="Created by" source="createdBy" reference="user" target="id">
+        <SingleFieldList>
+          <ChipField source="userName" />
+        </SingleFieldList>
+      </ReferenceManyField>
     </Datagrid>
   </List>
 );
@@ -106,13 +83,17 @@ interface InbutSelectorProps {
 }
 
 const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
+
+  const validateNumber = [number(), minValue(0)]
+  const classes = useStyle()
+
   if (props.type === 'string') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} />;
-  if (props.type === 'number') return <NumberInput source={`attributes.${props.attributesName}`} label={props.label} />;
+  if (props.type === 'number') return <NumberInput source={`attributes.${props.attributesName}`} label={props.label} validate={validateNumber} />;
   if (props.type === 'boolean') return <BooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
   if (props.type === 'number[]') {
     return (
-      <ReferenceArrayInput source="attributes.categories" reference="categories">
-        <SelectArrayInput optionText="name" />
+      <ReferenceArrayInput source="attributes.categories" label="categories" reference="categories" >
+        <SelectArrayInput optionText="name" className={classes.reference} />
       </ReferenceArrayInput>
     );
   }
@@ -120,54 +101,124 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
   if (props.type === 'content_uri') {
 
     return (
-        <ImageInput value={props.record!.attributes["image.png"]} source="files" accept="image/*">
-          <ImageField source="src" title="title" />
-        </ImageInput>
-      );
+      <ImageInput source="files" accept="image/*">
+        <ImageField src="attributes.image.png" source="src" title="title" />
+      </ImageInput>
+    );
   }
   else return null
 }
+
+const NftAside = ({ ...props }) => {
+
+  const dataProvider = useDataProvider()
+  const [categories, setCategories] = React.useState()
+  const { data, loading, error } = useGetMany('categories', props.record?.attributes.categories?? [], { enabled: props.record !== undefined });
+
+  React.useEffect(() => {
+    // setCategories()
+  }, [])
+
+  return (
+    <Paper style={{ width: 750, marginLeft: '1em' }}>
+      <div style={{ margin: '1em' }}>
+        <Typography variant="h6" style={{ fontFamily: 'Poppins SemiBold' }}>
+          Preview your nft
+
+        </Typography>
+        <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', color: "#c4c4c4" }}>
+          Representation of the Nft
+          {JSON.stringify(props.record?.attributes.categories)}
+        </Typography>
+        <Stack direction="row" sx={{ alignItems: 'flex-end', margin: '2em' }} spacing={3}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+            <img src={props.record?.attributes["image.png"]} style={{ maxWidth: '80%', maxHeight: '80%' }} />
+          </Box>
+          <Stack direction="column" sx={{ flexStart: 'end', width: '60%' }}>
+            {
+              props.record &&
+              Object.keys(props.record?.attributes)?.map(attrKey => {
+                if (attrKey === "image.png") return;
+                if(data && attrKey === "categories") return (
+                  <Stack direction="row">
+                    <Stack direction="column">
+                      <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
+                        {attrKey[0].toUpperCase() + attrKey.replace('_', ' ').slice(1)}
+                      </Typography>
+                      <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
+                        {data.map(category => {
+                          if (!category) return;
+                          return category.name + (data.indexOf(category) === data.length -1 ? '' : ', ')
+                        }
+                        )
+                        }
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                )
+                return (
+                  <Stack direction="row">
+                    <Stack direction="column">
+                      <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
+                        {attrKey[0].toUpperCase() + attrKey.replace('_', ' ').slice(1)}
+                      </Typography>
+                      <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
+                        {props.record.attributes[attrKey]}
+                      </Typography>
+                    </Stack>
+                  </Stack>)
+              })
+            }
+          </Stack>
+        </Stack>
+      </div>
+    </Paper>
+  )
+};
 
 // Add authorization for allowedActions
 export const NftEdit = (props: any) => {
 
   const classes = useStyle()
-  const resource = useResourceContext();
   const concernedNft = useGetOne('nft', props.id);
 
   const [formKeys, setFormKeys] = React.useState<string[]>([])
 
   React.useEffect(() => {
-    console.log(resource)
     if (!concernedNft.data) return;
     if (!concernedNft.data.allowedActions) return;
     setFormKeys(Object.keys(concernedNft.data!.allowedActions))
-  }, [concernedNft, resource])
+  }, [concernedNft])
 
   return (
     concernedNft &&
-    <Box className={classes.boxWrapper}>
-      <Typography variant="h3" component="h1" className={classes.title} style={{ fontFamily: 'Poppins SemiBold' }}>
-        Update an NFT
-      </Typography>
-      <Typography variant="h6" component="h2" className={classes.subtitle} style={{ fontFamily: 'Poppins Light', color: "#C4C4C4 !important", maxWidth: '40%' }}>
-        After creating the NFT you will be able to edit as much as you want before submitting it
-      </Typography>
-      <Edit title="Update an NFT" {...props}>
-        <SimpleForm className={classes.form}>
-          {
-            formKeys.length > 0 &&
-            formKeys.map(key =>
-              <InputSelector
-                attributesName={key}
-                label={key[0].toUpperCase() + key.replace('_', ' ').slice(1)}
-                type={concernedNft.data!.allowedActions[key] as 'string' | 'boolean' | 'number' | 'content_uri' | 'number[]' | 'votes'}
-              />
-            )
-          }
-        </SimpleForm>
-      </Edit>
-    </Box>
+    <Edit
+      title="Update an NFT"
+      {...props}
+      aside={<NftAside />}
+    >
+      <SimpleForm className={classes.form}>
+        <Box className={classes.boxWrapper}>
+          <Box flex={1}>
+            <Typography variant="h4" component="h2" className={classes.title} style={{ fontFamily: 'Poppins SemiBold' }}>
+              Update an NFT
+            </Typography>
+            {
+              formKeys.length > 0 &&
+              formKeys.map(key =>
+                <Box>
+                  <InputSelector
+                    attributesName={key}
+                    label={key[0].toUpperCase() + key.replace('_', ' ').slice(1)}
+                    type={concernedNft.data!.allowedActions[key] as 'string' | 'boolean' | 'number' | 'content_uri' | 'number[]' | 'votes'}
+                  />
+                </Box>
+              )
+            }
+          </Box>
+        </Box>
+      </SimpleForm>
+    </Edit>
   );
 };
 
@@ -177,18 +228,15 @@ export const NftCreate = ({ ...props }) => {
   const classes = useStyle()
 
   return (
-    <Box className={classes.boxWrapper}>
-      <Typography variant="h3" component="h1" className={classes.title} style={{ fontFamily: 'Poppins SemiBold' }}>
-        Create an NFT
-      </Typography>
-      <Typography variant="h6" component="h2" className={classes.subtitle} style={{ fontFamily: 'Poppins Light', color: "#C4C4C4 !important", maxWidth: '40%' }}>
-        After creating the NFT you will be able to edit as much as you want before submitting it
-      </Typography>
-      <Create {...props}>
-        <SimpleForm className={classes.form}>
+    <Create {...props}>
+      <SimpleForm className={classes.form}>
+        <Box className={classes.boxWrapper}>
+          <Typography variant="h4" component="h1" className={classes.title} style={{ fontFamily: 'Poppins SemiBold' }}>
+            Create an NFT
+          </Typography>
           <TextInput source="attributes.name" label="Name" />
-        </SimpleForm>
-      </Create>
-    </Box>
+        </Box>
+      </SimpleForm>
+    </Create>
   );
 };

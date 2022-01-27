@@ -98,7 +98,7 @@ LIMIT  ${params.pageSize}
       `,
       [params.filters.nftStates, params.filters.nftIds],
     );
-    console.log(qryRes)
+
     if (qryRes.rowCount === 0) {
       return undefined;
     }
@@ -122,7 +122,7 @@ LIMIT  ${params.pageSize}
     const filterParams = new NftFilterParams();
 
     filterParams.filters.nftIds = nftIds;
-    console.log(filterParams)
+
     return await this.findAll(filterParams);
   }
 
@@ -167,12 +167,8 @@ LIMIT  ${params.pageSize}
       }
       const nft = nfts[0];
       const actor = await this.getActorForNft(user, nft);
-      console.log(actor)
 
       for (let nftUpdate of nftUpdates) {
-        console.log(nftUpdate)
-        console.log('nft:')
-        console.log(nft)
         // Check if attribute is of type content in order to upload to ipfs
         if (typeof nftUpdate.file !== 'undefined') {
           nftUpdate = await this.#uploadContent(
@@ -306,10 +302,9 @@ RETURNING id
     `,
         [creator.id],
       );
-      console.log(creator)
-      console.log('creator')
+
       const test= await this.getNft(creator, qryRes.rows[0].id);
-      console.log(test)
+      
       return test
     } catch (err: any) {
       Logger.error(`Unable to create new nft, err: ${err}`);
