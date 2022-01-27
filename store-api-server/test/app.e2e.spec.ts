@@ -129,10 +129,62 @@ describe('AppController (e2e)', () => {
       expect(res.body.nfts.length).toEqual(PAGE_SIZE);
 
       expect(res.body.nfts.map((elem: any) => elem.id)).toStrictEqual([
-        23, 3, 1,
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
       ]);
     },
   );
+
+  skipOnPriorFail(
+    '/nfts with address filter (OK when 0 nfts owned)',
+    async () => {
+      const res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ userAddress: 'addr' });
+      expect(res.statusCode).toEqual(200);
+
+      expect(res.body).toStrictEqual({
+        currentPage: 1,
+        numberOfPages: 0,
+        nfts: [],
+        lowerPriceBound: 0,
+        upperPriceBound: 0,
+      });
+    },
+  );
+
+  skipOnPriorFail('/nfts pagination', async () => {
+    const PAGE_SIZE = 3;
+    const res = await request(app.getHttpServer())
+      .get('/nfts')
+      .query({ page: '3', pageSize: `${PAGE_SIZE}` });
+    expect(res.statusCode).toEqual(200);
+
+    expect(res.body.nfts.length).toEqual(PAGE_SIZE);
+
+    expect(res.body.nfts.map((elem: any) => elem.id)).toStrictEqual([7, 8, 9]);
+  });
+
+  skipOnPriorFail('/nfts pagination (page <1 => BAD REQUEST)', async () => {
+    let res = await request(app.getHttpServer())
+      .get('/nfts')
+      .query({ page: '0' });
+    expect(res.statusCode).toEqual(400);
+
+    res = await request(app.getHttpServer()).get('/nfts').query({ page: -1 });
+    expect(res.statusCode).toEqual(400);
+  });
+
+  skipOnPriorFail('/nfts pagination (pageSize <1 => BAD REQUEST)', async () => {
+    let res = await request(app.getHttpServer())
+      .get('/nfts')
+      .query({ pageSize: '0' });
+    expect(res.statusCode).toEqual(400);
+
+    res = await request(app.getHttpServer())
+      .get('/nfts')
+      .query({ pageSize: '-1' });
+    expect(res.statusCode).toEqual(400);
+  });
 
   skipOnPriorFail(
     '/users/profile: not logged in and no userAddress provided => BAD REQUEST',
@@ -1091,6 +1143,79 @@ describe('AppController (e2e)', () => {
         id,
       );
       expect(stillSuccess.status).toEqual(PaymentStatus.SUCCEEDED);
+    },
+  );
+
+  skipOnPriorFail(
+    '/nfts with address filter (OK when >0 nfts owned)',
+    async () => {
+      const res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ userAddress: 'addr' });
+      expect(res.statusCode).toEqual(200);
+
+      expect(res.body.nfts.map((nft: any) => nft.id)).toStrictEqual([1, 4]);
+
+      for (const i in res.body.nfts) {
+        delete res.body.nfts[i].createdAt;
+        delete res.body.nfts[i].launchAt;
+      }
+
+      console.log(JSON.stringify(res.body));
+
+      expect(res.body).toStrictEqual({
+        currentPage: 1,
+        numberOfPages: 1,
+        nfts: [
+          {
+            id: 1,
+            name: 'Cartoon',
+            description:
+              'Hey guys, here s the WL team ready to write some more code !',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            price: 1,
+            contract: null,
+            tokenId: null,
+            editionsSize: 4,
+            editionsAvailable: 3,
+            categories: [
+              {
+                id: 4,
+                description: 'Sub fine art category',
+                name: 'Drawing',
+              },
+            ],
+            ownerStatuses: ['pending'],
+          },
+          {
+            id: 4,
+            name: 'The cat & the city',
+            description: 'What s better then a cat in a city ?',
+            ipfsHash: 'ipfs://.....',
+            metadata: {},
+            dataUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            price: 43,
+            contract: null,
+            tokenId: null,
+            editionsSize: 8,
+            editionsAvailable: 3,
+            categories: [
+              {
+                id: 4,
+                description: 'Sub fine art category',
+                name: 'Drawing',
+              },
+            ],
+            ownerStatuses: ['pending', 'pending', 'pending', 'pending'],
+          },
+        ],
+        lowerPriceBound: 1,
+        upperPriceBound: 43,
+      });
     },
   );
 });
