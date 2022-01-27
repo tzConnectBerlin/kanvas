@@ -17,7 +17,14 @@ You can run postgres on `localhost`, a server, or in a Docker container by runni
 ### Migrations
 
 Replace the username/password and db name with values that match your setup
-`$ ./script/migrate up`
+`$ ./script/migrate up` or `docker-compose up`
+
+### Seeding
+
+`yarn seed`
+### Docker build
+
+`docker-compose build`
 
 To create a new migration, run `./script/shmig -t postgresql -d postgres://dev_user:dev_password@localhost/dev_database create my_table_name`
 

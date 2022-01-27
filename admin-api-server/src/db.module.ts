@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import { assertEnv } from './utils';
-import { PG_CONNECTION } from './constants';
+import { PG_CONNECTION, PG_CONNECTION_STORE_REPLICATION } from './constants';
 import { Client, types } from 'pg';
 import * as Pool from 'pg-pool';
 export type DbPool = Pool<Client>;
@@ -30,8 +30,19 @@ const dbProvider = {
   useValue: dbPool,
 };
 
+const dbStoreProvider = {
+  provide: PG_CONNECTION_STORE_REPLICATION,
+  useValue: new Pool({
+    host: assertEnv('PGHOST'),
+    port: Number(assertEnv('PGPORT')),
+    user: assertEnv('PGUSER'),
+    password: assertEnv('PGPASSWORD'),
+    database: 'store_replication',
+  }),
+};
+
 @Module({
-  providers: [dbProvider],
-  exports: [dbProvider],
+  providers: [dbProvider, dbStoreProvider],
+  exports: [dbProvider, dbStoreProvider],
 })
 export class DbModule {}

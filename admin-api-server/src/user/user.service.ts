@@ -15,15 +15,15 @@ const getSelectStatement = (
   limitClause = '',
   sortField = 'id',
   sortDirection = 'ASC',
-): string => `SELECT id, user_name as "userName", address, email, password, disabled, ARRAY_AGG(mkuur.user_role_id) as roles 
-       FROM kanvas_user ku 
+): string => `SELECT id, user_name as "userName", address, email, password, disabled, ARRAY_AGG(mkuur.user_role_id) as roles
+       FROM kanvas_user ku
        inner join mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id ${whereClause}
        GROUP BY ku.id
        ORDER BY ${sortField} ${sortDirection} ${limitClause}`;
 
 const getSelectCountStatement = (
   whereClause = '',
-): string => `SELECT COUNT(*) FROM kanvas_user ku 
+): string => `SELECT COUNT(*) FROM kanvas_user ku
        inner join mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id ${whereClause}
        GROUP BY ku.id
        ORDER BY $1`;
@@ -84,12 +84,14 @@ export class UserService {
     const sortDirection = sort && sort[1] ? sort[1] : 'ASC';
     const countResult = await this.db.query(
       getSelectCountStatement(whereClause),
-      [sortField, ...params],
+      [...params],
     );
+
     const result = await this.db.query<User[]>(
       getSelectStatement(whereClause, limitClause, sortField, sortDirection),
       params,
     );
+
     return { data: result.rows, count: countResult?.rows[0]?.count ?? 0 };
   }
 
@@ -137,7 +139,6 @@ export class UserService {
       }
     } catch (e) {
       await client.query('ROLLBACK');
-      console.log(e);
       throw new HttpException('Unable to update user', HttpStatus.BAD_REQUEST);
     } finally {
       client.release();

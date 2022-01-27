@@ -9,6 +9,7 @@ trap "kill 0" EXIT
 [ -z $PGUSER ] && export PGUSER=dev_user
 [ -z $PGPASSWORD ] && export PGPASSWORD=dev_password
 [ -z $PGDATABASE ] && export PGDATABASE=dev_database
+[ -z $PGHOST ] && export PGHOST=localhost
 
 (
     ./script/wait-db

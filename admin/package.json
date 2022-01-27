@@ -6,6 +6,8 @@
     "@auth0/auth0-spa-js": "^1.19.2",
     "@emotion/react": "^11.6.0",
     "@emotion/styled": "^11.6.0",
+    "@mui/icons-material": "^5.3.0",
+    "@mui/lab": "^5.0.0-alpha.65",
     "@mui/material": "^5.2.0",
     "@taquito/beacon-wallet": "^11.0.1",
     "@taquito/taquito": "^11.0.1",
@@ -21,6 +23,7 @@
     "history": "^4",
     "jwt-decode": "^3.1.2",
     "kukai-embed": "^0.6.7-beta.0",
+    "lodash": "^4.17.21",
     "query-string": "^7.0.1",
     "ra-data-json-server": "^3.19.0",
     "react": "^17.0.2",
@@ -59,6 +62,8 @@
   },
   "devDependencies": {
     "@types/history": "^4.7.9",
+    "@types/lodash": "^4.14.178",
+    "@types/react-router-dom": "^5.3.2",
     "prettier": "2.4.1"
   }
 }

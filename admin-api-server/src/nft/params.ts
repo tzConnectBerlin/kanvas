@@ -1,26 +1,21 @@
-import { IsInt, IsOptional, IsArray } from 'class-validator';
-import { Type, Transform } from 'class-transformer';
-
 export class NftPaginationParams {
-  @IsInt()
-  @Type(() => Number)
-  @IsOptional()
-  page = 1;
-
-  @IsInt()
-  @Type(() => Number)
-  @IsOptional()
+  pageOffset = 0;
   pageSize = 10;
+
+  orderBy = 'id';
+  orderDirection = 'asc';
+}
+
+export interface NftFilters {
+  nftStates?: string[];
+  nftIds?: number[];
 }
 
 export class NftFilterParams extends NftPaginationParams {
-  @IsArray()
-  @Transform(({ value }) => (value ? parseStringArray(value, ',') : undefined))
-  @IsOptional()
-  nftStates: string[];
+  filters: NftFilters = <NftFilters>{};
 }
 
-function parseStringArray(v: string | string[], sep: string): string[] {
+export function parseStringArray(v: string | string[], sep: string): string[] {
   if (typeof v !== 'string') {
     return v;
   }

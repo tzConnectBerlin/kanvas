@@ -24,4 +24,5 @@ export const TextArrayField: React.FC<TextArrayFieldProps> = ({
     );
   }
 };
+
 TextArrayField.defaultProps = { addLabel: true };

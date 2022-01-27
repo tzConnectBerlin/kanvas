@@ -1,6 +1,6 @@
 attributes:
   name: string
-  content_uri: content
+  image.png: content_uri
   create_ready: boolean
   price: number
   editions_size: number
@@ -18,10 +18,9 @@ states:
     - next_state: setup_nft
       when: |
         nft.name.length > 0 &&
-        nft.content_uri.length > 0 &&
-        nft.create_ready
+        nft['image.png'].length > 0
     mutables:
-    - attributes: [name, content_uri, create_ready]
+    - attributes: [name, image.png]
       by_roles: [creator]
 
   setup_nft:

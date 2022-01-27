@@ -229,8 +229,6 @@ LIMIT $1
       [NUM_TOP_BUYERS],
     );
 
-    console.log(qryRes);
-
     return qryRes.rows.map(
       (row: any) =>
         <UserTotalPaid>{

@@ -1,3 +1,4 @@
+import { reject } from 'lodash';
 import { stringify } from 'query-string';
 import { fetchUtils, DataProvider } from 'ra-core';
 import { getToken } from '../auth/authUtils';
@@ -34,6 +35,7 @@ import { getToken } from '../auth/authUtils';
  *
  * export default App;
  */
+
 const dataProvider = (
   apiUrl: string,
   httpClient = fetchUtils.fetchJson,
@@ -45,10 +47,11 @@ const dataProvider = (
 
     const rangeStart = (page - 1) * perPage;
     const rangeEnd = page * perPage - 1;
+
     const query = {
-      sort: JSON.stringify([field, order]),
+      sort: JSON.stringify([field, order === 'ASC' ? 'asc' : 'desc']),
       range: JSON.stringify([rangeStart, rangeEnd]),
-      filter: JSON.stringify(params.filter),
+      filters: Object.keys(params.filter).length === 0 ? undefined : JSON.stringify(params.filter),
     };
 
     const url = `${apiUrl}/${resource}?${stringify(query, {
@@ -59,11 +62,12 @@ const dataProvider = (
     const options =
       countHeader === 'Content-Range'
         ? {
-            // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
-            headers: new Headers({
-              Range: `${resource}=${rangeStart}-${rangeEnd}`,
-            }),
-          }
+          // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
+          headers: new Headers({
+            Authorization: `Bearer ${getToken()}`,
+            Range: `${resource}=${rangeStart}-${rangeEnd}`,
+          }),
+        }
         : {};
 
     return httpClient(url, options).then(({ headers, json }) => ({
@@ -73,7 +77,8 @@ const dataProvider = (
   },
 
   getOne: (resource, params) =>
-    httpClient(`${apiUrl}/${resource}/${params.id}`).then(({ json }) => ({
+    httpClient(`${apiUrl}/${resource}/${params.id}`, { headers: new Headers({ Authorization: `Bearer ${getToken()}` }) }).then(({ json }) => ({
+      headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
       data: json,
     })),
 
@@ -82,7 +87,12 @@ const dataProvider = (
       filter: JSON.stringify({ id: params.ids }),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    return httpClient(url).then(({ json }) => ({ data: json }));
+    return httpClient(url, {headers: new Headers({ Authorization: `Bearer ${getToken()}`})}).then(({ json }) => {
+
+      return ({
+        data: json.data, headers: new Headers({ Authorization: `Bearer ${getToken()}` })
+      });
+    });
   },
 
   getManyReference: (resource, params) => {
@@ -104,11 +114,11 @@ const dataProvider = (
     const options =
       countHeader === 'Content-Range'
         ? {
-            // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
-            headers: new Headers({
-              Range: `${resource}=${rangeStart}-${rangeEnd}`,
-            }),
-          }
+          // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
+          headers: new Headers({
+            Range: `${resource}=${rangeStart}-${rangeEnd}`,
+          }),
+        }
         : {};
 
     return httpClient(url, options).then(({ headers, json }) => {
@@ -117,26 +127,27 @@ const dataProvider = (
           `The ${countHeader} header is missing in the HTTP Response. The simple REST data provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare ${countHeader} in the Access-Control-Expose-Headers header?`,
         );
       }
+
       return {
         data: json,
         total:
           countHeader === 'Content-Range'
             ? parseInt(
-                (headers.get('content-range') ?? '').split('/').pop() ?? '',
-                10,
-              )
+              (headers.get('content-range') ?? '').split('/').pop() ?? '',
+              10,
+            )
             : parseInt(headers.get(countHeader.toLowerCase()) ?? ''),
       };
     });
   },
 
-  update: (resource, params) => {
-    console.log(params);
-    return httpClient(`${apiUrl}/${resource}/${params.id}`, {
+  update: async (resource, params) => {
+    const updatedData = diffPreviousDataToNewData(params.previousData, params.data)
+    return await httpClient(`${apiUrl}/${resource}/${params.id}`, {
       method: 'PATCH',
-      body: toFormData(params.data),
+      body: toFormData(updatedData, resource),
       headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
-    }).then(({ json }) => ({ data: json }));
+    }).then(({ json }) => ({ data: json }))
   },
 
   // simple-rest doesn't handle provide an updateMany route, so we fallback to calling update n times instead
@@ -150,14 +161,28 @@ const dataProvider = (
       ),
     ).then((responses) => ({ data: responses.map(({ json }) => json.id) })),
 
-  create: (resource, params) =>
-    httpClient(`${apiUrl}/${resource}`, {
+  create: async (resource, params) => {
+    if (resource === 'nft') {
+      debugger
+      const updatedData = diffPreviousDataToNewData({}, params.data)
+      return await httpClient(`${apiUrl}/${resource}/0`, {
+        method: 'PATCH',
+        body: toFormData(updatedData, resource),
+        headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
+      }).then(({ json }) => ({
+        data: { ...params.data, id: json.id },
+      }))
+
+    }
+    // fallback to the default implementation
+    return await httpClient(`${apiUrl}/${resource}`, {
       method: 'POST',
-      body: toFormData(params.data),
+      body: JSON.stringify(params.data),
       headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
     }).then(({ json }) => ({
       data: { ...params.data, id: json.id },
-    })),
+    }))
+  },
 
   delete: (resource, params) =>
     httpClient(`${apiUrl}/${resource}/${params.id}`, {
@@ -185,26 +210,55 @@ const dataProvider = (
     })),
 });
 
-const toFormData = (data: any) => {
-  if (data.image) {
-    const formData = new FormData();
-    const keys = Object.keys(data);
-    keys.forEach((key) => {
-      if (data[key]) {
-        if (key === 'image') {
-          formData.append(key, data[key].rawFile);
-        } else {
-          if (typeof data[key] === 'object') {
-            formData.append(key, JSON.stringify(data[key]));
-          } else {
-            formData.append(key, data[key]);
-          }
-        }
-      }
-    });
-    return formData;
+const diffPreviousDataToNewData = (previousData: any, data: any) => {
+  // Attributes part
+  let diff: any = {};
+  const newKeys = Object.keys(data.attributes)
+
+  for (const key of newKeys) {
+    if (!previousData.attributes) {
+      diff[key] = data.attributes[key]
+      continue
+    }
+    if (JSON.stringify(previousData.attributes[key]) !== JSON.stringify(data.attributes[key])) {
+      diff[key] = data.attributes[key]
+    }
   }
-  return JSON.stringify(data);
+  // File part
+  if (data.hasOwnProperty('files')) {
+    diff['files'] = data['files'].length ? data['files'] : [data['files']]
+  }
+
+  return diff
+}
+
+const toFormData = (data: any, resource = '') => {
+  const formData = new FormData();
+  const keys = Object.keys(data);
+
+  keys.forEach((key) => {
+    if (data[key]) {
+      // contains .png
+      if (key === 'files') {
+        data[key].map((file: any) => {
+          try {
+            Object.defineProperty(file, 'name', {
+              writable: true,
+              value: 'image.png'
+            });
+            formData.append('files[]', file.rawFile, file.name);
+          } catch (error: any) {
+            console.log(error)
+          }
+        })
+      } else {
+        formData.append(key, JSON.stringify(data[key]));
+      }
+    }
+  });
+
+  return formData;
+
 };
 
 export default dataProvider;

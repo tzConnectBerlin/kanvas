@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NftController } from './nft.controller';
-import { NftService } from './nft.service';
+import { NftService } from '../nft.service';
 
 describe('NftController', () => {
   let controller: NftController;
