@@ -39,4 +39,11 @@ export class NftServiceMock {
       HttpStatus.INTERNAL_SERVER_ERROR,
     );
   }
+
+  async getNftOwnerStatus(address: string, nftIds: number[]) {
+    throw new HttpException(
+      `mock getNftOwnerStatus not implemented`,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
 }

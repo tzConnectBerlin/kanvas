@@ -82,8 +82,8 @@ export class IpfsService {
     return axios
       .post('https://api.pinata.cloud/pinning/pinFileToIPFS', form, {
         headers: {
-          pinata_api_key: this.PINATA_API_KEY,
-          pinata_secret_api_key: this.PINATA_API_SECRET,
+          pinata_api_key: this.PINATA_API_KEY || '',
+          pinata_secret_api_key: this.PINATA_API_SECRET || '',
           ...form.getHeaders(),
         },
       })
@@ -104,8 +104,8 @@ export class IpfsService {
     return axios
       .post('https://api.pinata.cloud/pinning/pinJSONToIPFS', jsonData, {
         headers: {
-          pinata_api_key: this.PINATA_API_KEY,
-          pinata_secret_api_key: this.PINATA_API_SECRET,
+          pinata_api_key: this.PINATA_API_KEY || '',
+          pinata_secret_api_key: this.PINATA_API_SECRET || '',
         },
       })
       .then(function (response: any) {
