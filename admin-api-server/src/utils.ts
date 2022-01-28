@@ -2,7 +2,8 @@ import { Ok, Err } from 'ts-results';
 import * as bcrypt from 'bcrypt';
 import { AUTH_SALT_ROUNDS } from './constants';
 import { FilterParams } from './types';
-import { NftFilterParams } from './nft/params';
+import { NftFilterParams, PaginationParams } from './nft/params';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 class AssertionError extends Error {
   constructor(message: string) {
@@ -104,4 +105,40 @@ export function enumFromStringValue<T>(
   return (Object.values(enm) as unknown as string[]).includes(value)
     ? (value as unknown as T)
     : undefined;
+}
+
+export const queryParamsToPaginationParams = (
+  sort?: string[],
+  range?: number[]
+): PaginationParams => {
+  const res = new PaginationParams();
+
+  if (typeof sort !== 'undefined' && sort.length > 0) {
+    res.orderBy = sort[0];
+    if (sort.length > 1) {
+      res.orderDirection = sort[1] as 'asc' | 'desc';
+    }
+  }
+
+  if (typeof range !== 'undefined' && range.length === 2) {
+    res.pageOffset = range[0];
+    res.pageSize = range[1] - range[0];
+  }
+
+  return res
+}
+
+export function parseStringArray(v: string | string[], sep = ','): string[] | undefined {
+  if (typeof v !== 'string') {
+    return undefined;
+  }
+  return v.split(sep);
+}
+
+export function parseNumberParam(v: string): number {
+  const res = Number(v);
+  if (isNaN(res)) {
+    throw new HttpException(`${v} is not a number`, HttpStatus.BAD_REQUEST);
+  }
+  return res;
 }

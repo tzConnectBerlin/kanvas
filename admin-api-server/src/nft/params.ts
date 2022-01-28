@@ -1,9 +1,9 @@
-export class NftPaginationParams {
+export class PaginationParams {
   pageOffset = 0;
   pageSize = 10;
 
   orderBy = 'id';
-  orderDirection = 'asc';
+  orderDirection : 'asc' | 'desc' = 'asc';
 }
 
 export interface NftFilters {
@@ -11,7 +11,7 @@ export interface NftFilters {
   nftIds?: number[];
 }
 
-export class NftFilterParams extends NftPaginationParams {
+export class NftFilterParams extends PaginationParams {
   filters: NftFilters = <NftFilters>{};
 }
 

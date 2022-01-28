@@ -14,12 +14,6 @@ import { NftFilterParams, parseStringArray } from '../params';
 import { RoleService } from 'src/role/role.service';
 import { S3Service } from './s3.service';
 import { Lock } from 'async-await-mutex-lock';
-import { QueryParams } from 'src/types';
-import {
-  convertToSnakeCase,
-  prepareFilterClause,
-  prepareNftFilterClause,
-} from 'src/utils';
 const fs = require('fs');
 
 @Injectable()
@@ -304,7 +298,7 @@ RETURNING id
       );
 
       const test= await this.getNft(creator, qryRes.rows[0].id);
-      
+
       return test
     } catch (err: any) {
       Logger.error(`Unable to create new nft, err: ${err}`);
