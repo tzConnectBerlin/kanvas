@@ -25,7 +25,6 @@ const rolesEnum = {
   3: 'creator',
 };
 
-
 export const UserList = ({ ...props }) => {
   return (
     <List
@@ -60,9 +59,9 @@ export const UserEdit = ({ ...props }) => {
     <Edit {...props} transform={transform}>
       <SimpleForm>
         <TextInput source="id" disabled />
-        <TextInput source="userName" />
-        <TextInput source="address" />
-        <TextInput source="email" />
+        <TextInput source="userName" disabled />
+        <TextInput source="address" disabled/>
+        <TextInput source="email" disabled/>
         {props.permissions?.includes(1) && (
           <SelectArrayInput
             source="roles"

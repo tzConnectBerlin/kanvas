@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JoiPipeModule } from 'nestjs-joi';
-import { UserService } from './user.service';
-import { UserController } from './user.controller';
+import { UserService } from './service/user.service';
+import { UserController } from './controller/user.controller';
 import { DbModule } from 'src/db.module';
 
 @Module({

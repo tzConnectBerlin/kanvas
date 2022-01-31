@@ -1,4 +1,4 @@
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/service/user.service';
 import { dbPool } from '../db.module';
 import { RoleService } from '../role/role.service';
 

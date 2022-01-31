@@ -2,12 +2,34 @@ import { Ok, Err } from 'ts-results';
 import * as bcrypt from 'bcrypt';
 import { AUTH_SALT_ROUNDS } from './constants';
 import { FilterParams } from './types';
-import { NftFilterParams } from './nft/params';
+import { HttpException, HttpStatus } from '@nestjs/common';
+import { IsInt, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 
 class AssertionError extends Error {
   constructor(message: string) {
     super(message);
   }
+}
+
+export class PaginationParams {
+  @IsInt()
+  @Type(() => Number)
+  @IsOptional()
+  pageOffset: number = 0;
+
+  @IsInt()
+  @Type(() => Number)
+  @IsOptional()
+  pageSize: number = 10;
+
+  @IsString()
+  @IsOptional()
+  orderDirection: string = 'asc';
+
+  @IsString()
+  @IsOptional()
+  orderBy: string = 'id';
 }
 
 export function assert(condition: boolean, message: string): void {
@@ -105,3 +127,67 @@ export function enumFromStringValue<T>(
     ? (value as unknown as T)
     : undefined;
 }
+
+export function validatePaginationParams(params: PaginationParams, allowedSortableKeys: string[]) {
+  if (params.pageOffset < 0 || params.pageSize < 1) {
+    throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST);
+  }
+
+  if (!(allowedSortableKeys.some(
+    (allowedfilterAttr: string) => allowedfilterAttr !== params.orderBy
+  ))) {
+    throw new HttpException(
+      `${params.orderBy} is not one of the allowed sort keys`,
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+  if (
+    !['asc', 'desc'].some(
+      (allowedOrderDir: string) => params.orderDirection == allowedOrderDir,
+    )
+  ) {
+    throw new HttpException(
+      `${params.orderDirection} is not one of the allowed sort directions`,
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}
+
+export const queryParamsToPaginationParams = (
+  sort?: string[],
+  range?: number[]
+): PaginationParams => {
+  const res = new PaginationParams();
+
+  if (typeof sort !== 'undefined' && sort.length > 0) {
+    res.orderBy = sort[0];
+    if (sort.length > 1) {
+      res.orderDirection = sort[1] as 'asc' | 'desc';
+    }
+  }
+
+  if (typeof range !== 'undefined' && range.length === 2) {
+    res.pageOffset = range[0];
+    res.pageSize = range[1] - range[0];
+  }
+
+  return res
+}
+
+export function parseStringArray(v: string | string[], sep = ','): string[] | undefined {
+  if (typeof v !== 'string') {
+    return undefined;
+  }
+  return v.split(sep);
+}
+
+export function parseNumberParam(v: string): number {
+  const res = Number(v);
+  if (isNaN(res)) {
+    throw new HttpException(`${v} is not a number`, HttpStatus.BAD_REQUEST);
+  }
+  return res;
+}
+
+
+validatePaginationParams

@@ -41,6 +41,7 @@ const dataProvider = (
   httpClient = fetchUtils.fetchJson,
   countHeader: string = 'Content-Range',
 ): DataProvider => ({
+
   getList: (resource, params) => {
     const { page, perPage } = params.pagination;
     const { field, order } = params.sort;
@@ -49,7 +50,7 @@ const dataProvider = (
     const rangeEnd = page * perPage - 1;
 
     const query = {
-      sort: JSON.stringify([field, order === 'ASC' ? 'asc' : 'desc']),
+      sort: JSON.stringify([field.startsWith('attributes.') ? field.slice('attributes.'.length) : field, order.toLowerCase()]),
       range: JSON.stringify([rangeStart, rangeEnd]),
       filters: Object.keys(params.filter).length === 0 ? undefined : JSON.stringify(params.filter),
     };
@@ -86,8 +87,9 @@ const dataProvider = (
     const query = {
       filter: JSON.stringify({ id: params.ids }),
     };
+
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    return httpClient(url, {headers: new Headers({ Authorization: `Bearer ${getToken()}`})}).then(({ json }) => {
+    return httpClient(url, { headers: new Headers({ Authorization: `Bearer ${getToken()}` }) }).then(({ json }) => {
 
       return ({
         data: json.data, headers: new Headers({ Authorization: `Bearer ${getToken()}` })
@@ -103,12 +105,9 @@ const dataProvider = (
     const rangeEnd = page * perPage - 1;
 
     const query = {
-      sort: JSON.stringify([field, order]),
+      sort: JSON.stringify([field, order.toLowerCase()]),
       range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
-      filter: JSON.stringify({
-        ...params.filter,
-        [params.target]: params.id,
-      }),
+      [params.target]: params.id,
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
     const options =
@@ -129,7 +128,7 @@ const dataProvider = (
       }
 
       return {
-        data: json,
+        data: json.data,
         total:
           countHeader === 'Content-Range'
             ? parseInt(
@@ -142,24 +141,30 @@ const dataProvider = (
   },
 
   update: async (resource, params) => {
-    const updatedData = diffPreviousDataToNewData(params.previousData, params.data)
+    let updatedData: any = {};
+
+    if (resource === 'nft') {
+      updatedData = diffPreviousDataToNewData(params.previousData, params.data)
+    }
+
     return await httpClient(`${apiUrl}/${resource}/${params.id}`, {
       method: 'PATCH',
-      body: toFormData(updatedData, resource),
+      body: resource === 'nft' ? toFormData(updatedData, resource) : JSON.stringify(params.data),
       headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
     }).then(({ json }) => ({ data: json }))
   },
 
   // simple-rest doesn't handle provide an updateMany route, so we fallback to calling update n times instead
-  updateMany: (resource, params) =>
-    Promise.all(
+  updateMany: async (resource, params) => {
+    return Promise.all(
       params.ids.map((id) =>
         httpClient(`${apiUrl}/${resource}/${id}`, {
           method: 'PATCH',
           body: JSON.stringify(params.data),
         }),
       ),
-    ).then((responses) => ({ data: responses.map(({ json }) => json.id) })),
+    ).then((responses) => ({ data: responses.map(({ json }) => json.id) }))
+  },
 
   create: async (resource, params) => {
     if (resource === 'nft') {
@@ -178,7 +183,7 @@ const dataProvider = (
     return await httpClient(`${apiUrl}/${resource}`, {
       method: 'POST',
       body: JSON.stringify(params.data),
-      headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
+      headers: new Headers({ 'Content-type': 'application/json', Authorization: `Bearer ${getToken()}` }),
     }).then(({ json }) => ({
       data: { ...params.data, id: json.id },
     }))
@@ -213,6 +218,7 @@ const dataProvider = (
 const diffPreviousDataToNewData = (previousData: any, data: any) => {
   // Attributes part
   let diff: any = {};
+
   const newKeys = Object.keys(data.attributes)
 
   for (const key of newKeys) {

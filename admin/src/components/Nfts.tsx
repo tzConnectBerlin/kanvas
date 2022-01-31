@@ -59,7 +59,7 @@ export const NftList = ({ ...props }) => (
     actions={<ToolbarActions />}
     bulkActionButtons={<CustomDeleteButton {...props} />}
   >
-    <Datagrid rowClick="edit" expand={<JsonField source="value" />}>
+    <Datagrid rowClick="edit">
       <TextField source="id" />
       <TextField source="attributes.name" label="Name" />
       <TextField source="state" label="Current State" />
@@ -130,7 +130,6 @@ const NftAside = ({ ...props }) => {
       <div style={{ margin: '1em' }}>
         <Typography variant="h6" style={{ fontFamily: 'Poppins SemiBold' }}>
           Preview your nft
-
         </Typography>
         <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', color: "#c4c4c4" }}>
           Representation of the Nft
@@ -140,7 +139,7 @@ const NftAside = ({ ...props }) => {
           <Box sx={{minHeight: '100px', display: 'flex', flexDirection: "column", flexGrow: 1, justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
             <img src={props.record?.attributes["image.png"]} style={{ margin: 'auto', maxWidth: '80%', maxHeight: '80%' }} />
           </Box>
-          
+
           <Stack direction="column" sx={{ flexStart: 'end', width: '60%' }}>
             {
               props.record &&

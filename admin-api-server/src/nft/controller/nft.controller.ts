@@ -23,8 +23,9 @@ import { NftEntity, NftUpdate } from '../entities/nft.entity';
 import { NftService } from '../service/nft.service';
 import { CurrentUser } from 'src/decoraters/user.decorator';
 import { User } from 'src/user/entities/user.entity';
-import { NftPaginationParams, NftFilterParams, NftFilters } from '../params';
+import { NftFilterParams, NftFilters } from '../params';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
+import { PaginationParams, queryParamsToPaginationParams, validatePaginationParams } from 'src/utils';
 
 function pngFileFilter(req: any, file: any, callback: any) {
   if (
@@ -41,20 +42,21 @@ function pngFileFilter(req: any, file: any, callback: any) {
 
 @Controller('nft')
 export class NftController {
-  constructor(private readonly nftService: NftService) {}
+  constructor(private readonly nftService: NftService) { }
 
   @Get()
   @UseGuards(JwtAuthGuard)
   async findAll(
+    @Query() filters: NftFilters,
     @Query('sort', new ParseJSONArrayPipe())
     sort?: string[],
-    @Query('filter') filters?: NftFilters,
     @Query('range', new ParseJSONArrayPipe())
     range?: number[],
   ) {
     const params = this.#queryParamsToFilterParams(filters, sort, range);
 
-    this.#validatePaginationParams(params);
+    validatePaginationParams(params, this.nftService.getSortableFields());
+
     return { data: await this.nftService.findAll(params) };
   }
 
@@ -95,7 +97,7 @@ export class NftController {
     return await this.nftService.deleteNft(user, nftId);
   }
 
-  #validatePaginationParams(params: NftPaginationParams): void {
+  #validatePaginationParams(params: PaginationParams): void {
     if (params.pageOffset < 0 || params.pageSize < 1) {
       throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST);
     }
@@ -149,24 +151,10 @@ export class NftController {
     sort?: string[],
     range?: number[],
   ) {
-    const res = new NftFilterParams();
-
-    if (typeof sort !== 'undefined' && sort.length > 0) {
-      res.orderBy = sort[0];
-      if (sort.length > 1) {
-        res.orderDirection = sort[1];
-      }
+    return {
+      ...new NftFilterParams(),
+      ...queryParamsToPaginationParams(sort, range),
+      filters: filters
     }
-
-    if (typeof range !== 'undefined' && range.length === 2) {
-      res.pageOffset = range[0];
-      res.pageSize = range[1] - range[0];
-    }
-
-    if (typeof filters !== 'undefined') {
-      res.filters.nftStates = filters.nftStates;
-    }
-
-    return res;
   }
 }
