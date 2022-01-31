@@ -150,6 +150,9 @@ INSERT INTO mtm_kanvas_user_user_role (
 )
 SELECT $1, UNNEST($2::INTEGER[])
         `, [id, addRoles]);
+
+        await client.query('COMMIT');
+        
     } catch (error: any) {
       Logger.error(`Unable to update the user, error: ${error}`)
       await client.query('ROLLBACK')
