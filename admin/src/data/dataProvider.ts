@@ -50,7 +50,7 @@ const dataProvider = (
     const rangeEnd = page * perPage - 1;
 
     const query = {
-      sort: JSON.stringify([field, order.toLowerCase()]),
+      sort: JSON.stringify([field.startsWith('attributes.') ? field.slice('attributes.'.length) : field, order.toLowerCase()]),
       range: JSON.stringify([rangeStart, rangeEnd]),
       filters: Object.keys(params.filter).length === 0 ? undefined : JSON.stringify(params.filter),
     };
@@ -87,6 +87,7 @@ const dataProvider = (
     const query = {
       filter: JSON.stringify({ id: params.ids }),
     };
+    debugger
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
     return httpClient(url, { headers: new Headers({ Authorization: `Bearer ${getToken()}` }) }).then(({ json }) => {
 
