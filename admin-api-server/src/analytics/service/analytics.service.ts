@@ -103,8 +103,12 @@ ORDER BY timestamp
       case Resolution.Month:
         intervalSeconds = 60 * 60 * 24 * 30;
         break;
+      case Resolution.Infinite:
+        intervalSeconds = Math.floor((new Date()).getTime() / 1000);
+        break;
     }
 
+    console.log(intervalSeconds)
     return await this.storeRepl.query(
       `
 SELECT

@@ -49,6 +49,14 @@ export class AnalyticsController {
     @Query('resolution') resolutionStr?: string,
   ): Promise<{ data: MetricEntity[] }> {
     const params = this.#queryParamsToMetricParams(resolutionStr);
+
+    if (params.resolution === Resolution.Infinite) {
+      throw new HttpException(
+        'Bad resolution parameter',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    
     return {
       data: await this.analyticsService.getTimeseriesSalesPriceVolume(params),
     };
@@ -61,6 +69,14 @@ export class AnalyticsController {
     @Query('resolution') resolutionStr?: string,
   ): Promise<{ data: MetricEntity[] }> {
     const params = this.#queryParamsToMetricParams(resolutionStr);
+
+    if (params.resolution === Resolution.Infinite) {
+      throw new HttpException(
+        'Bad resolution parameter',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     return {
       data: await this.analyticsService.getTimeseriesSalesNftCount(params),
     };

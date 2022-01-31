@@ -104,6 +104,7 @@ SELECT id, user_name as "userName", address, email, disabled, ARRAY_AGG(mkuur.us
   FROM kanvas_user ku
   INNER JOIN mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id
   WHERE id = $1
+  GROUP BY ku.id
 `,
       [id],
     );
@@ -118,6 +119,7 @@ SELECT id, user_name as "userName", address, email, password, disabled, ARRAY_AG
   FROM kanvas_user ku
   INNER JOIN mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id
   WHERE id = $1
+  GROUP BY ku.id
 `,
       [email],
     );

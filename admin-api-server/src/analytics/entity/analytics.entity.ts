@@ -12,4 +12,5 @@ export enum Resolution {
   Day = 'day',
   Week = 'week',
   Month = 'month',
+  Infinite = 'infinite'
 }
