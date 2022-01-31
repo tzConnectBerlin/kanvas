@@ -1,20 +1,9 @@
 import {
-    IsString,
-    IsInt,
-    IsNumber,
     IsOptional,
     IsArray,
 } from 'class-validator';
-import { Type, Transform } from 'class-transformer';
-import { parseStringArray, parseNumberParam } from 'src/utils'
-
-export class UserPaginationParams {
-    pageOffset = 0;
-    pageSize = 10;
-
-    orderBy = 'id';
-    orderDirection: 'asc' | 'desc' = 'asc';
-}
+import { Transform } from 'class-transformer';
+import { parseStringArray, parseNumberParam, PaginationParams } from 'src/utils'
 
 export class UserFilters {
     @IsArray()
@@ -38,6 +27,6 @@ export class UserFilters {
     roleIds?: number[];
 }
 
-export class UserFilterParams extends UserPaginationParams {
+export class UserFilterParams extends PaginationParams {
     filters: UserFilters = <UserFilters>{};
 }

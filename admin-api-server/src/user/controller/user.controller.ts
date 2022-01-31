@@ -22,7 +22,7 @@ import { UpdateUserGuard } from '../update-user.guard';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
 import { Response as Resp } from 'express';
 import { UserFilterParams, UserFilters } from '../params';
-import { queryParamsToPaginationParams } from 'src/utils';
+import { queryParamsToPaginationParams, validatePaginationParams } from 'src/utils';
 import { User } from '../entities/user.entity';
 import { PaginationParams } from 'src/nft/params';
 
@@ -47,7 +47,7 @@ export class UserController {
   }
 
   @Get()
-  async findAll(
+  async findAll( 
     @Response() resp: Resp,
     @Query() filters: UserFilters,
     @Query('sort', new ParseJSONArrayPipe())
@@ -57,7 +57,7 @@ export class UserController {
   ) {
     const params = this.#queryParamsToFilterParams(filters, sort, range)
 
-    this.#validationPaginationParams(params)
+    validatePaginationParams(params, ['email', 'userName', 'address', 'roles'])
 
     const result = await this.userService.findAll(params);
 
@@ -76,7 +76,6 @@ export class UserController {
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUser: any) {
     try {
-      console.log(updateUser)
       return await this.userService.update(+id, updateUser);
     } catch (error) {
       Logger.error(`Unable to update the user, error: ${error}`)
@@ -93,44 +92,15 @@ export class UserController {
     return this.userService.remove(+id);
   }
 
-  #validationPaginationParams(params: PaginationParams) {
-    if (params.pageOffset < 0 || params.pageSize < 1) {
-      throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST);
-    }
-
-    if (!(['email', 'userName', 'address', 'roles'].some(
-      (allowedfilterAttr: string) => allowedfilterAttr !== params.orderBy
-    ))) {
-      throw new HttpException(
-        `${params.orderBy} is not one of the allowed sort keys`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    if (
-      !['asc', 'desc'].some(
-        (allowedOrderDir: string) => params.orderDirection == allowedOrderDir,
-      )
-    ) {
-      throw new HttpException(
-        `${params.orderDirection} is not one of the allowed sort directions`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-  }
-
   #queryParamsToFilterParams(
     filters: UserFilters,
     sort?: string[],
     range?: number[]
   ) {
-    let res = new UserFilterParams();
-
-    const paginationParams = queryParamsToPaginationParams(sort, range)
-    res = { ...res, ...paginationParams }
-
-    res.filters = filters
-
-    return res
+    return {
+      ...new UserFilterParams(),
+      ...queryParamsToPaginationParams(sort, range),
+      filters: filters
+    }
   }
 }

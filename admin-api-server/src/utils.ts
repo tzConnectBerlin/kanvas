@@ -2,13 +2,34 @@ import { Ok, Err } from 'ts-results';
 import * as bcrypt from 'bcrypt';
 import { AUTH_SALT_ROUNDS } from './constants';
 import { FilterParams } from './types';
-import { NftFilterParams, PaginationParams } from './nft/params';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { IsInt, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 
 class AssertionError extends Error {
   constructor(message: string) {
     super(message);
   }
+}
+
+export class PaginationParams {
+  @IsInt()
+  @Type(() => Number)
+  @IsOptional()
+  pageOffset: number = 0;
+
+  @IsInt()
+  @Type(() => Number)
+  @IsOptional()
+  pageSize: number = 10;
+
+  @IsString()
+  @IsOptional()
+  orderDirection: string = 'asc';
+
+  @IsString()
+  @IsOptional()
+  orderBy: string = 'id';
 }
 
 export function assert(condition: boolean, message: string): void {
@@ -107,6 +128,31 @@ export function enumFromStringValue<T>(
     : undefined;
 }
 
+export function validatePaginationParams(params: PaginationParams, allowedSortableKeys: string[]) {
+  if (params.pageOffset < 0 || params.pageSize < 1) {
+    throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST);
+  }
+
+  if (!(allowedSortableKeys.some(
+    (allowedfilterAttr: string) => allowedfilterAttr !== params.orderBy
+  ))) {
+    throw new HttpException(
+      `${params.orderBy} is not one of the allowed sort keys`,
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+  if (
+    !['asc', 'desc'].some(
+      (allowedOrderDir: string) => params.orderDirection == allowedOrderDir,
+    )
+  ) {
+    throw new HttpException(
+      `${params.orderDirection} is not one of the allowed sort directions`,
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}
+
 export const queryParamsToPaginationParams = (
   sort?: string[],
   range?: number[]
@@ -142,3 +188,6 @@ export function parseNumberParam(v: string): number {
   }
   return res;
 }
+
+
+validatePaginationParams

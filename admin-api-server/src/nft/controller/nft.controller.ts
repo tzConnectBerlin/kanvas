@@ -25,7 +25,7 @@ import { CurrentUser } from 'src/decoraters/user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { PaginationParams, NftFilterParams, NftFilters } from '../params';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
-import { queryParamsToPaginationParams } from 'src/utils';
+import { queryParamsToPaginationParams, validatePaginationParams } from 'src/utils';
 
 function pngFileFilter(req: any, file: any, callback: any) {
   if (
@@ -45,7 +45,7 @@ export class NftController {
   constructor(private readonly nftService: NftService) {}
 
   @Get()
- // @UseGuards(JwtAuthGuard)
+ @UseGuards(JwtAuthGuard)
   async findAll(
     @Query() filters: NftFilters,
     @Query('sort', new ParseJSONArrayPipe())
@@ -54,8 +54,9 @@ export class NftController {
     range?: number[],
   ) {
     const params = this.#queryParamsToFilterParams(filters, sort, range);
-    
-    this.#validatePaginationParams(params);
+
+    validatePaginationParams(params, this.nftService.getSortableFields());
+
     return { data: await this.nftService.findAll(params) };
   }
 

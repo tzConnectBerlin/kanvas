@@ -2,10 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable, Logger } from '@nestjs/c
 
 import { PG_CONNECTION } from '../../constants';
 import { DbPool } from '../../db.module';
-import {
-  convertToSnakeCase,
-  hashPassword,
-} from '../../utils';
+import { hashPassword } from '../../utils';
 import { User } from '../entities/user.entity';
 import { UserProps } from '../controller/user.controller';
 import { UserFilterParams } from '../params';
@@ -21,36 +18,6 @@ const getSelectStatement = (
        GROUP BY ku.id
        ORDER BY ${sortField} ${sortDirection} ${limitClause}`;
 
-const getSelectCountStatement = (
-  whereClause = '',
-): string => {
-  console.log(`SELECT COUNT(*) FROM kanvas_user ku
-  inner join mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id ${whereClause}
-  GROUP BY ku.id
-  ORDER BY $1`
-  )
-  return `SELECT COUNT(*) FROM kanvas_user ku
-inner join mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id ${whereClause}
-GROUP BY ku.id
-ORDER BY $1`;
-}
-const getUpdateQuery = (fields: string[], indexes: string[]) =>
-  `UPDATE kanvas_user SET (${fields.join(',')}) = (${indexes.join(
-    ',',
-  )}) WHERE id = $${fields.length + 1}`;
-
-const INSERT_ROLES_QUERY =
-  'INSERT INTO mtm_kanvas_user_user_role (kanvas_user_id, user_role_id) values ($1, unnest($2::integer[]));';
-
-const INSERT_USER_QUERY =
-  'INSERT INTO kanvas_user (email, user_name, address, password) VALUES ($1, $2, $3, $4) RETURNING id;';
-
-const DELETE_ROLES_QUERY =
-  'DELETE from mtm_kanvas_user_user_role where kanvas_user_id = $1;';
-
-const DELETE_USER_QUERY =
-  'UPDATE kanvas_user SET disabled = true WHERE id = $1';
-
 @Injectable()
 export class UserService {
   constructor(@Inject(PG_CONNECTION) private db: DbPool) { }
@@ -61,17 +28,28 @@ export class UserService {
     try {
       await client.query('BEGIN');
 
-      const resultInsertUser = await client.query(INSERT_USER_QUERY, [
+      const resultInsertUser = await client.query(
+`
+INSERT INTO
+  kanvas_user (email, user_name, address, password)
+  VALUES ($1, $2, $3, $4) RETURNING id
+`
+        , [
         rest.email,
         rest.userName,
         rest.address,
         hashedPassword,
       ]);
 
-
       const userId = resultInsertUser.rows[0].id;
 
-      await client.query(INSERT_ROLES_QUERY, [userId, roles]);
+      await client.query(
+`
+INSERT INTO
+  mtm_kanvas_user_user_role (kanvas_user_id, user_role_id)
+  VALUES ($1, unnest($2::integer[]))
+`
+        , [userId, roles]);
       await client.query('COMMIT');
 
       return { id: userId, roles, ...rest };
@@ -183,7 +161,13 @@ SELECT $1, UNNEST($2::INTEGER[])
   }
 
   async remove(id: number) {
-    const result = await this.db.query<User>(DELETE_USER_QUERY, [id]);
+    const result = await this.db.query<User>(
+`
+UPDATE kanvas_user
+SET disabled = true
+WHERE id = $1
+`
+      , [id]);
     if (result.rowCount === 1) {
       const { password, ...rest } = await this.findOne(id);
       return rest;
