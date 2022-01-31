@@ -9,7 +9,7 @@ export class UserFilters {
     @IsArray()
     @Transform(({ value }) => parseStringArray(value)?.map((v: string) => parseNumberParam(v)))
     @IsOptional()
-    userIds?: number[];
+    id?: number[];
 
     @IsArray()
     @Transform(({value}) => parseStringArray(value))

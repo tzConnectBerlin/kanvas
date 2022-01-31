@@ -55,7 +55,7 @@ export class UserController {
   ) {
     const params = this.#queryParamsToFilterParams(filters, sort, range)
 
-    validatePaginationParams(params, ['email', 'userName', 'address', 'roles'])
+    validatePaginationParams(params, ['id', 'email', 'userName', 'address', 'roles'])
 
     const result = await this.userService.findAll(params);
 

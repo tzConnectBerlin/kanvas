@@ -104,13 +104,12 @@ const dataProvider = (
     const rangeStart = (page - 1) * perPage;
     const rangeEnd = page * perPage - 1;
 
+    debugger
+
     const query = {
       sort: JSON.stringify([field, order.toLowerCase()]),
       range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
-      filter: JSON.stringify({
-        ...params.filter,
-        [params.target]: params.id,
-      }),
+      [params.target]: params.id,
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
     const options =

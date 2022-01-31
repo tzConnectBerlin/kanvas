@@ -87,7 +87,7 @@ INSERT INTO
   ORDER BY ${params.orderBy} ${params.orderDirection}
   OFFSET ${params.pageOffset}
   LIMIT ${params.pageSize}
-`, [params.filters.userIds, params.filters.address, params.filters.userName, params.filters.roleIds]
+`, [params.filters.id, params.filters.address, params.filters.userName, params.filters.roleIds]
     );
 
     if (qryRes.rowCount === 0) {
