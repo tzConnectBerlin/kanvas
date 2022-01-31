@@ -23,9 +23,9 @@ import { NftEntity, NftUpdate } from '../entities/nft.entity';
 import { NftService } from '../service/nft.service';
 import { CurrentUser } from 'src/decoraters/user.decorator';
 import { User } from 'src/user/entities/user.entity';
-import { PaginationParams, NftFilterParams, NftFilters } from '../params';
+import { NftFilterParams, NftFilters } from '../params';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
-import { queryParamsToPaginationParams, validatePaginationParams } from 'src/utils';
+import { PaginationParams, queryParamsToPaginationParams, validatePaginationParams } from 'src/utils';
 
 function pngFileFilter(req: any, file: any, callback: any) {
   if (

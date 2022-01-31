@@ -23,8 +23,6 @@ import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
 import { Response as Resp } from 'express';
 import { UserFilterParams, UserFilters } from '../params';
 import { queryParamsToPaginationParams, validatePaginationParams } from 'src/utils';
-import { User } from '../entities/user.entity';
-import { PaginationParams } from 'src/nft/params';
 
 export interface UserProps {
   id: number;
@@ -47,7 +45,7 @@ export class UserController {
   }
 
   @Get()
-  async findAll( 
+  async findAll(
     @Response() resp: Resp,
     @Query() filters: UserFilters,
     @Query('sort', new ParseJSONArrayPipe())
