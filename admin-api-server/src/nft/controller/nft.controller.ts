@@ -42,10 +42,10 @@ function pngFileFilter(req: any, file: any, callback: any) {
 
 @Controller('nft')
 export class NftController {
-  constructor(private readonly nftService: NftService) {}
+  constructor(private readonly nftService: NftService) { }
 
   @Get()
- @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async findAll(
     @Query() filters: NftFilters,
     @Query('sort', new ParseJSONArrayPipe())
@@ -151,13 +151,10 @@ export class NftController {
     sort?: string[],
     range?: number[],
   ) {
-    let res = new NftFilterParams();
-
-    const paginationRes = queryParamsToPaginationParams(sort, range)
-    res = {...res, ...paginationRes}
-
-      res.filters = filters;
-
-    return res;
+    return {
+      ...new NftFilterParams(),
+      ...queryParamsToPaginationParams(sort, range),
+      filters: filters
+    }
   }
 }
