@@ -7,17 +7,6 @@ import { User } from '../entities/user.entity';
 import { UserProps } from '../controller/user.controller';
 import { UserFilterParams } from '../params';
 
-const getSelectStatement = (
-  whereClause = '',
-  limitClause = '',
-  sortField = 'id',
-  sortDirection = 'ASC',
-): string => `SELECT id, user_name as "userName", address, email, password, disabled, ARRAY_AGG(mkuur.user_role_id) as roles
-       FROM kanvas_user ku
-       inner join mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id ${whereClause}
-       GROUP BY ku.id
-       ORDER BY ${sortField} ${sortDirection} ${limitClause}`;
-
 @Injectable()
 export class UserService {
   constructor(@Inject(PG_CONNECTION) private db: DbPool) { }
@@ -110,15 +99,26 @@ INSERT INTO
 
   async findOne(id: number) {
     const result = await this.db.query<User>(
-      getSelectStatement(`WHERE id = $1`),
+`
+SELECT id, user_name as "userName", address, email, disabled, ARRAY_AGG(mkuur.user_role_id) as roles
+  FROM kanvas_user ku
+  INNER JOIN mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id
+  WHERE id = $1
+`,
       [id],
     );
     return result.rows[0];
   }
 
+  // Function used for auth this is why password is fetch
   async findOneByEmail(email: string) {
     const result = await this.db.query<User>(
-      getSelectStatement(`WHERE email = $1`),
+`
+SELECT id, user_name as "userName", address, email, password, disabled, ARRAY_AGG(mkuur.user_role_id) as roles
+  FROM kanvas_user ku
+  INNER JOIN mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id
+  WHERE id = $1
+`,
       [email],
     );
     return result.rows[0];
@@ -127,9 +127,6 @@ INSERT INTO
   async update(id: number, { roles, ...rest }) {
     const concernedUser = await this.findOne(id)
     const client = await this.db.connect();
-
-    console.log(roles)
-    console.log(concernedUser.roles)
 
     // Doing complex stuff for nothing
     const deleteRoles = concernedUser.roles.filter((role: number) => roles.indexOf(role) === -1)

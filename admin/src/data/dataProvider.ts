@@ -87,7 +87,7 @@ const dataProvider = (
     const query = {
       filter: JSON.stringify({ id: params.ids }),
     };
-    debugger
+
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
     return httpClient(url, { headers: new Headers({ Authorization: `Bearer ${getToken()}` }) }).then(({ json }) => {
 
@@ -103,8 +103,6 @@ const dataProvider = (
 
     const rangeStart = (page - 1) * perPage;
     const rangeEnd = page * perPage - 1;
-
-    debugger
 
     const query = {
       sort: JSON.stringify([field, order.toLowerCase()]),
