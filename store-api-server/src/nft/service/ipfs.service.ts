@@ -1,5 +1,5 @@
 import { Logger, Injectable } from '@nestjs/common';
-import { STORE_SYMBOL, STORE_PUBLISHERS, MINTER_ADDRESS } from 'src/constants';
+import { STORE_PUBLISHERS, MINTER_ADDRESS } from 'src/constants';
 import { NftEntity } from 'src/nft/entity/nft.entity';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -34,25 +34,32 @@ export class IpfsService {
     if (!this.#serviceEnabled()) {
       throw `IpfsService not enabled`;
     }
-    const [displayIpfs /*, thumbnailIpfs*/] = await Promise.all([
-      this.#pinUri(nft.dataUri),
-      // this.#pinUri(nft.thumbnailUri),
-    ]);
-    const thumbnailIpfs = displayIpfs; // TODO: insert thumbnailUri here instead
 
-    const metadata = this.#nftMetadataJson(nft, displayIpfs, thumbnailIpfs);
+    const [artifactIpfsUri, displayIpfsUri, thumbnailIpfsUri] =
+      await Promise.all([
+        this.#pinUri(nft.artifactUri),
+        nft.displayUri ? this.#pinUri(nft.displayUri) : undefined,
+        nft.thumbnailUri ? this.#pinUri(nft.thumbnailUri) : undefined,
+      ]);
+
+    const metadata = this.#nftMetadataJson(
+      nft,
+      artifactIpfsUri,
+      displayIpfsUri ?? artifactIpfsUri,
+      thumbnailIpfsUri ?? displayIpfsUri ?? artifactIpfsUri,
+    );
     return await this.#pinJson(metadata);
   }
 
   #nftMetadataJson(
     nft: NftEntity,
-    imageUri: string,
-    thumbnailUri: string,
+    artifactIpfsUri: string,
+    displayIpfsUri: string,
+    thumbnailIpfsUri: string,
   ): any {
     const createdAt = new Date(nft.createdAt).toISOString();
 
     return {
-      symbol: STORE_SYMBOL,
       decimals: 0,
 
       name: nft.name,
@@ -60,13 +67,16 @@ export class IpfsService {
       date: createdAt,
       tags: nft.categories.map((cat) => cat.name),
 
-      displayUrl: imageUri,
-      thumbnailUri: thumbnailUri,
+      artifactUri: artifactIpfsUri,
+      displayUri: displayIpfsUri,
+      thumbnailUri: thumbnailIpfsUri,
 
       minter: MINTER_ADDRESS,
       creators: [], // TODO
       contributors: [], // TODO
       publishers: STORE_PUBLISHERS,
+
+      isBooleanAmount: nft.editionsSize === 1,
     };
   }
 

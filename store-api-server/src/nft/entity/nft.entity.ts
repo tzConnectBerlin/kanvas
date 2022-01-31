@@ -1,17 +1,16 @@
 import { CategoryEntity } from 'src/category/entity/category.entity';
 
-// TODO let's replace this and all other models with just a simple immutable key/value object - preferably using Immutable.js
 export interface NftEntity {
   id: number;
   createdAt: number;
   name: string;
-  description?: string;
-  ipfsHash: string;
-  metadata: any; // TODO expand on the meaning of this type
-  dataUri: string;
-  thumbnailUri: string;
-  contract: string;
-  tokenId: string;
+  description: string;
+  ipfsHash?: string;
+
+  artifactUri: string;
+  displayUri?: string;
+  thumbnailUri?: string;
+
   price: number;
   categories: CategoryEntity[];
   editionsSize: number;

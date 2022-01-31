@@ -229,11 +229,10 @@ SELECT
   nft_name,
   description,
   ipfs_hash,
-  metadata,
-  data_uri,
+  artifact_uri,
+  display_uri,
+  thumbnail_uri,
   price,
-  contract,
-  token_id,
   categories,
   editions_size,
   editions_available,
@@ -243,16 +242,15 @@ FROM nfts_by_id($1, $2, $3)`,
         [nftIds, orderBy, orderDirection],
       );
       return nftsQryRes.rows.map((nftRow: any) => {
-        return <NftEntity>{
+        const nft = <NftEntity>{
           id: nftRow['nft_id'],
           name: nftRow['nft_name'],
           description: nftRow['description'],
           ipfsHash: nftRow['ipfs_hash'],
-          metadata: nftRow['metadata'],
-          dataUri: nftRow['data_uri'],
+          artifactUri: nftRow['artifact_uri'],
+          displayUri: nftRow['display_uri'],
+          thumbnailUri: nftRow['thumbnail_uri'],
           price: Number(nftRow['price']),
-          contract: nftRow['contract'],
-          tokenId: nftRow['token_id'],
           editionsSize: Number(nftRow['editions_size']),
           editionsAvailable: Number(nftRow['editions_available']),
           createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
@@ -265,6 +263,11 @@ FROM nfts_by_id($1, $2, $3)`,
             };
           }),
         };
+
+        nft.displayUri ??= nft.artifactUri;
+        nft.thumbnailUri ??= nft.displayUri;
+
+        return nft;
       });
     } catch (err) {
       Logger.error('Error on find nfts by ids query: ' + err);

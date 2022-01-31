@@ -117,12 +117,13 @@ describe('AppController (e2e)', () => {
       description:
         'Hey guys, here s the WL team ready to write some more code !',
       ipfsHash: 'ipfs://.....',
-      metadata: {},
-      dataUri:
+      artifactUri:
+        'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+      displayUri:
+        'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+      thumbnailUri:
         'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
       price: 1,
-      contract: null,
-      tokenId: null,
       editionsSize: 4,
       editionsAvailable: 4,
       categories: [
@@ -209,12 +210,13 @@ describe('AppController (e2e)', () => {
             description:
               'Hey guys, here s the WL team ready to write some more code !',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            displayUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             price: 1,
-            contract: null,
-            tokenId: null,
             editionsSize: 4,
             editionsAvailable: 4,
             categories: [
@@ -231,12 +233,13 @@ describe('AppController (e2e)', () => {
             description:
               'Framley Parsonage - Was it not a Lie?,1860. John Everett Millais (d.1896) and Dalziel Brothers',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2202&q=80',
+            displayUri:
+              'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2202&q=80',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2202&q=80',
             price: 78,
-            contract: null,
-            tokenId: null,
             editionsSize: 2,
             editionsAvailable: 2,
             categories: [
@@ -252,12 +255,13 @@ describe('AppController (e2e)', () => {
             name: 'Internet',
             description: 'its a mountain',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+            displayUri:
+              'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             price: 104,
-            contract: null,
-            tokenId: null,
             editionsSize: 6,
             editionsAvailable: 6,
             categories: [
@@ -273,12 +277,13 @@ describe('AppController (e2e)', () => {
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            displayUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: 43,
-            contract: null,
-            tokenId: null,
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -295,12 +300,13 @@ describe('AppController (e2e)', () => {
             description:
               'Bronze sculpture of Antonin DVORAK who lived from 1841 - 1904',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+            displayUri:
+              'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
             price: 92,
-            contract: null,
-            tokenId: null,
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -317,12 +323,13 @@ describe('AppController (e2e)', () => {
             description:
               'Inventor of the korean language. This is the statue in Seoul South Korea of him.',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1506809211073-d0785aaad75e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2656&q=80',
+            displayUri:
+              'https://images.unsplash.com/photo-1506809211073-d0785aaad75e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2656&q=80',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1506809211073-d0785aaad75e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2656&q=80',
             price: 41,
-            contract: null,
-            tokenId: null,
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -339,12 +346,13 @@ describe('AppController (e2e)', () => {
             description:
               'The humanoid robot TOCABI. I both led the design and took the photo. It is a full-size (real) humanoid robot that can also be used as an avatar for teleoperation.',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1633957897986-70e83293f3ff?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1986&q=80',
+            displayUri:
+              'https://images.unsplash.com/photo-1633957897986-70e83293f3ff?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1986&q=80',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1633957897986-70e83293f3ff?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1986&q=80',
             price: 36,
-            contract: null,
-            tokenId: null,
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -360,12 +368,13 @@ describe('AppController (e2e)', () => {
             name: 'Lost',
             description: 'You look lost in thought.',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1599790772272-d1425cd3242e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
+            displayUri:
+              'https://images.unsplash.com/photo-1599790772272-d1425cd3242e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1599790772272-d1425cd3242e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
             price: 642,
-            contract: null,
-            tokenId: null,
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -382,12 +391,13 @@ describe('AppController (e2e)', () => {
             description:
               'In South Korea these sculptures are part of the light festival. Dragon vs. Tiger.',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+            displayUri:
+              'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             price: 3432,
-            contract: null,
-            tokenId: null,
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -520,12 +530,13 @@ describe('AppController (e2e)', () => {
           description:
             'In South Korea these sculptures are part of the light festival. Dragon vs. Tiger.',
           ipfsHash: 'ipfs://.....',
-          metadata: {},
-          dataUri:
+          artifactUri:
+            'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+          displayUri:
+            'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+          thumbnailUri:
             'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
           price: 3432,
-          contract: null,
-          tokenId: null,
           editionsSize: 8,
           editionsAvailable: 8,
           categories: [
@@ -1700,12 +1711,13 @@ describe('AppController (e2e)', () => {
             description:
               'Hey guys, here s the WL team ready to write some more code !',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            displayUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             price: 1,
-            contract: null,
-            tokenId: null,
             editionsSize: 4,
             editionsAvailable: 3,
             categories: [
@@ -1722,12 +1734,13 @@ describe('AppController (e2e)', () => {
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            displayUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: 43,
-            contract: null,
-            tokenId: null,
             editionsSize: 8,
             editionsAvailable: 3,
             categories: [
@@ -1771,12 +1784,13 @@ describe('AppController (e2e)', () => {
             description:
               'Hey guys, here s the WL team ready to write some more code !',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            displayUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             price: 1,
-            contract: null,
-            tokenId: null,
             editionsSize: 4,
             editionsAvailable: 3,
             categories: [
@@ -1819,12 +1833,13 @@ describe('AppController (e2e)', () => {
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            displayUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: 43,
-            contract: null,
-            tokenId: null,
             editionsSize: 8,
             editionsAvailable: 3,
             categories: [
@@ -1871,12 +1886,13 @@ describe('AppController (e2e)', () => {
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            displayUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: 43,
-            contract: null,
-            tokenId: null,
             editionsSize: 8,
             editionsAvailable: 3,
             categories: [
@@ -1923,12 +1939,13 @@ describe('AppController (e2e)', () => {
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            displayUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: 43,
-            contract: null,
-            tokenId: null,
             editionsSize: 8,
             editionsAvailable: 3,
             categories: [
@@ -1975,12 +1992,13 @@ describe('AppController (e2e)', () => {
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            displayUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: 43,
-            contract: null,
-            tokenId: null,
             editionsSize: 8,
             editionsAvailable: 3,
             categories: [
@@ -2027,12 +2045,13 @@ describe('AppController (e2e)', () => {
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
-            metadata: {},
-            dataUri:
+            artifactUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            displayUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: 43,
-            contract: null,
-            tokenId: null,
             editionsSize: 8,
             editionsAvailable: 3,
             categories: [
