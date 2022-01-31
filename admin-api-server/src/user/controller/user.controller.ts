@@ -16,13 +16,16 @@ import {
 import { UserService } from '../service/user.service';
 import { Roles } from 'src/role/role.decorator';
 import { Role } from 'src/role/role';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { RolesGuard } from 'src/role/role.guard';
 import { UpdateUserGuard } from '../update-user.guard';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
 import { Response as Resp } from 'express';
 import { UserFilterParams, UserFilters } from '../params';
-import { queryParamsToPaginationParams, validatePaginationParams } from 'src/utils';
+import {
+  queryParamsToPaginationParams,
+  validatePaginationParams,
+} from 'src/utils';
 
 export interface UserProps {
   id: number;
@@ -35,7 +38,7 @@ export interface UserProps {
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -53,16 +56,24 @@ export class UserController {
     @Query('range', new ParseJSONArrayPipe())
     range?: number[],
   ) {
-    const params = this.#queryParamsToFilterParams(filters, sort, range)
+    const params = this.#queryParamsToFilterParams(filters, sort, range);
 
-    validatePaginationParams(params, ['id', 'email', 'userName', 'address', 'roles'])
+    validatePaginationParams(params, [
+      'id',
+      'email',
+      'userName',
+      'address',
+      'roles',
+    ]);
 
     const result = await this.userService.findAll(params);
 
-    return resp.set({
-      'Access-Control-Expose-Headers': "Content-Range",
-      'Content-range': result.count
-    }).json({ data: result.users })
+    return resp
+      .set({
+        'Access-Control-Expose-Headers': 'Content-Range',
+        'Content-range': result.count,
+      })
+      .json({ data: result.users });
   }
 
   @Get(':id')
@@ -76,11 +87,8 @@ export class UserController {
     try {
       return await this.userService.update(+id, updateUser);
     } catch (error) {
-      Logger.error(`Unable to update the user, error: ${error}`)
-      throw new HttpException(
-        'Unable to update user',
-        HttpStatus.BAD_REQUEST,
-      );
+      Logger.error(`Unable to update the user, error: ${error}`);
+      throw new HttpException('Unable to update user', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -93,12 +101,12 @@ export class UserController {
   #queryParamsToFilterParams(
     filters: UserFilters,
     sort?: string[],
-    range?: number[]
+    range?: number[],
   ) {
     return {
       ...new UserFilterParams(),
       ...queryParamsToPaginationParams(sort, range),
-      filters: filters
-    }
+      filters: filters,
+    };
   }
 }

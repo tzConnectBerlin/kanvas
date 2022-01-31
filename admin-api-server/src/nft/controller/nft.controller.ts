@@ -13,7 +13,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import {
   FILE_MAX_BYTES,
   MAX_FILE_UPLOADS_PER_CALL,
@@ -25,7 +25,11 @@ import { CurrentUser } from 'src/decoraters/user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { NftFilterParams, NftFilters } from '../params';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
-import { PaginationParams, queryParamsToPaginationParams, validatePaginationParams } from 'src/utils';
+import {
+  PaginationParams,
+  queryParamsToPaginationParams,
+  validatePaginationParams,
+} from 'src/utils';
 
 function pngFileFilter(req: any, file: any, callback: any) {
   if (
@@ -42,7 +46,7 @@ function pngFileFilter(req: any, file: any, callback: any) {
 
 @Controller('nft')
 export class NftController {
-  constructor(private readonly nftService: NftService) { }
+  constructor(private readonly nftService: NftService) {}
 
   @Get()
   @UseGuards(JwtAuthGuard)
@@ -82,7 +86,6 @@ export class NftController {
     @UploadedFiles() filesArray?: any[],
     @Param('id') nftId?: number,
   ): Promise<NftEntity> {
-
     const nftUpdates = this.#transformFormDataToNftUpdates(
       nftUpdatesBody,
       filesArray,
@@ -154,7 +157,7 @@ export class NftController {
     return {
       ...new NftFilterParams(),
       ...queryParamsToPaginationParams(sort, range),
-      filters: filters
-    }
+      filters: filters,
+    };
   }
 }
