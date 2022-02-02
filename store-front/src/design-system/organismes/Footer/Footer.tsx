@@ -1,6 +1,6 @@
 import { Box } from '@mui/system';
 import Grid from '@mui/material/Grid';
-import { FC, useState } from 'react';
+import { useEffect, FC, useState } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import {
@@ -100,7 +100,7 @@ const StyledLink = styled(Link)<{ theme?: Theme }>`
 export const Footer: FC<FooterProps> = () => {
     const { t } = useTranslation(['translation']);
 
-    const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
+    const [selectedLanguage, setSelectedLanguage] = useState<string>(i18next.language);
 
     return (
         <StyledBox>
