@@ -64,7 +64,7 @@ export const NftThumbnail = (props: Nft) => {
                     {props.name || ' '}
                 </Typography>
                 <Typography variant="subtitle2" component="h2" className={classes.subtitle} >
-                    Sold for {props.price || ' '} tez
+                    {props.price || ' '} tez
                 </Typography>
             </Grid>
         </Grid>

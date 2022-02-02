@@ -118,7 +118,7 @@ SELECT id, user_name as "userName", address, email, disabled, ARRAY_AGG(mkuur.us
 SELECT id, user_name as "userName", address, email, password, disabled, ARRAY_AGG(mkuur.user_role_id) as roles
   FROM kanvas_user ku
   INNER JOIN mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id
-  WHERE id = $1
+  WHERE email = $1
   GROUP BY ku.id
 `,
       [email],
@@ -152,7 +152,7 @@ SELECT $1, UNNEST($2::INTEGER[])
         `, [id, addRoles]);
 
         await client.query('COMMIT');
-        
+
     } catch (error: any) {
       Logger.error(`Unable to update the user, error: ${error}`)
       await client.query('ROLLBACK')

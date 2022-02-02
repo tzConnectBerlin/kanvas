@@ -27,9 +27,11 @@ export class AnalyticsController {
   @Get('sales/priceVolume/snapshot')
   async salesPriceVolume(
     @Query('resolution') resolutionStr?: string,
-  ): Promise<MetricEntity> {
+  ) {
     const params = this.#queryParamsToMetricParams(resolutionStr);
-    return await this.analyticsService.getSnapshotSalesPriceVolume(params);
+    return {
+      data: [{id: 1, ...await this.analyticsService.getSnapshotSalesPriceVolume(params)}]
+    }
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -37,9 +39,11 @@ export class AnalyticsController {
   @Get('sales/nftCount/snapshot')
   async salesNftCount(
     @Query('resolution') resolutionStr?: string,
-  ): Promise<MetricEntity> {
+  ) {
     const params = this.#queryParamsToMetricParams(resolutionStr);
-    return await this.analyticsService.getSnapshotSalesNftCount(params);
+    return {
+      data: [{id: 1, ...await this.analyticsService.getSnapshotSalesNftCount(params)}]
+    }
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -56,7 +60,7 @@ export class AnalyticsController {
         HttpStatus.BAD_REQUEST,
       );
     }
-    
+
     return {
       data: await this.analyticsService.getTimeseriesSalesPriceVolume(params),
     };

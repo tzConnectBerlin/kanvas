@@ -67,7 +67,7 @@ export const NftList = ({ ...props }) => (
       <NumberField source="attributes.editions_size" label='Token amount' />
       <DateField source="createdAt" label="Created at" showTime />
       <DateField source="updatedAt" label="Last updated at" showTime />
-      <ReferenceManyField label="Created by" source="createdBy" reference="user" target="id">
+      <ReferenceManyField label="Created by" source="createdBy" reference="localhost:3001/user" target="id">
         <SingleFieldList>
           <ChipField source="userName" />
         </SingleFieldList>
