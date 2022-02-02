@@ -13,8 +13,8 @@ import {
 } from '../../analytics/entity/analytics.entity';
 import { AnalyticsService } from '../service/analytics.service';
 import { enumFromStringValue } from 'src/utils';
-import { Roles } from 'src/role/role.decorator';
-import { Role } from 'src/role/role';
+import { RolesDecorator } from 'src/role/role.decorator';
+import { Roles } from 'src/role/role.entity';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { RolesGuard } from 'src/role/role.guard';
 
@@ -23,31 +23,37 @@ export class AnalyticsController {
   constructor(private analyticsService: AnalyticsService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @RolesDecorator(Roles.admin)
   @Get('sales/priceVolume/snapshot')
-  async salesPriceVolume(
-    @Query('resolution') resolutionStr?: string,
-  ) {
+  async salesPriceVolume(@Query('resolution') resolutionStr?: string) {
     const params = this.#queryParamsToMetricParams(resolutionStr);
     return {
-      data: [{id: 1, ...await this.analyticsService.getSnapshotSalesPriceVolume(params)}]
-    }
+      data: [
+        {
+          id: 1,
+          ...(await this.analyticsService.getSnapshotSalesPriceVolume(params)),
+        },
+      ],
+    };
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @RolesDecorator(Roles.admin)
   @Get('sales/nftCount/snapshot')
-  async salesNftCount(
-    @Query('resolution') resolutionStr?: string,
-  ) {
+  async salesNftCount(@Query('resolution') resolutionStr?: string) {
     const params = this.#queryParamsToMetricParams(resolutionStr);
     return {
-      data: [{id: 1, ...await this.analyticsService.getSnapshotSalesNftCount(params)}]
-    }
+      data: [
+        {
+          id: 1,
+          ...(await this.analyticsService.getSnapshotSalesNftCount(params)),
+        },
+      ],
+    };
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @RolesDecorator(Roles.admin)
   @Get('sales/priceVolume/timeseries')
   async timeseriesSalesPriceVolume(
     @Query('resolution') resolutionStr?: string,
@@ -67,7 +73,7 @@ export class AnalyticsController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @RolesDecorator(Roles.admin)
   @Get('sales/nftCount/timeseries')
   async timeseriesSalesNftCount(
     @Query('resolution') resolutionStr?: string,

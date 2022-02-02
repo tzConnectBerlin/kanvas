@@ -15,7 +15,6 @@ types.setTypeParser(
     return new Date(stringValue + '+0000');
   },
 );
-console.debug('PORT IS', Number(assertEnv('PGPORT')));
 
 export const dbPool = new Pool({
   host: assertEnv('PGHOST'),

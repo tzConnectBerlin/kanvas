@@ -94,7 +94,7 @@ LIMIT  ${params.pageSize}
     );
 
     if (qryRes.rowCount === 0) {
-      return undefined;
+      return [];
     }
     return qryRes.rows.map((row: any) => {
       const nft = <NftEntity>{
@@ -149,14 +149,14 @@ LIMIT  ${params.pageSize}
 
   async applyNftUpdates(
     user: User,
-    nftId: number,
+    nftId: number | undefined,
     nftUpdates: NftUpdate[],
   ): Promise<NftEntity> {
     await this.nftLock.acquire(nftId);
     try {
-      let nfts = await this.findByIds([nftId]);
-      if (typeof nfts === 'undefined') {
-        nfts = [await this.#createNft(user)];
+      const nfts = await this.findByIds([nftId]);
+      if (nfts.length === 0) {
+        throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
       }
       const nft = nfts[0];
       const actor = await this.getActorForNft(user, nft);
@@ -283,7 +283,7 @@ WHERE id = $1
     };
   }
 
-  async #createNft(creator: User): Promise<NftEntity> {
+  async createNft(creator: User): Promise<NftEntity> {
     try {
       const qryRes = await this.db.query(
         `

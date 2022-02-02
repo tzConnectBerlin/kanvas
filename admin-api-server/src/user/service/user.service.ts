@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 
 import { PG_CONNECTION } from '../../constants';
 import { DbPool } from '../../db.module';
@@ -9,7 +15,7 @@ import { UserFilterParams } from '../params';
 
 @Injectable()
 export class UserService {
-  constructor(@Inject(PG_CONNECTION) private db: DbPool) { }
+  constructor(@Inject(PG_CONNECTION) private db: DbPool) {}
 
   async create({ password, roles, ...rest }: UserProps) {
     const client = await this.db.connect();
@@ -18,32 +24,29 @@ export class UserService {
       await client.query('BEGIN');
 
       const resultInsertUser = await client.query(
-`
+        `
 INSERT INTO
   kanvas_user (email, user_name, address, password)
   VALUES ($1, $2, $3, $4) RETURNING id
-`
-        , [
-        rest.email,
-        rest.userName,
-        rest.address,
-        hashedPassword,
-      ]);
+`,
+        [rest.email, rest.userName, rest.address, hashedPassword],
+      );
 
       const userId = resultInsertUser.rows[0].id;
 
       await client.query(
-`
+        `
 INSERT INTO
   mtm_kanvas_user_user_role (kanvas_user_id, user_role_id)
   VALUES ($1, unnest($2::integer[]))
-`
-        , [userId, roles]);
+`,
+        [userId, roles],
+      );
       await client.query('COMMIT');
 
       return { id: userId, roles, ...rest };
     } catch (e) {
-      console.log(e)
+      console.log(e);
       await client.query('ROLLBACK');
       throw new HttpException(
         'Unable to create new user',
@@ -54,8 +57,9 @@ INSERT INTO
     }
   }
 
-  async findAll(params: UserFilterParams): Promise<{ users: User[], count: number }> {
-
+  async findAll(
+    params: UserFilterParams,
+  ): Promise<{ users: User[]; count: number }> {
     const qryRes = await this.db.query(
       `
   WITH user_roles AS (
@@ -76,30 +80,38 @@ INSERT INTO
   ORDER BY ${params.orderBy} ${params.orderDirection}
   OFFSET ${params.pageOffset}
   LIMIT ${params.pageSize}
-`, [params.filters.id, params.filters.address, params.filters.userName, params.filters.roleIds]
+`,
+      [
+        params.filters.id,
+        params.filters.address,
+        params.filters.userName,
+        params.filters.roleIds,
+      ],
     );
 
     if (qryRes.rowCount === 0) {
-      return undefined
+      return undefined;
     }
 
     return {
-      users: qryRes.rows.map((row: any) => <User>{
-        id: row['id'],
-        email: row['email'],
-        userName: row['user_name'],
-        address: row['address'],
-        disabled: row['disabled'],
-        roles: row['roles']
-      }
+      users: qryRes.rows.map(
+        (row: any) =>
+          <User>{
+            id: row['id'],
+            email: row['email'],
+            userName: row['user_name'],
+            address: row['address'],
+            disabled: row['disabled'],
+            roles: row['roles'],
+          },
       ),
-      count: qryRes.rows[0]['total_matched_users']
-    }
+      count: qryRes.rows[0]['total_matched_users'],
+    };
   }
 
   async findOne(id: number) {
     const result = await this.db.query<User>(
-`
+      `
 SELECT id, user_name as "userName", address, email, disabled, ARRAY_AGG(mkuur.user_role_id) as roles
   FROM kanvas_user ku
   INNER JOIN mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id
@@ -114,7 +126,7 @@ SELECT id, user_name as "userName", address, email, disabled, ARRAY_AGG(mkuur.us
   // Function used for auth this is why password is fetch
   async findOneByEmail(email: string) {
     const result = await this.db.query<User>(
-`
+      `
 SELECT id, user_name as "userName", address, email, password, disabled, ARRAY_AGG(mkuur.user_role_id) as roles
   FROM kanvas_user ku
   INNER JOIN mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id
@@ -127,35 +139,43 @@ SELECT id, user_name as "userName", address, email, password, disabled, ARRAY_AG
   }
 
   async update(id: number, { roles, ...rest }) {
-    const concernedUser = await this.findOne(id)
+    const concernedUser = await this.findOne(id);
     const client = await this.db.connect();
 
     // Doing complex stuff for nothing
-    const deleteRoles = concernedUser.roles.filter((role: number) => roles.indexOf(role) === -1)
-    const addRoles = roles.filter((role: number) => concernedUser.roles.indexOf(role) === -1)
+    const deleteRoles = concernedUser.roles.filter(
+      (role: number) => roles.indexOf(role) === -1,
+    );
+    const addRoles = roles.filter(
+      (role: number) => concernedUser.roles.indexOf(role) === -1,
+    );
 
     try {
       await client.query('BEGIN');
 
-      await client.query(`
+      await client.query(
+        `
 DELETE FROM mtm_kanvas_user_user_role
 WHERE kanvas_user_id = $1
   AND user_role_id = ANY($2)
-    `, [id, deleteRoles]);
+    `,
+        [id, deleteRoles],
+      );
 
-
-      await client.query(`
+      await client.query(
+        `
 INSERT INTO mtm_kanvas_user_user_role (
   kanvas_user_id, user_role_id
 )
 SELECT $1, UNNEST($2::INTEGER[])
-        `, [id, addRoles]);
+        `,
+        [id, addRoles],
+      );
 
-        await client.query('COMMIT');
-
+      await client.query('COMMIT');
     } catch (error: any) {
-      Logger.error(`Unable to update the user, error: ${error}`)
-      await client.query('ROLLBACK')
+      Logger.error(`Unable to update the user, error: ${error}`);
+      await client.query('ROLLBACK');
       throw new Error(`Unable to update the user.`);
     } finally {
       client.release();
@@ -164,12 +184,13 @@ SELECT $1, UNNEST($2::INTEGER[])
 
   async remove(id: number) {
     const result = await this.db.query<User>(
-`
+      `
 UPDATE kanvas_user
 SET disabled = true
 WHERE id = $1
-`
-      , [id]);
+`,
+      [id],
+    );
     if (result.rowCount === 1) {
       const { password, ...rest } = await this.findOne(id);
       return rest;

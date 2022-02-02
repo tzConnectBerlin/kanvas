@@ -14,11 +14,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
-import { Roles } from 'src/role/role.decorator';
-import { Role } from 'src/role/role';
+import { RolesDecorator } from 'src/role/role.decorator';
+import { Roles } from 'src/role/role.entity';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { RolesGuard } from 'src/role/role.guard';
-import { UpdateUserGuard } from '../update-user.guard';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
 import { Response as Resp } from 'express';
 import { UserFilterParams, UserFilters } from '../params';
@@ -42,7 +41,7 @@ export class UserController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @RolesDecorator(Roles.admin)
   create(@Body() createUser: UserProps) {
     return this.userService.create(createUser);
   }
@@ -81,8 +80,9 @@ export class UserController {
     return this.userService.findOne(+id);
   }
 
-  @UseGuards(JwtAuthGuard, UpdateUserGuard)
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
+  @RolesDecorator(Roles.admin)
   async update(@Param('id') id: string, @Body() updateUser: any) {
     try {
       return await this.userService.update(+id, updateUser);
@@ -94,6 +94,7 @@ export class UserController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @RolesDecorator(Roles.admin)
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
   }

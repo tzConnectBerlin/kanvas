@@ -79,13 +79,16 @@ export class NftController {
     }),
   )
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
+  @Patch(':id?')
   async update(
     @Body() nftUpdatesBody: any,
     @CurrentUser() user: User,
     @UploadedFiles() filesArray?: any[],
     @Param('id') nftId?: number,
   ): Promise<NftEntity> {
+    if (typeof nftId === 'undefined') {
+      nftId = (await this.nftService.createNft(user)).id;
+    }
     const nftUpdates = this.#transformFormDataToNftUpdates(
       nftUpdatesBody,
       filesArray,
@@ -96,7 +99,7 @@ export class NftController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async delete(@CurrentUser() user: User, @Param('id') nftId?: number) {
+  async delete(@CurrentUser() user: User, @Param('id') nftId: number) {
     return await this.nftService.deleteNft(user, nftId);
   }
 

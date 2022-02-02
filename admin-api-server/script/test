@@ -47,7 +47,8 @@ store_env_exec psql < ../store-api-server/script/populate-testdb.sql || exit 1
 
 echo "waiting for testdb setup (store).."
 store_env_exec ../store-api-server/script/wait-db
-sleep 1  # sleeping for 1 more second, for db migrations to finish
+
+yarn run seed || exit 1
 
 
 export JWT_EXPIRATION_TIME=86400000
