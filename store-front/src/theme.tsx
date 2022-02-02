@@ -258,7 +258,7 @@ export const lightTheme = createTheme({
         shoppingCart: 'drop-shadow(0 1rem 0.55rem #C4C4C4)',
     },
     boxShadow: {
-        default: '#C4C4C4',
+        default: '2px 2px 15px #C4C4C4',
     },
 });
 
@@ -340,6 +340,6 @@ export const darkTheme = createTheme({
         shoppingCart: 'drop-shadow(0 1rem 0.55rem black)',
     },
     boxShadow: {
-        default: 'black'
+        default: '10px 5px 5px black;'
     }
 });
