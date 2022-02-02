@@ -236,21 +236,34 @@ export const Footer: FC<FooterProps> = () => {
                     >
                         <Box
                             component="a"
-                            href="https://facebook.com/tzconnect"
+                            target="_blank"
+                            href="https://www.linkedin.com/company/tzconnect/"
                             sx={iconStyle}
                         >
                             <FacebookStyled
-                                src={'/img/facebook.png'}
-                                alt="Facebook"
+                                src={'/img/linkedin.png'}
+                                alt="Linkedin"
                             />
                         </Box>
                         <Box
                             component="a"
-                            href="https://twitter.com/tzconnect"
+                            target="_blank"
+                            href="https://twitter.com/TZConnectBerlin"
                             sx={iconStyle}
                         >
                             <TwitterStyled
                                 src={'/img/twitter.jpeg'}
+                                alt="Twitter"
+                            />
+                        </Box>
+                        <Box
+                            component="a"
+                            target="_blank"
+                            href="https://www.tzconnect.com/en/"
+                            sx={iconStyle}
+                        >
+                            <TwitterStyled
+                                src={'/img/web.png'}
                                 alt="Twitter"
                             />
                         </Box>
