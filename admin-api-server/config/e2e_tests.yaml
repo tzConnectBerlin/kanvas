@@ -1,0 +1,78 @@
+attributes:
+  name: string
+  create_ready: boolean
+  price: number
+  editions_size: number
+  categories: number[]
+  proposed: boolean
+  proposal_accept: votes
+  proposal_reject: votes
+  prototype_accept: votes
+  prototype_reject: votes
+
+
+states:
+  creation:
+    state_transitions:
+    - next_state: setup_nft
+      when: |
+        nft.name.length > 0 &&
+        nft.create_ready
+    mutables:
+    - attributes: [name, create_ready]
+      by_roles: [creator]
+
+  setup_nft:
+    state_transitions:
+    - next_state: proposed
+      when: |
+        nft.proposed &&
+        nft.editions_size > 0 &&
+        nft.price > 0 &&
+        nft.categories.length > 0
+    mutables:
+    - attributes: [price, editions_size, proposed, categories]
+      by_roles: [editor, creator, admin]
+
+  proposed:
+    state_transitions:
+    - next_state: setup_nft
+      when: |
+        nft.proposal_reject.length > 0
+      do: |
+        {
+          // Storing rejected state for future reference inside 'proposal_reject_x',
+          // where x equals the reject count of this nft
+
+          let idx = 0;
+          while (nft.hasOwnProperty('proposal_reject_' + idx)) {
+            idx++;
+          }
+          let reject_name = 'proposal_reject_' + idx;
+
+          nft[reject_name] = {};
+          for (let key of Object.keys(nft)) {
+            if (!key.startsWith('proposal_reject_')) {
+              nft[reject_name][key] = structuredClone(nft[key]);
+            }
+          }
+
+          nft.proposal_reject = [];
+          nft.proposed = false;
+        }
+    - next_state: prototype
+      when: |
+        nft.proposal_accept.length == 1
+    mutables:
+    - attributes: [proposal_accept, proposal_reject]
+      by_roles: [moderator, admin]
+
+  prototype:
+    state_transitions:
+    - new_state: finish
+      when: 'nft.prototype_accept.length == 3'
+    - new_state: setup_nft
+      when: 'nft.prototype_reject.length > 0'
+    mutables:
+    - attributes: [prototype_accept, prototype_reject]
+      by_roles: [moderator]

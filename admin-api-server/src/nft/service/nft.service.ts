@@ -5,7 +5,7 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import { PG_CONNECTION, FILE_PREFIX } from 'src/constants';
+import { PG_CONNECTION, FILE_PREFIX, STM_CONFIG_FILE } from 'src/constants';
 import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
 import { User } from 'src/user/entities/user.entity';
@@ -29,7 +29,7 @@ export class NftService {
     @Inject(PG_CONNECTION) private db: DbPool,
     private readonly roleService: RoleService,
   ) {
-    const stmConfigFile = './config/stm_example.yaml';
+    const stmConfigFile = STM_CONFIG_FILE;
     this.stm = new StateTransitionMachine(stmConfigFile);
     this.nftLock = new Lock<number>();
     fs.watch(stmConfigFile, (event: any, filename: any) => {
@@ -156,7 +156,6 @@ LIMIT  ${params.pageSize}
     try {
       let nfts = await this.findByIds([nftId]);
       if (typeof nfts === 'undefined') {
-
         nfts = [await this.#createNft(user)];
       }
       const nft = nfts[0];
@@ -297,9 +296,9 @@ RETURNING id
         [creator.id],
       );
 
-      const test= await this.getNft(creator, qryRes.rows[0].id);
+      const test = await this.getNft(creator, qryRes.rows[0].id);
 
-      return test
+      return test;
     } catch (err: any) {
       Logger.error(`Unable to create new nft, err: ${err}`);
       throw new HttpException(

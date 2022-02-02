@@ -23,9 +23,6 @@ export PGUSER=testusr
 export PGPASSWORD=testpass
 export PGDATABASE=test_admin
 
-export JWT_EXPIRATION_TIME=86400000
-export JWT_SECRET='wPK-TfcjDSjztKrb4SUnfRPQ1YIovrooYQaX4h-EnU4'
-
 function assert_docker_ok {
     port=$1
 
@@ -51,6 +48,11 @@ store_env_exec psql < ../store-api-server/script/populate-testdb.sql || exit 1
 echo "waiting for testdb setup (store).."
 store_env_exec ../store-api-server/script/wait-db
 sleep 1  # sleeping for 1 more second, for db migrations to finish
+
+
+export JWT_EXPIRATION_TIME=86400000
+export JWT_SECRET='wPK-TESTING_ADMIN'
+export STM_CONFIG_FILE='config/e2e_tests.yaml'
 
 echo "running tests.."
 
