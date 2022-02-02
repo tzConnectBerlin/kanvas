@@ -22,7 +22,7 @@ import {
 import { NftEntity, NftUpdate } from '../entities/nft.entity';
 import { NftService } from '../service/nft.service';
 import { CurrentUser } from 'src/decoraters/user.decorator';
-import { User } from 'src/user/entities/user.entity';
+import { UserEntity } from 'src/user/entities/user.entity';
 import { NftFilterParams, NftFilters } from '../params';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
 import {
@@ -66,7 +66,7 @@ export class NftController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  async findOne(@Param('id') id: number, @CurrentUser() user: User) {
+  async findOne(@Param('id') id: number, @CurrentUser() user: UserEntity) {
     return await this.nftService.getNft(user, id);
   }
 
@@ -82,7 +82,7 @@ export class NftController {
   @Patch(':id?')
   async update(
     @Body() nftUpdatesBody: any,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserEntity,
     @UploadedFiles() filesArray?: any[],
     @Param('id') nftId?: number,
   ): Promise<NftEntity> {
@@ -99,7 +99,7 @@ export class NftController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async delete(@CurrentUser() user: User, @Param('id') nftId: number) {
+  async delete(@CurrentUser() user: UserEntity, @Param('id') nftId: number) {
     return await this.nftService.deleteNft(user, nftId);
   }
 

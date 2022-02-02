@@ -128,14 +128,19 @@ export function enumFromStringValue<T>(
     : undefined;
 }
 
-export function validatePaginationParams(params: PaginationParams, allowedSortableKeys: string[]) {
+export function validatePaginationParams(
+  params: PaginationParams,
+  allowedSortableKeys: string[],
+) {
   if (params.pageOffset < 0 || params.pageSize < 1) {
     throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST);
   }
 
-  if (!(allowedSortableKeys.some(
-    (allowedfilterAttr: string) => allowedfilterAttr !== params.orderBy
-  ))) {
+  if (
+    !allowedSortableKeys.some(
+      (allowedfilterAttr: string) => allowedfilterAttr !== params.orderBy,
+    )
+  ) {
     throw new HttpException(
       `${params.orderBy} is not one of the allowed sort keys`,
       HttpStatus.BAD_REQUEST,
@@ -155,7 +160,7 @@ export function validatePaginationParams(params: PaginationParams, allowedSortab
 
 export const queryParamsToPaginationParams = (
   sort?: string[],
-  range?: number[]
+  range?: number[],
 ): PaginationParams => {
   const res = new PaginationParams();
 
@@ -171,12 +176,15 @@ export const queryParamsToPaginationParams = (
     res.pageSize = range[1] - range[0];
   }
 
-  return res
-}
+  return res;
+};
 
-export function parseStringArray(v: string | string[], sep = ','): string[] | undefined {
+export function parseStringArray(
+  v: string | string[] | undefined,
+  sep = ',',
+): string[] | undefined {
   if (typeof v !== 'string') {
-    return undefined;
+    return v;
   }
   return v.split(sep);
 }
@@ -188,6 +196,3 @@ export function parseNumberParam(v: string): number {
   }
   return res;
 }
-
-
-validatePaginationParams

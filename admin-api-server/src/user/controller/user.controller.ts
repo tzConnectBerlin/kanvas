@@ -21,19 +21,11 @@ import { RolesGuard } from 'src/role/role.guard';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
 import { Response as Resp } from 'express';
 import { UserFilterParams, UserFilters } from '../params';
+import { UserEntity } from '../entities/user.entity';
 import {
   queryParamsToPaginationParams,
   validatePaginationParams,
 } from 'src/utils';
-
-export interface UserProps {
-  id: number;
-  email: string;
-  userName: string;
-  address: string;
-  password?: string;
-  roles: number[];
-}
 
 @Controller('user')
 export class UserController {
@@ -42,8 +34,17 @@ export class UserController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesDecorator(Roles.admin)
-  create(@Body() createUser: UserProps) {
-    return this.userService.create(createUser);
+  async create(@Body() usr: UserEntity): Promise<UserEntity> {
+    if (
+      usr.roles.length === 0 ||
+      usr.roles.some((roleId) => !Object.values(Roles).includes(roleId))
+    ) {
+      throw new HttpException(
+        `bad roles parameter (empty or has a nonexisting role id)`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return await this.userService.create(usr);
   }
 
   @Get()
@@ -76,8 +77,8 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.userService.findOne(+id);
   }
 
   @UseGuards(JwtAuthGuard)

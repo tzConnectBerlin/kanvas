@@ -103,6 +103,10 @@
     "collectCoverageFrom": [
       "src/**/{!(nft_mock.service),}.ts"
     ],
+    "coveragePathIgnorePatterns": [
+        "<rootDir>/node_modules/",
+        "<rootDir>/src/seeds"
+    ],
     "coverageDirectory": "test/coverage",
     "testEnvironment": "node"
   }

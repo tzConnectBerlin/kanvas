@@ -8,7 +8,7 @@ import {
 import { PG_CONNECTION, FILE_PREFIX, STM_CONFIG_FILE } from 'src/constants';
 import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
-import { User } from 'src/user/entities/user.entity';
+import { UserEntity } from 'src/user/entities/user.entity';
 import { NftEntity, NftUpdate } from '../entities/nft.entity';
 import { NftFilterParams, parseStringArray } from '../params';
 import { RoleService } from 'src/role/role.service';
@@ -129,7 +129,7 @@ LIMIT  ${params.pageSize}
     return nfts[0];
   }
 
-  async getNft(user: User, nftId: number) {
+  async getNft(user: UserEntity, nftId: number) {
     const nft = await this.findOne(nftId);
     const actor = await this.getActorForNft(user, nft);
 
@@ -139,7 +139,7 @@ LIMIT  ${params.pageSize}
     };
   }
 
-  async getActorForNft(user: User, nft: NftEntity): Promise<Actor> {
+  async getActorForNft(user: UserEntity, nft: NftEntity): Promise<Actor> {
     const roles = await this.roleService.getLabels(user.roles);
     if (nft.createdBy === user.id) {
       roles.push('creator');
@@ -148,7 +148,7 @@ LIMIT  ${params.pageSize}
   }
 
   async applyNftUpdates(
-    user: User,
+    user: UserEntity,
     nftId: number | undefined,
     nftUpdates: NftUpdate[],
   ): Promise<NftEntity> {
@@ -204,7 +204,7 @@ LIMIT  ${params.pageSize}
     }
   }
 
-  async deleteNft(user: User, nftId: number) {
+  async deleteNft(user: UserEntity, nftId: number) {
     await this.nftLock.acquire(nftId);
     const nft = await this.findOne(nftId);
     if (nft.createdBy !== user.id) {
@@ -249,7 +249,7 @@ WHERE id = $1
   }
 
   async #uploadContent(
-    user: User,
+    user: UserEntity,
     nftId: number,
     attribute: string,
     file: any,
@@ -283,7 +283,7 @@ WHERE id = $1
     };
   }
 
-  async createNft(creator: User): Promise<NftEntity> {
+  async createNft(creator: UserEntity): Promise<NftEntity> {
     try {
       const qryRes = await this.db.query(
         `
@@ -308,7 +308,7 @@ RETURNING id
     }
   }
 
-  async #updateNft(setBy: User, nft: NftEntity) {
+  async #updateNft(setBy: UserEntity, nft: NftEntity) {
     const attrNames = Object.keys(nft.attributes);
     const attrValues = attrNames.map((name: string) =>
       JSON.stringify(nft.attributes[name]),

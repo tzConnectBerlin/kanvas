@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { Roles } from 'src/role/role.entity';
@@ -30,6 +30,7 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     await app.init();
   });
 
@@ -252,10 +253,274 @@ describe('AppController (e2e)', () => {
         email: 'regular_joe@bigbrother.co',
         userName: 'Regular Joe',
         address: 'tz1bla',
-        password: 'root',
-        roles: [],
+        password: 'somepass',
+        roles: [2],
       });
     expect(res.statusCode).toEqual(201);
+    expect(res.body).toStrictEqual({
+      id: 2,
+      roles: [2],
+      email: 'regular_joe@bigbrother.co',
+      userName: 'Regular Joe',
+      address: 'tz1bla',
+    });
+  });
+
+  skipOnPriorFail('new user must have at least 1 role assigned', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'admin@tzconnect.com',
+      'supersafepassword',
+    );
+    const res = await request(app.getHttpServer())
+      .post('/user')
+      .set('authorization', bearer)
+      .send({
+        email: 'ben@bigbrother.co',
+        userName: 'Ben',
+        address: 'tz1ben',
+        password: 'somepass',
+        roles: [],
+      });
+    expect(res.statusCode).toEqual(400);
+  });
+
+  skipOnPriorFail(`new user's roles must all be valid`, async () => {
+    const { bearer } = await loginUser(
+      app,
+      'admin@tzconnect.com',
+      'supersafepassword',
+    );
+    const res = await request(app.getHttpServer())
+      .post('/user')
+      .set('authorization', bearer)
+      .send({
+        email: 'hank@bigbrother.co',
+        userName: 'Hank',
+        address: 'tz1hank',
+        password: 'somepass',
+        roles: [2, 0], // 0 is invalid here
+      });
+    expect(res.statusCode).toEqual(400);
+  });
+
+  skipOnPriorFail('non-admin cannot create new users', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'regular_joe@bigbrother.co',
+      'somepass',
+    );
+    const res = await request(app.getHttpServer())
+      .post('/user')
+      .set('authorization', bearer)
+      .send({
+        email: 'jane@bigbrother.co',
+        userName: 'Jane',
+        address: 'tz1blb',
+        password: 'pass',
+        roles: [3],
+      });
+    expect(res.statusCode).toEqual(403);
+  });
+
+  skipOnPriorFail('anyone can list users', async () => {
+    const res = await request(app.getHttpServer()).get('/user');
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({
+      data: [
+        {
+          id: 1,
+          email: 'admin@tzconnect.com',
+          userName: 'admin',
+          address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
+          roles: ['admin'],
+        },
+        {
+          id: 2,
+          email: 'regular_joe@bigbrother.co',
+          userName: 'Regular Joe',
+          address: 'tz1bla',
+          roles: ['editor'],
+        },
+      ],
+    });
+  });
+
+  skipOnPriorFail('/user has filter on username', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/user')
+      .query({ userName: 'Regular Joe' });
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({
+      data: [
+        {
+          id: 2,
+          email: 'regular_joe@bigbrother.co',
+          userName: 'Regular Joe',
+          address: 'tz1bla',
+          roles: ['editor'],
+        },
+      ],
+    });
+  });
+
+  skipOnPriorFail(
+    'only logged in users can see available categories for assigning to nfts',
+    async () => {
+      const res = await request(app.getHttpServer()).get('/categories');
+      expect(res.statusCode).toEqual(401);
+    },
+  );
+
+  skipOnPriorFail('logged in user GET /categories/assignable', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'regular_joe@bigbrother.co',
+      'somepass',
+    );
+    const res = await request(app.getHttpServer())
+      .get('/categories/assignable')
+      .set('authorization', bearer);
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toStrictEqual({
+      data: [
+        { id: 3, name: 'Applied Art' },
+        { id: 4, name: 'Drawing' },
+        { id: 5, name: 'Painting' },
+        { id: 6, name: 'Sculpture' },
+        { id: 7, name: 'Digital' },
+        { id: 9, name: 'Abstract' },
+        { id: 10, name: 'Landscape' },
+        { id: 11, name: 'Portrait' },
+        { id: 13, name: 'Honk Kong' },
+        { id: 14, name: 'Toronto' },
+        { id: 15, name: 'London' },
+        { id: 16, name: 'Black & White' },
+      ],
+    });
+  });
+
+  skipOnPriorFail(
+    'only logged in admin can access analytics endpoints (part 1; not logged in at all)',
+    async () => {
+      let res = await request(app.getHttpServer()).get(
+        '/analytics/sales/priceVolume/snapshot',
+      );
+      expect(res.statusCode).toEqual(401);
+
+      res = await request(app.getHttpServer()).get(
+        '/analytics/sales/priceVolume/timeseries',
+      );
+      expect(res.statusCode).toEqual(401);
+
+      res = await request(app.getHttpServer()).get(
+        '/analytics/sales/nftCount/snapshot',
+      );
+      expect(res.statusCode).toEqual(401);
+
+      res = await request(app.getHttpServer()).get(
+        '/analytics/sales/nftCount/timeseries',
+      );
+      expect(res.statusCode).toEqual(401);
+    },
+  );
+
+  skipOnPriorFail(
+    'only logged in admin can access analytics endpoints (part 2; non-admin logged in)',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'regular_joe@bigbrother.co',
+        'somepass',
+      );
+      let res = await request(app.getHttpServer())
+        .get('/analytics/sales/priceVolume/snapshot')
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(403);
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/priceVolume/timeseries')
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(403);
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/nftCount/snapshot')
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(403);
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/nftCount/timeseries')
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(403);
+    },
+  );
+
+  skipOnPriorFail(
+    'admin can access analytics endpoints (part 1; before any emulated sales)',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'admin@tzconnect.com',
+        'supersafepassword',
+      );
+      let res = await request(app.getHttpServer())
+        .get('/analytics/sales/priceVolume/snapshot')
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(200);
+
+      expect(res.body.timestamp).toBeGreaterThan(0);
+      delete res.body.timestamp;
+
+      expect(res.body).toStrictEqual({ value: 0 });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/priceVolume/timeseries')
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(200);
+
+      expect(res.body).toStrictEqual({ data: [] });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/nftCount/snapshot')
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(200);
+
+      expect(res.body.timestamp).toBeGreaterThan(0);
+      delete res.body.timestamp;
+
+      expect(res.body).toStrictEqual({ value: 0 });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/nftCount/timeseries')
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toStrictEqual({ data: [] });
+    },
+  );
+
+  skipOnPriorFail('admin can remove users', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'admin@tzconnect.com',
+      'supersafepassword',
+    );
+
+    let res = await request(app.getHttpServer())
+      .get('/user')
+      .query({ userName: 'Regular Joe' });
+    const userId = res.body.data[0].id;
+
+    res = await request(app.getHttpServer())
+      .delete(`/user/${userId}`)
+      .set('authorization', bearer)
+      .send({
+        email: 'regular_joe@bigbrother.co',
+        userName: 'Regular Joe',
+        address: 'tz1bla',
+        password: 'somepass',
+        roles: [],
+      });
+    expect(res.statusCode).toEqual(200);
   });
 });
 

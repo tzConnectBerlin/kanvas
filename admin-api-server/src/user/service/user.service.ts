@@ -9,15 +9,14 @@ import {
 import { PG_CONNECTION } from '../../constants';
 import { DbPool } from '../../db.module';
 import { hashPassword } from '../../utils';
-import { User } from '../entities/user.entity';
-import { UserProps } from '../controller/user.controller';
+import { UserEntity } from '../entities/user.entity';
 import { UserFilterParams } from '../params';
 
 @Injectable()
 export class UserService {
   constructor(@Inject(PG_CONNECTION) private db: DbPool) {}
 
-  async create({ password, roles, ...rest }: UserProps) {
+  async create({ password, roles, ...rest }: UserEntity): Promise<UserEntity> {
     const client = await this.db.connect();
     const hashedPassword = await hashPassword(password);
     try {
@@ -45,8 +44,13 @@ INSERT INTO
       await client.query('COMMIT');
 
       return { id: userId, roles, ...rest };
-    } catch (e) {
-      console.log(e);
+    } catch (err: any) {
+      Logger.error(
+        `failed to create new user (${JSON.stringify({
+          roles,
+          ...rest,
+        })}), err: ${err}`,
+      );
       await client.query('ROLLBACK');
       throw new HttpException(
         'Unable to create new user',
@@ -59,7 +63,7 @@ INSERT INTO
 
   async findAll(
     params: UserFilterParams,
-  ): Promise<{ users: User[]; count: number }> {
+  ): Promise<{ users: UserEntity[]; count: number }> {
     const qryRes = await this.db.query(
       `
   WITH user_roles AS (
@@ -96,7 +100,7 @@ INSERT INTO
     return {
       users: qryRes.rows.map(
         (row: any) =>
-          <User>{
+          <UserEntity>{
             id: row['id'],
             email: row['email'],
             userName: row['user_name'],
@@ -109,8 +113,8 @@ INSERT INTO
     };
   }
 
-  async findOne(id: number) {
-    const result = await this.db.query<User>(
+  async findOne(id: number): Promise<UserEntity> {
+    const result = await this.db.query<UserEntity>(
       `
 SELECT id, user_name as "userName", address, email, disabled, ARRAY_AGG(mkuur.user_role_id) as roles
   FROM kanvas_user ku
@@ -124,8 +128,8 @@ SELECT id, user_name as "userName", address, email, disabled, ARRAY_AGG(mkuur.us
   }
 
   // Function used for auth this is why password is fetch
-  async findOneByEmail(email: string) {
-    const result = await this.db.query<User>(
+  async findOneByEmail(email: string): Promise<UserEntity> {
+    const result = await this.db.query<UserEntity>(
       `
 SELECT id, user_name as "userName", address, email, password, disabled, ARRAY_AGG(mkuur.user_role_id) as roles
   FROM kanvas_user ku
@@ -183,7 +187,7 @@ SELECT $1, UNNEST($2::INTEGER[])
   }
 
   async remove(id: number) {
-    const result = await this.db.query<User>(
+    const result = await this.db.query<UserEntity>(
       `
 UPDATE kanvas_user
 SET disabled = true

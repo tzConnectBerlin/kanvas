@@ -20,6 +20,8 @@ import { RolesGuard } from 'src/role/role.guard';
 
 @Controller('analytics')
 export class AnalyticsController {
+  defaultResolution = Resolution.Day;
+
   constructor(private analyticsService: AnalyticsService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -27,14 +29,7 @@ export class AnalyticsController {
   @Get('sales/priceVolume/snapshot')
   async salesPriceVolume(@Query('resolution') resolutionStr?: string) {
     const params = this.#queryParamsToMetricParams(resolutionStr);
-    return {
-      data: [
-        {
-          id: 1,
-          ...(await this.analyticsService.getSnapshotSalesPriceVolume(params)),
-        },
-      ],
-    };
+    return await this.analyticsService.getSnapshotSalesPriceVolume(params);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -42,14 +37,7 @@ export class AnalyticsController {
   @Get('sales/nftCount/snapshot')
   async salesNftCount(@Query('resolution') resolutionStr?: string) {
     const params = this.#queryParamsToMetricParams(resolutionStr);
-    return {
-      data: [
-        {
-          id: 1,
-          ...(await this.analyticsService.getSnapshotSalesNftCount(params)),
-        },
-      ],
-    };
+    return await this.analyticsService.getSnapshotSalesNftCount(params);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -93,7 +81,7 @@ export class AnalyticsController {
   }
 
   #queryParamsToMetricParams(resolutionStr?: string): MetricParams {
-    const resolution = enumFromStringValue(Resolution, resolutionStr);
+    const resolution = this.#parseResolution(resolutionStr);
     if (typeof resolution === 'undefined') {
       throw new HttpException(
         'Bad resolution parameter',
@@ -103,5 +91,12 @@ export class AnalyticsController {
     return <MetricParams>{
       resolution: resolution || Resolution.Hour,
     };
+  }
+
+  #parseResolution(resolutionStr?: string): Resolution | undefined {
+    if (typeof resolutionStr === 'undefined') {
+      return this.defaultResolution;
+    }
+    return enumFromStringValue(Resolution, resolutionStr);
   }
 }
