@@ -3,7 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { storeDbPool } from 'src/db.module';
-import { Roles } from 'src/role/role.entity';
+import { Roles } from 'src/role/entities/role.entity';
 
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {

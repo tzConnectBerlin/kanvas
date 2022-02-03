@@ -11,7 +11,7 @@ import { DbPool } from '../../db.module';
 import { hashPassword } from '../../utils';
 import { UserEntity } from '../entities/user.entity';
 import { UserFilterParams } from '../params';
-import { Roles } from 'src/role/role.entity';
+import { Roles } from 'src/role/entities/role.entity';
 
 @Injectable()
 export class UserService {
@@ -200,7 +200,6 @@ WHERE kanvas_user_id = $1
     `,
         [id, deleteRoles],
       );
-
       await client.query(
         `
 INSERT INTO mtm_kanvas_user_user_role (
@@ -219,6 +218,7 @@ SELECT $1, UNNEST($2::INTEGER[])
     } finally {
       client.release();
     }
+    return await this.findOne(id);
   }
 
   async remove(id: number) {

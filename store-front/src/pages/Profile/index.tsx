@@ -235,14 +235,12 @@ const Profile: FC<ProfileProps> = () => {
         if (userResponse.error?.code === '404') {
             history.push('/404');
         } else {
-            debugger
             loadTezosDomain(userAddress!)
         }
     }, [userResponse]);
 
     // Edit profile section
     const editProfile = () => {
-        debugger
         if (userResponse.data?.user) {
             const currentUser = {
                 userName: userResponse.data?.user.userName,

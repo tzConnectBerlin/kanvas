@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { PG_CONNECTION } from '../constants';
-import { DbPool } from '../db.module';
-import { Roles } from './role.entity';
+import { PG_CONNECTION } from 'src/constants';
+import { DbPool } from 'src/db.module';
+import { Roles } from '../entities/role.entity';
 
 @Injectable()
 export class RoleService {
@@ -28,5 +28,15 @@ WHERE id = ANY($1)
       [roleIds],
     );
     return labelsQryRes.rows.map((row: any) => row.role_label);
+  }
+
+  async getRoles(): Promise<Roles[]> {
+    const labelsQryRes = await this.db.query(
+      `
+SELECT id, role_label
+FROM user_role
+`,
+    );
+    return labelsQryRes.rows;
   }
 }

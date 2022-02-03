@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import { RolesDecorator } from 'src/role/role.decorator';
-import { Roles } from 'src/role/role.entity';
+import { Roles } from 'src/role/entities/role.entity';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { RolesGuard } from 'src/role/role.guard';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';

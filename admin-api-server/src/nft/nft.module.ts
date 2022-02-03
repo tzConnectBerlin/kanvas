@@ -3,7 +3,7 @@ import { NftService } from './service/nft.service';
 import { NftController } from './controller/nft.controller';
 import { DbModule } from 'src/db.module';
 import { S3Service } from './service/s3.service';
-import { RoleService } from 'src/role/role.service';
+import { RoleService } from 'src/role/service/role.service';
 
 @Module({
   imports: [DbModule],

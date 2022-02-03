@@ -3,7 +3,7 @@ import { NftController } from './nft.controller';
 import { NftService } from '../service/nft.service';
 import { S3Service } from '../service/s3.service';
 import { DbMockModule } from 'src/db_mock.module';
-import { RoleService } from 'src/role/role.service';
+import { RoleService } from 'src/role/service/role.service';
 
 describe('NftController', () => {
   let controller: NftController;
