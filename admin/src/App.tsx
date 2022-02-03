@@ -63,6 +63,9 @@ function App() {
         name="analytics/sales/priceVolume/snapshot"
       />
       <Resource
+        name="analytics/sales/NftCount/snapshot"
+      />
+      <Resource
         name="kanvas.tzconnect.berlin/api/users/topBuyers"
       />
     </Admin>
