@@ -11,7 +11,7 @@ import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
 import { User } from 'src/user/entities/user.entity';
 import { NftEntity, NftUpdate } from '../entities/nft.entity';
 import { NftFilterParams, parseStringArray } from '../params';
-import { RoleService } from 'src/role/role.service';
+import { RoleService } from 'src/role/service/role.service';
 import { S3Service } from './s3.service';
 import { Lock } from 'async-await-mutex-lock';
 const fs = require('fs');

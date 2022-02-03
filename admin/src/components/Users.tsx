@@ -17,9 +17,10 @@ import {
 } from 'react-admin';
 import { getDecodedToken } from '../auth/authUtils';
 import { CustomDeleteButton } from './Buttons/CustomDeleteButton';
-
+import React from 'react';
 import { TextArrayField } from './TextArrayField';
 import ToolbarActions from './ToolbarActions';
+import axios from 'axios';
 
 // Get this from config file
 const rolesEnum = {
@@ -68,6 +69,21 @@ export const UserEdit = ({ ...props }) => {
     refresh();
   };
 
+  const [roles, setRoles] = React.useState([])
+
+  React.useEffect(() => {
+    axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/role', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
+      }
+    })
+      .then(response => {
+        setRoles(response.data.data.map((role: any) =>  ({ id: role.id, name: role.role_label.charAt(0).toUpperCase() + role.role_label.slice(1) })))
+      }).catch(error => {
+        notify(`An error occured while fetching the roles`);
+      })
+  }, [])
+
   return props.permissions?.includes(1) || currentUser ? (
     <Edit {...props} onSuccess={onSuccess} mutationMode="pessimistic" transform={transform}>
       <SimpleForm>
@@ -78,12 +94,7 @@ export const UserEdit = ({ ...props }) => {
         {props.permissions?.includes(1) && (
           <SelectArrayInput
             source="roles"
-            choices={[
-              { id: 2, name: 'Editor' },
-              { id: 1, name: 'Super Admin' },
-              { id: 3, name: 'Creator' },
-              { id: 4, name: 'dog' },
-            ]}
+            choices={roles}
           />
         )}
       </SimpleForm>
@@ -105,6 +116,21 @@ export const UserCreate = ({ ...props }) => {
     refresh();
   };
 
+  const [roles, setRoles] = React.useState([])
+
+  React.useEffect(() => {
+    axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/role', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
+      }
+    })
+      .then(response => {
+        setRoles(response.data.data.map((role: any) =>  ({ id: role.id, name: role.role_label.charAt(0).toUpperCase() + role.role_label.slice(1) })))
+      }).catch(error => {
+        notify(`An error occured while fetching the roles`);
+      })
+  }, [])
+
   return props?.permissions?.includes(1) ? (
     <Create onSuccess={onSuccess} {...props}>
       <SimpleForm>
@@ -114,12 +140,7 @@ export const UserCreate = ({ ...props }) => {
         <PasswordInput source="password" />
         <SelectArrayInput
           source="roles"
-          choices={[
-            { id: 2, name: 'Editor' },
-            { id: 1, name: 'Super Admin' },
-            { id: 3, name: 'Creator' },
-            { id: 4, name: 'dog' },
-          ]}
+          choices={roles}
         />
       </SimpleForm>
     </Create>

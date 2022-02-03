@@ -34,27 +34,27 @@ function App() {
     >
       <Resource
         name="user"
-        options={{ label: `user` }}
         list={UserList}
         edit={UserEdit}
         create={UserCreate}
       />
       <Resource
         name="nft"
-        options={{ label: `nft` }}
         list={NftList}
         edit={NftEdit}
         create={NftCreate}
         icon={NftIcon}
       />
       <Resource
-      options={{ label: `activity` }}
         name="activity"
         list={ActivityList}
         icon={EqualizerIcon}
       />
       <Resource
         name="categories"
+      />
+      <Resource
+        name="role"
       />
       <Resource
         name="categories/assignable"
