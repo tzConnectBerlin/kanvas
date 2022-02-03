@@ -47,11 +47,8 @@ describe('AppController (e2e)', () => {
 
   skipOnPriorFail('should be defined', () => expect(app).toBeDefined());
 
-  skipOnPriorFail('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  it(`/ (GET) => NOT FOUND (make sure the nestjs's Hello World page is gone)`, () => {
+    return request(app.getHttpServer()).get('/').expect(404);
   });
 
   // Note:

@@ -11,12 +11,20 @@ import { DbPool } from '../../db.module';
 import { hashPassword } from '../../utils';
 import { UserEntity } from '../entities/user.entity';
 import { UserFilterParams } from '../params';
+import { Roles } from 'src/role/role.entity';
 
 @Injectable()
 export class UserService {
   constructor(@Inject(PG_CONNECTION) private db: DbPool) {}
 
   async create({ password, roles, ...rest }: UserEntity): Promise<UserEntity> {
+    if (!this.#allRolesValid(roles)) {
+      throw new HttpException(
+        `(partially) invalid roles`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const client = await this.db.connect();
     const hashedPassword = await hashPassword(password);
     try {
@@ -67,20 +75,29 @@ INSERT INTO
     const qryRes = await this.db.query(
       `
   WITH user_roles AS (
-    SELECT mtm_user_role.kanvas_user_id, ARRAY_AGG(user_role.id) as role_ids, ARRAY_AGG(user_role.role_label) as roles
+    SELECT
+      mtm_user_role.kanvas_user_id,
+      ARRAY_AGG(user_role.id) AS role_ids
     FROM user_role
-    JOIN mtm_kanvas_user_user_role as mtm_user_role
-        ON mtm_user_role.user_role_id = user_role.id
+    JOIN mtm_kanvas_user_user_role AS mtm_user_role
+      ON mtm_user_role.user_role_id = user_role.id
     GROUP BY 1
   )
-  SELECT kanvas_user.id, email, user_name, address, user_roles.roles, COUNT(1) OVER () AS total_matched_users
+  SELECT
+    kanvas_user.id,
+    email,
+    user_name,
+    address,
+    COALESCE(user_roles.role_ids, '{}'::INTEGER[]) AS roles,
+    COUNT(1) OVER () AS total_matched_users
   FROM kanvas_user
-  JOIN user_roles
+  LEFT JOIN user_roles
     ON user_roles.kanvas_user_id = kanvas_user.id
   WHERE ($1::INTEGER[] IS NULL OR kanvas_user.id = ANY($1::INTEGER[]))
-      AND ($2::TEXT[] IS NULL OR address = ANY($2::TEXT[]))
-      AND ($3::TEXT[] IS NULL OR user_name = ANY($3::TEXT[]))
-      AND ($4::INTEGER[] IS NULL OR user_roles.role_ids && $4::INTEGER[])
+    AND ($2::TEXT[] IS NULL OR address = ANY($2::TEXT[]))
+    AND ($3::TEXT[] IS NULL OR user_name = ANY($3::TEXT[]))
+    AND ($4::INTEGER[] IS NULL OR user_roles.role_ids && $4::INTEGER[])
+    AND NOT kanvas_user.disabled
   ORDER BY ${params.orderBy} ${params.orderDirection}
   OFFSET ${params.pageOffset}
   LIMIT ${params.pageSize}
@@ -94,7 +111,7 @@ INSERT INTO
     );
 
     if (qryRes.rowCount === 0) {
-      return undefined;
+      return { users: [], count: 0 };
     }
 
     return {
@@ -105,7 +122,6 @@ INSERT INTO
             email: row['email'],
             userName: row['user_name'],
             address: row['address'],
-            disabled: row['disabled'],
             roles: row['roles'],
           },
       ),
@@ -114,35 +130,52 @@ INSERT INTO
   }
 
   async findOne(id: number): Promise<UserEntity> {
-    const result = await this.db.query<UserEntity>(
-      `
-SELECT id, user_name as "userName", address, email, disabled, ARRAY_AGG(mkuur.user_role_id) as roles
-  FROM kanvas_user ku
-  INNER JOIN mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id
-  WHERE id = $1
-  GROUP BY ku.id
-`,
-      [id],
-    );
-    return result.rows[0];
+    const params = new UserFilterParams();
+    params.filters.id = [id];
+    const findRes = await this.findAll(params);
+    if (findRes.users.length === 0) {
+      throw new HttpException(
+        `no user exists with this id`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return findRes.users[0];
   }
 
   // Function used for auth this is why password is fetch
-  async findOneByEmail(email: string): Promise<UserEntity> {
+  async findOneByEmail(email: string): Promise<UserEntity | undefined> {
     const result = await this.db.query<UserEntity>(
       `
-SELECT id, user_name as "userName", address, email, password, disabled, ARRAY_AGG(mkuur.user_role_id) as roles
-  FROM kanvas_user ku
-  INNER JOIN mtm_kanvas_user_user_role mkuur on mkuur.kanvas_user_id = ku.id
-  WHERE email = $1
-  GROUP BY ku.id
+SELECT
+  id,
+  user_name as "userName",
+  address,
+  email,
+  password,
+  disabled,
+  COALESCE(ARRAY_AGG(mkuur.user_role_id), '{}'::INTEGER[]) AS roles
+FROM kanvas_user ku
+LEFT JOIN mtm_kanvas_user_user_role mkuur ON mkuur.kanvas_user_id = ku.id
+WHERE email = $1
+  AND NOT ku.disabled
+GROUP BY ku.id
 `,
       [email],
     );
+    if (result.rowCount === 0) {
+      return undefined;
+    }
     return result.rows[0];
   }
 
   async update(id: number, { roles, ...rest }) {
+    if (!this.#allRolesValid(roles)) {
+      throw new HttpException(
+        `(partially) invalid roles`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const concernedUser = await this.findOne(id);
     const client = await this.db.connect();
 
@@ -195,10 +228,15 @@ WHERE id = $1
 `,
       [id],
     );
-    if (result.rowCount === 1) {
-      const { password, ...rest } = await this.findOne(id);
-      return rest;
+    if (result.rowCount === 0) {
+      throw new HttpException(
+        `user with this id does not exist`,
+        HttpStatus.BAD_REQUEST,
+      );
     }
-    throw Error('Unable to disable/delete user');
+  }
+
+  #allRolesValid(roles: Roles[]): boolean {
+    return !roles.some((roleId) => !Object.values(Roles).includes(roleId));
   }
 }

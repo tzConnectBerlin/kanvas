@@ -35,19 +35,11 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesDecorator(Roles.admin)
   async create(@Body() usr: UserEntity): Promise<UserEntity> {
-    if (
-      usr.roles.length === 0 ||
-      usr.roles.some((roleId) => !Object.values(Roles).includes(roleId))
-    ) {
-      throw new HttpException(
-        `bad roles parameter (empty or has a nonexisting role id)`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
     return await this.userService.create(usr);
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async findAll(
     @Response() resp: Resp,
     @Query() filters: UserFilters,
@@ -77,12 +69,13 @@ export class UserController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   async findOne(@Param('id') id: string) {
     return await this.userService.findOne(+id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesDecorator(Roles.admin)
   async update(@Param('id') id: string, @Body() updateUser: any) {
     try {
@@ -97,7 +90,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesDecorator(Roles.admin)
   remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+    return this.userService.remove(Number(id));
   }
 
   #queryParamsToFilterParams(

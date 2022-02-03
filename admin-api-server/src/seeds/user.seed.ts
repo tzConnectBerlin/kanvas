@@ -1,7 +1,7 @@
-import { UserService } from '../user/service/user.service';
-import { dbPool } from '../db.module';
-import { RoleService } from '../role/role.service';
-import { Roles } from '../role/role.entity';
+import { UserService } from 'src/user/service/user.service';
+import { dbPool } from 'src/db.module';
+import { RoleService } from 'src/role/role.service';
+import { Roles } from 'src/role/role.entity';
 
 export const seedUser = async () => {
   const roleService = new RoleService(dbPool);

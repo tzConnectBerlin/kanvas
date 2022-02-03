@@ -1,8 +1,6 @@
 import { APP_GUARD } from '@nestjs/core';
 import { Module, MiddlewareConsumer } from '@nestjs/common';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { CategoryModule } from './category/category.module';
 import { NftModule } from './nft/nft.module';
 import { UserModule } from './user/user.module';
@@ -31,11 +29,7 @@ import { ScheduleModule } from '@nestjs/schedule';
       limit: RATE_LIMIT,
     }),
   ],
-  controllers: [AppController],
-  providers: [
-    AppService,
-    { provide: APP_GUARD, useClass: ProxiedThrottlerGuard },
-  ],
+  providers: [{ provide: APP_GUARD, useClass: ProxiedThrottlerGuard }],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer): void {
