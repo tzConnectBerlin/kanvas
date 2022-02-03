@@ -86,7 +86,7 @@ INSERT INTO
   SELECT
     kanvas_user.id,
     email,
-    user_name,
+    user_name AS "userName",
     address,
     COALESCE(user_roles.role_ids, '{}'::INTEGER[]) AS roles,
     COUNT(1) OVER () AS total_matched_users
@@ -98,7 +98,7 @@ INSERT INTO
     AND ($3::TEXT[] IS NULL OR user_name = ANY($3::TEXT[]))
     AND ($4::INTEGER[] IS NULL OR user_roles.role_ids && $4::INTEGER[])
     AND NOT kanvas_user.disabled
-  ORDER BY ${params.orderBy} ${params.orderDirection}
+  ORDER BY "${params.orderBy}" ${params.orderDirection}
   OFFSET ${params.pageOffset}
   LIMIT ${params.pageSize}
 `,
@@ -120,7 +120,7 @@ INSERT INTO
           <UserEntity>{
             id: row['id'],
             email: row['email'],
-            userName: row['user_name'],
+            userName: row['userName'],
             address: row['address'],
             roles: row['roles'],
           },

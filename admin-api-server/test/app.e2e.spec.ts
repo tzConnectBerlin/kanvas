@@ -479,6 +479,334 @@ describe('AppController (e2e)', () => {
     });
   });
 
+  skipOnPriorFail('users list is sortable desc', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'regular_joe@bigbrother.co',
+      'somepass',
+    );
+    const res = await request(app.getHttpServer())
+      .get('/user')
+      .set('authorization', bearer)
+      .query({ sort: JSON.stringify(['id', 'desc']) });
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({
+      data: [
+        {
+          id: 3,
+          email: 'ben@bigbrother.co',
+          userName: 'Ben',
+          address: 'tz1ben',
+          roles: [],
+        },
+        {
+          id: 2,
+          email: 'regular_joe@bigbrother.co',
+          userName: 'Regular Joe',
+          address: 'tz1bla',
+          roles: [Roles.editor],
+        },
+        {
+          id: 1,
+          email: 'admin@tzconnect.com',
+          userName: 'admin',
+          address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
+          roles: [Roles.admin],
+        },
+      ],
+    });
+  });
+
+  skipOnPriorFail('users list is paginated', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'regular_joe@bigbrother.co',
+      'somepass',
+    );
+    const res = await request(app.getHttpServer())
+      .get('/user')
+      .set('authorization', bearer)
+      .query({
+        sort: JSON.stringify(['id', 'desc']),
+        range: JSON.stringify([0, 2]),
+      });
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({
+      data: [
+        {
+          id: 3,
+          email: 'ben@bigbrother.co',
+          userName: 'Ben',
+          address: 'tz1ben',
+          roles: [],
+        },
+        {
+          id: 2,
+          email: 'regular_joe@bigbrother.co',
+          userName: 'Regular Joe',
+          address: 'tz1bla',
+          roles: [Roles.editor],
+        },
+      ],
+    });
+  });
+
+  skipOnPriorFail('users list is paginated (part 2)', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'regular_joe@bigbrother.co',
+      'somepass',
+    );
+    const res = await request(app.getHttpServer())
+      .get('/user')
+      .set('authorization', bearer)
+      .query({
+        sort: JSON.stringify(['id', 'desc']),
+        range: JSON.stringify([2, 3]),
+      });
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({
+      data: [
+        {
+          id: 1,
+          email: 'admin@tzconnect.com',
+          userName: 'admin',
+          address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
+          roles: [Roles.admin],
+        },
+      ],
+    });
+  });
+
+  skipOnPriorFail(
+    'users list, <1 page or <0 page size => BAD REQUEST',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'regular_joe@bigbrother.co',
+        'somepass',
+      );
+      let res = await request(app.getHttpServer())
+        .get('/user')
+        .set('authorization', bearer)
+        .query({ range: JSON.stringify([0, 0]) });
+      expect(res.statusCode).toEqual(400);
+      res = await request(app.getHttpServer())
+        .get('/user')
+        .set('authorization', bearer)
+        .query({ range: JSON.stringify([2, 1]) });
+      expect(res.statusCode).toEqual(400);
+      res = await request(app.getHttpServer())
+        .get('/user')
+        .set('authorization', bearer)
+        .query({ range: JSON.stringify([-1, 1]) });
+      expect(res.statusCode).toEqual(400);
+    },
+  );
+
+  skipOnPriorFail(
+    'users list, only asc,desc orderDirection accepted otherwise BAD REQUEST',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'regular_joe@bigbrother.co',
+        'somepass',
+      );
+      let res = await request(app.getHttpServer())
+        .get('/user')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['id', 'des']) });
+      expect(res.statusCode).toEqual(400);
+      res = await request(app.getHttpServer())
+        .get('/user')
+        .set('authorization', bearer)
+        .query({
+          sort: JSON.stringify(['id', 'some non allowed string;']),
+        });
+      expect(res.statusCode).toEqual(400);
+    },
+  );
+
+  skipOnPriorFail(
+    'users list is sortable by id,email,userName,address,roles',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'regular_joe@bigbrother.co',
+        'somepass',
+      );
+      let res = await request(app.getHttpServer())
+        .get('/user')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['id']) });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toEqual({
+        data: [
+          {
+            id: 1,
+            email: 'admin@tzconnect.com',
+            userName: 'admin',
+            address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
+            roles: [Roles.admin],
+          },
+          {
+            id: 2,
+            email: 'regular_joe@bigbrother.co',
+            userName: 'Regular Joe',
+            address: 'tz1bla',
+            roles: [Roles.editor],
+          },
+          {
+            id: 3,
+            email: 'ben@bigbrother.co',
+            userName: 'Ben',
+            address: 'tz1ben',
+            roles: [],
+          },
+        ],
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/user')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['email']) });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toEqual({
+        data: [
+          {
+            id: 1,
+            email: 'admin@tzconnect.com',
+            userName: 'admin',
+            address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
+            roles: [Roles.admin],
+          },
+          {
+            id: 3,
+            email: 'ben@bigbrother.co',
+            userName: 'Ben',
+            address: 'tz1ben',
+            roles: [],
+          },
+          {
+            id: 2,
+            email: 'regular_joe@bigbrother.co',
+            userName: 'Regular Joe',
+            address: 'tz1bla',
+            roles: [Roles.editor],
+          },
+        ],
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/user')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['userName']) });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toEqual({
+        data: [
+          {
+            id: 1,
+            email: 'admin@tzconnect.com',
+            userName: 'admin',
+            address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
+            roles: [Roles.admin],
+          },
+          {
+            id: 3,
+            email: 'ben@bigbrother.co',
+            userName: 'Ben',
+            address: 'tz1ben',
+            roles: [],
+          },
+          {
+            id: 2,
+            email: 'regular_joe@bigbrother.co',
+            userName: 'Regular Joe',
+            address: 'tz1bla',
+            roles: [Roles.editor],
+          },
+        ],
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/user')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['address']) });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toEqual({
+        data: [
+          {
+            id: 3,
+            email: 'ben@bigbrother.co',
+            userName: 'Ben',
+            address: 'tz1ben',
+            roles: [],
+          },
+          {
+            id: 2,
+            email: 'regular_joe@bigbrother.co',
+            userName: 'Regular Joe',
+            address: 'tz1bla',
+            roles: [Roles.editor],
+          },
+          {
+            id: 1,
+            email: 'admin@tzconnect.com',
+            userName: 'admin',
+            address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
+            roles: [Roles.admin],
+          },
+        ],
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/user')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['roles']) });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toEqual({
+        data: [
+          {
+            id: 3,
+            email: 'ben@bigbrother.co',
+            userName: 'Ben',
+            address: 'tz1ben',
+            roles: [],
+          },
+          {
+            id: 1,
+            email: 'admin@tzconnect.com',
+            userName: 'admin',
+            address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
+            roles: [Roles.admin],
+          },
+          {
+            id: 2,
+            email: 'regular_joe@bigbrother.co',
+            userName: 'Regular Joe',
+            address: 'tz1bla',
+            roles: [Roles.editor],
+          },
+        ],
+      });
+    },
+  );
+  skipOnPriorFail(
+    'users list with non allowed orderBy => BAD REQUEST',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'regular_joe@bigbrother.co',
+        'somepass',
+      );
+      const res = await request(app.getHttpServer())
+        .get('/user')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['some non allowed orderBy string;']) });
+      expect(res.statusCode).toEqual(400);
+    },
+  );
+
   skipOnPriorFail('/user has filter on username', async () => {
     const { bearer } = await loginUser(
       app,

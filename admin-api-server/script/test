@@ -34,7 +34,7 @@ function assert_docker_ok {
     fi
 }
 
-db_docker=`DOCKER_ARGS='-d' DBSETUP_LOG=quiet ./script/local-db -c wal_level=logical`
+db_docker=`DOCKER_ARGS='-d' DBSETUP_LOG=quiet ./script/local-db -c wal_level=logical -c log_statement=all`
 assert_docker_ok $PGPORT
 trap "docker kill $db_docker" EXIT
 

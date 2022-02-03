@@ -138,7 +138,7 @@ export function validatePaginationParams(
 
   if (
     !allowedSortableKeys.some(
-      (allowedfilterAttr: string) => allowedfilterAttr !== params.orderBy,
+      (allowedfilterAttr: string) => allowedfilterAttr === params.orderBy,
     )
   ) {
     throw new HttpException(
