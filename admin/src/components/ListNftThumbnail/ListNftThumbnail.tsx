@@ -31,7 +31,7 @@ export const ListNftThumbnail: FC<ListNftThumbnailPropd> = ({ ...props }) => {
                     :
                     props.nfts.map((nft: any, index: number) =>
                         <Grid item xs={4}>
-                            <NftThumbnail name={nft.name} image={nft.dataUri} description={''} price={nft.price} state='published' />
+                            <NftThumbnail name={nft.name} image={nft.displayUri} description={''} price={nft.price} state='published' />
                         </Grid>
                     )
             }

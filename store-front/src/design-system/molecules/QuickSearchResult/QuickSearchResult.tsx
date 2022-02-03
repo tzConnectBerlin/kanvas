@@ -185,7 +185,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                         }
                                     >
                                         <Avatar
-                                            src={nft?.dataUri}
+                                            src={nft?.displayUri}
                                             height={65}
                                             width={65}
                                             borderRadius={2}

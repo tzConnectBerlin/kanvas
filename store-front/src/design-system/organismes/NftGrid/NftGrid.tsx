@@ -78,7 +78,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                                 id={nft.id.toString()}
                                 name={nft.name}
                                 ipfsHash={nft.ipfsHash}
-                                dataUri={nft.dataUri}
+                                displayUri={nft.displayUri}
                                 price={nft.price}
                                 loading={props.loading}
                                 editionsAvailable={Number(
