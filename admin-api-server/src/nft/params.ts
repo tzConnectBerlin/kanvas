@@ -1,17 +1,25 @@
-import { PaginationParams } from "src/utils";
+import { IsOptional, IsArray } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  parseStringArray,
+  parseNumberParam,
+  PaginationParams,
+} from 'src/utils';
 
-export interface NftFilters {
+export class NftFilters {
+  @IsArray()
+  @Transform(({ value }) => parseStringArray(value))
+  @IsOptional()
   nftStates?: string[];
+
+  @IsArray()
+  @Transform(({ value }) =>
+    parseStringArray(value)?.map((v: string) => parseNumberParam(v)),
+  )
+  @IsOptional()
   nftIds?: number[];
 }
 
 export class NftFilterParams extends PaginationParams {
   filters: NftFilters = <NftFilters>{};
-}
-
-export function parseStringArray(v: string | string[], sep: string): string[] {
-  if (typeof v !== 'string') {
-    return v;
-  }
-  return v.split(sep);
 }

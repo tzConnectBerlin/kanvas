@@ -150,7 +150,7 @@ describe('AppController (e2e)', () => {
       expect(res.statusCode).toEqual(200);
 
       expect(res.body.createdAt).toBeGreaterThan(0);
-      expect(res.body.updatedAt).toEqual(res.body.createdAt);
+      expect(res.body.updatedAt).toBeGreaterThanOrEqual(res.body.createdAt);
       delete res.body.createdAt;
       delete res.body.updatedAt;
 
@@ -179,7 +179,7 @@ describe('AppController (e2e)', () => {
       expect(res.statusCode).toEqual(200);
 
       expect(res.body.createdAt).toBeGreaterThan(0);
-      expect(res.body.updatedAt).toEqual(res.body.createdAt);
+      expect(res.body.updatedAt).toBeGreaterThanOrEqual(res.body.createdAt);
       delete res.body.createdAt;
       delete res.body.updatedAt;
 
@@ -384,6 +384,583 @@ describe('AppController (e2e)', () => {
       expect(res.statusCode).toEqual(400);
     },
   );
+
+  skipOnPriorFail(
+    'PATCH /nft/:id can overwrite previously set attributes (of course only if still in the same state)',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'admin@tzconnect.com',
+        'supersafepassword',
+      );
+      let res = await request(app.getHttpServer())
+        .patch('/nft')
+        .set('authorization', bearer)
+        .send({ name: JSON.stringify('test') });
+      expect(res.statusCode).toEqual(200);
+
+      expect(res.body.createdAt).toBeGreaterThan(0);
+      expect(res.body.updatedAt).toBeGreaterThanOrEqual(res.body.createdAt);
+      delete res.body.createdAt;
+      delete res.body.updatedAt;
+
+      expect(res.body).toStrictEqual({
+        id: 7,
+        state: 'creation',
+        createdBy: 1,
+        attributes: { name: 'test' },
+        allowedActions: { name: 'string', create_ready: 'boolean' },
+      });
+
+      res = await request(app.getHttpServer())
+        .patch('/nft/7')
+        .set('authorization', bearer)
+        .send({ name: JSON.stringify('modified name') });
+
+      expect(res.body.createdAt).toBeGreaterThan(0);
+      expect(res.body.updatedAt).toBeGreaterThanOrEqual(res.body.createdAt);
+      delete res.body.createdAt;
+      delete res.body.updatedAt;
+
+      expect(res.body).toStrictEqual({
+        id: 7,
+        state: 'creation',
+        createdBy: 1,
+        attributes: { name: 'modified name' },
+        allowedActions: { name: 'string', create_ready: 'boolean' },
+      });
+
+      res = await request(app.getHttpServer())
+        .patch('/nft/7')
+        .set('authorization', bearer)
+        .send({ create_ready: JSON.stringify(true) });
+
+      expect(res.body.createdAt).toBeGreaterThan(0);
+      expect(res.body.updatedAt).toBeGreaterThanOrEqual(res.body.createdAt);
+      delete res.body.createdAt;
+      delete res.body.updatedAt;
+
+      expect(res.body).toStrictEqual({
+        id: 7,
+        state: 'setup_nft',
+        createdBy: 1,
+        attributes: { name: 'modified name', create_ready: true },
+        allowedActions: {
+          categories: 'number[]',
+          editions_size: 'number',
+          price: 'number',
+          proposed: 'boolean',
+        },
+      });
+    },
+  );
+
+  skipOnPriorFail(
+    'GET /nft OK when logged in (with res; some NFTs have now been created)',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'admin@tzconnect.com',
+        'supersafepassword',
+      );
+      const res = await request(app.getHttpServer())
+        .get('/nft')
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(200);
+
+      for (const i in res.body.data) {
+        expect(res.body.data[i].createdAt).toBeGreaterThan(0);
+        expect(res.body.data[i].updatedAt).toBeGreaterThanOrEqual(
+          res.body.data[i].createdAt,
+        );
+        delete res.body.data[i].createdAt;
+        delete res.body.data[i].updatedAt;
+      }
+
+      expect(res.body).toStrictEqual({
+        data: [
+          {
+            id: 1,
+            state: 'creation',
+            createdBy: 1,
+            attributes: {},
+          },
+          {
+            id: 2,
+            state: 'creation',
+            createdBy: 1,
+            attributes: { name: 'test' },
+          },
+          {
+            id: 3,
+            state: 'creation',
+            createdBy: 2,
+            attributes: { name: 'this will be accepted, user is the creator' },
+          },
+          {
+            id: 5,
+            state: 'creation',
+            createdBy: 2,
+            attributes: {},
+          },
+          {
+            id: 7,
+            state: 'setup_nft',
+            createdBy: 1,
+            attributes: { name: 'modified name', create_ready: true },
+          },
+        ],
+      });
+    },
+  );
+
+  skipOnPriorFail('GET /nft pagination tests', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'admin@tzconnect.com',
+      'supersafepassword',
+    );
+    let res = await request(app.getHttpServer())
+      .get('/nft')
+      .set('authorization', bearer)
+      .query({ range: JSON.stringify([0, 2]) });
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data.map((row: any) => row.id)).toStrictEqual([1, 2]);
+
+    res = await request(app.getHttpServer())
+      .get('/nft')
+      .set('authorization', bearer)
+      .query({ range: JSON.stringify([1, 3]) });
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data.map((row: any) => row.id)).toStrictEqual([2, 3]);
+
+    res = await request(app.getHttpServer())
+      .get('/nft')
+      .set('authorization', bearer)
+      .query({
+        sort: JSON.stringify(['id', 'desc']),
+        range: JSON.stringify([0, 2]),
+      });
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data.map((row: any) => row.id)).toStrictEqual([7, 5]);
+  });
+
+  skipOnPriorFail(
+    'nft list, <1 page or <0 page size => BAD REQUEST',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'regular_joe@bigbrother.co',
+        'somepass',
+      );
+      let res = await request(app.getHttpServer())
+        .get('/nft')
+        .set('authorization', bearer)
+        .query({ range: JSON.stringify([0, 0]) });
+      expect(res.statusCode).toEqual(400);
+      res = await request(app.getHttpServer())
+        .get('/nft')
+        .set('authorization', bearer)
+        .query({ range: JSON.stringify([2, 1]) });
+      expect(res.statusCode).toEqual(400);
+      res = await request(app.getHttpServer())
+        .get('/nft')
+        .set('authorization', bearer)
+        .query({ range: JSON.stringify([-1, 1]) });
+      expect(res.statusCode).toEqual(400);
+    },
+  );
+
+  skipOnPriorFail(
+    'nft list, only asc,desc orderDirection accepted otherwise BAD REQUEST',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'regular_joe@bigbrother.co',
+        'somepass',
+      );
+      let res = await request(app.getHttpServer())
+        .get('/nft')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['id', 'des']) });
+      expect(res.statusCode).toEqual(400);
+      res = await request(app.getHttpServer())
+        .get('/nft')
+        .set('authorization', bearer)
+        .query({
+          sort: JSON.stringify(['id', 'some non allowed string;']),
+        });
+      expect(res.statusCode).toEqual(400);
+    },
+  );
+
+  skipOnPriorFail(
+    'nft list is sortable by id,state,created_at,updated_at and STM defined attributes',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'regular_joe@bigbrother.co',
+        'somepass',
+      );
+      let res = await request(app.getHttpServer())
+        .get('/nft')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['id']) });
+      expect(res.statusCode).toEqual(200);
+
+      for (const i in res.body.data) {
+        expect(res.body.data[i].createdAt).toBeGreaterThan(0);
+        expect(res.body.data[i].updatedAt).toBeGreaterThanOrEqual(
+          res.body.data[i].createdAt,
+        );
+        delete res.body.data[i].createdAt;
+        delete res.body.data[i].updatedAt;
+      }
+
+      expect(res.body).toStrictEqual({
+        data: [
+          {
+            id: 1,
+            state: 'creation',
+            createdBy: 1,
+            attributes: {},
+          },
+          {
+            id: 2,
+            state: 'creation',
+            createdBy: 1,
+            attributes: { name: 'test' },
+          },
+          {
+            id: 3,
+            state: 'creation',
+            createdBy: 2,
+            attributes: { name: 'this will be accepted, user is the creator' },
+          },
+          {
+            id: 5,
+            state: 'creation',
+            createdBy: 2,
+            attributes: {},
+          },
+          {
+            id: 7,
+            state: 'setup_nft',
+            createdBy: 1,
+            attributes: { name: 'modified name', create_ready: true },
+          },
+        ],
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/nft')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['state']) });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.map((row: any) => row.id)).toStrictEqual([
+        1, 2, 3, 5, 7,
+      ]);
+
+      res = await request(app.getHttpServer())
+        .get('/nft')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['created_at']) });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.map((row: any) => row.id)).toStrictEqual([
+        1, 2, 3, 5, 7,
+      ]);
+
+      res = await request(app.getHttpServer())
+        .get('/nft')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['updated_at']) });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.map((row: any) => row.id)).toStrictEqual([
+        1, 2, 3, 5, 7,
+      ]);
+
+      res = await request(app.getHttpServer())
+        .get('/nft')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['name']) });
+      expect(res.statusCode).toEqual(200);
+
+      for (const i in res.body.data) {
+        expect(res.body.data[i].createdAt).toBeGreaterThan(0);
+        expect(res.body.data[i].updatedAt).toBeGreaterThanOrEqual(
+          res.body.data[i].createdAt,
+        );
+        delete res.body.data[i].createdAt;
+        delete res.body.data[i].updatedAt;
+      }
+
+      expect(res.body).toStrictEqual({
+        data: [
+          {
+            id: 7,
+            state: 'setup_nft',
+            createdBy: 1,
+            attributes: { name: 'modified name', create_ready: true },
+          },
+          {
+            id: 2,
+            state: 'creation',
+            createdBy: 1,
+            attributes: { name: 'test' },
+          },
+          {
+            id: 3,
+            state: 'creation',
+            createdBy: 2,
+            attributes: { name: 'this will be accepted, user is the creator' },
+          },
+          {
+            id: 1,
+            state: 'creation',
+            createdBy: 1,
+            attributes: {},
+          },
+          {
+            id: 5,
+            state: 'creation',
+            createdBy: 2,
+            attributes: {},
+          },
+        ],
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/nft')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['create_ready']) });
+      expect(res.statusCode).toEqual(200);
+
+      for (const i in res.body.data) {
+        expect(res.body.data[i].createdAt).toBeGreaterThan(0);
+        expect(res.body.data[i].updatedAt).toBeGreaterThanOrEqual(
+          res.body.data[i].createdAt,
+        );
+        delete res.body.data[i].createdAt;
+        delete res.body.data[i].updatedAt;
+      }
+
+      expect(res.body).toStrictEqual({
+        data: [
+          {
+            id: 7,
+            state: 'setup_nft',
+            createdBy: 1,
+            attributes: { name: 'modified name', create_ready: true },
+          },
+          {
+            id: 1,
+            state: 'creation',
+            createdBy: 1,
+            attributes: {},
+          },
+          {
+            id: 2,
+            state: 'creation',
+            createdBy: 1,
+            attributes: { name: 'test' },
+          },
+          {
+            id: 3,
+            state: 'creation',
+            createdBy: 2,
+            attributes: { name: 'this will be accepted, user is the creator' },
+          },
+          {
+            id: 5,
+            state: 'creation',
+            createdBy: 2,
+            attributes: {},
+          },
+        ],
+      });
+    },
+  );
+
+  skipOnPriorFail(
+    'nft list, any non supported sort field => BAD REQUEST',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'regular_joe@bigbrother.co',
+        'somepass',
+      );
+      let res = await request(app.getHttpServer())
+        .get('/nft')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['email']) });
+      expect(res.statusCode).toEqual(400);
+
+      res = await request(app.getHttpServer())
+        .get('/nft')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['something malicious;']) });
+      expect(res.statusCode).toEqual(400);
+    },
+  );
+
+  skipOnPriorFail('nft list is filterable by id,state', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'regular_joe@bigbrother.co',
+      'somepass',
+    );
+    let res = await request(app.getHttpServer())
+      .get('/nft')
+      .set('authorization', bearer)
+      .query({ nftStates: 'creation' });
+    expect(res.statusCode).toEqual(200);
+
+    for (const i in res.body.data) {
+      expect(res.body.data[i].createdAt).toBeGreaterThan(0);
+      expect(res.body.data[i].updatedAt).toBeGreaterThanOrEqual(
+        res.body.data[i].createdAt,
+      );
+      delete res.body.data[i].createdAt;
+      delete res.body.data[i].updatedAt;
+    }
+
+    expect(res.body).toStrictEqual({
+      data: [
+        {
+          id: 1,
+          state: 'creation',
+          createdBy: 1,
+          attributes: {},
+        },
+        {
+          id: 2,
+          state: 'creation',
+          createdBy: 1,
+          attributes: { name: 'test' },
+        },
+        {
+          id: 3,
+          state: 'creation',
+          createdBy: 2,
+          attributes: { name: 'this will be accepted, user is the creator' },
+        },
+        {
+          id: 5,
+          state: 'creation',
+          createdBy: 2,
+          attributes: {},
+        },
+      ],
+    });
+
+    res = await request(app.getHttpServer())
+      .get('/nft')
+      .set('authorization', bearer)
+      .query({ nftStates: 'setup_nft' });
+    expect(res.statusCode).toEqual(200);
+
+    for (const i in res.body.data) {
+      expect(res.body.data[i].createdAt).toBeGreaterThan(0);
+      expect(res.body.data[i].updatedAt).toBeGreaterThanOrEqual(
+        res.body.data[i].createdAt,
+      );
+      delete res.body.data[i].createdAt;
+      delete res.body.data[i].updatedAt;
+    }
+
+    expect(res.body).toStrictEqual({
+      data: [
+        {
+          id: 7,
+          state: 'setup_nft',
+          createdBy: 1,
+          attributes: { name: 'modified name', create_ready: true },
+        },
+      ],
+    });
+
+    res = await request(app.getHttpServer())
+      .get('/nft')
+      .set('authorization', bearer)
+      .query({ nftStates: 'setup_nft,creation' });
+    expect(res.statusCode).toEqual(200);
+
+    for (const i in res.body.data) {
+      expect(res.body.data[i].createdAt).toBeGreaterThan(0);
+      expect(res.body.data[i].updatedAt).toBeGreaterThanOrEqual(
+        res.body.data[i].createdAt,
+      );
+      delete res.body.data[i].createdAt;
+      delete res.body.data[i].updatedAt;
+    }
+
+    expect(res.body).toStrictEqual({
+      data: [
+        {
+          id: 1,
+          state: 'creation',
+          createdBy: 1,
+          attributes: {},
+        },
+        {
+          id: 2,
+          state: 'creation',
+          createdBy: 1,
+          attributes: { name: 'test' },
+        },
+        {
+          id: 3,
+          state: 'creation',
+          createdBy: 2,
+          attributes: { name: 'this will be accepted, user is the creator' },
+        },
+        {
+          id: 5,
+          state: 'creation',
+          createdBy: 2,
+          attributes: {},
+        },
+        {
+          id: 7,
+          state: 'setup_nft',
+          createdBy: 1,
+          attributes: { name: 'modified name', create_ready: true },
+        },
+      ],
+    });
+
+    res = await request(app.getHttpServer())
+      .get('/nft')
+      .set('authorization', bearer)
+      .query({ nftIds: '3,5,7', nftStates: 'creation' });
+    expect(res.statusCode).toEqual(200);
+
+    for (const i in res.body.data) {
+      expect(res.body.data[i].createdAt).toBeGreaterThan(0);
+      expect(res.body.data[i].updatedAt).toBeGreaterThanOrEqual(
+        res.body.data[i].createdAt,
+      );
+      delete res.body.data[i].createdAt;
+      delete res.body.data[i].updatedAt;
+    }
+
+    expect(res.body).toStrictEqual({
+      data: [
+        {
+          id: 3,
+          state: 'creation',
+          createdBy: 2,
+          attributes: { name: 'this will be accepted, user is the creator' },
+        },
+        {
+          id: 5,
+          state: 'creation',
+          createdBy: 2,
+          attributes: {},
+        },
+      ],
+    });
+  });
 
   skipOnPriorFail('new user with 0 roles assigned is ok', async () => {
     const { bearer } = await loginUser(
@@ -799,10 +1376,16 @@ describe('AppController (e2e)', () => {
         'regular_joe@bigbrother.co',
         'somepass',
       );
-      const res = await request(app.getHttpServer())
+      let res = await request(app.getHttpServer())
         .get('/user')
         .set('authorization', bearer)
         .query({ sort: JSON.stringify(['some non allowed orderBy string;']) });
+      expect(res.statusCode).toEqual(400);
+
+      res = await request(app.getHttpServer())
+        .get('/user')
+        .set('authorization', bearer)
+        .query({ sort: JSON.stringify(['state']) });
       expect(res.statusCode).toEqual(400);
     },
   );

@@ -98,7 +98,9 @@ INSERT INTO
     AND ($3::TEXT[] IS NULL OR user_name = ANY($3::TEXT[]))
     AND ($4::INTEGER[] IS NULL OR user_roles.role_ids && $4::INTEGER[])
     AND NOT kanvas_user.disabled
-  ORDER BY "${params.orderBy}" ${params.orderDirection}
+  ORDER BY "${params.orderBy}" ${params.orderDirection} ${
+        params.orderBy !== 'id' ? ', id' : ''
+      }
   OFFSET ${params.pageOffset}
   LIMIT ${params.pageSize}
 `,

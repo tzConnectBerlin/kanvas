@@ -10,7 +10,7 @@ import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { NftEntity, NftUpdate } from '../entities/nft.entity';
-import { NftFilterParams, parseStringArray } from '../params';
+import { NftFilterParams } from '../params';
 import { RoleService } from 'src/role/role.service';
 import { S3Service } from './s3.service';
 import { Lock } from 'async-await-mutex-lock';
@@ -56,6 +56,7 @@ export class NftService {
   }
 
   async findAll(params: NftFilterParams): Promise<NftEntity[]> {
+    console.log(params);
     let orderBy = params.orderBy;
     if (
       Object.keys(this.stm.getAttributes()).some(
@@ -69,7 +70,8 @@ export class NftService {
 WITH attr AS (
   SELECT
     nft_id,
-    JSONB_OBJECT(ARRAY_AGG(name), ARRAY_AGG(value)) AS attributes
+    JSONB_OBJECT(ARRAY_AGG(name), ARRAY_AGG(value)) AS attributes,
+    MAX(set_at) AS last_updated_at
   FROM nft_attribute
   WHERE ($2::INTEGER[] IS NULL OR nft_id = ANY($2::INTEGER[]))
   GROUP BY nft_id
@@ -79,14 +81,14 @@ SELECT
   nft.state,
   nft.created_by,
   nft.created_at,
-  nft.updated_at,
+  COALESCE(attr.last_updated_at, nft.created_at) AS updated_at,
   attr.attributes
 FROM nft
 LEFT JOIN attr
   ON nft.id = attr.nft_id
 WHERE ($1::TEXT[] IS NULL OR state = ANY($1::TEXT[]))
   AND ($2::INTEGER[] IS NULL OR id = ANY($2::INTEGER[]))
-ORDER BY ${orderBy} ${params.orderDirection}
+ORDER BY ${orderBy} ${params.orderDirection} ${orderBy !== 'id' ? ', id' : ''}
 OFFSET ${params.pageOffset}
 LIMIT  ${params.pageSize}
       `,
@@ -320,7 +322,8 @@ RETURNING id
       dbTx.query(
         `
 UPDATE nft
-SET state = $2
+SET
+  state = $2
 WHERE id = $1
       `,
         [nft.id, nft.state],
