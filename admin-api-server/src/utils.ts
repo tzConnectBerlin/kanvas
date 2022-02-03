@@ -1,7 +1,5 @@
-import { Ok, Err } from 'ts-results';
 import * as bcrypt from 'bcrypt';
 import { AUTH_SALT_ROUNDS } from './constants';
-import { FilterParams } from './types';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 class AssertionError extends Error {
