@@ -82,7 +82,7 @@ const dataProvider = (
         : {};
 
     return httpClient(url, options).then(({ headers, json }) => {
-      
+
       return {
         data: json?.data,
         total: json?.count ?? 1,
@@ -180,7 +180,6 @@ const dataProvider = (
 
   create: async (resource, params) => {
     if (resource === 'nft') {
-      debugger
       const updatedData = diffPreviousDataToNewData({}, params.data)
       return await httpClient(`${apiUrl}/${resource}/0`, {
         method: 'PATCH',

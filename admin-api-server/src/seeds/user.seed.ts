@@ -1,6 +1,6 @@
 import { UserService } from '../user/service/user.service';
 import { dbPool } from '../db.module';
-import { RoleService } from '../role/role.service';
+import { RoleService } from '../role/service/role.service';
 
 export const seedUser = async () => {
   const roleService = new RoleService(dbPool);

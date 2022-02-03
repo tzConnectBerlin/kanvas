@@ -24,7 +24,10 @@ import {
   number,
   minValue,
   useGetMany,
-  useDataProvider
+  useDataProvider,
+  useNotify,
+  useRefresh,
+  useRedirect
 } from 'react-admin';
 import { JsonField } from 'react-admin-json-view';
 import { CustomDeleteButton } from './Buttons/CustomDeleteButton';
@@ -67,7 +70,7 @@ export const NftList = ({ ...props }) => (
       <NumberField source="attributes.editions_size" label='Token amount' />
       <DateField source="createdAt" label="Created at" showTime />
       <DateField source="updatedAt" label="Last updated at" showTime />
-      <ReferenceManyField label="Created by" source="createdBy" reference="localhost:3001/user" target="id">
+      <ReferenceManyField label="Created by" source="createdBy" reference="user" target="id">
         <SingleFieldList>
           <ChipField source="userName" />
         </SingleFieldList>
@@ -198,11 +201,23 @@ export const NftEdit = (props: any) => {
     setFormKeys(Object.keys(concernedNft.data!.allowedActions))
   }, [concernedNft])
 
+  const notify = useNotify();
+  const refresh = useRefresh();
+  const redirect = useRedirect();
+
+  const onSuccess = () => {
+    notify(`Nft updated successfully`);
+    redirect('/nft');
+    refresh();
+  };
+
   return (
     concernedNft &&
     <Edit
       title="Update an NFT"
       {...props}
+      onSuccess={onSuccess}
+      mutationMode="pessimistic"
       aside={<NftAside />}
     >
       <SimpleForm className={classes.form}>
@@ -235,8 +250,19 @@ export const NftCreate = ({ ...props }) => {
 
   const classes = useStyle()
 
+
+  const notify = useNotify();
+  const refresh = useRefresh();
+  const redirect = useRedirect();
+
+  const onSuccess = () => {
+    notify(`Nft created successfully`);
+    redirect('/nft');
+    refresh();
+  };
+
   return (
-    <Create {...props}>
+    <Create onSuccess={onSuccess} {...props}>
       <SimpleForm className={classes.form}>
         <Box className={classes.boxWrapper}>
           <Typography variant="h4" component="h1" className={classes.title} style={{ fontFamily: 'Poppins SemiBold' }}>

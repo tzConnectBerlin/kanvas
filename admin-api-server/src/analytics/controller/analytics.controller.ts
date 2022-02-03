@@ -29,9 +29,7 @@ export class AnalyticsController {
     @Query('resolution') resolutionStr?: string,
   ) {
     const params = this.#queryParamsToMetricParams(resolutionStr);
-    return {
-      data: [{id: 1, ...await this.analyticsService.getSnapshotSalesPriceVolume(params)}]
-    }
+    return await this.analyticsService.getSnapshotSalesPriceVolume(params)
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -41,9 +39,7 @@ export class AnalyticsController {
     @Query('resolution') resolutionStr?: string,
   ) {
     const params = this.#queryParamsToMetricParams(resolutionStr);
-    return {
-      data: [{id: 1, ...await this.analyticsService.getSnapshotSalesNftCount(params)}]
-    }
+    return await this.analyticsService.getSnapshotSalesNftCount(params)
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
