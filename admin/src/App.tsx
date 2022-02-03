@@ -27,20 +27,20 @@ function App() {
       layout={CustomLayout}
       catchAll={NotFound}
       dashboard={Dashboard}
-      dataProvider={dataProvider('http://')}
+      dataProvider={dataProvider('http://localhost:3001')}
       disableTelemetry
       authProvider={authProvider}
       theme={theme}
     >
       <Resource
-        name="localhost:3001/user"
+        name="user"
         options={{ label: `user` }}
         list={UserList}
         edit={UserEdit}
         create={UserCreate}
       />
       <Resource
-        name="localhost:3001/nft"
+        name="nft"
         options={{ label: `nft` }}
         list={NftList}
         edit={NftEdit}
@@ -49,18 +49,18 @@ function App() {
       />
       <Resource
       options={{ label: `activity` }}
-        name="localhost:3001/activity"
+        name="activity"
         list={ActivityList}
         icon={EqualizerIcon}
       />
       <Resource
-        name="localhost:3001/categories"
+        name="categories"
       />
       <Resource
-        name="localhost:3001/categories/assignable"
+        name="categories/assignable"
       />
       <Resource
-        name="localhost:3001/analytics/sales/priceVolume/snapshot"
+        name="analytics/sales/priceVolume/snapshot"
       />
       <Resource
         name="kanvas.tzconnect.berlin/api/users/topBuyers"

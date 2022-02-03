@@ -143,7 +143,6 @@ WHERE kanvas_user_id = $1
   AND user_role_id = ANY($2)
     `, [id, deleteRoles]);
 
-
       await client.query(`
 INSERT INTO mtm_kanvas_user_user_role (
   kanvas_user_id, user_role_id
@@ -160,6 +159,7 @@ SELECT $1, UNNEST($2::INTEGER[])
     } finally {
       client.release();
     }
+    return await this.findOne(id)
   }
 
   async remove(id: number) {

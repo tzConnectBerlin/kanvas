@@ -11,6 +11,9 @@ import {
   ChipField,
   SingleFieldList,
   PasswordInput,
+  useRefresh,
+  useNotify,
+  useRedirect,
 } from 'react-admin';
 import { getDecodedToken } from '../auth/authUtils';
 import { CustomDeleteButton } from './Buttons/CustomDeleteButton';
@@ -34,7 +37,6 @@ export const UserList = ({ ...props }) => {
     >
       <Datagrid rowClick="edit">
         <TextField source="id" />
-        <TextField source="disabled" />
         <TextField source="userName" />
         <TextField source="address" />
         <EmailField source="email" />
@@ -55,13 +57,24 @@ export const UserEdit = ({ ...props }) => {
     return data;
   };
   const currentUser = Number(props.id) === getDecodedToken().sub;
+
+  const notify = useNotify();
+  const refresh = useRefresh();
+  const redirect = useRedirect();
+
+  const onSuccess = () => {
+    notify(`User updated successfully`);
+    redirect('/user');
+    refresh();
+  };
+
   return props.permissions?.includes(1) || currentUser ? (
-    <Edit {...props} transform={transform}>
+    <Edit {...props} onSuccess={onSuccess} mutationMode="pessimistic" transform={transform}>
       <SimpleForm>
         <TextInput source="id" disabled />
         <TextInput source="userName" disabled />
-        <TextInput source="address" disabled/>
-        <TextInput source="email" disabled/>
+        <TextInput source="address" disabled />
+        <TextInput source="email" disabled />
         {props.permissions?.includes(1) && (
           <SelectArrayInput
             source="roles"
@@ -81,8 +94,19 @@ export const UserEdit = ({ ...props }) => {
 };
 
 export const UserCreate = ({ ...props }) => {
+
+  const notify = useNotify();
+  const refresh = useRefresh();
+  const redirect = useRedirect();
+
+  const onSuccess = () => {
+    notify(`User created successfully`);
+    redirect('/user');
+    refresh();
+  };
+
   return props?.permissions?.includes(1) ? (
-    <Create {...props}>
+    <Create onSuccess={onSuccess} {...props}>
       <SimpleForm>
         <TextInput source="userName" />
         <TextInput source="address" />
