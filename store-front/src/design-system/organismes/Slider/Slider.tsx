@@ -102,7 +102,7 @@ export const Slider: FC<SliderProps> = ({ ...props }) => {
                             />
                         </StyledBox>
                         <CardMedia
-                            image={nft.dataUri}
+                            image={nft.displayUri}
                             component="img"
                             sx={{
                                 pointerEvents: 'none',

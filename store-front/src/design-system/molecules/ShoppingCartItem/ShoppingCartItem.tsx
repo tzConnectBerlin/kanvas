@@ -86,7 +86,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
             sx={{ width: 'auto', alignItems: 'center' }}
         >
             <Avatar
-                src={nft!.dataUri ? nft!.dataUri : undefined}
+                src={nft!.displayUri ? nft!.displayUri : undefined}
                 height={62}
                 width={62}
                 borderRadius={2}
