@@ -103,33 +103,6 @@ export class NftController {
     return await this.nftService.deleteNft(user, nftId);
   }
 
-  #validatePaginationParams(params: PaginationParams): void {
-    if (params.pageOffset < 0 || params.pageSize < 1) {
-      throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST);
-    }
-
-    if (
-      !this.nftService
-        .getSortableFields()
-        .some((allowedSortKey: string) => params.orderBy == allowedSortKey)
-    ) {
-      throw new HttpException(
-        `${params.orderBy} is not one of the allowed sort keys`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    if (
-      !['asc', 'desc'].some(
-        (allowedOrderDir: string) => params.orderDirection == allowedOrderDir,
-      )
-    ) {
-      throw new HttpException(
-        `${params.orderDirection} is not one of the allowed sort directions`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
   #transformFormDataToNftUpdates(nftUpdatesBody: any, filesArray?: any[]) {
     const res: NftUpdate[] = [];
 

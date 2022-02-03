@@ -10,7 +10,7 @@ import {
   MetricEntity,
   MetricParams,
   Resolution,
-} from '../../analytics/entity/analytics.entity';
+} from '../entity/analytics.entity';
 import { AnalyticsService } from '../service/analytics.service';
 import { enumFromStringValue } from 'src/utils';
 import { RolesDecorator } from 'src/role/role.decorator';

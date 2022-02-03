@@ -326,6 +326,43 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail(
+    'NFT cannot be removed when in is past setup_nft state',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'admin@tzconnect.com',
+        'supersafepassword',
+      );
+      let res = await request(app.getHttpServer())
+        .patch('/nft')
+        .set('authorization', bearer)
+        .send({
+          name: JSON.stringify('some name'),
+          create_ready: JSON.stringify(true),
+        });
+      expect(res.statusCode).toEqual(200);
+
+      const nftId = res.body.id;
+      res = await request(app.getHttpServer())
+        .patch(`/nft/${nftId}`)
+        .set('authorization', bearer)
+        .send({
+          price: JSON.stringify(105),
+          categories: JSON.stringify([2, 5, 10]),
+          editions_size: JSON.stringify(4),
+          proposed: JSON.stringify(true),
+        });
+
+      expect(res.body.state).toEqual('proposed');
+
+      res = await request(app.getHttpServer())
+        .delete(`/nft/${nftId}`)
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(403);
+    },
+  );
+
+  skipOnPriorFail(
     'NFT cannot be removed by anyone else than the creator',
     async () => {
       const joe = await loginUser(app, 'regular_joe@bigbrother.co', 'somepass');
@@ -405,7 +442,7 @@ describe('AppController (e2e)', () => {
       delete res.body.updatedAt;
 
       expect(res.body).toStrictEqual({
-        id: 7,
+        id: 8,
         state: 'creation',
         createdBy: 1,
         attributes: { name: 'test' },
@@ -413,7 +450,7 @@ describe('AppController (e2e)', () => {
       });
 
       res = await request(app.getHttpServer())
-        .patch('/nft/7')
+        .patch('/nft/8')
         .set('authorization', bearer)
         .send({ name: JSON.stringify('modified name') });
 
@@ -423,7 +460,7 @@ describe('AppController (e2e)', () => {
       delete res.body.updatedAt;
 
       expect(res.body).toStrictEqual({
-        id: 7,
+        id: 8,
         state: 'creation',
         createdBy: 1,
         attributes: { name: 'modified name' },
@@ -431,7 +468,7 @@ describe('AppController (e2e)', () => {
       });
 
       res = await request(app.getHttpServer())
-        .patch('/nft/7')
+        .patch('/nft/8')
         .set('authorization', bearer)
         .send({ create_ready: JSON.stringify(true) });
 
@@ -441,7 +478,7 @@ describe('AppController (e2e)', () => {
       delete res.body.updatedAt;
 
       expect(res.body).toStrictEqual({
-        id: 7,
+        id: 8,
         state: 'setup_nft',
         createdBy: 1,
         attributes: { name: 'modified name', create_ready: true },
@@ -498,13 +535,26 @@ describe('AppController (e2e)', () => {
             attributes: { name: 'this will be accepted, user is the creator' },
           },
           {
+            attributes: {
+              categories: [2, 5, 10],
+              create_ready: true,
+              editions_size: 4,
+              name: 'some name',
+              price: 105,
+              proposed: true,
+            },
+            createdBy: 1,
             id: 5,
+            state: 'proposed',
+          },
+          {
+            id: 6,
             state: 'creation',
             createdBy: 2,
             attributes: {},
           },
           {
-            id: 7,
+            id: 8,
             state: 'setup_nft',
             createdBy: 1,
             attributes: { name: 'modified name', create_ready: true },
@@ -542,7 +592,7 @@ describe('AppController (e2e)', () => {
         range: JSON.stringify([0, 2]),
       });
     expect(res.statusCode).toEqual(200);
-    expect(res.body.data.map((row: any) => row.id)).toStrictEqual([7, 5]);
+    expect(res.body.data.map((row: any) => row.id)).toStrictEqual([8, 6]);
   });
 
   skipOnPriorFail(
@@ -638,13 +688,26 @@ describe('AppController (e2e)', () => {
             attributes: { name: 'this will be accepted, user is the creator' },
           },
           {
+            attributes: {
+              categories: [2, 5, 10],
+              create_ready: true,
+              editions_size: 4,
+              name: 'some name',
+              price: 105,
+              proposed: true,
+            },
+            createdBy: 1,
             id: 5,
+            state: 'proposed',
+          },
+          {
+            id: 6,
             state: 'creation',
             createdBy: 2,
             attributes: {},
           },
           {
-            id: 7,
+            id: 8,
             state: 'setup_nft',
             createdBy: 1,
             attributes: { name: 'modified name', create_ready: true },
@@ -658,7 +721,7 @@ describe('AppController (e2e)', () => {
         .query({ sort: JSON.stringify(['state']) });
       expect(res.statusCode).toEqual(200);
       expect(res.body.data.map((row: any) => row.id)).toStrictEqual([
-        1, 2, 3, 5, 7,
+        1, 2, 3, 6, 5, 8,
       ]);
 
       res = await request(app.getHttpServer())
@@ -667,7 +730,7 @@ describe('AppController (e2e)', () => {
         .query({ sort: JSON.stringify(['created_at']) });
       expect(res.statusCode).toEqual(200);
       expect(res.body.data.map((row: any) => row.id)).toStrictEqual([
-        1, 2, 3, 5, 7,
+        1, 2, 3, 5, 6, 8,
       ]);
 
       res = await request(app.getHttpServer())
@@ -676,7 +739,7 @@ describe('AppController (e2e)', () => {
         .query({ sort: JSON.stringify(['updated_at']) });
       expect(res.statusCode).toEqual(200);
       expect(res.body.data.map((row: any) => row.id)).toStrictEqual([
-        1, 2, 3, 5, 7,
+        1, 2, 3, 5, 6, 8,
       ]);
 
       res = await request(app.getHttpServer())
@@ -697,10 +760,23 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         data: [
           {
-            id: 7,
+            id: 8,
             state: 'setup_nft',
             createdBy: 1,
             attributes: { name: 'modified name', create_ready: true },
+          },
+          {
+            attributes: {
+              categories: [2, 5, 10],
+              create_ready: true,
+              editions_size: 4,
+              name: 'some name',
+              price: 105,
+              proposed: true,
+            },
+            createdBy: 1,
+            id: 5,
+            state: 'proposed',
           },
           {
             id: 2,
@@ -721,7 +797,7 @@ describe('AppController (e2e)', () => {
             attributes: {},
           },
           {
-            id: 5,
+            id: 6,
             state: 'creation',
             createdBy: 2,
             attributes: {},
@@ -747,7 +823,20 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         data: [
           {
-            id: 7,
+            attributes: {
+              categories: [2, 5, 10],
+              create_ready: true,
+              editions_size: 4,
+              name: 'some name',
+              price: 105,
+              proposed: true,
+            },
+            createdBy: 1,
+            id: 5,
+            state: 'proposed',
+          },
+          {
+            id: 8,
             state: 'setup_nft',
             createdBy: 1,
             attributes: { name: 'modified name', create_ready: true },
@@ -771,7 +860,7 @@ describe('AppController (e2e)', () => {
             attributes: { name: 'this will be accepted, user is the creator' },
           },
           {
-            id: 5,
+            id: 6,
             state: 'creation',
             createdBy: 2,
             attributes: {},
@@ -845,7 +934,7 @@ describe('AppController (e2e)', () => {
           attributes: { name: 'this will be accepted, user is the creator' },
         },
         {
-          id: 5,
+          id: 6,
           state: 'creation',
           createdBy: 2,
           attributes: {},
@@ -871,7 +960,7 @@ describe('AppController (e2e)', () => {
     expect(res.body).toStrictEqual({
       data: [
         {
-          id: 7,
+          id: 8,
           state: 'setup_nft',
           createdBy: 1,
           attributes: { name: 'modified name', create_ready: true },
@@ -915,13 +1004,13 @@ describe('AppController (e2e)', () => {
           attributes: { name: 'this will be accepted, user is the creator' },
         },
         {
-          id: 5,
+          id: 6,
           state: 'creation',
           createdBy: 2,
           attributes: {},
         },
         {
-          id: 7,
+          id: 8,
           state: 'setup_nft',
           createdBy: 1,
           attributes: { name: 'modified name', create_ready: true },
@@ -932,7 +1021,7 @@ describe('AppController (e2e)', () => {
     res = await request(app.getHttpServer())
       .get('/nft')
       .set('authorization', bearer)
-      .query({ nftIds: '3,5,7', nftStates: 'creation' });
+      .query({ nftIds: '3,6,8', nftStates: 'creation' });
     expect(res.statusCode).toEqual(200);
 
     for (const i in res.body.data) {
@@ -953,10 +1042,42 @@ describe('AppController (e2e)', () => {
           attributes: { name: 'this will be accepted, user is the creator' },
         },
         {
-          id: 5,
+          id: 6,
           state: 'creation',
           createdBy: 2,
           attributes: {},
+        },
+      ],
+    });
+
+    res = await request(app.getHttpServer())
+      .get('/nft')
+      .set('authorization', bearer)
+      .query({ nftIds: '3,8' });
+    expect(res.statusCode).toEqual(200);
+
+    for (const i in res.body.data) {
+      expect(res.body.data[i].createdAt).toBeGreaterThan(0);
+      expect(res.body.data[i].updatedAt).toBeGreaterThanOrEqual(
+        res.body.data[i].createdAt,
+      );
+      delete res.body.data[i].createdAt;
+      delete res.body.data[i].updatedAt;
+    }
+
+    expect(res.body).toStrictEqual({
+      data: [
+        {
+          id: 3,
+          state: 'creation',
+          createdBy: 2,
+          attributes: { name: 'this will be accepted, user is the creator' },
+        },
+        {
+          id: 8,
+          state: 'setup_nft',
+          createdBy: 1,
+          attributes: { name: 'modified name', create_ready: true },
         },
       ],
     });
@@ -1398,7 +1519,7 @@ describe('AppController (e2e)', () => {
     );
     const res = await request(app.getHttpServer())
       .get('/user')
-      .query({ userName: 'Regular Joe' })
+      .query({ userName: 'Regular Joe,Ben,Someone that doesnt exist' })
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
@@ -1409,6 +1530,75 @@ describe('AppController (e2e)', () => {
           userName: 'Regular Joe',
           address: 'tz1bla',
           roles: [Roles.editor],
+        },
+        {
+          address: 'tz1ben',
+          email: 'ben@bigbrother.co',
+          id: 3,
+          roles: [],
+          userName: 'Ben',
+        },
+      ],
+    });
+  });
+
+  skipOnPriorFail('/user has filter on address', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'regular_joe@bigbrother.co',
+      'somepass',
+    );
+    const res = await request(app.getHttpServer())
+      .get('/user')
+      .query({ address: 'tz1bla,tz1ben,some address that doesnt exist' })
+      .set('authorization', bearer);
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({
+      data: [
+        {
+          id: 2,
+          email: 'regular_joe@bigbrother.co',
+          userName: 'Regular Joe',
+          address: 'tz1bla',
+          roles: [Roles.editor],
+        },
+        {
+          address: 'tz1ben',
+          email: 'ben@bigbrother.co',
+          id: 3,
+          roles: [],
+          userName: 'Ben',
+        },
+      ],
+    });
+  });
+
+  skipOnPriorFail('/user has filter on user id', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'regular_joe@bigbrother.co',
+      'somepass',
+    );
+    const res = await request(app.getHttpServer())
+      .get('/user')
+      .query({ id: '2,3,0,-1' })
+      .set('authorization', bearer);
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({
+      data: [
+        {
+          id: 2,
+          email: 'regular_joe@bigbrother.co',
+          userName: 'Regular Joe',
+          address: 'tz1bla',
+          roles: [Roles.editor],
+        },
+        {
+          address: 'tz1ben',
+          email: 'ben@bigbrother.co',
+          id: 3,
+          roles: [],
+          userName: 'Ben',
         },
       ],
     });
@@ -1457,7 +1647,9 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'only logged in users can see available categories for assigning to nfts',
     async () => {
-      const res = await request(app.getHttpServer()).get('/categories');
+      const res = await request(app.getHttpServer()).get(
+        '/categories/assignable',
+      );
       expect(res.statusCode).toEqual(401);
     },
   );
@@ -1585,6 +1777,97 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(res.statusCode).toEqual(200);
       expect(res.body).toStrictEqual({ data: [] });
+    },
+  );
+
+  skipOnPriorFail(
+    'analytics endpoints, bad resolution param => BAD REQUEST (part 1: all allowed resolutions)',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'admin@tzconnect.com',
+        'supersafepassword',
+      );
+
+      const snapshotAllowedResolutions = [
+        'hour',
+        'day',
+        'week',
+        'month',
+        'infinite',
+      ];
+      const timeseriesAllowedResolutions = ['hour', 'day', 'week', 'month'];
+      for (const r of snapshotAllowedResolutions) {
+        let res = await request(app.getHttpServer())
+          .get('/analytics/sales/priceVolume/snapshot')
+          .set('authorization', bearer)
+          .query({ resolution: r });
+        expect(res.statusCode).toEqual(200);
+        res = await request(app.getHttpServer())
+          .get('/analytics/sales/nftCount/snapshot')
+          .set('authorization', bearer)
+          .query({ resolution: r });
+        expect(res.statusCode).toEqual(200);
+      }
+
+      for (const r of timeseriesAllowedResolutions) {
+        let res = await request(app.getHttpServer())
+          .get('/analytics/sales/priceVolume/timeseries')
+          .set('authorization', bearer)
+          .query({ resolution: r });
+        expect(res.statusCode).toEqual(200);
+
+        res = await request(app.getHttpServer())
+          .get('/analytics/sales/nftCount/timeseries')
+          .set('authorization', bearer)
+          .query({ resolution: r });
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toStrictEqual({ data: [] });
+      }
+    },
+  );
+
+  skipOnPriorFail(
+    'analytics endpoints, bad resolution param => BAD REQUEST (part 1: not allowed resolutions)',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'admin@tzconnect.com',
+        'supersafepassword',
+      );
+
+      const snapshotNotAllowedResolutions = ['malicisious', 'something else.;'];
+      const timeseriesNotAllowedResolutions = [
+        'infinite',
+        'malicisious',
+        'something else.;',
+      ];
+      for (const r of snapshotNotAllowedResolutions) {
+        let res = await request(app.getHttpServer())
+          .get('/analytics/sales/priceVolume/snapshot')
+          .set('authorization', bearer)
+          .query({ resolution: r });
+        expect(res.statusCode).toEqual(400);
+        res = await request(app.getHttpServer())
+          .get('/analytics/sales/nftCount/snapshot')
+          .set('authorization', bearer)
+          .query({ resolution: r });
+        expect(res.statusCode).toEqual(400);
+      }
+
+      for (const r of timeseriesNotAllowedResolutions) {
+        let res = await request(app.getHttpServer())
+          .get('/analytics/sales/priceVolume/timeseries')
+          .set('authorization', bearer)
+          .query({ resolution: r });
+        expect(res.statusCode).toEqual(400);
+
+        res = await request(app.getHttpServer())
+          .get('/analytics/sales/nftCount/timeseries')
+          .set('authorization', bearer)
+          .query({ resolution: r });
+        expect(res.statusCode).toEqual(400);
+      }
     },
   );
 

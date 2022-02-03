@@ -56,7 +56,6 @@ export class NftService {
   }
 
   async findAll(params: NftFilterParams): Promise<NftEntity[]> {
-    console.log(params);
     let orderBy = params.orderBy;
     if (
       Object.keys(this.stm.getAttributes()).some(
