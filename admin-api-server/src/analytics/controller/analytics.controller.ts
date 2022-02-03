@@ -83,8 +83,6 @@ export class AnalyticsController {
   }
 
   #queryParamsToMetricParams(resolutionStr?: string): MetricParams {
-    console.log('resolution sent')
-    console.log(resolutionStr)
     const resolution = enumFromStringValue(Resolution, resolutionStr);
     if (typeof resolution === 'undefined') {
       throw new HttpException(
