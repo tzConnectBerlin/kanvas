@@ -34,7 +34,7 @@ export class AnalyticsService {
 
     return <MetricEntity>{
       timestamp: Math.floor(qryRes.rows[0]['timestamp'].getTime() / 1000),
-      value: qryRes.rows[0]['price_volume'] || 0,
+      value: Number(qryRes.rows[0]['price_volume']) || 0,
     };
   }
 
@@ -61,7 +61,7 @@ export class AnalyticsService {
       (row: any) =>
         <MetricEntity>{
           timestamp: Math.floor(row['timestamp'].getTime() / 1000),
-          value: row['price_volume'],
+          value: Number(row['price_volume']),
         },
     );
   }

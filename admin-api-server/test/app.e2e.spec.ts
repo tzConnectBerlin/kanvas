@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
+import { storeDbPool } from 'src/db.module';
 import { Roles } from 'src/role/role.entity';
 
 let anyTestFailed = false;
@@ -2037,9 +2038,110 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
   });
+
+  skipOnPriorFail(
+    'admin can access analytics endpoints (part 2; after emulated sales)',
+    async () => {
+      await emulateNftSale(
+        1,
+        [4, 7, 10],
+        new Date('December 17, 1995 03:24:00'),
+      );
+      await emulateNftSale(
+        2,
+        [2, 27, 11, 10, 4],
+        new Date('December 17, 1995 13:24:00'),
+      );
+      await emulateNftSale(
+        1,
+        [1, 3, 30],
+        new Date('December 17, 1995 13:34:00'),
+      );
+
+      const { bearer } = await loginUser(
+        app,
+        'admin@tzconnect.com',
+        'supersafepassword',
+      );
+      let res = await request(app.getHttpServer())
+        .get('/analytics/sales/priceVolume/snapshot')
+        .set('authorization', bearer)
+        .query({ resolution: 'infinite' });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.timestamp).toBeGreaterThan(0);
+      delete res.body.timestamp;
+      expect(res.body).toStrictEqual({ value: 680 });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/priceVolume/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'hour' });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toStrictEqual({
+        data: [
+          { timestamp: 819165600, value: 233 },
+          { timestamp: 819201600, value: 447 },
+        ],
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/nftCount/snapshot')
+        .set('authorization', bearer)
+        .query({ resolution: 'infinite' });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.timestamp).toBeGreaterThan(0);
+      delete res.body.timestamp;
+      expect(res.body).toStrictEqual({ value: 11 });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/nftCount/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'hour' });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toStrictEqual({
+        data: [
+          { timestamp: 819165600, value: 3 },
+          { timestamp: 819201600, value: 8 },
+        ],
+      });
+    },
+  );
 });
 
-async function emulateNftSale() {}
+async function emulateNftSale(userId: number, nftIds: number[], at: Date) {
+  const qryRes = await storeDbPool.query(
+    `
+INSERT INTO nft_order (
+  user_id, order_at
+)
+VALUES ($1, $2)
+RETURNING id
+    `,
+    [userId, at.toUTCString()],
+  );
+
+  const orderId = qryRes.rows[0]['id'];
+
+  await storeDbPool.query(
+    `
+INSERT INTO mtm_nft_order_nft (
+  nft_order_id, nft_id
+)
+SELECT $1, UNNEST($2::INTEGER[])
+    `,
+    [orderId, nftIds],
+  );
+
+  await storeDbPool.query(
+    `
+INSERT INTO payment (
+  payment_id, status, nft_order_id, provider, expires_at
+)
+VALUES ('bla', 'succeeded', $1, 'test_provider', now())
+    `,
+    [orderId],
+  );
+}
 
 async function loginUser(
   app: INestApplication,
