@@ -10,7 +10,9 @@
     "notifications": "Benachrichtigungen",
     "button": {
       "backToHome": "Zurück zu Hause"
-    }
+    },
+    "language": "Sprache",
+    "select": "Auswahl"
   },
   "menu": {
     "home": "Startseite",
@@ -116,11 +118,25 @@
       "link": "Alle anzeigen"
     }
   },
+  "checkout": {
+    "headline_0": "Zusammenfassung",
+    "headline_1": "Zahlungsmethode wählen",
+    "headline_2": "Zahlung fortsetzen",
+    "back_button": "Zurück",
+    "next_button_0": "Warenkorb validieren",
+    "next_button_1": "Weiter zur Zahlung",
+    "next_button_3": "Gehe zum Profil",
+    "headline_payment_method": "Zahlungsmethode:",
+    "headline_payment_method_2": "Zahlung:",
+    "link_payment_method": "Mehr erfahren",
+    "upcoming_payment_method": "Bald verfügbar ",
+    "iframe_not_supported": "Ihr Browser unterstützt keine iFrames."
+ }, 
   "cookies": {
     "text": "Durch Klicken auf \"Alle Cookies akzeptieren\" stimmen Sie der Speicherung von Cookies auf Ihrem Gerät zu. Wir verwenden diese Cookies, um die Navigation in der Website zu verbessern.",
     "button": "Alle Coookies akzeptieren",
     "link": "Datenschutzrichtlinie"
-  },
+  },  
   "filters": {
     "button": {
       "results": "Ergebnisse anzeigen",

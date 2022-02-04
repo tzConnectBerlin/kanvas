@@ -100,7 +100,9 @@ const StyledLink = styled(Link)<{ theme?: Theme }>`
 export const Footer: FC<FooterProps> = () => {
     const { t } = useTranslation(['translation']);
 
-    const [selectedLanguage, setSelectedLanguage] = useState<string>(i18next.language);
+    const [selectedLanguage, setSelectedLanguage] = useState<string>(
+        i18next.language,
+    );
 
     return (
         <StyledBox>
@@ -141,6 +143,7 @@ export const Footer: FC<FooterProps> = () => {
                 container
                 md={7}
                 lg={6}
+                columnSpacing={{ xs: 0, sm: 2, md: 3 }}
                 sx={{
                     marginLeft: 'auto',
                 }}
@@ -262,10 +265,7 @@ export const Footer: FC<FooterProps> = () => {
                             href="https://www.tzconnect.com/en/"
                             sx={iconStyle}
                         >
-                            <TwitterStyled
-                                src={'/img/web.png'}
-                                alt="Twitter"
-                            />
+                            <TwitterStyled src={'/img/web.png'} alt="Twitter" />
                         </Box>
                     </Box>
 
