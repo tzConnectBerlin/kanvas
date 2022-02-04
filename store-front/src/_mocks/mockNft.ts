@@ -13,7 +13,7 @@ const mockNft = [
             test: 'hey',
         },
         dataUrl: 'heyyy',
-        dataUri:
+        displayUri:
             'https://ipfs.io/ipfs/QmbpTK79f1DcuGj1eg7YhUErF5jXSDmVaJj2N8UhyBVZC8',
         contract: 'contract_address',
         tokenId: 'teojteojt',
@@ -25,7 +25,7 @@ const mockNft = [
         artistName: ' Long Artist name here',
         ipfsHash: '',
         price: 12,
-        dataUri:
+        displayUri:
             'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
         metadata: {
             key2: 'value1',
@@ -42,7 +42,7 @@ const mockNft = [
         artistName: ' Long Artist name here',
         ipfsHash: '',
         price: 10,
-        dataUri:
+        displayUri:
             'https://ipfs.io/ipfs/QmPUasCEy132RNhk6QCznsbVbXJkrj9WcodMcuuR9hLZZu',
         metadata: {
             key2: 'value1',
@@ -59,7 +59,7 @@ const mockNft = [
         artistName: ' Long Artist name here',
         ipfsHash: '',
         price: 12,
-        dataUri:
+        displayUri:
             'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
         metadata: {
             key2: 'value1',
@@ -76,7 +76,7 @@ const mockNft = [
         artistName: ' Long Artist name here',
         ipfsHash: '',
         price: 12,
-        dataUri:
+        displayUri:
             'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
         metadata: {
             key2: 'value1',
@@ -93,7 +93,7 @@ const mockNft = [
         artistName: ' Long Artist name here',
         ipfsHash: '',
         price: 12,
-        dataUri:
+        displayUri:
             'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
         metadata: {
             key2: 'value1',
@@ -110,7 +110,7 @@ const mockNft = [
         artistName: ' Long Artist name here',
         ipfsHash: '',
         price: 12,
-        dataUri:
+        displayUri:
             'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
         metadata: {
             key2: 'value1',
@@ -127,7 +127,7 @@ const mockNft = [
         artistName: ' Long Artist name here',
         ipfsHash: '',
         price: 12,
-        dataUri:
+        displayUri:
             'https://uploads-ssl.webflow.com/60098420fcf354eb258f25c5/60098420fcf3542cf38f287b_Illustrations%202019-37.jpg',
         metadata: {
             key2: 'value1',

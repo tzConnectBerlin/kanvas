@@ -20,7 +20,7 @@ export interface NftCardProps {
     height?: number;
     ipfsHash?: string;
     openFilters?: boolean;
-    dataUri?: string;
+    displayUri?: string;
     launchAt?: number;
     editionsAvailable?: number;
     nftCardMode?: 'user';
@@ -199,11 +199,11 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
             <StyledImgWrapper>
                 <StyledImg
                     data-object-fit="cover"
-                    src={props.dataUri}
+                    src={props.displayUri}
                     alt={props.name}
                     willDrop={!launchTime ? false : launchTime > 0}
                     onLoad={() =>
-                        props.dataUri ? loadImage(props.dataUri) : undefined
+                        props.displayUri ? loadImage(props.displayUri) : undefined
                     }
                     style={{
                         filter: `${componentLoading ? 'blur(20px)' : 'none'}`,

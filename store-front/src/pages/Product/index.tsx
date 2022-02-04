@@ -227,7 +227,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
         <StytledPageWrapper>
             <WrapperFullScreen open={fullScreenView}>
                 <StyledImage
-                    src={nftResponse.data?.dataUri}
+                    src={nftResponse.data?.displayUri}
                     alt="random"
                     onClick={fullScreenView
                         ? () => { setFullScreenView(false); document.body.style.overflow = ''; }
@@ -283,7 +283,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                         >
                             <StyledCardMedia
                                 component="img"
-                                image={nftResponse.data?.dataUri}
+                                image={nftResponse.data?.displayUri}
                                 alt="random"
                             />
                             <StyledWrapperIcon
