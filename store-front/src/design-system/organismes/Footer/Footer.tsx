@@ -1,21 +1,19 @@
 import { Box } from '@mui/system';
 import Grid from '@mui/material/Grid';
-import { useEffect, FC, useState } from 'react';
+import {  FC, useState } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import {
     SelectChangeEvent,
-    Stack,
+    Chip,
     Theme,
-    useMediaQuery,
-    useTheme,
 } from '@mui/material';
 import Typography from '../../atoms/Typography';
 import { Copyright } from '../../atoms/Copyright';
 import { useTranslation } from 'react-i18next';
-import { lightTheme as theme } from '../../../theme';
 import CustomSelect from '../../atoms/Select';
 import i18next from 'i18next';
+ 
 export interface FooterProps {
     selectedTheme?: string;
     theme?: Theme;
@@ -49,13 +47,16 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
         transition: padding-left 0.2s, padding-right 0.2s;
     }
 `;
+
 const LinkStyled = styled(Link)`
-    display: block;
-    transition: 0.2s;
-    width: 100%;
+    display: block;    
     height: 2.5rem;
+    max-width: max-content;
+    transition: 0.2s;
     align-items: center;
 `;
+
+ 
 
 const LogoStyled = styled.img<{ theme?: Theme }>`
     filter: ${(props) => props.theme.logo.filter ?? 'invert(0%)'};
@@ -69,14 +70,11 @@ const LogoStyled = styled.img<{ theme?: Theme }>`
     }
 `;
 
-const FacebookStyled = styled.img<{ theme?: Theme }>`
+const SocialStyled = styled.img<{ theme?: Theme }>`
     filter: ${(props) => props.theme.logo.filter ?? 'invert(0%)'};
     height: 1.6rem;
 `;
-const TwitterStyled = styled.img<{ theme?: Theme }>`
-    filter: ${(props) => props.theme.logo.filter ?? 'invert(0%)'};
-    height: 1.6rem;
-`;
+
 const iconStyle = {
     width: 25,
     height: 25,
@@ -160,13 +158,13 @@ export const Footer: FC<FooterProps> = () => {
 
                     <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/store/">
-                                {t('footer.headline_1.link_1')}
+                            <StyledLink to="/home">
+                                {t('footer.headline_1.link_2')}
                             </StyledLink>
                         </Box>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/product/">
-                                {t('footer.headline_1.link_2')}
+                            <StyledLink to="/store">
+                                {t('footer.headline_1.link_1')}
                             </StyledLink>
                         </Box>
                     </Box>
@@ -183,12 +181,12 @@ export const Footer: FC<FooterProps> = () => {
 
                     <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/vision/">
+                            <StyledLink to="/vision">
                                 {t('footer.headline_2.link_1')}
                             </StyledLink>
                         </Box>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/privacy/">
+                            <StyledLink to="/privacy">
                                 {t('footer.headline_2.link_2')}
                             </StyledLink>
                         </Box>
@@ -207,17 +205,17 @@ export const Footer: FC<FooterProps> = () => {
 
                     <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/terms/">
+                            <StyledLink to="/terms">
                                 {t('footer.headline_3.link_1')}
                             </StyledLink>
                         </Box>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/privacy/">
+                            <StyledLink to="/privacy">
                                 {t('footer.headline_3.link_2')}
                             </StyledLink>
                         </Box>
                         <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/faq/">
+                            <StyledLink to="/faq">
                                 {t('footer.headline_3.link_3')}
                             </StyledLink>
                         </Box>
@@ -243,8 +241,8 @@ export const Footer: FC<FooterProps> = () => {
                             href="https://www.linkedin.com/company/tzconnect/"
                             sx={iconStyle}
                         >
-                            <FacebookStyled
-                                src={'/img/linkedin.png'}
+                           <SocialStyled
+                                src={'/img/linkedin.svg'}
                                 alt="Linkedin"
                             />
                         </Box>
@@ -254,8 +252,8 @@ export const Footer: FC<FooterProps> = () => {
                             href="https://twitter.com/TZConnectBerlin"
                             sx={iconStyle}
                         >
-                            <TwitterStyled
-                                src={'/img/twitter.jpeg'}
+                            <SocialStyled
+                                src={'/img/twitter.svg'}
                                 alt="Twitter"
                             />
                         </Box>
@@ -265,7 +263,7 @@ export const Footer: FC<FooterProps> = () => {
                             href="https://www.tzconnect.com/en/"
                             sx={iconStyle}
                         >
-                            <TwitterStyled src={'/img/web.png'} alt="Twitter" />
+                            <SocialStyled src={'/img/tezos.svg'} alt="TZ connect" />
                         </Box>
                     </Box>
 
