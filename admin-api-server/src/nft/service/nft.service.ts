@@ -19,6 +19,8 @@ import { NftEntity, NftUpdate } from '../entities/nft.entity';
 import { NftFilterParams } from '../params';
 import { RoleService } from 'src/role/service/role.service';
 import { S3Service } from './s3.service';
+import { CategoryService } from 'src/category/service/category.service';
+import { CategoryEntity } from 'src/category/entity/category.entity';
 import { Lock } from 'async-await-mutex-lock';
 const fs = require('fs');
 
@@ -34,6 +36,7 @@ export class NftService {
     @Inject(S3Service) private s3Service: S3Service,
     @Inject(PG_CONNECTION) private db: DbPool,
     @Inject(PG_CONNECTION_STORE) private dbStore: DbPool,
+    @Inject(CategoryService) private categoryService: CategoryService,
     private readonly roleService: RoleService,
   ) {
     const stmConfigFile = STM_CONFIG_FILE;
@@ -349,7 +352,7 @@ WHERE TARGET.value != EXCLUDED.value
       );
 
       if (this.#isNftInPublishState(nft)) {
-        this.#publishNft(nft);
+        await this.#publishNft(nft);
       }
 
       await dbTx.query(`COMMIT`);
@@ -374,10 +377,29 @@ WHERE TARGET.value != EXCLUDED.value
     return nft.state === NFT_PUBLISH_STATE;
   }
 
-  async #publishNft(nft: NftEntity) {
+  async #assertNftPublishable(nft: NftEntity) {
     if (!this.#isNftInPublishState(nft)) {
       throw `cannot publish nft that is not in the publish state (nft id=${nft.id}, nft state=${nft.state})`;
     }
+    const attr = nft.attributes;
+
+    const allowedCategories = await this.categoryService.getNftAssignable();
+    if (
+      attr.categories.some(
+        (cat: number) =>
+          !allowedCategories.some(
+            (allowed: CategoryEntity) => cat === allowed.id,
+          ),
+      )
+    ) {
+      throw `some categories are not valid (assigned categories: ${JSON.stringify(
+        attr.categories,
+      )}, allowed categories: ${JSON.stringify(allowedCategories)} )`;
+    }
+  }
+
+  async #publishNft(nft: NftEntity) {
+    await this.#assertNftPublishable(nft);
     const attr = nft.attributes;
 
     const launchAt = new Date();
@@ -397,7 +419,7 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
           nft.id,
           attr.name,
           attr['image.png'],
-          attr['thumbnail_uri'],
+          attr['thumbnail.png'],
           attr.description,
           launchAt.toUTCString(),
           attr.price,

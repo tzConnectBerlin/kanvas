@@ -1,5 +1,6 @@
 attributes:
   name: string
+  description: string
   image.png: content_uri
   thumbnail.png: content_uri
   create_ready: boolean
@@ -20,10 +21,11 @@ states:
     - next_state: setup_nft
       when: |
         nft.name.length > 0 &&
+        nft.description.length > 0 &&
         nft['image.png'].length > 0 &&
         nft['thumbnail.png'].length > 0
     mutables:
-    - attributes: [name, image.png, thumbnail.png]
+    - attributes: [name, image.png, thumbnail.png, description]
       by_roles: [creator]
 
   setup_nft:
@@ -74,9 +76,9 @@ states:
 
   prototype:
     state_transitions:
-    - new_state: finish
+    - next_state: finish
       when: 'nft.prototype_accept.length == 3'
-    - new_state: setup_nft
+    - next_state: setup_nft
       when: 'nft.prototype_reject.length > 0'
     mutables:
     - attributes: [prototype_accept, prototype_reject]

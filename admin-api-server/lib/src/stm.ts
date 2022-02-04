@@ -64,8 +64,11 @@ export class StateTransitionMachine {
   getAllowedActions(actor: Actor, nft: Nft): any {
     let res: any = {};
 
-    const st: State = this.states[nft.state];
-    for (const mut of st.mutables) {
+    const st: State | undefined = this.states[nft.state];
+    if (typeof st === 'undefined') {
+      return res;
+    }
+    for (const mut of st?.mutables) {
       if (
         !mut.by_roles.some((allowedRole: string) => actor.hasRole(allowedRole))
       ) {
