@@ -1,6 +1,7 @@
 export const PG_CONNECTION = 'PG_CONNECTION';
 export const PG_CONNECTION_STORE_REPLICATION =
   'PG_CONNECTION_STORE_REPLICATION';
+export const PG_CONNECTION_STORE = 'PG_CONNECTION_STORE';
 
 export const PG_UNIQUE_VIOLATION_ERRCODE = '23505';
 export const AUTH_SALT_ROUNDS = 10;
@@ -17,3 +18,4 @@ export const RATE_LIMIT = Number(process.env['RATE_LIMIT'] || 100);
 
 export const STM_CONFIG_FILE =
   process.env['STM_CONFIG_FILE'] || './config/stm_example.yaml';
+export const NFT_PUBLISH_STATE = 'finish';

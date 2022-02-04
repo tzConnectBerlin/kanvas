@@ -1,10 +1,12 @@
 attributes:
   name: string
   image.png: content_uri
+  thumbnail.png: content_uri
   create_ready: boolean
   price: number
   editions_size: number
   categories: number[]
+  launch_at: date
   proposed: boolean
   proposal_accept: votes
   proposal_reject: votes
@@ -18,9 +20,10 @@ states:
     - next_state: setup_nft
       when: |
         nft.name.length > 0 &&
-        nft['image.png'].length > 0
+        nft['image.png'].length > 0 &&
+        nft['thumbnail.png'].length > 0
     mutables:
-    - attributes: [name, image.png]
+    - attributes: [name, image.png, thumbnail.png]
       by_roles: [creator]
 
   setup_nft:
@@ -30,9 +33,10 @@ states:
         nft.proposed &&
         nft.editions_size > 0 &&
         nft.price > 0 &&
-        nft.categories.length > 0
+        nft.categories.length > 0 &&
+        nft.launch_at >= Date.now()
     mutables:
-    - attributes: [price, editions_size, proposed, categories]
+    - attributes: [price, editions_size, proposed, categories, launch_at]
       by_roles: [editor, creator, admin]
 
   proposed:

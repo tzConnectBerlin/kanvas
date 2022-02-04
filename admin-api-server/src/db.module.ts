@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import { assertEnv } from './utils';
-import { PG_CONNECTION, PG_CONNECTION_STORE_REPLICATION } from './constants';
+import {
+  PG_CONNECTION,
+  PG_CONNECTION_STORE_REPLICATION,
+  PG_CONNECTION_STORE,
+} from './constants';
 import { Client, types } from 'pg';
 import * as Pool from 'pg-pool';
 export type DbPool = Pool<Client>;
@@ -28,20 +32,31 @@ const dbProvider = {
   useValue: dbPool,
 };
 
-export const storeDbPool = new Pool({
+export const storeReplDbPool = new Pool({
   host: assertEnv('PGHOST'),
   port: Number(assertEnv('PGPORT')),
   user: assertEnv('PGUSER'),
   password: assertEnv('PGPASSWORD'),
   database: 'store_replication',
 });
-const dbStoreProvider = {
+const dbStoreReplProvider = {
   provide: PG_CONNECTION_STORE_REPLICATION,
-  useValue: storeDbPool,
+  useValue: storeReplDbPool,
+};
+
+const dbStoreProvider = {
+  provide: PG_CONNECTION_STORE,
+  useValue: new Pool({
+    host: assertEnv('STORE_PGHOST'),
+    port: Number(assertEnv('STORE_PGPORT')),
+    user: assertEnv('STORE_PGUSER'),
+    password: assertEnv('STORE_PGPASSWORD'),
+    database: assertEnv('STORE_PGDATABASE'),
+  }),
 };
 
 @Module({
-  providers: [dbProvider, dbStoreProvider],
-  exports: [dbProvider, dbStoreProvider],
+  providers: [dbProvider, dbStoreReplProvider, dbStoreProvider],
+  exports: [dbProvider, dbStoreReplProvider, dbStoreProvider],
 })
 export class DbModule {}

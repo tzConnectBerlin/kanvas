@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
-import { storeDbPool } from 'src/db.module';
+import { storeReplDbPool } from 'src/db.module';
 import { Roles } from 'src/role/entities/role.entity';
 
 let anyTestFailed = false;
@@ -2109,7 +2109,7 @@ describe('AppController (e2e)', () => {
 });
 
 async function emulateNftSale(userId: number, nftIds: number[], at: Date) {
-  const qryRes = await storeDbPool.query(
+  const qryRes = await storeReplDbPool.query(
     `
 INSERT INTO nft_order (
   user_id, order_at
@@ -2122,7 +2122,7 @@ RETURNING id
 
   const orderId = qryRes.rows[0]['id'];
 
-  await storeDbPool.query(
+  await storeReplDbPool.query(
     `
 INSERT INTO mtm_nft_order_nft (
   nft_order_id, nft_id
@@ -2132,7 +2132,7 @@ SELECT $1, UNNEST($2::INTEGER[])
     [orderId, nftIds],
   );
 
-  await storeDbPool.query(
+  await storeReplDbPool.query(
     `
 INSERT INTO payment (
   payment_id, status, nft_order_id, provider, expires_at

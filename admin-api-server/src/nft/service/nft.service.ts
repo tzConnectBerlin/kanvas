@@ -5,7 +5,13 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import { PG_CONNECTION, FILE_PREFIX, STM_CONFIG_FILE } from 'src/constants';
+import {
+  PG_CONNECTION,
+  PG_CONNECTION_STORE,
+  FILE_PREFIX,
+  STM_CONFIG_FILE,
+  NFT_PUBLISH_STATE,
+} from 'src/constants';
 import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
 import { UserEntity } from 'src/user/entities/user.entity';
@@ -27,12 +33,13 @@ export class NftService {
   constructor(
     @Inject(S3Service) private s3Service: S3Service,
     @Inject(PG_CONNECTION) private db: DbPool,
+    @Inject(PG_CONNECTION_STORE) private dbStore: DbPool,
     private readonly roleService: RoleService,
   ) {
     const stmConfigFile = STM_CONFIG_FILE;
     this.stm = new StateTransitionMachine(stmConfigFile);
     this.nftLock = new Lock<number>();
-    fs.watch(stmConfigFile, (event: any, filename: any) => {
+    fs.watch(stmConfigFile, (event: any /* , filename: any */) => {
       if (event !== 'change') {
         return;
       }
@@ -113,16 +120,15 @@ LIMIT  ${params.pageSize}
     });
   }
 
-  async findByIds(nftIds: number[]): Promise<NftEntity[]> {
+  async #findByIds(nftIds: number[]): Promise<NftEntity[]> {
     const filterParams = new NftFilterParams();
 
     filterParams.filters.nftIds = nftIds;
-
     return await this.findAll(filterParams);
   }
 
-  async findOne(nftId: number): Promise<NftEntity> {
-    const nfts = await this.findByIds([nftId]);
+  async #findOne(nftId: number): Promise<NftEntity> {
+    const nfts = await this.#findByIds([nftId]);
 
     if (nfts.length === 0) {
       throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
@@ -131,8 +137,8 @@ LIMIT  ${params.pageSize}
   }
 
   async getNft(user: UserEntity, nftId: number) {
-    const nft = await this.findOne(nftId);
-    const actor = await this.getActorForNft(user, nft);
+    const nft = await this.#findOne(nftId);
+    const actor = await this.#getActorForNft(user, nft);
 
     return {
       ...nft,
@@ -140,12 +146,29 @@ LIMIT  ${params.pageSize}
     };
   }
 
-  async getActorForNft(user: UserEntity, nft: NftEntity): Promise<Actor> {
-    const roles = await this.roleService.getLabels(user.roles);
-    if (nft.createdBy === user.id) {
-      roles.push('creator');
+  async createNft(creator: UserEntity): Promise<NftEntity> {
+    try {
+      const qryRes = await this.db.query(
+        `
+INSERT INTO nft (
+  created_by, state
+)
+VALUES ($1, 'creation')
+RETURNING id
+    `,
+        [creator.id],
+      );
+
+      const test = await this.getNft(creator, qryRes.rows[0].id);
+
+      return test;
+    } catch (err: any) {
+      Logger.error(`Unable to create new nft, err: ${err}`);
+      throw new HttpException(
+        'Unable to create new nft',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-    return new Actor(user.id, roles);
   }
 
   async applyNftUpdates(
@@ -155,12 +178,19 @@ LIMIT  ${params.pageSize}
   ): Promise<NftEntity> {
     await this.nftLock.acquire(nftId);
     try {
-      const nfts = await this.findByIds([nftId]);
+      const nfts = await this.#findByIds([nftId]);
       if (nfts.length === 0) {
         throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
       }
       const nft = nfts[0];
-      const actor = await this.getActorForNft(user, nft);
+      const actor = await this.#getActorForNft(user, nft);
+
+      if (this.#isNftInPublishState(nft)) {
+        throw new HttpException(
+          `cannot update this nft, it is already published to the store`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
 
       for (let nftUpdate of nftUpdates) {
         // Check if attribute is of type content in order to upload to ipfs
@@ -207,7 +237,7 @@ LIMIT  ${params.pageSize}
 
   async deleteNft(user: UserEntity, nftId: number) {
     await this.nftLock.acquire(nftId);
-    const nft = await this.findOne(nftId);
+    const nft = await this.#findOne(nftId);
     if (nft.createdBy !== user.id) {
       throw new HttpException(
         'no permission to delete this nft (only the creator may)',
@@ -284,31 +314,6 @@ WHERE id = $1
     };
   }
 
-  async createNft(creator: UserEntity): Promise<NftEntity> {
-    try {
-      const qryRes = await this.db.query(
-        `
-INSERT INTO nft (
-  created_by, state
-)
-VALUES ($1, 'creation')
-RETURNING id
-    `,
-        [creator.id],
-      );
-
-      const test = await this.getNft(creator, qryRes.rows[0].id);
-
-      return test;
-    } catch (err: any) {
-      Logger.error(`Unable to create new nft, err: ${err}`);
-      throw new HttpException(
-        'Unable to create new nft',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
   async #updateNft(setBy: UserEntity, nft: NftEntity) {
     const attrNames = Object.keys(nft.attributes);
     const attrValues = attrNames.map((name: string) =>
@@ -342,6 +347,11 @@ WHERE TARGET.value != EXCLUDED.value
       `,
         [nft.id, setBy.id, attrNames, attrValues],
       );
+
+      if (this.#isNftInPublishState(nft)) {
+        this.#publishNft(nft);
+      }
+
       await dbTx.query(`COMMIT`);
     } catch (err: any) {
       Logger.error(`failed to update nft (id=${nft.id}), err: ${err}`);
@@ -349,6 +359,70 @@ WHERE TARGET.value != EXCLUDED.value
       throw err;
     } finally {
       dbTx.release();
+    }
+  }
+
+  async #getActorForNft(user: UserEntity, nft: NftEntity): Promise<Actor> {
+    const roles = await this.roleService.getLabels(user.roles);
+    if (nft.createdBy === user.id) {
+      roles.push('creator');
+    }
+    return new Actor(user.id, roles);
+  }
+
+  #isNftInPublishState(nft: NftEntity): boolean {
+    return nft.state === NFT_PUBLISH_STATE;
+  }
+
+  async #publishNft(nft: NftEntity) {
+    if (!this.#isNftInPublishState(nft)) {
+      throw `cannot publish nft that is not in the publish state (nft id=${nft.id}, nft state=${nft.state})`;
+    }
+    const attr = nft.attributes;
+
+    const launchAt = new Date();
+    launchAt.setTime(attr.launch_at);
+
+    const storeDbTx = await this.dbStore.connect();
+    try {
+      await storeDbTx.query(`BEGIN`);
+      await storeDbTx.query(
+        `
+INSERT INTO nft (
+  id, nft_name, artifact_uri, thumbnail_uri, description, launch_at, price, editions_size
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `,
+        [
+          nft.id,
+          attr.name,
+          attr['image.png'],
+          attr['thumbnail_uri'],
+          attr.description,
+          launchAt.toUTCString(),
+          attr.price,
+          attr.editions_size,
+        ],
+      );
+
+      await storeDbTx.query(
+        `
+INSERT INTO mtm_nft_category (
+  nft_id, nft_category_id
+)
+SELECT $1, UNNEST($2::INTEGER[])
+      `,
+        [nft.id, attr.categories],
+      );
+
+      await storeDbTx.query(`COMMIT`);
+      Logger.log(`Published NFT ${nft.id} to the store database`);
+    } catch (err: any) {
+      Logger.error(`failed to publish nft (id=${nft.id}), err: ${err}`);
+      await storeDbTx.query(`ROLLBACK`);
+      throw err;
+    } finally {
+      storeDbTx.release();
     }
   }
 }
