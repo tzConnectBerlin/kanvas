@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ValidationPipe } from '@nestjs/common';
-import { Logger, INestApplication } from '@nestjs/common';
+import { Logger, INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { RATE_LIMIT } from 'src/constants';
@@ -48,11 +47,8 @@ describe('AppController (e2e)', () => {
 
   skipOnPriorFail('should be defined', () => expect(app).toBeDefined());
 
-  skipOnPriorFail('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  it(`/ (GET) => NOT FOUND (make sure the nestjs's Hello World page is gone)`, () => {
+    return request(app.getHttpServer()).get('/').expect(404);
   });
 
   // Note:

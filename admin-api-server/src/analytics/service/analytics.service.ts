@@ -22,8 +22,8 @@ export class AnalyticsService {
     const qryRes = await this.#snapshot(params);
 
     return <MetricEntity>{
-      timestamp: qryRes.rows[0]['timestamp'],
-      value: qryRes.rows[0]['nft_count'],
+      timestamp: Math.floor(qryRes.rows[0]['timestamp'].getTime() / 1000),
+      value: Number(qryRes.rows[0]['nft_count']),
     };
   }
 
@@ -33,8 +33,8 @@ export class AnalyticsService {
     const qryRes = await this.#snapshot(params);
 
     return <MetricEntity>{
-      timestamp: qryRes.rows[0]['timestamp'],
-      value: qryRes.rows[0]['price_volume'],
+      timestamp: Math.floor(qryRes.rows[0]['timestamp'].getTime() / 1000),
+      value: Number(qryRes.rows[0]['price_volume']) || 0,
     };
   }
 
@@ -47,7 +47,7 @@ export class AnalyticsService {
       (row: any) =>
         <MetricEntity>{
           timestamp: Math.floor(row['timestamp'].getTime() / 1000),
-          value: row['nft_count'],
+          value: Number(row['nft_count']),
         },
     );
   }
@@ -61,7 +61,7 @@ export class AnalyticsService {
       (row: any) =>
         <MetricEntity>{
           timestamp: Math.floor(row['timestamp'].getTime() / 1000),
-          value: row['price_volume'],
+          value: Number(row['price_volume']),
         },
     );
   }
@@ -104,11 +104,10 @@ ORDER BY timestamp
         intervalSeconds = 60 * 60 * 24 * 30;
         break;
       case Resolution.Infinite:
-        intervalSeconds = Math.floor((new Date()).getTime() / 1000);
+        intervalSeconds = Math.floor(new Date().getTime() / 1000);
         break;
     }
 
-    console.log(intervalSeconds)
     return await this.storeRepl.query(
       `
 SELECT

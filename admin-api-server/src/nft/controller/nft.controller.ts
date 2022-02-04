@@ -13,7 +13,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import {
   FILE_MAX_BYTES,
   MAX_FILE_UPLOADS_PER_CALL,
@@ -22,10 +22,14 @@ import {
 import { NftEntity, NftUpdate } from '../entities/nft.entity';
 import { NftService } from '../service/nft.service';
 import { CurrentUser } from 'src/decoraters/user.decorator';
-import { User } from 'src/user/entities/user.entity';
+import { UserEntity } from 'src/user/entities/user.entity';
 import { NftFilterParams, NftFilters } from '../params';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
-import { PaginationParams, queryParamsToPaginationParams, validatePaginationParams } from 'src/utils';
+import {
+  PaginationParams,
+  queryParamsToPaginationParams,
+  validatePaginationParams,
+} from 'src/utils';
 
 function pngFileFilter(req: any, file: any, callback: any) {
   if (
@@ -42,7 +46,7 @@ function pngFileFilter(req: any, file: any, callback: any) {
 
 @Controller('nft')
 export class NftController {
-  constructor(private readonly nftService: NftService) { }
+  constructor(private readonly nftService: NftService) {}
 
   @Get()
   @UseGuards(JwtAuthGuard)
@@ -62,7 +66,7 @@ export class NftController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  async findOne(@Param('id') id: number, @CurrentUser() user: User) {
+  async findOne(@Param('id') id: number, @CurrentUser() user: UserEntity) {
     return await this.nftService.getNft(user, id);
   }
 
@@ -75,14 +79,16 @@ export class NftController {
     }),
   )
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
+  @Patch(':id?')
   async update(
     @Body() nftUpdatesBody: any,
-    @CurrentUser() user: User,
+    @CurrentUser() user: UserEntity,
     @UploadedFiles() filesArray?: any[],
     @Param('id') nftId?: number,
   ): Promise<NftEntity> {
-
+    if (typeof nftId === 'undefined') {
+      nftId = (await this.nftService.createNft(user)).id;
+    }
     const nftUpdates = this.#transformFormDataToNftUpdates(
       nftUpdatesBody,
       filesArray,
@@ -93,35 +99,8 @@ export class NftController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async delete(@CurrentUser() user: User, @Param('id') nftId?: number) {
+  async delete(@CurrentUser() user: UserEntity, @Param('id') nftId: number) {
     return await this.nftService.deleteNft(user, nftId);
-  }
-
-  #validatePaginationParams(params: PaginationParams): void {
-    if (params.pageOffset < 0 || params.pageSize < 1) {
-      throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST);
-    }
-
-    if (
-      !this.nftService
-        .getSortableFields()
-        .some((allowedSortKey: string) => params.orderBy == allowedSortKey)
-    ) {
-      throw new HttpException(
-        `${params.orderBy} is not one of the allowed sort keys`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    if (
-      !['asc', 'desc'].some(
-        (allowedOrderDir: string) => params.orderDirection == allowedOrderDir,
-      )
-    ) {
-      throw new HttpException(
-        `${params.orderDirection} is not one of the allowed sort directions`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
   }
 
   #transformFormDataToNftUpdates(nftUpdatesBody: any, filesArray?: any[]) {
@@ -154,7 +133,7 @@ export class NftController {
     return {
       ...new NftFilterParams(),
       ...queryParamsToPaginationParams(sort, range),
-      filters: filters
-    }
+      filters: filters,
+    };
   }
 }

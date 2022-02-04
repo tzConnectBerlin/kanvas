@@ -1,22 +1,19 @@
-import { Injectable, Inject, HttpException, HttpStatus } from '@nestjs/common';
-import { PG_CONNECTION } from '../../constants';
-import { DbPool } from '../../db.module';
-import { Role } from '../entities/role.entity';
+import { Injectable, Inject } from '@nestjs/common';
+import { PG_CONNECTION } from 'src/constants';
+import { DbPool } from 'src/db.module';
+import { Roles } from '../entities/role.entity';
 
 @Injectable()
 export class RoleService {
   constructor(@Inject(PG_CONNECTION) private db: DbPool) {}
-  async create({ id, roleLabel }: Role) {
-    try {
+  async createRoles() {
+    for (const roleId of Object.keys(Roles)) {
+      if (isNaN(Number(roleId))) {
+        continue;
+      }
       await this.db.query(
         'INSERT INTO user_role (id, role_label) VALUES ($1, $2)',
-        [id, roleLabel],
-      );
-      return { id, roleLabel };
-    } catch (e) {
-      throw new HttpException(
-        'Unable to create new role',
-        HttpStatus.BAD_REQUEST,
+        [roleId, Roles[roleId]],
       );
     }
   }
@@ -33,12 +30,12 @@ WHERE id = ANY($1)
     return labelsQryRes.rows.map((row: any) => row.role_label);
   }
 
-  async getRoles(): Promise<Role[]> {
+  async getRoles(): Promise<Roles[]> {
     const labelsQryRes = await this.db.query(
       `
 SELECT id, role_label
 FROM user_role
-`
+`,
     );
     return labelsQryRes.rows;
   }

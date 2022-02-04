@@ -15,7 +15,6 @@ types.setTypeParser(
     return new Date(stringValue + '+0000');
   },
 );
-console.debug('PORT IS', Number(assertEnv('PGPORT')));
 
 export const dbPool = new Pool({
   host: assertEnv('PGHOST'),
@@ -24,21 +23,21 @@ export const dbPool = new Pool({
   password: assertEnv('PGPASSWORD'),
   database: assertEnv('PGDATABASE'),
 });
-
 const dbProvider = {
   provide: PG_CONNECTION,
   useValue: dbPool,
 };
 
+export const storeDbPool = new Pool({
+  host: assertEnv('PGHOST'),
+  port: Number(assertEnv('PGPORT')),
+  user: assertEnv('PGUSER'),
+  password: assertEnv('PGPASSWORD'),
+  database: 'store_replication',
+});
 const dbStoreProvider = {
   provide: PG_CONNECTION_STORE_REPLICATION,
-  useValue: new Pool({
-    host: assertEnv('PGHOST'),
-    port: Number(assertEnv('PGPORT')),
-    user: assertEnv('PGUSER'),
-    password: assertEnv('PGPASSWORD'),
-    database: 'store_replication',
-  }),
+  useValue: storeDbPool,
 };
 
 @Module({

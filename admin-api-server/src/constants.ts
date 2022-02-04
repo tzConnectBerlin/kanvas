@@ -14,3 +14,6 @@ export const RATE_LIMIT_WINDOW_SECS = Number(
   process.env['RATE_LIMIT_WINDOW_SECS'] || 60,
 );
 export const RATE_LIMIT = Number(process.env['RATE_LIMIT'] || 100);
+
+export const STM_CONFIG_FILE =
+  process.env['STM_CONFIG_FILE'] || './config/stm_example.yaml';

@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR/..
+
+export STORE_PGPORT=15431
+export STORE_PGHOST=localhost
+export STORE_PGUSER=testusr
+export STORE_PGPASSWORD=testpass
+export STORE_PGDATABASE=store_replication
+
+function store_env_exec {
+    PGHOST=$STORE_PGHOST \
+        PGPORT=$STORE_PGPORT \
+        PGUSER=$STORE_PGUSER \
+        PGPASSWORD=$STORE_PGPASSWORD \
+        PGDATABASE=$STORE_PGDATABASE \
+        $@
+}
+
+export PGPORT=15431
+export PGHOST=localhost
+export PGUSER=testusr
+export PGPASSWORD=testpass
+export PGDATABASE=test_admin
+
+function assert_docker_ok {
+    port=$1
+
+    if [[ "$?" != "0" ]]; then
+        process=`docker ps | grep $port | awk '{print $1}'`
+        docker kill $process
+        echo failed to start testdb, cannot run tests
+        exit 1
+    fi
+}
+
+db_docker=`DOCKER_ARGS='-d' DBSETUP_LOG=quiet ./script/local-db -c wal_level=logical -c log_statement=all`
+assert_docker_ok $PGPORT
+trap "docker kill $db_docker" EXIT
+
+echo "waiting for testdb setup (admin).. (docker: $db_docker)"
+./script/wait-db
+
+psql -c 'create database test_store'
+store_env_exec ../store-api-server/script/migrate >/dev/null 2>&1 || exit 1
+store_env_exec psql < ../store-api-server/script/populate-testdb.sql || exit 1
+
+echo "waiting for testdb setup (store).."
+store_env_exec ../store-api-server/script/wait-db
+
+yarn run seed || exit 1
+
+
+export JWT_EXPIRATION_TIME=86400000
+export JWT_SECRET='wPK-TESTING_ADMIN'
+export STM_CONFIG_FILE='config/e2e_tests.yaml'
+
+echo "running tests.."
+
+mkdir -p test/coverage
+jest "$@" --coverage | tee test/coverage/summary.txt || exit 1
+sed -n '/^-----/,$p' test/coverage/summary.txt > test/coverage/summary_.txt
+head -n 4 test/coverage/summary_.txt | awk -F '|' '{print $2 $3 $4 $5}'
+sed 's/^/\n/' test/coverage/summary_.txt > test/coverage/summary.txt
+rm test/coverage/summary_.txt

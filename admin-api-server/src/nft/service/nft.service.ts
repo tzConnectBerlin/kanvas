@@ -5,12 +5,12 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import { PG_CONNECTION, FILE_PREFIX } from 'src/constants';
+import { PG_CONNECTION, FILE_PREFIX, STM_CONFIG_FILE } from 'src/constants';
 import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
-import { User } from 'src/user/entities/user.entity';
+import { UserEntity } from 'src/user/entities/user.entity';
 import { NftEntity, NftUpdate } from '../entities/nft.entity';
-import { NftFilterParams, parseStringArray } from '../params';
+import { NftFilterParams } from '../params';
 import { RoleService } from 'src/role/service/role.service';
 import { S3Service } from './s3.service';
 import { Lock } from 'async-await-mutex-lock';
@@ -29,7 +29,7 @@ export class NftService {
     @Inject(PG_CONNECTION) private db: DbPool,
     private readonly roleService: RoleService,
   ) {
-    const stmConfigFile = './config/stm_example.yaml';
+    const stmConfigFile = STM_CONFIG_FILE;
     this.stm = new StateTransitionMachine(stmConfigFile);
     this.nftLock = new Lock<number>();
     fs.watch(stmConfigFile, (event: any, filename: any) => {
@@ -69,7 +69,8 @@ export class NftService {
 WITH attr AS (
   SELECT
     nft_id,
-    JSONB_OBJECT(ARRAY_AGG(name), ARRAY_AGG(value)) AS attributes
+    JSONB_OBJECT(ARRAY_AGG(name), ARRAY_AGG(value)) AS attributes,
+    MAX(set_at) AS last_updated_at
   FROM nft_attribute
   WHERE ($2::INTEGER[] IS NULL OR nft_id = ANY($2::INTEGER[]))
   GROUP BY nft_id
@@ -79,14 +80,14 @@ SELECT
   nft.state,
   nft.created_by,
   nft.created_at,
-  nft.updated_at,
+  COALESCE(attr.last_updated_at, nft.created_at) AS updated_at,
   attr.attributes
 FROM nft
 LEFT JOIN attr
   ON nft.id = attr.nft_id
 WHERE ($1::TEXT[] IS NULL OR state = ANY($1::TEXT[]))
   AND ($2::INTEGER[] IS NULL OR id = ANY($2::INTEGER[]))
-ORDER BY ${orderBy} ${params.orderDirection}
+ORDER BY ${orderBy} ${params.orderDirection} ${orderBy !== 'id' ? ', id' : ''}
 OFFSET ${params.pageOffset}
 LIMIT  ${params.pageSize}
       `,
@@ -94,7 +95,7 @@ LIMIT  ${params.pageSize}
     );
 
     if (qryRes.rowCount === 0) {
-      return undefined;
+      return [];
     }
     return qryRes.rows.map((row: any) => {
       const nft = <NftEntity>{
@@ -129,7 +130,7 @@ LIMIT  ${params.pageSize}
     return nfts[0];
   }
 
-  async getNft(user: User, nftId: number) {
+  async getNft(user: UserEntity, nftId: number) {
     const nft = await this.findOne(nftId);
     const actor = await this.getActorForNft(user, nft);
 
@@ -139,7 +140,7 @@ LIMIT  ${params.pageSize}
     };
   }
 
-  async getActorForNft(user: User, nft: NftEntity): Promise<Actor> {
+  async getActorForNft(user: UserEntity, nft: NftEntity): Promise<Actor> {
     const roles = await this.roleService.getLabels(user.roles);
     if (nft.createdBy === user.id) {
       roles.push('creator');
@@ -148,16 +149,15 @@ LIMIT  ${params.pageSize}
   }
 
   async applyNftUpdates(
-    user: User,
-    nftId: number,
+    user: UserEntity,
+    nftId: number | undefined,
     nftUpdates: NftUpdate[],
   ): Promise<NftEntity> {
     await this.nftLock.acquire(nftId);
     try {
-      let nfts = await this.findByIds([nftId]);
-      if (typeof nfts === 'undefined') {
-
-        nfts = [await this.#createNft(user)];
+      const nfts = await this.findByIds([nftId]);
+      if (nfts.length === 0) {
+        throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
       }
       const nft = nfts[0];
       const actor = await this.getActorForNft(user, nft);
@@ -205,7 +205,7 @@ LIMIT  ${params.pageSize}
     }
   }
 
-  async deleteNft(user: User, nftId: number) {
+  async deleteNft(user: UserEntity, nftId: number) {
     await this.nftLock.acquire(nftId);
     const nft = await this.findOne(nftId);
     if (nft.createdBy !== user.id) {
@@ -250,7 +250,7 @@ WHERE id = $1
   }
 
   async #uploadContent(
-    user: User,
+    user: UserEntity,
     nftId: number,
     attribute: string,
     file: any,
@@ -284,7 +284,7 @@ WHERE id = $1
     };
   }
 
-  async #createNft(creator: User): Promise<NftEntity> {
+  async createNft(creator: UserEntity): Promise<NftEntity> {
     try {
       const qryRes = await this.db.query(
         `
@@ -297,9 +297,9 @@ RETURNING id
         [creator.id],
       );
 
-      const test= await this.getNft(creator, qryRes.rows[0].id);
+      const test = await this.getNft(creator, qryRes.rows[0].id);
 
-      return test
+      return test;
     } catch (err: any) {
       Logger.error(`Unable to create new nft, err: ${err}`);
       throw new HttpException(
@@ -309,7 +309,7 @@ RETURNING id
     }
   }
 
-  async #updateNft(setBy: User, nft: NftEntity) {
+  async #updateNft(setBy: UserEntity, nft: NftEntity) {
     const attrNames = Object.keys(nft.attributes);
     const attrValues = attrNames.map((name: string) =>
       JSON.stringify(nft.attributes[name]),
@@ -321,7 +321,8 @@ RETURNING id
       dbTx.query(
         `
 UPDATE nft
-SET state = $2
+SET
+  state = $2
 WHERE id = $1
       `,
         [nft.id, nft.state],
