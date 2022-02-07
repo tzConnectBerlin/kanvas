@@ -101,7 +101,7 @@ const AvailabilityWrapper = styled.div<{ inStock: boolean; willDrop: boolean; pe
     right: 1rem;
 
     background-color: ${(props) =>
-        props.pending ? '#dadd10' : props.inStock ? (props.willDrop ? '#136dff' : '#00ca00') :  'red'};
+        props.pending ? '#dadd10' : props.inStock ? (props.willDrop ? '#136dff' : '#00ca00') : 'red'};
 
     padding-left: 0.5rem;
     padding-right: 0.5rem;
@@ -298,29 +298,30 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                             <CustomCircularProgress height={1.2} />
 
                         </Stack>
-                    :
-                        <Box
-                            display="flex"
-                            flexDirection="row"
-                            marginLeft="auto"
-                        >
-                            <Typography
-                                weight="SemiBold"
-                                size="h4"
+                        :
+                        props.nftCardMode !== 'user' &&
+                            <Box
+                                display="flex"
+                                flexDirection="row"
                                 marginLeft="auto"
                             >
-                                {' '}
-                                {props.price ? props.price : '- '}
-                            </Typography>
+                                <Typography
+                                    weight="SemiBold"
+                                    size="h4"
+                                    marginLeft="auto"
+                                >
+                                    {' '}
+                                    {props.price ? props.price : '- '}
+                                </Typography>
 
-                            <Typography
-                                weight="Currency"
-                                size="h4"
-                                marginLeft="auto"
-                            >
-                                <TezosLogo width="18px" margin="0 0.2rem" />
-                            </Typography>
-                        </Box>
+                                <Typography
+                                    weight="Currency"
+                                    size="h4"
+                                    marginLeft="auto"
+                                >
+                                    <TezosLogo width="18px" margin="0 0.2rem" />
+                                </Typography>
+                            </Box>
                     }
                 </Stack>
 
