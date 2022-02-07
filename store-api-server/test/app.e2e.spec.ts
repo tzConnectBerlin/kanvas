@@ -81,6 +81,10 @@ describe('AppController (e2e)', () => {
         request(app.getHttpServer()).post('/nfts/28'),
       ]);
 
+      // have to sleep here for a bit, because we (on purpose) don't await
+      // on the nft increment view count query in POST /nfts/:id calls
+      await sleep(300);
+
       const res = await request(app.getHttpServer())
         .get('/nfts')
         .query({ orderBy: 'views', orderDirection: 'desc', pageSize: '3' });
@@ -1139,7 +1143,7 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      // nft price: 43 id: 1
+      // nft price: 104 id: 1
       const add2 = await request(app.getHttpServer())
         .post('/users/cart/add/1')
         .set('authorization', bearer);
@@ -1561,6 +1565,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'stripe payment: Payment status should not change from FAILED',
     async () => {
+      console.log('start of failed test');
       const { bearer, id } = await loginUser(app, 'addr', 'admin');
 
       // nft price: 43 id: 4
@@ -1599,6 +1604,9 @@ describe('AppController (e2e)', () => {
 
       const failed = await paymentService.getPaymentIdForLatestUserOrder(id);
       expect(failed.status).toEqual(PaymentStatus.FAILED);
+      console.log(
+        `failed.payment_id: ${failed.payment_id}, payment_id: ${payment_id}`,
+      );
 
       // reconstruct success event from stripe
       const constructedEvent2 = {
@@ -1617,6 +1625,12 @@ describe('AppController (e2e)', () => {
         id,
       );
       expect(stillFailed.status).toEqual(PaymentStatus.FAILED);
+      console.log('end of failed test');
+
+      const cleanupCart = await request(app.getHttpServer())
+        .post('/users/cart/remove/4')
+        .set('authorization', bearer);
+      expect(cleanupCart.statusCode).toEqual(204);
     },
   );
 
@@ -1738,7 +1752,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: 43,
             editionsSize: 8,
-            editionsAvailable: 3,
+            editionsAvailable: 1,
             categories: [
               {
                 id: 4,
@@ -1746,7 +1760,7 @@ describe('AppController (e2e)', () => {
                 name: 'Drawing',
               },
             ],
-            ownerStatuses: ['pending', 'pending', 'pending', 'pending'],
+            ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
         lowerPriceBound: 1,
@@ -1837,7 +1851,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: 43,
             editionsSize: 8,
-            editionsAvailable: 3,
+            editionsAvailable: 1,
             categories: [
               {
                 id: 4,
@@ -1845,7 +1859,7 @@ describe('AppController (e2e)', () => {
                 name: 'Drawing',
               },
             ],
-            ownerStatuses: ['pending', 'pending', 'pending', 'pending'],
+            ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
         lowerPriceBound: 1,
@@ -1890,7 +1904,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: 43,
             editionsSize: 8,
-            editionsAvailable: 3,
+            editionsAvailable: 1,
             categories: [
               {
                 id: 4,
@@ -1898,7 +1912,7 @@ describe('AppController (e2e)', () => {
                 name: 'Drawing',
               },
             ],
-            ownerStatuses: ['pending', 'pending', 'pending', 'pending'],
+            ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
         lowerPriceBound: 1,
@@ -1943,7 +1957,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: 43,
             editionsSize: 8,
-            editionsAvailable: 3,
+            editionsAvailable: 1,
             categories: [
               {
                 id: 4,
@@ -1951,7 +1965,7 @@ describe('AppController (e2e)', () => {
                 name: 'Drawing',
               },
             ],
-            ownerStatuses: ['pending', 'pending', 'pending', 'pending'],
+            ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
         lowerPriceBound: 1,
@@ -1996,7 +2010,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: 43,
             editionsSize: 8,
-            editionsAvailable: 3,
+            editionsAvailable: 1,
             categories: [
               {
                 id: 4,
@@ -2004,7 +2018,7 @@ describe('AppController (e2e)', () => {
                 name: 'Drawing',
               },
             ],
-            ownerStatuses: ['pending', 'pending', 'pending', 'pending'],
+            ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
         lowerPriceBound: 1,
@@ -2049,7 +2063,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: 43,
             editionsSize: 8,
-            editionsAvailable: 3,
+            editionsAvailable: 1,
             categories: [
               {
                 id: 4,
@@ -2057,7 +2071,7 @@ describe('AppController (e2e)', () => {
                 name: 'Drawing',
               },
             ],
-            ownerStatuses: ['pending', 'pending', 'pending', 'pending'],
+            ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
         lowerPriceBound: 1,
@@ -2092,7 +2106,7 @@ describe('AppController (e2e)', () => {
       { nftId: '1', ownerStatuses: ['pending'] },
       {
         nftId: '4',
-        ownerStatuses: ['pending', 'pending', 'pending', 'pending'],
+        ownerStatuses: ['pending', 'pending', 'pending'],
       },
     ]);
   });
@@ -2129,7 +2143,7 @@ describe('AppController (e2e)', () => {
           userName: 'admin',
           userAddress: 'addr',
           userPicture: null,
-          totalPaid: '173',
+          totalPaid: '130',
         },
       ],
     });
@@ -2330,4 +2344,10 @@ async function loginUser(
     id: login.body.id,
     address: address,
   };
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }

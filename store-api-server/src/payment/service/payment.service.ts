@@ -20,7 +20,7 @@ export enum PaymentStatus {
 
 export enum PaymentProviderEnum {
   STRIPE = 'stripe',
-  TEST = 'test_provider'
+  TEST = 'test_provider',
 }
 
 interface NftOrder {
@@ -42,15 +42,16 @@ export class PaymentService {
     ? require('stripe')(process.env.STRIPE_SECRET)
     : undefined;
 
+  FINAL_STATES = [PaymentStatus.FAILED, PaymentStatus.SUCCEEDED];
+
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
     private readonly mintService: MintService,
     private readonly userService: UserService,
-    private readonly nftService: NftService
-  ) { }
+    private readonly nftService: NftService,
+  ) {}
 
   async webhookHandler(constructedEvent: any) {
-
     let paymentStatus: PaymentStatus;
 
     switch (constructedEvent.type) {
@@ -68,15 +69,22 @@ export class PaymentService {
         break;
       default:
         Logger.error(`Unhandled event type ${constructedEvent.type}`);
-        throw Err('')
+        throw Err('');
     }
 
     const previousStatus = await this.editPaymentStatus(
-      paymentStatus,
       constructedEvent.data.object.id,
+      paymentStatus,
     );
 
-    if (previousStatus !== PaymentStatus.FAILED && paymentStatus === PaymentStatus.SUCCEEDED) {
+    console.log(
+      `prevStatus: ${previousStatus}, paymentStatus: ${paymentStatus}`,
+    );
+    if (
+      (typeof previousStatus === 'undefined' ||
+        !this.FINAL_STATES.includes(previousStatus)) &&
+      paymentStatus === PaymentStatus.SUCCEEDED
+    ) {
       const orderId = await this.getPaymentOrderId(
         constructedEvent.data.object.id,
       );
@@ -86,8 +94,10 @@ export class PaymentService {
   }
 
   // Prepare the cart, order and amount for payment
-  async preparePayment(userId: number, provider: PaymentProviderEnum): Promise<{ amount: number, nftOrder: NftOrder }> {
-
+  async preparePayment(
+    userId: number,
+    provider: PaymentProviderEnum,
+  ): Promise<{ amount: number; nftOrder: NftOrder }> {
     const cartSessionRes = await this.userService.getUserCartSession(userId);
 
     if (!cartSessionRes.ok || typeof cartSessionRes.val !== 'string') {
@@ -100,11 +110,13 @@ export class PaymentService {
 
     const amount = cartList.nfts.reduce((sum, nft) => sum + nft.price, 0);
 
-    return { amount: amount, nftOrder: nftOrder }
+    return { amount: amount, nftOrder: nftOrder };
   }
 
-  async createStripePayment(amount: number, user: UserEntity): Promise<StripePaymentIntent> {
-
+  async createStripePayment(
+    amount: number,
+    user: UserEntity,
+  ): Promise<StripePaymentIntent> {
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount: amount * 100,
       currency: 'eur', // Have to change this to handle different currencies
@@ -114,16 +126,27 @@ export class PaymentService {
     });
 
     // add multiple currency later on
-    return { amount: amount * 100, currency: 'eur', clientSecret: paymentIntent.client_secret, id: paymentIntent.id };
+    return {
+      amount: amount * 100,
+      currency: 'eur',
+      clientSecret: paymentIntent.client_secret,
+      id: paymentIntent.id,
+    };
   }
 
   newOrderExpiration(): Date {
     const expiresAt = new Date();
-    expiresAt.setTime(expiresAt.getTime() + Number(assertEnv('ORDER_EXPIRATION_MILLI_SECS')));
+    expiresAt.setTime(
+      expiresAt.getTime() + Number(assertEnv('ORDER_EXPIRATION_MILLI_SECS')),
+    );
     return expiresAt;
   }
 
-  async createPayment(provider: PaymentProviderEnum, paymentId: string, nftOrderId: number) {
+  async createPayment(
+    provider: PaymentProviderEnum,
+    paymentId: string,
+    nftOrderId: number,
+  ) {
     try {
       const expireAt = this.newOrderExpiration();
       await this.conn.query(
@@ -149,35 +172,63 @@ export class PaymentService {
     }
   }
 
-  async editPaymentStatus(status: PaymentStatus, paymentId: string): Promise<string | undefined> {
+  async editPaymentStatus(
+    paymentId: string,
+    status: PaymentStatus,
+  ): Promise<PaymentStatus | undefined> {
+    const tx = await this.conn.connect();
     try {
-      const qryRes = await this.conn.query(
+      await tx.query('BEGIN');
+      const qryPrevStatus = await tx.query(
         `
-  UPDATE payment
-  SET status = $1
-  WHERE payment_id = $2
-  AND status NOT IN ($3, $4)
-  RETURNING status`,
-        [status, paymentId, PaymentStatus.SUCCEEDED, PaymentStatus.FAILED],
+SELECT status
+FROM payment
+WHERE payment_id = $1
+        `,
+        [paymentId],
       );
-      return qryRes.rows[0] ? qryRes.rows[0]['status'] : undefined
+
+      await tx.query(
+        `
+UPDATE payment
+SET status = $1
+WHERE payment_id = $2
+  AND NOT status = ANY($3::payment_status[])`,
+        [status, paymentId, this.FINAL_STATES],
+      );
+
+      await tx.query('commit');
+
+      return qryPrevStatus.rows[0]
+        ? qryPrevStatus.rows[0]['status']
+        : undefined;
     } catch (err) {
+      await tx.query('ROLLBACK');
       Logger.error(
         `Err on updating payment status in db (paymentId=${paymentId}, newStatus=${status}), err: ${err}`,
       );
       throw err;
+    } finally {
+      tx.release();
     }
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
   async deleteExpiredPayments() {
-    const canceledPaymentsIds = await this.conn.query(`
+    const canceledPaymentsIds = await this.conn.query(
+      `
       UPDATE payment
       SET status = $1
       WHERE expires_at < now()::timestamp AT TIME ZONE 'UTC'
         AND status IN ($2, $3)
       RETURNING payment_id, expires_at
-    `, [PaymentStatus.TIMED_OUT, PaymentStatus.CREATED, PaymentStatus.PROCESSING]);
+    `,
+      [
+        PaymentStatus.TIMED_OUT,
+        PaymentStatus.CREATED,
+        PaymentStatus.PROCESSING,
+      ],
+    );
 
     for (const row of canceledPaymentsIds.rows) {
       try {
@@ -199,10 +250,16 @@ export class PaymentService {
 UPDATE payment
 SET status = $2
 WHERE nft_order_id = $1
-AND status NOT IN ($2, $3, $4, $5)
+AND status IN ($3, $4, $5)
 RETURNING payment_id
       `,
-      [orderId, PaymentStatus.CANCELED, PaymentStatus.SUCCEEDED, PaymentStatus.PROCESSING, PaymentStatus.TIMED_OUT],
+      [
+        orderId,
+        PaymentStatus.CANCELED,
+        PaymentStatus.CREATED,
+        PaymentStatus.PROCESSING,
+        PaymentStatus.TIMED_OUT,
+      ],
     );
 
     if (!paymentIntentId.rowCount) {
@@ -211,14 +268,20 @@ RETURNING payment_id
 
     try {
       if (provider === PaymentProviderEnum.STRIPE) {
-        await this.stripe.paymentIntents.cancel(paymentIntentId.rows[0]['payment_id']);
+        await this.stripe.paymentIntents.cancel(
+          paymentIntentId.rows[0]['payment_id'],
+        );
       }
     } catch (err: any) {
       throw Err(`paymentIntentCancel failed (orderId=${orderId}), err: ${err}`);
     }
   }
 
-  async createNftOrder(session: string, userId: number, provider: PaymentProviderEnum): Promise<NftOrder> {
+  async createNftOrder(
+    session: string,
+    userId: number,
+    provider: PaymentProviderEnum,
+  ): Promise<NftOrder> {
     const cartMeta = await this.userService.getCartMeta(session);
     if (typeof cartMeta === 'undefined') {
       throw Err(`createNftOrder err: cart should not be empty`);
@@ -233,7 +296,7 @@ RETURNING payment_id
 
     const tx = await this.conn.connect();
     try {
-      tx.query('BEGIN');
+      await tx.query('BEGIN');
       const nftQryRes = await tx.query(
         `
 INSERT INTO nft_order (
@@ -312,6 +375,7 @@ WHERE nft_order.id = $1
   }
 
   async orderCheckout(orderId: number): Promise<boolean> {
+    console.log(`order checkout: ${orderId}`);
     const userAddress = await this.getOrderUserAddress(orderId);
 
     const dbTx = await this.conn.connect();
@@ -361,8 +425,11 @@ RETURNING nft_id
   }
 
   // Test functions
-  async getPaymentIdForLatestUserOrder(userId: number): Promise<{ payment_id: string, order_id: number, status: PaymentStatus }> {
-    const qryRes = await this.conn.query(`
+  async getPaymentIdForLatestUserOrder(
+    userId: number,
+  ): Promise<{ payment_id: string; order_id: number; status: PaymentStatus }> {
+    const qryRes = await this.conn.query(
+      `
 SELECT payment_id, status, nft_order.id as order_id
 FROM payment
 JOIN nft_order
@@ -375,8 +442,14 @@ WHERE nft_order_id = (
   LIMIT 1
 )
 ORDER BY payment.id DESC
-      `, [userId])
+      `,
+      [userId],
+    );
 
-    return { payment_id: qryRes.rows[0]['payment_id'], order_id: qryRes.rows[0]['order_id'], status: qryRes.rows[0]['status'] }
+    return {
+      payment_id: qryRes.rows[0]['payment_id'],
+      order_id: qryRes.rows[0]['order_id'],
+      status: qryRes.rows[0]['status'],
+    };
   }
 }

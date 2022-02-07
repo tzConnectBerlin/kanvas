@@ -3,7 +3,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
 export STORE_PGPORT=15431
-export STORE_PGHOST=localhost
+export STORE_PGHOST=0.0.0.0
 export STORE_PGUSER=testusr
 export STORE_PGPASSWORD=testpass
 export STORE_PGDATABASE=store_replication
@@ -18,7 +18,7 @@ function store_env_exec {
 }
 
 export PGPORT=15431
-export PGHOST=localhost
+export PGHOST=0.0.0.0
 export PGUSER=testusr
 export PGPASSWORD=testpass
 export PGDATABASE=test_admin
