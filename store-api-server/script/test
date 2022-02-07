@@ -32,5 +32,3 @@ sed -n '/^-----/,$p' test/coverage/summary.txt > test/coverage/summary_.txt
 head -n 4 test/coverage/summary_.txt | awk -F '|' '{print $2 $3 $4 $5}'
 sed 's/^/\n/' test/coverage/summary_.txt > test/coverage/summary.txt
 rm test/coverage/summary_.txt
-
-psql

@@ -77,9 +77,6 @@ export class PaymentService {
       paymentStatus,
     );
 
-    console.log(
-      `prevStatus: ${previousStatus}, paymentStatus: ${paymentStatus}`,
-    );
     if (
       (typeof previousStatus === 'undefined' ||
         !this.FINAL_STATES.includes(previousStatus)) &&
@@ -375,7 +372,6 @@ WHERE nft_order.id = $1
   }
 
   async orderCheckout(orderId: number): Promise<boolean> {
-    console.log(`order checkout: ${orderId}`);
     const userAddress = await this.getOrderUserAddress(orderId);
 
     const dbTx = await this.conn.connect();

@@ -1565,7 +1565,6 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'stripe payment: Payment status should not change from FAILED',
     async () => {
-      console.log('start of failed test');
       const { bearer, id } = await loginUser(app, 'addr', 'admin');
 
       // nft price: 43 id: 4
@@ -1604,9 +1603,6 @@ describe('AppController (e2e)', () => {
 
       const failed = await paymentService.getPaymentIdForLatestUserOrder(id);
       expect(failed.status).toEqual(PaymentStatus.FAILED);
-      console.log(
-        `failed.payment_id: ${failed.payment_id}, payment_id: ${payment_id}`,
-      );
 
       // reconstruct success event from stripe
       const constructedEvent2 = {
@@ -1625,7 +1621,6 @@ describe('AppController (e2e)', () => {
         id,
       );
       expect(stillFailed.status).toEqual(PaymentStatus.FAILED);
-      console.log('end of failed test');
 
       const cleanupCart = await request(app.getHttpServer())
         .post('/users/cart/remove/4')
