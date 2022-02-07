@@ -188,6 +188,9 @@ const Router = () => {
                     </Switch>
                 </ScrollToTop>
 
+
+                <Footer />
+            </StyledBrowserRouter>
                 <ShoppingCart
                     open={cartOpen}
                     nftsInCart={nftsInCart}
@@ -201,9 +204,6 @@ const Router = () => {
                 {!hasCookie && (
                     <CookieBanner handleClose={() => setCookie(!cookie)} />
                 )}
-
-                <Footer />
-            </StyledBrowserRouter>
         </ThemeProvider>
     );
 };
