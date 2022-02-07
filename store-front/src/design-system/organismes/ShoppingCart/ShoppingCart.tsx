@@ -29,7 +29,7 @@ const ContainerPopupStyled = styled.div<{ open: boolean }>`
     height: 100vh;
     z-index: 11;
 
-    width: ${(props) => (props.open ? 65 : 0)}%;
+    width: ${(props) => (props.open ? 100 : 0)}%;
     visibility: ${(props) => (props.open ? 'visible' : 'hidden')}!important;
     opacity: ${(props) => (props.open ? 1 : 0)} !important;
 
@@ -54,7 +54,7 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
     position: fixed;
     right: 0;
     bottom: 0;
-    z-index: 10;
+    z-index: 12;
     top: 0;
     border-top: 1px solid black;
 

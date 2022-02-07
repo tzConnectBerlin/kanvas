@@ -7,12 +7,11 @@ import PageWrapper from '../../design-system/commons/PageWrapper';
 
 import { Pagination, Stack, useMediaQuery, useTheme } from '@mui/material';
 import { Animated } from 'react-animated-css';
-import { FC, useCallback, useEffect, useState } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router';
+import { FC, useEffect, useState } from 'react';
+import { useHistory, useParams } from 'react-router';
 import { HeaderProfile } from '../../design-system/molecules/HeaderProfile/HeaderProfile';
 import { Theme } from '@mui/material';
 import { INft } from '../../interfaces/artwork';
-import { LensTwoTone } from '@mui/icons-material';
 
 interface ParamTypes {
     userAddress: string;
