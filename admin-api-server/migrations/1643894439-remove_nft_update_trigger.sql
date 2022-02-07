@@ -4,10 +4,10 @@
 
 BEGIN;
 
-DROP FUNCTION IF EXISTS update_updated_at_column;
-DROP TRIGGER IF EXITS update_nft_updated_at;
-
 ALTER TABLE nft DROP COLUMN updated_at;
+
+DROP TRIGGER update_nft_updated_at ON nft;
+DROP FUNCTION update_updated_at_column;
 
 COMMIT;
 

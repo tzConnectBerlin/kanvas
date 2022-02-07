@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
-import { PG_CONNECTION, PG_CONNECTION_STORE_REPLICATION } from './constants';
+import {
+  PG_CONNECTION,
+  PG_CONNECTION_STORE_REPLICATION,
+  PG_CONNECTION_STORE,
+} from './constants';
 
 class dbConnMock {}
 
@@ -13,8 +17,13 @@ const dbMockStoreReplProvider = {
   useValue: new dbConnMock(),
 };
 
+const dbMockStoreProvider = {
+  provide: PG_CONNECTION_STORE,
+  useValue: new dbConnMock(),
+};
+
 @Module({
-  providers: [dbMockProvider, dbMockStoreReplProvider],
-  exports: [dbMockProvider, dbMockStoreReplProvider],
+  providers: [dbMockProvider, dbMockStoreReplProvider, dbMockStoreProvider],
+  exports: [dbMockProvider, dbMockStoreReplProvider, dbMockStoreProvider],
 })
 export class DbMockModule {}

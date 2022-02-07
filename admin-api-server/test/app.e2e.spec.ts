@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
-import { storeDbPool } from 'src/db.module';
+import { dbPool, storeReplDbPool } from 'src/db.module';
 import { Roles } from 'src/role/entities/role.entity';
 
 let anyTestFailed = false;
@@ -352,6 +352,7 @@ describe('AppController (e2e)', () => {
           categories: JSON.stringify([2, 5, 10]),
           editions_size: JSON.stringify(4),
           proposed: JSON.stringify(true),
+          launch_at: JSON.stringify(Date.now() + 30 * 60 * 1000),
         });
 
       expect(res.body.state).toEqual('proposed');
@@ -487,6 +488,7 @@ describe('AppController (e2e)', () => {
           categories: 'number[]',
           editions_size: 'number',
           price: 'number',
+          launch_at: 'date',
           proposed: 'boolean',
         },
       });
@@ -513,6 +515,8 @@ describe('AppController (e2e)', () => {
         );
         delete res.body.data[i].createdAt;
         delete res.body.data[i].updatedAt;
+
+        delete res.body.data[i].attributes.launch_at;
       }
 
       expect(res.body).toStrictEqual({
@@ -666,6 +670,8 @@ describe('AppController (e2e)', () => {
         );
         delete res.body.data[i].createdAt;
         delete res.body.data[i].updatedAt;
+
+        delete res.body.data[i].attributes.launch_at;
       }
 
       expect(res.body).toStrictEqual({
@@ -756,6 +762,8 @@ describe('AppController (e2e)', () => {
         );
         delete res.body.data[i].createdAt;
         delete res.body.data[i].updatedAt;
+
+        delete res.body.data[i].attributes.launch_at;
       }
 
       expect(res.body).toStrictEqual({
@@ -819,6 +827,8 @@ describe('AppController (e2e)', () => {
         );
         delete res.body.data[i].createdAt;
         delete res.body.data[i].updatedAt;
+
+        delete res.body.data[i].attributes.launch_at;
       }
 
       expect(res.body).toStrictEqual({
@@ -2106,10 +2116,133 @@ describe('AppController (e2e)', () => {
       });
     },
   );
+
+  skipOnPriorFail('NFT test publish to store db', async () => {
+    await alignAdminNftNextIdWithStoreNfts();
+
+    const { bearer } = await loginUser(
+      app,
+      'admin@tzconnect.com',
+      'supersafepassword',
+    );
+    let res = await request(app.getHttpServer())
+      .patch('/nft')
+      .set('authorization', bearer)
+      .send({
+        name: JSON.stringify('some name'),
+        create_ready: JSON.stringify(true),
+      });
+    expect(res.statusCode).toEqual(200);
+
+    const allowedCategories = await request(app.getHttpServer())
+      .get(`/categories/assignable`)
+      .set('authorization', bearer);
+
+    const nftId = res.body.id;
+    res = await request(app.getHttpServer())
+      .patch(`/nft/${nftId}`)
+      .set('authorization', bearer)
+      .send({
+        price: JSON.stringify(105),
+        categories: JSON.stringify(
+          allowedCategories.body.data.map((cat: any) => cat.id).slice(0, 3),
+        ),
+        editions_size: JSON.stringify(4),
+        launch_at: JSON.stringify(Date.now() + 30 * 60 * 1000),
+        proposed: JSON.stringify(true),
+      });
+    expect(res.statusCode).toEqual(200);
+
+    res = await request(app.getHttpServer())
+      .patch(`/nft/${nftId}`)
+      .set('authorization', bearer)
+      .send({
+        publish: JSON.stringify(true),
+        'image.png': JSON.stringify('someuri'),
+        'thumbnail.png': JSON.stringify('somethumbnailuri'),
+        description: JSON.stringify('some long description'),
+      });
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.state).toEqual('finish');
+
+    const storeNft = await queryStoreDbNft(nftId);
+    delete storeNft.nft.created_at;
+    delete storeNft.nft.launch_at;
+
+    expect(storeNft).toStrictEqual({
+      nft: {
+        id: 35,
+        nft_name: 'some name',
+        ipfs_hash: null,
+        artifact_uri: 'someuri',
+        price: '105',
+        editions_size: 4,
+        view_count: 0,
+        description: 'some long description',
+        display_uri: null,
+        thumbnail_uri: 'somethumbnailuri',
+      },
+      categories: [3, 4, 5],
+    });
+  });
+
+  skipOnPriorFail(
+    'NFT test publish to store db (fails if non valid category assigned)',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'admin@tzconnect.com',
+        'supersafepassword',
+      );
+      let res = await request(app.getHttpServer())
+        .patch('/nft')
+        .set('authorization', bearer)
+        .send({
+          name: JSON.stringify('some name'),
+          create_ready: JSON.stringify(true),
+        });
+      expect(res.statusCode).toEqual(200);
+
+      const allowedCategories = await request(app.getHttpServer())
+        .get(`/categories/assignable`)
+        .set('authorization', bearer);
+
+      const nftId = res.body.id;
+      res = await request(app.getHttpServer())
+        .patch(`/nft/${nftId}`)
+        .set('authorization', bearer)
+        .send({
+          price: JSON.stringify(105),
+          categories: JSON.stringify(
+            [
+              ...allowedCategories.body.data
+                .map((cat: any) => cat.id)
+                .slice(0, 3),
+              0,
+            ], // 0 here is definitely wrong
+          ),
+          editions_size: JSON.stringify(4),
+          launch_at: JSON.stringify(Date.now() + 30 * 60 * 1000),
+          proposed: JSON.stringify(true),
+        });
+      expect(res.statusCode).toEqual(200);
+
+      res = await request(app.getHttpServer())
+        .patch(`/nft/${nftId}`)
+        .set('authorization', bearer)
+        .send({
+          publish: JSON.stringify(true),
+          'image.png': JSON.stringify('someuri'),
+          'thumbnail.png': JSON.stringify('somethumbnailuri'),
+          description: JSON.stringify('some long description'),
+        });
+      expect(res.statusCode).toEqual(500);
+    },
+  );
 });
 
 async function emulateNftSale(userId: number, nftIds: number[], at: Date) {
-  const qryRes = await storeDbPool.query(
+  const qryRes = await storeReplDbPool.query(
     `
 INSERT INTO nft_order (
   user_id, order_at
@@ -2122,7 +2255,7 @@ RETURNING id
 
   const orderId = qryRes.rows[0]['id'];
 
-  await storeDbPool.query(
+  await storeReplDbPool.query(
     `
 INSERT INTO mtm_nft_order_nft (
   nft_order_id, nft_id
@@ -2132,7 +2265,7 @@ SELECT $1, UNNEST($2::INTEGER[])
     [orderId, nftIds],
   );
 
-  await storeDbPool.query(
+  await storeReplDbPool.query(
     `
 INSERT INTO payment (
   payment_id, status, nft_order_id, provider, expires_at
@@ -2140,6 +2273,47 @@ INSERT INTO payment (
 VALUES ('bla', 'succeeded', $1, 'test_provider', now())
     `,
     [orderId],
+  );
+}
+
+async function queryStoreDbNft(nftId: number) {
+  const qryRes = await storeReplDbPool.query(
+    `
+SELECT *
+FROM nft
+WHERE id = $1`,
+    [nftId],
+  );
+  const qryResCats = await storeReplDbPool.query(
+    `
+SELECT nft_category_id
+FROM mtm_nft_category
+WHERE nft_id = $1
+ORDER BY 1`,
+    [nftId],
+  );
+
+  return {
+    nft: qryRes.rows[0],
+    categories: qryResCats.rows.map((row: any) => row['nft_category_id']),
+  };
+}
+
+async function alignAdminNftNextIdWithStoreNfts() {
+  const qryRes = await storeReplDbPool.query(
+    `
+SELECT MAX(id) as max_id FROM nft
+    `,
+    [],
+  );
+
+  const setLastId = qryRes.rows[0]['max_id'];
+
+  await dbPool.query(
+    `
+SELECT setval('nft_id_seq', $1)
+    `,
+    [setLastId],
   );
 }
 
