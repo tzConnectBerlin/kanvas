@@ -249,10 +249,11 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                     }}
                 >
                     {props.loading ? (
-                        [...new Array(3)].map(() => (
+                        [...new Array(3)].map((index) => (
                             <ShoppingCartItem
                                 loading={true}
                                 removeNft={() => {}}
+                                key={index}
                             />
                         ))
                     ) : props.nftsInCart.length > 0 ? (
@@ -261,6 +262,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 <ShoppingCartItem
                                     loading={false}
                                     nft={nft}
+                                    key={nft.id}
                                     removeNftLoading={
                                         deleteFromCartResponse.loading &&
                                         concernedDeletedNFT === nft.id

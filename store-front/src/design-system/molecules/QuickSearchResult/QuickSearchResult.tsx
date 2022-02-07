@@ -149,7 +149,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                             {[{}, {}, {}].map(() => (
                                 <ProfileResultWrapper
                                     direction="row"
-                                    spacing={4}
+                                    spacing={4}                                    
                                 >
                                     <Skeleton
                                         animation="wave"
@@ -183,6 +183,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                         onMouseDown={() =>
                                             navigateTo(`/product/${nft.id}`)
                                         }
+                                        key={nft.id}
                                     >
                                         <Avatar
                                             src={nft?.displayUri}

@@ -1,4 +1,3 @@
-
 import styled from '@emotion/styled';
 import Typography from '../../atoms/Typography';
 import { FC, useEffect, useState } from 'react';
@@ -41,9 +40,9 @@ export const UsersGrid: FC<UsersGridProps> = ({ ...props }) => {
     return (
         <StyledDiv>
             {props.users && props.users.length > 0 ? (
-                <StyledGrid container md={5} rowSpacing={5} spacing={2}>
+                <StyledGrid container rowSpacing={5} spacing={2}>
                     {props.users.map((user, index) => (
-                        <Grid item lg={3} md={4} sm={6} xs={12}>
+                        <Grid item lg={3} md={4} sm={6} xs={12} key={user.id}>
                             <UsersCard
                                 name={user.userName}
                                 index={index + 1}
@@ -65,10 +64,7 @@ export const UsersGrid: FC<UsersGridProps> = ({ ...props }) => {
                 >
                     {[...Array(12)].map((user, index) => (
                         <Grid item lg={3} md={4} sm={6} xs={12}>
-                            <UsersCard
-                                index={index + 1}
-                                loading={true}
-                            />
+                            <UsersCard index={index + 1} loading={true} />
                         </Grid>
                     ))}
                 </StyledGrid>

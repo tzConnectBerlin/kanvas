@@ -73,6 +73,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                             md={props.open ? 6 : 4}
                             sm={6}
                             xs={12}
+                            key={nft.id}
                         >
                             <NftCard
                                 id={nft.id.toString()}
