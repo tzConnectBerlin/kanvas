@@ -13,7 +13,7 @@ import { Copyright } from '../../atoms/Copyright';
 import { useTranslation } from 'react-i18next';
 import CustomSelect from '../../atoms/Select';
 import i18next from 'i18next';
- 
+
 export interface FooterProps {
     selectedTheme?: string;
     theme?: Theme;
@@ -49,14 +49,14 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
 `;
 
 const LinkStyled = styled(Link)`
-    display: block;    
+    display: block;
     height: 2.5rem;
     max-width: max-content;
     transition: 0.2s;
     align-items: center;
 `;
 
- 
+
 
 const LogoStyled = styled.img<{ theme?: Theme }>`
     filter: ${(props) => props.theme.logo.filter ?? 'invert(0%)'};

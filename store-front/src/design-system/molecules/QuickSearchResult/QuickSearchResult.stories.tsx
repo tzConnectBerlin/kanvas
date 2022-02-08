@@ -2,7 +2,6 @@ import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 
 import { QuickSearchResult } from './QuickSearchResult';
-import { ApolloError, LazyQueryResult } from '@apollo/client';
 
 export default {
     title: 'Molecules/QuickSearchResult',
@@ -37,10 +36,10 @@ export const Suggestion = Template.bind({});
 Suggestion.args = {
     open: true,
     profilesSearchResult: {
-        error: ApolloError,
+        error: undefined,
     },
     artworksSearchResult: {
-        error: ApolloError,
+        error: undefined,
     },
     categoriesSearchResult: {
         error: undefined,
