@@ -181,7 +181,7 @@ const dataProvider = (
   create: async (resource, params) => {
     if (resource === 'nft') {
       const updatedData = diffPreviousDataToNewData({}, params.data)
-      return await httpClient(`${apiUrl}/${resource}/0`, {
+      return await httpClient(`${apiUrl}/${resource}/`, {
         method: 'PATCH',
         body: toFormData(updatedData, resource),
         headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
@@ -256,15 +256,19 @@ const toFormData = (data: any, resource = '') => {
   keys.forEach((key) => {
     if (data[key]) {
       // contains .png
-      if (key === 'files') {
-        data[key].map((file: any) => {
+      if (key.startsWith('files')) {
+
+        data[key].map((file: any, index: number) => {
           try {
             Object.defineProperty(file, 'name', {
               writable: true,
-              value: 'image.png'
+              value: key.slice('files'.length).toLowerCase()
             });
-            formData.append('files[]', file.rawFile, file.name);
+            const test = file[Object.keys(file)[0]].rawFile
+            debugger
+            formData.append('files[]', file[Object.keys(file)[0]].rawFile, Object.keys(file)[0].toLowerCase());
           } catch (error: any) {
+            debugger
             console.log(error)
           }
         })
