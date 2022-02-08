@@ -183,7 +183,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                         onMouseDown={() =>
                                             navigateTo(`/product/${nft.id}`)
                                         }
-                                        key={nft.id}
+                                        key={Date + nft.id}
                                     >
                                         <Avatar
                                             src={nft?.displayUri}
