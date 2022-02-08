@@ -2,16 +2,13 @@ import styled from '@emotion/styled';
 import Typography from '../../atoms/Typography';
 
 import { FC, useEffect, useState } from 'react';
-import { Grid, Stack, useMediaQuery, useTheme } from '@mui/material';
-import { Layouts } from 'react-grid-layout';
+import { Grid, Stack } from '@mui/material';
 
 import { NftCard } from '../../molecules/NftCard';
 import { INft } from '../../../interfaces/artwork';
 
 export interface NftGridProps {
     editable?: boolean;
-    layouts?: Layouts;
-    setLayouts?: Function;
     assets?: any[];
     emptyMessage?: string;
     emptyLink?: string;
