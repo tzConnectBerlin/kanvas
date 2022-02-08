@@ -5,7 +5,7 @@ import Typography from '../../atoms/Typography';
 import { Animated } from 'react-animated-css';
 import { FC, useEffect, useState } from 'react';
 import { Theme, Stack, Box } from '@mui/material';
-import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
+import { Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
