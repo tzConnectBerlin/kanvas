@@ -1,4 +1,4 @@
-import { Box, Card, Paper, Stack, Typography, unstable_useEnhancedEffect } from '@mui/material';
+import { Box, Paper, Stack, Typography } from '@mui/material';
 import {
   Record,
   List,
@@ -18,18 +18,16 @@ import {
   NullableBooleanInput,
   ReferenceArrayInput,
   SelectArrayInput,
-  ReferenceManyField,
   SingleFieldList,
   ChipField,
   number,
   minValue,
-  useGetMany,
   useDataProvider,
   useNotify,
   useRefresh,
-  useRedirect
+  useRedirect,
+  ReferenceField
 } from 'react-admin';
-import { JsonField } from 'react-admin-json-view';
 import { CustomDeleteButton } from './Buttons/CustomDeleteButton';
 import ToolbarActions from './ToolbarActions';
 import { makeStyles } from '@material-ui/core/styles';
@@ -70,11 +68,9 @@ export const NftList = ({ ...props }) => (
       <NumberField source="attributes.editions_size" label='Token amount' />
       <DateField source="createdAt" label="Created at" showTime />
       <DateField source="updatedAt" label="Last updated at" showTime />
-      <ReferenceManyField label="Created by" source="createdBy" reference="user" target="id">
-        <SingleFieldList>
+      <ReferenceField label="Created by" source="createdBy" reference="user">
           <ChipField source="userName" />
-        </SingleFieldList>
-      </ReferenceManyField>
+      </ReferenceField>
     </Datagrid>
   </List>
 );
@@ -105,8 +101,8 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
   if (props.type === 'content_uri') {
 
     return (
-      <ImageInput source="files" accept="image/*">
-        <ImageField src="attributes.image.png" source="src" title="title" />
+      <ImageInput label={props.label} source={`files[${props.label}]`} accept="image/*">
+      <ImageField src={`attributes.${props.label}`} source="src" title="title" />
       </ImageInput>
     );
   }

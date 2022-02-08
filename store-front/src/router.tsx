@@ -119,10 +119,11 @@ const Router = () => {
                     : lightThemeResponsive
             }
         >
-            <StyledBrowserRouter getUserConfirmation={(message, callback) => {
-                const allowTransition = window.confirm(message)
-                callback(allowTransition);
-            }}>
+            <StyledBrowserRouter
+                getUserConfirmation={(message, callback) => {
+                    const allowTransition = window.confirm(message)
+                    callback(allowTransition);
+                }}>
                 <Header
                     beaconWallet={beaconWallet}
                     embedKukai={embedKukai}
@@ -187,10 +188,6 @@ const Router = () => {
                         <Redirect from="*" to="/404" />
                     </Switch>
                 </ScrollToTop>
-
-
-                <Footer />
-            </StyledBrowserRouter>
                 <ShoppingCart
                     open={cartOpen}
                     nftsInCart={nftsInCart}
@@ -204,6 +201,11 @@ const Router = () => {
                 {!hasCookie && (
                     <CookieBanner handleClose={() => setCookie(!cookie)} />
                 )}
+
+
+                <Footer />
+            </StyledBrowserRouter>
+
         </ThemeProvider>
     );
 };

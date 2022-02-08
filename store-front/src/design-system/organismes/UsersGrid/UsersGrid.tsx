@@ -64,7 +64,11 @@ export const UsersGrid: FC<UsersGridProps> = ({ ...props }) => {
                 >
                     {[...Array(12)].map((user, index) => (
                         <Grid item lg={3} md={4} sm={6} xs={12}>
-                            <UsersCard index={index + 1} loading={true} />
+                            <UsersCard
+                                index={index + 1}
+                                loading={true}
+                                key={new Date().getTime()}
+                            />
                         </Grid>
                     ))}
                 </StyledGrid>
