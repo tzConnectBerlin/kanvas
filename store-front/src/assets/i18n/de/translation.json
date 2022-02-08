@@ -25,6 +25,7 @@
       "part_3": "Wird in",
       "editions": "Verfügbarkeit",
       "categories": "Angehängte Katagorien",
+      "ipfs" : "IPFS hash",
       "price": "Preis",
       "button": "Zum Warenkorb hinzufügen"
     },

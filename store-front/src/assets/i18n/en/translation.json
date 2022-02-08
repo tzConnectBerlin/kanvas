@@ -25,6 +25,7 @@
       "part_3": "Will drop in",
       "editions": "Availability",
       "categories": "Attached catagories",
+      "ipfs" : "IPFS hash",
       "price": "Price",
       "button": "Add to cart"
     },
