@@ -68,6 +68,7 @@ export const UsersGrid: FC<UsersGridProps> = ({ ...props }) => {
                             <UsersCard
                                 index={index + 1}
                                 loading={true}
+                                key={new Date().getTime()}
                             />
                         </Grid>
                     ))}
