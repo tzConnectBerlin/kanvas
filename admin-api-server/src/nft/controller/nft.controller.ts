@@ -83,9 +83,10 @@ export class NftController {
   async update(
     @Body() nftUpdatesBody: any,
     @CurrentUser() user: UserEntity,
+    @Param() urlParams: any,
     @UploadedFiles() filesArray?: any[],
-    @Param('id') nftId?: number,
   ): Promise<NftEntity> {
+    let nftId = urlParams.id;
     if (typeof nftId === 'undefined') {
       nftId = (await this.nftService.createNft(user)).id;
     }
