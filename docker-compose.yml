@@ -84,6 +84,7 @@ services:
           ./script/setup-replication-sub
         fi
         if [ "$ADMIN_API_ENABLED" != "false" ]; then
+          yarn run start
         fi
       '
     ports:
