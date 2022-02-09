@@ -1,5 +1,5 @@
--- Migration: replication-pub-part2
--- Created at: 2022-01-27 15:34:32
+-- Migration: setup-replication-publish
+-- Created at: 2022-02-09 16:09:06
 -- ====  UP  ====
 
 BEGIN;
@@ -11,12 +11,10 @@ CREATE PUBLICATION store_pub FOR TABLE
   mtm_kanvas_user_nft,
   mtm_nft_category,
   mtm_nft_order_nft,
-  mtm_kanvas_user_user_role,
   nft,
   nft_category,
   nft_order,
-  payment,
-  user_role;
+  payment;
 
 COMMIT;
 
