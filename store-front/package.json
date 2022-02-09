@@ -45,6 +45,7 @@
     "react-animated-css": "^1.2.1",
     "react-dom": "^17.0.2",
     "react-dropzone": "^11.4.2",
+    "react-error-overlay": "6.0.9",
     "react-icons": "^4.2.0",
     "react-material-ui-carousel": "^3.0.4",
     "react-router": "5",

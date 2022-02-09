@@ -108,7 +108,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
 
     const navigateTo = (path: string, categoryId?: number) => {
         props.closeResult();
-        history.push(path, {refresh: true, category: categoryId });
+        history.push(path, { refresh: true, category: categoryId });
     };
 
     return (
@@ -149,7 +149,8 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                             {[{}, {}, {}].map(() => (
                                 <ProfileResultWrapper
                                     direction="row"
-                                    spacing={4}                                    
+                                    spacing={4}
+                                    key={`profile-${new Date().getTime() + Math.random()}`}
                                 >
                                     <Skeleton
                                         animation="wave"
@@ -221,7 +222,12 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                             <StyledContentStack sx={{ marginLeft: '1em' }}>
                                 <StyledGrid container spacing={2}>
                                     {[{}, {}, {}].map(() => (
-                                        <Grid item>
+                                        <Grid
+                                            item
+                                            key={`result-categories-${
+                                                new Date().getTime() + Math.random()
+                                            }`}
+                                        >
                                             <Skeleton
                                                 animation="wave"
                                                 height={40}
@@ -258,10 +264,9 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                                         onMouseDown={() => {
                                                             navigateTo(
                                                                 `/store?categories=${category.id}`,
-                                                                category.id
-                                                                )
-                                                            }
-                                                        }
+                                                                category.id,
+                                                            );
+                                                        }}
                                                     />
                                                 </Grid>
                                             ),

@@ -63,41 +63,37 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                     spacing={24}
                     columnSpacing={{ sm: 4 }}
                 >
-                    {gridNfts.map((nft) => {
-                        function addWithUnion(arg1: any, arg2: any) {
-                            return arg1 + arg2;
-                        }
-
-                        return (
-                            <Grid
-                                item
-                                lg={props.open ? 4 : 3}
-                                md={props.open ? 6 : 4}
-                                sm={6}
-                                xs={12}
-                                key={addWithUnion(Date, nft.id)}
-                            >
-                                <NftCard
-                                    id={nft.id.toString()}
-                                    name={nft.name}
-                                    ipfsHash={nft.ipfsHash}
-                                    displayUri={nft.displayUri}
-                                    price={nft.price}
-                                    loading={props.loading}
-                                    editionsAvailable={Number(
-                                        nft.editionsAvailable,
-                                    )}
-                                    nftCardMode={props.nftCardMode}
-                                    launchAt={nft.launchAt * 1000}
-                                    ownerStatus={
-                                        nft.ownerStatuses
-                                            ? nft.ownerStatuses[0]
-                                            : undefined
-                                    }
-                                />
-                            </Grid>
-                        );
-                    })}
+                    {gridNfts.map((nft) => (
+                        <Grid
+                            item
+                            lg={props.open ? 4 : 3}
+                            md={props.open ? 6 : 4}
+                            sm={6}
+                            xs={12}
+                            key={`users-${
+                                new Date().getTime() + Math.random()
+                            }`}
+                        >
+                            <NftCard
+                                id={nft.id.toString()}
+                                name={nft.name}
+                                ipfsHash={nft.ipfsHash}
+                                displayUri={nft.displayUri}
+                                price={nft.price}
+                                loading={props.loading}
+                                editionsAvailable={Number(
+                                    nft.editionsAvailable,
+                                )}
+                                nftCardMode={props.nftCardMode}
+                                launchAt={nft.launchAt * 1000}
+                                ownerStatus={
+                                    nft.ownerStatuses
+                                        ? nft.ownerStatuses[0]
+                                        : undefined
+                                }
+                            />
+                        </Grid>
+                    ))}
                 </StyledGrid>
             ) : props.loading || comfortLoading ? (
                 <StyledGrid
@@ -114,6 +110,9 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                             md={props.open ? 6 : 4}
                             sm={6}
                             xs={12}
+                            key={`nft-loader-${
+                                new Date().getTime() + Math.random()
+                            }`}
                         >
                             <NftCard
                                 name={''}
