@@ -22,7 +22,7 @@ services:
       bash -c '
         set -e
         ./script/wait-db
-        ./script/migrate up
+        SKIP_QUEPASA_INIT=true ./script/migrate up
         if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
           psql < script/populate-testdb.sql
         fi
@@ -50,10 +50,6 @@ services:
 
       KANVAS_API_PORT: 3000
 
-      QUEPASA_DOCKER_ARGS: "\
-        --network kanvas_default \
-        --mount type=bind,source=$PWD/store-api-server/config,target=/config"
-
       STORE_API_ENABLED: ${STORE_API_ENABLED}
 
       #AWS_S3_BUCKET: ..
@@ -62,6 +58,29 @@ services:
 
       #PINATA_API_KEY: ..
       #PINATA_API_SECRET: ..
+
+  store-quepasa:
+    image: ghcr.io/tzconnectberlin/que-pasa:1.1.0
+    entrypoint: |-
+      bash -c '
+        set -e -x
+        while ! psql -d "$DATABASE_URL" -c "select 1" ; do
+          sleep 1
+        done
+        /que-pasa/que-pasa --bcd-enable
+      '
+    volumes:
+      - ./config:/config
+    environment:
+      PGHOST: store-db
+      PGPORT: 5432
+      PGUSER: store_pguser
+      PGPASSWORD: store_pgpass
+      PGDATABASE: dev_database
+      DATABASE_URL: "postgres://store_pguser:store_pgpass@store-db:5432/dev_database"
+      CONTRACT_SETTINGS: /config/kanvas.yaml
+      NODE_URL: http://art-basel.tzconnect.berlin:18732
+      BCD_NETWORK: hangzhou2net
 
   admin-db:
     image: postgres:13
@@ -78,7 +97,7 @@ services:
       bash -c '
         set -e -x
         ./script/wait-db
-        ./script/migrate up
+        SKIP_QUEPASA_INIT=true ./script/migrate
         if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
           yarn seed
           ./script/setup-replication-sub
@@ -113,3 +132,26 @@ services:
 
       JWT_SECRET: another_random_string
       JWT_EXPIRATION_TIME: 86400000
+
+  admin-quepasa:
+    image: ghcr.io/tzconnectberlin/que-pasa:1.1.0
+    entrypoint: |-
+      bash -c '
+        set -e -x
+        while ! psql -d "$DATABASE_URL" -c "select 1" ; do
+          sleep 1
+        done
+        /que-pasa/que-pasa --bcd-enable
+      '
+    volumes:
+      - ./config:/config
+    environment:
+      PGHOST: admin-db
+      PGPORT: 5432
+      PGUSER: admin_pguser
+      PGPASSWORD: admin_pgpass
+      PGDATABASE: dev_database
+      DATABASE_URL: "postgres://admin_pguser:admin_pgpass@admin-db:5432/dev_database"
+      CONTRACT_SETTINGS: /config/kanvas.yaml
+      NODE_URL: http://art-basel.tzconnect.berlin:18732
+      BCD_NETWORK: hangzhou2net
