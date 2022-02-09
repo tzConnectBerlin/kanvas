@@ -27,7 +27,7 @@ function App() {
       layout={CustomLayout}
       catchAll={NotFound}
       dashboard={Dashboard}
-      dataProvider={dataProvider('http://localhost:3001')}
+      dataProvider={dataProvider(process.env.REACT_APP_API_SERVER_BASE_URL ?? 'http://localhost:3001')}
       disableTelemetry
       authProvider={authProvider}
       theme={theme}
