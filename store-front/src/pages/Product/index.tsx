@@ -143,6 +143,11 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
     const history = useHistory();
     const { id } = useParams<IProductParam>();
 
+    const handleRedirect = (path: string) => {
+        history.push(path);
+    };
+
+
     const [nftResponse, getNft] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/${id}`,
@@ -222,6 +227,11 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
             }, 1000);
         }
     }, [launchTime]);
+
+
+    function openTab() {
+        window.open(`https://cloudflare-ipfs.com/ipfs/${nftResponse.data?.ipfsHash.slice('ipfs://'.length)}`);
+    }
 
     return (
         <StytledPageWrapper>
@@ -460,8 +470,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     size="body1"
                                     weight="Medium"
                                     type="link"
-                                    //onClick={{() => navigateTo(`https://cloudflare-ipfs.com/ipfs/${nftResponse.data?.ipfsHash.slice('ipfs://'.length)}`)}}
-                                    id={`https://cloudflare-ipfs.com/ipfs/${nftResponse.data?.ipfsHash.slice('ipfs://'.length)}`}
+                                    onClick={() => openTab()}
                                 >
                                     {nftResponse.data?.ipfsHash}
                                 </Typography>
