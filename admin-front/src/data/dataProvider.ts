@@ -264,15 +264,17 @@ const toFormData = (data: any, resource = '') => {
               writable: true,
               value: key.slice('files'.length).toLowerCase()
             });
-            const test = file[Object.keys(file)[0]].rawFile
-            debugger
+
             formData.append('files[]', file[Object.keys(file)[0]].rawFile, Object.keys(file)[0].toLowerCase());
           } catch (error: any) {
-            debugger
             console.log(error)
           }
         })
       } else {
+        // Checking if it s a date: not the best way but convenient enough in this case
+        if (typeof data[key].getMonth === 'function') {
+          data[key] = data[key].getTime()
+        }
         formData.append(key, JSON.stringify(data[key]));
       }
     }

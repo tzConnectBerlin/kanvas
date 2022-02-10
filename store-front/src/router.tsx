@@ -28,7 +28,7 @@ import { INft } from './interfaces/artwork';
 import { toast } from 'react-toastify';
 import { Checkout } from './pages/Checkout';
 
-const StyledBrowserRouter = styled(BrowserRouter) <{ theme?: Theme }>`
+const StyledBrowserRouter = styled(BrowserRouter)<{ theme?: Theme }>`
     display: block;
 
     #root {
@@ -121,9 +121,10 @@ const Router = () => {
         >
             <StyledBrowserRouter
                 getUserConfirmation={(message, callback) => {
-                    const allowTransition = window.confirm(message)
+                    const allowTransition = window.confirm(message);
                     callback(allowTransition);
-                }}>
+                }}
+            >
                 <Header
                     beaconWallet={beaconWallet}
                     embedKukai={embedKukai}
@@ -173,16 +174,20 @@ const Router = () => {
                             path="/nft/:id"
                             render={(props) => <CreateNFT {...props} />}
                         />
-                        <Route path="/checkout" render={() =>
-                            <Checkout
-                                nftsInCart={nftsInCart}
-                                setNftsInCart={setNftsInCart}
-                                listCart={listCart}
-                                setLoginOpen={setLoginOpen}
-
-                                expiresAt={listCartResponse.data?.expiresAt}
-                                loading={listCartResponse.loading && !listCalled}
-                            />}
+                        <Route
+                            path="/checkout"
+                            render={() => (
+                                <Checkout
+                                    nftsInCart={nftsInCart}
+                                    setNftsInCart={setNftsInCart}
+                                    listCart={listCart}
+                                    setLoginOpen={setLoginOpen}
+                                    expiresAt={listCartResponse.data?.expiresAt}
+                                    loading={
+                                        listCartResponse.loading && !listCalled
+                                    }
+                                />
+                            )}
                         />
                         <Route path="/404" component={NotFound} />
                         <Redirect from="*" to="/404" />
@@ -202,10 +207,8 @@ const Router = () => {
                     <CookieBanner handleClose={() => setCookie(!cookie)} />
                 )}
 
-
                 <Footer />
             </StyledBrowserRouter>
-
         </ThemeProvider>
     );
 };

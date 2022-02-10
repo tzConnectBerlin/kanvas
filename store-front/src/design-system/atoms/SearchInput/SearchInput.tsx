@@ -67,7 +67,7 @@ const SearchIconWrapper = styled.div<{ theme?: Theme }>`
 
 const StyledSearchRounded = styled(SearchRounded)<{
     theme?: Theme;
-    isMobile: boolean;
+    isMobile?: boolean;
 }>`
     color: ${(props) => props.theme.palette.text.primary};
     cursor: pointer;
