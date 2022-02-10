@@ -1,10 +1,9 @@
--- Migration: pending-fix-part3
--- Created at: 2022-01-14 18:14:39
+-- Migration: purchased_editions_pending_transfer_v1
+-- Created at: 2022-02-09 15:56:47
 -- ====  UP  ====
 
 BEGIN;
 
-ALTER FUNCTION purchased_editions_pending_transfer RENAME TO __purchased_editions_pending_transfer_v3;
 CREATE FUNCTION purchased_editions_pending_transfer(
   purchased_nft_id INTEGER, buyer_address TEXT, minter_address TEXT)
 RETURNS INTEGER
@@ -20,7 +19,7 @@ AS $$
       AND mint.command->'args'->>'to_address' = buyer_address
       AND EXISTS (
         SELECT 1
-        FROM txs AS onchain_tx
+        FROM que_pasa.txs AS onchain_tx
         WHERE onchain_tx.operation_hash = mint.included_in
       )
   )
@@ -42,6 +41,5 @@ COMMIT;
 BEGIN;
 
 DROP FUNCTION purchased_editions_pending_transfer(INTEGER, TEXT, TEXT);
-ALTER FUNCTION __purchased_editions_pending_transfer_v3 RENAME TO purchased_editions_pending_transfer;
 
 COMMIT;

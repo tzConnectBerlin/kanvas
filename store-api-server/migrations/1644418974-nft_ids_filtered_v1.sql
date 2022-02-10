@@ -1,19 +1,17 @@
--- Migration: nft_functions_v13
--- Created at: 2021-12-15 17:29:19
+-- Migration: nft_ids_filtered_v1
+-- Created at: 2022-02-09 16:02:54
 -- ====  UP  ====
 
 BEGIN;
 
--- Diff between previous and this version:
---   - take into account onchain state wrt nfts owned by address
-ALTER FUNCTION nft_ids_filtered RENAME TO __nft_ids_filtered_v12;
 CREATE FUNCTION nft_ids_filtered(
     address TEXT, categories INTEGER[],
     price_at_least NUMERIC, price_at_most NUMERIC,
     availability TEXT[],
     order_by TEXT, order_direction TEXT,
     "offset" INTEGER, "limit" INTEGER,
-    until TIMESTAMP WITHOUT TIME ZONE)
+    until TIMESTAMP WITHOUT TIME ZONE,
+    minter_address TEXT)
   RETURNS TABLE(nft_id nft.id%TYPE, total_nft_count bigint)
 AS $$
 BEGIN
@@ -39,21 +37,15 @@ BEGIN
         ON mtm_kanvas_user_nft.nft_id = nft.id
       LEFT JOIN kanvas_user
         ON mtm_kanvas_user_nft.kanvas_user_id = kanvas_user.id
-      LEFT JOIN onchain_kanvas."storage.ledger_ordered" ledger
-        ON ledger.idx_assets_nat = nft.id
       WHERE ($1 IS NULL OR nft.created_at <= $1)
         AND ($2 IS NULL OR (
-              (kanvas_user.address = $2 AND NOT EXISTS (
-                SELECT 1
-                FROM onchain_kanvas."storage.ledger_ordered"
-                WHERE idx_assets_address = $2
-                  AND idx_assets_nat = nft.id
-              )) OR
               EXISTS (
                 SELECT 1
                 FROM onchain_kanvas."storage.ledger_live"
                 WHERE idx_assets_address = $2
                   AND idx_assets_nat = nft.id
+              ) OR (
+                purchased_editions_pending_transfer(nft.id, $2, $9) > 0
               )
             ))
         AND ($3 IS NULL OR nft_category_id = ANY($3))
@@ -80,7 +72,7 @@ BEGIN
       OFFSET $7
       LIMIT  $8
     ) q'
-    USING until, address, categories, price_at_least, price_at_most, availability, "offset", "limit";
+    USING until, address, categories, price_at_least, price_at_most, availability, "offset", "limit", minter_address;
 END
 $$
 LANGUAGE plpgsql;
@@ -92,12 +84,12 @@ COMMIT;
 BEGIN;
 
 DROP FUNCTION nft_ids_filtered(
-    TEXT, INTEGER[],
-    NUMERIC, NUMERIC,
-    TEXT[],
-    TEXT, TEXT,
-    INTEGER, INTEGER,
-    TIMESTAMP WITHOUT TIME ZONE);
-ALTER FUNCTION __nft_ids_filtered_v12 RENAME TO nft_ids_filtered;
+  TEXT, INTEGER[],
+  NUMERIC, NUMERIC,
+  TEXT[],
+  TEXT, TEXT,
+  INTEGER, INTEGER,
+  TIMESTAMP WITHOUT TIME ZONE,
+  TEXT);
 
 COMMIT;

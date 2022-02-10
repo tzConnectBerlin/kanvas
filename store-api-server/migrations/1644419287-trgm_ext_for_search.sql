@@ -1,5 +1,5 @@
--- Migration: search
--- Created at: 2021-11-29 13:08:24
+-- Migration: trgm_ext_for_search
+-- Created at: 2022-02-09 16:08:07
 -- ====  UP  ====
 
 BEGIN;
