@@ -122,11 +122,11 @@ const NftAside = ({ ...props }) => {
     if (!props.record) return;
     if (!props.record.attributes) return;
     if (!categories) return;
-      axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/categories/assignable', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
-        }
-      })
+    axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/categories/assignable', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
+      }
+    })
       .then((response: any) => {
         setCategories(response.data.data.map((cat: any) => props.record.attributes.categories.indexOf(cat.id) !== -1 ? cat : undefined))
       }).catch((error: any) => {
@@ -154,6 +154,7 @@ const NftAside = ({ ...props }) => {
               props.record &&
               Object.keys(props.record?.attributes)?.map(attrKey => {
 
+
                 if (attrKey === "proposal_reject_0") return;
                 if (attrKey === "image.png") return;
                 if (categories.length > 0 && attrKey === "categories") return (
@@ -173,21 +174,26 @@ const NftAside = ({ ...props }) => {
                     </Stack>
                   </Stack>
                 )
+                debugger
                 return (
                   <Stack direction="row">
                     <Stack direction="column">
                       <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
                         {attrKey[0].toUpperCase() + attrKey.replace('_', ' ').slice(1)}
                       </Typography>
-                      <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
-                        {
-                          attrKey === 'launch_at' ?
-                          new Date(props.record.attributes[attrKey]).toString()
+                      {
+                        attrKey === 'thumbnail.png' ?
+                          <img src={props.record?.attributes["thumbnail.png"]} style={{ margin: 'auto', maxWidth: '100px', maxHeight: '100px' }} />
                           :
-                          props.record.attributes[attrKey]
-
-                        }
-                      </Typography>
+                         (<Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
+                            {
+                              attrKey === 'launch_at' ?
+                                new Date(props.record.attributes[attrKey]).toString()
+                                :
+                                props.record.attributes[attrKey]
+                            }
+                          </Typography>)
+                      }
                     </Stack>
                   </Stack>)
               })
