@@ -38,7 +38,7 @@ const StyledStack = styled(Stack)`
     }
 `;
 
-const LinkStyled = styled(CustomButton) <{ theme?: Theme }>`
+const LinkStyled = styled(CustomButton)<{ theme?: Theme }>`
     outline: none;
     background: transparent;
     padding: 0;
@@ -72,7 +72,7 @@ const HomePage: FC<HomePageProps> = () => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-    }, [])
+    }, []);
 
     const [sliderNftResponse] = useAxios({
         url: process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts?',
@@ -101,7 +101,7 @@ const HomePage: FC<HomePageProps> = () => {
     });
 
     const [topBuyersResponse] = useAxios({
-        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/users/topBuyers'
+        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/users/topBuyers',
     });
 
     return (
@@ -136,7 +136,11 @@ const HomePage: FC<HomePageProps> = () => {
                     </Stack>
 
                     <UsersGrid
-                        users={topBuyersResponse.data ? topBuyersResponse.data.topBuyers : []}
+                        users={
+                            topBuyersResponse.data
+                                ? topBuyersResponse.data.topBuyers
+                                : []
+                        }
                         loading={topBuyersResponse.loading}
                         emptyMessage={'No top Buyers yet'}
                     />

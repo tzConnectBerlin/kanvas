@@ -74,6 +74,7 @@ export class NftService {
     ) {
       orderBy = `attributes->>'${orderBy}'`;
     }
+
     const qryRes = await this.db.query(
       `
 WITH attr AS (
@@ -176,7 +177,7 @@ RETURNING id
 
   async applyNftUpdates(
     user: UserEntity,
-    nftId: number | undefined,
+    nftId: number,
     nftUpdates: NftUpdate[],
   ): Promise<NftEntity> {
     await this.nftLock.acquire(nftId);

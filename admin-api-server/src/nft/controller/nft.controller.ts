@@ -8,9 +8,7 @@ import {
   Query,
   UseGuards,
   UploadedFiles,
-  UseInterceptors,
-  HttpException,
-  HttpStatus,
+  UseInterceptors
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
@@ -26,7 +24,6 @@ import { UserEntity } from 'src/user/entities/user.entity';
 import { NftFilterParams, NftFilters } from '../params';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
 import {
-  PaginationParams,
   queryParamsToPaginationParams,
   validatePaginationParams,
 } from 'src/utils';
@@ -83,9 +80,11 @@ export class NftController {
   async update(
     @Body() nftUpdatesBody: any,
     @CurrentUser() user: UserEntity,
+    @Param() urlParams: any,
     @UploadedFiles() filesArray?: any[],
-    @Param('id') nftId?: number,
   ): Promise<NftEntity> {
+    let nftId = urlParams.id;
+    
     if (typeof nftId === 'undefined') {
       nftId = (await this.nftService.createNft(user)).id;
     }
