@@ -1,1 +1,0 @@
-export { CustomAppBar as default } from './CustomAppBar';

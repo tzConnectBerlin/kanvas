@@ -1,1 +1,0 @@
-export const RPC_URL = 'https://florencenet.smartpy.io/';
