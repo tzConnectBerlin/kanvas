@@ -174,7 +174,6 @@ const NftAside = ({ ...props }) => {
                     </Stack>
                   </Stack>
                 )
-                debugger
                 return (
                   <Stack direction="row">
                     <Stack direction="column">
