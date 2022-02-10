@@ -460,6 +460,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     size="body1"
                                     weight="Medium"
                                     type="link"
+                                    //onClick={{() => navigateTo(`https://cloudflare-ipfs.com/ipfs/${nftResponse.data?.ipfsHash.slice('ipfs://'.length)}`)}}
+                                    id={`https://cloudflare-ipfs.com/ipfs/${nftResponse.data?.ipfsHash.slice('ipfs://'.length)}`}
                                 >
                                     {nftResponse.data?.ipfsHash}
                                 </Typography>
