@@ -67,7 +67,6 @@ export const UsersGrid: FC<UsersGridProps> = ({ ...props }) => {
             ) : props.loading || comfortLoading ? (
                 <StyledGrid
                     container
-                    md={12}
                     rowSpacing={5}
                     columnSpacing={{ xs: 1, sm: 2, md: 5 }}
                 >
