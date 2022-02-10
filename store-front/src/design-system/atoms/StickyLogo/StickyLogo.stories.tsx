@@ -7,7 +7,7 @@ export default {
 } as Meta;
 
 const Template: Story<typeof StickyLogo> = (args) => (
-    <StickyLogo display={true} />
+    <StickyLogo isdisplay={true} />
 );
 export const LoggedIn = Template.bind({});
 LoggedIn.args = {};
