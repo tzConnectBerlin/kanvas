@@ -56,9 +56,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
         <StyledDiv>
             {gridNfts && gridNfts.length > 0 ? (
                 <StyledGrid
-                    container
-                    md={props.open ? 9 : 6}
-                    lg={props.open ? 12 : 9}
+                    container 
                     rowSpacing={4}
                     spacing={24}
                     columnSpacing={{ sm: 4 }}
@@ -97,9 +95,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                 </StyledGrid>
             ) : props.loading || comfortLoading ? (
                 <StyledGrid
-                    container
-                    md={props.open ? 9 : 6}
-                    lg={props.open ? 12 : 9}
+                    container                             
                     rowSpacing={5}
                     columnSpacing={{ xs: 1, sm: 2, md: 5 }}
                 >
