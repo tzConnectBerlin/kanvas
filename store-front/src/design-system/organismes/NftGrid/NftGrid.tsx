@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import Typography from '../../atoms/Typography';
 
 import { FC, useEffect, useState } from 'react';
-import { Grid, Stack, useMediaQuery, useTheme } from '@mui/material';
+import { Grid, Stack } from '@mui/material';
 
 import { NftCard } from '../../molecules/NftCard';
 import { INft } from '../../../interfaces/artwork';
@@ -56,9 +56,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
         <StyledDiv>
             {gridNfts && gridNfts.length > 0 ? (
                 <StyledGrid
-                    container
-                    md={props.open ? 9 : 6}
-                    lg={props.open ? 12 : 9}
+                    container 
                     rowSpacing={4}
                     spacing={24}
                     columnSpacing={{ sm: 4 }}
@@ -70,6 +68,9 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                             md={props.open ? 6 : 4}
                             sm={6}
                             xs={12}
+                            key={`users-${
+                                new Date().getTime() + Math.random()
+                            }`}
                         >
                             <NftCard
                                 id={nft.id.toString()}
@@ -83,16 +84,18 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                                 )}
                                 nftCardMode={props.nftCardMode}
                                 launchAt={nft.launchAt * 1000}
-                                ownerStatus={nft.ownerStatuses ? nft.ownerStatuses[0] : undefined}
+                                ownerStatus={
+                                    nft.ownerStatuses
+                                        ? nft.ownerStatuses[0]
+                                        : undefined
+                                }
                             />
                         </Grid>
                     ))}
                 </StyledGrid>
             ) : props.loading || comfortLoading ? (
                 <StyledGrid
-                    container
-                    md={props.open ? 9 : 6}
-                    lg={props.open ? 12 : 9}
+                    container                             
                     rowSpacing={5}
                     columnSpacing={{ xs: 1, sm: 2, md: 5 }}
                 >
@@ -103,6 +106,9 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                             md={props.open ? 6 : 4}
                             sm={6}
                             xs={12}
+                            key={`nft-loader-${
+                                new Date().getTime() + Math.random()
+                            }`}
                         >
                             <NftCard
                                 name={''}

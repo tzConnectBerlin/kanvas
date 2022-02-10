@@ -13,7 +13,7 @@ export interface CustomButtonProps extends MButtonProps {
     /**
      * Is this the principal call to action on the page?
      */
-    primary?: boolean;
+    primary?: any;
     /**
      * What background color to use
      */
@@ -43,7 +43,7 @@ interface StyledButtonProps {
     verified?: boolean;
     bordercolor: string;
     theme?: Theme;
-    primary: boolean;
+    primary: any;
 }
 
 const StyledButton = styled(MButton)<StyledButtonProps>`
@@ -153,7 +153,7 @@ export const CustomButton: FC<CustomButtonProps> = ({
             size={size}
             verified={props.verified}
             {...props}
-            primary={primary}
+            primary={`${primary}`}
             disableRipple
             disabled={props.disabled}
         >

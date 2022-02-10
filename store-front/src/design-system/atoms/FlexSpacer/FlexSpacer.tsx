@@ -5,7 +5,7 @@ export interface FlexSpacerProps {
     borderBottom?: boolean;
     minHeight?: number;
     minWidth?: number;
-    display?: boolean;
+    isdisplay?: any;
 }
 
 const FlexSpacerStyled = styled.div<FlexSpacerProps>`
@@ -15,7 +15,7 @@ const FlexSpacerStyled = styled.div<FlexSpacerProps>`
         props.borderBottom ? '1px solid #d4d4d4' : ''};
     min-height: ${(props) => props.minHeight ?? 0}rem;
     min-width: ${(props) => props.minWidth ?? 0}rem;
-    display: ${(props) => (props.display ? 'flex' : 'none')};
+    display: ${(props) => (props.isdisplay ? 'flex' : 'none')};
 
     transition: all 0.2s;
 
@@ -27,7 +27,7 @@ const FlexSpacerStyled = styled.div<FlexSpacerProps>`
 `;
 
 export const FlexSpacer: FC<FlexSpacerProps> = ({
-    display = true,
+    isdisplay = true,
     ...props
 }) => {
     return (
@@ -35,7 +35,7 @@ export const FlexSpacer: FC<FlexSpacerProps> = ({
             borderBottom={props.borderBottom}
             minHeight={props.minHeight}
             minWidth={props.minWidth}
-            display={display}
+            isdisplay={isdisplay}
         />
     );
 };

@@ -14,7 +14,7 @@ export interface AvatarProps extends MAvatarProps {
     borderRadius?: number;
     theme?: Theme;
     loading?: boolean;
-    responsive?: boolean;
+    responsive?: any;
 }
 
 const StyledAvatar = styled(MAvatar)<AvatarProps>`
@@ -108,13 +108,13 @@ export const Avatar: FC<AvatarProps> = ({
             variant="circular"
             width={width}
             height={height}
-            responsive={responsive}
+            responsive={`${responsive}`}
         />
     ) : (
         <StyledAvatar
             height={height}
             width={width}
-            responsive={responsive}
+            responsive={`${responsive}`}
             src={props.src}
             sx={{ bgcolor: '#e1e1e1', borderRadius: props.borderRadius }}
             onClick={onClick}

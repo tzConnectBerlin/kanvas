@@ -60,7 +60,7 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
 const Spacer = styled.div<FlexSpacerProps>`
     flex-grow: 1;
     flex-grow: 1;
-    width: ${(props) => (props.display ? '' : '0rem')};
+    width: ${(props) => (props.isdisplay ? '' : '0rem')};
     transition: width 0.2s;
 `;
 
@@ -152,8 +152,8 @@ export const Header: FC<HeaderProps> = ({
                 paddingRight: '2rem',
             }}
         >
-            <StickyLogo display={!isSearchOpen} />
-            <Spacer display={!isSearchOpen} />
+            <StickyLogo isdisplay={`${!isSearchOpen}`} />
+            <Spacer isdisplay={!isSearchOpen} />
 
             <Menu
                 loading={loggedUser.loading}

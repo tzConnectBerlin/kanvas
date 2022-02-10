@@ -5,7 +5,7 @@ import { FC } from 'react';
 import { Link } from 'react-router-dom';
 
 interface StickyLogoProps {
-    display?: boolean;
+    isdisplay?: any;
 }
 
 const ImgStyled = styled.img<{ theme?: Theme }>`
@@ -22,7 +22,7 @@ const ImgStyled = styled.img<{ theme?: Theme }>`
 
 const LinkStyled = styled(Link)<StickyLogoProps>`
     @media (max-width: 875px) {
-        opacity: ${(props) => (props.display ? '1' : '0')};
+        opacity: ${(props) => (props.isdisplay ? '1' : '0')};
     }
 
     transition: 0.2s;
@@ -34,7 +34,7 @@ const LinkStyled = styled(Link)<StickyLogoProps>`
 
 export const StickyLogo: FC<StickyLogoProps> = ({ ...props }) => {
     return (
-        <LinkStyled to="/" display={props.display}>
+        <LinkStyled to="/" isdisplay={props.isdisplay}>
             <ImgStyled alt="Sticky Logo" src={'/img/Logo.svg'} />
         </LinkStyled>
     );
