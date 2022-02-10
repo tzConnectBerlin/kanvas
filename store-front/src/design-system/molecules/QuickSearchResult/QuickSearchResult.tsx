@@ -150,7 +150,9 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                 <ProfileResultWrapper
                                     direction="row"
                                     spacing={4}
-                                    key={`profile-${new Date().getTime() + Math.random()}`}
+                                    key={`profile-${
+                                        new Date().getTime() + Math.random()
+                                    }`}
                                 >
                                     <Skeleton
                                         animation="wave"
@@ -225,7 +227,8 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                         <Grid
                                             item
                                             key={`result-categories-${
-                                                new Date().getTime() + Math.random()
+                                                new Date().getTime() +
+                                                Math.random()
                                             }`}
                                         >
                                             <Skeleton
