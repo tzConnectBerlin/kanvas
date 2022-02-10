@@ -1,0 +1,1 @@
+export { ListNftThumbnail as default } from './ListNftThumbnail';
