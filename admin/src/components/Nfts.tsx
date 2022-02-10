@@ -26,12 +26,15 @@ import {
   useNotify,
   useRefresh,
   useRedirect,
-  ReferenceField
+  ReferenceField,
+  DateTimeInput
 } from 'react-admin';
+// import { DateTimeInput } from 'react-admin-date-inputs';
 import { CustomDeleteButton } from './Buttons/CustomDeleteButton';
 import ToolbarActions from './ToolbarActions';
 import { makeStyles } from '@material-ui/core/styles';
 import React from 'react';
+import axios from 'axios';
 
 const useStyle = makeStyles({
   boxWrapper: {
@@ -69,7 +72,7 @@ export const NftList = ({ ...props }) => (
       <DateField source="createdAt" label="Created at" showTime />
       <DateField source="updatedAt" label="Last updated at" showTime />
       <ReferenceField label="Created by" source="createdBy" reference="user">
-          <ChipField source="userName" />
+        <ChipField source="userName" />
       </ReferenceField>
     </Datagrid>
   </List>
@@ -78,7 +81,7 @@ export const NftList = ({ ...props }) => (
 interface InbutSelectorProps {
   attributesName: string;
   label: string;
-  type: "string" | "boolean" | "number" | "content_uri" | "number[]" | "votes";
+  type: "string" | "boolean" | "number" | "content_uri" | "number[]" | "votes" | "date";
   record?: any;
 }
 
@@ -90,6 +93,7 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
   if (props.type === 'string') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} />;
   if (props.type === 'number') return <NumberInput source={`attributes.${props.attributesName}`} label={props.label} validate={validateNumber} />;
   if (props.type === 'boolean') return <BooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
+  if (props.type === 'date') return <DateTimeInput source={`attributes.${props.attributesName}`} label={props.label} />;
   if (props.type === 'number[]') {
     return (
       <ReferenceArrayInput source="attributes.categories" label="categories" reference="categories/assignable">
@@ -102,7 +106,7 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
 
     return (
       <ImageInput label={props.label} source={`files[${props.label}]`} accept="image/*">
-      <ImageField src={`attributes.${props.label}`} source="src" title="title" />
+        <ImageField src={`attributes.${props.label}`} source="src" title="title" />
       </ImageInput>
     );
   }
@@ -117,10 +121,16 @@ const NftAside = ({ ...props }) => {
   React.useEffect(() => {
     if (!props.record) return;
     if (!props.record.attributes) return;
-    if (categories) return;
-    dataProvider.getMany('categories', {ids: props.record.attributes.categories})
-      .then(response => {
-        setCategories(response.data)
+    if (!categories) return;
+      axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/categories/assignable', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
+        }
+      })
+      .then((response: any) => {
+        setCategories(response.data.data.map((cat: any) => props.record.attributes.categories.indexOf(cat.id) !== -1 ? cat : undefined))
+      }).catch((error: any) => {
+        console.log(error)
       })
   }, [props])
 
@@ -133,9 +143,9 @@ const NftAside = ({ ...props }) => {
         <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', color: "#c4c4c4" }}>
           Representation of the Nft
         </Typography>
-        <Stack direction="row" sx={{position: 'relative', alignItems: 'flex-end', margin: '2em', height: '100%', flexGrow: 1 }} spacing={3}>
+        <Stack direction="row" sx={{ position: 'relative', alignItems: 'flex-end', margin: '2em', height: '100%', flexGrow: 1 }} spacing={3}>
 
-          <Box sx={{minHeight: '100px', display: 'flex', flexDirection: "column", flexGrow: 1, justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
+          <Box sx={{ minHeight: '100px', display: 'flex', flexDirection: "column", flexGrow: 1, justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
             <img src={props.record?.attributes["image.png"]} style={{ margin: 'auto', maxWidth: '80%', maxHeight: '80%' }} />
           </Box>
 
@@ -170,7 +180,13 @@ const NftAside = ({ ...props }) => {
                         {attrKey[0].toUpperCase() + attrKey.replace('_', ' ').slice(1)}
                       </Typography>
                       <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
-                        {props.record.attributes[attrKey]}
+                        {
+                          attrKey === 'launch_at' ?
+                          new Date(props.record.attributes[attrKey]).toString()
+                          :
+                          props.record.attributes[attrKey]
+
+                        }
                       </Typography>
                     </Stack>
                   </Stack>)
@@ -229,7 +245,7 @@ export const NftEdit = (props: any) => {
                   <InputSelector
                     attributesName={key}
                     label={key[0].toUpperCase() + key.replace('_', ' ').slice(1)}
-                    type={concernedNft.data!.allowedActions[key] as 'string' | 'boolean' | 'number' | 'content_uri' | 'number[]' | 'votes'}
+                    type={concernedNft.data!.allowedActions[key] as 'string' | 'boolean' | 'number' | 'content_uri' | 'number[]' | 'votes' | 'date'}
                   />
                 </Box>
               )
