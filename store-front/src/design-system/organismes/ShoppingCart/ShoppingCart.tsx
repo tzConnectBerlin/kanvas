@@ -337,7 +337,10 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         <CustomButton
                             size="medium"
                             label="Go to checkout"
-                            onClick={() => { props.closeCart(); history.push('/checkout')} }
+                            onClick={() => {
+                                props.closeCart();
+                                history.push('/checkout');
+                            }}
                             disabled={props.nftsInCart.length === 0}
                             loading={checkoutResponse.loading}
                             sx={{
