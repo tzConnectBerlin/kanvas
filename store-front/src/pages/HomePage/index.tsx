@@ -16,6 +16,7 @@ import useAxios from 'axios-hooks';
 
 import { useHistory } from 'react-router';
 import UsersGrid from '../../design-system/organismes/UsersGrid';
+import Carousel from '../../design-system/molecules/Carousel';
 
 interface HomePageProps {
     theme?: Theme;
@@ -145,6 +146,37 @@ const HomePage: FC<HomePageProps> = () => {
                         emptyMessage={'No top Buyers yet'}
                     />
 
+                    <FlexSpacer minHeight={isMobile ? 5 : 7} />
+
+                    <Stack
+                        direction="row"
+                        sx={{ alignItems: 'end', marginBottom: '1.5rem' }}
+                    >
+                        <Typography
+                            size="h2"
+                            weight="SemiBold"
+                            sx={{ pt: 2, mb: 1 }}
+                        >
+                            {t('home.sales.headline')}
+                        </Typography>
+
+                        <FlexSpacer />
+
+                        <LinkStyled
+                            size="small"
+                            textSize="Light"
+                            label={t('home.nfts.link')}
+                            onClick={() => history.push(`/store`)}
+                        />
+                    </Stack>
+
+                    <Carousel
+                        nfts={FeaturedNftsResponse.data?.nfts}
+                        loading={FeaturedNftsResponse.loading}
+                        emptyMessage={'No Top sales yet'}
+                        emptyLink={'See entire collection.'}
+                    />
+
                     <FlexSpacer minHeight={4} />
 
                     {/* Gallery Grid */}
@@ -175,7 +207,6 @@ const HomePage: FC<HomePageProps> = () => {
                         nfts={FeaturedNftsResponse.data?.nfts}
                         loading={FeaturedNftsResponse.loading}
                         emptyMessage={'No Featured NFTs yet'}
-                        emptyLink={'See entire collection.'}
                     />
                 </StyledAnimated>
 

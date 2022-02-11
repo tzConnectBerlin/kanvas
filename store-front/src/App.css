@@ -167,3 +167,57 @@ ul {
 .MuiPaper-root {
   border-radius: 1rem !important;
 }
+ 
+
+
+/* // Carousel */
+body .react-multi-carousel-list {
+  overflow: visible;
+  position: inherit;
+}
+body .react-multiple-carousel__arrow {
+  min-width: 33px;
+  min-height: 33px;
+}
+
+body .react-multiple-carousel__arrow--right {
+  right: calc(1% + 1px);
+}
+
+body .react-multiple-carousel__arrow--left {
+  left: calc(1% + 1px);
+}
+
+.carousel-custom-item {
+  padding-right: 1rem;
+}
+
+@media (min-width: 900px) {
+  body .react-multiple-carousel__arrow--right {
+      right: calc(2% + 1px);
+  }
+  body .react-multiple-carousel__arrow--left {
+      left: calc(2% + 1px);
+  }
+  .carousel-custom-item {
+      max-width: 14rem;
+  }
+}
+
+@media (min-width: 1100px) {
+  .carousel-custom-item {
+      max-width: 17rem;
+  }
+}
+
+@media (min-width: 1500px) {
+  body .react-multiple-carousel__arrow--right {
+      right: calc(6% + 1px);
+  }
+  body .react-multiple-carousel__arrow--left {
+      left: calc(6% + 1px);
+  }
+  .carousel-custom-item {
+      max-width: 15.6rem;
+  }
+}

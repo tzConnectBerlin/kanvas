@@ -110,6 +110,10 @@
       "button_2": "Sign in",
       "button_3": "View"
     },
+    "sales": {
+      "headline": "Top sales",
+      "link": "See all"
+    },
     "topSellers": {
       "headline": "Top Buyers",
       "link": "See all"

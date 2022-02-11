@@ -110,6 +110,10 @@
       "button_2": "Anmelden",
       "button_3": "Anzeigen"
     },
+    "sales": {
+      "headline": "Top-Verkäufe",
+      "link": "Alle anzeigen"
+    },
     "topSellers": {
       "headline": "Bestkaufer",
       "link": "Alle anzeigen"

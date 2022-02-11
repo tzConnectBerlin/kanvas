@@ -110,6 +110,10 @@
       "button_2": "Se connecter",
       "button_3": "Afficher"
     },
+    "sales": {
+      "headline": "Meilleures ventes",
+      "link": "Voir tous les"
+    },
     "topSellers": {
       "headline": "Top Achteurs",
       "link": "Voir tous les"
