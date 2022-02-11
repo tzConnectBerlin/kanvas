@@ -5,6 +5,14 @@ import ReactDOM from 'react-dom';
 import reportWebVitals from './reportWebVitals';
 import { IntlProvider } from 'react-intl';
 
+
+// TODO: get error overlay to work
+// if (process.env.REACT_APP_API_SERVER_BASE_URL === 'development') {
+//     import('react-error-overlay').then((m) => {
+//         m.stopReportingRuntimeErrors();
+//     });
+// }
+
 const locale = 'en';
 
 const setupAndRender = async () => {
