@@ -87,8 +87,8 @@ export class AnalyticsController {
     };
   }
 
-  //@UseGuards(JwtAuthGuard, RolesGuard)
-  //@RolesDecorator(Roles.admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RolesDecorator(Roles.admin)
   @Get('activities')
   async activities(
     @Query() filters: ActivityFilters,
