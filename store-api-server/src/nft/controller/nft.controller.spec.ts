@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Logger, HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException } from '@nestjs/common';
 import { NftController } from './nft.controller';
 import { DbMockModule } from 'src/db_mock.module';
+import { NftService } from '../service/nft.service';
 import { NftServiceMock } from '../service/nft_mock.service';
 import { CategoryService } from 'src/category/service/category.service';
 import { PaginationParams } from '../params';
@@ -11,11 +12,11 @@ describe('NftController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DbMockModule],
+      imports: [DbMockModule, NftServiceMock],
       controllers: [NftController],
       providers: [
         {
-          provide: 'NftService',
+          provide: NftService,
           useClass: NftServiceMock,
         },
         CategoryService,

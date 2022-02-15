@@ -106,9 +106,9 @@ const StyledGrid = styled(Grid)`
 export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
     const history = useHistory();
 
-    const navigateTo = (path: string) => {
+    const navigateTo = (path: string, categoryId?: number) => {
         props.closeResult();
-        history.push(path);
+        history.push(path, { refresh: true, category: categoryId });
     };
 
     return (
@@ -150,6 +150,9 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                 <ProfileResultWrapper
                                     direction="row"
                                     spacing={4}
+                                    key={`profile-${
+                                        new Date().getTime() + Math.random()
+                                    }`}
                                 >
                                     <Skeleton
                                         animation="wave"
@@ -183,9 +186,10 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                         onMouseDown={() =>
                                             navigateTo(`/product/${nft.id}`)
                                         }
+                                        key={Date + nft.id}
                                     >
                                         <Avatar
-                                            src={nft?.dataUri}
+                                            src={nft?.displayUri}
                                             height={65}
                                             width={65}
                                             borderRadius={2}
@@ -220,7 +224,13 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                             <StyledContentStack sx={{ marginLeft: '1em' }}>
                                 <StyledGrid container spacing={2}>
                                     {[{}, {}, {}].map(() => (
-                                        <Grid item>
+                                        <Grid
+                                            item
+                                            key={`result-categories-${
+                                                new Date().getTime() +
+                                                Math.random()
+                                            }`}
+                                        >
                                             <Skeleton
                                                 animation="wave"
                                                 height={40}
@@ -254,11 +264,12 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                                         textSize="Light"
                                                         primary={false}
                                                         label={category.name}
-                                                        onMouseDown={() =>
+                                                        onMouseDown={() => {
                                                             navigateTo(
                                                                 `/store?categories=${category.id}`,
-                                                            )
-                                                        }
+                                                                category.id,
+                                                            );
+                                                        }}
                                                     />
                                                 </Grid>
                                             ),

@@ -1,12 +1,12 @@
 ## Description
 
-Back end for the white label store for selling NFTs.
+The backend for the white label store for selling NFTs.
 
 Built with [Nest](https://github.com/nestjs/nest) framework.
 
-Please note that you must use Yarn, not NPM to install dependencies.
+Please note that we use Yarn, not NPM, to install dependencies.
 
-Usage of the API is documented here: https://tzconnectberlin.github.io/slate
+Usage of the API is documented here: https://tzconnectberlin.github.io/slate (though somewhat outdated).
 
 ## Installation
 
@@ -14,20 +14,9 @@ Usage of the API is documented here: https://tzconnectberlin.github.io/slate
 $ yarn install
 ```
 
-For development, you also need to add file `.env`, with the following contents:
+For development, you also need to add file `.env`, see `env.example` for variables that are required to set.
 
-```
-PGPORT=5432
-PGUSER=dev_user
-PGPASSWORD=dev_password
-PGDATABASE=dev_database
-PGHOST=localhost
-
-JWT_EXPIRATION_TIME=86400000
-JWT_SECRET='wPK-TfcjDSjztKrb4SUnfRPQ1YIovrooYQaX4h-EnU4'
-```
-
-With Docker you can also run a development version of the database with `./script/local-db.bash`.
+With Docker you can also run a development version of the database with `./script/local-db`.
 
 ## Running the app
 
@@ -66,12 +55,6 @@ somewhere in the typescript code, `some_custom_function` is defined in the migra
 ```bash
 # unit tests
 $ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
 ```
 
 ## License

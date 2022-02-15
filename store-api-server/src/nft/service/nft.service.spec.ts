@@ -1,8 +1,7 @@
-require('dotenv').config();
 import { Test, TestingModule } from '@nestjs/testing';
 import { NftService } from './nft.service';
 import { CategoryService } from 'src/category/service/category.service';
-import { DbMockModule } from '../../db_mock.module';
+import { DbMockModule } from 'src/db_mock.module';
 
 describe('NftService', () => {
   let service: NftService;

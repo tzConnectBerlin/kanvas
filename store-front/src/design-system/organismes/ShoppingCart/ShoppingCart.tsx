@@ -19,7 +19,6 @@ interface ShoppingCartProps {
     open: boolean;
     listCart: Function;
     expiresAt: string;
-    setOpenLogin: Function;
 }
 
 const ContainerPopupStyled = styled.div<{ open: boolean }>`
@@ -30,7 +29,7 @@ const ContainerPopupStyled = styled.div<{ open: boolean }>`
     height: 100vh;
     z-index: 11;
 
-    width: ${(props) => (props.open ? 65 : 0)}%;
+    width: ${(props) => (props.open ? 100 : 0)}%;
     visibility: ${(props) => (props.open ? 'visible' : 'hidden')}!important;
     opacity: ${(props) => (props.open ? 1 : 0)} !important;
 
@@ -55,7 +54,7 @@ const WrapperCart = styled.div<{ theme?: Theme; open: boolean }>`
     position: fixed;
     right: 0;
     bottom: 0;
-    z-index: 10;
+    z-index: 12;
     top: 0;
     border-top: 1px solid black;
 
@@ -135,7 +134,6 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
             );
         } else if (checkoutResponse.error?.response?.status === 401) {
             props.listCart();
-            props.setOpenLogin(true);
         }
     }, [checkoutResponse]);
 
@@ -181,6 +179,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
         if (isExpiredError && (timeLeft === 0 || (timeLeft && timeLeft < 0))) {
             setIsExpiredError(true);
             toast.error('Your cart has expired');
+            props.listCart();
         }
 
         if (!timeLeft) return;
@@ -254,6 +253,9 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             <ShoppingCartItem
                                 loading={true}
                                 removeNft={() => {}}
+                                key={`shopping-loading-${
+                                    new Date().getTime() + Math.random()
+                                }`}
                             />
                         ))
                     ) : props.nftsInCart.length > 0 ? (
@@ -262,6 +264,9 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 <ShoppingCartItem
                                     loading={false}
                                     nft={nft}
+                                    key={`in-cart-${
+                                        new Date().getTime() + Math.random()
+                                    }`}
                                     removeNftLoading={
                                         deleteFromCartResponse.loading &&
                                         concernedDeletedNFT === nft.id
@@ -331,10 +336,11 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                     {props.open && (
                         <CustomButton
                             size="medium"
-                            label="Checkout"
-                            onClick={() =>
-                                !checkoutResponse.loading && checkout()
-                            }
+                            label="Go to checkout"
+                            onClick={() => {
+                                props.closeCart();
+                                history.push('/checkout');
+                            }}
                             disabled={props.nftsInCart.length === 0}
                             loading={checkoutResponse.loading}
                             sx={{

@@ -3,7 +3,13 @@ WORKDIR /build
 ENV DEBIAN_FRONTEND=noninteractive
 ENV NODE_OPTIONS --openssl-legacy-provider
 ENV TZ=UTC
-RUN apt-get update && apt-get upgrade -y
+
+# need psql
+RUN apt update && apt upgrade -y
+RUN apt install -y postgresql
+
 ADD . .
-RUN yarn
+ADD .env .
+RUN yarn install
+
 ENTRYPOINT yarn start

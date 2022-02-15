@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR/..
+
+export PGPORT=15431
+export PGHOST=localhost
+export PGUSER=testusr
+export PGPASSWORD=testpass
+export PGDATABASE=test
+
+export JWT_EXPIRATION_TIME=86400000
+export JWT_SECRET='wPK-TfcjDSjztKrb4SUnfRPQ1YIovrooYQaX4h-EnU4'
+
+db_docker=`DBSETUP_LOG=quiet DOCKER_ARGS='-d' ./script/local-db 2>/dev/null`
+if [[ "$?" != "0" ]]; then
+    process=`docker ps | grep $PGPORT | awk '{print $1}'`
+    docker kill $process
+    echo failed to start testdb, cannot run tests
+    exit 1
+fi
+trap "docker kill $db_docker" EXIT
+
+echo "waiting for testdb setup.. (docker: $db_docker)"
+./script/wait-db
+sleep 1  # sleeping for 1 more second, for db migrations to finish
+
+echo "running tests.."
+
+mkdir -p test/coverage
+jest "$@" --coverage | tee test/coverage/summary.txt || exit 1
+sed -n '/^-----/,$p' test/coverage/summary.txt > test/coverage/summary_.txt
+head -n 4 test/coverage/summary_.txt | awk -F '|' '{print $2 $3 $4 $5}'
+sed 's/^/\n/' test/coverage/summary_.txt > test/coverage/summary.txt
+rm test/coverage/summary_.txt

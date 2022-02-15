@@ -72,49 +72,55 @@ export const Slider: FC<SliderProps> = ({ ...props }) => {
                     },
                 }}
             >
-                {props.sliderNfts.map((nft: INft) => (
-                    <Card
-                        sx={{
-                            display: 'flex',
-                            borderRadius: '1rem',
-                            height: '100%',
-                        }}
-                        key={nft.id}
-                    >
-                        <StyledBox
-                            animationInDelay={1200}
-                            animationIn="fadeIn"
-                            animationOut="fadeOut"
-                            isVisible={true}
-                        >
-                            <Typography
-                                size="h2"
-                                weight="SemiBold"
-                                color="#fff"
-                            >
-                                {nft.name}
-                            </Typography>
+                {props.sliderNfts.map((nft: INft) => {
+                    function addWithUnion(arg1: any, arg2: any) {
+                        return arg1 + arg2;
+                    }
 
-                            <CustomButton
-                                size="medium"
-                                onClick={() => navigateTo(nft.id)}
-                                label={t('home.hero.button_3')}
-                            />
-                        </StyledBox>
-                        <CardMedia
-                            image={nft.dataUri}
-                            component="img"
+                    return (
+                        <Card
                             sx={{
-                                pointerEvents: 'none',
-                                height: '80vh',
-                                minHeight: 400,
-                                maxHeight: 600,
-                                maxWidth: '100%',
+                                display: 'flex',
+                                borderRadius: '1rem',
+                                height: '100%',
                             }}
-                            alt="random"
-                        ></CardMedia>
-                    </Card>
-                ))}
+                            key={addWithUnion(Date, nft.id)}
+                        >
+                            <StyledBox
+                                animationInDelay={1200}
+                                animationIn="fadeIn"
+                                animationOut="fadeOut"
+                                isVisible={true}
+                            >
+                                <Typography
+                                    size="h2"
+                                    weight="SemiBold"
+                                    color="#fff"
+                                >
+                                    {nft.name}
+                                </Typography>
+
+                                <CustomButton
+                                    size="medium"
+                                    onClick={() => navigateTo(nft.id)}
+                                    label={t('home.hero.button_3')}
+                                />
+                            </StyledBox>
+                            <CardMedia
+                                image={nft.displayUri}
+                                component="img"
+                                sx={{
+                                    pointerEvents: 'none',
+                                    height: '80vh',
+                                    minHeight: 400,
+                                    maxHeight: 600,
+                                    maxWidth: '100%',
+                                }}
+                                alt="random"
+                            ></CardMedia>
+                        </Card>
+                    );
+                })}
             </Carousel>
         </Box>
     );

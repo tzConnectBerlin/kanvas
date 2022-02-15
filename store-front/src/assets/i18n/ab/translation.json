@@ -10,7 +10,9 @@
     "notifications": ". \"لمن\"",
     "button": {
       "backToHome": "\". وله حق\""
-    }
+    },
+    "language": "اللغة",
+    "select": "ناخب"
   },
   "menu": {
     "home": "ما له من حق في الفترة",
@@ -23,6 +25,7 @@
       "part_3": "الفترة الزمنية للتجديد",
       "editions": "ما هي",
       "categories": "الفترة الزمنية للتجديد",
+      "ipfs" : "IPFS تجزئة ",
       "price": "\".",
       "button": "وحق له في \""
     },
@@ -33,7 +36,7 @@
     "headline_1": {
       "title": "خريطة الموقع",
       "link_1": "ما هي في",
-      "link_2": "ما هي"
+      "link_2": "الصفحة الرئيسية"
     },
     "headline_2": {
       "title": "راهبات وحدة مهر",
@@ -107,16 +110,34 @@
       "button_2": "\"أنه\"",
       "button_3": "محددات الفترة"
     },
+    "topSellers": {
+      "headline": "أفضل مشتر",
+      "link": "عرض الكل"
+    },
     "nfts": {
       "headline": "ما هي الفترة الزمنية للتجديد",
       "link": "محددات الفترة الزمنية للتجديد"
     }
   },
+  "checkout": {
+    "headline_0": "الملخص",
+    "headline_1": "اختر طريقة الدفعwählen",
+    "headline_2": "متابعة الدفع",
+    "back_button": "رجوع",
+    "next_button_0": "التحقق من سلة التسوق",
+    "next_button_1": "متابعة الدفع",
+    "next_button_3": "انتقل إلى الملف الشخصي",
+    "headline_payment_method": "طريقة الدفع:",
+    "headline_payment_method_2": "الدفع:",
+    "link_payment_method": "اعرف المزيد",
+    "upcoming_payment_method": "يتوفر قريبًا",
+    "iframe_not_supported": ".iframes متصفحك لا يدعم إطارات "
+ }, 
   "cookies": {
     "text": "لأنه لا يمكن له أن يكون في الفترة الزمنية التي لا يمكن أن يكون فيها له ما هو عليه. ",
     "button": "وله حق.",
     "link": "\"حق\" \"."
-  },
+  },  
   "filters": {
     "button": {
       "results": "\".\" ملكية \"الشي\" له",

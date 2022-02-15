@@ -5,11 +5,7 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import {
-  NftEntity,
-  NftEntityPage,
-  SearchResult,
-} from 'src/nft/entity/nft.entity';
+import { NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity';
 import { CategoryEntity } from 'src/category/entity/category.entity';
 import { CategoryService } from 'src/category/service/category.service';
 import { FilterParams, PaginationParams } from '../params';
@@ -177,7 +173,7 @@ WHERE id = $1
     );
   }
 
-  async #addNftOwnerStatus(address: string, nfts: NftEntity[]) {
+  async getNftOwnerStatus(address: string, nftIds: number[]) {
     const qryRes = await this.conn.query(
       `
 SELECT
@@ -198,7 +194,7 @@ FROM UNNEST($3::integer[]) as nft_id
 
 ORDER BY 1
 `,
-      [MINTER_ADDRESS, address, nfts.map((nft: NftEntity) => nft.id)],
+      [MINTER_ADDRESS, address, nftIds],
     );
     const ownerStatuses: any = {};
     for (const row of qryRes.rows) {
@@ -207,7 +203,14 @@ ORDER BY 1
         ...Array(Number(row.num_editions)).fill(row.owner_status),
       ];
     }
+    return ownerStatuses;
+  }
 
+  async #addNftOwnerStatus(address: string, nfts: NftEntity[]) {
+    const ownerStatuses = await this.getNftOwnerStatus(
+      address,
+      nfts.map((nft: NftEntity) => nft.id),
+    );
     for (const nft of nfts) {
       nft.ownerStatuses = ownerStatuses[nft.id];
     }
@@ -226,11 +229,10 @@ SELECT
   nft_name,
   description,
   ipfs_hash,
-  metadata,
-  data_uri,
+  artifact_uri,
+  display_uri,
+  thumbnail_uri,
   price,
-  contract,
-  token_id,
   categories,
   editions_size,
   editions_available,
@@ -240,16 +242,15 @@ FROM nfts_by_id($1, $2, $3)`,
         [nftIds, orderBy, orderDirection],
       );
       return nftsQryRes.rows.map((nftRow: any) => {
-        return <NftEntity>{
+        const nft = <NftEntity>{
           id: nftRow['nft_id'],
           name: nftRow['nft_name'],
           description: nftRow['description'],
           ipfsHash: nftRow['ipfs_hash'],
-          metadata: nftRow['metadata'],
-          dataUri: nftRow['data_uri'],
+          artifactUri: nftRow['artifact_uri'],
+          displayUri: nftRow['display_uri'],
+          thumbnailUri: nftRow['thumbnail_uri'],
           price: Number(nftRow['price']),
-          contract: nftRow['contract'],
-          tokenId: nftRow['token_id'],
           editionsSize: Number(nftRow['editions_size']),
           editionsAvailable: Number(nftRow['editions_available']),
           createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
@@ -262,6 +263,11 @@ FROM nfts_by_id($1, $2, $3)`,
             };
           }),
         };
+
+        nft.displayUri ??= nft.artifactUri;
+        nft.thumbnailUri ??= nft.displayUri;
+
+        return nft;
       });
     } catch (err) {
       Logger.error('Error on find nfts by ids query: ' + err);

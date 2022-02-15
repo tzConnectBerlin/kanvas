@@ -159,6 +159,13 @@ const StorePage = () => {
         getPageParams();
     }, []);
 
+    useEffect(() => {
+        if (history.location.state) {
+            const state : any = history.location.state
+            if (state.refresh && state.category) setPreSelectedCategories([state.category]);
+        }
+    }, [history.location.state])
+
     const callNFTsEndpoint = (params: IParamsNFTs) => {
         setComfortLoader(true);
         const comfortTrigger = setTimeout(() => {
