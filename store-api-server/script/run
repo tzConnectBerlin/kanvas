@@ -4,5 +4,7 @@ cd $SCRIPT_DIR/..
 
 command=${1-start}
 
+[ -f .env ] && . .env
+
 script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1
 yarn run $command
