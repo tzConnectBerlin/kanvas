@@ -114,70 +114,75 @@ const HomePage: FC<HomePageProps> = () => {
                     animationOut="fadeOut"
                     isVisible={true}
                 >
-                    <Hero
-                        sliderLoading={sliderNftResponse.loading}
-                        sliderNfts={sliderNftResponse.data?.nfts ?? []}
-                        role="banner"
-                    />
+                    {/* Hero */}
+                    <Stack direction="column" role="Homepage banner">
+                        <Hero
+                            sliderLoading={sliderNftResponse.loading}
+                            sliderNfts={sliderNftResponse.data?.nfts ?? []}
+                        />
 
-                    <FlexSpacer minHeight={isMobile ? 5 : 7} />
-
-                    {/* Top Sellers Grid */}
-                    <Stack
-                        direction="row"
-                        sx={{ alignItems: 'end', marginBottom: '1.5rem' }}
-                    >
-                        <Typography
-                            size="h2"
-                            weight="SemiBold"
-                            sx={{ pt: 2, mb: 1 }}
-                        >
-                            {t('home.topSellers.headline')}
-                        </Typography>
+                        <FlexSpacer minHeight={isMobile ? 5 : 7} />
                     </Stack>
 
-                    <UsersGrid
-                        users={
-                            topBuyersResponse.data
-                                ? topBuyersResponse.data.topBuyers
-                                : []
-                        }
-                        loading={topBuyersResponse.loading}
-                        emptyMessage={'No top Buyers yet'}
-                    />
-
-                    <FlexSpacer minHeight={4} />
-
-                    {/* Gallery Grid */}
-
-                    <Stack
-                        direction="row"
-                        sx={{ alignItems: 'end', marginBottom: '1.5rem' }}
-                    >
-                        <Typography
-                            size="h2"
-                            weight="SemiBold"
-                            sx={{ pt: 2, mb: 1 }}
+                    {/* Top Buyers User Grid */}
+                    <Stack direction="column" role="Top Buyers grid">
+                        <Stack
+                            direction="row"
+                            sx={{ alignItems: 'end', marginBottom: '1.5rem' }}
                         >
-                            {t('home.nfts.headline')}
-                        </Typography>
+                            <Typography
+                                size="h2"
+                                weight="SemiBold"
+                                sx={{ pt: 2, mb: 1 }}
+                            >
+                                {t('home.topBuyers.headline')}
+                            </Typography>
+                        </Stack>
 
-                        <FlexSpacer />
+                        <UsersGrid
+                            users={
+                                topBuyersResponse.data
+                                    ? topBuyersResponse.data.topBuyers
+                                    : []
+                            }
+                            loading={topBuyersResponse.loading}
+                            emptyMessage={'No top Buyers yet'}
+                        />
 
-                        <LinkStyled
-                            size="small"
-                            textSize="Light"
-                            label={t('home.nfts.link')}
-                            onClick={() => history.push(`/store`)}
+                        <FlexSpacer minHeight={4} />
+                    </Stack>
+
+                    {/* Gallery Featured Grid */}
+                    <Stack direction="column" role="Gallery Featured Grid">
+                        <Stack
+                            direction="row"
+                            sx={{ alignItems: 'end', marginBottom: '1.5rem' }}
+                        >
+                            <Typography
+                                size="h2"
+                                weight="SemiBold"
+                                sx={{ pt: 2, mb: 1 }}
+                            >
+                                {t('home.nfts.headline')}
+                            </Typography>
+
+                            <FlexSpacer />
+
+                            <LinkStyled
+                                size="small"
+                                textSize="Light"
+                                label={t('home.nfts.link')}
+                                onClick={() => history.push(`/store`)}
+                            />
+                        </Stack>
+
+                        <NftGrid
+                            nfts={FeaturedNftsResponse.data?.nfts}
+                            loading={FeaturedNftsResponse.loading}
+                            emptyMessage={'No Featured NFTs yet'}
+                            emptyLink={'See entire collection.'}
                         />
                     </Stack>
-
-                    <NftGrid
-                        nfts={FeaturedNftsResponse.data?.nfts}
-                        loading={FeaturedNftsResponse.loading}
-                        emptyMessage={'No Featured NFTs yet'}
-                        emptyLink={'See entire collection.'}
-                    />
                 </StyledAnimated>
 
                 <FlexSpacer minHeight={2} />

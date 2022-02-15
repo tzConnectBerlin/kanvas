@@ -25,7 +25,6 @@ export interface HeroProps {
     loading?: boolean;
     selectedTheme?: string;
     theme?: Theme;
-    role?: string;
     sliderLoading?: boolean;
     sliderNfts: INft[];
 }
