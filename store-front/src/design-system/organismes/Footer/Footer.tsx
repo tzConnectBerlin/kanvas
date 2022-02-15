@@ -13,6 +13,7 @@ import i18next from 'i18next';
 export interface FooterProps {
     selectedTheme?: string;
     theme?: Theme;
+    role?: string;
 }
 
 const StyledBox = styled(Box)<{ theme?: Theme }>`
@@ -131,11 +132,7 @@ export const Footer: FC<FooterProps> = () => {
                 </Box>
             </Grid>
 
-            <Grid
-                item
-                md={7}
-                lg={6}            
-            >
+            <Grid item md={7} lg={6}>
                 <Grid container columnSpacing={{ xs: 0, sm: 2, md: 3 }}>
                     <Grid item xs={6} md={3}>
                         <Typography
@@ -236,38 +233,46 @@ export const Footer: FC<FooterProps> = () => {
                                 margin: '.5rem 0 1.5rem',
                             }}
                         >
-                            <Box
-                                component="a"
-                                target="_blank"
-                                href="https://www.linkedin.com/company/tzconnect/"
-                                sx={iconStyle}
-                            >
-                                <SocialStyled
-                                    src={'/img/linkedin.svg'}
-                                    alt="Linkedin"
-                                />
+                            <Box component="li">
+                                <Box
+                                    component="a"
+                                    target="_blank"
+                                    href="https://www.linkedin.com/company/tzconnect/"
+                                    sx={iconStyle}
+                                >
+                                    <SocialStyled
+                                        src={'/img/linkedin.svg'}
+                                        alt="Linkedin"
+                                    />
+                                </Box>
                             </Box>
-                            <Box
-                                component="a"
-                                target="_blank"
-                                href="https://twitter.com/TZConnectBerlin"
-                                sx={iconStyle}
-                            >
-                                <SocialStyled
-                                    src={'/img/twitter.svg'}
-                                    alt="Twitter"
-                                />
+
+                            <Box component="li">
+                                <Box
+                                    component="a"
+                                    target="_blank"
+                                    href="https://twitter.com/TZConnectBerlin"
+                                    sx={iconStyle}
+                                >
+                                    <SocialStyled
+                                        src={'/img/twitter.svg'}
+                                        alt="Twitter"
+                                    />
+                                </Box>
                             </Box>
-                            <Box
-                                component="a"
-                                target="_blank"
-                                href="https://www.tzconnect.com/en/"
-                                sx={iconStyle}
-                            >
-                                <SocialStyled
-                                    src={'/img/tezos.svg'}
-                                    alt="TZ connect"
-                                />
+
+                            <Box component="li">
+                                <Box
+                                    component="a"
+                                    target="_blank"
+                                    href="https://www.tzconnect.com/en/"
+                                    sx={iconStyle}
+                                >
+                                    <SocialStyled
+                                        src={'/img/tezos.svg'}
+                                        alt="TZ connect"
+                                    />
+                                </Box>
                             </Box>
                         </Box>
 

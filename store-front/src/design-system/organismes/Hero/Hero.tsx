@@ -35,6 +35,13 @@ const GridStyled = styled(Grid)`
     }
 `;
 
+const StyledParagraph = styled(Typography) `
+    font-size: 1.3462rem;
+`
+
+const StyledSpan = styled(Typography) `
+        font-size: 1rem;
+`
 export const Hero: FC<HeroProps> = ({ ...props }) => {
     const { t } = useTranslation(['translation']);
     const theme = useTheme();
@@ -57,24 +64,24 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
                     {t('home.hero.headline')}
                 </Typography>
 
-                <Typography size="h3" weight="Light" sx={{ pt: 2, mb: 1 }}>
+                <StyledParagraph size="body2" weight="Light" sx={{ pt: 2, mb: 1 }}>
                     {t('home.hero.description_1')}
-                </Typography>
+                </StyledParagraph>
 
-                <Typography
-                    size="h5"
+                <StyledSpan size="body"               
                     weight="Light"
                     color="#C4C4C4"
                     sx={{ pt: 1, mb: 1 }}
                 >
                     {t('home.hero.description_2')}
-                </Typography>
+                </StyledSpan>
 
                 <FlexSpacer minHeight={3} />
 
                 <Stack direction="row">
                     <CustomButton
                         size="medium"
+                        role="button view collection"
                         label={t('home.hero.button_1')}
                         onClick={() => navigateTo('store')}
                     />

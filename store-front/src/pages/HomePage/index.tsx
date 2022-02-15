@@ -115,7 +115,7 @@ const HomePage: FC<HomePageProps> = () => {
                     isVisible={true}
                 >
                     {/* Hero */}
-                    <Stack direction="column" role="Homepage banner">
+                    <Stack direction="column" aria-label="Homepage banner">
                         <Hero
                             sliderLoading={sliderNftResponse.loading}
                             sliderNfts={sliderNftResponse.data?.nfts ?? []}
@@ -125,7 +125,7 @@ const HomePage: FC<HomePageProps> = () => {
                     </Stack>
 
                     {/* Top Buyers User Grid */}
-                    <Stack direction="column" role="Top Buyers grid">
+                    <Stack direction="column" aria-label="Top Buyers grid">
                         <Stack
                             direction="row"
                             sx={{ alignItems: 'end', marginBottom: '1.5rem' }}
@@ -153,7 +153,7 @@ const HomePage: FC<HomePageProps> = () => {
                     </Stack>
 
                     {/* Gallery Featured Grid */}
-                    <Stack direction="column" role="Gallery Featured Grid">
+                    <Stack direction="column" aria-label="Gallery Featured Grid">
                         <Stack
                             direction="row"
                             sx={{ alignItems: 'end', marginBottom: '1.5rem' }}
