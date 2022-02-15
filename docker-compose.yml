@@ -22,7 +22,7 @@ services:
       bash -c '
         set -e
         ./script/wait-db
-        SKIP_QUEPASA_INIT=true ./script/migrate up
+        INIT_QUEPASA=false ./script/migrate up
         if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
           psql < script/populate-testdb.sql
         fi
@@ -61,7 +61,7 @@ services:
       #PINATA_API_SECRET: ..
 
   store-quepasa:
-    image: ghcr.io/tzconnectberlin/que-pasa:1.1.0
+    image: ghcr.io/tzconnectberlin/que-pasa:1.2.0
     entrypoint: |-
       bash -c '
         set -e -x
@@ -96,9 +96,9 @@ services:
     build: ./admin-api-server
     entrypoint: |-
       bash -c '
-        set -e -x
+        set -e
         ./script/wait-db
-        SKIP_QUEPASA_INIT=true ./script/migrate
+        INIT_QUEPASA=false ./script/migrate
         if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
           yarn seed
           ./script/setup-replication-sub
@@ -135,10 +135,10 @@ services:
       JWT_EXPIRATION_TIME: 86400000
 
   admin-quepasa:
-    image: ghcr.io/tzconnectberlin/que-pasa:1.1.0
+    image: ghcr.io/tzconnectberlin/que-pasa:1.2.0
     entrypoint: |-
       bash -c '
-        set -e -x
+        set -e
         while ! psql -d "$DATABASE_URL" -c "select 1" ; do
           sleep 1
         done
@@ -151,8 +151,8 @@ services:
       PGPORT: 5432
       PGUSER: admin_pguser
       PGPASSWORD: admin_pgpass
-      PGDATABASE: dev_database
-      DATABASE_URL: "postgres://admin_pguser:admin_pgpass@admin-db:5432/dev_database"
+      PGDATABASE: store_replication
+      DATABASE_URL: "postgres://admin_pguser:admin_pgpass@admin-db:5432/store_replication"
       CONTRACT_SETTINGS: /config/kanvas.yaml
       NODE_URL: http://art-basel.tzconnect.berlin:18732
       BCD_NETWORK: hangzhou2net
