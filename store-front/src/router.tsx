@@ -141,58 +141,67 @@ const Router = () => {
                     setRedirectAfterSignIn={setRedirectAfterSignIn}
                 />
 
-                <ScrollToTop>
-                    <Switch>
-                        <Route exact path="/">
-                            <Redirect to="/home" />
-                        </Route>
-                        <Route path="/home" component={HomePage} />
-                        <Route path="/store" component={StorePage} />
-                        <Route path="/profile/edit" component={EditProfile} />
-                        <Route
-                            path="/profile/:userAddress"
-                            component={Profile}
-                        />
-                        <Route
-                            path="/product/:id"
-                            render={(props) => (
-                                <ProductPage
-                                    nftsInCart={nftsInCart}
-                                    setNftsInCart={setNftsInCart}
-                                    listCart={listCart}
-                                    {...props}
-                                />
-                            )}
-                        />
-                        <Route path="/faq" component={Faq} />{' '}
-                        <Route path="/privacy" component={Privacy} />
-                        <Route
-                            path="/create-nft"
-                            render={(props) => <CreateNFT {...props} />}
-                        />
-                        <Route
-                            path="/nft/:id"
-                            render={(props) => <CreateNFT {...props} />}
-                        />
-                        <Route
-                            path="/checkout"
-                            render={() => (
-                                <Checkout
-                                    nftsInCart={nftsInCart}
-                                    setNftsInCart={setNftsInCart}
-                                    listCart={listCart}
-                                    setLoginOpen={setLoginOpen}
-                                    expiresAt={listCartResponse.data?.expiresAt}
-                                    loading={
-                                        listCartResponse.loading && !listCalled
-                                    }
-                                />
-                            )}
-                        />
-                        <Route path="/404" component={NotFound} />
-                        <Redirect from="*" to="/404" />
-                    </Switch>
-                </ScrollToTop>
+                <main role="main">
+                    <ScrollToTop>
+                        <Switch>
+                            <Route exact path="/">
+                                <Redirect to="/home" />
+                            </Route>
+                            <Route path="/home" component={HomePage} />
+                            <Route path="/store" component={StorePage} />
+                            <Route
+                                path="/profile/edit"
+                                component={EditProfile}
+                            />
+                            <Route
+                                path="/profile/:userAddress"
+                                component={Profile}
+                            />
+                            <Route
+                                path="/product/:id"
+                                render={(props) => (
+                                    <ProductPage
+                                        nftsInCart={nftsInCart}
+                                        setNftsInCart={setNftsInCart}
+                                        listCart={listCart}
+                                        {...props}
+                                    />
+                                )}
+                            />
+                            <Route path="/faq" component={Faq} />{' '}
+                            <Route path="/privacy" component={Privacy} />
+                            <Route
+                                path="/create-nft"
+                                render={(props) => <CreateNFT {...props} />}
+                            />
+                            <Route
+                                path="/nft/:id"
+                                render={(props) => <CreateNFT {...props} />}
+                            />
+                            <Route
+                                path="/checkout"
+                                render={() => (
+                                    <Checkout
+                                        nftsInCart={nftsInCart}
+                                        setNftsInCart={setNftsInCart}
+                                        listCart={listCart}
+                                        setLoginOpen={setLoginOpen}
+                                        expiresAt={
+                                            listCartResponse.data?.expiresAt
+                                        }
+                                        loading={
+                                            listCartResponse.loading &&
+                                            !listCalled
+                                        }
+                                    />
+                                )}
+                            />
+                            <Route path="/404" component={NotFound} />
+                            <Redirect from="*" to="/404" />
+                        </Switch>
+                    </ScrollToTop>
+                </main>
+                
                 <ShoppingCart
                     open={cartOpen}
                     nftsInCart={nftsInCart}

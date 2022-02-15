@@ -25,6 +25,7 @@ export interface HeroProps {
     loading?: boolean;
     selectedTheme?: string;
     theme?: Theme;
+    role?: string;
     sliderLoading?: boolean;
     sliderNfts: INft[];
 }
@@ -50,7 +51,7 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
     return (
         <Grid container>
             {/* HERO: Greetings and button set */}
-            <Grid item xs={12} md={5} pr={isMobile ? 0 : 5}>
+            <Grid item xs={12} md={5} pr={isMobile ? 0 : 5} aria-label="Grid item with site Greetings and button set">
                 <FlexSpacer minHeight={4} />
 
                 <Typography size="h1" weight="SemiBold" sx={{ pt: 4 }}>
@@ -82,7 +83,7 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
             </Grid>
 
             {/* HERO: Featured Image */}
-            <GridStyled item xs={12} md={7} px={0} sx={{ display: 'flex' }}>
+            <GridStyled item xs={12} md={7} px={0} sx={{ display: 'flex' }} aria-label="Grid item featured NFTs images">
                 {
                     //Render Skeleton if image not loading
                     props.sliderLoading ? (

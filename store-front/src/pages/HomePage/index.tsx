@@ -117,6 +117,7 @@ const HomePage: FC<HomePageProps> = () => {
                     <Hero
                         sliderLoading={sliderNftResponse.loading}
                         sliderNfts={sliderNftResponse.data?.nfts ?? []}
+                        role="banner"
                     />
 
                     <FlexSpacer minHeight={isMobile ? 5 : 7} />
