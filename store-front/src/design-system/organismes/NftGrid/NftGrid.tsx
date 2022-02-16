@@ -60,9 +60,11 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                     rowSpacing={4}
                     spacing={24}
                     columnSpacing={{ sm: 4 }}
+                    aria-label="nfts grid"
                 >
                     {gridNfts.map((nft) => (
                         <Grid
+                            aria-label="nfts grid item"
                             item
                             lg={props.open ? 4 : 3}
                             md={props.open ? 6 : 4}

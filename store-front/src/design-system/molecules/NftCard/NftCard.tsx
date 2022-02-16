@@ -183,6 +183,8 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
 
     return !loading ? (
         <StyledCard
+            role="link"
+            aria-label={`nft link ${props.id}`}
             onClick={() => handleRedirect(`/product/${props.id}`)}
             sx={{
                 height: props.height,
@@ -198,6 +200,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
         >
             <StyledImgWrapper>
                 <StyledImg
+                    aria-label={`nft image ${props.name}`}
                     data-object-fit="cover"
                     src={props.displayUri}
                     alt={props.name}
@@ -235,6 +238,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                             weight="SemiBold"
                             size="body2"
                             color="white"
+                            aria-label="nft name"
                         >
                             {props.ownerStatus === 'pending' ?
                                 'Pending'
@@ -269,7 +273,8 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                             display="initial !important"
                             noWrap
                             size="h3"
-                            sx={{ width: '90%' }}
+                            sx={{ width: '90%' }}   
+                            aria-label="nft name"                         
                         >
                             {props.name}
                         </Typography>
@@ -280,6 +285,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                             display="initial !important"
                             noWrap
                             sx={{ width: '85%' }}
+                            aria-label="nft ipfs hash"
                         >
                             {props.ipfsHash}
                         </Typography>
@@ -304,6 +310,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                                 display="flex"
                                 flexDirection="row"
                                 marginLeft="auto"
+                                aria-label="nft price"
                             >
                                 <Typography
                                     weight="SemiBold"
