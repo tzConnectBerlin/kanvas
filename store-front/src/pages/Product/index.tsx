@@ -237,7 +237,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
             <WrapperFullScreen open={fullScreenView}>
                 <StyledImage
                     src={nftResponse.data?.displayUri}
-                    alt="random"
+                    alt={`Nft ${nftResponse.data?.name} image` }
                     onClick={
                         fullScreenView
                             ? () => {
@@ -297,7 +297,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             <StyledCardMedia
                                 component="img"
                                 image={nftResponse.data?.displayUri}
-                                alt="random"
+                                alt={`Nft ${nftResponse.data?.name}` }                    
                             />
                             <StyledWrapperIcon
                                 onClick={
