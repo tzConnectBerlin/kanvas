@@ -145,6 +145,7 @@ export const Header: FC<HeaderProps> = ({
 
     return (
         <StyledBox
+            role="header"
             sx={{
                 height: '4.5rem',
                 display: 'flex',
@@ -167,7 +168,7 @@ export const Header: FC<HeaderProps> = ({
                 openOrCloseShoppingCart={() =>
                     props.setCartOpen(!props.cartOpen)
                 }
-                nftsInCartNumber={props.nftsInCartNumber}
+                nftsInCartNumber={props.nftsInCartNumber}             
             />
 
             <SignInModal

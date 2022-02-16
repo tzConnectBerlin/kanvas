@@ -76,6 +76,8 @@ export const Menu: FC<MenuProps> = ({
             direction={{ xs: 'column', sm: 'column', md: 'row' }}
             spacing={4}
             sx={{ display: 'flex', alignItems: 'center' }}
+            role="navigation"
+            aria-label="Main"
         >
             <MobileMenu
                 user={user}

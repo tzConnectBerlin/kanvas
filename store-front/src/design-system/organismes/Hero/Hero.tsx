@@ -81,7 +81,7 @@ export const Hero: FC<HeroProps> = ({ ...props }) => {
                 <Stack direction="row">
                     <CustomButton
                         size="medium"
-                        role="button view collection"
+                        role="button"
                         label={t('home.hero.button_1')}
                         onClick={() => navigateTo('store')}
                     />

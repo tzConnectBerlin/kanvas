@@ -34,8 +34,8 @@ const LinkStyled = styled(Link)<StickyLogoProps>`
 
 export const StickyLogo: FC<StickyLogoProps> = ({ ...props }) => {
     return (
-        <LinkStyled to="/" isdisplay={props.isdisplay}>
-            <ImgStyled alt="Sticky Logo" src={'/img/Logo.svg'} />
+        <LinkStyled to="/" isdisplay={props.isdisplay} role="link" aria-label='Brand link to homepage'>
+            <ImgStyled alt="Brand" src={'/img/Logo.svg'} />
         </LinkStyled>
     );
 };

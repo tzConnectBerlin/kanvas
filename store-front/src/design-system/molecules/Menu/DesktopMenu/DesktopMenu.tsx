@@ -54,6 +54,8 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
                         <StyledLink
                             to="/home"
                             isSearchOpen={props.isSearchOpen}
+                            role="link"
+                            aria-label='home link'
                         >
                             <Typography
                                 size="inherit"
@@ -68,6 +70,8 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
                         <StyledLink
                             to="/store?orderBy=createdAt&orderDirection=desc"
                             isSearchOpen={props.isSearchOpen}
+                            role="link"
+                            aria-label='store link'
                         >
                             <Typography
                                 size="inherit"
@@ -106,22 +110,26 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
                         size="medium"
                         onClick={() => props.setOpen(true)}
                         label="Sign in"
+                        role="button"
                         loading={props.loading}
                     />
                 )}
 
-                <Badge color="error" badgeContent={props.nftsInCartNumber}>
+                <Badge role="button" aria-label="Cart button" color="error" badgeContent={props.nftsInCartNumber}>
                     <StyledShoppingCartRoundedIcon
                         onClick={() => props.openOrCloseShoppingCart()}
                     />
                 </Badge>
+
                 {props.selectedTheme === 'dark' ? (
                     <Brightness3Icon
+                        aria-label="Day mode switcher"
                         onClick={() => props.switchTheme('light')}
                         sx={{ cursor: 'pointer' }}
                     />
                 ) : (
                     <WbSunnyOutlinedIcon
+                        aria-label="Night mode switcher"
                         onClick={() => props.switchTheme('dark')}
                         sx={{ cursor: 'pointer' }}
                     />
