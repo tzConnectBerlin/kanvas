@@ -134,6 +134,7 @@ const HomePage: FC<HomePageProps> = () => {
                                 size="h2"
                                 weight="SemiBold"
                                 sx={{ pt: 2, mb: 1 }}
+                                aria-label='Top buyers headline'
                             >
                                 {t('home.topBuyers.headline')}
                             </Typography>
@@ -162,6 +163,7 @@ const HomePage: FC<HomePageProps> = () => {
                                 size="h2"
                                 weight="SemiBold"
                                 sx={{ pt: 2, mb: 1 }}
+                                aria-label='Collection headline'
                             >
                                 {t('home.nfts.headline')}
                             </Typography>
@@ -173,6 +175,8 @@ const HomePage: FC<HomePageProps> = () => {
                                 textSize="Light"
                                 label={t('home.nfts.link')}
                                 onClick={() => history.push(`/store`)}
+                                role="link"
+                                aria-label='link to collection'
                             />
                         </Stack>
 
