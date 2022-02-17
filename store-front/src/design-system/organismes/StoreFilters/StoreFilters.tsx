@@ -3,16 +3,14 @@ import FlexSpacer from '../../atoms/FlexSpacer';
 import Typography from '../../atoms/Typography';
 import TreeView from '../../molecules/TreeView/TreeView';
 import CircularProgress from '../../atoms/CircularProgress';
-
 import { Checkbox, Stack, Theme, useMediaQuery } from '@mui/material';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import PriceFilter from '../../molecules/PriceFilter';
 import { ArrowBackIosNew } from '@mui/icons-material';
 import { useTheme } from '@mui/system';
 import { useTranslation } from 'react-i18next';
 import CustomButton from '../../atoms/Button';
 import { IParamsNFTs, ITreeCategory } from '../../../pages/StorePage';
-import CustomSelect from '../../atoms/Select';
 
 interface FilterProps {
     name: string;
@@ -322,6 +320,7 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                         ml={2}
                         weight="SemiBold"
                         sx={{ lineHeight: 1.1 }}
+                        aria-label="Subheadline filter - filters"
                     >
                         Filters
                     </Typography>
@@ -343,6 +342,8 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                             });
                         }}
                         size="subtitle2"
+                        aria-label="clear - filters"
+                        role="button"
                         weight={
                             props.selectedFilters.length > 0 ||
                             props.availabilityFilter.length > 0

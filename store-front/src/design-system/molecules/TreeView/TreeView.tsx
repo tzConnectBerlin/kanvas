@@ -293,7 +293,7 @@ const TreeView: FC<TreeViewProps> = ({
 
             setSelectedFilters(treeState.selectedNodes);
             setHighlightedParents(treeState.highlightedParents);
-            setNewCategorySelected(true)
+            setNewCategorySelected(true);
         }
     }, [props.nodes, preSelectedFilters]);
 
@@ -340,6 +340,7 @@ const TreeView: FC<TreeViewProps> = ({
                             >
                                 <Typography
                                     size="h5"
+                                    aria-label={`Checkbox label ${node.name}`}
                                     weight={
                                         (highlightedParents.indexOf(node.id) !==
                                             -1 &&
@@ -358,11 +359,19 @@ const TreeView: FC<TreeViewProps> = ({
                                 {node.children?.length &&
                                 node.children?.length > 0 ? (
                                     activeRef.indexOf(node.id) !== -1 ? (
-                                        <Typography size="h5" weight="Light">
+                                        <Typography
+                                            size="h5"
+                                            weight="Light"
+                                            aria-label={`Collapse options`}
+                                        >
                                             -
                                         </Typography>
                                     ) : (
-                                        <Typography size="h5" weight="Light">
+                                        <Typography
+                                            size="h5"
+                                            weight="Light"
+                                            aria-label={`Expand options`}
+                                        >
                                             +
                                         </Typography>
                                     )

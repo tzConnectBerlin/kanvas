@@ -1,6 +1,5 @@
 import useAxios from 'axios-hooks';
 import styled from '@emotion/styled';
-import ListIcon from '@mui/icons-material/List';
 import NftGrid from '../../design-system/organismes/NftGrid';
 import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
@@ -161,10 +160,11 @@ const StorePage = () => {
 
     useEffect(() => {
         if (history.location.state) {
-            const state : any = history.location.state
-            if (state.refresh && state.category) setPreSelectedCategories([state.category]);
+            const state: any = history.location.state;
+            if (state.refresh && state.category)
+                setPreSelectedCategories([state.category]);
         }
-    }, [history.location.state])
+    }, [history.location.state]);
 
     const callNFTsEndpoint = (params: IParamsNFTs) => {
         setComfortLoader(true);
@@ -402,9 +402,12 @@ const StorePage = () => {
                     <StyledChevronLeftIcon
                         opened={isMobile ? false : filterOpen}
                         onClick={() => setFilterOpen(!filterOpen)}
+                        aria-labelledby="Hide filter - store page"
+                        role="button"
                     />
+
                     <Typography
-                        size="h4"
+                        size="subtitle1"
                         weight="SemiBold"
                         onClick={() => setFilterOpen(!filterOpen)}
                         sx={{
@@ -430,6 +433,7 @@ const StorePage = () => {
                             !nftsResponse.loading)) && (
                         <StyledChip
                             label="Clear all"
+                            aria-label="Clear all filters - store page"
                             variant="outlined"
                             onDelete={() => {
                                 setSelectedCategories([]);
@@ -451,54 +455,63 @@ const StorePage = () => {
 
                     <CustomSelect
                         id="Sort filter - store page"
-                        availableOptions={[{
-                            value: JSON.stringify({
-                                orderBy: 'name',
-                                orderDirection: 'asc',
-                            }),
-                            label: 'Name: A - Z'
-                        },
-                        {
-                            value: JSON.stringify({
-                                orderBy: 'name',
-                                orderDirection: 'desc',
-                            }),
-                            label: 'Name: Z - A'
-                        },
-                        {
-                            value: JSON.stringify({
-                                orderBy: 'price',
-                                orderDirection: 'desc',
-                            }),
-                            label: 'Price: High - Low'
-                        },
-                        {
-                            value: JSON.stringify({orderBy: 'price',orderDirection: 'asc'}),
-                            label: 'Price: Low - High'
-                        },
-                        {
-                            value: JSON.stringify({
-                                orderBy: 'createdAt',
-                                orderDirection: 'desc',
-                            }),
-                            label: 'Created: New - Old'
-                        },
-                        {
-                            value: JSON.stringify({
-                                orderBy: 'createdAt',
-                                orderDirection: 'asc',
-                            }),
-                            label: 'Created: Old - New'
-                        }
+                        aria-label="Sort filter - store page"
+                        availableOptions={[
+                            {
+                                value: JSON.stringify({
+                                    orderBy: 'name',
+                                    orderDirection: 'asc',
+                                }),
+                                label: 'Name: A - Z',
+                            },
+                            {
+                                value: JSON.stringify({
+                                    orderBy: 'name',
+                                    orderDirection: 'desc',
+                                }),
+                                label: 'Name: Z - A',
+                            },
+                            {
+                                value: JSON.stringify({
+                                    orderBy: 'price',
+                                    orderDirection: 'desc',
+                                }),
+                                label: 'Price: High - Low',
+                            },
+                            {
+                                value: JSON.stringify({
+                                    orderBy: 'price',
+                                    orderDirection: 'asc',
+                                }),
+                                label: 'Price: Low - High',
+                            },
+                            {
+                                value: JSON.stringify({
+                                    orderBy: 'createdAt',
+                                    orderDirection: 'desc',
+                                }),
+                                label: 'Created: New - Old',
+                            },
+                            {
+                                value: JSON.stringify({
+                                    orderBy: 'createdAt',
+                                    orderDirection: 'asc',
+                                }),
+                                label: 'Created: Old - New',
+                            },
                         ]}
-                        selectedOption={JSON.stringify(selectedSort) ?? JSON.stringify({
-                            orderBy: 'createdAt',
-                            orderDirection: 'desc',
-                        })}
+                        selectedOption={
+                            JSON.stringify(selectedSort) ??
+                            JSON.stringify({
+                                orderBy: 'createdAt',
+                                orderDirection: 'desc',
+                            })
+                        }
                         triggerFunction={(event: SelectChangeEvent) => {
                             const sort: SortProps = {
                                 orderBy: JSON.parse(event.target.value).orderBy,
-                                orderDirection: JSON.parse(event.target.value).orderDirection,
+                                orderDirection: JSON.parse(event.target.value)
+                                    .orderDirection,
                             };
                             callNFTsEndpoint({
                                 handlePriceRange: true,
@@ -508,7 +521,7 @@ const StorePage = () => {
                             setSelectedSort(JSON.parse(event.target.value));
                         }}
                         disabled={nftsResponse.loading}
-                        customSize='big'
+                        customSize="big"
                     />
                 </Stack>
 
