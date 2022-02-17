@@ -1,6 +1,5 @@
 import './App.css';
 import { Admin, Resource } from 'react-admin';
-// import jsonServerProvider from 'ra-data-json-server';
 import { UserList, UserEdit, UserCreate } from './components/Users';
 import { NftList, NftEdit, NftCreate } from './components/Nfts';
 import Dashboard from './components/Dashboard';
@@ -46,9 +45,12 @@ function App() {
         icon={NftIcon}
       />
       <Resource
-        name="activity"
+        name="analytics/activities"
         list={ActivityList}
         icon={EqualizerIcon}
+        options={{
+          label: 'Activities'
+        }}
       />
       <Resource
         name="categories"

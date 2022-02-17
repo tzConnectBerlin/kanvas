@@ -1,18 +1,16 @@
-import { List, Datagrid, TextField, EmailField, SingleFieldList, ChipField } from "react-admin";
-import { CustomDeleteButton } from "./Buttons/CustomDeleteButton";
-import { TextArrayField } from "./TextArrayField";
-import ToolbarActions from "./ToolbarActions";
-
+import { List, Datagrid, TextField, NumberField } from "react-admin";
 
 export const ActivityList = ({ ...props }) => {
     return (
-        <List {...props}>
-            <Datagrid rowClick="edit">
-                <TextField source="id" />
-                <TextField source="disabled" />
-                <TextField source="userName" />
-                <TextField source="address" />
-                <EmailField source="email" />
+        <List sort={{ field: 'at', order: 'DESC' }} {...props}>
+            <Datagrid>
+                <TextField source="kind" />
+                <TextField source="tokenId" />
+                <NumberField source="price" />
+                <NumberField source="amount" />
+                <TextField source="from" />
+                <TextField source="to" />
+                <TextField source="at" />
             </Datagrid>
         </List>
     );

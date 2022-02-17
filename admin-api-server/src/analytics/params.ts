@@ -2,7 +2,6 @@ import { IsOptional, IsArray } from 'class-validator';
 import { Transform } from 'class-transformer';
 import {
   parseStringArray,
-  parseNumberParam,
   PaginationParams,
 } from 'src/utils';
 
