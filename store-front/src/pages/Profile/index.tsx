@@ -108,9 +108,8 @@ const Profile: FC<ProfileProps> = () => {
         { manual: true },
     );
 
-    const fetchPendingNfts = () => {
+    const fetchPendingNfts = (pendingNfts: any) => {
         if (userNftsResponse.data?.nfts.length > 0) {
-            const pendingNfts = userNftsResponse.data.nfts.map((nft: INft) => nft.ownerStatuses?.map(status => status === "pending" ) ? nft : undefined)
             checkPendingNfts({
                 url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/nftOwnership`,
                 withCredentials: true,
@@ -152,12 +151,17 @@ const Profile: FC<ProfileProps> = () => {
         if(userNftsResponse.data ) {
             if (userNftsResponse.data.nfts.length === 0) return;
 
-            const pendingNfts = userNftsResponse.data.nfts.map((nft: INft) => nft.ownerStatuses?.map(status => status === "pending" ) ? nft : undefined)
+            let pendingNfts : any[] = []
+
+            for (const nft of userNftsResponse.data.nfts) {
+                if (nft.ownerStatuses?.map((status: any) => status === "pending" ).indexOf(true) === -1) continue
+                pendingNfts.push(nft)
+            }
 
             if (pendingNfts.length === 0) return;
 
             let timer = setInterval(() => {
-                fetchPendingNfts()
+                fetchPendingNfts(pendingNfts)
             }, 2500)
 
             return () => {

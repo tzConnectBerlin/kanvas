@@ -114,7 +114,7 @@ export const SignInModal: FC<SignInModalProps> = ({
         loginType: 'embed' | 'beacon',
     ) => {
         // The data to format
-        const dappUrl = 'd-art.io';
+        const dappUrl = 'https://kanvas.tzconnect.berlin';
         const input = `Welcome to Kanvas ${userAddress}`;
 
         // The full string
@@ -124,7 +124,7 @@ export const SignInModal: FC<SignInModalProps> = ({
             input,
         ].join(' ');
 
-        const bytes = '05' + char2Bytes(formattedInput);
+        const bytes = '0501000000' + char2Bytes(formattedInput);
 
         const payload: RequestSignPayloadInput = {
             signingType: SigningType.MICHELINE,
@@ -157,7 +157,7 @@ export const SignInModal: FC<SignInModalProps> = ({
         } else if (embedKukai && loginType === 'embed') {
             try {
                 const signedPayload = await embedKukai.signExpr(
-                    '0501000000' + payload.payload.slice(2),
+                    payload.payload,
                 );
                 setSignInParams({
                     userAddress: userAddress,
@@ -165,6 +165,7 @@ export const SignInModal: FC<SignInModalProps> = ({
                 });
                 signUser({
                     data: {
+                        name: userAddress,
                         userAddress: userAddress,
                         signedPayload: signedPayload,
                     },
@@ -191,10 +192,12 @@ export const SignInModal: FC<SignInModalProps> = ({
                     },
                 })
                 .then(async (response: PermissionResponseOutput) => {
+                    debugger
                     signExpression(response.address, 'beacon');
                 })
                 .catch((permissionError: ErrorResponse) => {
                     console.log(permissionError);
+                    debugger
                     setBeaconLoading(false);
                 });
 
