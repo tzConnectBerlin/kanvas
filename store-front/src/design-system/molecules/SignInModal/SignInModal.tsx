@@ -192,12 +192,10 @@ export const SignInModal: FC<SignInModalProps> = ({
                     },
                 })
                 .then(async (response: PermissionResponseOutput) => {
-                    debugger
                     signExpression(response.address, 'beacon');
                 })
                 .catch((permissionError: ErrorResponse) => {
                     console.log(permissionError);
-                    debugger
                     setBeaconLoading(false);
                 });
 
