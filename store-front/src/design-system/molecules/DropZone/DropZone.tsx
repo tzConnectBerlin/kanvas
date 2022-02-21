@@ -3,9 +3,8 @@ import CustomButton from '../../atoms/Button';
 import Typography from '../../atoms/Typography';
 
 import { Stack, Theme } from '@mui/material';
-import { FC, useCallback, useState } from 'react';
+import { FC, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import Avatar from '../../atoms/Avatar';
 import { ClearRounded } from '@mui/icons-material';
 
 interface StyledDropZoneProps {
@@ -208,6 +207,8 @@ export const DropZone: FC<DropZoneProps> = ({
                     size="medium"
                     onClick={() => getInputProps()}
                     label={props.fileUrl === '' ? 'Choose file' : 'Edit file'}
+                    aria-label="Confirm upload button"
+                    role="button"
                 />
             </StyledStack>
         </StyledZone>

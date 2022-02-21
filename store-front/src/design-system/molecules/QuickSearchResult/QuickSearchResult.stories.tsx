@@ -1,6 +1,4 @@
-import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-
 import { QuickSearchResult } from './QuickSearchResult';
 
 export default {

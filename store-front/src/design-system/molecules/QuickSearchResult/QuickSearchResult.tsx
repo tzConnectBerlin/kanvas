@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import Avatar from '../../atoms/Avatar';
 import FlexSpacer from '../../atoms/FlexSpacer';
-
 import { FC } from 'react';
 import { useHistory } from 'react-router';
 import { CustomButton } from '../../atoms/Button';
@@ -15,7 +14,6 @@ import {
     Skeleton,
     Stack,
     Theme,
-    useMediaQuery,
 } from '@mui/material';
 
 interface QuickSearResultProps {
@@ -27,6 +25,7 @@ interface QuickSearResultProps {
     open?: boolean;
     closeResult: Function;
     loading?: boolean;
+    role?: string;
 }
 
 interface BoxProps extends MBoxProps {
@@ -140,7 +139,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                 {props.loading ? (
                     <>
                         <StyledHeaderStack direction="row">
-                            <Typography size="h4" weight="SemiBold">
+                            <Typography size="h4" weight="SemiBold" aria-label="nfts loading">
                                 {' '}
                                 Nfts{' '}
                             </Typography>
@@ -203,6 +202,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                             }}
                                             display="initial !important"
                                             noWrap
+                                            aria-label="Nft name"
                                         >
                                             {nft?.name}
                                         </Typography>
@@ -217,7 +217,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                     props.loading ? (
                         <>
                             <StyledHeaderStack direction="row">
-                                <Typography size="h4" weight="SemiBold">
+                                <Typography size="h4" weight="SemiBold" aria-label="categories loading">
                                     Categories
                                 </Typography>
                             </StyledHeaderStack>
@@ -249,7 +249,7 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                         props.categoriesSearchResult.length > 0 && (
                             <>
                                 <StyledHeaderStack direction="row">
-                                    <Typography size="h4" weight="SemiBold">
+                                    <Typography size="h4" weight="SemiBold" aria-label="categories">
                                         Categories
                                     </Typography>
                                     <FlexSpacer />
@@ -264,6 +264,8 @@ export const QuickSearchResult: FC<QuickSearResultProps> = ({ ...props }) => {
                                                         textSize="Light"
                                                         primary={false}
                                                         label={category.name}
+                                                        role="button"
+                                                        aria-label={`navigate to: ${category.id} category`}
                                                         onMouseDown={() => {
                                                             navigateTo(
                                                                 `/store?categories=${category.id}`,

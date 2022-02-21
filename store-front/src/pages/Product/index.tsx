@@ -3,7 +3,6 @@ import styled from '@emotion/styled';
 import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
-
 import { FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, CardMedia, Skeleton, Stack, Theme } from '@mui/material';
@@ -22,14 +21,14 @@ export interface ProductPageProps {
     listCart: Function;
 }
 
-const StyledA = styled.a<{theme? : Theme}>`
-    color: ${props => props.theme.palette.primary.dark};
+const StyledA = styled.a<{ theme?: Theme }>`
+    color: ${(props) => props.theme.palette.primary.dark};
     text-decoration: none;
 
     :hover {
         text-decoration: underline;
     }
-`
+`;
 
 const StytledPageWrapper = styled(PageWrapper)`
     align-items: center;
@@ -237,7 +236,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
             <WrapperFullScreen open={fullScreenView}>
                 <StyledImage
                     src={nftResponse.data?.displayUri}
-                    alt={`Nft ${nftResponse.data?.name} image` }
+                    alt={`Nft ${nftResponse.data?.name} image`}
                     onClick={
                         fullScreenView
                             ? () => {
@@ -297,7 +296,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             <StyledCardMedia
                                 component="img"
                                 image={nftResponse.data?.displayUri}
-                                alt={`Nft ${nftResponse.data?.name}` }                    
+                                alt={`Nft ${nftResponse.data?.name}`}
                             />
                             <StyledWrapperIcon
                                 onClick={
@@ -322,7 +321,11 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                         {/* Headline */}
                         <FlexSpacer />
 
-                        <Typography size="h4" weight="SemiBold">
+                        <Typography
+                            size="h4"
+                            weight="SemiBold"
+                            aria-label="Subtitle - nft creator"
+                        >
                             {nftResponse.loading || comfortLoader ? (
                                 <Skeleton width="15rem" height="2rem" />
                             ) : (
@@ -330,7 +333,11 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             )}
                         </Typography>
 
-                        <Typography size="h2" weight="SemiBold">
+                        <Typography
+                            size="h2"
+                            weight="SemiBold"
+                            aria-label="Subtitle - nft description"
+                        >
                             {nftResponse.loading || comfortLoader ? (
                                 <Skeleton width="10rem" height="2rem" />
                             ) : (
@@ -343,6 +350,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             weight="SemiBold"
                             sx={{ pt: 4 }}
                             color="#757575"
+                            aria-label="Nft description"
                         >
                             {nftResponse.loading || comfortLoader ? (
                                 <Skeleton width="10rem" height="2rem" />
@@ -354,6 +362,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             size="h5"
                             weight="Light"
                             sx={{ pt: 2, mb: 1 }}
+                            aria-label="NFT without description"
                         >
                             {nftResponse.loading || comfortLoader ? (
                                 <Stack direction="column">
@@ -374,6 +383,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     weight="SemiBold"
                                     sx={{ pt: 4 }}
                                     color="#757575"
+                                    aria-label="NFT description new paragraph"
                                 >
                                     {nftResponse.loading ||
                                     (comfortLoader &&
@@ -386,6 +396,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     size="h5"
                                     weight="Light"
                                     sx={{ pt: 2, mb: 1 }}
+                                    aria-label="NFT ramaining time"
                                 >
                                     {nftResponse.loading || comfortLoader ? (
                                         <Skeleton width="8rem" height="2rem" />
@@ -410,6 +421,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             weight="SemiBold"
                             sx={{ pt: 4 }}
                             color="#757575"
+                            aria-label="subtitle - NFT category "
                         >
                             {nftResponse.loading || comfortLoader
                                 ? undefined
@@ -420,6 +432,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             size="h5"
                             weight="Light"
                             sx={{ pt: 2, mb: 1 }}
+                            aria-label="NFT catrgory"
                         >
                             {nftResponse.loading ||
                             comfortLoader ? undefined : (
@@ -452,6 +465,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             weight="SemiBold"
                             sx={{ pt: 4 }}
                             color="#757575"
+                            aria-label="Subtitle - NFT ipfs"
                         >
                             {nftResponse.loading || comfortLoader
                                 ? undefined
@@ -462,6 +476,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             size="h5"
                             weight="Light"
                             sx={{ pt: 2, mb: 1 }}
+                            aria-label="NFT ipfs"
                         >
                             {nftResponse.loading ||
                             comfortLoader ? undefined : (
@@ -470,9 +485,14 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     weight="Medium"
                                     type="link"
                                 >
-                                <StyledA href={`https://cloudflare-ipfs.com/ipfs/${nftResponse.data?.ipfsHash.slice('ipfs://'.length)}`} target='_blank'>
-                                    {nftResponse.data?.ipfsHash}
-                                </StyledA>
+                                    <StyledA
+                                        href={`https://cloudflare-ipfs.com/ipfs/${nftResponse.data?.ipfsHash.slice(
+                                            'ipfs://'.length,
+                                        )}`}
+                                        target="_blank"
+                                    >
+                                        {nftResponse.data?.ipfsHash}
+                                    </StyledA>
                                 </Typography>
                             )}
                         </Typography>
@@ -483,6 +503,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     weight="SemiBold"
                                     sx={{ pt: 4 }}
                                     color="#757575"
+                                    aria-label="Subtitle - NFT editions availability"
                                 >
                                     {nftResponse.loading || comfortLoader
                                         ? undefined
@@ -493,6 +514,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     size="h5"
                                     weight="SemiBold"
                                     sx={{ pt: 2, mb: 1 }}
+                                    aria-label="NFT editions availability"
                                 >
                                     {nftResponse.loading || comfortLoader
                                         ? undefined
@@ -507,6 +529,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     weight="SemiBold"
                                     sx={{ pt: 4 }}
                                     color="#757575"
+                                    aria-label="Subtitle - NFT price"
                                 >
                                     {nftResponse.loading || comfortLoader
                                         ? undefined
@@ -517,6 +540,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     size="h5"
                                     weight="SemiBold"
                                     sx={{ pt: 2, mb: 1 }}
+                                    aria-label="NFT price"
                                 >
                                     {nftResponse.loading ||
                                     comfortLoader ? undefined : (
@@ -530,6 +554,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             size="medium"
                             onClick={() => handleAddToBasket()}
                             loading={addToCartResponse.loading}
+                            role="button"
+                            aria-label="Add to cart"
                             label={
                                 launchTime! > 0
                                     ? 'Not dropped yet'

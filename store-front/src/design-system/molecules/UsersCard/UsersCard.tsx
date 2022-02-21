@@ -139,14 +139,18 @@ export const UsersCard: FC<UsersCardProps> = ({ ...props }) => {
                     ''
                 )}
 
-                <Stack direction="column" sx={{justifyContent: "center"}}>
-                    {props.loading ?
+                <Stack direction="column" sx={{ justifyContent: 'center' }}>
+                    {props.loading ? (
                         <Skeleton width="5rem" />
-                        :
+                    ) : (
                         <Typography
                             size="h5"
                             weight="SemiBold"
-                            onClick={() => navigateTo(`/profile/${props.userAddress}`)}
+                            role="button"
+                            aria-label="Navigate to user profile"
+                            onClick={() =>
+                                navigateTo(`/profile/${props.userAddress}`)
+                            }
                             width={isMobile ? '100%' : '16ch'}
                             sx={{
                                 display: 'initial !important',
@@ -160,24 +164,24 @@ export const UsersCard: FC<UsersCardProps> = ({ ...props }) => {
                         >
                             {props.name}
                         </Typography>
-                    }
-                    {
-                        props.loading ?
-                            <Skeleton width="2rem" />
-                        :
-                            <Typography
-                                size="h5"
-                                weight="Medium"
-                                sx={{
-                                    cursor: 'pointer',
-                                    width: 'auto',
-                                    marginTop: '.5rem',
-                                }}
-                            >
-                                <FormattedNumber value={props.amountBought} />
-                                <TezosLogo width=".9rem" margin="0 0.2rem" />
-                            </Typography>
-                    }
+                    )}
+                    {props.loading ? (
+                        <Skeleton width="2rem" />
+                    ) : (
+                        <Typography
+                            size="h5"
+                            weight="Medium"
+                            sx={{
+                                cursor: 'pointer',
+                                width: 'auto',
+                                marginTop: '.5rem',
+                            }}
+                            aria-label="Users amount bought in tezos"
+                        >
+                            <FormattedNumber value={props.amountBought} />
+                            <TezosLogo width=".9rem" margin="0 0.2rem" />
+                        </Typography>
+                    )}
                 </Stack>
             </StyledStack>
         </StyledButtonBase>

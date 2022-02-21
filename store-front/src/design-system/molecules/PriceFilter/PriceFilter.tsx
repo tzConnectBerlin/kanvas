@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import Typography from '../../atoms/Typography';
 
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import { Stack, Slider, Theme, TextField } from '@mui/material';
 
 interface PriceFilterProps {
@@ -64,6 +64,7 @@ export const PriceFilter: FC<PriceFilterProps> = ({ ...props }) => {
             <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
                 <StyledTextField
                     type="number"
+                    aria-label="Number - input price range from"
                     value={props.range ? props.range[0] : props.minRange}
                     onChange={(e) =>
                         props.setRange((bonds: [number, number]) => [
@@ -78,11 +79,13 @@ export const PriceFilter: FC<PriceFilterProps> = ({ ...props }) => {
                     display="initial !important"
                     align="center"
                     color="#C4C4C4"
+                    aria-label="separator"
                 >
                     -
                 </Typography>
                 <StyledTextField
                     type="number"
+                    aria-label="Number - input price range up to"
                     value={props.range ? props.range[1] : props.maxRange}
                     onChange={(e) =>
                         props.setRange((bonds: [number, number]) => [

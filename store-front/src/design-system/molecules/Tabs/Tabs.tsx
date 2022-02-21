@@ -1,5 +1,4 @@
 import styled from '@emotion/styled';
-
 import { FC, useState } from 'react';
 import {
     Box,
@@ -57,6 +56,7 @@ export const Tabs: FC<TabsProps> = ({ ...props }) => {
                 {props.tabs.map((tab) => (
                     <StyledTab
                         label={tab.label}
+                        aria-label="tab"
                         value={tab.value}
                         wrapped={true}
                         disableRipple

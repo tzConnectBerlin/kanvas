@@ -17,7 +17,7 @@ interface HeaderProfileProps {
     nftsCount: number;
     editProfile: Function;
     userDomain: string;
-    userDomainLoading: boolean
+    userDomainLoading: boolean;
 }
 
 const FiCopyStyled = styled(FiCopy)<{ theme?: Theme; loading: boolean }>`
@@ -145,6 +145,8 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                                     size="medium"
                                     onClick={() => props.editProfile()}
                                     label="Edit profile"
+                                    aria-label="Edit profile button"
+                                    role="button"
                                 />
                             ) : undefined
                         }
@@ -166,8 +168,10 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                             {' '}
                             {props.loading || props.userDomainLoading ? (
                                 <Skeleton width="5rem" />
+                            ) : props.userDomain !== '' ? (
+                                props.userDomain
                             ) : (
-                                props.userDomain !== '' ? props.userDomain : props.user?.userAddress
+                                props.user?.userAddress
                             )}{' '}
                         </Typography>
                         <FiCopyStyled
@@ -290,6 +294,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                         noWrap={true}
                         align="right"
                         display="block"
+                        aria-label="User name"
                     >
                         {' '}
                         {props.loading ? (
@@ -312,6 +317,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                             align="center"
                             display="initial !important"
                             width="50%"
+                            aria-label="User adress"
                         >
                             {' '}
                             {props.loading ? (
@@ -350,6 +356,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                         color="#C4C4C4"
                         truncate={true}
                         align="left"
+                        aria-label="User nfts"
                     >
                         {' '}
                         Nfts{' '}

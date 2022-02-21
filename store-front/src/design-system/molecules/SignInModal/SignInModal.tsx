@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import FlexSpacer from '../../atoms/FlexSpacer';
-import { Box, useTheme } from '@mui/system';
+import { useTheme } from '@mui/system';
 import { toast } from 'react-toastify';
 import { Modal, Stack, Theme, useMediaQuery } from '@mui/material';
 import { KukaiEmbed } from 'kukai-embed';
@@ -337,6 +337,7 @@ export const SignInModal: FC<SignInModalProps> = ({
                                 size="3.5rem"
                                 weight="SemiBold"
                                 sx={{ justifyContent: 'center' }}
+                                aria-label="sign in headline"
                             >
                                 {t('modal.signIn.headline')}{' '}
                             </Typography>
@@ -350,6 +351,7 @@ export const SignInModal: FC<SignInModalProps> = ({
                                 textAlign: 'center',
                                 justifyContent: 'center',
                             }}
+                            aria-label="sign in message"
                         >
                             {t('modal.signIn.text_1')}{' '}
                             {t('modal.signIn.text_2')}
@@ -370,6 +372,8 @@ export const SignInModal: FC<SignInModalProps> = ({
                             }
                             label={t('modal.signIn.button_1')}
                             loading={beaconLoading}
+                            role="button"
+                            aria-label="sign in with wallet"
                         />
                         <Typography size="h5" weight="Light">
                             {' '}
@@ -379,16 +383,20 @@ export const SignInModal: FC<SignInModalProps> = ({
                             size="medium"
                             onClick={() => requestUserWalletPermission('embed')}
                             label={t('modal.signIn.button_2')}
+                            role="button"
+                            aria-label="sign in with social media"
                             loading={socialLoading}
                         />
                     </Stack>
-
-                    <StyledExternalLink href="" target="_blank">
+                    
+                    {/* TODO: missing link on href*/}
+                    <StyledExternalLink href="" target="_blank" aria-label="Link for learn more about wallets">
                         <Typography
                             size="h5"
                             weight="Light"
                             color={'#15a0e1'}
                             sx={{ justifyContent: 'center' }}
+                            
                         >
                             {t('modal.signIn.text_4')}{' '}
                         </Typography>

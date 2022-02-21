@@ -118,6 +118,7 @@ export const Avatar: FC<AvatarProps> = ({
             src={props.src}
             sx={{ bgcolor: '#e1e1e1', borderRadius: props.borderRadius }}
             onClick={onClick}
+            aria-label="Avatar image"
         >
             {props.children}
         </StyledAvatar>

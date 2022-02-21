@@ -95,9 +95,13 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
             <StyledBackground
                 open={openSearchResult}
                 onClick={() => handleCloseInput()}
+                role="button"
+                aria-label='Open search results'
             ></StyledBackground>
             <QuickSearchWrapper
                 direction="column"
+                role="button"
+                aria-label='Open search'
                 onClick={() => {
                     props.setSearchOpen(true);
                 }}
@@ -109,6 +113,8 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
                     searchOpen={props.searchOpen ?? false}
                     onChange={handleChange}
                     closeResult={handleCloseInput}
+                    role="button"
+                    aria-label='Open search'
                     onClick={() => {
                         inputRef.current?.focus();
                         setOpenSearchresult(true);
@@ -119,6 +125,8 @@ export const QuickSearch: FC<QuickSearchProps> = ({ ...props }) => {
                     loading={loading || searchResponse.loading}
                     open={openSearchResult}
                     closeResult={handleCloseInput}
+                    role="button"
+                    aria-label='close search'
                     profilesSearchResult={[]}
                     error={searchResponse.error ? true : false}
                     artworksSearchResult={searchResponse.data?.nfts ?? []}

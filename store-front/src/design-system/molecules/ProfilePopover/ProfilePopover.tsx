@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import Avatar from '../../atoms/Avatar';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
-
 import { FC } from 'react';
 import { Typography } from '../../atoms/Typography';
 import { Menu, MenuProps, MenuItem, Stack, Theme } from '@mui/material';
@@ -80,6 +79,8 @@ export const ProfilePopover: FC<ProfilePopoverProps> = ({ ...props }) => {
             <Stack spacing={1}>
                 <StyledMenuItem
                     onClick={() => navigateTo(`/profile/${props.address}`)}
+                    role="button"
+                    aria-label="button go to profile"
                 >
                     <Avatar src={props.avatarSrc} />
                     <Typography size="inherit" weight="SemiBold">
@@ -100,7 +101,11 @@ export const ProfilePopover: FC<ProfilePopoverProps> = ({ ...props }) => {
                             }}
                         />
                     </Avatar>
-                    <Typography size="inherit" weight="Medium">
+                    <Typography
+                        size="inherit"
+                        weight="Medium"
+                        aria-label="Sign out"
+                    >
                         {' '}
                         Sign out{' '}
                     </Typography>

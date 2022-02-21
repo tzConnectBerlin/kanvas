@@ -3,7 +3,6 @@ import Avatar from '../../../atoms/Avatar';
 import Brightness3Icon from '@mui/icons-material/Brightness3';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import ProfilePopover from '../../ProfilePopover';
-
 import { Badge } from '@mui/material';
 import { QuickSearch } from '../../../molecules/QuickSearch';
 import { FC, useState } from 'react';
@@ -55,7 +54,7 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
                             to="/home"
                             isSearchOpen={props.isSearchOpen}
                             role="link"
-                            aria-label='home link'
+                            aria-label="home link"
                         >
                             <Typography
                                 size="inherit"
@@ -71,7 +70,7 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
                             to="/store?orderBy=createdAt&orderDirection=desc"
                             isSearchOpen={props.isSearchOpen}
                             role="link"
-                            aria-label='store link'
+                            aria-label="store link"
                         >
                             <Typography
                                 size="inherit"
@@ -115,7 +114,12 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
                     />
                 )}
 
-                <Badge role="button" aria-label="Cart button" color="error" badgeContent={props.nftsInCartNumber}>
+                <Badge
+                    role="button"
+                    aria-label="Cart button"
+                    color="error"
+                    badgeContent={props.nftsInCartNumber}
+                >
                     <StyledShoppingCartRoundedIcon
                         onClick={() => props.openOrCloseShoppingCart()}
                     />

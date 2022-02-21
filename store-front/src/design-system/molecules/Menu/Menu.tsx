@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import MobileMenu from './MobileMenu';
 import DesktopMenu from './DesktopMenu';
 import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded';
-
 import { FC } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Stack, Theme } from '@mui/material';

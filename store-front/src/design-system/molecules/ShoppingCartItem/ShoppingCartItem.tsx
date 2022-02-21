@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import Avatar from '../../atoms/Avatar';
-import ClearIcon from '@mui/icons-material/Clear';
 import ImageNotSupportedOutlinedIcon from '@mui/icons-material/ImageNotSupportedOutlined';
 
 import { FC } from 'react';
@@ -100,6 +99,8 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     display="initial !important"
                     noWrap
                     type="link"
+                    role="button"
+                    aria-label={`Navigate to ${nft!.name} nft page`}
                     onClick={() => navigateTo(`/product/${nft!.id}`)}
                     sx={{ cursor: 'pointer', width: 'auto' }}
                 >
@@ -111,6 +112,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     display="initial !important"
                     noWrap
                     color="#C4C4C4"
+                    aria-label="nft ipfs hash"
                     sx={{ cursor: 'pointer', maxWidth: '70%' }}
                 >
                     {nft!.ipfsHash}
@@ -123,6 +125,8 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     weight="Medium"
                     type="link"
                     color="contrastText"
+                    role="button"
+                    aria-label="remove nft"
                     sx={{
                         cursor: 'pointer',
                         width: 'auto',
@@ -133,6 +137,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     Remove
                     {props.removeNftLoading && (
                         <CustomCircularProgress
+                            aria-label="progress"
                             height={0.6}
                             sx={{ marginLeft: '0.7rem' }}
                         />
@@ -144,6 +149,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                 size="body1"
                 weight="Light"
                 noWrap
+                aria-label="nft price"
                 sx={{
                     cursor: 'pointer',
                     width: 'auto',

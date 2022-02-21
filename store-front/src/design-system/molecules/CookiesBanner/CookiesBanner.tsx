@@ -6,8 +6,6 @@ import { Typography } from '../../atoms/Typography';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Theme } from '@mui/material';
-import FlexSpacer from '../../atoms/FlexSpacer';
-import ProfilePopoverStories from '../ProfilePopover/ProfilePopover.stories';
 
 interface StyledPaperProps {
     backgroundColor?: string;
@@ -34,15 +32,15 @@ export interface CookiesBannerProps {
     handleClose?: (title: string) => void | Promise<void>;
 }
 
-const StyledLink = styled(Link) <{ theme?: Theme }>`
+const StyledLink = styled(Link)<{ theme?: Theme }>`
     color: inherit;
     text-decoration: none;
     font-family: inherit;
     display: inline;
     text-decoration: underline;
 `;
-const StyledPaper = styled(Paper) <StyledPaperProps>`
-    background-color: ${propos => propos.theme.palette.background.paper};
+const StyledPaper = styled(Paper)<StyledPaperProps>`
+    background-color: ${(propos) => propos.theme.palette.background.paper};
     border-radius: 0 !important;
     color: #fff;
     position: sticky;
@@ -54,11 +52,10 @@ const StyledPaper = styled(Paper) <StyledPaperProps>`
 `;
 
 const StyledStack = styled(Stack)`
-
     justify-content: center !important;
     align-items: center !important;
     padding: 2.5rem;
-`
+`;
 
 const defaultCookies = {
     necessary: true,
@@ -67,7 +64,7 @@ const defaultCookies = {
     marketing: false,
 };
 
-const StyledBackgroundDiv = styled.div<{theme?: Theme}>`
+const StyledBackgroundDiv = styled.div<{ theme?: Theme }>`
     z-index: 30;
     top: 0;
     bottom: 0;
@@ -77,8 +74,8 @@ const StyledBackgroundDiv = styled.div<{theme?: Theme}>`
     overflow-x: hidden;
     overflow-y: hidden;
     opacity: 0.75;
-    background-color: ${props => props.theme.palette.background.default };
-`
+    background-color: ${(props) => props.theme.palette.background.default};
+`;
 
 export const CookiesBanner: React.FC<CookiesBannerProps> = ({
     title = 'Privacy Policy',
@@ -96,9 +93,9 @@ export const CookiesBanner: React.FC<CookiesBannerProps> = ({
         document.cookie = `user=${JSON.stringify(cookies)}; max-age=8640000;}`;
     };
 
-    React.useEffect(()  => {
+    React.useEffect(() => {
         document.body.style.overflow = 'hidden';
-    }, [])
+    }, []);
 
     const handleSubmit = () => {
         document.body.style.overflow = '';
@@ -110,12 +107,16 @@ export const CookiesBanner: React.FC<CookiesBannerProps> = ({
         <>
             <StyledBackgroundDiv></StyledBackgroundDiv>
             <StyledPaper elevation={0} backgroundColor={primary.main}>
-                <StyledStack direction={{ xs: "column", md: "row" }} spacing={2}>
+                <StyledStack
+                    direction={{ xs: 'column', md: 'row' }}
+                    spacing={2}
+                >
                     <Typography
                         width={isMobile ? '90%' : '45%'}
-                        size='body2'
+                        size="body2"
                         weight="Light"
                         display="inline"
+                        aria-label="Cookies banner description"
                         style={{
                             alignSelf: 'center',
                             marginBottom: !isDesktop ? '2rem' : 0,
@@ -123,15 +124,20 @@ export const CookiesBanner: React.FC<CookiesBannerProps> = ({
                         }}
                     >
                         {t('cookies.text')}
-                        <StyledLink to="/privacy">
+                        <StyledLink
+                            to="/privacy"
+                            role="link"
+                            aria-label="Cookies link"
+                        >
                             {t('cookies.link')}
                         </StyledLink>
                         {' .'}
                     </Typography>
                     <CustomButton
-                        size='small'
+                        size="small"
                         onClick={handleSubmit}
                         label={t('cookies.button')}
+                        aria-label="Accept cookies to navigate"
                     />
                 </StyledStack>
             </StyledPaper>

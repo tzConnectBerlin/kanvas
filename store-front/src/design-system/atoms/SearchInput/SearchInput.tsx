@@ -87,7 +87,6 @@ const StyledInputBase = styled(MInputBase)<MInputBasePropsStyled>`
             ? `1px solid ${props.theme.palette.text.primary}`
             : ''};
 
-
     &.MuiInputBase-root {
         font-family: 'Poppins Medium' !important;
         width: ${(props) => (props.searchOpen ? '100%' : '0')} !important ;
@@ -124,6 +123,8 @@ export const SearchInput = forwardRef<HTMLInputElement, InputBaseProps>(
             >
                 <SearchIconWrapper
                     onClick={props.searchOpen ? () => {} : props.onClick}
+                    role="button"
+                    aria-labelledby="start search"
                 >
                     <StyledSearchRounded
                         fontSize="small"

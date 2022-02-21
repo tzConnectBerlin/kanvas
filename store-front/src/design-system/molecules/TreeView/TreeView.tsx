@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import Typography from '../../atoms/Typography';
 import FlexSpacer from '../../atoms/FlexSpacer';
-
 import { Checkbox, Stack, Theme } from '@mui/material';
 import { FC, useEffect, useState } from 'react';
 import { IParamsNFTs, ITreeCategory } from '../../../pages/StorePage';

@@ -24,9 +24,11 @@ interface SelectedProps extends MuiSelectProps {
     customSize: 'small' | 'big';
 }
 
-const StyledFormControl = styled(FormControl) <{ theme?: Theme, customSize: 'small' | 'big' }>`
+const StyledFormControl = styled(FormControl)<{
+    theme?: Theme;
+    customSize: 'small' | 'big';
+}>`
     margin: 0;
-
 
     .MuiOutlinedInput-root.MuiInputBase-root.MuiInputBase-colorPrimary.MuiInputBase-formControl:after {
         border: none;
@@ -52,11 +54,22 @@ const StyledFormControl = styled(FormControl) <{ theme?: Theme, customSize: 'sma
     .MuiSelect-select {
         border-radius: 2rem !important;
         min-height: 0 !important;
-        font-family: ${ props => props.customSize === 'small' ?  'Poppins' : props.customSize === 'big' ? 'Poppins SemiBold' : 'Poppins' } !important ;
-        font-size: ${ props => props.customSize === 'small' ?  0.8 : props.customSize === 'big' ? 1.1 : 0.8 }rem !important ;
+        font-family: ${(props) =>
+            props.customSize === 'small'
+                ? 'Poppins'
+                : props.customSize === 'big'
+                ? 'Poppins SemiBold'
+                : 'Poppins'} !important ;
+        font-size: ${(props) =>
+            props.customSize === 'small'
+                ? 0.8
+                : props.customSize === 'big'
+                ? 1.1
+                : 0.8}rem !important ;
         padding-right: 3rem !important;
-        
-        padding-left: ${ props => props.customSize === 'small' ? 0 : 0.5}rem !important;
+
+        padding-left: ${(props) =>
+            props.customSize === 'small' ? 0 : 0.5}rem !important;
         @media (max-width: 874px) {
             width: 4.5rem;
         }
@@ -67,32 +80,45 @@ const StyledFormControl = styled(FormControl) <{ theme?: Theme, customSize: 'sma
     }
 `;
 
-const StyledMenuItem = styled(MenuItem) <{ theme?: Theme, customSize: 'small' | 'big' }>`
+const StyledMenuItem = styled(MenuItem)<{
+    theme?: Theme;
+    customSize: 'small' | 'big';
+}>`
     font-family: 'Poppins' !important;
-    font-size: ${ props => props.customSize === 'small' ?  0.8 : props.customSize === 'big' ? 1.1 : 0.8 }rem !important ;
+    font-size: ${(props) =>
+        props.customSize === 'small'
+            ? 0.8
+            : props.customSize === 'big'
+            ? 1.1
+            : 0.8}rem !important ;
     border-radius: 0.5rem;
     margin-left: 0.5rem;
     margin-right: 0.5rem;
 
     &.Mui-selected {
         background-color: ${(props) =>
-        props.theme.palette.primary.contrastText} !important;
+            props.theme.palette.primary.contrastText} !important;
     }
 `;
 
-const StyledExpandMoreIcon = styled(ExpandMoreIcon) <{ theme?: Theme, customSize: 'small' | 'big' }>`
-    width: ${ props => props.customSize === 'small' ?  1.4 : props.customSize === 'big' ? 1.8 : 1.4 }rem !important ;
-    margin-left: ${ props => props.customSize === 'small' ? 0 : 0.5}rem;
+const StyledExpandMoreIcon = styled(ExpandMoreIcon)<{
+    theme?: Theme;
+    customSize: 'small' | 'big';
+}>`
+    width: ${(props) =>
+        props.customSize === 'small'
+            ? 1.4
+            : props.customSize === 'big'
+            ? 1.8
+            : 1.4}rem !important ;
+    margin-left: ${(props) => (props.customSize === 'small' ? 0 : 0.5)}rem;
     color: ${(props) => props.theme.palette.text.primary};
 
     font-size: 1.8rem;
     transition: transform 0.3s;
 `;
 
-export const CustomSelect: FC<SelectedProps> = ({
-    ...props
-}) => {
-
+export const CustomSelect: FC<SelectedProps> = ({ ...props }) => {
     return (
         <StyledFormControl
             variant="outlined"
@@ -102,24 +128,23 @@ export const CustomSelect: FC<SelectedProps> = ({
             <Select
                 id={props.id}
                 labelId={`${props.id}-label"`}
+                inputProps={{ 'aria-label': 'select' }}
                 value={props.selectedOption}
                 onChange={props.triggerFunction}
                 IconComponent={StyledExpandMoreIcon}
                 autoWidth
             >
-                {
-                    props.availableOptions.map((item: selectOption) =>
-                        <StyledMenuItem
-                            disableRipple
-                            value={item.value}
-                            customSize={props.customSize}
-                            key={item.value}
-                        >
-                            {item.label}
-                        </StyledMenuItem>
-                    )
-                }
-
+                {props.availableOptions.map((item: selectOption) => (
+                    <StyledMenuItem
+                        disableRipple
+                        value={item.value}
+                        customSize={props.customSize}
+                        key={item.value}
+                        aria-label={`select-option-${item.label}`}
+                    >
+                        {item.label}
+                    </StyledMenuItem>
+                ))}
             </Select>
         </StyledFormControl>
     );
