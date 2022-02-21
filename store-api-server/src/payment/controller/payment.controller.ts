@@ -33,6 +33,14 @@ export class PaymentController {
     this.nftLock = new Lock<number>();
   }
 
+  // TODO: remove this
+  @Post('/test')
+  async test(
+    @Headers() headers: any
+  ) {
+    console.log(headers['x-forwarded-host'])
+  }
+
   @Post('/stripe-webhook')
   async stripeWebhook(
     @Headers('stripe-signature') signature: string,
@@ -72,23 +80,20 @@ export class PaymentController {
   @UseGuards(JwtAuthGuard)
   async createPayment(
     @CurrentUser() user: UserEntity,
+    @Headers() headers: any,
   ): Promise<StripePaymentIntent> {
     await this.nftLock.acquire(user.id);
 
+    const clientIp = headers['x-forwarded-host']
+
+    if (typeof clientIp === 'undefined') {
+      throw new HttpException('', HttpStatus.BAD_REQUEST)
+    }
+
     try {
-      const preparedPayment = await this.paymentService.preparePayment(
-        user.id,
-        PaymentProviderEnum.STRIPE,
-      );
-      const stripePaymentIntent = await this.paymentService.createStripePayment(
-        preparedPayment.amount,
-        user,
-      );
-      await this.paymentService.createPayment(
-        PaymentProviderEnum.STRIPE,
-        stripePaymentIntent.id,
-        preparedPayment.nftOrder.id,
-      );
+      const preparedPayment = await this.paymentService.preparePayment(user.id, PaymentProviderEnum.STRIPE)
+      const stripePaymentIntent = await this.paymentService.createStripePayment(preparedPayment.amount, user, clientIp);
+      await this.paymentService.createPayment(PaymentProviderEnum.STRIPE, stripePaymentIntent.id, preparedPayment.nftOrder.id)
 
       return stripePaymentIntent;
     } catch (err: any) {

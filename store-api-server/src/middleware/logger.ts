@@ -44,7 +44,7 @@ export class LoggerMiddleware implements NestMiddleware {
     const { ip, method, originalUrl } = request;
     const userAgent = request.get('user-agent') || '';
     const cookieSession = request.session?.uuid.slice(0, 5) || '';
-    const realIp = request.get('x-real-ip') || ip;
+    const realIp = request.get('x-forwarded-host') || ip;
 
     const fields = [
       method,

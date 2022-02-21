@@ -1,4 +1,4 @@
-import { Injectable, Inject, HttpStatus, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { PG_CONNECTION } from 'src/constants';
 import { UserEntity } from 'src/user/entity/user.entity';
 import { UserService } from 'src/user/service/user.service';
@@ -32,6 +32,8 @@ export interface StripePaymentIntent {
   amount: number;
   currency: string;
   clientSecret: string;
+  vatAmount: number;
+  vatRate: number;
   id: string;
 }
 
@@ -114,21 +116,33 @@ export class PaymentService {
   async createStripePayment(
     amount: number,
     user: UserEntity,
+    ipAddress: string
   ): Promise<StripePaymentIntent> {
+
+    const amountInBaseCurrency = amount * 100
+
     const paymentIntent = await this.stripe.paymentIntents.create({
-      amount: amount * 100,
+      amount: amountInBaseCurrency,
       currency: 'eur', // Have to change this to handle different currencies
       automatic_payment_methods: {
         enabled: false,
       },
     });
 
+    const vatRate = await this.getVatRate(ipAddress)
+
+    if (typeof vatRate === 'undefined') {
+      throw Error('Country not supported')
+    }
+
     // add multiple currency later on
     return {
-      amount: amount * 100,
+      amount: amountInBaseCurrency,
       currency: 'eur',
       clientSecret: paymentIntent.client_secret,
       id: paymentIntent.id,
+      vatAmount: amountInBaseCurrency + amountInBaseCurrency * (vatRate/100),
+      vatRate: vatRate
     };
   }
 
@@ -448,5 +462,32 @@ ORDER BY payment.id DESC
       order_id: qryRes.rows[0]['order_id'],
       status: qryRes.rows[0]['status'],
     };
+  }
+
+  // Note rate is already devided by a hundred and should be between 0 and 100
+  async getVatRate(ipAddress: string) : Promise<number | undefined> {
+    const intIpAddress = this.dot2num(ipAddress)
+
+    const qryRes = await this.conn.query(
+    `
+SELECT rate
+FROM vat
+LEFT JOIN country
+ON country.vat_id = vat.id
+LEFT JOIN ip_country
+ON ip_country.country_id = country.id
+WHERE country.id = ip_country.country_id
+AND ip_country.ip_from < 281470698520830
+AND 281470698520830 < ip_country.ip_to
+AND country.vat_id = vat.id
+      `, [intIpAddress]
+    );
+
+    return qryRes.rows[0]['rate']
+  }
+
+  dot2num(IpDoted: string) {
+      var d = IpDoted.split('.');
+      return ((((((+d[0])*256)+(+d[1]))*256)+(+d[2]))*256)+(+d[3]);
   }
 }
