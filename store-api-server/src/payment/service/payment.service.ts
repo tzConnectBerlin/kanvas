@@ -1423,4 +1423,31 @@ ORDER BY payment.id DESC
       ),
     );
   }
+
+  // Note rate is already devided by a hundred and should be between 0 and 100
+  async getVatRate(ipAddress: string) : Promise<number | undefined> {
+    const intIpAddress = this.dot2num(ipAddress)
+
+    const qryRes = await this.conn.query(
+    `
+SELECT rate
+FROM vat
+LEFT JOIN country
+ON country.vat_id = vat.id
+LEFT JOIN ip_country
+ON ip_country.country_id = country.id
+WHERE country.id = ip_country.country_id
+AND ip_country.ip_from < 281470698520830
+AND 281470698520830 < ip_country.ip_to
+AND country.vat_id = vat.id
+      `, [intIpAddress]
+    );
+
+    return qryRes.rows[0]['rate']
+  }
+
+  dot2num(IpDoted: string) {
+      var d = IpDoted.split('.');
+      return ((((((+d[0])*256)+(+d[1]))*256)+(+d[2]))*256)+(+d[3]);
+  }
 }
