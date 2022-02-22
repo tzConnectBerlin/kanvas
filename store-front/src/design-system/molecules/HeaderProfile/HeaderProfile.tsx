@@ -147,7 +147,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                                 <CustomButton
                                     size="medium"
                                     onClick={() => props.editProfile()}
-                                    label={t('nftGrid.edit')}
+                                    label={t('profile.edit')}
                                     aria-label="Edit profile button"
                                     role="button"
                                 />

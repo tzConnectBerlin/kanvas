@@ -40,14 +40,20 @@ const StyledStack = styled(Stack)`
     width: 100vw;
     max-width: 100rem;
     align-items: center;
-    margin-bottom: 4rem;
+    margin-bottom: 4rem;   
 `;
 
 const StyledMetadataStack = styled(Stack)`
-    min-width: 30%;
-    max-width: 30%;
+    min-width: 100%;
+    margin: 3rem 0 0 0;
+    
+    @media (min-width: 969px) {        
+        min-width: 30%;
+        max-width: 30%;
+        margin-left: 3rem ;
+    }
 
-    @media (max-width: 874px) {
+    @media (min-width: 900px) {
         max-width: 100%;
     }
 
@@ -59,17 +65,18 @@ const StyledMetadataStack = styled(Stack)`
 
 const StyledCardMedia = styled(CardMedia)<{ component?: string; alt: string }>`
     object-fit: contain;
-    max-height: 75vh;
-    /* min-height: 35rem; */
+    min-height: 100%;
+    
+    @media (max-width: 600px) {
+        min-height: 100%;
+    }
 
-    @media (max-width: 874px) {
-        min-height: 0;
-        max-height: 100% !important;
+    @media (min-width: 969px) {
+        max-height: 43rem;
     }
 
     @media (min-width: 1440px) {
-        /* width: 70%; */
-        /* height: auto; */
+        max-height: 55vh;
     }
 `;
 
@@ -140,6 +147,21 @@ const StyledImage = styled.img<{ open: boolean }>`
     width: 100%;
     transition: opacity 0.4s;
     border-radius: 1rem;
+`;
+
+const StyledCustomButton = styled(CustomButton)`
+    margin-top: 3rem;
+    
+     @media (min-width: 969px) {
+        margin-top: auto;
+    }
+`;
+
+const StyledWrapper = styled(Stack)`
+ 
+    @media (min-width: 786px) {
+        margin-top: auto;
+    }
 `;
 
 interface IProductParam {
@@ -260,7 +282,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                     minHeight: '45rem',
                 }}
             >
-                <Stack
+                <StyledWrapper
                     direction={{ xs: 'column', md: 'row' }}
                     spacing={5}
                     sx={{
@@ -268,6 +290,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                         minHeight: '20rem',
                         marginTop: '7rem',
                         justifyContent: 'center',
+                        flexWrap: 'wrap',
                     }}
                 >
                     {nftResponse.loading || comfortLoader ? (
@@ -322,7 +345,6 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                         sx={{ position: 'relative' }}
                     >
                         {/* Headline */}
-                        <FlexSpacer />
 
                         <Typography
                             size="h4"
@@ -574,7 +596,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                                 <>
                                                     {nftResponse.data?.price}
                                                     <TezosLogo
-                                                        width="15px"
+                                                        width={15}
                                                         margin="0 0.2rem"
                                                     />
                                                 </>
@@ -587,7 +609,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             </Stack>
                         </Stack>
 
-                        <CustomButton
+                        <StyledCustomButton
                             size="medium"
                             onClick={() => handleAddToBasket()}
                             loading={addToCartResponse.loading}
@@ -615,10 +637,9 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     0 ||
                                 launchTime! > 0
                             }
-                            sx={{ marginTop: '3rem !important' }}
                         />
                     </StyledMetadataStack>
-                </Stack>
+                </StyledWrapper>
             </StyledStack>
         </StytledPageWrapper>
     );
