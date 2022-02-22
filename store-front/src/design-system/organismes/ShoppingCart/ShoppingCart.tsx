@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import { Stack, Theme } from '@mui/material';
 import { INft } from '../../../interfaces/artwork';
 import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface ShoppingCartProps {
     nftsInCart: INft[];
@@ -96,6 +97,7 @@ export const StyledStackWrapper = styled(Stack)<{ theme?: Theme }>`
 `;
 
 export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
+    const { t } = useTranslation(['translation']);
     const history = useHistory();
     const [timeLeft, setTimeLeft] = useState<number>();
 
@@ -223,7 +225,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         weight="SemiBold"
                         sx={{ marginTop: '1rem', marginLeft: '1rem' }}
                     >
-                        Summary
+                        {t('cart.summary')}
                     </Typography>
                     <FlexSpacer />
                     <Typography
@@ -232,7 +234,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         sx={{ marginTop: '1rem', marginRight: '1rem' }}
                     >
                         {props.nftsInCart.length > 0 && (
-                            <>{props.nftsInCart.length} - items </>
+                            <>{props.nftsInCart.length} - {t('cart.items')} </>
                         )}
                     </Typography>
                 </Stack>
@@ -283,8 +285,9 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                     weight="SemiBold"
                                     display="initial !important"
                                     align="left"
+                                    aria-label="subtitle"
                                 >
-                                    Total
+                                    {t('common.total')}
                                 </Typography>
 
                                 <FlexSpacer />
@@ -312,7 +315,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             color="#C4C4C4"
                             sx={{ marginBottom: '1.5rem' }}
                         >
-                            {'Empty Shopping Cart..'}
+                          {t('cart.empty')}
                         </Typography>
                     )}
 
@@ -325,18 +328,18 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             color="#C4C4C4"
                         >
                             {timeLeft && timeLeft > 0
-                                ? `Your cart will expire in ${Math.round(
+                                ? `${t('cart.willExpire')} ${Math.round(
                                       timeLeft / 60000,
                                   )}
-                                minutes.`
-                                : 'Cart Expired'}
+                                ${t('cart.minutes')}.`
+                                : `${t('cart.expired')}`}
                         </Typography>
                     )}
 
                     {props.open && (
                         <CustomButton
                             size="medium"
-                            label="Go to checkout"
+                            label={t('cart.goCheckout')}
                             onClick={() => {
                                 props.closeCart();
                                 history.push('/checkout');

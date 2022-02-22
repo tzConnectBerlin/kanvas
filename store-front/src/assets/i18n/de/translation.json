@@ -8,6 +8,9 @@
     "signOut": "Abmelden",
     "profile": " Zum Profil wechseln",
     "notifications": "Benachrichtigungen",
+    "menu": "Speisekarte",
+    "user": "Benutzer",
+    "total": "Gesamt",
     "button": {
       "backToHome": "Zurück zu Hause"
     },
@@ -19,6 +22,11 @@
     "store": "Speicher"
   },
   "product": {
+    "already": "Bereits im Warenkorb",
+    "add": "In den Warenkorb",
+    "notDropped": "Noch nicht gelöscht",
+    "dropped": "NFT wurde gelöscht",
+    "noDescription": "Keine Beschreibung angegeben",
     "description": {
       "part_1": "Über den Künstler",
       "part_2": "Beschreibung",
@@ -112,12 +120,30 @@
     },
     "topBuyers": {
       "headline": "Bestkaufer",
-      "link": "Alle anzeigen"
+      "link": "Alle anzeigen",
+      "none": "Noch keine Top-Käufer"
     },
     "nfts": {
       "headline": "Vorgestellte NFTs",
-      "link": "Alle anzeigen"
+      "link": "Alle anzeigen",
+      "emptyMessage": "Keine vorgestellten NFTs",
+      "emptyLink": "Gesamte Sammlung anzeigen"
     }
+  },
+  "profile": {
+    "emptyMessage": "Noch keine NFTs in Sammlung",
+    "emptyLink": "Klicken Sie hier, um welche im Laden zu kaufen.",
+    "edit": "Profil bearbeiten"
+  },
+  "cart": {
+    "remove": "Löschen",
+    "goCheckout": "Zur Kasse gehen",
+    "items": "Artikel",
+    "minutes": "Minuten",
+    "expired": "Warenkorb abgelaufen",
+    "willExpire": "Ihr Warenkorb läuft ab in",
+    "summary": "Zusammenfassung",
+    "empty": "Warenkorb ist leer.."
   },
   "checkout": {
     "headline_0": "Zusammenfassung",

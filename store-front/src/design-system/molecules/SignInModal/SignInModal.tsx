@@ -372,6 +372,7 @@ export const SignInModal: FC<SignInModalProps> = ({
                             }
                             label={t('modal.signIn.button_1')}
                             loading={beaconLoading}
+                            sx={{lineHeight: 1}}
                             role="button"
                             aria-label="sign in with wallet"
                         />
@@ -383,6 +384,7 @@ export const SignInModal: FC<SignInModalProps> = ({
                             size="medium"
                             onClick={() => requestUserWalletPermission('embed')}
                             label={t('modal.signIn.button_2')}
+                            sx={{lineHeight: 1}}
                             role="button"
                             aria-label="sign in with social media"
                             loading={socialLoading}

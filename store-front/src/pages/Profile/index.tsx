@@ -4,7 +4,6 @@ import Tabs from '../../design-system/molecules/Tabs';
 import NftGrid from '../../design-system/organismes/NftGrid';
 import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
-
 import { Pagination, Stack, useMediaQuery, useTheme } from '@mui/material';
 import { Animated } from 'react-animated-css';
 import { FC, useEffect, useState } from 'react';
@@ -12,6 +11,7 @@ import { useHistory, useParams } from 'react-router';
 import { HeaderProfile } from '../../design-system/molecules/HeaderProfile/HeaderProfile';
 import { Theme } from '@mui/material';
 import { INft } from '../../interfaces/artwork';
+import { useTranslation } from 'react-i18next';
 
 interface ParamTypes {
     userAddress: string;
@@ -69,6 +69,7 @@ const StyledPagination = styled(Pagination)<{
 
 const Profile: FC<ProfileProps> = () => {
     let { userAddress } = useParams<ParamTypes>();
+    const { t } = useTranslation(['translation']);
 
     const history = useHistory();
 
@@ -309,8 +310,8 @@ const Profile: FC<ProfileProps> = () => {
                     open={false}
                     loading={userNftsResponse.loading}
                     nfts={userNftsResponse.data?.nfts}
-                    emptyMessage={'No Nfts in collection yet'}
-                    emptyLink={'Click here to buy some in the store.'}
+                    emptyMessage={t('profile.emptyMessage')}
+                    emptyLink={t('profile.emptyLink')}
                     nftCardMode="user"
                 />
 

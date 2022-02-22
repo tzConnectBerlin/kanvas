@@ -338,11 +338,12 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                         size="h5"
                         weight="Medium"
                         color="#9b9b9b"
+                        aria-label="headline"
                         sx={{ cursor: 'pointer', marginBottom: '0.7rem' }}
                     >
-                        Menu
+                        {t('common.menu')}
                     </Typography>
-                    <StyledMobileLink to="/">
+                    <StyledMobileLink to="/" role="link" aria-label="home link">
                         <Typography
                             size="h2"
                             weight="SemiBold"
@@ -352,7 +353,11 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                         </Typography>
                     </StyledMobileLink>
 
-                    <StyledMobileLink to="/store">
+                    <StyledMobileLink
+                        to="/store"
+                        role="link"
+                        aria-label="store link"
+                    >
                         <Typography
                             size="h2"
                             weight="SemiBold"
@@ -371,8 +376,9 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                             marginBottom: '0.7rem',
                             marginTop: '1rem',
                         }}
+                        aria-label="headline"
                     >
-                        User
+                        {t('common.user')}
                     </Typography>
 
                     {localStorage.getItem('Kanvas - address') !==
@@ -382,6 +388,8 @@ export const MobileMenu: FC<MenuProps> = ({ ...props }) => {
                             weight="SemiBold"
                             sx={{ cursor: 'pointer' }}
                             onClick={() => props.setOpen(true)}
+                            role="link"
+                            aria-labelledBy="Sign-in link"
                         >
                             Sign in
                         </StyledSignIn>

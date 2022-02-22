@@ -8,6 +8,9 @@
     "signOut": "Désigner",
     "profile": " Accéder au profil",
     "notifications": "Notifications",
+    "menu": "Menu",
+    "user": "Utilisateur",
+    "total": "Totale",
     "button": {
       "backToHome": "Retour à la maison"
     },
@@ -19,13 +22,18 @@
     "store": "Magasin"
   },
   "product": {
+    "already": "Déjà dans le panier",
+    "add": " Ajouter au panier",
+    "notDropped": "Pas encore déposé",
+    "dropped": "NFT a été supprimé",
+    "noDescription": "Aucune description fournie",
     "description": {
       "part_1": "À propos de l'artiste",
       "part_2": "Description",
       "part_3": "La baisse sera",
       "editions": "Disponibilité",
       "categories": "Les catagories joints",
-      "ipfs" : "IPFS hash",
+      "ipfs": "IPFS hash",
       "price": "Prix",
       "button": "Ajouter au panier"
     },
@@ -105,21 +113,39 @@
     "hero": {
       "headline": "NFT Kanvas",
       "description_1": "Le nouveau marché NFT et la solution de marque blanche de Tezos. ",
-      "description_2": "Mint, Buy and sell your NFTs on our Auctions or you can create your platform with us now.",
+      "description_2": "Monnayez, achetez et vendez vos NFT sur nos enchères ou vous pouvez créer votre plateforme avec nous maintenant.",
       "button_1": "Afficher la collection",
       "button_2": "Se connecter",
       "button_3": "Afficher"
     },
     "topBuyers": {
       "headline": "Top Achteurs",
-      "link": "Voir tous les"
+      "link": "Voir tous les",
+      "none": "Aucun meilleur acheteur pour le moment"
     },
     "nfts": {
       "headline": "NFT présentées",
-      "link": "Voir tous les"
+      "link": "Voir tous les",
+      "emptyMessage": "Aucun NFT en vedette",
+      "emptyLink": "Voir toute la collection"
     }
   },
-  "vérifier": {
+   "profile": {
+    "emptyMessage": "Pas encore de Nfts dans la collection",
+    "emptyLink": "Cliquez ici pour en acheter en magasin.",
+    "edit": "Modifier le profil"
+  },
+  "cart": {
+    "remove": "retirer",
+    "goCheckout": "Aller à la caisse",
+    "items": "articles",
+    "minutes": "minutes",
+    "expired": "Panier expiré",
+    "willExpite": "Votre panier expirera dans",
+    "summary": "Résumé",
+    "empty": "Panier vide.."
+  },
+  "checkout": {
     "headline_0": "Résumé",
     "headline_1": "Choisir le mode de paiement",
     "headline_2": "Procéder au paiement",

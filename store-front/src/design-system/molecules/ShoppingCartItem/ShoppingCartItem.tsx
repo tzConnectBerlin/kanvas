@@ -9,6 +9,7 @@ import Typography from '../../atoms/Typography';
 import CustomCircularProgress from '../../atoms/CircularProgress';
 import { useHistory } from 'react-router-dom';
 import FlexSpacer from '../../atoms/FlexSpacer';
+import { useTranslation } from 'react-i18next';
 
 interface ShoppingCartItemProps {
     loading: boolean;
@@ -38,6 +39,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
     ...props
 }) => {
     const history = useHistory();
+    const { t } = useTranslation(['translation']);
 
     const navigateTo = (pathname: string) => {
         history.push({ pathname: pathname });
@@ -134,7 +136,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                         marginTop: '0.4rem !important',
                     }}
                 >
-                    Remove
+                    {t('cart.remove')}
                     {props.removeNftLoading && (
                         <CustomCircularProgress
                             aria-label="progress"

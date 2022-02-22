@@ -54,7 +54,7 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
                             to="/home"
                             isSearchOpen={props.isSearchOpen}
                             role="link"
-                            aria-label="home link"
+                            aria-label="home link"                            
                         >
                             <Typography
                                 size="inherit"
@@ -115,12 +115,12 @@ export const DesktopMenu: FC<MenuProps> = ({ user, onLogout, ...props }) => {
                 )}
 
                 <Badge
-                    role="button"
-                    aria-label="Cart button"
                     color="error"
                     badgeContent={props.nftsInCartNumber}
-                >
+                    >
                     <StyledShoppingCartRoundedIcon
+                        role="button"
+                        aria-label={`${props.nftsInCartNumber} NFTs on cart`}
                         onClick={() => props.openOrCloseShoppingCart()}
                     />
                 </Badge>

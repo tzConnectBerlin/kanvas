@@ -8,6 +8,9 @@
     "signOut": "Sign out",
     "profile": " Go to profile",
     "notifications": "Notifications",
+    "menu": "Menu",
+    "user": "User",
+    "total": "Total",
     "button": {
       "backToHome": "Back to home"
     },
@@ -19,13 +22,18 @@
     "store": "Store"
   },
   "product": {
+    "already": "Already in cart",
+    "add": " Add to cart",
+    "notDropped": "Not dropped yet",
+    "dropped": "NFT has been dropped",
+    "noDescription": "No description provided",
     "description": {
       "part_1": "About the artist",
       "part_2": "Description",
       "part_3": "Will drop in",
       "editions": "Availability",
       "categories": "Attached catagories",
-      "ipfs" : "IPFS hash",
+      "ipfs": "IPFS hash",
       "price": "Price",
       "button": "Add to cart"
     },
@@ -112,12 +120,30 @@
     },
     "topBuyers": {
       "headline": "Top Buyers",
-      "link": "See all"
+      "link": "See all",
+      "none": "No top Buyers yet"
     },
     "nfts": {
       "headline": "Featured NFTs",
-      "link": "See all"
+      "link": "See all",
+      "emptyMessage": "No featured NFTs",
+      "emptyLink": "See entire collection"
     }
+  },
+  "profile": {
+    "emptyMessage" : "No Nfts in collection yet",
+    "emptyLink": "Click here to buy some in the store.",
+    "edit": "Edit profile"
+  },
+  "cart": {
+    "remove": "Remove",
+    "goCheckout": "Go to checkout",
+    "items": "items",
+    "minutes": "minutes",
+    "expired": "Cart Expired",
+    "willExpite": "Your cart will expire in",
+    "summary": "Summary",
+    "empty": "Empty Shopping Cart.."
   },
   "checkout": {
     "headline_0": "Summary",

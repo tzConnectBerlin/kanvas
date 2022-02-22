@@ -9,6 +9,7 @@ import { Skeleton, Stack, Theme } from '@mui/material';
 import { IUser } from '../../../interfaces/user';
 import { CustomButton } from '../../atoms/Button';
 import { Animated } from 'react-animated-css';
+import { useTranslation } from 'react-i18next';
 
 interface HeaderProfileProps {
     user: IUser;
@@ -74,6 +75,7 @@ const StyledAnimated = styled(Animated)`
 export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
     const [tooltipText, setTooltipText] = useState('');
     const [showCopyOverlay, setShowCopyOverlay] = useState(false);
+    const { t } = useTranslation(['translation']);
 
     const copyAddressToClipBoard = () => {
         try {
@@ -126,6 +128,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                             align="left"
                             sx={{ marginRight: '2rem' }}
                             display="block"
+                            aria-labelledby="Username"
                         >
                             {' '}
                             {props.loading ? (
@@ -144,7 +147,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                                 <CustomButton
                                     size="medium"
                                     onClick={() => props.editProfile()}
-                                    label="Edit profile"
+                                    label={t('nftGrid.edit')}
                                     aria-label="Edit profile button"
                                     role="button"
                                 />
@@ -164,6 +167,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                             align="left"
                             display="initial !important"
                             maxWidth="16rem"
+                            aria-labelledby="wallet address"
                         >
                             {' '}
                             {props.loading || props.userDomainLoading ? (
@@ -198,7 +202,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                                 position: 'absolute',
                                 bottom: '-2rem',
                                 justifyContent: 'center',
-                            }}
+                            }}                            
                         >
                             {' '}
                             {tooltipText}{' '}
@@ -249,6 +253,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                         align="left"
                         width={400}
                         sx={{ marginTop: '0.5rem', alignItems: 'left' }}
+                        aria-label="Joined date"
                     >
                         {' '}
                         {props.loading ? (
@@ -317,7 +322,7 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                             align="center"
                             display="initial !important"
                             width="50%"
-                            aria-label="User adress"
+                            aria-label="Wallet adress"
                         >
                             {' '}
                             {props.loading ? (

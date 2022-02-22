@@ -13,6 +13,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { ICategory } from '../../interfaces/category';
 import CircularProgress from '../../design-system/atoms/CircularProgress';
+import TezosLogo from '../../design-system/atoms/TezosLogo/TezosLogo';
 
 export interface ProductPageProps {
     theme?: Theme;
@@ -299,6 +300,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 alt={`Nft ${nftResponse.data?.name}`}
                             />
                             <StyledWrapperIcon
+                                role="button"
+                                aria-labelledBy="Button to expand image"
                                 onClick={
                                     !fullScreenView
                                         ? () => {
@@ -336,7 +339,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                         <Typography
                             size="h2"
                             weight="SemiBold"
-                            aria-label="Subtitle - nft description"
+                            aria-label="Title - nft name"
                         >
                             {nftResponse.loading || comfortLoader ? (
                                 <Skeleton width="10rem" height="2rem" />
@@ -373,7 +376,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 </Stack>
                             ) : (
                                 nftResponse.data?.description ??
-                                'No description provided'
+                                t('product.noDescription')
                             )}
                         </Typography>
                         {launchTime && launchTime > 0 && (
@@ -396,7 +399,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     size="h5"
                                     weight="Light"
                                     sx={{ pt: 2, mb: 1 }}
-                                    aria-label="NFT ramaining time"
+                                    aria-label="NFT ramaining to drop"
                                 >
                                     {nftResponse.loading || comfortLoader ? (
                                         <Skeleton width="8rem" height="2rem" />
@@ -411,7 +414,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                             launchTime,
                                         ).getSeconds()}`
                                     ) : (
-                                        'NFT has been dropped'
+                                        t('product.dropped')
                                     )}
                                 </Typography>
                             </>
@@ -443,6 +446,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                                 size="body1"
                                                 weight="Medium"
                                                 type="link"
+                                                role="link"
                                                 onClick={() =>
                                                     nagivateTo(
                                                         `/store?categories=${category.id}`,
@@ -490,6 +494,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                             'ipfs://'.length,
                                         )}`}
                                         target="_blank"
+                                        role="link"
+                                        aria-labelledBy="link to ipfs website"
                                     >
                                         {nftResponse.data?.ipfsHash}
                                     </StyledA>
@@ -514,13 +520,28 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     size="h5"
                                     weight="SemiBold"
                                     sx={{ pt: 2, mb: 1 }}
-                                    aria-label="NFT editions availability"
+                                    aria-label={`NFT editions ${
+                                        nftResponse.data
+                                            ? 'available'
+                                            : 'unavailable'
+                                    }`}
                                 >
-                                    {nftResponse.loading || comfortLoader
-                                        ? undefined
-                                        : nftResponse.data?.editionsAvailable +
-                                          '/' +
-                                          nftResponse.data?.editionsSize}
+                                    {nftResponse.loading ||
+                                    comfortLoader ? undefined : (
+                                        <>
+                                            {nftResponse.data ? (
+                                                <>
+                                                    {nftResponse.data
+                                                        ?.editionsAvailable +
+                                                        '/' +
+                                                        nftResponse.data
+                                                            ?.editionsSize}
+                                                </>
+                                            ) : (
+                                                '- '
+                                            )}{' '}
+                                        </>
+                                    )}
                                 </Typography>
                             </Stack>
                             <Stack direction="column">
@@ -539,12 +560,28 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 <Typography
                                     size="h5"
                                     weight="SemiBold"
-                                    sx={{ pt: 2, mb: 1 }}
-                                    aria-label="NFT price"
+                                    sx={{ pt: 2, mb: 1, fontWeight: 'bold' }}
+                                    aria-label={`NFT price ${
+                                        nftResponse.data
+                                            ? 'available'
+                                            : 'unavailable'
+                                    }`}
                                 >
                                     {nftResponse.loading ||
                                     comfortLoader ? undefined : (
-                                        <>{nftResponse.data?.price} ꜩ</>
+                                        <>
+                                            {nftResponse.data ? (
+                                                <>
+                                                    {nftResponse.data?.price}
+                                                    <TezosLogo
+                                                        width="15px"
+                                                        margin="0 0.2rem"
+                                                    />
+                                                </>
+                                            ) : (
+                                                '- '
+                                            )}{' '}
+                                        </>
                                     )}
                                 </Typography>
                             </Stack>
@@ -555,16 +592,16 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             onClick={() => handleAddToBasket()}
                             loading={addToCartResponse.loading}
                             role="button"
-                            aria-label="Add to cart"
+                            aria-label={t('product.add')} // Add to cart
                             label={
                                 launchTime! > 0
-                                    ? 'Not dropped yet'
+                                    ? t('product.notDropped')
                                     : props.nftsInCart.filter(
                                           (nft) =>
                                               Number(nft.id) ===
                                               nftResponse.data?.id,
                                       ).length > 0
-                                    ? 'Already in cart'
+                                    ? t('product.already')
                                     : t('product.button_1')
                             }
                             disabled={

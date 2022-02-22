@@ -405,7 +405,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                                         align="center"
                                         color="#C4C4C4"
                                     >
-                                        {'Empty Shopping Cart..'}
+                                        {t('cart.empty')}
                                     </Typography>
                                 )}
 

@@ -221,17 +221,18 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
                 <FlexSpacer minHeight={4} />
 
                 <StyledStack direction="column" spacing={4}>
-                    <Typography size="h3" weight="Medium">
+                    <Typography size="h3" weight="Medium" aria-label="subtitle">
                         {' '}
                         Upload your photo{' '}
                     </Typography>
                     <Element
                         name="profilePicture"
-                        onFocus={() => scrollTo('profilePicture')}
+                        onFocus={() => scrollTo('profilePicture')}                        
                     >
                         <Stack direction="row" spacing={8}>
                             <DropZone
-                                inputId="profilePicture"
+                                inputId="profilePicture"                                
+                                aria-labelledBy="file upload role"
                                 fileUrl={profilePicture}
                                 setFileUrl={setProfilePicture}
                                 setDropZoneErrorMessage={
@@ -252,7 +253,7 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
                 <FlexSpacer minHeight={4} />
 
                 <StyledStack direction="column" spacing={4}>
-                    <Typography size="h3" weight="Medium">
+                    <Typography size="h3" weight="Medium" aria-label="subtitle">
                         {' '}
                         Enter a username*{' '}
                     </Typography>
@@ -263,6 +264,7 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
                             placeholder="Type Here"
                             onFocus={() => scrollTo('userName')}
                             onBlur={formik.handleBlur}
+                            aria-label="username input"
                             onChange={(event) => {
                                 formik.handleChange(event);
                                 sessionStorage.setItem(
@@ -306,6 +308,8 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
 
                 <CustomButton
                     size="medium"
+                    role="button"
+                    aria-label="Save"
                     onClick={() => formik.handleSubmit()}
                     label={'Save'}
                     sx={{ width: '10rem' }}

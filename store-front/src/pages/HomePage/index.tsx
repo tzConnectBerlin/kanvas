@@ -147,7 +147,7 @@ const HomePage: FC<HomePageProps> = () => {
                                     : []
                             }
                             loading={topBuyersResponse.loading}
-                            emptyMessage={'No top Buyers yet'}
+                            emptyMessage={t('home.topBuyers.none')}
                         />
 
                         <FlexSpacer minHeight={4} />
@@ -183,8 +183,8 @@ const HomePage: FC<HomePageProps> = () => {
                         <NftGrid
                             nfts={FeaturedNftsResponse.data?.nfts}
                             loading={FeaturedNftsResponse.loading}
-                            emptyMessage={'No Featured NFTs yet'}
-                            emptyLink={'See entire collection.'}
+                            emptyMessage={t('home.nfts.emptyMessage')}
+                            emptyLink={t('home.nfts.emptyLink')}
                         />
                     </Stack>
                 </StyledAnimated>
