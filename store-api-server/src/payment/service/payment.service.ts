@@ -67,9 +67,12 @@ export class PaymentService {
       case 'payment_intent.payment_failed':
         paymentStatus = PaymentStatus.FAILED;
         break;
+      case 'payment_intent.created':
+        paymentStatus = PaymentStatus.CREATED;
+        break;
       default:
         Logger.error(`Unhandled event type ${constructedEvent.type}`);
-        throw Err('');
+        throw Err('Unknown stripe webhook event');
     }
 
     const previousStatus = await this.editPaymentStatus(
@@ -78,8 +81,7 @@ export class PaymentService {
     );
 
     if (
-      (typeof previousStatus === 'undefined' ||
-        !this.FINAL_STATES.includes(previousStatus)) &&
+      !this.FINAL_STATES.includes(previousStatus!) &&
       paymentStatus === PaymentStatus.SUCCEEDED
     ) {
       const orderId = await this.getPaymentOrderId(
@@ -173,6 +175,7 @@ export class PaymentService {
     paymentId: string,
     status: PaymentStatus,
   ): Promise<PaymentStatus | undefined> {
+    console.log(`editPaymentStatus (paymentId=${paymentId}) to ${status}`);
     const tx = await this.conn.connect();
     try {
       await tx.query('BEGIN');
@@ -196,6 +199,12 @@ WHERE payment_id = $2
 
       await tx.query('commit');
 
+      console.log(
+        `status updated (paymentId=${paymentId}) from ${JSON.stringify(
+          qryPrevStatus.rows[0],
+        )} to ${status}`,
+      );
+
       return qryPrevStatus.rows[0]
         ? qryPrevStatus.rows[0]['status']
         : undefined;
@@ -216,7 +225,7 @@ WHERE payment_id = $2
       `
       UPDATE payment
       SET status = $1
-      WHERE expires_at < now()::timestamp AT TIME ZONE 'UTC'
+      WHERE expires_at < now() AT TIME ZONE 'UTC'
         AND status IN ($2, $3)
       RETURNING payment_id, expires_at
     `,
@@ -231,7 +240,7 @@ WHERE payment_id = $2
       try {
         await this.stripe.paymentIntents.cancel(row['payment_id']);
         Logger.warn(
-          `canceled following expired order session: ${row['payment_id']}`,
+          `canceled following expired order session: ${row['payment_id']} (expired at: ${row['expires_at']})`,
         );
       } catch (err: any) {
         Logger.error(
@@ -262,6 +271,9 @@ RETURNING payment_id
     if (!paymentIntentId.rowCount) {
       return;
     }
+    console.log(
+      `cancelNftOrderId (orderId=${orderId}): paymentIntentId=${paymentIntentId.rows[0]['payment_id']}`,
+    );
 
     try {
       if (provider === PaymentProviderEnum.STRIPE) {
@@ -279,6 +291,7 @@ RETURNING payment_id
     userId: number,
     provider: PaymentProviderEnum,
   ): Promise<NftOrder> {
+    console.log(`createNftOrder (session=${session}, userId=${userId})`);
     const cartMeta = await this.userService.getCartMeta(session);
     if (typeof cartMeta === 'undefined') {
       throw Err(`createNftOrder err: cart should not be empty`);

@@ -28,7 +28,7 @@ export class PaymentController {
 
   constructor(
     private paymentService: PaymentService,
-    private userService: UserService
+    private userService: UserService,
   ) {
     this.nftLock = new Lock<number>();
   }
@@ -59,8 +59,10 @@ export class PaymentController {
       );
     }
 
+    Logger.log(`stripe web-hook event: ${JSON.stringify(constructedEvent)}`);
+
     try {
-      await this.paymentService.webhookHandler(constructedEvent)
+      await this.paymentService.webhookHandler(constructedEvent);
     } catch (error) {
       new HttpException('', HttpStatus.UNPROCESSABLE_ENTITY);
     }
@@ -76,9 +78,19 @@ export class PaymentController {
     await this.nftLock.acquire(user.id);
 
     try {
-      const preparedPayment = await this.paymentService.preparePayment(user.id, PaymentProviderEnum.STRIPE)
-      const stripePaymentIntent = await this.paymentService.createStripePayment(preparedPayment.amount, user);
-      await this.paymentService.createPayment(PaymentProviderEnum.STRIPE, stripePaymentIntent.id, preparedPayment.nftOrder.id)
+      const preparedPayment = await this.paymentService.preparePayment(
+        user.id,
+        PaymentProviderEnum.STRIPE,
+      );
+      const stripePaymentIntent = await this.paymentService.createStripePayment(
+        preparedPayment.amount,
+        user,
+      );
+      await this.paymentService.createPayment(
+        PaymentProviderEnum.STRIPE,
+        stripePaymentIntent.id,
+        preparedPayment.nftOrder.id,
+      );
 
       return stripePaymentIntent;
     } catch (err: any) {

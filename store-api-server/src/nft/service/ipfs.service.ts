@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import { Logger, Injectable } from '@nestjs/common';
 import { STORE_PUBLISHERS, MINTER_ADDRESS } from 'src/constants';
 import { NftEntity } from 'src/nft/entity/nft.entity';
@@ -38,8 +39,12 @@ export class IpfsService {
     const [artifactIpfsUri, displayIpfsUri, thumbnailIpfsUri] =
       await Promise.all([
         this.#pinUri(nft.artifactUri),
-        nft.displayUri ? this.#pinUri(nft.displayUri) : undefined,
-        nft.thumbnailUri ? this.#pinUri(nft.thumbnailUri) : undefined,
+        nft.displayUri !== nft.artifactUri
+          ? this.#pinUri(nft.displayUri!)
+          : undefined,
+        nft.thumbnailUri !== nft.displayUri
+          ? this.#pinUri(nft.thumbnailUri!)
+          : undefined,
       ]);
 
     const metadata = this.#nftMetadataJson(
@@ -88,6 +93,8 @@ export class IpfsService {
 
     const form = new FormData();
     form.append('file', createReadStream(tmpFileName));
+
+    console.log(`${uri} form headers: ${JSON.stringify(form.getHeaders())})`);
 
     return axios
       .post('https://api.pinata.cloud/pinning/pinFileToIPFS', form, {
