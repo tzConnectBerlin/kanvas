@@ -1,3 +1,5 @@
+import { assertEnv } from './utils';
+
 export const PG_CONNECTION = 'PG_CONNECTION';
 
 // source: https://www.postgresql.org/docs/current/errcodes-appendix.html
@@ -10,7 +12,7 @@ export const SEARCH_MAX_NFTS = 3;
 export const SEARCH_MAX_CATEGORIES = 6;
 export const SEARCH_SIMILARITY_LIMIT = 0.4;
 
-export const MINTER_ADDRESS = 'tz1YZh7rTPxf6EAmw7dkNszRGPpoN2ZFxuku';
+export const MINTER_ADDRESS = assertEnv('MINTER_TZ_ADDRESS');
 export const STORE_PUBLISHERS = ['Tezos'];
 
 export const RATE_LIMIT_WINDOW_SECS = Number(
