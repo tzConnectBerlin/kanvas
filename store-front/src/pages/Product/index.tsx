@@ -40,21 +40,20 @@ const StyledStack = styled(Stack)`
     width: 100vw;
     max-width: 100rem;
     align-items: center;
-    margin-bottom: 4rem;   
+    margin-bottom: 4rem;
 `;
 
 const StyledMetadataStack = styled(Stack)`
     min-width: 100%;
-    margin: 3rem 0 0 0;
-    
-    @media (min-width: 969px) {        
+    margin-top: 3rem !important;
+    margin-left: 0 !important;
+
+    @media (min-width: 769px) {
         min-width: 30%;
         max-width: 30%;
-        margin-left: 3rem ;
-    }
 
-    @media (min-width: 900px) {
-        max-width: 100%;
+        margin-top: 0  !important;
+        margin-left: 3rem !important;
     }
 
     @media (min-width: 1440px) {
@@ -66,17 +65,13 @@ const StyledMetadataStack = styled(Stack)`
 const StyledCardMedia = styled(CardMedia)<{ component?: string; alt: string }>`
     object-fit: contain;
     min-height: 100%;
-    
-    @media (max-width: 600px) {
-        min-height: 100%;
-    }
 
-    @media (min-width: 969px) {
+    @media (min-width: 768px) {
         max-height: 43rem;
     }
 
     @media (min-width: 1440px) {
-        max-height: 55vh;
+        max-height: 65vh;
     }
 `;
 
@@ -137,6 +132,16 @@ const FullScreenView = styled.div<{ theme?: Theme; open: boolean }>`
     transition: opacity 0.4s;
 `;
 
+const StyledBox = styled(Box)`
+    @media (min-width: 600px) {
+        width: 50%;
+    }
+
+    @media (min-width: 900px) {
+        width: 40%;
+    }
+`;
+
 const StyledImage = styled.img<{ open: boolean }>`
     max-height: 90vh;
     max-width: 90vw;
@@ -147,21 +152,31 @@ const StyledImage = styled.img<{ open: boolean }>`
     width: 100%;
     transition: opacity 0.4s;
     border-radius: 1rem;
+
+    @media (min-width: 600px) {
+        width: 50%;
+        margin: 0 auto;
+    }
 `;
 
 const StyledCustomButton = styled(CustomButton)`
     margin-top: 3rem;
-    
-     @media (min-width: 969px) {
+
+    @media (min-width: 768px) {
         margin-top: auto;
     }
 `;
 
 const StyledWrapper = styled(Stack)`
- 
     @media (min-width: 786px) {
         margin-top: auto;
     }
+`;
+const StyledContainer = styled(Stack)`
+    max-width: fit-content;
+    margin-bottom: auto;
+    max-height: fit-content;
+    position: relative;
 `;
 
 interface IProductParam {
@@ -283,7 +298,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                 }}
             >
                 <StyledWrapper
-                    direction={{ xs: 'column', md: 'row' }}
+                    direction={{ xs: 'column', sm: 'row' }}
                     spacing={5}
                     sx={{
                         width: '100%',
@@ -309,7 +324,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             <CircularProgress height={2} />
                         </Box>
                     ) : (
-                        <Box
+                        <StyledBox
                             sx={{
                                 position: 'relative',
                                 display: 'flex',
@@ -317,27 +332,29 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 alignItems: 'flex-end',
                             }}
                         >
-                            <StyledCardMedia
-                                component="img"
-                                image={nftResponse.data?.displayUri}
-                                alt={`Nft ${nftResponse.data?.name}`}
-                            />
-                            <StyledWrapperIcon
-                                role="button"
-                                aria-labelledBy="Button to expand image"
-                                onClick={
-                                    !fullScreenView
-                                        ? () => {
-                                              setFullScreenView(true);
-                                              document.body.style.overflow =
-                                                  'hidden';
-                                          }
-                                        : () => {}
-                                }
-                            >
-                                <StyledFullscreenIcon />
-                            </StyledWrapperIcon>
-                        </Box>
+                            <StyledContainer sx={{ maxWidth: 'fit-content' }}>
+                                <StyledCardMedia
+                                    component="img"
+                                    image={nftResponse.data?.displayUri}
+                                    alt={`Nft ${nftResponse.data?.name}`}
+                                />
+                                <StyledWrapperIcon
+                                    role="button"
+                                    aria-labelledBy="Button to expand image"
+                                    onClick={
+                                        !fullScreenView
+                                            ? () => {
+                                                  setFullScreenView(true);
+                                                  document.body.style.overflow =
+                                                      'hidden';
+                                              }
+                                            : () => {}
+                                    }
+                                >
+                                    <StyledFullscreenIcon />
+                                </StyledWrapperIcon>
+                            </StyledContainer>
+                        </StyledBox>
                     )}
 
                     <StyledMetadataStack
