@@ -67,9 +67,12 @@ export class PaymentService {
       case 'payment_intent.payment_failed':
         paymentStatus = PaymentStatus.FAILED;
         break;
+      case 'payment_intent.created':
+        paymentStatus = PaymentStatus.CREATED;
+        break;
       default:
         Logger.error(`Unhandled event type ${constructedEvent.type}`);
-        throw Err('');
+        throw Err('Unknown stripe webhook event');
     }
 
     const previousStatus = await this.editPaymentStatus(
@@ -78,8 +81,7 @@ export class PaymentService {
     );
 
     if (
-      (typeof previousStatus === 'undefined' ||
-        !this.FINAL_STATES.includes(previousStatus)) &&
+      !this.FINAL_STATES.includes(previousStatus!) &&
       paymentStatus === PaymentStatus.SUCCEEDED
     ) {
       const orderId = await this.getPaymentOrderId(
@@ -216,7 +218,7 @@ WHERE payment_id = $2
       `
       UPDATE payment
       SET status = $1
-      WHERE expires_at < now()::timestamp AT TIME ZONE 'UTC'
+      WHERE expires_at < now() AT TIME ZONE 'UTC'
         AND status IN ($2, $3)
       RETURNING payment_id, expires_at
     `,

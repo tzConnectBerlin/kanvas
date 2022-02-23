@@ -114,17 +114,20 @@ export const SignInModal: FC<SignInModalProps> = ({
         loginType: 'embed' | 'beacon',
     ) => {
         // The data to format
-        const dappUrl = 'd-art.io';
+        const dappUrl = process.env.REACT_APP_CLIENT_URL;
         const input = `Welcome to Kanvas ${userAddress}`;
 
         // The full string
         const formattedInput: string = [
-            'Tezos Signed Message:',
+            'Tezos Signed Message: ',
             dappUrl,
             input,
         ].join(' ');
 
-        const bytes = '05' + char2Bytes(formattedInput);
+        let inputHex = char2Bytes(formattedInput)
+        let inputLengthHex = (~~(inputHex.length / 2)).toString(16).padStart(8, '0');
+
+        const bytes = '0501' + inputLengthHex + inputHex;
 
         const payload: RequestSignPayloadInput = {
             signingType: SigningType.MICHELINE,
@@ -157,7 +160,7 @@ export const SignInModal: FC<SignInModalProps> = ({
         } else if (embedKukai && loginType === 'embed') {
             try {
                 const signedPayload = await embedKukai.signExpr(
-                    '0501000000' + payload.payload.slice(2),
+                    payload.payload,
                 );
                 setSignInParams({
                     userAddress: userAddress,
@@ -165,6 +168,7 @@ export const SignInModal: FC<SignInModalProps> = ({
                 });
                 signUser({
                     data: {
+                        name: userAddress,
                         userAddress: userAddress,
                         signedPayload: signedPayload,
                     },

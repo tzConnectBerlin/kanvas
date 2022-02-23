@@ -312,6 +312,9 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                 clientSecret: paymentIntentSecret.data.clientSecret
             })
         }
+        if (paymentIntentSecret.response?.status === 401) {
+            return;
+        }
         if (paymentIntentSecret.error) {
             toast.error('Something went wrong with the cart, please refresh')
         }
