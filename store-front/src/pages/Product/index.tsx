@@ -173,10 +173,11 @@ const StyledWrapper = styled(Stack)`
     }
 `;
 const StyledContainer = styled(Stack)`
+    position: relative;
     max-width: fit-content;
     margin-bottom: auto;
     max-height: fit-content;
-    position: relative;
+    margin-left: auto;
 `;
 
 interface IProductParam {
