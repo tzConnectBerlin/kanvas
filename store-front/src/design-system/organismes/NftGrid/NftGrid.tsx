@@ -56,21 +56,19 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
         <StyledDiv>
             {gridNfts && gridNfts.length > 0 ? (
                 <StyledGrid
-                    container 
+                    container
                     rowSpacing={4}
                     spacing={24}
                     columnSpacing={{ sm: 4 }}
                 >
-                    {gridNfts.map((nft) => (
+                    {gridNfts.map((nft, index) => (
                         <Grid
                             item
                             lg={props.open ? 4 : 3}
                             md={props.open ? 6 : 4}
                             sm={6}
                             xs={12}
-                            key={`users-${
-                                new Date().getTime() + Math.random()
-                            }`}
+                            key={`users-${index}`}
                         >
                             <NftCard
                                 id={nft.id.toString()}
@@ -95,20 +93,18 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                 </StyledGrid>
             ) : props.loading || comfortLoading ? (
                 <StyledGrid
-                    container                             
+                    container
                     rowSpacing={5}
                     columnSpacing={{ xs: 1, sm: 2, md: 5 }}
                 >
-                    {[...new Array(8)].map((nft) => (
+                    {[...new Array(8)].map((nft, index) => (
                         <Grid
                             item
                             lg={props.open ? 4 : 3}
                             md={props.open ? 6 : 4}
                             sm={6}
                             xs={12}
-                            key={`nft-loader-${
-                                new Date().getTime() + Math.random()
-                            }`}
+                            key={`nft-loader-${index}`}
                         >
                             <NftCard
                                 name={''}
