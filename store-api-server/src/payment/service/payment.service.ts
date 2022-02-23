@@ -175,7 +175,6 @@ export class PaymentService {
     paymentId: string,
     status: PaymentStatus,
   ): Promise<PaymentStatus | undefined> {
-    console.log(`editPaymentStatus (paymentId=${paymentId}) to ${status}`);
     const tx = await this.conn.connect();
     try {
       await tx.query('BEGIN');
@@ -198,12 +197,6 @@ WHERE payment_id = $2
       );
 
       await tx.query('commit');
-
-      console.log(
-        `status updated (paymentId=${paymentId}) from ${JSON.stringify(
-          qryPrevStatus.rows[0],
-        )} to ${status}`,
-      );
 
       return qryPrevStatus.rows[0]
         ? qryPrevStatus.rows[0]['status']
@@ -240,7 +233,7 @@ WHERE payment_id = $2
       try {
         await this.stripe.paymentIntents.cancel(row['payment_id']);
         Logger.warn(
-          `canceled following expired order session: ${row['payment_id']} (expired at: ${row['expires_at']})`,
+          `canceled following expired order session: ${row['payment_id']}`,
         );
       } catch (err: any) {
         Logger.error(
@@ -271,9 +264,6 @@ RETURNING payment_id
     if (!paymentIntentId.rowCount) {
       return;
     }
-    console.log(
-      `cancelNftOrderId (orderId=${orderId}): paymentIntentId=${paymentIntentId.rows[0]['payment_id']}`,
-    );
 
     try {
       if (provider === PaymentProviderEnum.STRIPE) {
@@ -291,7 +281,6 @@ RETURNING payment_id
     userId: number,
     provider: PaymentProviderEnum,
   ): Promise<NftOrder> {
-    console.log(`createNftOrder (session=${session}, userId=${userId})`);
     const cartMeta = await this.userService.getCartMeta(session);
     if (typeof cartMeta === 'undefined') {
       throw Err(`createNftOrder err: cart should not be empty`);

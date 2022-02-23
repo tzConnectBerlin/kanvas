@@ -94,8 +94,6 @@ export class IpfsService {
     const form = new FormData();
     form.append('file', createReadStream(tmpFileName));
 
-    console.log(`${uri} form headers: ${JSON.stringify(form.getHeaders())})`);
-
     return axios
       .post('https://api.pinata.cloud/pinning/pinFileToIPFS', form, {
         headers: {

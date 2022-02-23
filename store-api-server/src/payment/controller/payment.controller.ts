@@ -59,8 +59,6 @@ export class PaymentController {
       );
     }
 
-    Logger.log(`stripe web-hook event: ${JSON.stringify(constructedEvent)}`);
-
     try {
       await this.paymentService.webhookHandler(constructedEvent);
     } catch (error) {
