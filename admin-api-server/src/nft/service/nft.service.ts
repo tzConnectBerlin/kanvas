@@ -160,7 +160,6 @@ LIMIT  ${params.pageSize}
   }
 
   async createNft(creator: UserEntity): Promise<NftEntity> {
-    console.log(`creator of nft: ${JSON.stringify(creator)}`);
     try {
       const qryRes = await this.db.query(
         `

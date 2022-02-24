@@ -8,7 +8,6 @@ import {
   Post,
   Query,
   UseGuards,
-  Response,
   HttpStatus,
   HttpException,
   Logger,
@@ -19,7 +18,6 @@ import { Roles } from 'src/role/entities/role.entity';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { RolesGuard } from 'src/role/role.guard';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
-import { Response as Resp } from 'express';
 import { UserFilterParams, UserFilters } from '../params';
 import { UserEntity } from '../entities/user.entity';
 import {
