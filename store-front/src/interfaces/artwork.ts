@@ -10,7 +10,7 @@ export interface INft {
     name: string;
     artistName?: string;
     description: string;
-    ipfsHash: string;
+    ipfsHash?: string;
     displayUri: string;
     price: number;
     creator?: string;
