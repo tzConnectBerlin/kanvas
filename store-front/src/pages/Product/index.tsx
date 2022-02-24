@@ -470,7 +470,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     weight="Medium"
                                     type="link"
                                 >
-                                <StyledA href={`https://cloudflare-ipfs.com/ipfs/${nftResponse.data?.ipfsHash.slice('ipfs://'.length)}`} target='_blank'>
+                                <StyledA href={`https://cloudflare-ipfs.com/ipfs/${nftResponse.data?.ipfsHash?.slice('ipfs://'.length)}`} target='_blank'>
                                     {nftResponse.data?.ipfsHash}
                                 </StyledA>
                                 </Typography>
