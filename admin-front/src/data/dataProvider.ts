@@ -47,7 +47,7 @@ const dataProvider = (
     const { field, order } = params.sort;
 
     const rangeStart = (page - 1) * perPage;
-    const rangeEnd = page * perPage - 1;
+    const rangeEnd = perPage;
 
 
     let query = {}

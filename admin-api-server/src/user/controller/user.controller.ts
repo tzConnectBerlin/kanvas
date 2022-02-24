@@ -41,7 +41,6 @@ export class UserController {
   @Get()
   @UseGuards(JwtAuthGuard)
   async findAll(
-    @Response() resp: Resp,
     @Query() filters: UserFilters,
     @Query('sort', new ParseJSONArrayPipe())
     sort?: [string, 'asc' | 'desc'],
@@ -58,14 +57,7 @@ export class UserController {
       'roles',
     ]);
 
-    const result = await this.userService.findAll(params);
-
-    return resp
-      .set({
-        'Access-Control-Expose-Headers': 'Content-Range',
-        'Content-range': result.count,
-      })
-      .json({ data: result.users });
+    return await this.userService.findAll(params);
   }
 
   @Get(':id')

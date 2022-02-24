@@ -12,7 +12,13 @@ export class RoleService {
         continue;
       }
       await this.db.query(
-        'INSERT INTO user_role (id, role_label) VALUES ($1, $2)',
+        `
+INSERT INTO user_role (
+  id, role_label
+)
+VALUES ($1, $2)
+ON CONFLICT DO NOTHING
+        `,
         [roleId, Roles[roleId]],
       );
     }

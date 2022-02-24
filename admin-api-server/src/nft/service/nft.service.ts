@@ -44,6 +44,7 @@ export class NftService {
     this.nftLock = new Lock<number>();
     fs.watch(stmConfigFile, (event: any /* , filename: any */) => {
       if (event !== 'change') {
+        Logger.log(`ignored stm config file event: ${event}`);
         return;
       }
       try {
@@ -65,7 +66,9 @@ export class NftService {
     ];
   }
 
-  async findAll(params: NftFilterParams): Promise<NftEntity[]> {
+  async findAll(
+    params: NftFilterParams,
+  ): Promise<{ count: number; data: NftEntity[] }> {
     let orderBy = params.orderBy;
     if (
       Object.keys(this.stm.getAttributes()).some(
@@ -92,7 +95,8 @@ SELECT
   nft.created_by,
   nft.created_at,
   COALESCE(attr.last_updated_at, nft.created_at) AS updated_at,
-  attr.attributes
+  attr.attributes,
+  COUNT(1) OVER () AS total_matched_nfts
 FROM nft
 LEFT JOIN attr
   ON nft.id = attr.nft_id
@@ -106,29 +110,34 @@ LIMIT  ${params.pageSize}
     );
 
     if (qryRes.rowCount === 0) {
-      return [];
+      return { data: [], count: 0 };
     }
-    return qryRes.rows.map((row: any) => {
-      const nft = <NftEntity>{
-        id: row['id'],
-        state: row['state'],
-        createdBy: row['created_by'],
-        createdAt: Math.floor(row['created_at'].getTime() / 1000),
-        updatedAt: Math.floor(row['updated_at'].getTime() / 1000),
-        attributes: {},
-      };
-      for (const key of Object.keys(row['attributes'] || [])) {
-        nft.attributes[key] = JSON.parse(row['attributes'][key]);
-      }
-      return nft;
-    });
+
+    return {
+      data: qryRes.rows.map((row: any) => {
+        const nft = <NftEntity>{
+          id: row['id'],
+          state: row['state'],
+          createdBy: row['created_by'],
+          createdAt: Math.floor(row['created_at'].getTime() / 1000),
+          updatedAt: Math.floor(row['updated_at'].getTime() / 1000),
+          attributes: {},
+        };
+        for (const key of Object.keys(row['attributes'] || [])) {
+          nft.attributes[key] = JSON.parse(row['attributes'][key]);
+        }
+        return nft;
+      }),
+      count: Number(qryRes.rows[0]['total_matched_nfts']),
+    };
   }
 
   async #findByIds(nftIds: number[]): Promise<NftEntity[]> {
     const filterParams = new NftFilterParams();
 
     filterParams.filters.nftIds = nftIds;
-    return await this.findAll(filterParams);
+    filterParams.pageSize = nftIds.length;
+    return (await this.findAll(filterParams)).data;
   }
 
   async #findOne(nftId: number): Promise<NftEntity> {
@@ -151,6 +160,7 @@ LIMIT  ${params.pageSize}
   }
 
   async createNft(creator: UserEntity): Promise<NftEntity> {
+    console.log(`creator of nft: ${JSON.stringify(creator)}`);
     try {
       const qryRes = await this.db.query(
         `

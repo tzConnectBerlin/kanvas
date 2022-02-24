@@ -17,7 +17,7 @@ if [[ ${INIT_QUEPASA:-'true'} == "true" ]]; then
     export DATABASE_URL="host=$PGHOST dbname=$PGDATABASE user=$PGUSER password=$PGPASSWORD port=$PGPORT"
 
     docker run \
-        -v $SCRIPT_DIR/../config:/config \
+        -v $SCRIPT_DIR/../../config:/config \
         --network host \
         -e NODE_URL=$NODE_URL \
         -e DATABASE_URL="$DATABASE_URL" \

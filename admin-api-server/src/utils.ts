@@ -90,7 +90,7 @@ export const queryParamsToPaginationParams = (
 
   if (typeof range !== 'undefined' && range.length === 2) {
     res.pageOffset = range[0];
-    res.pageSize = range[1] - range[0];
+    res.pageSize = range[1];
   }
 
   return res;
