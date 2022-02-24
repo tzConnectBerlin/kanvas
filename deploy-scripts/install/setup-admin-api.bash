@@ -13,7 +13,8 @@ yarn link roles_stm || exit 1
 yarn install || exit 1
 yarn build || exit 1
 
+set -a
 source .env || exit 1
 
 ./script/migrate up || exit 1
-yarn seed 2>/dev/null &
+yarn seed 2>/dev/null
