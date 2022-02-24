@@ -1,5 +1,6 @@
 import {
   Controller,
+  Response,
   Get,
   Body,
   Patch,
@@ -12,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
+import { Response as Resp } from 'express';
 import {
   FILE_MAX_BYTES,
   MAX_FILE_UPLOADS_PER_CALL,
@@ -58,7 +60,16 @@ export class NftController {
 
     validatePaginationParams(params, this.nftService.getSortableFields());
 
-    return { data: await this.nftService.findAll(params) };
+    return await this.nftService.findAll(params);
+
+    /*
+    return resp
+      .set({
+        'Access-Control-Expose-Headers': 'Content-Range',
+        'Content-range': result.total,
+      })
+      .json({ data: result.nfts });
+    */
   }
 
   @Get(':id')

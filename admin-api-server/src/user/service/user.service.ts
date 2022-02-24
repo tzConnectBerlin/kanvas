@@ -71,7 +71,7 @@ INSERT INTO
 
   async findAll(
     params: UserFilterParams,
-  ): Promise<{ users: UserEntity[]; count: number }> {
+  ): Promise<{ data: UserEntity[]; count: number }> {
     const qryRes = await this.db.query(
       `
   WITH user_roles AS (
@@ -113,11 +113,11 @@ INSERT INTO
     );
 
     if (qryRes.rowCount === 0) {
-      return { users: [], count: 0 };
+      return { data: [], count: 0 };
     }
 
     return {
-      users: qryRes.rows.map(
+      data: qryRes.rows.map(
         (row: any) =>
           <UserEntity>{
             id: row['id'],
@@ -135,13 +135,13 @@ INSERT INTO
     const params = new UserFilterParams();
     params.filters.id = [id];
     const findRes = await this.findAll(params);
-    if (findRes.users.length === 0) {
+    if (findRes.data.length === 0) {
       throw new HttpException(
         `no user exists with this id`,
         HttpStatus.BAD_REQUEST,
       );
     }
-    return findRes.users[0];
+    return findRes.data[0];
   }
 
   // Function used for auth this is why password is fetch

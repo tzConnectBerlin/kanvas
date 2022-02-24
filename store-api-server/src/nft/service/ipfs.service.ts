@@ -36,16 +36,15 @@ export class IpfsService {
       throw `IpfsService not enabled`;
     }
 
-    const [artifactIpfsUri, displayIpfsUri, thumbnailIpfsUri] =
-      await Promise.all([
-        this.#pinUri(nft.artifactUri),
-        nft.displayUri !== nft.artifactUri
-          ? this.#pinUri(nft.displayUri!)
-          : undefined,
-        nft.thumbnailUri !== nft.displayUri
-          ? this.#pinUri(nft.thumbnailUri!)
-          : undefined,
-      ]);
+    const [artifactIpfsUri, displayIpfsUri, thumbnailIpfsUri] = [
+      await this.#pinUri(nft.artifactUri),
+      await (nft.displayUri !== nft.artifactUri
+        ? this.#pinUri(nft.displayUri!)
+        : undefined),
+      await (nft.thumbnailUri !== nft.displayUri
+        ? this.#pinUri(nft.thumbnailUri!)
+        : undefined),
+    ];
 
     const metadata = this.#nftMetadataJson(
       nft,
