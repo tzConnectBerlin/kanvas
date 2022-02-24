@@ -93,13 +93,6 @@ export const CustomSelect: FC<SelectedProps> = ({
     ...props
 }) => {
 
-    React.useEffect(() => {
-        console.log(JSON.stringify(props.selectedOption))
-        console.log(props.selectedOption)
-        console.log(props.availableOptions)
-        console.log(props.availableOptions.filter(option => option.value === JSON.stringify(props.selectedOption)))
-    }, [props.selectedOption])
-
     return (
         <StyledFormControl
             variant="outlined"
@@ -120,6 +113,7 @@ export const CustomSelect: FC<SelectedProps> = ({
                             disableRipple
                             value={item.value}
                             customSize={props.customSize}
+                            key={item.value}
                         >
                             {item.label}
                         </StyledMenuItem>

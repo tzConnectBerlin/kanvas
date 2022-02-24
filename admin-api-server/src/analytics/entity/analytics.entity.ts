@@ -12,5 +12,15 @@ export enum Resolution {
   Day = 'day',
   Week = 'week',
   Month = 'month',
-  Infinite = 'infinite'
+  Infinite = 'infinite',
+}
+
+export interface Activity {
+  timestamp: number;
+  kind: string;
+  from: string;
+  to: string;
+  tokenId: number;
+  price: number;
+  amount: number;
 }

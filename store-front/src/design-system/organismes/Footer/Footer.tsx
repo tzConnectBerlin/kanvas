@@ -1,13 +1,9 @@
 import { Box } from '@mui/system';
 import Grid from '@mui/material/Grid';
-import {  FC, useState } from 'react';
+import { FC, useState } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
-import {
-    SelectChangeEvent,
-    Chip,
-    Theme,
-} from '@mui/material';
+import { SelectChangeEvent, Chip, Theme } from '@mui/material';
 import Typography from '../../atoms/Typography';
 import { Copyright } from '../../atoms/Copyright';
 import { useTranslation } from 'react-i18next';
@@ -55,8 +51,6 @@ const LinkStyled = styled(Link)`
     transition: 0.2s;
     align-items: center;
 `;
-
-
 
 const LogoStyled = styled.img<{ theme?: Theme }>`
     filter: ${(props) => props.theme.logo.filter ?? 'invert(0%)'};
@@ -138,167 +132,178 @@ export const Footer: FC<FooterProps> = () => {
             </Grid>
 
             <Grid
-                container
+                item
                 md={7}
-                lg={6}
-                columnSpacing={{ xs: 0, sm: 2, md: 3 }}
-                sx={{
-                    marginLeft: 'auto',
-                }}
+                lg={6}            
             >
-                <Grid item xs={6} md={3}>
-                    <Typography
-                        size="h5"
-                        weight="SemiBold"
-                        gutterBottom
-                        sx={{ marginTop: '1rem' }}
-                    >
-                        {t('footer.headline_1.title')}
-                    </Typography>
-
-                    <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
-                        <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/home">
-                                {t('footer.headline_1.link_2')}
-                            </StyledLink>
-                        </Box>
-                        <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/store">
-                                {t('footer.headline_1.link_1')}
-                            </StyledLink>
-                        </Box>
-                    </Box>
-                </Grid>
-                <Grid item xs={6} md={3}>
-                    <Typography
-                        size="h5"
-                        weight="SemiBold"
-                        gutterBottom
-                        sx={{ marginTop: '1rem' }}
-                    >
-                        {t('footer.headline_2.title')}
-                    </Typography>
-
-                    <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
-                        <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/vision">
-                                {t('footer.headline_2.link_1')}
-                            </StyledLink>
-                        </Box>
-                        <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/privacy">
-                                {t('footer.headline_2.link_2')}
-                            </StyledLink>
-                        </Box>
-                    </Box>
-                </Grid>
-
-                <Grid
-                    item
-                    xs={6}
-                    md={3}
-                    sx={{ height: '7rem', marginTop: '1rem' }}
-                >
-                    <Typography weight="SemiBold" size="h5" gutterBottom>
-                        {t('footer.headline_3.title')}
-                    </Typography>
-
-                    <Box component="ul" sx={{ m: 0, listStyle: 'none', p: 0 }}>
-                        <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/terms">
-                                {t('footer.headline_3.link_1')}
-                            </StyledLink>
-                        </Box>
-                        <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/privacy">
-                                {t('footer.headline_3.link_2')}
-                            </StyledLink>
-                        </Box>
-                        <Box component="li" sx={{ py: 0.5 }}>
-                            <StyledLink to="/faq">
-                                {t('footer.headline_3.link_3')}
-                            </StyledLink>
-                        </Box>
-                    </Box>
-                </Grid>
-
-                <Grid item xs={6} md={3} sx={{ marginTop: '1rem' }}>
-                    <Typography weight="SemiBold" size="h5" gutterBottom>
-                        {t('footer.headline_4.title')}
-                    </Typography>
-
-                    <Box
-                        component="ul"
-                        sx={{
-                            display: 'flex',
-                            paddingLeft: '0',
-                            margin: '.5rem 0 1.5rem',
-                        }}
-                    >
-                        <Box
-                            component="a"
-                            target="_blank"
-                            href="https://www.linkedin.com/company/tzconnect/"
-                            sx={iconStyle}
+                <Grid container columnSpacing={{ xs: 0, sm: 2, md: 3 }}>
+                    <Grid item xs={6} md={3}>
+                        <Typography
+                            size="h5"
+                            weight="SemiBold"
+                            gutterBottom
+                            sx={{ marginTop: '1rem' }}
                         >
-                           <SocialStyled
-                                src={'/img/linkedin.svg'}
-                                alt="Linkedin"
-                            />
-                        </Box>
-                        <Box
-                            component="a"
-                            target="_blank"
-                            href="https://twitter.com/TZConnectBerlin"
-                            sx={iconStyle}
-                        >
-                            <SocialStyled
-                                src={'/img/twitter.svg'}
-                                alt="Twitter"
-                            />
-                        </Box>
-                        <Box
-                            component="a"
-                            target="_blank"
-                            href="https://www.tzconnect.com/en/"
-                            sx={iconStyle}
-                        >
-                            <SocialStyled src={'/img/tezos.svg'} alt="TZ connect" />
-                        </Box>
-                    </Box>
+                            {t('footer.headline_1.title')}
+                        </Typography>
 
-                    <Typography weight="SemiBold" size="h5" gutterBottom>
-                        {t('footer.headline_5.title')}
-                    </Typography>
+                        <Box
+                            component="ul"
+                            sx={{ m: 0, listStyle: 'none', p: 0 }}
+                        >
+                            <Box component="li" sx={{ py: 0.5 }}>
+                                <StyledLink to="/home">
+                                    {t('footer.headline_1.link_2')}
+                                </StyledLink>
+                            </Box>
+                            <Box component="li" sx={{ py: 0.5 }}>
+                                <StyledLink to="/store">
+                                    {t('footer.headline_1.link_1')}
+                                </StyledLink>
+                            </Box>
+                        </Box>
+                    </Grid>
 
-                    <CustomSelect
-                        id="Language selection - footer"
-                        availableOptions={[
-                            {
-                                value: 'en',
-                                label: 'English',
-                            },
-                            {
-                                value: 'fr',
-                                label: 'Français',
-                            },
-                            {
-                                value: 'de',
-                                label: 'Deutsch',
-                            },
-                            {
-                                value: 'ab',
-                                label: 'عرب',
-                            },
-                        ]}
-                        selectedOption={selectedLanguage ?? 'en'}
-                        triggerFunction={(event: SelectChangeEvent) => {
-                            setSelectedLanguage(event.target.value);
-                            i18next.changeLanguage(event.target.value);
-                        }}
-                        disabled={false}
-                        customSize="small"
-                    />
+                    <Grid item xs={6} md={3}>
+                        <Typography
+                            size="h5"
+                            weight="SemiBold"
+                            gutterBottom
+                            sx={{ marginTop: '1rem' }}
+                        >
+                            {t('footer.headline_2.title')}
+                        </Typography>
+
+                        <Box
+                            component="ul"
+                            sx={{ m: 0, listStyle: 'none', p: 0 }}
+                        >
+                            <Box component="li" sx={{ py: 0.5 }}>
+                                <StyledLink to="/vision">
+                                    {t('footer.headline_2.link_1')}
+                                </StyledLink>
+                            </Box>
+                            <Box component="li" sx={{ py: 0.5 }}>
+                                <StyledLink to="/privacy">
+                                    {t('footer.headline_2.link_2')}
+                                </StyledLink>
+                            </Box>
+                        </Box>
+                    </Grid>
+
+                    <Grid
+                        item
+                        xs={6}
+                        md={3}
+                        sx={{ height: '7rem', marginTop: '1rem' }}
+                    >
+                        <Typography weight="SemiBold" size="h5" gutterBottom>
+                            {t('footer.headline_3.title')}
+                        </Typography>
+
+                        <Box
+                            component="ul"
+                            sx={{ m: 0, listStyle: 'none', p: 0 }}
+                        >
+                            <Box component="li" sx={{ py: 0.5 }}>
+                                <StyledLink to="/terms">
+                                    {t('footer.headline_3.link_1')}
+                                </StyledLink>
+                            </Box>
+                            <Box component="li" sx={{ py: 0.5 }}>
+                                <StyledLink to="/privacy">
+                                    {t('footer.headline_3.link_2')}
+                                </StyledLink>
+                            </Box>
+                            <Box component="li" sx={{ py: 0.5 }}>
+                                <StyledLink to="/faq">
+                                    {t('footer.headline_3.link_3')}
+                                </StyledLink>
+                            </Box>
+                        </Box>
+                    </Grid>
+
+                    <Grid item xs={6} md={3} sx={{ marginTop: '1rem' }}>
+                        <Typography weight="SemiBold" size="h5" gutterBottom>
+                            {t('footer.headline_4.title')}
+                        </Typography>
+
+                        <Box
+                            component="ul"
+                            sx={{
+                                display: 'flex',
+                                paddingLeft: '0',
+                                margin: '.5rem 0 1.5rem',
+                            }}
+                        >
+                            <Box
+                                component="a"
+                                target="_blank"
+                                href="https://www.linkedin.com/company/tzconnect/"
+                                sx={iconStyle}
+                            >
+                                <SocialStyled
+                                    src={'/img/linkedin.svg'}
+                                    alt="Linkedin"
+                                />
+                            </Box>
+                            <Box
+                                component="a"
+                                target="_blank"
+                                href="https://twitter.com/TZConnectBerlin"
+                                sx={iconStyle}
+                            >
+                                <SocialStyled
+                                    src={'/img/twitter.svg'}
+                                    alt="Twitter"
+                                />
+                            </Box>
+                            <Box
+                                component="a"
+                                target="_blank"
+                                href="https://www.tzconnect.com/en/"
+                                sx={iconStyle}
+                            >
+                                <SocialStyled
+                                    src={'/img/tezos.svg'}
+                                    alt="TZ connect"
+                                />
+                            </Box>
+                        </Box>
+
+                        <Typography weight="SemiBold" size="h5" gutterBottom>
+                            {t('footer.headline_5.title')}
+                        </Typography>
+
+                        <CustomSelect
+                            id="Language selection - footer"
+                            availableOptions={[
+                                {
+                                    value: 'en',
+                                    label: 'English',
+                                },
+                                {
+                                    value: 'fr',
+                                    label: 'Français',
+                                },
+                                {
+                                    value: 'de',
+                                    label: 'Deutsch',
+                                },
+                                {
+                                    value: 'ab',
+                                    label: 'عرب',
+                                },
+                            ]}
+                            selectedOption={selectedLanguage ?? 'en'}
+                            triggerFunction={(event: SelectChangeEvent) => {
+                                setSelectedLanguage(event.target.value);
+                                i18next.changeLanguage(event.target.value);
+                            }}
+                            disabled={false}
+                            customSize="small"
+                        />
+                    </Grid>
                 </Grid>
             </Grid>
         </StyledBox>
