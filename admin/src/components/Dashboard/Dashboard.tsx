@@ -62,9 +62,7 @@ export const Dashboard = () => {
 
   const fetchTopBuyers = () => {
     axios.get('https://kanvas.tzconnect.berlin/api/users/topBuyers', {
-      withCredentials: true, headers: {
-        'Content-type': 'application/json'
-      }
+        withCredentials: true
     })
       .then(response => {
         setTopBuyers(response.data.topBuyers)
