@@ -52,7 +52,7 @@ const StyledMetadataStack = styled(Stack)`
         min-width: 30%;
         max-width: 30%;
 
-        margin-top: 7rem !important;
+        margin-top: 0 !important;
         margin-left: 3rem !important;
     }
 
@@ -163,7 +163,7 @@ const StyledCustomButton = styled(CustomButton)`
     margin-top: 3rem;
 
     @media (min-width: 768px) {
-        margin-top: 2rem;
+        margin-top: auto;
     }
 `;
 

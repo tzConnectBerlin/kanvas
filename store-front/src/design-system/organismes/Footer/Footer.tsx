@@ -103,7 +103,7 @@ export const Footer: FC<FooterProps> = () => {
                 item
                 xs={12}
                 md={4}
-                lg={6}
+                lg={5}
                 sx={{
                     display: 'flex',
                     height: '8rem',
@@ -132,7 +132,7 @@ export const Footer: FC<FooterProps> = () => {
                 </Box>
             </Grid>
 
-            <Grid item md={7} lg={6}>
+            <Grid item md={7} lg={7}>
                 <Grid container columnSpacing={{ xs: 0, sm: 2, md: 3 }}>
                     <Grid item xs={6} md={3}>
                         <Typography

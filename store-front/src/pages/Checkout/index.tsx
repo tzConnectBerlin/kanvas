@@ -27,6 +27,7 @@ import ShoppingCartItem from '../../design-system/molecules/ShoppingCartItem';
 import { Animated } from 'react-animated-css';
 import Success from '../../design-system/atoms/Success';
 import StripeCheckoutForm from '../../design-system/organismes/StripeCheckOutForm';
+import { useTranslation } from 'react-i18next';
 
 interface CheckoutProps {
     loading: boolean;
@@ -151,14 +152,15 @@ const StyledDoneIcon = styled(DoneIcon)<{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.primary.contrastText};
 `;
 
-const steps = ['Summary', 'Choose payment method', 'Proceed payment'];
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PK_KEY!);
 
 export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
     const history = useHistory();
     const isMobile = useMediaQuery('(max-width: 874px)');
+    const { t } = useTranslation(['translation']);
 
+    const steps = [t('checkout.headline_0'),t('checkout.headline_1'),t('checkout.headline_2'),];
     const [activeStep, setActiveStep] = useState<number>(0);
 
     const wrapperRef = useRef();
