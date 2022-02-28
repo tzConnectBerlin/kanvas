@@ -194,9 +194,10 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
 
         if (timeLeft < 300000 && !isWarned) {
             toast.warning(
-                `Your card will expire in ${new Date(
+                `${t('checkout.expireIn')} 
+                ${new Date(
                     timeLeft,
-                ).getMinutes()} minutes`,
+                ).getMinutes()} ${t('cart.minutes')}`,
             );
             setIsWarned(true);
         }
@@ -223,15 +224,18 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                     <Typography
                         size="h2"
                         weight="SemiBold"
+                        aria-lablledBy="Subtitle - Summary"
                         sx={{ marginTop: '1rem', marginLeft: '1rem' }}
                     >
                         {t('cart.summary')}
                     </Typography>
                     <FlexSpacer />
+
                     <Typography
                         size="h5"
                         weight="Medium"
                         sx={{ marginTop: '1rem', marginRight: '1rem' }}
+                        aria-lablledBy="Amount in cart"
                     >
                         {props.nftsInCart.length > 0 && (
                             <>
@@ -343,6 +347,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         <CustomButton
                             size="medium"
                             label={t('cart.goCheckout')}
+                            role="button"
                             onClick={() => {
                                 props.closeCart();
                                 history.push('/checkout');

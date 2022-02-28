@@ -245,16 +245,16 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
         if (!timeLeft) return;
         setInterval(() => {
             setTimeLeft(
-                // new Date(props.expiresAt).getTime() - new Date().getTime(),
-                Math.round(timeLeft / 60000),
+                new Date(props.expiresAt).getTime() - new Date().getTime(),
             );
         });
 
         if (timeLeft < 300000 && !isWarned) {
             toast.warning(
-                `${t('checkout.expireIn')} ${new Date(
+                `${t('checkout.expireIn')} 
+                ${new Date(
                     timeLeft,
-                ).getMinutes()} ${'cart.minutes'}`,
+                ).getMinutes()} ${t('cart.minutes')}`,
             );
             setIsWarned(true);
         }
