@@ -157,7 +157,9 @@
     "headline_payment_method_2": "Zahlung:",
     "link_payment_method": "Mehr erfahren",
     "upcoming_payment_method": "Bald verfügbar ",
-    "iframe_not_supported": "Ihr Browser unterstützt keine iFrames."
+    "iframe_not_supported": "Ihr Browser unterstützt keine iFrames.",
+    "expired": "Warenkorb abgelaufen",
+    "expireIn": "Ihr Warenkorb läuft ab in"
  }, 
   "cookies": {
     "text": "Durch Klicken auf \"Alle Cookies akzeptieren\" stimmen Sie der Speicherung von Cookies auf Ihrem Gerät zu. Wir verwenden diese Cookies, um die Navigation in der Website zu verbessern.",

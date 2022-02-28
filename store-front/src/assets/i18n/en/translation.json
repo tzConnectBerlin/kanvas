@@ -157,7 +157,9 @@
     "headline_payment_method_2": "Payment:",
     "link_payment_method": "Learn more",
     "upcoming_payment_method": "Soon available ",
-    "iframe_not_supported": "Your browser does not support iframes."
+    "iframe_not_supported": "Your browser does not support iframes.",
+    "expired": "Cart Expired",
+    "expireIn": "Your cart will expire in"
   },
   "cookies": {
     "text": "By clicking “Accept All Cookies”, you agree to the storing of cookies on your device. We use these cookies to enhance site navigation.",

@@ -157,7 +157,9 @@
     "headline_payment_method_2": "الدفع:",
     "link_payment_method": "اعرف المزيد",
     "upcoming_payment_method": "يتوفر قريبًا",
-    "iframe_not_supported": ".iframes متصفحك لا يدعم إطارات "
+    "iframe_not_supported": ".iframes متصفحك لا يدعم إطارات ",
+    "expired": "انتهت صلاحية عربة التسوق",
+    "expireIn": "ستنتهي صلاحية عربة التسوق الخاصة بك في"
   },
   "cookies": {
     "text": "لأنه لا يمكن له أن يكون في الفترة الزمنية التي لا يمكن أن يكون فيها له ما هو عليه. ",

@@ -130,7 +130,7 @@
       "emptyLink": "Voir toute la collection"
     }
   },
-   "profile": {
+  "profile": {
     "emptyMessage": "Pas encore de Nfts dans la collection",
     "emptyLink": "Cliquez ici pour en acheter en magasin.",
     "edit": "Modifier le profil"
@@ -157,7 +157,9 @@
     "headline_payment_method_2": "Paiement :",
     "link_payment_method": "En savoir plus",
     "upcoming_payment_method": "Bientôt disponible ",
-    "iframe_not_supported": "Votre navigateur ne prend pas en charge les iframes."
+    "iframe_not_supported": "Votre navigateur ne prend pas en charge les iframes.",
+    "expired": "Panier expiré",
+    "expireIn": "Votre panier expirera dans"
   },
   "cookies": {
     "text": "En continuant à utiliser ce site, vous acceptez l'utilisation de cookies. En savoir plus dans notre ",
