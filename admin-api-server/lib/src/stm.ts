@@ -163,6 +163,8 @@ export class StateTransitionMachine {
     const st = this.states[nft.state];
 
     for (const transition of st.transitions) {
+      console.log(`trying to move with ${transition.when}`);
+      log.notice('test');
       if (evalExpr<boolean>(nft, transition.when, false)) {
         log.notice(
           `nft.id ${nft.id} ${nft.state} -> ${

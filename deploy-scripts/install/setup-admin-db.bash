@@ -5,5 +5,5 @@ set -a
 . .env || exit 1
 set +a
 
-./script/migrate || exit 1
+INIT_QUEPASA=false ./script/migrate || exit 1
 ./script/setup-replication-sub

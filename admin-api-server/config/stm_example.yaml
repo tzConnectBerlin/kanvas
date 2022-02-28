@@ -34,6 +34,7 @@ states:
         nft.proposed &&
         nft.editions_size > 0 &&
         nft.price > 0 &&
+        nft.price < 1000000 &&
         nft.categories.length > 0
     mutables:
     - attributes: [price, editions_size, proposed, categories, launch_at]
@@ -71,7 +72,7 @@ states:
         nft.proposal_accept.length == 1
     mutables:
     - attributes: [proposal_accept, proposal_reject]
-      by_roles: [moderator, admin]
+      by_roles: [moderator]
 
   prototype:
     state_transitions:
@@ -92,4 +93,4 @@ states:
         }
     mutables:
     - attributes: [prototype_accept, prototype_reject]
-      by_roles: [moderator, admin]
+      by_roles: [moderator]
