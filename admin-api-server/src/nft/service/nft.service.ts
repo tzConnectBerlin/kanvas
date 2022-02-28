@@ -156,6 +156,7 @@ LIMIT  ${params.pageSize}
     return {
       ...nft,
       allowedActions: this.stm.getAllowedActions(actor, nft),
+      stateInfo: this.stm.tryMoveNft(nft),
     };
   }
 
@@ -254,7 +255,6 @@ RETURNING id
     try {
       const nft = await this.#findOne(nftId);
       if (nft.createdBy !== user.id) {
-        this.nftLock.release(nftId);
         throw new HttpException(
           'no permission to delete this nft (only the creator may)',
           HttpStatus.FORBIDDEN,
@@ -263,7 +263,6 @@ RETURNING id
       if (
         !this.DELETABLE_IN_STATES.some((state: string) => nft.state === state)
       ) {
-        this.nftLock.release(nftId);
         throw new HttpException(
           'no permission to delete this nft (nft is not in a state where it may still be deleted)',
           HttpStatus.FORBIDDEN,
