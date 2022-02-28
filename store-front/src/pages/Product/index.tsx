@@ -52,7 +52,7 @@ const StyledMetadataStack = styled(Stack)`
         min-width: 30%;
         max-width: 30%;
 
-        margin-top: 0  !important;
+        margin-top: 7rem !important;
         margin-left: 3rem !important;
     }
 
@@ -163,7 +163,7 @@ const StyledCustomButton = styled(CustomButton)`
     margin-top: 3rem;
 
     @media (min-width: 768px) {
-        margin-top: auto;
+        margin-top: 2rem;
     }
 `;
 
@@ -333,28 +333,35 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 alignItems: 'flex-end',
                             }}
                         >
-                            <StyledContainer sx={{ maxWidth: 'fit-content' }}>
-                                <StyledCardMedia
-                                    component="img"
-                                    image={nftResponse.data?.displayUri}
-                                    alt={`Nft ${nftResponse.data?.name}`}
-                                />
-                                <StyledWrapperIcon
-                                    role="button"
-                                    aria-labelledBy="Button to expand image"
-                                    onClick={
-                                        !fullScreenView
-                                            ? () => {
-                                                  setFullScreenView(true);
-                                                  document.body.style.overflow =
-                                                      'hidden';
-                                              }
-                                            : () => {}
-                                    }
+                            {nftResponse.data ? (
+                                <StyledContainer
+                                    sx={{ maxWidth: 'fit-content' }}
                                 >
-                                    <StyledFullscreenIcon />
-                                </StyledWrapperIcon>
-                            </StyledContainer>
+                                    <StyledCardMedia
+                                        component="img"
+                                        image={nftResponse.data?.displayUri}
+                                        alt={`Nft ${nftResponse.data?.name}`}
+                                    />
+
+                                    <StyledWrapperIcon
+                                        role="button"
+                                        aria-labelledBy="Button to expand image"
+                                        onClick={
+                                            !fullScreenView
+                                                ? () => {
+                                                      setFullScreenView(true);
+                                                      document.body.style.overflow =
+                                                          'hidden';
+                                                  }
+                                                : () => {}
+                                        }
+                                    >
+                                        <StyledFullscreenIcon />
+                                    </StyledWrapperIcon>
+                                </StyledContainer>
+                            ) : (
+                                <Skeleton width="43rem" height="43rem" />
+                            )}
                         </StyledBox>
                     )}
 
@@ -631,8 +638,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             size="medium"
                             onClick={() => handleAddToBasket()}
                             loading={addToCartResponse.loading}
-                            role="button"
                             aria-label={t('product.add')} // Add to cart
+                            role="button"
                             label={
                                 launchTime! > 0
                                     ? t('product.notDropped')
