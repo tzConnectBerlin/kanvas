@@ -159,7 +159,8 @@
     "upcoming_payment_method": "Bald verfügbar ",
     "iframe_not_supported": "Ihr Browser unterstützt keine iFrames.",
     "expired": "Warenkorb abgelaufen",
-    "expireIn": "Ihr Warenkorb läuft ab in"
+    "expireIn": "Ihr Warenkorb läuft ab in",
+    "success": "Zahlung erfolgreich, Sie können Ihre NFTs in Kürze in Ihrem Wallet und in Ihrem Profil sehen"
  }, 
   "cookies": {
     "text": "Durch Klicken auf \"Alle Cookies akzeptieren\" stimmen Sie der Speicherung von Cookies auf Ihrem Gerät zu. Wir verwenden diese Cookies, um die Navigation in der Website zu verbessern.",

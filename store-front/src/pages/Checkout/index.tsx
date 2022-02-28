@@ -245,15 +245,23 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
         if (!timeLeft) return;
         setInterval(() => {
             setTimeLeft(
-                new Date(props.expiresAt).getTime() - new Date().getTime(),
+                // new Date(props.expiresAt).getTime() - new Date().getTime(),
+                Math.round(timeLeft / 60000),
             );
-        }, 60000);
+        });
 
         if (timeLeft < 300000 && !isWarned) {
             toast.warning(
-                `Your card will expire in ${new Date(
+                `${t('checkout.expireIn')} ${new Date(
                     timeLeft,
-                ).getMinutes()} minutes`,
+                ).getMinutes()} ${'cart.minutes'}`,
+            );
+            setIsWarned(true);
+        }
+
+        if (timeLeft === 0 && !isWarned) {
+            toast.warning(
+                t('checkout.expired'),
             );
             setIsWarned(true);
         }
@@ -481,11 +489,11 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                                         display="initial !important"
                                         align="left"
                                         color="#C4C4C4"
-                                        aria-label='expiry notice'
+                                        aria-label="expiry notice"
                                     >
                                         {timeLeft && timeLeft > 0
                                             ? `${t(
-                                                  'checkout.expiredIn',
+                                                  'checkout.expireIn',
                                               )} ${Math.round(timeLeft / 60000)}
                                             ${t('cart.minutes')}.`
                                             : t('checkout.expired')}
@@ -694,10 +702,9 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                                     size="h4"
                                     weight="Light"
                                     align="center"
+                                    aria-label="success message"
                                 >
-                                    {
-                                        'Payment successfull, you will shortly be able to see your NFTs in your wallet and in your profile '
-                                    }
+                                    {t('checkout.success')}
                                 </Typography>
                             </Stack>
                         </StyledPaper>

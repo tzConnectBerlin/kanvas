@@ -11,6 +11,7 @@ import { Stack, Theme } from '@mui/material';
 import { INft } from '../../../interfaces/artwork';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import TezosLogo from '../../atoms/TezosLogo/TezosLogo';
 
 interface ShoppingCartProps {
     nftsInCart: INft[];
@@ -217,7 +218,6 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                 open={props.open}
                 onClick={() => props.closeCart()}
             ></ContainerPopupStyled>
-
             <WrapperCart open={props.open}>
                 <Stack direction="row">
                     <Typography
@@ -234,7 +234,9 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         sx={{ marginTop: '1rem', marginRight: '1rem' }}
                     >
                         {props.nftsInCart.length > 0 && (
-                            <>{props.nftsInCart.length} - {t('cart.items')} </>
+                            <>
+                                {props.nftsInCart.length} - {t('cart.items')}{' '}
+                            </>
                         )}
                     </Typography>
                 </Stack>
@@ -286,7 +288,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                     display="initial !important"
                                     align="left"
                                     aria-label="subtitle"
-                                >
+                                    >
                                     {t('common.total')}
                                 </Typography>
 
@@ -295,14 +297,15 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 <Typography
                                     size="h4"
                                     weight="SemiBold"
-                                    display="initial !important"
                                     align="right"
+                                    style={{ display: 'flex', alignItems: 'center', }}
                                 >
                                     {`${calculateTotal(
                                         props.nftsInCart.map(
                                             (nft) => nft.price,
                                         ),
-                                    )} ꜩ`}
+                                    )}`}
+                                    <TezosLogo width="18px" margin="0 0.2rem" />
                                 </Typography>
                             </StyledStackWrapper>
                         </>
@@ -315,7 +318,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             color="#C4C4C4"
                             sx={{ marginBottom: '1.5rem' }}
                         >
-                          {t('cart.empty')}
+                            {t('cart.empty')}
                         </Typography>
                     )}
 
@@ -328,7 +331,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                             color="#C4C4C4"
                         >
                             {timeLeft && timeLeft > 0
-                                ? `${t('cart.willExpire')} ${Math.round(
+                                ? `${t('checkout.expireIn')} ${Math.round(
                                       timeLeft / 60000,
                                   )}
                                 ${t('cart.minutes')}.`

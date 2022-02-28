@@ -159,7 +159,8 @@
     "upcoming_payment_method": "Bientôt disponible ",
     "iframe_not_supported": "Votre navigateur ne prend pas en charge les iframes.",
     "expired": "Panier expiré",
-    "expireIn": "Votre panier expirera dans"
+    "expireIn": "Votre panier expirera dans",
+    "success": "Paiement réussi, vous pourrez bientôt voir vos NFT dans votre portefeuille et dans votre profil"
   },
   "cookies": {
     "text": "En continuant à utiliser ce site, vous acceptez l'utilisation de cookies. En savoir plus dans notre ",

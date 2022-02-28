@@ -159,7 +159,8 @@
     "upcoming_payment_method": "Soon available ",
     "iframe_not_supported": "Your browser does not support iframes.",
     "expired": "Cart Expired",
-    "expireIn": "Your cart will expire in"
+    "expireIn": "Your cart will expire in",
+    "success": "Payment successfull, you will shortly be able to see your NFTs in your wallet and in your profile"
   },
   "cookies": {
     "text": "By clicking “Accept All Cookies”, you agree to the storing of cookies on your device. We use these cookies to enhance site navigation.",
