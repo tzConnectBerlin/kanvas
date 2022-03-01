@@ -95,6 +95,25 @@ describe('AppController (e2e)', () => {
     });
   });
 
+  skipOnPriorFail('new user with 0 roles assigned is ok', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'admin@tzconnect.com',
+      'supersafepassword',
+    );
+    const res = await request(app.getHttpServer())
+      .post('/user')
+      .set('authorization', bearer)
+      .send({
+        email: 'ben@bigbrother.co',
+        userName: 'Ben',
+        address: 'tz1ben',
+        password: 'somepass',
+        roles: [],
+      });
+    expect(res.statusCode).toEqual(201);
+  });
+
   skipOnPriorFail('PATCH /nft/:id fails requires to be logged in', async () => {
     const res = await request(app.getHttpServer()).patch('/nft/1');
     expect(res.statusCode).toEqual(401);
@@ -377,14 +396,10 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail(
-    'NFT cannot be removed by anyone else than the creator',
+    'NFT cannot be removed by anyone else than the creator or an admin',
     async () => {
       const joe = await loginUser(app, 'regular_joe@bigbrother.co', 'somepass');
-      const admin = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const ben = await loginUser(app, 'ben@bigbrother.co', 'somepass');
       let res = await request(app.getHttpServer())
         .patch('/nft')
         .set('authorization', joe.bearer);
@@ -394,7 +409,7 @@ describe('AppController (e2e)', () => {
 
       res = await request(app.getHttpServer())
         .delete(`/nft/${nftId}`)
-        .set('authorization', admin.bearer);
+        .set('authorization', ben.bearer);
       expect(res.statusCode).toEqual(403);
     },
   );
@@ -1128,25 +1143,6 @@ describe('AppController (e2e)', () => {
         },
       ],
     });
-  });
-
-  skipOnPriorFail('new user with 0 roles assigned is ok', async () => {
-    const { bearer } = await loginUser(
-      app,
-      'admin@tzconnect.com',
-      'supersafepassword',
-    );
-    const res = await request(app.getHttpServer())
-      .post('/user')
-      .set('authorization', bearer)
-      .send({
-        email: 'ben@bigbrother.co',
-        userName: 'Ben',
-        address: 'tz1ben',
-        password: 'somepass',
-        roles: [],
-      });
-    expect(res.statusCode).toEqual(201);
   });
 
   skipOnPriorFail(`new user's roles must all be valid`, async () => {

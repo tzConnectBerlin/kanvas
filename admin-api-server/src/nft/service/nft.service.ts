@@ -254,7 +254,12 @@ RETURNING id
 
     try {
       const nft = await this.#findOne(nftId);
-      if (nft.createdBy !== user.id) {
+      const actor = await this.#getActorForNft(user, nft);
+      if (
+        !actor.roles.some(
+          (userRole) => userRole === 'creator' || userRole === 'admin',
+        )
+      ) {
         throw new HttpException(
           'no permission to delete this nft (only the creator may)',
           HttpStatus.FORBIDDEN,
