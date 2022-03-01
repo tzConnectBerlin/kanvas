@@ -1,5 +1,5 @@
 import { APP_GUARD } from '@nestjs/core';
-import { Module, MiddlewareConsumer } from '@nestjs/common';
+import { CacheModule, Module, MiddlewareConsumer } from '@nestjs/common';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CategoryModule } from './category/category.module';
 import { NftModule } from './nft/nft.module';
@@ -11,7 +11,12 @@ import { PaymentModule } from './payment/payment.module';
 import { LoggerMiddleware } from './middleware/logger';
 import { CookieSessionMiddleware } from './middleware/cookie_session';
 import { ProxiedThrottlerGuard } from './decoraters/proxied_throttler';
-import { RATE_LIMIT_WINDOW_SECS, RATE_LIMIT } from 'src/constants';
+import {
+  RATE_LIMIT_TTL,
+  RATE_LIMIT,
+  CACHE_TTL,
+  CACHE_SIZE,
+} from 'src/constants';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
@@ -25,8 +30,12 @@ import { ScheduleModule } from '@nestjs/schedule';
     PaymentModule,
     DbModule,
     ThrottlerModule.forRoot({
-      ttl: RATE_LIMIT_WINDOW_SECS,
+      ttl: RATE_LIMIT_TTL,
       limit: RATE_LIMIT,
+    }),
+    CacheModule.register({
+      ttl: CACHE_TTL,
+      max: CACHE_SIZE,
     }),
   ],
   providers: [{ provide: APP_GUARD, useClass: ProxiedThrottlerGuard }],

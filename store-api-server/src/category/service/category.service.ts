@@ -4,8 +4,10 @@ import {
   HttpException,
   Injectable,
   Inject,
+  CACHE_MANAGER,
 } from '@nestjs/common';
 import { CategoryEntity } from '../entity/category.entity';
+import { Cache } from 'cache-manager';
 import {
   PG_CONNECTION,
   SEARCH_SIMILARITY_LIMIT,
@@ -21,7 +23,16 @@ interface CategoryQueryResponse {
 
 @Injectable()
 export class CategoryService {
-  constructor(@Inject(PG_CONNECTION) private conn: any) {}
+  constructor(
+    @Inject(PG_CONNECTION) private conn: any,
+    @Inject(CACHE_MANAGER) private cache: Cache,
+  ) {}
+
+  async cachedSearch(str: string): Promise<CategoryEntity[]> {
+    return await this.cache.wrap('category', 'search', str, async () => {
+      return await this.search(str);
+    });
+  }
 
   async search(str: string): Promise<CategoryEntity[]> {
     if (str === '') {
@@ -74,6 +85,12 @@ ORDER BY view_count
       [SEARCH_MAX_CATEGORIES],
     );
     return qryRes.rows;
+  }
+
+  async cachedFindAll(): Promise<CategoryEntity[]> {
+    return await this.cache.wrap('category', 'findAll', async () => {
+      return await this.findAll();
+    });
   }
 
   async findAll(): Promise<CategoryEntity[]> {

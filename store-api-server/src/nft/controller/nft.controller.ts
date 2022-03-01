@@ -20,22 +20,17 @@ export class NftController {
     private categoryService: CategoryService,
   ) {}
 
-  @Post()
-  async create(@Body() nft: NftEntity): Promise<NftEntity> {
-    return this.nftService.create(nft);
-  }
-
   @Get()
   async getFiltered(@Query() params: FilterParams): Promise<NftEntityPage> {
     this.#validateFilterParams(params);
-    return await this.nftService.findNftsWithFilter(params);
+    return await this.nftService.cachedFindNftsWithFilter(params);
   }
 
   @Get('/search')
   async search(@Query() params: SearchParam): Promise<SearchResult> {
     const [nfts, categories] = await Promise.all([
-      this.nftService.search(params.searchString),
-      this.categoryService.search(params.searchString),
+      this.nftService.cachedSearch(params.searchString),
+      this.categoryService.cachedSearch(params.searchString),
     ]);
     return {
       nfts: nfts,

@@ -15,9 +15,10 @@ export const SEARCH_SIMILARITY_LIMIT = 0.4;
 export const MINTER_ADDRESS = assertEnv('MINTER_TZ_ADDRESS');
 export const STORE_PUBLISHERS = ['Tezos'];
 
-export const RATE_LIMIT_WINDOW_SECS = Number(
-  process.env['RATE_LIMIT_WINDOW_SECS'] || 60,
-);
+export const RATE_LIMIT_TTL = Number(process.env['RATE_LIMIT_TTL'] || 60); // in seconds
 export const RATE_LIMIT = Number(process.env['RATE_LIMIT'] || 100);
+
+export const CACHE_TTL = Number(process.env['CACHE_TTL'] || 60); // in seconds
+export const CACHE_SIZE = Number(process.env['CACHE_SIZE'] || 10_000); // in max number of items in the cache
 
 export const NUM_TOP_BUYERS = 12;

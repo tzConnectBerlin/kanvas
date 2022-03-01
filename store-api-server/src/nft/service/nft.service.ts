@@ -4,7 +4,9 @@ import {
   Logger,
   Injectable,
   Inject,
+  CACHE_MANAGER,
 } from '@nestjs/common';
+import { Cache } from 'cache-manager';
 import { NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity';
 import { CategoryEntity } from 'src/category/entity/category.entity';
 import { CategoryService } from 'src/category/service/category.service';
@@ -22,12 +24,13 @@ export class NftService {
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
     private readonly categoryService: CategoryService,
+    @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
 
-  async create(_nft: NftEntity): Promise<NftEntity> {
-    throw new Error(
-      "Not yet implemented - let's implement it when we need it rather than have a big generated code blob",
-    );
+  async cachedSearch(str: string): Promise<NftEntity[]> {
+    return await this.cache.wrap('nft', 'search', str, async () => {
+      return await this.search(str);
+    });
   }
 
   async search(str: string): Promise<NftEntity[]> {
@@ -60,6 +63,17 @@ LIMIT $3
     return nftIds.rows
       .map((row: any) => nfts.find((nft) => nft.id === row.id))
       .filter(Boolean);
+  }
+
+  async cachedFindNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {
+    return await this.cache.wrap(
+      'nft',
+      'findNftsWithFilter',
+      JSON.stringify(params),
+      async () => {
+        return await this.findNftsWithFilter(params);
+      },
+    );
   }
 
   async findNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {

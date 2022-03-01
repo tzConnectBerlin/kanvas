@@ -121,7 +121,7 @@ export class UserController {
   @Get('topBuyers')
   async topBuyers() {
     return {
-      topBuyers: await this.userService.getTopBuyers(),
+      topBuyers: await this.userService.cachedGetTopBuyers(),
     };
   }
 

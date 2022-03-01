@@ -8,6 +8,6 @@ export class CategoryController {
 
   @Get()
   async findAll(): Promise<CategoryEntity[]> {
-    return this.categoryService.findAll();
+    return this.categoryService.cachedFindAll();
   }
 }
