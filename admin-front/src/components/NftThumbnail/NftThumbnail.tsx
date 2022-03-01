@@ -57,16 +57,18 @@ export const NftThumbnail = (props: Nft) => {
     const classes = useStyles();
 
     return (
+            <a href={process.env.REACT_APP_STORE_BASE_URL + `product/${props.id}`} target="_blank">
         <Grid container className={classes.content}>
-            <img src={props.image} alt="" className={classes.img} />
-            <Grid item className={classes.wrapperTitle}>
-                <Typography variant="h6" component="h2" className={classes.title} >
-                    {props.name || ' '}
-                </Typography>
-                <Typography variant="subtitle2" component="h2" className={classes.subtitle} >
-                    {props.price || ' '} tez
-                </Typography>
-            </Grid>
+                <img src={props.image} alt="" className={classes.img} />
+                <Grid item className={classes.wrapperTitle}>
+                    <Typography variant="h6" component="h2" className={classes.title} >
+                        {props.name || ' '}
+                    </Typography>
+                    <Typography variant="subtitle2" component="h2" className={classes.subtitle} >
+                        {props.price || ' '} tez
+                    </Typography>
+                </Grid>
         </Grid>
+            </a>
     )
 }

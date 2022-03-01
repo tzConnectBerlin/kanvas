@@ -62,7 +62,7 @@ export const Dashboard = () => {
 
   const fetchTopBuyers = () => {
     axios.get('https://kanvas.tzconnect.berlin/api/users/topBuyers', {
-        withCredentials: true
+      withCredentials: true
     })
       .then(response => {
         setTopBuyers(response.data.topBuyers)
@@ -148,7 +148,7 @@ export const Dashboard = () => {
           to="/"
           icon={ShoppingCartRoundedIcon}
           title="Nb of sold nfts (24h)"
-          subtitle={totalNFTCount24h}
+          subtitle={totalNFTCount24h.toString()}
         />
         <VerticalSpacer />
         <CardWithIcon
@@ -161,7 +161,7 @@ export const Dashboard = () => {
             {
               topBuyers.map((user: any, index: number) =>
                 <ListItem >
-                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.address ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
+                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.userAddress ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
                     <ListItemAvatar >
                       <Avatar src="https://kanvas-files.s3.amazonaws.com/profilePicture_7" />
                     </ListItemAvatar>
@@ -198,7 +198,7 @@ export const Dashboard = () => {
           to="/"
           icon={ShoppingCartRoundedIcon}
           title="Nb of sold nfts (24h)"
-          subtitle={totalNFTCount24h}
+          subtitle={totalNFTCount24h.toString()}
         />
       </div>
       <div style={styles.singleCol}>
@@ -215,7 +215,7 @@ export const Dashboard = () => {
             {
               topBuyers.map((user: any, index: number) =>
                 <ListItem >
-                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.address ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
+                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.userAddress ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
                     <ListItemAvatar >
                       <Avatar src="https://kanvas-files.s3.amazonaws.com/profilePicture_7" />
                     </ListItemAvatar>
@@ -252,15 +252,15 @@ export const Dashboard = () => {
               to="/"
               icon={ShoppingCartRoundedIcon}
               title="Nb of sold nfts (24h)"
-              subtitle={totalNFTCount24h}
+              subtitle={totalNFTCount24h.toString()}
             />
           </div>
           <div style={styles.singleCol}>
             {/* <OrderChart orders={recentOrders} /> */}
           </div>
-          <div style={styles.singleCol}>
+          <div style={styles.singleCol} >
             <CardWithIcon
-              to="/"
+              to=""
               icon={InsertPhotoIcon}
               title="Most viewed"
               subtitle={mostViewed.length ?? 0}
@@ -281,7 +281,7 @@ export const Dashboard = () => {
                 {
                   topBuyers.map((user: any, index: number) =>
                     <ListItem >
-                      <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.address ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
+                      <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.userAddress ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
                         <ListItemAvatar >
                           <Avatar src={user.userPicture} />
                         </ListItemAvatar>

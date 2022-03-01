@@ -121,7 +121,7 @@ const NftAside = ({ ...props }) => {
   React.useEffect(() => {
     if (!props.record) return;
     if (!props.record.attributes) return;
-    if (!categories) return;
+    if (categories) return;
     axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/categories/assignable', {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
