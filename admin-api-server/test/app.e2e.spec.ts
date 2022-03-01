@@ -2354,7 +2354,6 @@ describe('AppController (e2e)', () => {
       });
     expect(res.statusCode).toEqual(200);
     expect(res.body.state).toEqual('setup_nft');
-    console.log(res.body);
   });
 
   skipOnPriorFail('non admin cannot remove users', async () => {
