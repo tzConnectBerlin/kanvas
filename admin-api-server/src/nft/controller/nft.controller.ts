@@ -59,15 +59,6 @@ export class NftController {
     validatePaginationParams(params, this.nftService.getSortableFields());
 
     return await this.nftService.findAll(params);
-
-    /*
-    return resp
-      .set({
-        'Access-Control-Expose-Headers': 'Content-Range',
-        'Content-range': result.total,
-      })
-      .json({ data: result.nfts });
-    */
   }
 
   @Get(':id')

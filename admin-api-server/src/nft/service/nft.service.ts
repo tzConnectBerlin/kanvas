@@ -156,6 +156,7 @@ LIMIT  ${params.pageSize}
     return {
       ...nft,
       allowedActions: this.stm.getAllowedActions(actor, nft),
+      stateInfo: this.stm.tryMoveNft(nft),
     };
   }
 
@@ -250,22 +251,36 @@ RETURNING id
 
   async deleteNft(user: UserEntity, nftId: number) {
     await this.nftLock.acquire(nftId);
-    const nft = await this.#findOne(nftId);
-    if (nft.createdBy !== user.id) {
-      throw new HttpException(
-        'no permission to delete this nft (only the creator may)',
-        HttpStatus.FORBIDDEN,
-      );
-    }
-    if (
-      !this.DELETABLE_IN_STATES.some((state: string) => nft.state === state)
-    ) {
-      throw new HttpException(
-        'no permission to delete this nft (nft is not in a state where it may still be deleted)',
-        HttpStatus.FORBIDDEN,
-      );
-    }
 
+    try {
+      const nft = await this.#findOne(nftId);
+      const actor = await this.#getActorForNft(user, nft);
+      if (
+        !actor.roles.some(
+          (userRole) => userRole === 'creator' || userRole === 'admin',
+        )
+      ) {
+        throw new HttpException(
+          'no permission to delete this nft (only the creator may)',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+      if (
+        !this.DELETABLE_IN_STATES.some((state: string) => nft.state === state)
+      ) {
+        throw new HttpException(
+          'no permission to delete this nft (nft is not in a state where it may still be deleted)',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      await this.#deleteNft(nftId);
+    } finally {
+      this.nftLock.release(nftId);
+    }
+  }
+
+  async #deleteNft(nftId: number) {
     const dbTx = await this.db.connect();
     try {
       await dbTx.query(`BEGIN`);
@@ -287,8 +302,6 @@ WHERE id = $1
     } catch (err: any) {
       await dbTx.query('ROLLBACK');
       throw err;
-    } finally {
-      this.nftLock.release(nftId);
     }
   }
 
