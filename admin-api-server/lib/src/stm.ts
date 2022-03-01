@@ -135,26 +135,34 @@ export class StateTransitionMachine {
     v?: string | null,
   ) {
     if (isBottom(v)) {
-      this.#removeVote(nft, actorId, attr, 'no');
-      this.#removeVote(nft, actorId, attr, 'yes');
+      this.#removeVote(nft, actorId, attr, 'rejects');
+      this.#removeVote(nft, actorId, attr, 'accepts');
       return;
     }
     if (v === '1') {
-      this.#addVote(nft, actorId, attr, 'yes');
-      this.#removeVote(nft, actorId, attr, 'no');
+      this.#addVote(nft, actorId, attr, 'accepts');
+      this.#removeVote(nft, actorId, attr, 'rejects');
     } else if (v === '0') {
-      this.#addVote(nft, actorId, attr, 'no');
-      this.#removeVote(nft, actorId, attr, 'yes');
+      this.#addVote(nft, actorId, attr, 'rejects');
+      this.#removeVote(nft, actorId, attr, 'accepts');
     } else {
       throw `bad vote value ${v}`;
     }
   }
 
-  #addVote(nft: Nft, actorId: number, attr: string, side: 'yes' | 'no') {
-    if (!nft.attributes.hasOwnProperty(attr)) {
+  #addVote(
+    nft: Nft,
+    actorId: number,
+    attr: string,
+    side: 'accepts' | 'rejects',
+  ) {
+    if (
+      !nft.attributes.hasOwnProperty(attr) ||
+      isBottom(nft.attributes[attr])
+    ) {
       nft.attributes[attr] = {
-        yes: [],
-        no: [],
+        accepts: [],
+        rejects: [],
       };
     }
     if (nft.attributes[attr][side].some((id: number) => id === actorId)) {
@@ -165,7 +173,12 @@ export class StateTransitionMachine {
     nft.attributes[attr][side].push(actorId);
   }
 
-  #removeVote(nft: Nft, actorId: number, attr: string, side: 'yes' | 'no') {
+  #removeVote(
+    nft: Nft,
+    actorId: number,
+    attr: string,
+    side: 'accepts' | 'rejects',
+  ) {
     if (!nft.attributes.hasOwnProperty(attr)) {
       return;
     }
