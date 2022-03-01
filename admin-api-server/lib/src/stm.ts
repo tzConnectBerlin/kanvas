@@ -4,8 +4,6 @@ import { evalExpr, execExpr } from './expr';
 import { Nft, Actor } from './types';
 import * as log from 'log';
 
-interface StateTransition {}
-
 interface State {
   transitions: [
     {
@@ -62,7 +60,7 @@ export class StateTransitionMachine {
   }
 
   getAllowedActions(actor: Actor, nft: Nft): any {
-    let res: any = {};
+    const res: any = {};
 
     const st: State | undefined = this.states[nft.state];
     if (typeof st === 'undefined') {
@@ -87,7 +85,7 @@ export class StateTransitionMachine {
     actor: Actor,
     nft: Nft,
     attr: string,
-    v?: string,
+    v?: string | null,
   ): STMResult {
     const st = this.states[nft.state];
     const isAllowed =
@@ -105,11 +103,7 @@ export class StateTransitionMachine {
 
     switch (this.attrTypes[attr]) {
       case 'votes':
-        if (v === 'true') {
-          this.#tryAttributeAddVote(nft, attr, actor.id);
-        } else {
-          this.#tryAttributeRemoveVote(nft, attr, actor.id);
-        }
+        this.#attributeSetVote(nft, actor.id, attr, v);
         break;
       default:
         this.#attributeSet(nft, attr, v);
@@ -124,36 +118,60 @@ export class StateTransitionMachine {
     };
   }
 
-  #attributeSet(nft: Nft, attr: string, v?: string) {
-    if (typeof v === 'undefined') {
+  #attributeSet(nft: Nft, attr: string, v?: string | null) {
+    if (isBottom(v)) {
       nft.attributes[attr] = null;
       return;
     }
-    nft.attributes[attr] = JSON.parse(v);
-    log.info(`type of attribute '${attr}' is '${typeof nft.attributes[attr]}'`);
+
+    /* eslint-disable  @typescript-eslint/no-non-null-assertion */
+    nft.attributes[attr] = JSON.parse(v!);
   }
 
-  #tryAttributeRemoveVote(nft: Nft, attr: string, actorId: number) {
-    if (!nft.attributes.hasOwnProperty(attr)) {
-      throw `cannot remove actor id from non existing attr ${attr}, nft=${JSON.stringify(
-        nft,
-      )}`;
+  #attributeSetVote(
+    nft: Nft,
+    actorId: number,
+    attr: string,
+    v?: string | null,
+  ) {
+    if (isBottom(v)) {
+      this.#removeVote(nft, actorId, attr, 'no');
+      this.#removeVote(nft, actorId, attr, 'yes');
+      return;
     }
-    nft.attributes[attr] = nft.attributes[attr].filter(
-      (id: number) => id !== actorId,
-    );
+    if (v === '1') {
+      this.#addVote(nft, actorId, attr, 'yes');
+      this.#removeVote(nft, actorId, attr, 'no');
+    } else if (v === '0') {
+      this.#addVote(nft, actorId, attr, 'no');
+      this.#removeVote(nft, actorId, attr, 'yes');
+    } else {
+      throw `bad vote value ${v}`;
+    }
   }
 
-  #tryAttributeAddVote(nft: Nft, attr: string, actorId: number) {
+  #addVote(nft: Nft, actorId: number, attr: string, side: 'yes' | 'no') {
     if (!nft.attributes.hasOwnProperty(attr)) {
-      nft.attributes[attr] = [];
+      nft.attributes[attr] = {
+        yes: [],
+        no: [],
+      };
     }
-    if (nft.attributes[attr].some((id: number) => id === actorId)) {
-      throw `actor with id ${actorId} already signed nft with attr '${attr}', nft=${JSON.stringify(
+    if (nft.attributes[attr][side].some((id: number) => id === actorId)) {
+      throw `actor with id ${actorId} already voted ${side} nft with attr '${attr}', nft=${JSON.stringify(
         nft,
       )}'`;
     }
-    nft.attributes[attr].push(actorId);
+    nft.attributes[attr][side].push(actorId);
+  }
+
+  #removeVote(nft: Nft, actorId: number, attr: string, side: 'yes' | 'no') {
+    if (!nft.attributes.hasOwnProperty(attr)) {
+      return;
+    }
+    nft.attributes[attr][side] = nft.attributes[attr][side].filter(
+      (id: number) => id !== actorId,
+    );
   }
 
   // move nft if possible to a new state
@@ -192,4 +210,11 @@ export class StateTransitionMachine {
 
     return unmetTransitionConditions;
   }
+}
+
+function isBottom(v: any): boolean {
+  // note: v here is checked for Javascripts' bottom values (null and undefined)
+  //       because undefined coerces into null. And its safe because nothing
+  //       else coerces into null (other than null itself).
+  return v == null;
 }

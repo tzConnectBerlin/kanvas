@@ -9,7 +9,7 @@ attributes:
   launch_at: date
   categories: number[]
   proposed: boolean
-  publish: boolean
+  publish: votes
 
 
 states:
@@ -40,10 +40,17 @@ states:
     state_transitions:
     - next_state: finish
       when:
-      - nft.publish
+      - nft.publish['yes'].length >= 2
       - nft['image.png'].length > 0
       - nft['thumbnail.png'].length > 0
       - nft.description.length > 0
+    - next_state: setup_nft
+      when:
+      - nft.publish['no'].length > 0
+      do: |
+        {
+          nft.proposed = false;
+        }
     mutables:
     - attributes: [publish, image.png, thumbnail.png, description]
       by_roles: [moderator, admin]
