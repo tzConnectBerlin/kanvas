@@ -139,10 +139,10 @@ export class StateTransitionMachine {
       this.#removeVote(nft, actorId, attr, 'accepts');
       return;
     }
-    if (v === '1') {
+    if (v === 'true') {
       this.#addVote(nft, actorId, attr, 'accepts');
       this.#removeVote(nft, actorId, attr, 'rejects');
-    } else if (v === '0') {
+    } else if (v === 'false') {
       this.#addVote(nft, actorId, attr, 'rejects');
       this.#removeVote(nft, actorId, attr, 'accepts');
     } else {
