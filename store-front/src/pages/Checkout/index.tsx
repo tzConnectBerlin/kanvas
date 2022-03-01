@@ -226,7 +226,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
 
         if (timeLeft < 300000 && !isWarned) {
             toast.warning(
-                `Your card will expire in ${new Date(
+                `Your cart will expire in ${new Date(
                     timeLeft,
                 ).getMinutes()} minutes`,
             );
