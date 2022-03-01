@@ -127,7 +127,7 @@ INSERT INTO
             roles: row['roles'],
           },
       ),
-      count: qryRes.rows[0]['total_matched_users'],
+      count: Number(qryRes.rows[0]['total_matched_users']),
     };
   }
 

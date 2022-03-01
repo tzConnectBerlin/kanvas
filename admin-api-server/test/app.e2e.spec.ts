@@ -117,7 +117,7 @@ describe('AppController (e2e)', () => {
         .get('/nft')
         .set('authorization', bearer);
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toStrictEqual({ data: [] });
+      expect(res.body).toStrictEqual({ count: 0, data: [] });
     },
   );
 
@@ -161,6 +161,9 @@ describe('AppController (e2e)', () => {
         createdBy: 1,
         attributes: {},
         allowedActions: { name: 'string', create_ready: 'boolean' },
+        stateInfo: {
+          setup_nft: ['nft.name.length > 0', 'nft.create_ready'],
+        },
       });
     },
   );
@@ -190,6 +193,9 @@ describe('AppController (e2e)', () => {
         createdBy: 1,
         attributes: { name: 'test' },
         allowedActions: { name: 'string', create_ready: 'boolean' },
+        stateInfo: {
+          setup_nft: ['nft.create_ready'],
+        },
       });
     },
   );
@@ -223,6 +229,9 @@ describe('AppController (e2e)', () => {
         createdBy: 1,
         attributes: { name: 'test' },
         allowedActions: { name: 'string', create_ready: 'boolean' },
+        stateInfo: {
+          setup_nft: ['nft.create_ready'],
+        },
       });
 
       const joe = await loginUser(app, 'regular_joe@bigbrother.co', 'somepass');
@@ -243,6 +252,9 @@ describe('AppController (e2e)', () => {
         createdBy: 1,
         attributes: { name: 'test' },
         allowedActions: {},
+        stateInfo: {
+          setup_nft: ['nft.create_ready'],
+        },
       });
     },
   );
@@ -449,6 +461,9 @@ describe('AppController (e2e)', () => {
         createdBy: 1,
         attributes: { name: 'test' },
         allowedActions: { name: 'string', create_ready: 'boolean' },
+        stateInfo: {
+          setup_nft: ['nft.create_ready'],
+        },
       });
 
       res = await request(app.getHttpServer())
@@ -467,6 +482,9 @@ describe('AppController (e2e)', () => {
         createdBy: 1,
         attributes: { name: 'modified name' },
         allowedActions: { name: 'string', create_ready: 'boolean' },
+        stateInfo: {
+          setup_nft: ['nft.create_ready'],
+        },
       });
 
       res = await request(app.getHttpServer())
@@ -490,6 +508,15 @@ describe('AppController (e2e)', () => {
           price: 'number',
           launch_at: 'date',
           proposed: 'boolean',
+        },
+        stateInfo: {
+          proposed: [
+            'nft.proposed',
+            'nft.editions_size > 0',
+            'nft.price > 0',
+            'nft.categories.length > 0',
+            'nft.launch_at >= Date.now()',
+          ],
         },
       });
     },
@@ -520,6 +547,7 @@ describe('AppController (e2e)', () => {
       }
 
       expect(res.body).toStrictEqual({
+        count: 6,
         data: [
           {
             id: 1,
@@ -585,7 +613,7 @@ describe('AppController (e2e)', () => {
     res = await request(app.getHttpServer())
       .get('/nft')
       .set('authorization', bearer)
-      .query({ range: JSON.stringify([1, 3]) });
+      .query({ range: JSON.stringify([1, 2]) });
     expect(res.statusCode).toEqual(200);
     expect(res.body.data.map((row: any) => row.id)).toStrictEqual([2, 3]);
 
@@ -616,7 +644,7 @@ describe('AppController (e2e)', () => {
       res = await request(app.getHttpServer())
         .get('/nft')
         .set('authorization', bearer)
-        .query({ range: JSON.stringify([2, 1]) });
+        .query({ range: JSON.stringify([2, -1]) });
       expect(res.statusCode).toEqual(400);
       res = await request(app.getHttpServer())
         .get('/nft')
@@ -675,6 +703,7 @@ describe('AppController (e2e)', () => {
       }
 
       expect(res.body).toStrictEqual({
+        count: 6,
         data: [
           {
             id: 1,
@@ -767,6 +796,7 @@ describe('AppController (e2e)', () => {
       }
 
       expect(res.body).toStrictEqual({
+        count: 6,
         data: [
           {
             id: 8,
@@ -832,6 +862,7 @@ describe('AppController (e2e)', () => {
       }
 
       expect(res.body).toStrictEqual({
+        count: 6,
         data: [
           {
             attributes: {
@@ -925,6 +956,7 @@ describe('AppController (e2e)', () => {
     }
 
     expect(res.body).toStrictEqual({
+      count: 4,
       data: [
         {
           id: 1,
@@ -969,6 +1001,7 @@ describe('AppController (e2e)', () => {
     }
 
     expect(res.body).toStrictEqual({
+      count: 1,
       data: [
         {
           id: 8,
@@ -995,6 +1028,7 @@ describe('AppController (e2e)', () => {
     }
 
     expect(res.body).toStrictEqual({
+      count: 5,
       data: [
         {
           id: 1,
@@ -1045,6 +1079,7 @@ describe('AppController (e2e)', () => {
     }
 
     expect(res.body).toStrictEqual({
+      count: 2,
       data: [
         {
           id: 3,
@@ -1077,6 +1112,7 @@ describe('AppController (e2e)', () => {
     }
 
     expect(res.body).toStrictEqual({
+      count: 2,
       data: [
         {
           id: 3,
@@ -1162,6 +1198,7 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 3,
       data: [
         {
           id: 1,
@@ -1200,6 +1237,7 @@ describe('AppController (e2e)', () => {
       .query({ sort: JSON.stringify(['id', 'desc']) });
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 3,
       data: [
         {
           id: 3,
@@ -1241,6 +1279,7 @@ describe('AppController (e2e)', () => {
       });
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 3,
       data: [
         {
           id: 3,
@@ -1275,6 +1314,7 @@ describe('AppController (e2e)', () => {
       });
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 3,
       data: [
         {
           id: 1,
@@ -1303,7 +1343,7 @@ describe('AppController (e2e)', () => {
       res = await request(app.getHttpServer())
         .get('/user')
         .set('authorization', bearer)
-        .query({ range: JSON.stringify([2, 1]) });
+        .query({ range: JSON.stringify([2, -1]) });
       expect(res.statusCode).toEqual(400);
       res = await request(app.getHttpServer())
         .get('/user')
@@ -1350,6 +1390,7 @@ describe('AppController (e2e)', () => {
         .query({ sort: JSON.stringify(['id']) });
       expect(res.statusCode).toEqual(200);
       expect(res.body).toEqual({
+        count: 3,
         data: [
           {
             id: 1,
@@ -1381,6 +1422,7 @@ describe('AppController (e2e)', () => {
         .query({ sort: JSON.stringify(['email']) });
       expect(res.statusCode).toEqual(200);
       expect(res.body).toEqual({
+        count: 3,
         data: [
           {
             id: 1,
@@ -1412,6 +1454,7 @@ describe('AppController (e2e)', () => {
         .query({ sort: JSON.stringify(['userName']) });
       expect(res.statusCode).toEqual(200);
       expect(res.body).toEqual({
+        count: 3,
         data: [
           {
             id: 1,
@@ -1443,6 +1486,7 @@ describe('AppController (e2e)', () => {
         .query({ sort: JSON.stringify(['address']) });
       expect(res.statusCode).toEqual(200);
       expect(res.body).toEqual({
+        count: 3,
         data: [
           {
             id: 3,
@@ -1474,6 +1518,7 @@ describe('AppController (e2e)', () => {
         .query({ sort: JSON.stringify(['roles']) });
       expect(res.statusCode).toEqual(200);
       expect(res.body).toEqual({
+        count: 3,
         data: [
           {
             id: 3,
@@ -1534,6 +1579,7 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 2,
       data: [
         {
           id: 2,
@@ -1565,6 +1611,7 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 2,
       data: [
         {
           id: 2,
@@ -1596,6 +1643,7 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 2,
       data: [
         {
           id: 2,
@@ -1627,6 +1675,7 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 1,
       data: [
         {
           id: 2,
@@ -1651,6 +1700,7 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 0,
       data: [],
     });
   });

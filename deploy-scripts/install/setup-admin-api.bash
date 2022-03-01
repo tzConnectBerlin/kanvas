@@ -14,7 +14,7 @@ yarn install || exit 1
 yarn build || exit 1
 
 set -a
-source .env || exit 1
+. .env
 
-./script/migrate up || exit 1
+INIT_QUEPASA=false ./script/migrate || exit 1
 yarn seed 2>/dev/null

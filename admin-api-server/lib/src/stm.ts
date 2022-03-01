@@ -10,7 +10,7 @@ interface State {
   transitions: [
     {
       next_state: string;
-      when: string;
+      when: string[];
       do?: string;
     },
   ];
@@ -157,26 +157,39 @@ export class StateTransitionMachine {
   }
 
   // move nft if possible to a new state
-  // returns true if moved and adjusts nft in memory
-  // returns false if not moved
-  tryMoveNft(nft: Nft): boolean {
+  // returns for each possible transition target the list of conditions that
+  // were not met (and if we did transition, returns []).
+  tryMoveNft(nft: Nft): any {
     const st = this.states[nft.state];
 
-    for (const transition of st.transitions) {
-      if (evalExpr<boolean>(nft, transition.when, false)) {
+    const unmetTransitionConditions: any = {};
+    for (const transition of st?.transitions || []) {
+      let allSucceed = true;
+
+      unmetTransitionConditions[transition.next_state] = [];
+      for (const condition of transition.when) {
+        if (!evalExpr<boolean>(nft, condition, false)) {
+          allSucceed = false;
+
+          unmetTransitionConditions[transition.next_state].push(condition);
+        }
+      }
+
+      if (allSucceed) {
         log.notice(
           `nft.id ${nft.id} ${nft.state} -> ${
             transition.next_state
           }, attrs=${JSON.stringify(nft.attributes)}`,
         );
+
         nft.state = transition.next_state;
         if (typeof transition.do !== 'undefined') {
           execExpr(nft, transition.do);
         }
-        return true;
+        return {};
       }
     }
 
-    return false;
+    return unmetTransitionConditions;
   }
 }
