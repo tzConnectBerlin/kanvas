@@ -4,8 +4,7 @@ import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 
-import { utcToZonedTime, format } from 'date-fns-tz';
-
+import { format } from 'date-fns';
 import { FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, CardMedia, Skeleton, Stack, Theme } from '@mui/material';
