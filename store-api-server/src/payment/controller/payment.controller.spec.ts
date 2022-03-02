@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DbMockModule } from 'src/db_mock.module';
+import { DbMock } from 'src/mock/db.module';
+import { CacheMock } from 'src/mock/cache.module';
 import { PaymentController } from './payment.controller';
 import { PaymentService } from '../service/payment.service';
 import { UserService } from 'src/user/service/user.service';
@@ -13,7 +14,7 @@ describe('PaymentController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DbMockModule],
+      imports: [DbMock, CacheMock],
       controllers: [PaymentController],
       providers: [
         UserService,

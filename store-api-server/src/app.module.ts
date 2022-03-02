@@ -36,6 +36,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     CacheModule.register({
       ttl: CACHE_TTL,
       max: CACHE_SIZE,
+      isGlobal: true,
     }),
   ],
   providers: [{ provide: APP_GUARD, useClass: ProxiedThrottlerGuard }],

@@ -28,8 +28,8 @@ export class NftService {
   ) {}
 
   async cachedSearch(str: string): Promise<NftEntity[]> {
-    return await this.cache.wrap('nft', 'search', str, async () => {
-      return await this.search(str);
+    return await this.cache.wrap('nft.search' + str, () => {
+      return this.search(str);
     });
   }
 
@@ -67,11 +67,9 @@ LIMIT $3
 
   async cachedFindNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {
     return await this.cache.wrap(
-      'nft',
-      'findNftsWithFilter',
-      JSON.stringify(params),
-      async () => {
-        return await this.findNftsWithFilter(params);
+      'nft.findNftsWithFilter' + JSON.stringify(params),
+      () => {
+        return this.findNftsWithFilter(params);
       },
     );
   }

@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException } from '@nestjs/common';
 import { NftController } from './nft.controller';
-import { DbMockModule } from 'src/db_mock.module';
+import { DbMock } from 'src/mock/db.module';
+import { CacheMock } from 'src/mock/cache.module';
 import { NftService } from '../service/nft.service';
 import { NftServiceMock } from '../service/nft_mock.service';
 import { CategoryService } from 'src/category/service/category.service';
@@ -12,7 +13,7 @@ describe('NftController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DbMockModule, NftServiceMock],
+      imports: [DbMock, CacheMock, NftServiceMock],
       controllers: [NftController],
       providers: [
         {

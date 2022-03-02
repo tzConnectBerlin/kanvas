@@ -29,8 +29,8 @@ export class CategoryService {
   ) {}
 
   async cachedSearch(str: string): Promise<CategoryEntity[]> {
-    return await this.cache.wrap('category', 'search', str, async () => {
-      return await this.search(str);
+    return await this.cache.wrap('category.search' + str, () => {
+      return this.search(str);
     });
   }
 
@@ -88,8 +88,8 @@ ORDER BY view_count
   }
 
   async cachedFindAll(): Promise<CategoryEntity[]> {
-    return await this.cache.wrap('category', 'findAll', async () => {
-      return await this.findAll();
+    return await this.cache.wrap('category.findAll', () => {
+      return this.findAll();
     });
   }
 

@@ -8,11 +8,19 @@ import {
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 export class NftServiceMock {
+  async cachedSearch(str: string): Promise<SearchResult> {
+    return await this.search(str);
+  }
+
   async search(str: string): Promise<SearchResult> {
     throw new HttpException(
       `mock search not implemented`,
       HttpStatus.INTERNAL_SERVER_ERROR,
     );
+  }
+
+  async cachedFindNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {
+    return await this.findNftsWithFilter(params);
   }
 
   async findNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {

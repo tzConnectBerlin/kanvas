@@ -198,8 +198,8 @@ WHERE id = $1`,
   }
 
   async cachedGetTopBuyers(): Promise<UserTotalPaid[]> {
-    return await this.cache.wrap('user', 'getTopBuyers', async () => {
-      return await this.getTopBuyers();
+    return await this.cache.wrap('user.getTopBuyers', () => {
+      return this.getTopBuyers();
     });
   }
 

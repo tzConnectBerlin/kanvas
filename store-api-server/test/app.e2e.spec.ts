@@ -18,6 +18,7 @@ const skipOnPriorFail = (name: string, action: any) => {
   test(name, async () => {
     if (!anyTestFailed) {
       try {
+        console.log('test: ' + name);
         await action();
       } catch (error) {
         anyTestFailed = true;
