@@ -257,15 +257,16 @@ const toFormData = (data: any, resource = '') => {
     if (data[key]) {
       // contains .png
       if (key.startsWith('files')) {
-
         data[key].map((file: any, index: number) => {
           try {
             Object.defineProperty(file, 'name', {
               writable: true,
               value: key.slice('files'.length).toLowerCase()
             });
-
-            formData.append('files[]', file[Object.keys(file)[0]].rawFile, Object.keys(file)[0].toLowerCase());
+            debugger
+            Object.keys(file).map((key: any, index: number) => {
+              formData.append('files[]', file[Object.keys(file)[index]].rawFile, Object.keys(file)[index].toLowerCase());
+            })
           } catch (error: any) {
             console.log(error)
           }

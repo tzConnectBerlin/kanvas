@@ -6,7 +6,7 @@ import ToolbarActions from "./ToolbarActions";
 
 export const ActivityList = ({ ...props }) => {
     return (
-        <List {...props}>
+        <List {...props} sort={{ field: 'at', order: 'DESC' }}>
             <Datagrid rowClick="edit">
                 <TextField source="id" />
                 <TextField source="disabled" />

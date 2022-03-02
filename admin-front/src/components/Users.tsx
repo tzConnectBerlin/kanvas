@@ -26,7 +26,7 @@ import axios from 'axios';
 const rolesEnum = {
   1: 'superadmin',
   2: 'editor',
-  3: 'creator',
+  3: 'moderator',
 };
 
 export const UserList = ({ ...props }) => {

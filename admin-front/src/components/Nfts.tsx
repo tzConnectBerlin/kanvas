@@ -1,4 +1,5 @@
 import { Box, Paper, Stack, Typography } from '@mui/material';
+import { format } from 'date-fns';
 import {
   Record,
   List,
@@ -27,7 +28,8 @@ import {
   useRefresh,
   useRedirect,
   ReferenceField,
-  DateTimeInput
+  DateTimeInput,
+  FunctionField
 } from 'react-admin';
 // import { DateTimeInput } from 'react-admin-date-inputs';
 import { CustomDeleteButton } from './Buttons/CustomDeleteButton';
@@ -69,8 +71,16 @@ export const NftList = ({ ...props }) => (
       <TextField source="state" label="Current State" />
       <NumberField source="attributes.price" label='Price' />
       <NumberField source="attributes.editions_size" label='Token amount' />
-      <DateField source="createdAt" label="Created at" showTime />
-      <DateField source="updatedAt" label="Last updated at" showTime />
+      <FunctionField label="createdAt" render={(record: any) => `${
+        format(
+          new Date((record.createdAt ?? new Date().getTime()) * 1000 + new Date().getTimezoneOffset() * 60 * 1000 ) ,
+          'dd/MM/yyyy - HH : mm : ss',
+      )}` } />
+      <FunctionField label="updatedAt" render={(record: any) => `${
+        format(
+          new Date((record.updatedAt?? new Date().getTime()) * 1000 + new Date().getTimezoneOffset() * 60 * 1000 ) ,
+          'dd/MM/yyyy - HH : mm : ss',
+      )}` } />
       <ReferenceField label="Created by" source="createdBy" reference="user">
         <ChipField source="userName" />
       </ReferenceField>
@@ -93,7 +103,7 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
   if (props.type === 'string') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} />;
   if (props.type === 'number') return <NumberInput source={`attributes.${props.attributesName}`} label={props.label} validate={validateNumber} />;
   if (props.type === 'boolean') return <BooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
-  if (props.type === 'date') return <DateTimeInput source={`attributes.${props.attributesName}`} label={props.label} />;
+  if (props.type === 'date') return <DateTimeInput source={`attributes.${props.attributesName}`} label={props.label} value={props.record * 1000} />;
   if (props.type === 'number[]') {
     return (
       <ReferenceArrayInput source="attributes.categories" label="categories" reference="categories/assignable">
@@ -154,7 +164,6 @@ const NftAside = ({ ...props }) => {
               props.record &&
               Object.keys(props.record?.attributes)?.map(attrKey => {
 
-
                 if (attrKey === "proposal_reject_0") return;
                 if (attrKey === "image.png") return;
                 if (categories.length > 0 && attrKey === "categories") return (
@@ -174,6 +183,17 @@ const NftAside = ({ ...props }) => {
                     </Stack>
                   </Stack>
                 )
+                if (attrKey === "proposal_vote") {
+                  return (
+                  <Stack direction="column">
+                    <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
+                      {attrKey[0].toUpperCase() + attrKey.replace('_', ' ').slice(1)}
+                    </Typography>
+                    <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
+                      { props.record?.attributes["proposal_vote"]['yes']?.length > props.record?.attributes["proposal_vote"]['no']?.length ? "Accepted" : props.record?.attributes["proposal_vote"]['yes']?.length === props.record?.attributes["proposal_vote"]['no']?.length ? "Equal" : "Rejected"}
+                    </Typography>
+                  </Stack>
+                )}
                 return (
                   <Stack direction="row">
                     <Stack direction="column">
@@ -266,7 +286,6 @@ export const NftEdit = (props: any) => {
 export const NftCreate = ({ ...props }) => {
 
   const classes = useStyle()
-
 
   const notify = useNotify();
   const refresh = useRefresh();
