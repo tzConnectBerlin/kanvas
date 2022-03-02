@@ -11,13 +11,13 @@ import { PaymentModule } from './payment/payment.module';
 import { LoggerMiddleware } from './middleware/logger';
 import { CookieSessionMiddleware } from './middleware/cookie_session';
 import { ProxiedThrottlerGuard } from './decoraters/proxied_throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import {
   RATE_LIMIT_TTL,
   RATE_LIMIT,
   CACHE_TTL,
   CACHE_SIZE,
 } from 'src/constants';
-import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
