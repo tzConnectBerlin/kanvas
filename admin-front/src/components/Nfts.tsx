@@ -157,12 +157,12 @@ const NftAside = ({ ...props }) => {
         }
       })
       .then((response: any) => {
-        debugger
+
         if (voters.length === 0 || voters.indexOf(response.data) !== -1) {
           setVoters([...voters,response.data])
         }
       }).catch((error: any ) => {
-        debugger
+
         console.log(error)
       })
     })

@@ -263,7 +263,7 @@ const toFormData = (data: any, resource = '') => {
               writable: true,
               value: key.slice('files'.length).toLowerCase()
             });
-            debugger
+
             Object.keys(file).map((key: any, index: number) => {
               formData.append('files[]', file[Object.keys(file)[index]].rawFile, Object.keys(file)[index].toLowerCase());
             })
