@@ -59,7 +59,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     '/nfts?orderBy=view is determined by number of POST /nfts/:id per id',
     async () => {
-      await Promise.all([
+      const posts = await Promise.all([
         request(app.getHttpServer()).post('/nfts/1'),
         request(app.getHttpServer()).post('/nfts/23'),
         request(app.getHttpServer()).post('/nfts/23'),
@@ -81,10 +81,13 @@ describe('AppController (e2e)', () => {
         request(app.getHttpServer()).post('/nfts/27'),
         request(app.getHttpServer()).post('/nfts/28'),
       ]);
+      for (const post of posts) {
+        expect(post.statusCode).toEqual(201);
+      }
 
       // have to sleep here for a bit, because we (on purpose) don't await
       // on the nft increment view count query in POST /nfts/:id calls
-      await sleep(300);
+      await sleep(2000);
 
       const res = await request(app.getHttpServer())
         .get('/nfts')

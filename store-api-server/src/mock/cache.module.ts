@@ -9,4 +9,8 @@ const cacheMockProvider = {
   providers: [cacheMockProvider],
   exports: [cacheMockProvider],
 })
-export class CacheMock {}
+export class CacheMock {
+  wrap(k: string, worker: any): any {
+    return worker();
+  }
+}

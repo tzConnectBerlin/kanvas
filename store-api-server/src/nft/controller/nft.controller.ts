@@ -58,7 +58,8 @@ export class NftController {
 
   @Post('/:id')
   async byId(@Param('id') id: number): Promise<NftEntity> {
-    if (typeof id !== 'number') {
+    id = Number(id);
+    if (isNaN(id)) {
       throw new HttpException(
         `invalid id (should be a number)`,
         HttpStatus.BAD_REQUEST,

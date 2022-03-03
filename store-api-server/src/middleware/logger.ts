@@ -15,7 +15,7 @@ export class StatsLogger {
   private logger = new Logger('STATS');
   constructor(@Inject(CACHE_MANAGER) private cache: Cache) {}
 
-  @Cron(CronExpression.EVERY_SECOND)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async logStats() {
     const store: any = this.cache.store;
 
