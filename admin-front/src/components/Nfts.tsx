@@ -239,6 +239,7 @@ const NftAside = ({ ...props }) => {
                     </Stack>
                   </Stack>
                 )} else if (attrKey === "proposal_vote") return;
+                if (props.record?.attributes[attrKey] === null) return;
                 return (
                   <Stack direction="row">
                     <Stack direction="column">
