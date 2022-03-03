@@ -66,6 +66,7 @@ export const Dashboard = () => {
   const dataProvider = useDataProvider()
   const [totalNFTPriceRevenue, setTotalNFTPriceRevenue] = React.useState<number>(0)
   const [totalNFTCount24h, setTotalNFTCount24h] = React.useState<number>(0)
+  const [roles, setRoles] = React.useState<{[i:string]: number}>()
 
   const [topBuyers, setTopBuyers] = React.useState([])
   const [mostViewed, setMostViewed] = React.useState([])
@@ -128,11 +129,26 @@ export const Dashboard = () => {
       })
   }
 
+  const fetchRoles = () => {
+    axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/role', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
+      }
+    })
+      .then(response => {
+        const newRoles : { [i: string]: number; } = {}
+        setRoles(response.data.data.map((role: any) =>  newRoles[role.role_label] = role.id))
+      }).catch(error => {
+        notify(`An error occured while fetching the roles`);
+      })
+  }
+
   React.useEffect(() => {
     fetchTopBuyers()
     fetchMostViewed()
     fetchTotalRevenu()
     fetchNftCount24h()
+    fetchRoles()
   }, [])
 
 
@@ -148,7 +164,7 @@ export const Dashboard = () => {
       <div style={styles.flexColumn as React.CSSProperties}>
         <Welcome />
         {
-          permissions.indexOf(1) !== -1 ? (
+          (roles ? permissions.indexOf(roles["admin"]) !== -1 : false) ? (
             <>
               <CardWithIcon
                 to="/"
@@ -204,7 +220,7 @@ export const Dashboard = () => {
         <Welcome />
       </div>
       {
-        permissions.indexOf(1) !== -1 ? (
+        (roles ? permissions.indexOf(roles["admin"]) !== -1 : false) ? (
           <>
             <CardWithIcon
               to="/"
@@ -261,7 +277,7 @@ export const Dashboard = () => {
       <div style={styles.flex}>
         <div style={styles.leftCol}>
           {
-            permissions.indexOf(1) !== -1 ? (
+            (roles ? permissions.indexOf(roles["admin"]) !== -1 : false) ? (
               <>
                 <CardWithIcon
                   to="/"

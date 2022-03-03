@@ -3,7 +3,7 @@ import { ArrayFieldProps } from 'ra-ui-materialui';
 import * as React from 'react';
 
 interface TextArrayFieldProps extends ArrayFieldProps {
-  value?: { [i: string | number]: string };
+  value: { [i: number]: string };
 }
 
 export const TextArrayField: React.FC<TextArrayFieldProps> = ({
@@ -11,14 +11,15 @@ export const TextArrayField: React.FC<TextArrayFieldProps> = ({
   source,
   value,
 }) => {
-  const array = record?.[source ?? 0];
+  const array = source ? record?.[source] : [];
+  debugger
   if (typeof array === 'undefined' || array === null || array.length === 0) {
     return <div />;
   } else {
     return (
       <>
-        {array.map((item: string) => (
-          <Chip label={value?.[item] ?? item} key={item} />
+        {array.map((item: string | number) => (
+          <Chip label={value[+item - 1]} key={item} />
         ))}
       </>
     );
