@@ -8,7 +8,7 @@ import { AuthProviderModule } from './auth-provider/auth-provider.module';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { DbModule } from './db.module';
 import { PaymentModule } from './payment/payment.module';
-import { LoggerMiddleware } from './middleware/logger';
+import { LoggerMiddleware, StatsLogger } from './middleware/logger';
 import { CookieSessionMiddleware } from './middleware/cookie_session';
 import { ProxiedThrottlerGuard } from './decoraters/proxied_throttler';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -39,7 +39,10 @@ import {
       isGlobal: true,
     }),
   ],
-  providers: [{ provide: APP_GUARD, useClass: ProxiedThrottlerGuard }],
+  providers: [
+    StatsLogger,
+    { provide: APP_GUARD, useClass: ProxiedThrottlerGuard },
+  ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer): void {

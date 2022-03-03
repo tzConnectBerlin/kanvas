@@ -4,9 +4,7 @@ import {
   Logger,
   Injectable,
   Inject,
-  CACHE_MANAGER,
 } from '@nestjs/common';
-import { Cache } from 'cache-manager';
 import { NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity';
 import { CategoryEntity } from 'src/category/entity/category.entity';
 import { CategoryService } from 'src/category/service/category.service';
@@ -24,14 +22,7 @@ export class NftService {
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
     private readonly categoryService: CategoryService,
-    @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
-
-  async cachedSearch(str: string): Promise<NftEntity[]> {
-    return await this.cache.wrap('nft.search' + str, () => {
-      return this.search(str);
-    });
-  }
 
   async search(str: string): Promise<NftEntity[]> {
     const nftIds = await this.conn.query(
@@ -63,15 +54,6 @@ LIMIT $3
     return nftIds.rows
       .map((row: any) => nfts.find((nft) => nft.id === row.id))
       .filter(Boolean);
-  }
-
-  async cachedFindNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {
-    return await this.cache.wrap(
-      'nft.findNftsWithFilter' + JSON.stringify(params),
-      () => {
-        return this.findNftsWithFilter(params);
-      },
-    );
   }
 
   async findNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {

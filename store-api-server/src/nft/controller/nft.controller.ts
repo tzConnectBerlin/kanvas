@@ -1,45 +1,69 @@
 import {
   HttpException,
   HttpStatus,
-  Body,
+  Res,
   Controller,
   Get,
   Query,
   Param,
   Post,
+  CACHE_MANAGER,
+  Inject,
 } from '@nestjs/common';
+import { Cache } from 'cache-manager';
+import { Response } from 'express';
 import { NftService } from '../service/nft.service';
 import { CategoryService } from 'src/category/service/category.service';
-import { NftEntity, NftEntityPage, SearchResult } from '../entity/nft.entity';
+import { NftEntity } from '../entity/nft.entity';
 import { FilterParams, PaginationParams, SearchParam } from '../params';
+import { wrapCache } from 'src/utils';
 
 @Controller('nfts')
 export class NftController {
   constructor(
     private nftService: NftService,
     private categoryService: CategoryService,
+    @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
 
   @Get()
-  async getFiltered(@Query() params: FilterParams): Promise<NftEntityPage> {
+  async getFiltered(@Res() resp: Response, @Query() params: FilterParams) {
     this.#validateFilterParams(params);
-    return await this.nftService.cachedFindNftsWithFilter(params);
+    return await wrapCache(
+      this.cache,
+      resp,
+      'nft.findNftsWithFilter' + JSON.stringify(params),
+      () => {
+        return this.nftService.findNftsWithFilter(params);
+      },
+    );
   }
 
   @Get('/search')
-  async search(@Query() params: SearchParam): Promise<SearchResult> {
-    const [nfts, categories] = await Promise.all([
-      this.nftService.cachedSearch(params.searchString),
-      this.categoryService.cachedSearch(params.searchString),
-    ]);
-    return {
-      nfts: nfts,
-      categories: categories,
-    };
+  async search(@Res() resp: Response, @Query() params: SearchParam) {
+    return await wrapCache(
+      this.cache,
+      resp,
+      'nft.search' + params.searchString,
+      () => {
+        return new Promise(async (resolve) => {
+          resolve({
+            nfts: await this.nftService.search(params.searchString),
+            categories: await this.categoryService.search(params.searchString),
+          });
+        });
+      },
+    );
   }
 
   @Post('/:id')
   async byId(@Param('id') id: number): Promise<NftEntity> {
+    if (typeof id !== 'number') {
+      throw new HttpException(
+        `invalid id (should be a number)`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     return await this.nftService.byId(id);
   }
 

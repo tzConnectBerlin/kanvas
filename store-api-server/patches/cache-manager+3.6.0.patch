@@ -1,0 +1,58 @@
+diff --git a/node_modules/cache-manager/lib/caching.js b/node_modules/cache-manager/lib/caching.js
+index 4dc9555..b59681b 100644
+--- a/node_modules/cache-manager/lib/caching.js
++++ b/node_modules/cache-manager/lib/caching.js
+@@ -374,6 +374,24 @@ var caching = function(args) {
+         self.ttl = self.store.ttl.bind(self.store);
+     }
+ 
++    /**
++     * Binds to the underlying store's `prune` function if it exists (included in a patch for Kanvas).
++     * @function
++     * @name prune
++     */
++    if (typeof self.store.prune === 'function') {
++        self.prune = self.store.prune.bind(self.store);
++    }
++
++    /**
++     * Binds to the underlying store's `itemCount` function if it exists (included in a patch for Kanvas).
++     * @function
++     * @name itemCount
++     */
++    if (typeof self.store.itemCount === 'function') {
++        self.itemCount = self.store.itemCount.bind(self.store);
++    }
++
+     return self;
+ };
+ 
+diff --git a/node_modules/cache-manager/lib/stores/memory.js b/node_modules/cache-manager/lib/stores/memory.js
+index cba7a5f..77a80bf 100644
+--- a/node_modules/cache-manager/lib/stores/memory.js
++++ b/node_modules/cache-manager/lib/stores/memory.js
+@@ -227,6 +227,24 @@ var memoryStore = function(args) {
+         }
+     };
+ 
++    /**
++     * included in a patch for Kanvas
++     */
++    self.prune = function() {
++      lruCache.prune();
++
++      if (self.usePromises) {
++        return Promise.resolve();
++      }
++    };
++
++    /**
++     * included in a patch for Kanvas
++     */
++    self.itemCount = function() {
++      return lruCache.itemCount;
++    }
++
+     return self;
+ };
+ 

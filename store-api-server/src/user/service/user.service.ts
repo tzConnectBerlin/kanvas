@@ -1,5 +1,4 @@
-import { Logger, Injectable, Inject, CACHE_MANAGER } from '@nestjs/common';
-import { Cache } from 'cache-manager';
+import { Logger, Injectable, Inject } from '@nestjs/common';
 import {
   UserEntity,
   ProfileEntity,
@@ -40,7 +39,6 @@ export class UserService {
     private readonly s3Service: S3Service,
     private readonly mintService: MintService,
     public readonly nftService: NftService,
-    @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
 
   async create(user: UserEntity): Promise<UserEntity> {
@@ -195,12 +193,6 @@ WHERE id = $1`,
       );
     }
     return Ok(qryRes.rows[0]['cart_session']);
-  }
-
-  async cachedGetTopBuyers(): Promise<UserTotalPaid[]> {
-    return await this.cache.wrap('user.getTopBuyers', () => {
-      return this.getTopBuyers();
-    });
   }
 
   async getTopBuyers(): Promise<UserTotalPaid[]> {
