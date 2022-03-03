@@ -178,9 +178,9 @@ export const Dashboard = () => {
             {
               topBuyers.map((user: any, index: number) =>
                 <ListItem >
-                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.userAddress ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
+                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.userAddress}`} target="_blank">
                     <ListItemAvatar >
-                      <Avatar src="https://kanvas-files.s3.amazonaws.com/profilePicture_7" />
+                      <Avatar src={user.userPicture} />
                     </ListItemAvatar>
                     <ListItemText
                       primary={`username - ${index}`}
@@ -235,9 +235,9 @@ export const Dashboard = () => {
             {
               topBuyers.map((user: any, index: number) =>
                 <ListItem >
-                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.userAddress ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
+                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.userAddress}`} target="_blank">
                     <ListItemAvatar >
-                      <Avatar src="https://kanvas-files.s3.amazonaws.com/profilePicture_7" />
+                      <Avatar src={user.userPicture} />
                     </ListItemAvatar>
                     <ListItemText
                       primary={`username - ${index}`}
@@ -303,7 +303,7 @@ export const Dashboard = () => {
                 {
                   topBuyers.map((user: any, index: number) =>
                     <ListItem >
-                      <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.userAddress ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
+                      <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.userAddress}`} target="_blank">
                         <ListItemAvatar >
                           <Avatar src={user.userPicture} />
                         </ListItemAvatar>
