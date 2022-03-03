@@ -18,7 +18,6 @@ const skipOnPriorFail = (name: string, action: any) => {
   test(name, async () => {
     if (!anyTestFailed) {
       try {
-        console.log('test: ' + name);
         await action();
       } catch (error) {
         anyTestFailed = true;
@@ -92,7 +91,6 @@ describe('AppController (e2e)', () => {
       const res = await request(app.getHttpServer())
         .get('/nfts')
         .query({ orderBy: 'views', orderDirection: 'desc', pageSize: '3' });
-      console.log(res.body);
       expect(res.statusCode).toEqual(200);
       expect(res.body.nfts.map((elem: any) => elem.id)).toStrictEqual([
         23, 3, 1,
