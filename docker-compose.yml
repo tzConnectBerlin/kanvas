@@ -26,7 +26,7 @@ services:
         if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
           psql < script/populate-testdb.sql
         fi
-        if [ "$STORE_API_ENABLED" != "false" ]; then
+        if [ "${STORE_API_ENABLED:-true}" != "false" ]; then
           yarn start
         fi
       '
@@ -36,6 +36,8 @@ services:
       - store-db
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - store-api-server/.env
     environment:
       PGHOST: store-db
       PGPORT: 5432
@@ -51,7 +53,7 @@ services:
       LOCAL_CORS: 'true'
       KANVAS_API_PORT: 3000
 
-      STORE_API_ENABLED: ${STORE_API_ENABLED}
+      MINTER_TZ_ADDRESS: 'tz1...'
 
       #AWS_S3_BUCKET: ..
       #AWS_S3_ACCESS_KEY: ..
@@ -65,7 +67,7 @@ services:
     entrypoint: |-
       bash -c '
         set -e -x
-        while ! psql -d "$DATABASE_URL" -c "select 1" ; do
+        while ! psql -d "$$DATABASE_URL" -c "select 1" ; do
           sleep 1
         done
         /que-pasa/que-pasa --bcd-enable
@@ -103,7 +105,7 @@ services:
           yarn seed
           ./script/setup-replication-sub
         fi
-        if [ "$ADMIN_API_ENABLED" != "false" ]; then
+        if [ "${ADMIN_API_ENABLED:-true}" != "false" ]; then
           yarn run start
         fi
       '
@@ -112,6 +114,8 @@ services:
     links:
       - admin-db
       - store-db
+    env_file:
+      - admin-api-server/.env
     environment:
       POSTGRES_USER: admin_pguser
       POSTGRES_PASSWORD: admin_pgpass
@@ -122,8 +126,6 @@ services:
       PGUSER: admin_pguser
       PGPASSWORD: admin_pgpass
       PGDATABASE: dev_database
-
-      ADMIN_API_ENABLED: ${ADMIN_API_ENABLED}
 
       STORE_PGHOST: store-db
       STORE_PGPORT: 5432
@@ -139,7 +141,7 @@ services:
     entrypoint: |-
       bash -c '
         set -e
-        while ! psql -d "$DATABASE_URL" -c "select 1" ; do
+        while ! psql -d "$$DATABASE_URL" -c "select 1" ; do
           sleep 1
         done
         /que-pasa/que-pasa --bcd-enable

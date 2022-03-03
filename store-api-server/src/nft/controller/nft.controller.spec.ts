@@ -1,7 +1,9 @@
+/* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpException } from '@nestjs/common';
+import { HttpException, CACHE_MANAGER } from '@nestjs/common';
 import { NftController } from './nft.controller';
-import { DbMockModule } from 'src/db_mock.module';
+import { DbMock } from 'src/mock/db.module';
+import { CacheMock } from 'src/mock/cache.module';
 import { NftService } from '../service/nft.service';
 import { NftServiceMock } from '../service/nft_mock.service';
 import { CategoryService } from 'src/category/service/category.service';
@@ -12,12 +14,16 @@ describe('NftController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DbMockModule, NftServiceMock],
+      imports: [DbMock, CacheMock, NftServiceMock],
       controllers: [NftController],
       providers: [
         {
           provide: NftService,
           useClass: NftServiceMock,
+        },
+        {
+          provide: CACHE_MANAGER,
+          useClass: CacheMock,
         },
         CategoryService,
       ],
@@ -84,12 +90,22 @@ describe('NftController', () => {
     },
   ];
 
+  const mockResponse: any = () => {
+    const res: any = {};
+    // replace the following () => res
+    // with your function stub/mock of choice
+    // making sure they still return `res`
+    res.status = () => res;
+    res.json = () => res;
+    return res;
+  };
+
   for (const { name, params, expStatusCode } of getFilteredHttpStatusTests) {
     it(`${name}: should return ${expStatusCode} for .get(${JSON.stringify(
       params,
     )})`, async () => {
       await expectErrWithHttpStatus(expStatusCode, () =>
-        controller.getFiltered(params),
+        controller.getFiltered(mockResponse, params),
       );
     });
   }
@@ -102,7 +118,7 @@ async function expectErrWithHttpStatus(
   try {
     await f();
   } catch (err: any) {
-    //Logger.error(err);
+    //console.log(err);
     expect(err instanceof HttpException).toBe(true);
 
     const gotStatusCode = err.getStatus();

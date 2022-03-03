@@ -6,14 +6,15 @@ import { MintService } from 'src/nft/service/mint.service';
 import { CategoryService } from 'src/category/service/category.service';
 import { IpfsService } from 'src/nft/service/ipfs.service';
 import { S3Service } from 'src/s3.service';
-import { DbMockModule } from 'src/db_mock.module';
+import { DbMock } from 'src/mock/db.module';
+import { CacheMock } from 'src/mock/cache.module';
 
 describe('UserService', () => {
   let service: UserService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DbMockModule],
+      imports: [DbMock, CacheMock],
       providers: [
         NftService,
         CategoryService,

@@ -1,7 +1,7 @@
-require('dotenv').config();
 import {
   Session,
   HttpException,
+  Inject,
   HttpStatus,
   Body,
   Param,
@@ -11,9 +11,14 @@ import {
   UploadedFile,
   Query,
   Get,
+  Res,
   UseGuards,
   Logger,
+  CACHE_MANAGER,
 } from '@nestjs/common';
+import { Cache } from 'cache-manager';
+import { Response } from 'express';
+import { wrapCache } from 'src/utils';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserEntity } from '../entity/user.entity';
 import { UserService } from '../service/user.service';
@@ -34,7 +39,10 @@ interface EditProfile {
 
 @Controller('users')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    @Inject(CACHE_MANAGER) private cache: Cache,
+  ) {}
 
   @Get('/profile')
   @UseGuards(JwtFailableAuthGuard)
@@ -119,10 +127,12 @@ export class UserController {
   }
 
   @Get('topBuyers')
-  async topBuyers() {
-    return {
-      topBuyers: await this.userService.getTopBuyers(),
-    };
+  async topBuyers(@Res() resp: Response) {
+    return await wrapCache(this.cache, resp, 'user.getTopBuyers', () => {
+      return this.userService.getTopBuyers().then((topBuyers) => {
+        return { topBuyers };
+      });
+    });
   }
 
   @Post('nftOwnership')

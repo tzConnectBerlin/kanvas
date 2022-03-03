@@ -5,7 +5,8 @@ import { NftService } from 'src/nft/service/nft.service';
 import { MintService } from 'src/nft/service/mint.service';
 import { IpfsService } from 'src/nft/service/ipfs.service';
 import { S3Service } from 'src/s3.service';
-import { DbMockModule } from 'src/db_mock.module';
+import { DbMock } from 'src/mock/db.module';
+import { CacheMock } from 'src/mock/cache.module';
 import { expectErrWithHttpStatus } from 'src/utils';
 import { CategoryService } from 'src/category/service/category.service';
 
@@ -14,7 +15,7 @@ describe('UserController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DbMockModule],
+      imports: [DbMock, CacheMock],
       controllers: [UserController],
       providers: [
         UserService,

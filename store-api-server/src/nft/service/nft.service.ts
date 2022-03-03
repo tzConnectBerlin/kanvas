@@ -24,12 +24,6 @@ export class NftService {
     private readonly categoryService: CategoryService,
   ) {}
 
-  async create(_nft: NftEntity): Promise<NftEntity> {
-    throw new Error(
-      "Not yet implemented - let's implement it when we need it rather than have a big generated code blob",
-    );
-  }
-
   async search(str: string): Promise<NftEntity[]> {
     const nftIds = await this.conn.query(
       `

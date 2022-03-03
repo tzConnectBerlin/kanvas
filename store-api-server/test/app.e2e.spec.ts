@@ -58,7 +58,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     '/nfts?orderBy=view is determined by number of POST /nfts/:id per id',
     async () => {
-      await Promise.all([
+      const posts = await Promise.all([
         request(app.getHttpServer()).post('/nfts/1'),
         request(app.getHttpServer()).post('/nfts/23'),
         request(app.getHttpServer()).post('/nfts/23'),
@@ -80,10 +80,13 @@ describe('AppController (e2e)', () => {
         request(app.getHttpServer()).post('/nfts/27'),
         request(app.getHttpServer()).post('/nfts/28'),
       ]);
+      for (const post of posts) {
+        expect(post.statusCode).toEqual(201);
+      }
 
       // have to sleep here for a bit, because we (on purpose) don't await
       // on the nft increment view count query in POST /nfts/:id calls
-      await sleep(300);
+      await sleep(2000);
 
       const res = await request(app.getHttpServer())
         .get('/nfts')
@@ -91,6 +94,65 @@ describe('AppController (e2e)', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body.nfts.map((elem: any) => elem.id)).toStrictEqual([
         23, 3, 1,
+      ]);
+    },
+  );
+
+  skipOnPriorFail(
+    'verify caching works as intended on one of the cached endpoints',
+    async () => {
+      const moduleFixture: TestingModule = await Test.createTestingModule({
+        imports: [AppModule],
+      }).compile();
+      app = moduleFixture.createNestApplication();
+      app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+      await app.init();
+
+      let res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ orderBy: 'views', orderDirection: 'desc', pageSize: '3' });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.nfts.map((elem: any) => elem.id)).toStrictEqual([
+        23, 3, 1,
+      ]);
+
+      await Promise.all([
+        request(app.getHttpServer()).post('/nfts/2'),
+        request(app.getHttpServer()).post('/nfts/2'),
+        request(app.getHttpServer()).post('/nfts/2'),
+      ]);
+      await sleep(100);
+
+      res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ orderBy: 'views', orderDirection: 'desc', pageSize: '3' });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.nfts.map((elem: any) => elem.id)).toStrictEqual([
+        23,
+        3,
+        1, // because of caching we expect no mention of nft 2 here
+      ]);
+
+      res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ orderBy: 'views', orderDirection: 'desc', pageSize: '4' });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.nfts.map((elem: any) => elem.id)).toStrictEqual([
+        23,
+        3,
+        2,
+        1, // because of different key, old cache isn't hit and we get an up to date result
+      ]);
+
+      await sleep(1000); // 1 sec, the .env.test file specifies CACHE_TTL to 1 sec
+      res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ orderBy: 'views', orderDirection: 'desc', pageSize: '3' });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.nfts.map((elem: any) => elem.id)).toStrictEqual([
+        23,
+        3,
+        2, // because of CACHE_TTL timed out of the outdated cache entry, we get an up to date result
       ]);
     },
   );
@@ -577,12 +639,12 @@ describe('AppController (e2e)', () => {
             description: 'Sub photography category',
           },
           { id: 15, name: 'London', description: 'Sub cities category' },
-          { id: 4, name: 'Drawing', description: 'Sub fine art category' },
           {
             id: 9,
             name: 'Abstract',
             description: 'Sub photography category',
           },
+          { id: 4, name: 'Drawing', description: 'Sub fine art category' },
         ],
       });
     },

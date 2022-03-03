@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PG_CONNECTION } from './constants';
+import { PG_CONNECTION } from 'src/constants';
 
 class dbConnMock {}
 
@@ -12,4 +12,4 @@ const dbMockProvider = {
   providers: [dbMockProvider],
   exports: [dbMockProvider],
 })
-export class DbMockModule {}
+export class DbMock {}

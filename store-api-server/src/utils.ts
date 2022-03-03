@@ -1,5 +1,22 @@
 import { Ok, Err } from 'ts-results';
-import { Logger, HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException } from '@nestjs/common';
+import { Response } from 'express';
+import { Cache } from 'cache-manager';
+
+export async function wrapCache<T>(
+  cache: Cache,
+  resp: Response,
+  key: string,
+  newValue: () => Promise<T>,
+): Promise<Response> {
+  let fromCache = true;
+  const res = await cache.wrap(key, () => {
+    fromCache = false;
+    return newValue();
+  });
+
+  return resp.set({ cached: fromCache ? 'yes' : 'no' }).json(res);
+}
 
 class AssertionError extends Error {
   constructor(message: string) {
