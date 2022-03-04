@@ -67,7 +67,9 @@ export class MintService {
 
   async #mint(nft: NftEntity) {
     const metadataIpfs = await this.ipfsService.uploadNft(nft);
-    // TODO: update nft in db: set ipfs_hash
+    if (typeof metadataIpfs === 'undefined') {
+      throw `failed to upload nft to Ipfs`;
+    }
     const cmd = {
       handler: 'nft',
       name: 'create_and_mint',

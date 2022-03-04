@@ -1,6 +1,6 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import { Logger, Injectable } from '@nestjs/common';
-import { STORE_PUBLISHERS, MINTER_ADDRESS } from 'src/constants';
+import { PG_CONNECTION, STORE_PUBLISHERS, MINTER_ADDRESS } from 'src/constants';
 import { NftEntity } from 'src/nft/entity/nft.entity';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
@@ -31,9 +31,27 @@ export class IpfsService {
   PINATA_API_KEY = process.env['PINATA_API_KEY'];
   PINATA_API_SECRET = process.env['PINATA_API_SECRET'];
 
-  async uploadNft(nft: NftEntity): Promise<string> {
+  constructor(@Inject(PG_CONNECTION) private conn: any) {}
+
+  async uploadNft(
+    nft: NftEntity,
+    dbTx: any = this.conn,
+  ): Promise<string | undefined> {
     if (!this.#serviceEnabled()) {
-      throw `IpfsService not enabled`;
+      Logger.warn(`IpfsService not enabled`);
+      return undefined;
+    }
+
+    const qryRes = await dbTx.query(
+      `
+SELECT ipfs_hash
+FROM nft
+WHERE id = $1
+    `,
+      [nft.id],
+    );
+    if (qryRes['ipfs_hash'] != null) {
+      return qryRes['ipfs_hash'];
     }
 
     const [artifactIpfsUri, displayIpfsUri, thumbnailIpfsUri] = [
@@ -52,7 +70,25 @@ export class IpfsService {
       displayIpfsUri ?? artifactIpfsUri,
       thumbnailIpfsUri ?? displayIpfsUri ?? artifactIpfsUri,
     );
-    return await this.#pinJson(metadata);
+    const ipfsHash = await this.#pinJson(metadata);
+
+    await this.#updateNftIpfsHash(nft.id, ipfsHash, dbTx);
+    return ipfsHash;
+  }
+
+  async #updateNftIpfsHash(
+    nftId: number,
+    ipfsHash: string,
+    dbTx: any = this.conn,
+  ) {
+    await dbTx.query(
+      `
+UPDATE nft
+SET ipfs_hash = $1
+WHERE id = $2
+      `,
+      [ipfsHash, nftId],
+    );
   }
 
   #nftMetadataJson(

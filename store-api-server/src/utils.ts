@@ -73,3 +73,9 @@ export async function expectErrWithHttpStatus(
   }
   expect('expected HttpException').toBe('got no error');
 }
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}

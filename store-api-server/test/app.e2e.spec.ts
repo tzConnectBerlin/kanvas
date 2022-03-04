@@ -9,6 +9,7 @@ import {
   PaymentStatus,
 } from 'src/payment/service/payment.service';
 import { UserService } from 'src/user/service/user.service';
+import { sleep } from 'src/utils';
 
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {
@@ -2401,10 +2402,4 @@ async function loginUser(
     id: login.body.id,
     address: address,
   };
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
 }
