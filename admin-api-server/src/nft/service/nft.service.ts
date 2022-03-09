@@ -427,7 +427,7 @@ WHERE TARGET.value != EXCLUDED.value
     await this.#assertNftPublishable(nft);
     const attr = nft.attributes;
 
-    return await axios.post(this.STORE_API + '/nfts/create', {
+    return await axios.post(STORE_API + '/nfts/create', {
       id: nft.id,
       name: attr.name,
       description: attr.description,
