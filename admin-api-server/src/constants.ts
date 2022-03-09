@@ -21,3 +21,5 @@ export const STM_CONFIG_FILE =
 export const NFT_PUBLISH_STATE = 'finish';
 
 export const STORE_API = process.env['STORE_API'] || 'http://localhost:3005';
+
+export const ADMIN_PRIVATE_KEY = process.env['ADMIN_PRIVATE_KEY'];

@@ -12,6 +12,7 @@ import {
   STM_CONFIG_FILE,
   NFT_PUBLISH_STATE,
   STORE_API,
+  ADMIN_PRIVATE_KEY,
 } from 'src/constants';
 import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
@@ -23,6 +24,7 @@ import { S3Service } from './s3.service';
 import { CategoryService } from 'src/category/service/category.service';
 import { CategoryEntity } from 'src/category/entity/category.entity';
 import { Lock } from 'async-await-mutex-lock';
+import { signPayload } from 'src/cryptography';
 import axios from 'axios';
 const fs = require('fs');
 
@@ -439,6 +441,8 @@ WHERE TARGET.value != EXCLUDED.value
       categories: attr.categories,
       editionsSize: attr.editions_size,
       launchAt: attr.launch_at,
+
+      signature: await signPayload(ADMIN_PRIVATE_KEY, `${nft.id}`),
     });
 
     Logger.log(`Published NFT ${nft.id} to the store database`);
