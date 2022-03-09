@@ -17,20 +17,31 @@ import {
   SEARCH_SIMILARITY_LIMIT,
 } from 'src/constants';
 import { sleep } from 'src/utils';
+import { cryptoUtils } from 'sotez';
+import { IpfsService } from './ipfs.service';
 
 @Injectable()
 export class NftService {
-  ipfsService: IpfsService;
-
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
     private readonly categoryService: CategoryService,
-  ) {
-    this.ipfsService = new IpfsService();
-  }
+    private ipfsService: IpfsService,
+  ) {}
 
   async createNft(newNft: CreateNft) {
-    const insert = (dbTx: any) => {
+    const validate = async () => {
+      if (
+        !(await cryptoUtils.verify(
+          `${newNft.id}`,
+          newNft.signature,
+          MINTER_ADDRESS,
+        ))
+      ) {
+        throw new HttpException('Invalid signature', HttpStatus.UNAUTHORIZED);
+      }
+    };
+
+    const insert = async (dbTx: any) => {
       const launchAt = new Date();
       launchAt.setTime(newNft.launchAt);
 
@@ -41,6 +52,7 @@ INSERT INTO nft (
 )
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       `,
+
         [
           newNft.id,
           newNft.name,
@@ -61,12 +73,12 @@ INSERT INTO mtm_nft_category (
 )
 SELECT $1, UNNEST($2::INTEGER[])
       `,
-        [nft.id, nft.categories],
+        [newNft.id, newNft.categories],
       );
     };
 
-    const uploadToIpfs = (dbTx: any) => {
-      const nftEntity: NftEntity = await this.byId(nft.id, dbTx);
+    const uploadToIpfs = async (dbTx: any) => {
+      const nftEntity: NftEntity = await this.byId(newNft.id, dbTx);
 
       const MAX_RETRIES = 10;
       const BACKOFF = 1000;
@@ -85,6 +97,8 @@ SELECT $1, UNNEST($2::INTEGER[])
       }
     };
 
+    await validate();
+
     const dbTx = await this.conn.connect();
     try {
       await dbTx.query(`BEGIN`);
@@ -93,9 +107,9 @@ SELECT $1, UNNEST($2::INTEGER[])
       await uploadToIpfs(dbTx);
 
       await dbTx.query(`COMMIT`);
-      Logger.log(`Created new NFT ${nft.id}`);
+      Logger.log(`Created new NFT ${newNft.id}`);
     } catch (err: any) {
-      Logger.error(`failed to publish nft (id=${nft.id}), err: ${err}`);
+      Logger.error(`failed to publish nft (id=${newNft.id}), err: ${err}`);
       await dbTx.query(`ROLLBACK`);
       throw err;
     } finally {

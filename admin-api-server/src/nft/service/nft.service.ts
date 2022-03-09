@@ -24,7 +24,7 @@ import { S3Service } from './s3.service';
 import { CategoryService } from 'src/category/service/category.service';
 import { CategoryEntity } from 'src/category/entity/category.entity';
 import { Lock } from 'async-await-mutex-lock';
-import { signPayload } from 'src/cryptography';
+import { cryptoUtils } from 'sotez';
 import axios from 'axios';
 const fs = require('fs');
 
@@ -442,7 +442,7 @@ WHERE TARGET.value != EXCLUDED.value
       editionsSize: attr.editions_size,
       launchAt: attr.launch_at,
 
-      signature: await signPayload(ADMIN_PRIVATE_KEY, `${nft.id}`),
+      signature: await cryptoUtils.sign(`${nft.id}`, ADMIN_PRIVATE_KEY),
     });
 
     Logger.log(`Published NFT ${nft.id} to the store database`);

@@ -19,11 +19,12 @@ interface Command {
 
 @Injectable()
 export class MintService {
-  ipfsService: IpfsService;
   nftLock: Lock<number>;
 
-  constructor(@Inject(PG_CONNECTION) private conn: any) {
-    this.ipfsService = new IpfsService();
+  constructor(
+    @Inject(PG_CONNECTION) private conn: any,
+    private ipfsService: IpfsService,
+  ) {
     this.nftLock = new Lock<number>();
   }
 

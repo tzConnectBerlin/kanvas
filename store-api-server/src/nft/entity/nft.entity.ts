@@ -32,6 +32,8 @@ export interface CreateNft {
   categories: number[];
   editionsSize: number;
   launchAt: number;
+
+  signature: string;
 }
 
 export interface NftEntityPage {
