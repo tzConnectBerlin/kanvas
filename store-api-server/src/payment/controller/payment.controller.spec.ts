@@ -6,6 +6,7 @@ import { PaymentService } from '../service/payment.service';
 import { UserService } from 'src/user/service/user.service';
 import { S3Service } from 'src/s3.service';
 import { NftService } from 'src/nft/service/nft.service';
+import { IpfsService } from 'src/nft/service/ipfs.service';
 import { MintService } from 'src/nft/service/mint.service';
 import { CategoryService } from 'src/category/service/category.service';
 
@@ -23,6 +24,7 @@ describe('PaymentController', () => {
         MintService,
         CategoryService,
         PaymentService,
+        IpfsService,
       ],
     }).compile();
 

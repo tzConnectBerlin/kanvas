@@ -12,6 +12,7 @@ import { FilterParams, PaginationParams } from '../params';
 import {
   PG_CONNECTION,
   MINTER_ADDRESS,
+  MINTER_PUBLIC_KEY,
   SEARCH_MAX_NFTS,
   SEARCH_MAX_CATEGORIES,
   SEARCH_SIMILARITY_LIMIT,
@@ -29,12 +30,16 @@ export class NftService {
   ) {}
 
   async createNft(newNft: CreateNft) {
+    console.log(`new nft: ${JSON.stringify(newNft)}`);
     const validate = async () => {
+      console.log(
+        `checking signature! pubkey=${MINTER_ADDRESS}, signature=${newNft.signature}, nftId=${newNft.id}`,
+      );
       if (
         !(await cryptoUtils.verify(
           `${newNft.id}`,
-          newNft.signature,
-          MINTER_ADDRESS,
+          `${newNft.signature}`,
+          MINTER_PUBLIC_KEY,
         ))
       ) {
         throw new HttpException('Invalid signature', HttpStatus.UNAUTHORIZED);
@@ -78,7 +83,7 @@ SELECT $1, UNNEST($2::INTEGER[])
     };
 
     const uploadToIpfs = async (dbTx: any) => {
-      const nftEntity: NftEntity = await this.byId(newNft.id, dbTx);
+      const nftEntity: NftEntity = await this.byId(newNft.id, false, dbTx);
 
       const MAX_RETRIES = 10;
       const BACKOFF = 1000;
@@ -237,7 +242,11 @@ FROM price_bounds($1, $2, $3)`,
     }
   }
 
-  async byId(id: number, dbConn: any = this.conn): Promise<NftEntity> {
+  async byId(
+    id: number,
+    increment_views: boolean = true,
+    dbConn: any = this.conn,
+  ): Promise<NftEntity> {
     const nfts = await this.findByIds([id], 'nft_id', 'asc', dbConn);
     if (nfts.length === 0) {
       throw new HttpException(
@@ -245,7 +254,9 @@ FROM price_bounds($1, $2, $3)`,
         HttpStatus.BAD_REQUEST,
       );
     }
-    this.#incrementNftViewCount(id);
+    if (increment_views) {
+      this.#incrementNftViewCount(id);
+    }
     return nfts[0];
   }
 

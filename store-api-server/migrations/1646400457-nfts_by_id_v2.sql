@@ -7,7 +7,20 @@ BEGIN;
 ALTER FUNCTION nfts_by_id RENAME TO __nfts_by_id_v1;
 CREATE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT)
   RETURNS TABLE(
-    nft_id INTEGER, nft_created_at TIMESTAMP WITHOUT TIME ZONE, launch_at TIMESTAMP WITHOUT TIME ZONE, nft_name TEXT, description TEXT, ipfs_hash TEXT, artifact_uri TEXT, display_uri TEXT, thumbnail_uri TEXT, price NUMERIC, editions_size INTEGER, editions_available BIGINT, categories TEXT[][])
+    nft_id INTEGER,
+    nft_created_at TIMESTAMP WITHOUT TIME ZONE,
+    launch_at TIMESTAMP WITHOUT TIME ZONE,
+    nft_name TEXT,
+    description TEXT,
+    ipfs_hash TEXT,
+    artifact_uri TEXT,
+    display_uri TEXT,
+    thumbnail_uri TEXT,
+    price NUMERIC,
+    editions_size INTEGER,
+    editions_reserved BIGINT,
+    editions_owned BIGINT,
+    categories TEXT[][])
 AS $$
 BEGIN
   IF orderDirection NOT IN ('asc', 'desc') THEN
@@ -41,9 +54,10 @@ BEGIN
       availability.reserved AS editions_reserved,
       availability.owned AS editions_owned,
       cat.categories
-    FROM nft, nft_editions_locked(nft.id) AS availability
+    FROM nft
     JOIN nft_categories AS cat
       ON cat.nft_id = nft.id
+    CROSS JOIN nft_editions_locked(nft.id) AS availability
     WHERE nft.id = ANY($1)
     ORDER BY ' || quote_ident(orderBy) || ' ' || orderDirection
     USING ids;

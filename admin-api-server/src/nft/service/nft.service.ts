@@ -429,6 +429,9 @@ WHERE TARGET.value != EXCLUDED.value
     await this.#assertNftPublishable(nft);
     const attr = nft.attributes;
 
+    const signed = await cryptoUtils.sign(`${nft.id}`, ADMIN_PRIVATE_KEY);
+    console.log(`sig is: ${JSON.stringify(signed)}`);
+
     return await axios.post(STORE_API + '/nfts/create', {
       id: nft.id,
       name: attr.name,
@@ -442,7 +445,7 @@ WHERE TARGET.value != EXCLUDED.value
       editionsSize: attr.editions_size,
       launchAt: attr.launch_at,
 
-      signature: await cryptoUtils.sign(`${nft.id}`, ADMIN_PRIVATE_KEY),
+      signature: signed.sig,
     });
 
     Logger.log(`Published NFT ${nft.id} to the store database`);

@@ -7,6 +7,7 @@ import { AuthenticationController } from 'src/authentication/controller/authenti
 import { JwtStrategy } from './strategy/jwt-auth.strategy';
 import { DbModule } from 'src/db.module';
 import { S3Service } from 'src/s3.service';
+import { IpfsService } from 'src/nft/service/ipfs.service';
 import { MintService } from 'src/nft/service/mint.service';
 import { CategoryService } from 'src/category/service/category.service';
 
@@ -26,6 +27,7 @@ import { CategoryService } from 'src/category/service/category.service';
     JwtStrategy,
     S3Service,
     MintService,
+    IpfsService,
   ],
   exports: [AuthenticationService, JwtStrategy],
 })

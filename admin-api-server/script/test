@@ -7,6 +7,9 @@ export STORE_PGHOST=0.0.0.0
 export STORE_PGUSER=testusr
 export STORE_PGPASSWORD=testpass
 export STORE_PGDATABASE=store_replication
+export STORE_API_PORT=13003
+export STORE_API="http://localhost:$STORE_API_PORT"
+export ADMIN_PRIVATE_KEY=edsk3yAfZsu8PXHqExtVXeLyAWExrxBjkHTpVv1DjH2EXLck4yygDa
 
 function store_env_exec {
     PGHOST=$STORE_PGHOST \
@@ -14,6 +17,7 @@ function store_env_exec {
         PGUSER=$STORE_PGUSER \
         PGPASSWORD=$STORE_PGPASSWORD \
         PGDATABASE=$STORE_PGDATABASE \
+        KANVAS_API_PORT=$STORE_API_PORT \
         $@
 }
 
@@ -41,15 +45,41 @@ trap "docker kill $db_docker" EXIT
 echo "waiting for testdb setup (admin).. (docker: $db_docker)"
 ./script/wait-db
 
-psql -c 'create database test_store'
-store_env_exec ../store-api-server/script/migrate >/dev/null 2>&1 || exit 1
-store_env_exec psql < ../store-api-server/script/populate-testdb.sql || exit 1
-
 echo "waiting for testdb setup (store).."
 store_env_exec ../store-api-server/script/wait-db
 
+
+echo "setting up the store db"
+(
+    cd $SCRIPT_DIR/../../store-api-server;
+    yarn build || exit 1
+
+    psql -c 'create database test_store' || exit 1
+    store_env_exec script/migrate >/dev/null 2>&1 || exit 1
+    store_env_exec psql < script/populate-testdb.sql || exit 1
+) || exit 1
+
+echo "starting the store api in the background"
+# enabling job control with set -m here, this will enforce a new process group
+# for the following background spawned store api, which in turn will allow
+# proper kill of all child processes by kill on process group id.
+set -m
+(
+    cd $SCRIPT_DIR/../../store-api-server
+    set -a
+    . .env.test
+    store_env_exec yarn run start
+) &
+store_api_pid=$!
+set +m
+trap "docker kill $db_docker; kill -- -$store_api_pid" EXIT
+
 yarn run seed || exit 1
 
+while ! http --quiet :$STORE_API_PORT 2>/dev/null; do
+    echo "store api not up yet.."
+    sleep 1
+done
 
 export JWT_EXPIRATION_TIME=86400000
 export JWT_SECRET='wPK-TESTING_ADMIN'

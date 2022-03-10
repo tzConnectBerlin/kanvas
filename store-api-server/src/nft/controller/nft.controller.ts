@@ -27,7 +27,7 @@ export class NftController {
     @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
 
-  @Post()
+  @Post('/create')
   async createNft(@Body() nft: CreateNft) {
     return await this.nftService.createNft(nft);
   }
