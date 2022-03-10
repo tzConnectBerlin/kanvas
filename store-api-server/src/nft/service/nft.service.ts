@@ -239,7 +239,7 @@ FROM price_bounds($1, $2, $3)`,
 
   async byId(
     id: number,
-    increment_views: boolean = true,
+    incrViewCount: boolean = true,
     dbConn: any = this.conn,
   ): Promise<NftEntity> {
     const nfts = await this.findByIds([id], 'nft_id', 'asc', dbConn);
@@ -249,7 +249,7 @@ FROM price_bounds($1, $2, $3)`,
         HttpStatus.BAD_REQUEST,
       );
     }
-    if (increment_views) {
+    if (incrViewCount) {
       this.#incrementNftViewCount(id);
     }
     return nfts[0];

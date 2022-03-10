@@ -44,7 +44,7 @@ export class IpfsService {
 
     const qryRes = await dbTx.query(
       `
-SELECT ipfs_hash
+SELECT ipfs_hash, signature
 FROM nft
 WHERE id = $1
     `,
@@ -69,6 +69,7 @@ WHERE id = $1
       artifactIpfsUri,
       displayIpfsUri ?? artifactIpfsUri,
       thumbnailIpfsUri ?? displayIpfsUri ?? artifactIpfsUri,
+      qryRes['signature'],
     );
     const ipfsHash = await this.#pinJson(metadata);
 
@@ -96,6 +97,7 @@ WHERE id = $2
     artifactIpfsUri: string,
     displayIpfsUri: string,
     thumbnailIpfsUri: string,
+    signature: string,
   ): any {
     const createdAt = new Date(nft.createdAt).toISOString();
 
@@ -117,6 +119,7 @@ WHERE id = $2
       publishers: STORE_PUBLISHERS,
 
       isBooleanAmount: nft.editionsSize === 1,
+      signature: signature,
     };
   }
 
