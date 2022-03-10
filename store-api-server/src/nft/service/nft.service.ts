@@ -8,13 +8,12 @@ import {
 import { CreateNft, NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity';
 import { CategoryEntity } from 'src/category/entity/category.entity';
 import { CategoryService } from 'src/category/service/category.service';
-import { FilterParams, PaginationParams } from '../params';
+import { FilterParams } from '../params';
 import {
   PG_CONNECTION,
   MINTER_ADDRESS,
   MINTER_PUBLIC_KEY,
   SEARCH_MAX_NFTS,
-  SEARCH_MAX_CATEGORIES,
   SEARCH_SIMILARITY_LIMIT,
 } from 'src/constants';
 import { sleep } from 'src/utils';
@@ -30,11 +29,7 @@ export class NftService {
   ) {}
 
   async createNft(newNft: CreateNft) {
-    console.log(`new nft: ${JSON.stringify(newNft)}`);
     const validate = async () => {
-      console.log(
-        `checking signature! pubkey=${MINTER_ADDRESS}, signature=${newNft.signature}, nftId=${newNft.id}`,
-      );
       if (
         !(await cryptoUtils.verify(
           `${newNft.id}`,

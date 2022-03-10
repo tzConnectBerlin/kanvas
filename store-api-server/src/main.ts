@@ -4,9 +4,6 @@ import { raw } from 'body-parser';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
-import { Sotez } from 'sotez';
-
-const tezos = new Sotez('https://testnet-tezos.giganode.io');
 
 async function bootstrap() {
   const port = process.env['KANVAS_API_PORT'] || 3000;

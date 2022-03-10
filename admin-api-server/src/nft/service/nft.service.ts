@@ -430,7 +430,6 @@ WHERE TARGET.value != EXCLUDED.value
     const attr = nft.attributes;
 
     const signed = await cryptoUtils.sign(`${nft.id}`, ADMIN_PRIVATE_KEY);
-    console.log(`sig is: ${JSON.stringify(signed)}`);
 
     return await axios.post(STORE_API + '/nfts/create', {
       id: nft.id,
