@@ -13,7 +13,7 @@ export const SEARCH_MAX_CATEGORIES = 6;
 export const SEARCH_SIMILARITY_LIMIT = 0.4;
 
 export const MINTER_ADDRESS = assertEnv('MINTER_TZ_ADDRESS');
-export const MINTER_PUBLIC_KEY = assertEnv('MINTER_PUBLIC_KEY'); // this is the revealed public key associated to the MINTER_ADDRESS (MINTER_ADDRESS is the public key hash)
+export const ADMIN_PUBLIC_KEY = assertEnv('ADMIN_PUBLIC_KEY'); // this probably should be the revealed public key associated to the MINTER_ADDRESS (MINTER_ADDRESS is the public key hash)
 export const STORE_PUBLISHERS = ['Tezos'];
 
 export const RATE_LIMIT_TTL = Number(process.env['RATE_LIMIT_TTL'] || 60); // in seconds

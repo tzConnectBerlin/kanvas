@@ -12,7 +12,7 @@ import { FilterParams } from '../params';
 import {
   PG_CONNECTION,
   MINTER_ADDRESS,
-  MINTER_PUBLIC_KEY,
+  ADMIN_PUBLIC_KEY,
   SEARCH_MAX_NFTS,
   SEARCH_SIMILARITY_LIMIT,
 } from 'src/constants';
@@ -35,7 +35,7 @@ export class NftService {
           !(await cryptoUtils.verify(
             `${newNft.id}`,
             `${newNft.signature}`,
-            MINTER_PUBLIC_KEY,
+            ADMIN_PUBLIC_KEY,
           ))
         ) {
           throw new HttpException('Invalid signature', HttpStatus.UNAUTHORIZED);
@@ -89,9 +89,9 @@ SELECT $1, UNNEST($2::INTEGER[])
     const uploadToIpfs = async (dbTx: any) => {
       const nftEntity: NftEntity = await this.byId(newNft.id, false, dbTx);
 
-      const MAX_RETRIES = 10;
-      const BACKOFF = 1000;
-      for (let i = 0; i < 10; i++) {
+      const MAX_ATTEMPTS = 10;
+      const BACKOFF_MS = 1000;
+      for (let i = 0; i < MAX_ATTEMPTS; i++) {
         try {
           this.ipfsService.uploadNft(nftEntity, dbTx);
           return;
@@ -99,10 +99,10 @@ SELECT $1, UNNEST($2::INTEGER[])
           Logger.warn(
             `failed to upload new nft to IPFS (attempt ${
               i + 1
-            }/${MAX_RETRIES}), err: ${err}`,
+            }/${MAX_ATTEMPTS}), err: ${err}`,
           );
         }
-        sleep(BACKOFF);
+        sleep(BACKOFF_MS);
       }
     };
 
