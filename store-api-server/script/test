@@ -2,14 +2,11 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
-export PGPORT=15431
-export PGHOST=localhost
-export PGUSER=testusr
-export PGPASSWORD=testpass
-export PGDATABASE=test
+set -a
+. .env.test
+set +a
 
-export JWT_EXPIRATION_TIME=86400000
-export JWT_SECRET='wPK-TfcjDSjztKrb4SUnfRPQ1YIovrooYQaX4h-EnU4'
+export $(grep --regexp='^ADMIN_PRIVATE_KEY' ../admin-api-server/.env.test | xargs)
 
 db_docker=`DBSETUP_LOG=quiet DOCKER_ARGS='-d' ./script/local-db 2>/dev/null`
 if [[ "$?" != "0" ]]; then

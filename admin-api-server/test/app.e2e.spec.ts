@@ -2204,6 +2204,8 @@ describe('AppController (e2e)', () => {
         description: 'some long description',
         display_uri: null,
         thumbnail_uri: 'somethumbnailuri',
+        signature:
+          'sigfSmL9QCGSihWrS68u9RNwRvXHUihReqS83ntK8ek9QmEWmzVjfrcW6AR2P9jHuHRzbxmJruo4PXtGMXmJ3z1WKdzPqMYi',
       },
       categories: [3, 4, 5],
     });

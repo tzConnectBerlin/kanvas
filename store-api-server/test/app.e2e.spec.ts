@@ -9,7 +9,8 @@ import {
   PaymentStatus,
 } from 'src/payment/service/payment.service';
 import { UserService } from 'src/user/service/user.service';
-import { sleep } from 'src/utils';
+import { assertEnv, sleep } from 'src/utils';
+import { cryptoUtils } from 'sotez';
 
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {
@@ -2384,6 +2385,33 @@ describe('AppController (e2e)', () => {
         children: [],
       },
     ]);
+  });
+
+  skipOnPriorFail('/nft/create: success case', async () => {
+    const nftId = 100000;
+    const signed = await cryptoUtils.sign(
+      `${nftId}`,
+      assertEnv('ADMIN_PRIVATE_KEY'),
+    );
+    const res = await request(app.getHttpServer())
+      .post('/nfts/create')
+      .send({
+        id: nftId,
+
+        name: 'test',
+        description: 'test description',
+
+        artifactUri: 'some_s3_uri',
+
+        price: 5,
+        categories: [10],
+        editionsSize: 4,
+
+        launchAt: 0,
+        signature: signed.sig,
+      });
+
+    expect(res.statusCode).toEqual(201);
   });
 });
 

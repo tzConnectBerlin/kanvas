@@ -48,13 +48,14 @@ export class NftService {
       await dbTx.query(
         `
 INSERT INTO nft (
-  id, nft_name, artifact_uri, display_uri, thumbnail_uri, description, launch_at, price, editions_size
+  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, launch_at, price, editions_size
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       `,
 
         [
           newNft.id,
+          newNft.signature,
           newNft.name,
           newNft.artifactUri,
           newNft.displayUri,

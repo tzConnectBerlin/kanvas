@@ -2,14 +2,9 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
-export STORE_PGPORT=15431
-export STORE_PGHOST=0.0.0.0
-export STORE_PGUSER=testusr
-export STORE_PGPASSWORD=testpass
-export STORE_PGDATABASE=store_replication
-export STORE_API_PORT=13003
-export STORE_API="http://localhost:$STORE_API_PORT"
-export ADMIN_PRIVATE_KEY=edsk3yAfZsu8PXHqExtVXeLyAWExrxBjkHTpVv1DjH2EXLck4yygDa
+set -a
+. .env.test
+set +a
 
 function store_env_exec {
     PGHOST=$STORE_PGHOST \
@@ -20,12 +15,6 @@ function store_env_exec {
         KANVAS_API_PORT=$STORE_API_PORT \
         $@
 }
-
-export PGPORT=15431
-export PGHOST=0.0.0.0
-export PGUSER=testusr
-export PGPASSWORD=testpass
-export PGDATABASE=test_admin
 
 function assert_docker_ok {
     port=$1
@@ -47,7 +36,6 @@ echo "waiting for testdb setup (admin).. (docker: $db_docker)"
 
 echo "waiting for testdb setup (store).."
 store_env_exec ../store-api-server/script/wait-db
-
 
 echo "setting up the store db"
 (
@@ -80,10 +68,6 @@ while ! http --quiet :$STORE_API_PORT 2>/dev/null; do
     echo "store api not up yet.."
     sleep 1
 done
-
-export JWT_EXPIRATION_TIME=86400000
-export JWT_SECRET='wPK-TESTING_ADMIN'
-export STM_CONFIG_FILE='config/e2e_tests.yaml'
 
 echo "running tests.."
 
