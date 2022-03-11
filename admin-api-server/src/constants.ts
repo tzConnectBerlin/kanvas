@@ -19,3 +19,7 @@ export const RATE_LIMIT = Number(process.env['RATE_LIMIT'] || 100);
 export const STM_CONFIG_FILE =
   process.env['STM_CONFIG_FILE'] || './config/stm_example.yaml';
 export const NFT_PUBLISH_STATE = 'finish';
+
+export const STORE_API = process.env['STORE_API'] || 'http://localhost:3005';
+
+export const ADMIN_PRIVATE_KEY = process.env['ADMIN_PRIVATE_KEY'];

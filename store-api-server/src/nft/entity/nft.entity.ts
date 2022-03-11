@@ -19,6 +19,23 @@ export interface NftEntity {
   ownerStatuses?: string[];
 }
 
+export interface CreateNft {
+  id: number;
+  name: string;
+  description: string;
+
+  artifactUri: string;
+  displayUri?: string;
+  thumbnailUri?: string;
+
+  price: number;
+  categories: number[];
+  editionsSize: number;
+  launchAt: number;
+
+  signature: string;
+}
+
 export interface NftEntityPage {
   firstRequestAt: number; // in UTC UNIX
   nfts: NftEntity[];

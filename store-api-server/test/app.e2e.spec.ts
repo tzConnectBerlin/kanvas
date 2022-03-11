@@ -9,6 +9,8 @@ import {
   PaymentStatus,
 } from 'src/payment/service/payment.service';
 import { UserService } from 'src/user/service/user.service';
+import { assertEnv, sleep } from 'src/utils';
+import { cryptoUtils } from 'sotez';
 
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {
@@ -178,7 +180,7 @@ describe('AppController (e2e)', () => {
       name: 'Cartoon',
       description:
         'Hey guys, here s the WL team ready to write some more code !',
-      ipfsHash: 'ipfs://.....',
+      ipfsHash: null,
       artifactUri:
         'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
       displayUri:
@@ -271,7 +273,7 @@ describe('AppController (e2e)', () => {
             name: 'Cartoon',
             description:
               'Hey guys, here s the WL team ready to write some more code !',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -294,7 +296,7 @@ describe('AppController (e2e)', () => {
             name: 'Framley',
             description:
               'Framley Parsonage - Was it not a Lie?,1860. John Everett Millais (d.1896) and Dalziel Brothers',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2202&q=80',
             displayUri:
@@ -316,7 +318,7 @@ describe('AppController (e2e)', () => {
             id: 3,
             name: 'Internet',
             description: 'its a mountain',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             displayUri:
@@ -338,7 +340,7 @@ describe('AppController (e2e)', () => {
             id: 4,
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -361,7 +363,7 @@ describe('AppController (e2e)', () => {
             name: 'Antonin DVORAK',
             description:
               'Bronze sculpture of Antonin DVORAK who lived from 1841 - 1904',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -384,7 +386,7 @@ describe('AppController (e2e)', () => {
             name: 'Korean Language',
             description:
               'Inventor of the korean language. This is the statue in Seoul South Korea of him.',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1506809211073-d0785aaad75e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2656&q=80',
             displayUri:
@@ -407,7 +409,7 @@ describe('AppController (e2e)', () => {
             name: 'TOCABI',
             description:
               'The humanoid robot TOCABI. I both led the design and took the photo. It is a full-size (real) humanoid robot that can also be used as an avatar for teleoperation.',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1633957897986-70e83293f3ff?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1986&q=80',
             displayUri:
@@ -429,7 +431,7 @@ describe('AppController (e2e)', () => {
             id: 13,
             name: 'Lost',
             description: 'You look lost in thought.',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1599790772272-d1425cd3242e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -452,7 +454,7 @@ describe('AppController (e2e)', () => {
             name: 'Light Festival - Korea',
             description:
               'In South Korea these sculptures are part of the light festival. Dragon vs. Tiger.',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             displayUri:
@@ -591,7 +593,7 @@ describe('AppController (e2e)', () => {
           name: 'Light Festival - Korea',
           description:
             'In South Korea these sculptures are part of the light festival. Dragon vs. Tiger.',
-          ipfsHash: 'ipfs://.....',
+          ipfsHash: null,
           artifactUri:
             'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
           displayUri:
@@ -1777,7 +1779,7 @@ describe('AppController (e2e)', () => {
             name: 'Cartoon',
             description:
               'Hey guys, here s the WL team ready to write some more code !',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: 'ipfs://.....', // Note: this is now non-null, because it's been purchased at least once
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -1800,7 +1802,7 @@ describe('AppController (e2e)', () => {
             id: 4,
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: 'ipfs://.....', // Note: this is now non-null, because it's been purchased at least once
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -2384,6 +2386,56 @@ describe('AppController (e2e)', () => {
       },
     ]);
   });
+
+  skipOnPriorFail('/nft/create: success case', async () => {
+    const nftId = 100000;
+    const signed = await cryptoUtils.sign(
+      `${nftId}`,
+      assertEnv('ADMIN_PRIVATE_KEY'),
+    );
+    const res = await request(app.getHttpServer())
+      .post('/nfts/create')
+      .send({
+        id: nftId,
+
+        name: 'test',
+        description: 'test description',
+
+        artifactUri: 'some_s3_uri',
+
+        price: 5,
+        categories: [10],
+        editionsSize: 4,
+
+        launchAt: 0,
+        signature: signed.sig,
+      });
+
+    expect(res.statusCode).toEqual(201);
+  });
+
+  skipOnPriorFail('/nft/create: bad signature => 403', async () => {
+    const nftId = 100000;
+    const res = await request(app.getHttpServer())
+      .post('/nfts/create')
+      .send({
+        id: nftId,
+
+        name: 'test',
+        description: 'test description',
+
+        artifactUri: 'some_s3_uri',
+
+        price: 5,
+        categories: [10],
+        editionsSize: 4,
+
+        launchAt: 0,
+        signature: 'some invalid signature',
+      });
+
+    expect(res.statusCode).toEqual(401);
+  });
 });
 
 async function loginUser(
@@ -2401,10 +2453,4 @@ async function loginUser(
     id: login.body.id,
     address: address,
   };
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
 }

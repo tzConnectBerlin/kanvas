@@ -5,6 +5,7 @@ import { NftController } from './nft.controller';
 import { DbMock } from 'src/mock/db.module';
 import { CacheMock } from 'src/mock/cache.module';
 import { NftService } from '../service/nft.service';
+import { IpfsService } from 'src/nft/service/ipfs.service';
 import { NftServiceMock } from '../service/nft_mock.service';
 import { CategoryService } from 'src/category/service/category.service';
 import { PaginationParams } from '../params';
@@ -26,6 +27,7 @@ describe('NftController', () => {
           useClass: CacheMock,
         },
         CategoryService,
+        IpfsService,
       ],
     }).compile();
 

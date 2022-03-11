@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Res,
   Controller,
+  Body,
   Get,
   Query,
   Param,
@@ -14,7 +15,7 @@ import { Cache } from 'cache-manager';
 import { Response } from 'express';
 import { NftService } from '../service/nft.service';
 import { CategoryService } from 'src/category/service/category.service';
-import { NftEntity } from '../entity/nft.entity';
+import { NftEntity, CreateNft } from '../entity/nft.entity';
 import { FilterParams, PaginationParams, SearchParam } from '../params';
 import { wrapCache } from 'src/utils';
 
@@ -25,6 +26,11 @@ export class NftController {
     private categoryService: CategoryService,
     @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
+
+  @Post('/create')
+  async createNft(@Body() nft: CreateNft) {
+    return await this.nftService.createNft(nft);
+  }
 
   @Get()
   async getFiltered(@Res() resp: Response, @Query() params: FilterParams) {

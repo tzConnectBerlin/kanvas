@@ -19,11 +19,12 @@ interface Command {
 
 @Injectable()
 export class MintService {
-  ipfsService: IpfsService;
   nftLock: Lock<number>;
 
-  constructor(@Inject(PG_CONNECTION) private conn: any) {
-    this.ipfsService = new IpfsService();
+  constructor(
+    @Inject(PG_CONNECTION) private conn: any,
+    private ipfsService: IpfsService,
+  ) {
     this.nftLock = new Lock<number>();
   }
 
@@ -67,7 +68,9 @@ export class MintService {
 
   async #mint(nft: NftEntity) {
     const metadataIpfs = await this.ipfsService.uploadNft(nft);
-    // TODO: update nft in db: set ipfs_hash
+    if (typeof metadataIpfs === 'undefined') {
+      throw `failed to upload nft to Ipfs`;
+    }
     const cmd = {
       handler: 'nft',
       name: 'create_and_mint',
