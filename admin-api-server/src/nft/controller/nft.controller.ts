@@ -45,6 +45,12 @@ function pngFileFilter(req: any, file: any, callback: any) {
 export class NftController {
   constructor(private readonly nftService: NftService) {}
 
+  @Get('/attributes')
+  @UseGuards(JwtAuthGuard)
+  getAttributes() {
+    return this.nftService.getAttributes();
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard)
   async findAll(
