@@ -2395,6 +2395,38 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
   });
+
+  skipOnPriorFail('GET /nft/attributes', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'admin@tzconnect.com',
+      'supersafepassword',
+    );
+
+    const res = await request(app.getHttpServer())
+      .get('/nft/attributes')
+      .set('authorization', bearer);
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toStrictEqual({
+      name: 'string',
+      create_ready: 'boolean',
+      description: 'string',
+      'image.png': 'string',
+      'thumbnail.png': 'string',
+      price: 'number',
+      editions_size: 'number',
+      launch_at: 'date',
+      categories: 'number[]',
+      proposed: 'boolean',
+      publish_vote: 'votes',
+    });
+  });
+
+  skipOnPriorFail('GET /nft/attributes requires logged in user', async () => {
+    const res = await request(app.getHttpServer()).get('/nft/attributes');
+    expect(res.statusCode).toEqual(401);
+  });
 });
 
 async function emulateNftSale(userId: number, nftIds: number[], at: Date) {

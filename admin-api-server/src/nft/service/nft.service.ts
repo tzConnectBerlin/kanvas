@@ -63,10 +63,14 @@ export class NftService {
     });
   }
 
+  getAttributes(): any {
+    return this.stm.getAttributes();
+  }
+
   getSortableFields(): string[] {
     return [
       ...this.TOP_LEVEL_IDENTIFIERS,
-      ...Object.keys(this.stm.getAttributes()),
+      ...Object.keys(this.getAttributes()),
     ];
   }
 
