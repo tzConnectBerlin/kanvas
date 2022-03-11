@@ -30,14 +30,22 @@ export class NftService {
 
   async createNft(newNft: CreateNft) {
     const validate = async () => {
-      if (
-        !(await cryptoUtils.verify(
-          `${newNft.id}`,
-          `${newNft.signature}`,
-          MINTER_PUBLIC_KEY,
-        ))
-      ) {
-        throw new HttpException('Invalid signature', HttpStatus.UNAUTHORIZED);
+      try {
+        if (
+          !(await cryptoUtils.verify(
+            `${newNft.id}`,
+            `${newNft.signature}`,
+            MINTER_PUBLIC_KEY,
+          ))
+        ) {
+          throw new HttpException('Invalid signature', HttpStatus.UNAUTHORIZED);
+        }
+      } catch (err: any) {
+        Logger.warn(`Error on new nft signature validation, err: ${err}`);
+        throw new HttpException(
+          'Could not validate signature (it may be misshaped)',
+          HttpStatus.UNAUTHORIZED,
+        );
       }
     };
 

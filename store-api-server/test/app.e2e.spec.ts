@@ -2413,6 +2413,29 @@ describe('AppController (e2e)', () => {
 
     expect(res.statusCode).toEqual(201);
   });
+
+  skipOnPriorFail('/nft/create: bad signature => 403', async () => {
+    const nftId = 100000;
+    const res = await request(app.getHttpServer())
+      .post('/nfts/create')
+      .send({
+        id: nftId,
+
+        name: 'test',
+        description: 'test description',
+
+        artifactUri: 'some_s3_uri',
+
+        price: 5,
+        categories: [10],
+        editionsSize: 4,
+
+        launchAt: 0,
+        signature: 'some invalid signature',
+      });
+
+    expect(res.statusCode).toEqual(401);
+  });
 });
 
 async function loginUser(
