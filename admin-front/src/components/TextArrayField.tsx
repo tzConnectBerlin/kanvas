@@ -12,7 +12,7 @@ export const TextArrayField: React.FC<TextArrayFieldProps> = ({
   value,
 }) => {
   const array = source ? record?.[source] : [];
-  debugger
+
   if (typeof array === 'undefined' || array === null || array.length === 0) {
     return <div />;
   } else {

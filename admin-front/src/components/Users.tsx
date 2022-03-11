@@ -22,12 +22,6 @@ import { TextArrayField } from './TextArrayField';
 import ToolbarActions from './ToolbarActions';
 import axios from 'axios';
 
-const test = {
-  1: "Admin",
-  2: "test",
-  3: "supertest"
-}
-
 export const UserList = ({ ...props }) => {
 
   const [roles, setRoles] = React.useState<{ [i: number]: string; }>({})
@@ -42,7 +36,6 @@ export const UserList = ({ ...props }) => {
       .then(response => {
         const newRoles: { [i: number]: string; } = {}
         setRoles(response.data.data.map((role: any) => newRoles[role.id] = role.role_label.charAt(0).toUpperCase() + role.role_label.slice(1)))
-        debugger
       }).catch(error => {
         notify(`An error occured while fetching the roles`);
       })
@@ -99,6 +92,7 @@ export const UserEdit = ({ ...props }) => {
         setRoles(response.data.data.map((role: any) => ({ id: role.id, name: role.role_label.charAt(0).toUpperCase() + role.role_label.slice(1) })))
       }).catch(error => {
         notify(`An error occured while fetching the roles`);
+        console.log(error)
       })
   }, [])
 
@@ -137,7 +131,7 @@ export const UserCreate = ({ ...props }) => {
   const [roles, setRoles] = React.useState([])
 
   React.useEffect(() => {
-    debugger
+
     axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/role', {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`

@@ -130,12 +130,7 @@ const NftAside = ({ ...props }) => {
   const [voters, setVoters] = React.useState<Record[]>([])
   const [votersCalled, setVotersCalled] = React.useState<boolean>(false)
 
-
-  React.useEffect(() => {
-    if (!props.record) return;
-    if (!props.record.attributes) return;
-    if (categories.length > 0 || categoriesCalled) return;
-    setCategoriesCalled(true)
+  const getAssignableCategories = () => {
     axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/categories/assignable', {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
@@ -146,10 +141,9 @@ const NftAside = ({ ...props }) => {
       }).catch((error: any) => {
         console.log(error)
       })
+  }
 
-    if (!props.record.attributes.proposal_vote) return;
-    if (voters.length > 0 || votersCalled) return;
-    setVotersCalled(true)
+  const getVoters = () => {
     props.record.attributes.proposal_vote.yes.concat(props.record.attributes.proposal_vote.no).map((id: number) => {
       axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + `/user/${id}`, {
         headers: {
@@ -157,16 +151,28 @@ const NftAside = ({ ...props }) => {
         }
       })
       .then((response: any) => {
-
         if (voters.length === 0 || voters.indexOf(response.data) !== -1) {
           setVoters([...voters,response.data])
         }
       }).catch((error: any ) => {
-
         console.log(error)
       })
     })
-  }, [props])
+  }
+
+  React.useEffect(() => {
+    if (!props.record) return;
+    if (!props.record.attributes) return;
+    if (categories.length > 0 || categoriesCalled) return;
+    debugger
+    setCategoriesCalled(true)
+    getAssignableCategories()
+
+    if (!props.record.attributes.proposal_vote) return;
+    if (voters.length > 0 || votersCalled) return;
+    setVotersCalled(true)
+    getVoters()
+  }, [props.record])
 
   return (
     <Paper style={{ width: 750, marginLeft: '1em' }}>
@@ -235,7 +241,6 @@ const NftAside = ({ ...props }) => {
                             })
                           )}
                       </Typography>
-
                     </Stack>
                   </Stack>
                 )} else if (attrKey === "proposal_vote") return;

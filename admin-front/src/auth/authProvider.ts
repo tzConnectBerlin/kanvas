@@ -28,7 +28,7 @@ const authProvider = {
 
   getPermissions: async () => {
     const user = await getDecodedToken();
-    debugger
+
     return user ? Promise.resolve(user.scope) : Promise.reject();
   },
 };
