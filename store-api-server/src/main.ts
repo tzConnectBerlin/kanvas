@@ -6,12 +6,15 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  const port = process.env['KANVAS_API_PORT'] || 3000;
+
   const app = await NestFactory.create(AppModule, {
-    cors: process.env.LOCAL_CORS === 'true'
+    cors: process.env.LOCAL_CORS === 'true',
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-  app.use('/payment/stripe-webhook', raw({type: 'application/json'}))
+  app.use('/payment/stripe-webhook', raw({ type: 'application/json' }));
 
-  await app.listen(process.env['KANVAS_API_PORT'] || 3000);
+  await app.listen(port);
+  console.log('Listening on ', port);
 }
 bootstrap();

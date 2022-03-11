@@ -11,6 +11,8 @@ import {
   FILE_PREFIX,
   STM_CONFIG_FILE,
   NFT_PUBLISH_STATE,
+  STORE_API,
+  ADMIN_PRIVATE_KEY,
 } from 'src/constants';
 import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
@@ -22,6 +24,8 @@ import { S3Service } from './s3.service';
 import { CategoryService } from 'src/category/service/category.service';
 import { CategoryEntity } from 'src/category/entity/category.entity';
 import { Lock } from 'async-await-mutex-lock';
+import { cryptoUtils } from 'sotez';
+import axios from 'axios';
 const fs = require('fs');
 
 @Injectable()
@@ -59,10 +63,14 @@ export class NftService {
     });
   }
 
+  getAttributes(): any {
+    return this.stm.getAttributes();
+  }
+
   getSortableFields(): string[] {
     return [
       ...this.TOP_LEVEL_IDENTIFIERS,
-      ...Object.keys(this.stm.getAttributes()),
+      ...Object.keys(this.getAttributes()),
     ];
   }
 
@@ -425,49 +433,24 @@ WHERE TARGET.value != EXCLUDED.value
     await this.#assertNftPublishable(nft);
     const attr = nft.attributes;
 
-    const launchAt = new Date();
-    launchAt.setTime(attr.launch_at);
+    const signed = await cryptoUtils.sign(`${nft.id}`, ADMIN_PRIVATE_KEY);
 
-    const storeDbTx = await this.dbStore.connect();
-    try {
-      await storeDbTx.query(`BEGIN`);
-      await storeDbTx.query(
-        `
-INSERT INTO nft (
-  id, nft_name, artifact_uri, thumbnail_uri, description, launch_at, price, editions_size
-)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      `,
-        [
-          nft.id,
-          attr.name,
-          attr['image.png'],
-          attr['thumbnail.png'],
-          attr.description,
-          launchAt.toUTCString(),
-          attr.price,
-          attr.editions_size,
-        ],
-      );
+    return await axios.post(STORE_API + '/nfts/create', {
+      id: nft.id,
+      name: attr.name,
+      description: attr.description,
 
-      await storeDbTx.query(
-        `
-INSERT INTO mtm_nft_category (
-  nft_id, nft_category_id
-)
-SELECT $1, UNNEST($2::INTEGER[])
-      `,
-        [nft.id, attr.categories],
-      );
+      artifactUri: attr['image.png'],
+      thumbnailUri: attr['thumbnail.png'],
 
-      await storeDbTx.query(`COMMIT`);
-      Logger.log(`Published NFT ${nft.id} to the store database`);
-    } catch (err: any) {
-      Logger.error(`failed to publish nft (id=${nft.id}), err: ${err}`);
-      await storeDbTx.query(`ROLLBACK`);
-      throw err;
-    } finally {
-      storeDbTx.release();
-    }
+      price: attr.price,
+      categories: attr.categories,
+      editionsSize: attr.editions_size,
+      launchAt: attr.launch_at,
+
+      signature: signed.sig,
+    });
+
+    Logger.log(`Published NFT ${nft.id} to the store database`);
   }
 }

@@ -5,29 +5,125 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import { NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity';
+import { CreateNft, NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity';
 import { CategoryEntity } from 'src/category/entity/category.entity';
 import { CategoryService } from 'src/category/service/category.service';
-import { FilterParams, PaginationParams } from '../params';
+import { FilterParams } from '../params';
 import {
   PG_CONNECTION,
   MINTER_ADDRESS,
+  ADMIN_PUBLIC_KEY,
   SEARCH_MAX_NFTS,
-  SEARCH_MAX_CATEGORIES,
   SEARCH_SIMILARITY_LIMIT,
-} from '../../constants';
+} from 'src/constants';
+import { sleep } from 'src/utils';
+import { cryptoUtils } from 'sotez';
+import { IpfsService } from './ipfs.service';
 
 @Injectable()
 export class NftService {
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
     private readonly categoryService: CategoryService,
+    private ipfsService: IpfsService,
   ) {}
 
-  async create(_nft: NftEntity): Promise<NftEntity> {
-    throw new Error(
-      "Not yet implemented - let's implement it when we need it rather than have a big generated code blob",
-    );
+  async createNft(newNft: CreateNft) {
+    const validate = async () => {
+      try {
+        if (
+          !(await cryptoUtils.verify(
+            `${newNft.id}`,
+            `${newNft.signature}`,
+            ADMIN_PUBLIC_KEY,
+          ))
+        ) {
+          throw new HttpException('Invalid signature', HttpStatus.UNAUTHORIZED);
+        }
+      } catch (err: any) {
+        Logger.warn(`Error on new nft signature validation, err: ${err}`);
+        throw new HttpException(
+          'Could not validate signature (it may be misshaped)',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+    };
+
+    const insert = async (dbTx: any) => {
+      const launchAt = new Date();
+      launchAt.setTime(newNft.launchAt);
+
+      await dbTx.query(
+        `
+INSERT INTO nft (
+  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, launch_at, price, editions_size
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      `,
+
+        [
+          newNft.id,
+          newNft.signature,
+          newNft.name,
+          newNft.artifactUri,
+          newNft.displayUri,
+          newNft.thumbnailUri,
+          newNft.description,
+          launchAt.toUTCString(),
+          newNft.price,
+          newNft.editionsSize,
+        ],
+      );
+
+      await dbTx.query(
+        `
+INSERT INTO mtm_nft_category (
+  nft_id, nft_category_id
+)
+SELECT $1, UNNEST($2::INTEGER[])
+      `,
+        [newNft.id, newNft.categories],
+      );
+    };
+
+    const uploadToIpfs = async (dbTx: any) => {
+      const nftEntity: NftEntity = await this.byId(newNft.id, false, dbTx);
+
+      const MAX_ATTEMPTS = 10;
+      const BACKOFF_MS = 1000;
+      for (let i = 0; i < MAX_ATTEMPTS; i++) {
+        try {
+          this.ipfsService.uploadNft(nftEntity, dbTx);
+          return;
+        } catch (err: any) {
+          Logger.warn(
+            `failed to upload new nft to IPFS (attempt ${
+              i + 1
+            }/${MAX_ATTEMPTS}), err: ${err}`,
+          );
+        }
+        sleep(BACKOFF_MS);
+      }
+    };
+
+    await validate();
+
+    const dbTx = await this.conn.connect();
+    try {
+      await dbTx.query(`BEGIN`);
+
+      await insert(dbTx);
+      await uploadToIpfs(dbTx);
+
+      await dbTx.query(`COMMIT`);
+      Logger.log(`Created new NFT ${newNft.id}`);
+    } catch (err: any) {
+      Logger.error(`failed to publish nft (id=${newNft.id}), err: ${err}`);
+      await dbTx.query(`ROLLBACK`);
+      throw err;
+    } finally {
+      dbTx.release();
+    }
   }
 
   async search(str: string): Promise<NftEntity[]> {
@@ -150,15 +246,21 @@ FROM price_bounds($1, $2, $3)`,
     }
   }
 
-  async byId(id: number): Promise<NftEntity> {
-    const nfts = await this.findByIds([id], 'nft_id', 'asc');
+  async byId(
+    id: number,
+    incrViewCount: boolean = true,
+    dbConn: any = this.conn,
+  ): Promise<NftEntity> {
+    const nfts = await this.findByIds([id], 'nft_id', 'asc', dbConn);
     if (nfts.length === 0) {
       throw new HttpException(
         'NFT with the requested id does not exist',
         HttpStatus.BAD_REQUEST,
       );
     }
-    this.#incrementNftViewCount(id);
+    if (incrViewCount) {
+      this.#incrementNftViewCount(id);
+    }
     return nfts[0];
   }
 
@@ -220,9 +322,10 @@ ORDER BY 1
     nftIds: number[],
     orderBy: string = 'nft_id',
     orderDirection: string = 'asc',
+    dbConn: any = this.conn,
   ): Promise<NftEntity[]> {
     try {
-      const nftsQryRes = await this.conn.query(
+      const nftsQryRes = await dbConn.query(
         `
 SELECT
   nft_id,
@@ -235,24 +338,29 @@ SELECT
   price,
   categories,
   editions_size,
-  editions_available,
+  editions_reserved,
+  editions_owned,
   nft_created_at,
   launch_at
 FROM nfts_by_id($1, $2, $3)`,
         [nftIds, orderBy, orderDirection],
       );
       return nftsQryRes.rows.map((nftRow: any) => {
+        const editions = Number(nftRow['editions_size']);
+        const reserved = Number(nftRow['editions_reserved']);
+        const owned = Number(nftRow['editions_owned']);
+
         const nft = <NftEntity>{
           id: nftRow['nft_id'],
           name: nftRow['nft_name'],
           description: nftRow['description'],
-          ipfsHash: nftRow['ipfs_hash'],
+          ipfsHash: owned === 0 ? null : nftRow['ipfs_hash'], // Hide the IPFS hash until first purchase (delay irreversable publishing of the NFT In our name for as long as possible)
           artifactUri: nftRow['artifact_uri'],
           displayUri: nftRow['display_uri'],
           thumbnailUri: nftRow['thumbnail_uri'],
           price: Number(nftRow['price']),
-          editionsSize: Number(nftRow['editions_size']),
-          editionsAvailable: Number(nftRow['editions_available']),
+          editionsSize: editions,
+          editionsAvailable: editions - (reserved + owned),
           createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
           launchAt: Math.floor(nftRow['launch_at'].getTime() / 1000),
           categories: nftRow['categories'].map((categoryRow: any) => {

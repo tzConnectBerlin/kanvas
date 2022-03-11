@@ -9,6 +9,8 @@ import {
   PaymentStatus,
 } from 'src/payment/service/payment.service';
 import { UserService } from 'src/user/service/user.service';
+import { assertEnv, sleep } from 'src/utils';
+import { cryptoUtils } from 'sotez';
 
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {
@@ -58,7 +60,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     '/nfts?orderBy=view is determined by number of POST /nfts/:id per id',
     async () => {
-      await Promise.all([
+      const posts = await Promise.all([
         request(app.getHttpServer()).post('/nfts/1'),
         request(app.getHttpServer()).post('/nfts/23'),
         request(app.getHttpServer()).post('/nfts/23'),
@@ -80,10 +82,13 @@ describe('AppController (e2e)', () => {
         request(app.getHttpServer()).post('/nfts/27'),
         request(app.getHttpServer()).post('/nfts/28'),
       ]);
+      for (const post of posts) {
+        expect(post.statusCode).toEqual(201);
+      }
 
       // have to sleep here for a bit, because we (on purpose) don't await
       // on the nft increment view count query in POST /nfts/:id calls
-      await sleep(300);
+      await sleep(2000);
 
       const res = await request(app.getHttpServer())
         .get('/nfts')
@@ -91,6 +96,65 @@ describe('AppController (e2e)', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body.nfts.map((elem: any) => elem.id)).toStrictEqual([
         23, 3, 1,
+      ]);
+    },
+  );
+
+  skipOnPriorFail(
+    'verify caching works as intended on one of the cached endpoints',
+    async () => {
+      const moduleFixture: TestingModule = await Test.createTestingModule({
+        imports: [AppModule],
+      }).compile();
+      app = moduleFixture.createNestApplication();
+      app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+      await app.init();
+
+      let res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ orderBy: 'views', orderDirection: 'desc', pageSize: '3' });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.nfts.map((elem: any) => elem.id)).toStrictEqual([
+        23, 3, 1,
+      ]);
+
+      await Promise.all([
+        request(app.getHttpServer()).post('/nfts/2'),
+        request(app.getHttpServer()).post('/nfts/2'),
+        request(app.getHttpServer()).post('/nfts/2'),
+      ]);
+      await sleep(100);
+
+      res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ orderBy: 'views', orderDirection: 'desc', pageSize: '3' });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.nfts.map((elem: any) => elem.id)).toStrictEqual([
+        23,
+        3,
+        1, // because of caching we expect no mention of nft 2 here
+      ]);
+
+      res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ orderBy: 'views', orderDirection: 'desc', pageSize: '4' });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.nfts.map((elem: any) => elem.id)).toStrictEqual([
+        23,
+        3,
+        2,
+        1, // because of different key, old cache isn't hit and we get an up to date result
+      ]);
+
+      await sleep(1000); // 1 sec, the .env.test file specifies CACHE_TTL to 1 sec
+      res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ orderBy: 'views', orderDirection: 'desc', pageSize: '3' });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.nfts.map((elem: any) => elem.id)).toStrictEqual([
+        23,
+        3,
+        2, // because of CACHE_TTL timed out of the outdated cache entry, we get an up to date result
       ]);
     },
   );
@@ -116,7 +180,7 @@ describe('AppController (e2e)', () => {
       name: 'Cartoon',
       description:
         'Hey guys, here s the WL team ready to write some more code !',
-      ipfsHash: 'ipfs://.....',
+      ipfsHash: null,
       artifactUri:
         'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
       displayUri:
@@ -209,7 +273,7 @@ describe('AppController (e2e)', () => {
             name: 'Cartoon',
             description:
               'Hey guys, here s the WL team ready to write some more code !',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -232,7 +296,7 @@ describe('AppController (e2e)', () => {
             name: 'Framley',
             description:
               'Framley Parsonage - Was it not a Lie?,1860. John Everett Millais (d.1896) and Dalziel Brothers',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2202&q=80',
             displayUri:
@@ -254,7 +318,7 @@ describe('AppController (e2e)', () => {
             id: 3,
             name: 'Internet',
             description: 'its a mountain',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             displayUri:
@@ -276,7 +340,7 @@ describe('AppController (e2e)', () => {
             id: 4,
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -299,7 +363,7 @@ describe('AppController (e2e)', () => {
             name: 'Antonin DVORAK',
             description:
               'Bronze sculpture of Antonin DVORAK who lived from 1841 - 1904',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -322,7 +386,7 @@ describe('AppController (e2e)', () => {
             name: 'Korean Language',
             description:
               'Inventor of the korean language. This is the statue in Seoul South Korea of him.',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1506809211073-d0785aaad75e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2656&q=80',
             displayUri:
@@ -345,7 +409,7 @@ describe('AppController (e2e)', () => {
             name: 'TOCABI',
             description:
               'The humanoid robot TOCABI. I both led the design and took the photo. It is a full-size (real) humanoid robot that can also be used as an avatar for teleoperation.',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1633957897986-70e83293f3ff?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1986&q=80',
             displayUri:
@@ -367,7 +431,7 @@ describe('AppController (e2e)', () => {
             id: 13,
             name: 'Lost',
             description: 'You look lost in thought.',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1599790772272-d1425cd3242e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -390,7 +454,7 @@ describe('AppController (e2e)', () => {
             name: 'Light Festival - Korea',
             description:
               'In South Korea these sculptures are part of the light festival. Dragon vs. Tiger.',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: null,
             artifactUri:
               'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             displayUri:
@@ -529,7 +593,7 @@ describe('AppController (e2e)', () => {
           name: 'Light Festival - Korea',
           description:
             'In South Korea these sculptures are part of the light festival. Dragon vs. Tiger.',
-          ipfsHash: 'ipfs://.....',
+          ipfsHash: null,
           artifactUri:
             'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
           displayUri:
@@ -577,12 +641,12 @@ describe('AppController (e2e)', () => {
             description: 'Sub photography category',
           },
           { id: 15, name: 'London', description: 'Sub cities category' },
-          { id: 4, name: 'Drawing', description: 'Sub fine art category' },
           {
             id: 9,
             name: 'Abstract',
             description: 'Sub photography category',
           },
+          { id: 4, name: 'Drawing', description: 'Sub fine art category' },
         ],
       });
     },
@@ -1715,7 +1779,7 @@ describe('AppController (e2e)', () => {
             name: 'Cartoon',
             description:
               'Hey guys, here s the WL team ready to write some more code !',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: 'ipfs://.....', // Note: this is now non-null, because it's been purchased at least once
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -1738,7 +1802,7 @@ describe('AppController (e2e)', () => {
             id: 4,
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
-            ipfsHash: 'ipfs://.....',
+            ipfsHash: 'ipfs://.....', // Note: this is now non-null, because it's been purchased at least once
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -2322,6 +2386,56 @@ describe('AppController (e2e)', () => {
       },
     ]);
   });
+
+  skipOnPriorFail('/nft/create: success case', async () => {
+    const nftId = 100000;
+    const signed = await cryptoUtils.sign(
+      `${nftId}`,
+      assertEnv('ADMIN_PRIVATE_KEY'),
+    );
+    const res = await request(app.getHttpServer())
+      .post('/nfts/create')
+      .send({
+        id: nftId,
+
+        name: 'test',
+        description: 'test description',
+
+        artifactUri: 'some_s3_uri',
+
+        price: 5,
+        categories: [10],
+        editionsSize: 4,
+
+        launchAt: 0,
+        signature: signed.sig,
+      });
+
+    expect(res.statusCode).toEqual(201);
+  });
+
+  skipOnPriorFail('/nft/create: bad signature => 403', async () => {
+    const nftId = 100000;
+    const res = await request(app.getHttpServer())
+      .post('/nfts/create')
+      .send({
+        id: nftId,
+
+        name: 'test',
+        description: 'test description',
+
+        artifactUri: 'some_s3_uri',
+
+        price: 5,
+        categories: [10],
+        editionsSize: 4,
+
+        launchAt: 0,
+        signature: 'some invalid signature',
+      });
+
+    expect(res.statusCode).toEqual(401);
+  });
 });
 
 async function loginUser(
@@ -2339,10 +2453,4 @@ async function loginUser(
     id: login.body.id,
     address: address,
   };
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
 }
