@@ -129,6 +129,22 @@ const NftAside = ({ ...props }) => {
   const [categoriesCalled, setCategoriesCalled] = React.useState<boolean>(false)
   const [voters, setVoters] = React.useState<Record[]>([])
   const [votersCalled, setVotersCalled] = React.useState<boolean>(false)
+  const [attributesTypes, setAttributesTypes] = React.useState()
+
+
+  const getAttributesTypes = () => {
+    axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/nft/attributes', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
+      }
+    })
+      .then((response: any) => {
+        setAttributesTypes(response.data)
+      }).catch((error: any) => {
+        debugger
+        console.log(error)
+      })
+  }
 
   const getAssignableCategories = () => {
     axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/categories/assignable', {
@@ -163,8 +179,8 @@ const NftAside = ({ ...props }) => {
   React.useEffect(() => {
     if (!props.record) return;
     if (!props.record.attributes) return;
+
     if (categories.length > 0 || categoriesCalled) return;
-    debugger
     setCategoriesCalled(true)
     getAssignableCategories()
 
@@ -172,7 +188,14 @@ const NftAside = ({ ...props }) => {
     if (voters.length > 0 || votersCalled) return;
     setVotersCalled(true)
     getVoters()
+
+
   }, [props.record])
+
+  React.useEffect(() => {
+    debugger
+    getAttributesTypes()
+  }, [])
 
   return (
     <Paper style={{ width: 750, marginLeft: '1em' }}>
@@ -191,10 +214,10 @@ const NftAside = ({ ...props }) => {
 
           <Stack direction="column" sx={{ flexStart: 'end', width: '60%' }}>
             {
-              props.record &&
+              props.record && attributesTypes &&
               Object.keys(props.record?.attributes)?.map(attrKey => {
 
-                if (attrKey === "proposal_reject_0") return;
+                if (attributesTypes[attrKey] === "") return;
                 if (attrKey === "image.png") return;
                 if (categories.length > 0 && attrKey === "categories") return (
                   <Stack direction="row">
