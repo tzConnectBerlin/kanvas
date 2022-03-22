@@ -198,6 +198,7 @@ const Profile: FC<ProfileProps> = () => {
 
         const responseBody =  await response.json();
         setTimeout(() => setUserDomainLoading(false), 600);
+        if(!responseBody.data.reverseRecords.items[0]) return;
         setUserDomain(responseBody.data.reverseRecords.items[0].domain.name)
      }
 

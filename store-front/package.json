@@ -19,6 +19,7 @@
     "@stripe/react-stripe-js": "^1.7.0",
     "@stripe/stripe-js": "^1.22.0",
     "@taquito/beacon-wallet": "^10.1.2",
+    "@taquito/taquito": "^12.0.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
@@ -45,7 +46,6 @@
     "react-animated-css": "^1.2.1",
     "react-dom": "^17.0.2",
     "react-dropzone": "^11.4.2",
-    "react-error-overlay": "6.0.9",
     "react-icons": "^4.2.0",
     "react-material-ui-carousel": "^3.0.4",
     "react-router": "5",
@@ -60,6 +60,9 @@
     "typescript": "^4.1.2",
     "web-vitals": "^1.0.1",
     "yup": "^0.32.9"
+  },
+  "resolutions": {
+    "react-error-overlay": "6.0.9"
   },
   "scripts": {
     "start": "react-scripts start",

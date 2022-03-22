@@ -23,3 +23,4 @@ export const initWallet = (): BeaconWallet => {
 export const setWalletProvider = (wallet: BeaconWallet): void => {
     tezos && tezos.setProvider({ wallet });
 };
+

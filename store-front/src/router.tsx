@@ -12,6 +12,7 @@ import ShoppingCart from './design-system/organismes/ShoppingCart';
 import useAxios from 'axios-hooks';
 import ScrollToTop from './ScrollToTop';
 import CookieBanner from './design-system/molecules/CookiesBanner';
+
 import { Redirect } from 'react-router';
 import { KUKAI_NETWORK, RPC_URL } from './global';
 import { Theme } from '@mui/material';
@@ -27,6 +28,7 @@ import { responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import { INft } from './interfaces/artwork';
 import { toast } from 'react-toastify';
 import { Checkout } from './pages/Checkout';
+import { TezosToolkit } from '@taquito/taquito';
 
 const StyledBrowserRouter = styled(BrowserRouter)<{ theme?: Theme }>`
     display: block;
@@ -42,6 +44,7 @@ const Router = () => {
 
     const [embedKukai, setEmbedKukai] = useState<KukaiEmbed>();
     const [beaconWallet, setBeaconWallet] = useState<BeaconWallet>();
+    const [tezosToolkit, setTezosToolKit] = useState<TezosToolkit>();
 
     const [selectedTheme, setSelectedTheme] = useState<'light' | 'dark'>(
         localStorage.getItem('Kanvas - theme') as 'light' | 'dark',
@@ -102,6 +105,13 @@ const Router = () => {
         setBeaconWallet(initWallet());
     }, []);
 
+    useEffect(() => {
+        if(!beaconWallet) return;
+        const toolkit = new TezosToolkit(RPC_URL);
+        toolkit.setWalletProvider(beaconWallet)
+        setTezosToolKit(toolkit)
+    }, [beaconWallet])
+
     const handleSelectTheme = (themeName: 'dark' | 'light') => {
         setSelectedTheme(themeName);
         localStorage.setItem('Kanvas - theme', themeName);
@@ -160,6 +170,7 @@ const Router = () => {
                                     nftsInCart={nftsInCart}
                                     setNftsInCart={setNftsInCart}
                                     listCart={listCart}
+                                    toolkit={tezosToolkit}
                                     {...props}
                                 />
                             )}

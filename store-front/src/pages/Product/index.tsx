@@ -1,26 +1,29 @@
 import useAxios from 'axios-hooks';
 import styled from '@emotion/styled';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
-import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import CircularProgress from '../../design-system/atoms/CircularProgress';
 
 import { format } from 'date-fns';
 import { FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, CardMedia, Skeleton, Stack, Theme } from '@mui/material';
+import { Box, CardMedia, InputAdornment, Skeleton, Stack, TextField, Theme } from '@mui/material';
 import { CustomButton } from '../../design-system/atoms/Button';
 import { Typography } from '../../design-system/atoms/Typography';
 import { INft } from '../../interfaces/artwork';
 import { useHistory, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { ICategory } from '../../interfaces/category';
-import CircularProgress from '../../design-system/atoms/CircularProgress';
+import { TezosToolkit } from '@taquito/taquito';
+import { listTokenOnObjkt } from '../../contracts/interact';
 
 export interface ProductPageProps {
     theme?: Theme;
     nftsInCart: INft[];
     setNftsInCart: Function;
     listCart: Function;
+    toolkit?: TezosToolkit;
 }
 
 const StyledA = styled.a<{ theme?: Theme }>`
@@ -143,6 +146,31 @@ const StyledImage = styled.img<{ open: boolean }>`
     border-radius: 1rem;
 `;
 
+const StyledInput = styled(TextField) <{ theme?: Theme }>`
+    .MuiInput-input {
+        padding: 4px 0 8px !important;
+    }
+
+    .MuiInput-root:after {
+        border-bottom: 2px solid
+            ${(props) => props.theme.palette.primary.contrastText};
+    }
+
+    .MuiFormHelperText-root {
+        font-family: 'Poppins Medium';
+        font-size: 0.9rem;
+        margin-top: 2.5rem !important;
+
+        position: absolute;
+    }
+`;
+
+const StyledInputAdornment = styled(InputAdornment) <{ theme?: Theme }>`
+    p {
+        color: ${(props) => props.theme.palette.text.primary} !important;
+    }
+`
+
 interface IProductParam {
     id: string;
 }
@@ -232,6 +260,9 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
             }, 1000);
         }
     }, [launchTime]);
+
+    const [listValue, setListValue] = useState<number>()
+    const [listEditionNb, setListEditionNb] = useState<number>()
 
     return (
         <StytledPageWrapper>
@@ -394,7 +425,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                         launchTime > 0 ?
                                         `${new Date(launchTime).getDate() - 1} day${new Date(launchTime).getDate() > 2 ? 's' : ''
                                         } - ${format(
-                                            new Date(launchTime + new Date().getTimezoneOffset() * 60 * 1000 ) ,
+                                            new Date(launchTime + new Date().getTimezoneOffset() * 60 * 1000),
                                             'HH : mm : ss',
                                         )}`
                                         : (
@@ -524,6 +555,53 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             </Stack>
                         </Stack>
 
+                        {
+                            nftResponse.data?.ipfsHash &&
+                            <Stack direction="row" spacing={4}>
+                                <StyledInput
+                                    id="list"
+                                    name="list"
+                                    placeholder="Nb"
+                                    type="number"
+                                    value={listEditionNb}
+                                    onChange={(event: any) => {
+                                        setListEditionNb(event.target.value)
+                                    }}
+                                    variant="standard"
+                                    error={false}
+                                    sx={{ marginTop: '3rem !important' }}
+                                />
+                                <StyledInput
+                                    id="list"
+                                    name="list"
+                                    placeholder="Price"
+                                    type="number"
+                                    value={listValue}
+                                    onChange={(event: any) => {
+                                        setListValue(event.target.value)
+                                    }}
+                                    variant="standard"
+                                    InputProps={{
+                                        startAdornment: (
+                                            <StyledInputAdornment position="start">
+                                                ꜩ
+                                            </StyledInputAdornment>
+                                        ),
+                                    }}
+                                    error={false}
+                                    helperText='List your token on Objkt.com'
+                                    sx={{ marginTop: '3rem !important' }}
+                                />
+                                <CustomButton
+                                    size="medium"
+                                    onClick={() => listTokenOnObjkt(listEditionNb ?? 0, nftResponse.data?.id, Number(listValue) ?? 0, nftResponse.data?.ipfsHash, props.toolkit)}
+                                    loading={addToCartResponse.loading}
+                                    label='List'
+                                    sx={{ marginTop: '3rem !important' }}
+                                />
+                            </Stack>
+                        }
+
                         <CustomButton
                             size="medium"
                             onClick={() => handleAddToBasket()}
@@ -552,6 +630,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             }
                             sx={{ marginTop: '3rem !important' }}
                         />
+
                     </StyledMetadataStack>
                 </Stack>
             </StyledStack>
@@ -560,3 +639,4 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
 };
 
 export default ProductPage;
+
