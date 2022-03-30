@@ -11,7 +11,6 @@ import {
   Create,
   ImageInput,
   ImageField,
-  DateField,
   NumberInput,
   NumberField,
   useGetOne,
@@ -19,11 +18,9 @@ import {
   NullableBooleanInput,
   ReferenceArrayInput,
   SelectArrayInput,
-  SingleFieldList,
   ChipField,
   number,
   minValue,
-  useDataProvider,
   useNotify,
   useRefresh,
   useRedirect,
@@ -71,16 +68,14 @@ export const NftList = ({ ...props }) => (
       <TextField source="state" label="Current State" />
       <NumberField source="attributes.price" label='Price' />
       <NumberField source="attributes.editions_size" label='Token amount' />
-      <FunctionField label="createdAt" render={(record: any) => `${
-        format(
-          new Date((record.createdAt ?? new Date().getTime()) * 1000 + new Date().getTimezoneOffset() * 60 * 1000 ) ,
-          'dd/MM/yyyy - HH : mm : ss',
-      )}` } />
-      <FunctionField label="updatedAt" render={(record: any) => `${
-        format(
-          new Date((record.updatedAt?? new Date().getTime()) * 1000 + new Date().getTimezoneOffset() * 60 * 1000 ) ,
-          'dd/MM/yyyy - HH : mm : ss',
-      )}` } />
+      <FunctionField label="createdAt" render={(record: any) => `${format(
+        new Date((record.createdAt ?? new Date().getTime()) * 1000 + new Date().getTimezoneOffset() * 60 * 1000),
+        'dd/MM/yyyy - HH : mm : ss',
+      )}`} />
+      <FunctionField label="updatedAt" render={(record: any) => `${format(
+        new Date((record.updatedAt ?? new Date().getTime()) * 1000 + new Date().getTimezoneOffset() * 60 * 1000),
+        'dd/MM/yyyy - HH : mm : ss',
+      )}`} />
       <ReferenceField label="Created by" source="createdBy" reference="user">
         <ChipField source="userName" />
       </ReferenceField>
@@ -91,8 +86,9 @@ export const NftList = ({ ...props }) => (
 interface InbutSelectorProps {
   attributesName: string;
   label: string;
-  type: "string" | "boolean" | "number" | "content_uri" | "number[]" | "votes" | "date";
+  type: "string" | "boolean" | "number" | "content_uri" | "number[]" | "votes" | "date" | "none";
   record?: any;
+  numberValueArray?: string[];
 }
 
 const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
@@ -123,14 +119,133 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
   else return null
 }
 
+const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
+
+  const [voters, setVoters] = React.useState<Record[]>([])
+  const [votersCalled, setVotersCalled] = React.useState<boolean>(false)
+
+  const getVoters = () => {
+    props.record.attributes.proposal_vote.yes.concat(props.record.attributes.proposal_vote.no).map((id: number) => {
+      axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + `/user/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
+        }
+      })
+        .then((response: any) => {
+          if (voters.length === 0 || voters.indexOf(response.data) !== -1) {
+            setVoters([...voters, response.data])
+          }
+        }).catch((error: any) => {
+          console.log(error)
+        })
+    })
+  }
+
+  React.useEffect(() => {
+    if (props.type !== 'votes') return;
+    if (voters.length > 0 || votersCalled) return;
+    setVotersCalled(true)
+    getVoters()
+  }, [])
+
+  if (!props.record || !props.type) return null;
+
+  if (props.type === 'string' || props.type === 'number') {
+    return <Stack direction="column">
+      <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
+        {props.label}
+      </Typography>
+      <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
+        {
+          props.record[props.attributesName]}
+      </Typography>
+    </Stack>
+  }
+  if (props.type === 'date') {
+    return <Stack direction="column">
+      <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
+        {props.label}
+      </Typography>
+      <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
+        {format(new Date(props.record[props.attributesName]), 'PPP')}
+      </Typography>
+    </Stack>
+  }
+  if (props.type === 'number[]') {
+    return (
+      < Stack direction="row" >
+        <Stack direction="column">
+          <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
+            {props.label}
+          </Typography>
+          <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
+            {
+              props.numberValueArray?.map((value: string, index: number) => value ? `${value}, ` : '')
+            }
+          </Typography>
+        </Stack>
+      </Stack >
+    );
+  }
+  if (props.type === 'votes') {
+    return <Stack direction="column">
+      <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
+        {props.label}
+      </Typography>
+      <Stack direction="row">
+        <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
+          Accepted: {props.record[props.attributesName]['yes'].map(
+            (id: number) =>
+              voters.map(voter => {
+                if (voter.id) {
+                  return voter.userName
+                }
+              })
+          )}
+        </Typography>
+      </Stack>
+      <Stack direction="row">
+        <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
+          Rejected: {props.record[props.attributesName]['no'].map(
+            (id: number) =>
+              voters.map(voter => {
+                if (voter.id) {
+                  return voter.userName
+                }
+              })
+          )}
+        </Typography>
+      </Stack>
+    </Stack>
+  };
+
+  if (props.type === 'content_uri' && props.attributesName !== 'image.png') {
+    return <Stack direction="column">
+      <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
+        {props.label}
+
+      </Typography>
+      <img src={props.record[props.attributesName]} style={{ maxWidth: '100px', maxHeight: '100px' }} />
+    </Stack>
+  }
+  else return null
+}
+
 const NftAside = ({ ...props }) => {
+
+  const [formKeys, setFormKeys] = React.useState<string[]>([])
+
+  React.useEffect(() => {
+    if (!props.record) return;
+    if (!props.record.attributes) return;
+
+    setFormKeys(Object.keys(props.record.attributes))
+  }, [props.record])
+
 
   const [categories, setCategories] = React.useState<Record[]>([])
   const [categoriesCalled, setCategoriesCalled] = React.useState<boolean>(false)
-  const [voters, setVoters] = React.useState<Record[]>([])
-  const [votersCalled, setVotersCalled] = React.useState<boolean>(false)
   const [attributesTypes, setAttributesTypes] = React.useState()
-
 
   const getAttributesTypes = () => {
     axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/nft/attributes', {
@@ -141,7 +256,6 @@ const NftAside = ({ ...props }) => {
       .then((response: any) => {
         setAttributesTypes(response.data)
       }).catch((error: any) => {
-        debugger
         console.log(error)
       })
   }
@@ -159,23 +273,6 @@ const NftAside = ({ ...props }) => {
       })
   }
 
-  const getVoters = () => {
-    props.record.attributes.proposal_vote.yes.concat(props.record.attributes.proposal_vote.no).map((id: number) => {
-      axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + `/user/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
-        }
-      })
-      .then((response: any) => {
-        if (voters.length === 0 || voters.indexOf(response.data) !== -1) {
-          setVoters([...voters,response.data])
-        }
-      }).catch((error: any ) => {
-        console.log(error)
-      })
-    })
-  }
-
   React.useEffect(() => {
     if (!props.record) return;
     if (!props.record.attributes) return;
@@ -183,17 +280,9 @@ const NftAside = ({ ...props }) => {
     if (categories.length > 0 || categoriesCalled) return;
     setCategoriesCalled(true)
     getAssignableCategories()
-
-    if (!props.record.attributes.proposal_vote) return;
-    if (voters.length > 0 || votersCalled) return;
-    setVotersCalled(true)
-    getVoters()
-
-
   }, [props.record])
 
   React.useEffect(() => {
-    debugger
     getAttributesTypes()
   }, [])
 
@@ -214,82 +303,17 @@ const NftAside = ({ ...props }) => {
 
           <Stack direction="column" sx={{ flexStart: 'end', width: '60%' }}>
             {
-              props.record && attributesTypes &&
-              Object.keys(props.record?.attributes)?.map(attrKey => {
-
-                if (attributesTypes[attrKey] === "") return;
-                if (attrKey === "image.png") return;
-                if (categories.length > 0 && attrKey === "categories") return (
-                  <Stack direction="row">
-                    <Stack direction="column">
-                      <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
-                        {attrKey[0].toUpperCase() + attrKey.replace('_', ' ').slice(1)}
-                      </Typography>
-                      <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
-                        {categories.map(category => {
-                          if (!category) return;
-                          return category.name + (categories.indexOf(category) === categories.length - 1 ? '' : ', ')
-                        })
-                        }
-                      </Typography>
-                    </Stack>
-                  </Stack>
-                )
-                if (attrKey === "proposal_vote" && voters.length > 0) {
-                  return (
-                  <Stack direction="column">
-                    <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
-                      {attrKey[0].toUpperCase() + attrKey.replace('_', ' ').slice(1)}
-                    </Typography>
-                    <Stack direction="row">
-                      <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
-                        Accepted: { props.record?.attributes["proposal_vote"]['yes'].map(
-                          (id: number) =>
-                            voters.map(voter => {
-                              if (voter.id) {
-                                return voter.userName
-                              }
-                            })
-                          )}
-                      </Typography>
-                      </Stack>
-                      <Stack direction="row">
-                        <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
-                        Rejected: { props.record?.attributes["proposal_vote"]['no'].map(
-                          (id: number) =>
-                            voters.map(voter => {
-                              if (voter.id) {
-                                return voter.userName
-                              }
-                            })
-                          )}
-                      </Typography>
-                    </Stack>
-                  </Stack>
-                )} else if (attrKey === "proposal_vote") return;
-                if (props.record?.attributes[attrKey] === null) return;
-                return (
-                  <Stack direction="row">
-                    <Stack direction="column">
-                      <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
-                        {attrKey[0].toUpperCase() + attrKey.replace('_', ' ').slice(1)}
-                      </Typography>
-                      {
-                        attrKey === 'thumbnail.png' ?
-                          <img src={props.record?.attributes["thumbnail.png"]} style={{ margin: 'auto', maxWidth: '100px', maxHeight: '100px' }} />
-                          :
-                         (<Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
-                            {
-                              attrKey === 'launch_at' ?
-                                new Date(props.record.attributes[attrKey]).toString()
-                                :
-                                props.record.attributes[attrKey]
-                            }
-                          </Typography>)
-                      }
-                    </Stack>
-                  </Stack>)
-              })
+              formKeys.length > 0 && attributesTypes &&
+              formKeys.map(key => {
+                return <FieldSelector
+                  attributesName={key}
+                  label={key[0].toUpperCase() + key.replace('_', ' ').slice(1)}
+                  type={attributesTypes[key] as 'string' | 'boolean' | 'number' | 'content_uri' | 'number[]' | 'votes' | 'date'}
+                  record={props.record.attributes}
+                  numberValueArray={key === 'categories' ? categories.map((category: Record) => category?.name) : []}
+                />
+              }
+              )
             }
           </Stack>
         </Stack>
