@@ -93,13 +93,18 @@ interface InbutSelectorProps {
 
 const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
 
-  const validateNumber = [number(), minValue(0)]
+  const validateNumber = [number(), minValue(0)];
+  const validateDate = (value: any) => {
+    if ( value && value.getTime() < new Date().getTime()) return 'Date must be in the future'
+    return undefined
+  };
+
   const classes = useStyle()
 
   if (props.type === 'string') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} />;
   if (props.type === 'number') return <NumberInput source={`attributes.${props.attributesName}`} label={props.label} validate={validateNumber} />;
   if (props.type === 'boolean') return <BooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
-  if (props.type === 'date') return <DateTimeInput source={`attributes.${props.attributesName}`} label={props.label} value={props.record * 1000} />;
+  if (props.type === 'date') return <DateTimeInput source={`attributes.${props.attributesName}`} label={props.label} value={props.record * 1000} validate={validateDate}/>;
   if (props.type === 'number[]') {
     return (
       <ReferenceArrayInput source="attributes.categories" label="categories" reference="categories/assignable">
@@ -121,24 +126,24 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
 
 const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
 
+  const notify = useNotify()
+
   const [voters, setVoters] = React.useState<Record[]>([])
   const [votersCalled, setVotersCalled] = React.useState<boolean>(false)
 
   const getVoters = () => {
-    props.record.attributes.proposal_vote.yes.concat(props.record.attributes.proposal_vote.no).map((id: number) => {
-      axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + `/user/${id}`, {
+    const instantVoters: any[] = []
+    props.record.proposal_vote.yes.concat(props.record.proposal_vote.no).map(async (id: number) => {
+      const res = await axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + `/user/${id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
         }
       })
-        .then((response: any) => {
-          if (voters.length === 0 || voters.indexOf(response.data) !== -1) {
-            setVoters([...voters, response.data])
-          }
-        }).catch((error: any) => {
-          console.log(error)
-        })
+      debugger
+      if (res.data.error === 400) return notify(res.data.error?.message);
+      instantVoters.push(res.data)
     })
+    setVoters(instantVoters)
   }
 
   React.useEffect(() => {
@@ -180,7 +185,7 @@ const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
           </Typography>
           <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
             {
-              props.numberValueArray?.map((value: string, index: number) => value ? `${value}, ` : '')
+              props.numberValueArray?.map((value: string) => value ? `${value}, ` : '')
             }
           </Typography>
         </Stack>
@@ -194,11 +199,14 @@ const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
       </Typography>
       <Stack direction="row">
         <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
-          Accepted: {props.record[props.attributesName]['yes'].map(
-            (id: number) =>
+          <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold' }}>
+            Accepted:
+          </Typography>
+          {props.record[props.attributesName]['yes'].map(
+            (id: number, index: number) =>
               voters.map(voter => {
-                if (voter.id) {
-                  return voter.userName
+                if (voter.id === id) {
+                  return index ===  props.record[props.attributesName]['yes'].length - 1 ? `${voter.userName}` : `${voter.userName}, `
                 }
               })
           )}
@@ -206,11 +214,14 @@ const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
       </Stack>
       <Stack direction="row">
         <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
-          Rejected: {props.record[props.attributesName]['no'].map(
-            (id: number) =>
+          <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold' }}>
+            Rejected:
+          </Typography>
+          {props.record[props.attributesName]['no'].map(
+            (id: number, index: number) =>
               voters.map(voter => {
-                if (voter.id) {
-                  return voter.userName
+                if (voter.id === id) {
+                  return index ===  props.record[props.attributesName]['no'].length - 1 ? `${voter.userName}` : `${voter.userName}, `
                 }
               })
           )}
