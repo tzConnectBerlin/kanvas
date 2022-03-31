@@ -24,15 +24,79 @@ replicated into the Admin PGs server under `store_replication` database name, fo
 ## Running in development
 
 ### With docker and docker-compose
-The most straightforward way of running locally is with Docker. We've prepared a docker-compose.yml so that all that's
-needed is to run `docker-compose up`, `docker-compose down` and `docker-compose build`. 
+The most straightforward way of running locally is with Docker. We've prepared a docker-compose.yml.
 
-Note however that this docker-compose.yml only runs the backend components (2
-postgres databases, the Store API, and the Admin API), so it'd still be
-required to run the Front components natively.
+#### Prerequisites
 
-Now the ports are as follows:
+`docker-compose` -- the version installed by ubuntu 20 using apt does not work, get the most recent from https://docs.docker.com/compose/install/
 
+`yarn` and `npm`: get npm from https://docs.npmjs.com/downloading-and-installing-node-js-and-npm and install yarn using `npm install -g yarn`.
+
+You will need to have the following set up prior to installation
+- an S3 account, its access key and secret
+- a Pinata account, its API key and secret
+- a Stripe account, its secret and webhook secret
+- a minter address on whatever testnet you are using
+
+Put these together into the file `kanvas/store-api-server/.env` which will look like this:
+
+```
+AWS_S3_BUCKET='bucketname'
+AWS_S3_ACCESS_KEY=''
+AWS_S3_KEY_SECRET=''
+
+PINATA_API_KEY=''
+PINATA_API_SECRET=''
+
+STRIPE_SECRET=''
+STRIPE_WEBHOOK_SECRET=''
+
+CART_EXPIRATION_MILLI_SECS=1800000
+ORDER_EXPIRATION_MILLI_SECS=3600000
+
+PGPORT=5432
+PGHOST=localhost
+PGUSER=postgres
+PGPASSWORD=''
+PGDATABASE='test_db'
+
+JWT_EXPIRATION_TIME=86400000
+JWT_SECRET=''
+
+KANVAS_API_PORT=3000
+
+MINTER_TZ_ADDRESS='tz1..'
+```
+
+Now all that's needed is to run `docker-compose up` in order to run the back-end components.
+
+The front-end components run outside of docker, because they are trivial to run, and this makes development of the user interface much easier.
+
+```
+yarn global add serve
+exp
+```
+
+To run the front-end components you will once more need `.env` files:
+
+in `store-front/.env`:
+
+```
+REACT_APP_API_SERVER_BASE_URL=http://localhost:3005
+REACT_APP_STRIPE_PK_KEY=pk_test_...
+REACT_APP_CLIENT_URL=http://localhost:3001
+REACT_APP_PORT=3001
+```
+
+and in `admin-front/.env`:
+```
+REACT_APP_API_SERVER_BASE_URL=http://localhost:3006
+REACT_APP_API_SERVER_BASE_URL_PREFIX=localhost:3006
+REACT_APP_STORE_BASE_URL="http://localhost:3005/
+REACT_APP_PORT=3001
+```
+
+The default ports are as follows:
 * Store PG `54320`
 * Store API `3005`
 * Admin API `3006`
@@ -40,9 +104,7 @@ Now the ports are as follows:
 
 ### Natively without docker
 
-Alternatively, there's also scripts in each components' `script/` directory that can be called, or/and scripts in the
-git root `deploy-scripts/` directory. This allows to run on your native machine, rather than through Docker. But it also
-requires some effort in glueing the different components together through correctly defined ENV variables.
+Alternatively, there's also scripts in each components' `script/` directory that can be called, or/and scripts in the git root `deploy-scripts/` directory. This allows to run on your native machine, rather than through Docker. But it also requires some effort in glueing the different components together through correctly defined ENV variables.
 
 
 # API Docs
