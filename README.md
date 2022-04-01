@@ -74,7 +74,6 @@ The front-end components run outside of docker, because they are trivial to run,
 
 ```
 yarn global add serve
-exp
 ```
 
 To run the front-end components you will once more need `.env` files:
@@ -93,8 +92,28 @@ and in `admin-front/.env`:
 REACT_APP_API_SERVER_BASE_URL=http://localhost:3006
 REACT_APP_API_SERVER_BASE_URL_PREFIX=localhost:3006
 REACT_APP_STORE_BASE_URL="http://localhost:3005/
-REACT_APP_PORT=3001
+REACT_APP_PORT=3002
 ```
+
+Once env variables are set you will have to build the two projects (in two different screens):
+
+```
+yarn build
+```
+
+After build completed:
+
+```
+cd kanvas
+./deploy-scripts/run/store-front.bash
+```
+
+and for the admin front end:
+
+```
+./deploy-scripts/run/admin-front.bash
+```
+
 
 The default ports are as follows:
 * Store PG `54320`
