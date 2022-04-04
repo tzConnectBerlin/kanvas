@@ -74,7 +74,7 @@ export class AnalyticsService {
     const qryRes = await this.storeRepl.query(
       `
 SELECT
-  at,
+  timestamp,
   kind,
   "from",
   "to",
@@ -84,7 +84,7 @@ SELECT
   COUNT(1) OVER () AS total_activity_count
 FROM (
   SELECT
-    lvl.baked_at AS at,
+    lvl.baked_at AS timestamp,
     'mint' AS kind,
     NULL AS "from",
     owner AS "to",
@@ -100,7 +100,7 @@ FROM (
   UNION ALL
 
   SELECT
-    lvl.baked_at AS at,
+    lvl.baked_at AS timestamp,
     'transfer' AS kind,
     tr_from.from_ AS "from",
     tr_dest.to_ AS "to",
@@ -118,7 +118,7 @@ FROM (
   UNION ALL
 
   SELECT
-    nft_order.order_at AS at,
+    nft_order.order_at AS timestamp,
     'sale' AS kind,
     NULL AS "from",
     usr.address AS "to",
@@ -154,7 +154,7 @@ LIMIT ${params.pageSize}
       data: qryRes.rows.map(
         (row: any) =>
           <Activity>{
-            timestamp: row['at'],
+            timestamp: Math.floor(row['timestamp'].getTime() / 1000),
             kind: row['kind'],
             from: row['from'],
             to: row['to'],
