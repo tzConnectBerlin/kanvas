@@ -100,7 +100,8 @@ export class AnalyticsController {
     const params = this.#queryParamsToFilterParams(filters, sort, range);
 
     validatePaginationParams(params, [
-      'at',
+      'id',
+      'timestamp',
       'kind',
       'from',
       'to',

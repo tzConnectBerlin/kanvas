@@ -214,7 +214,9 @@ RETURNING id
         );
       }
 
-      for (let nftUpdate of nftUpdates) {
+      for (let i = 0; i < nftUpdates.length; i++) {
+        let nftUpdate = nftUpdates[i];
+
         // Check if attribute is of type content in order to upload to ipfs
         if (typeof nftUpdate.file !== 'undefined') {
           nftUpdate = await this.#uploadContent(
@@ -231,6 +233,10 @@ RETURNING id
           nftUpdate.attribute,
           nftUpdate.value,
         );
+
+        if (i == nftUpdates.length - 1) {
+          this.stm.tryMoveNft(nft);
+        }
 
         if (stmRes.status != STMResultStatus.OK) {
           switch (stmRes.status) {
@@ -433,11 +439,7 @@ WHERE TARGET.value != EXCLUDED.value
     await this.#assertNftPublishable(nft);
     const attr = nft.attributes;
 
-    console.log(
-      `pre sign, ${ADMIN_PRIVATE_KEY}, ${nft.id}, ${JSON.stringify(nft)}`,
-    );
     const signed = await cryptoUtils.sign(`${nft.id}`, ADMIN_PRIVATE_KEY);
-    console.log('post sign');
 
     return await axios.post(STORE_API + '/nfts/create', {
       id: nft.id,
