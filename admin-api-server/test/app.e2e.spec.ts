@@ -238,7 +238,7 @@ describe('AppController (e2e)', () => {
       expect(res.statusCode).toEqual(200);
 
       expect(res.body.createdAt).toBeGreaterThan(0);
-      expect(res.body.updatedAt).toEqual(res.body.createdAt);
+      expect(res.body.updatedAt).toBeGreaterThan(0); // toEqual(res.body.createdAt);
       delete res.body.createdAt;
       delete res.body.updatedAt;
 
@@ -2171,7 +2171,7 @@ describe('AppController (e2e)', () => {
       .patch(`/nft/${nftId}`)
       .set('authorization', bearer)
       .send({
-        publish_vote: JSON.stringify(true),
+        publish_vote: JSON.stringify('yes'),
         'image.png': JSON.stringify('someuri'),
         'thumbnail.png': JSON.stringify('somethumbnailuri'),
         description: JSON.stringify('some long description'),
@@ -2183,7 +2183,7 @@ describe('AppController (e2e)', () => {
       .patch(`/nft/${nftId}`)
       .set('authorization', moderator.bearer)
       .send({
-        publish_vote: JSON.stringify(true),
+        publish_vote: JSON.stringify('yes'),
       });
     expect(res.statusCode).toEqual(200);
     expect(res.body.state).toEqual('finish');
@@ -2262,7 +2262,7 @@ describe('AppController (e2e)', () => {
         .patch(`/nft/${nftId}`)
         .set('authorization', bearer)
         .send({
-          publish_vote: JSON.stringify(true),
+          publish_vote: JSON.stringify('yes'),
           'image.png': JSON.stringify('someuri'),
           'thumbnail.png': JSON.stringify('somethumbnailuri'),
           description: JSON.stringify('some long description'),
@@ -2273,7 +2273,7 @@ describe('AppController (e2e)', () => {
         .patch(`/nft/${nftId}`)
         .set('authorization', moderator.bearer)
         .send({
-          publish_vote: JSON.stringify(true),
+          publish_vote: JSON.stringify('yes'),
         });
       expect(res.statusCode).toEqual(500);
     },
@@ -2323,7 +2323,7 @@ describe('AppController (e2e)', () => {
       .patch(`/nft/${nftId}`)
       .set('authorization', bearer)
       .send({
-        publish_vote: JSON.stringify(true),
+        publish_vote: JSON.stringify('yes'),
         'image.png': JSON.stringify('someuri'),
         'thumbnail.png': JSON.stringify('somethumbnailuri'),
         description: JSON.stringify('some long description'),
@@ -2343,7 +2343,7 @@ describe('AppController (e2e)', () => {
       .patch(`/nft/${nftId}`)
       .set('authorization', bearer)
       .send({
-        publish_vote: JSON.stringify(true),
+        publish_vote: JSON.stringify('yes'),
       });
     expect(res.statusCode).toEqual(200);
 
@@ -2352,7 +2352,7 @@ describe('AppController (e2e)', () => {
       .patch(`/nft/${nftId}`)
       .set('authorization', bearer)
       .send({
-        publish_vote: JSON.stringify(false),
+        publish_vote: JSON.stringify('no'),
       });
     expect(res.statusCode).toEqual(200);
     expect(res.body.state).toEqual('setup_nft');
