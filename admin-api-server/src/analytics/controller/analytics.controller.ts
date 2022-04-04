@@ -96,7 +96,7 @@ export class AnalyticsController {
     sort?: [string, 'asc' | 'desc'],
     @Query('range', new ParseJSONArrayPipe())
     range?: number[],
-  ): Promise<{ data: Activity[] }> {
+  ): Promise<{ data: Activity[]; count: number }> {
     const params = this.#queryParamsToFilterParams(filters, sort, range);
 
     validatePaginationParams(params, [
@@ -108,9 +108,7 @@ export class AnalyticsController {
       'price',
       'amount',
     ]);
-    return {
-      data: await this.analyticsService.getActivities(params),
-    };
+    return await this.analyticsService.getActivities(params);
   }
 
   #queryParamsToMetricParams(resolutionStr?: string): MetricParams {
