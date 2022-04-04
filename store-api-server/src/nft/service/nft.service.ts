@@ -50,8 +50,11 @@ export class NftService {
     };
 
     const insert = async (dbTx: any) => {
-      const launchAt = new Date();
-      launchAt.setTime(newNft.launchAt);
+      const launchAt: ?Date;
+      if (typeof newNft.launchAt !== 'undefined') {
+        launchAt = new Date();
+        launchAt.setTime(newNft.launchAt);
+      }
 
       await dbTx.query(
         `
@@ -69,7 +72,7 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
           newNft.displayUri,
           newNft.thumbnailUri,
           newNft.description,
-          launchAt.toUTCString(),
+          launchAt?.toUTCString(),
           newNft.price,
           newNft.editionsSize,
         ],
