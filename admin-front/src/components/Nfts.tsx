@@ -136,7 +136,7 @@ const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
 
   const getVoters = () => {
     const instantVoters: any[] = []
-    props.record.proposal_vote.yes.concat(props.record.proposal_vote.no).map(async (id: number) => {
+    props.record.proposal_vote?.yes?.concat(props.record.proposal_vote.no).map(async (id: number) => {
       const res = await axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + `/user/${id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
@@ -205,14 +205,17 @@ const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
           <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold' }}>
             Accepted:
           </Typography>
-          {props.record[props.attributesName]['yes'].map(
-            (id: number, index: number) =>
-              voters.map(voter => {
-                if (voter.id === id) {
-                  return index === props.record[props.attributesName]['yes'].length - 1 ? `${voter.userName}` : `${voter.userName}, `
-                }
-              })
-          )}
+          {
+            props.record[props.attributesName] &&
+            props.record[props.attributesName] !== null &&
+            props.record[props.attributesName]['yes'].map(
+              (id: number, index: number) =>
+                voters.map(voter => {
+                  if (voter.id === id) {
+                    return index === props.record[props.attributesName]['yes'].length - 1 ? `${voter.userName}` : `${voter.userName}, `
+                  }
+                })
+            )}
         </Typography>
       </Stack>
       <Stack direction="row">
@@ -220,14 +223,17 @@ const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
           <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold' }}>
             Rejected:
           </Typography>
-          {props.record[props.attributesName]['no'].map(
-            (id: number, index: number) =>
-              voters.map(voter => {
-                if (voter.id === id) {
-                  return index === props.record[props.attributesName]['no'].length - 1 ? `${voter.userName}` : `${voter.userName}, `
-                }
-              })
-          )}
+          {
+            props.record[props.attributesName] &&
+            props.record[props.attributesName] !== null &&
+            props.record[props.attributesName]['no'].map(
+              (id: number, index: number) =>
+                voters.map(voter => {
+                  if (voter.id === id) {
+                    return index === props.record[props.attributesName]['no'].length - 1 ? `${voter.userName}` : `${voter.userName}, `
+                  }
+                })
+            )}
         </Typography>
       </Stack>
     </Stack>
