@@ -1,11 +1,11 @@
 import { format } from "date-fns";
-import { List, Datagrid, TextField, DateField, FunctionField } from "react-admin";
-
+import { List, Datagrid, TextField, FunctionField } from "react-admin";
 
 export const ActivityList = ({ ...props }) => {
     return (
         <List {...props} sort={{ field: 'timestamp', order: 'DESC' }}>
             <Datagrid rowClick="edit">
+                <TextField source="id" />
                 <TextField source="tokenId" />
                 <FunctionField label="Timestamp" render={(record: any) => `${format(
                     new Date((record.timesteamp ?? new Date().getTime()) * 1000 + new Date().getTimezoneOffset() * 60 * 1000),
