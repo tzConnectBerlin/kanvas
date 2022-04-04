@@ -40,13 +40,13 @@ states:
     state_transitions:
     - next_state: finish
       when:
-      - nft.publish_vote.accepts.length >= 2
+      - nft.publish_vote.yes.length >= 2
       - nft['image.png'].length > 0
       - nft['thumbnail.png'].length > 0
       - nft.description.length > 0
     - next_state: setup_nft
       when:
-      - nft.publish_vote.rejects.length > 0
+      - nft.publish_vote.no.length > 0
       do: |
         {
           nft.proposed = false;
