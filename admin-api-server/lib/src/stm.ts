@@ -161,9 +161,12 @@ export class StateTransitionMachine {
       };
     }
     if (nft.attributes[attr][side].some((id: number) => id === actorId)) {
-      throw `actor with id ${actorId} already voted ${side} nft with attr '${attr}', nft=${JSON.stringify(
-        nft,
-      )}'`;
+      log.notice(
+        `actor with id ${actorId} already voted ${side} nft with attr '${attr}', nft=${JSON.stringify(
+          nft,
+        )}'`,
+      );
+      return;
     }
     nft.attributes[attr][side].push(actorId);
   }

@@ -1,3 +1,5 @@
+import { assertEnv } from './utils';
+
 export const PG_CONNECTION = 'PG_CONNECTION';
 export const PG_CONNECTION_STORE_REPLICATION =
   'PG_CONNECTION_STORE_REPLICATION';
@@ -22,4 +24,4 @@ export const NFT_PUBLISH_STATE = 'finish';
 
 export const STORE_API = process.env['STORE_API'] || 'http://localhost:3005';
 
-export const ADMIN_PRIVATE_KEY = process.env['ADMIN_PRIVATE_KEY'];
+export const ADMIN_PRIVATE_KEY = assertEnv('ADMIN_PRIVATE_KEY');
