@@ -49,7 +49,6 @@ const dataProvider = (
     const rangeStart = (page - 1) * perPage;
     const rangeEnd = perPage;
 
-
     let query = {}
     if (resource === 'analytics/sales/priceVolume/snapshot') {
       query = {

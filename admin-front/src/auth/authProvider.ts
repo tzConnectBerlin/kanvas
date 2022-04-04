@@ -16,7 +16,7 @@ const authProvider = {
     return Promise.resolve();
   },
   checkError: ({ status }: { status: number }) => {
-    if (status === 401 || status === 403) {
+    if (status === 401) {
       logout();
       return Promise.reject();
     }
