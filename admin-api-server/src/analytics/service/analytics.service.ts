@@ -81,6 +81,7 @@ SELECT
   token_id AS "tokenId",
   price,
   amount,
+  ROW_NUMBER() OVER (ORDER BY timestamp, kind, "from", "to", token_id) AS id,
   COUNT(1) OVER () AS total_activity_count
 FROM (
   SELECT
@@ -154,6 +155,7 @@ LIMIT ${params.pageSize}
       data: qryRes.rows.map(
         (row: any) =>
           <Activity>{
+            id: row['id'],
             timestamp: Math.floor(row['timestamp'].getTime() / 1000),
             kind: row['kind'],
             from: row['from'],

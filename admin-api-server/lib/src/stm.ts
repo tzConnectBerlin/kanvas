@@ -111,7 +111,6 @@ export class StateTransitionMachine {
     }
 
     log.notice(`nft.id ${nft.id}: '${attr}' ${v} (by actor.id ${actor.id})`);
-    this.tryMoveNft(nft);
 
     return <STMResult>{
       status: STMResultStatus.OK,
