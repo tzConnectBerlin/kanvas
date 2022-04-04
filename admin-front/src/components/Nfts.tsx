@@ -142,7 +142,6 @@ const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
           'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
         }
       })
-      debugger
       if (res.data.error === 400) return notify(res.data.error?.message);
       instantVoters.push(res.data)
     })

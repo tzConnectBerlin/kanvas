@@ -85,7 +85,8 @@ const dataProvider = (
       return {
         data: json?.data,
         total: json?.count ?? 1,
-    }});
+      }
+    });
   },
 
   getOne: (resource, params) =>
@@ -200,13 +201,13 @@ const dataProvider = (
   },
 
   delete: (resource, params) =>
-    httpClient(`${apiUrl}/${resource}/${params.id}`, {
+     httpClient(`${apiUrl}/${resource}/${params.id}`, {
       method: 'DELETE',
       headers: new Headers({
         'Content-Type': 'text/plain',
         Authorization: `Bearer ${getToken()}`,
       }),
-    }).then(({ json }) => ({ data: json })),
+    }).then(() => ({ data: params.previousData as any })),
 
   // simple-rest doesn't handle filters on DELETE route, so we fallback to calling DELETE n times instead
   deleteMany: (resource, params) =>
@@ -221,7 +222,7 @@ const dataProvider = (
         }),
       ),
     ).then((responses) => ({
-      data: responses.map(({ json }) => json.id),
+      data: responses.map(({ json }) => json),
     })),
 });
 
