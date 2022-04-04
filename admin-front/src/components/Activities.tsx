@@ -7,12 +7,12 @@ export const ActivityList = ({ ...props }) => {
         <List {...props} sort={{ field: 'at', order: 'DESC' }}>
             <Datagrid>
                 <TextField source="tokenId" />
-                <FunctionField label="timesteamp" render={(record: any) => `${format(
+                <FunctionField label="Timestamp" render={(record: any) => `${format(
                     new Date((record.timesteamp ?? new Date().getTime()) * 1000 + new Date().getTimezoneOffset() * 60 * 1000),
                     'dd/MM/yyyy - HH : mm : ss',
                 )}`} />
                 <TextField source="kind" />
-                <FunctionField label="price" render={(record: any) => `${record.price} tez`} />
+                <FunctionField label="Price" render={(record: any) => `${record.price} tez`} />
                 <TextField source="amount" />
                 <TextField source="from" />
                 <TextField source="to" />
