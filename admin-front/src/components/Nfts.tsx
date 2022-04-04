@@ -95,7 +95,7 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
 
   const validateNumber = [number(), minValue(0)];
   const validateDate = (value: any) => {
-    if ( value && value.getTime() < new Date().getTime()) return 'Date must be in the future'
+    if (value < new Date().getTime()) return 'Date must be in the future'
     return undefined
   };
 
@@ -104,7 +104,7 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
   if (props.type === 'string') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} />;
   if (props.type === 'number') return <NumberInput source={`attributes.${props.attributesName}`} label={props.label} validate={validateNumber} />;
   if (props.type === 'boolean') return <BooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
-  if (props.type === 'date') return <DateTimeInput source={`attributes.${props.attributesName}`} label={props.label} value={props.record * 1000} validate={validateDate}/>;
+  if (props.type === 'date') return <DateTimeInput source={`attributes.${props.attributesName}`} label={props.label} value={props.record * 1000} validate={validateDate} />;
   if (props.type === 'number[]') {
     return (
       <ReferenceArrayInput source="attributes.categories" label="categories" reference="categories/assignable">
@@ -112,7 +112,10 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
       </ReferenceArrayInput>
     );
   }
-  if (props.type === 'votes') return <NullableBooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
+  if (props.type === 'votes') return <NullableBooleanInput source={`attributes.${props.attributesName}`} label={props.label}
+    format={(val: 'yes' | 'no') => val === 'yes' ? true : val === 'no' ? false : undefined}
+    parse={(val: string) => val === 'true' ? 'yes' : 'no'}
+  />;
   if (props.type === 'content_uri') {
 
     return (
@@ -206,7 +209,7 @@ const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
             (id: number, index: number) =>
               voters.map(voter => {
                 if (voter.id === id) {
-                  return index ===  props.record[props.attributesName]['yes'].length - 1 ? `${voter.userName}` : `${voter.userName}, `
+                  return index === props.record[props.attributesName]['yes'].length - 1 ? `${voter.userName}` : `${voter.userName}, `
                 }
               })
           )}
@@ -221,7 +224,7 @@ const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
             (id: number, index: number) =>
               voters.map(voter => {
                 if (voter.id === id) {
-                  return index ===  props.record[props.attributesName]['no'].length - 1 ? `${voter.userName}` : `${voter.userName}, `
+                  return index === props.record[props.attributesName]['no'].length - 1 ? `${voter.userName}` : `${voter.userName}, `
                 }
               })
           )}
