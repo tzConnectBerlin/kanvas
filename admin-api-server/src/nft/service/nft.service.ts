@@ -83,7 +83,7 @@ export class NftService {
         (ident: string) => ident === orderBy,
       )
     ) {
-      orderBy = `attributes->>'${orderBy}'`;
+      orderBy = `naturalsort(attributes->>'${orderBy}')`;
     }
 
     const qryRes = await this.db.query(
