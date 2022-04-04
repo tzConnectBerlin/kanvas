@@ -50,7 +50,7 @@ export class NftService {
     };
 
     const insert = async (dbTx: any) => {
-      const launchAt: ?Date;
+      let launchAt: Date | undefined = undefined;
       if (typeof newNft.launchAt !== 'undefined') {
         launchAt = new Date();
         launchAt.setTime(newNft.launchAt);
@@ -96,7 +96,7 @@ SELECT $1, UNNEST($2::INTEGER[])
       const BACKOFF_MS = 1000;
       for (let i = 0; i < MAX_ATTEMPTS; i++) {
         try {
-          this.ipfsService.uploadNft(nftEntity, dbTx);
+          await this.ipfsService.uploadNft(nftEntity, dbTx);
           return;
         } catch (err: any) {
           Logger.warn(
@@ -107,6 +107,7 @@ SELECT $1, UNNEST($2::INTEGER[])
         }
         sleep(BACKOFF_MS);
       }
+      throw `failed to upload new nft to IPFS`;
     };
 
     await validate();
@@ -353,6 +354,8 @@ FROM nfts_by_id($1, $2, $3)`,
         const reserved = Number(nftRow['editions_reserved']);
         const owned = Number(nftRow['editions_owned']);
 
+        const launchAtMilliUnix = nftRow['launch_at']?.getTime() || 0;
+
         const nft = <NftEntity>{
           id: nftRow['nft_id'],
           name: nftRow['nft_name'],
@@ -365,7 +368,7 @@ FROM nfts_by_id($1, $2, $3)`,
           editionsSize: editions,
           editionsAvailable: editions - (reserved + owned),
           createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
-          launchAt: Math.floor(nftRow['launch_at'].getTime() / 1000),
+          launchAt: Math.floor(launchAtMilliUnix / 1000),
           categories: nftRow['categories'].map((categoryRow: any) => {
             return <CategoryEntity>{
               id: Number(categoryRow[0]),

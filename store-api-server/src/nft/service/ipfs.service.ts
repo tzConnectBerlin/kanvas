@@ -50,8 +50,8 @@ WHERE id = $1
     `,
       [nft.id],
     );
-    if (qryRes['ipfs_hash'] != null) {
-      return qryRes['ipfs_hash'];
+    if (qryRes.rows[0]['ipfs_hash'] != null) {
+      return qryRes.rows[0]['ipfs_hash'];
     }
 
     const [artifactIpfsUri, displayIpfsUri, thumbnailIpfsUri] = [
@@ -69,7 +69,7 @@ WHERE id = $1
       artifactIpfsUri,
       displayIpfsUri ?? artifactIpfsUri,
       thumbnailIpfsUri ?? displayIpfsUri ?? artifactIpfsUri,
-      qryRes['signature'],
+      qryRes.rows[0]['signature'],
     );
     const ipfsHash = await this.#pinJson(metadata);
 
@@ -99,7 +99,7 @@ WHERE id = $2
     thumbnailIpfsUri: string,
     signature: string,
   ): any {
-    const createdAt = new Date(nft.createdAt).toISOString();
+    const createdAt = new Date(nft.createdAt * 1000).toISOString();
 
     return {
       decimals: 0,
