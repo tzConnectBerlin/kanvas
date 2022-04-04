@@ -23,6 +23,7 @@ export interface Product extends Record {
 }
 
 export interface Nft {
+    id: number;
     name: string;
     description: string;
     image: string;

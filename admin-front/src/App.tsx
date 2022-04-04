@@ -13,6 +13,7 @@ import { theme } from './theme';
 import NftIcon from '@material-ui/icons/BurstMode';
 import { ActivityList } from './components/Activities';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
+import { Label } from '@mui/icons-material';
 
 //for data from the nest admin api
 
@@ -46,9 +47,13 @@ function App() {
         icon={NftIcon}
       />
       <Resource
-        name="activity"
+        name="analytics/activities"
         list={ActivityList}
         icon={EqualizerIcon}
+        options={{
+          label: 'Activities'
+        }
+        }
       />
       <Resource
         name="categories"

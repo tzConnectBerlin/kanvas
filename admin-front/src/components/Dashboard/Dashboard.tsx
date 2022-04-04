@@ -19,6 +19,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { useDataProvider, useNotify } from 'react-admin';
 import ListNftThumbnail from '../ListNftThumbnail';
 import axios from 'axios';
+import authProvider from '../../auth/authProvider';
 
 
 const useStyles = makeStyles({
@@ -53,16 +54,26 @@ export const Dashboard = () => {
   const classes = useStyles()
   const notify = useNotify()
 
+  const [permissions, setPermissions] = React.useState<number[]>([])
+
+  React.useEffect(() => {
+    const perm = async () => {
+      setPermissions(await authProvider.getPermissions())
+    }
+    perm()
+  }, [])
+
   const dataProvider = useDataProvider()
   const [totalNFTPriceRevenue, setTotalNFTPriceRevenue] = React.useState<number>(0)
   const [totalNFTCount24h, setTotalNFTCount24h] = React.useState<number>(0)
+  const [roles, setRoles] = React.useState<{[i:string]: number}>()
 
   const [topBuyers, setTopBuyers] = React.useState([])
   const [mostViewed, setMostViewed] = React.useState([])
 
   const fetchTopBuyers = () => {
     axios.get('https://kanvas.tzconnect.berlin/api/users/topBuyers', {
-        withCredentials: true
+      withCredentials: true
     })
       .then(response => {
         setTopBuyers(response.data.topBuyers)
@@ -118,11 +129,26 @@ export const Dashboard = () => {
       })
   }
 
+  const fetchRoles = () => {
+    axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/role', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
+      }
+    })
+      .then(response => {
+        const newRoles : { [i: string]: number; } = {}
+        setRoles(response.data.data.map((role: any) =>  newRoles[role.role_label] = role.id))
+      }).catch(error => {
+        notify(`An error occured while fetching the roles`);
+      })
+  }
+
   React.useEffect(() => {
     fetchTopBuyers()
     fetchMostViewed()
     fetchTotalRevenu()
     fetchNftCount24h()
+    fetchRoles()
   }, [])
 
 
@@ -137,20 +163,27 @@ export const Dashboard = () => {
     <div>
       <div style={styles.flexColumn as React.CSSProperties}>
         <Welcome />
-        <CardWithIcon
-          to="/"
-          icon={EuroIcon}
-          title="Total revenue"
-          subtitle={`${totalNFTPriceRevenue} EUR`}
-        />
-        <VerticalSpacer />
-        <CardWithIcon
-          to="/"
-          icon={ShoppingCartRoundedIcon}
-          title="Nb of sold nfts (24h)"
-          subtitle={totalNFTCount24h}
-        />
-        <VerticalSpacer />
+        {
+          (roles ? permissions.indexOf(roles["admin"]) !== -1 : false) ? (
+            <>
+              <CardWithIcon
+                to="/"
+                icon={EuroIcon}
+                title="Total revenue"
+                subtitle={`${totalNFTPriceRevenue} EUR`}
+              />
+              <div style={styles.singleCol} >
+                <CardWithIcon
+                  to="/"
+                  icon={ShoppingCartRoundedIcon}
+                  title="Nb of sold nfts (24h)"
+                  subtitle={totalNFTCount24h.toString()}
+                />
+              </div>
+              <VerticalSpacer />
+            </>
+          ) : <></>
+        }
         <CardWithIcon
           to="/"
           icon={PeopleAltRoundedIcon}
@@ -161,9 +194,9 @@ export const Dashboard = () => {
             {
               topBuyers.map((user: any, index: number) =>
                 <ListItem >
-                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.address ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
+                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.userAddress}`} target="_blank">
                     <ListItemAvatar >
-                      <Avatar src="https://kanvas-files.s3.amazonaws.com/profilePicture_7" />
+                      <Avatar src={user.userPicture} />
                     </ListItemAvatar>
                     <ListItemText
                       primary={`username - ${index}`}
@@ -186,25 +219,28 @@ export const Dashboard = () => {
       <div style={styles.singleCol}>
         <Welcome />
       </div>
-      <div style={styles.flex}>
-        <CardWithIcon
-          to="/"
-          icon={EuroIcon}
-          title="Total revenue"
-          subtitle={`${totalNFTPriceRevenue} EUR`}
-        />
-        <Spacer />
-        <CardWithIcon
-          to="/"
-          icon={ShoppingCartRoundedIcon}
-          title="Nb of sold nfts (24h)"
-          subtitle={totalNFTCount24h}
-        />
-      </div>
-      <div style={styles.singleCol}>
-        {/* <OrderChart orders={recentOrders} /> */}
-      </div>
-      <div style={styles.singleCol}>
+      {
+        (roles ? permissions.indexOf(roles["admin"]) !== -1 : false) ? (
+          <>
+            <CardWithIcon
+              to="/"
+              icon={EuroIcon}
+              title="Total revenue"
+              subtitle={`${totalNFTPriceRevenue} EUR`}
+            />
+            <div style={styles.singleCol} >
+              <CardWithIcon
+                to="/"
+                icon={ShoppingCartRoundedIcon}
+                title="Nb of sold nfts (24h)"
+                subtitle={totalNFTCount24h.toString()}
+              />
+            </div>
+            <VerticalSpacer />
+          </>
+        ) : <></>
+      }
+
         <CardWithIcon
           to="/"
           icon={PeopleAltRoundedIcon}
@@ -215,9 +251,9 @@ export const Dashboard = () => {
             {
               topBuyers.map((user: any, index: number) =>
                 <ListItem >
-                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.address ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
+                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.userAddress}`} target="_blank">
                     <ListItemAvatar >
-                      <Avatar src="https://kanvas-files.s3.amazonaws.com/profilePicture_7" />
+                      <Avatar src={user.userPicture} />
                     </ListItemAvatar>
                     <ListItemText
                       primary={`username - ${index}`}
@@ -233,41 +269,43 @@ export const Dashboard = () => {
             }
           </List>
         </CardWithIcon>
-      </div>
+
     </div>
   ) : (
     <>
       <Welcome />
       <div style={styles.flex}>
         <div style={styles.leftCol}>
-          <div style={styles.flex}>
+          {
+            (roles ? permissions.indexOf(roles["admin"]) !== -1 : false) ? (
+              <>
+                <CardWithIcon
+                  to="/"
+                  icon={EuroIcon}
+                  title="Total revenue"
+                  subtitle={`${totalNFTPriceRevenue} EUR`}
+                />
+                <div style={styles.singleCol} >
+                  <CardWithIcon
+                    to="/"
+                    icon={ShoppingCartRoundedIcon}
+                    title="Nb of sold nfts (24h)"
+                    subtitle={totalNFTCount24h.toString()}
+                  />
+                </div>
+                <VerticalSpacer />
+              </>
+            ) : undefined
+          }
+
             <CardWithIcon
-              to="/"
-              icon={EuroIcon}
-              title="Total revenue"
-              subtitle={`${totalNFTPriceRevenue} EUR`}
-            />
-            <Spacer />
-            <CardWithIcon
-              to="/"
-              icon={ShoppingCartRoundedIcon}
-              title="Nb of sold nfts (24h)"
-              subtitle={totalNFTCount24h}
-            />
-          </div>
-          <div style={styles.singleCol}>
-            {/* <OrderChart orders={recentOrders} /> */}
-          </div>
-          <div style={styles.singleCol}>
-            <CardWithIcon
-              to="/"
+              to=""
               icon={InsertPhotoIcon}
               title="Most viewed"
               subtitle={mostViewed.length ?? 0}
             >
               <ListNftThumbnail nfts={mostViewed ?? []} />
             </CardWithIcon>
-          </div>
         </div>
         <div style={styles.rightCol}>
           <div style={styles.flex}>
@@ -281,7 +319,7 @@ export const Dashboard = () => {
                 {
                   topBuyers.map((user: any, index: number) =>
                     <ListItem >
-                      <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.address ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
+                      <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.userAddress}`} target="_blank">
                         <ListItemAvatar >
                           <Avatar src={user.userPicture} />
                         </ListItemAvatar>
