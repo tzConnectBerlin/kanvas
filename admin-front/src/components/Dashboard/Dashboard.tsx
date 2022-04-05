@@ -187,7 +187,7 @@ export const Dashboard = () => {
           to="/"
           icon={PeopleAltRoundedIcon}
           title="Top buyers"
-          subtitle={topBuyers.length ?? 0}
+          subtitle={topBuyers ? topBuyers.length : 0 ?? 0}
         >
           <List>
             {
@@ -249,7 +249,7 @@ export const Dashboard = () => {
         to="/"
         icon={PeopleAltRoundedIcon}
         title="Top buyers"
-        subtitle={topBuyers.length ?? 0}
+        subtitle={topBuyers ? topBuyers.length : 0 ?? 0}
       >
         <List>
           {
@@ -312,7 +312,7 @@ export const Dashboard = () => {
             to=""
             icon={InsertPhotoIcon}
             title="Most viewed"
-            subtitle={mostViewed.length ?? 0}
+            subtitle={mostViewed ? mostViewed.length : 0 ?? 0}
           >
             <ListNftThumbnail nfts={mostViewed ?? []} />
             {
@@ -329,7 +329,7 @@ export const Dashboard = () => {
               to="/"
               icon={PeopleAltRoundedIcon}
               title="Top buyers"
-              subtitle={topBuyers.length ?? 0}
+              subtitle={topBuyers ? topBuyers.length : 0 ?? 0}
             >
               <List>
                 {
