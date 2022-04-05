@@ -57,31 +57,57 @@ const useStyle = makeStyles({
   }
 })
 
-export const NftList = ({ ...props }) => (
-  <List {...props}
-    actions={<ToolbarActions />}
-    bulkActionButtons={<CustomDeleteButton {...props} />}
-  >
-    <Datagrid rowClick="edit">
-      <TextField source="id" />
-      <TextField source="attributes.name" label="Name" />
-      <TextField source="state" label="Current State" />
-      <NumberField source="attributes.price" label='Price' />
-      <NumberField source="attributes.editions_size" label='Token amount' />
-      <FunctionField label="createdAt" render={(record: any) => `${format(
-        new Date((record.createdAt ?? new Date().getTime()) * 1000 + new Date().getTimezoneOffset() * 60 * 1000),
-        'dd/MM/yyyy - HH : mm : ss',
-      )}`} />
-      <FunctionField label="updatedAt" render={(record: any) => `${format(
-        new Date((record.updatedAt ?? new Date().getTime()) * 1000 + new Date().getTimezoneOffset() * 60 * 1000),
-        'dd/MM/yyyy - HH : mm : ss',
-      )}`} />
-      <ReferenceField label="Created by" source="createdBy" reference="user">
-        <ChipField source="userName" />
-      </ReferenceField>
-    </Datagrid>
-  </List>
-);
+export const NftList = ({ ...props }) => {
+
+  const renderState = (state: 'creation' | 'setup_nft' | 'proposed' | 'prototype' | 'finish') => {
+    switch (state) {
+      case 'creation':
+        return 'Ready for creative';
+      case 'setup_nft':
+        return 'Ready for commercials';
+      case 'proposed':
+        return 'Settings completed';
+      case 'prototype':
+        return 'Ready to publish';
+      case 'finish':
+        return 'Published';
+      default:
+        return state;
+    }
+  }
+
+  return (
+    <>
+      <Stack direction="row">
+        {`States are: 'Ready for creative' ->  'Ready for commercials' -> 'Settings completed' -> 'Ready to publish' -> 'Published'`}
+      </Stack>
+      <List {...props}
+        actions={<ToolbarActions />}
+        bulkActionButtons={<CustomDeleteButton {...props} />}
+        sort={{ field: "id", order: "DESC" }}
+      >
+        <Datagrid rowClick="edit">
+          <TextField source="id" />
+          <TextField source="attributes.name" label="Name" />
+          <FunctionField label="Current state" render={(record: any) => renderState(record.state)} />
+          <NumberField source="attributes.price" label='Price' />
+          <NumberField source="attributes.editions_size" label='Token amount' />
+          <FunctionField label="Creation time" render={(record: any) => `${format(
+            record.createdAt * 1000 ? new Date(record.createdAt * 1000) : new Date(),
+            'dd/MM/yyyy - HH : mm : ss',
+          )}`} />
+          <FunctionField label="Last updated" render={(record: any) => `${format(
+            record.createdAt * 1000 ? new Date(record.createdAt * 1000) : new Date(),
+            'dd/MM/yyyy - HH : mm : ss',
+          )}`} />
+          <ReferenceField label="Created by" source="createdBy" reference="user">
+            <ChipField source="userName" />
+          </ReferenceField>
+        </Datagrid>
+      </List>
+    </>
+  )
+};
 
 interface InbutSelectorProps {
   attributesName: string;

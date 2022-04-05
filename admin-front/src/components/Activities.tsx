@@ -12,8 +12,8 @@ export const ActivityList = ({ ...props }) => {
                     'dd/MM/yyyy - HH : mm : ss',
                 )}`} />
                 <TextField source="kind" />
-                <FunctionField label="Price" render={(record: any) => `${record.price} tez`} />
-                <TextField source="amount" />
+                <FunctionField label="Price" render={(record: any) => record.price ? `${record.price} tez` : '-'} />
+                <TextField source="amount" label="Edition size"/>
                 <TextField source="from" />
                 <TextField source="to" />
             </Datagrid>
