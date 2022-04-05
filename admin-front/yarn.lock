@@ -1475,9 +1475,9 @@
     react-is "^16.8.0 || ^17.0.0"
     react-transition-group "^4.4.0"
 
-"@material-ui/icons@^4.11.2":
+"@mui/icons-material@^4.11.2":
   version "4.11.2"
-  resolved "https://registry.yarnpkg.com/@material-ui/icons/-/icons-4.11.2.tgz#b3a7353266519cd743b6461ae9fdfcb1b25eb4c5"
+  resolved "https://registry.yarnpkg.com/@mui/icons-material/-/icons-4.11.2.tgz#b3a7353266519cd743b6461ae9fdfcb1b25eb4c5"
   integrity sha512-fQNsKX2TxBmqIGJCSi3tGTO/gZ+eJgWmMJkgDiOfyNaunNaxcklJQFaFogYcFl0qFuaEz1qaXYXboa/bUXVSOQ==
   dependencies:
     "@babel/runtime" "^7.4.4"
@@ -8347,7 +8347,7 @@ react-admin@^3.19.0:
   integrity sha512-F4ISXqKr7A9j3dcFLJ9qo/eymrjzKkPqSmZj8bGkOo2s04Dp1yiMY6ZvpPfjiq6kVeESl01Hcf6HdEfJlKV3Lg==
   dependencies:
     "@material-ui/core" "^4.12.1"
-    "@material-ui/icons" "^4.11.2"
+    "@mui/icons-material" "^4.11.2"
     "@material-ui/styles" "^4.11.2"
     connected-react-router "^6.5.2"
     final-form "^4.20.4"

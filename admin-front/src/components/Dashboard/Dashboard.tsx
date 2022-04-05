@@ -2,10 +2,10 @@
 import * as React from 'react';
 import Welcome from './Welcome';
 import CardWithIcon from '../CardWithIcon';
-import EuroIcon from '@material-ui/icons/Euro';
-import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
-import ShoppingCartRoundedIcon from '@material-ui/icons/ShoppingCartRounded';
-import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
+import EuroIcon from '@mui/icons-material/Euro';
+import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
+import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded';
+import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
 import {
   Avatar,
   List,
