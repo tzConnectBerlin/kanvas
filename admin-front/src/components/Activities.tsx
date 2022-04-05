@@ -8,12 +8,12 @@ export const ActivityList = ({ ...props }) => {
                 <TextField source="id" />
                 <TextField source="tokenId" />
                 <FunctionField label="Timestamp" render={(record: any) => `${format(
-                    new Date((record.timestamp * 1000 ?? new Date().getTime()) + new Date().getTimezoneOffset() * 60 * 1000),
+                    record.timestamp * 1000 ? new Date(record.timestamp * 1000) : new Date(),
                     'dd/MM/yyyy - HH : mm : ss',
                 )}`} />
                 <TextField source="kind" />
-                <FunctionField label="Price" render={(record: any) => `${record.price} tez`} />
-                <TextField source="amount" />
+                <FunctionField label="Price" render={(record: any) => record.price ? `${record.price} tez` : '-'} />
+                <TextField source="amount" label="Edition size"/>
                 <TextField source="from" />
                 <TextField source="to" />
             </Datagrid>

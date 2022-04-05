@@ -51,7 +51,7 @@ function App() {
         list={ActivityList}
         icon={EqualizerIcon}
         options={{
-          label: 'Activities'
+          label: 'Reporting'
         }
         }
       />
