@@ -97,7 +97,7 @@ export const NftList = ({ ...props }) => {
             'dd/MM/yyyy - HH : mm : ss',
           )}`} />
           <FunctionField label="Last updated" render={(record: any) => `${format(
-            record.createdAt * 1000 ? new Date(record.createdAt * 1000) : new Date(),
+            record.updatedAt * 1000 ? new Date(record.updatedAt * 1000) : new Date(),
             'dd/MM/yyyy - HH : mm : ss',
           )}`} />
           <ReferenceField label="Created by" source="createdBy" reference="user">
