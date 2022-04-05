@@ -439,7 +439,7 @@ WHERE TARGET.value != EXCLUDED.value
     await this.#assertNftPublishable(nft);
     const attr = nft.attributes;
 
-    const signed = await cryptoUtils.sign(`${nft.id}`, ADMIN_PRIVATE_KEY);
+    const signed = await this.#signNumber(nft.id, ADMIN_PRIVATE_KEY);
 
     return await axios.post(STORE_API + '/nfts/create', {
       id: nft.id,
@@ -454,9 +454,18 @@ WHERE TARGET.value != EXCLUDED.value
       editionsSize: attr.editions_size,
       launchAt: attr.launch_at,
 
-      signature: signed.sig,
+      signature: signed,
     });
 
     Logger.log(`Published NFT ${nft.id} to the store database`);
+  }
+
+  async #signNumber(n: number, privateKey): Promise<string> {
+    let hexMsg = n.toString(16);
+    if (hexMsg.length & 1) {
+      // hex is of uneven length, sotez expects an even number of hexadecimal characters
+      hexMsg = '0' + hexMsg;
+    }
+    return (await cryptoUtils.sign(hexMsg, privateKey)).sig;
   }
 }

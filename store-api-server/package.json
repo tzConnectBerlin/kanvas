@@ -60,7 +60,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7",
-    "sotez": "^11.0.0",
+    "sotez": "12.0.0",
     "stripe": "^8.194.0",
     "tmp": "^0.2.1",
     "ts-results": "^3.3.0",

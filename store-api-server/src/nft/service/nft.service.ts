@@ -30,10 +30,16 @@ export class NftService {
 
   async createNft(newNft: CreateNft) {
     const validate = async () => {
+      let hexMsg = newNft.id.toString(16);
+      if (hexMsg.length & 1) {
+        // hex is of uneven length, sotez expects an even number of hexadecimal characters
+        hexMsg = '0' + hexMsg;
+      }
+
       try {
         if (
           !(await cryptoUtils.verify(
-            `${newNft.id}`,
+            hexMsg,
             `${newNft.signature}`,
             ADMIN_PUBLIC_KEY,
           ))

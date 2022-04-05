@@ -2389,8 +2389,14 @@ describe('AppController (e2e)', () => {
 
   skipOnPriorFail('/nft/create: success case', async () => {
     const nftId = 100000;
+    let hexMsg = nftId.toString(16);
+    if (hexMsg.length & 1) {
+      // hex is of uneven length, sotez expects an even number of hexadecimal characters
+      hexMsg = '0' + hexMsg;
+    }
+
     const signed = await cryptoUtils.sign(
-      `${nftId}`,
+      hexMsg,
       assertEnv('ADMIN_PRIVATE_KEY'),
     );
     const res = await request(app.getHttpServer())
