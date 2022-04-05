@@ -10,7 +10,7 @@ import dataProvider from './data/dataProvider';
 import CustomLayout from './components/CustomLayout';
 import { theme } from './theme';
 
-import NftIcon from '@material-ui/icons/BurstMode';
+import BurstMode from '@mui/icons-material/BurstMode';
 import { ActivityList } from './components/Activities';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
 import { Label } from '@mui/icons-material';
@@ -44,7 +44,7 @@ function App() {
         list={NftList}
         edit={NftEdit}
         create={NftCreate}
-        icon={NftIcon}
+        icon={BurstMode}
       />
       <Resource
         name="analytics/activities"

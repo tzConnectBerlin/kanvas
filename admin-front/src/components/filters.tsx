@@ -1,6 +1,6 @@
 import * as React from 'react';
-import AccessTimeIcon from '@material-ui/icons/AccessTimeOutlined';
-import MonetizationOnIcon from '@material-ui/icons/MonetizationOnOutlined';
+import AccessTimeIcon from '@mui/icons-material/AccessTimeOutlined';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOnOutlined';
 import AccountBoxIcon from '@mui/icons-material/AccountBoxOutlined';
 import DescriptionIcon from '@mui/icons-material/DescriptionOutlined';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolderOutlined';
@@ -8,8 +8,8 @@ import CachedIcon from '@mui/icons-material/CachedOutlined';
 import QueryStatsIcon from '@mui/icons-material/QueryStatsOutlined';
 import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import SellIcon from '@mui/icons-material/Sell';
-import MailIcon from '@material-ui/icons/MailOutline';
-import LocalOfferIcon from '@material-ui/icons/LocalOfferOutlined';
+import MailIcon from '@mui/icons-material/MailOutline';
+import LocalOfferIcon from '@mui/icons-material/LocalOfferOutlined';
 import { FilterList, FilterListItem } from 'react-admin';
 import {
   endOfYesterday,
@@ -132,7 +132,7 @@ export const HasOrderedFilter = () => (
         nb_commands_lte: undefined,
       }}
     />
-   
+
   </FilterList>
 );
 export const HasNewsletterFilter = () => (

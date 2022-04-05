@@ -1,7 +1,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
-import ThumbUp from '@material-ui/icons/ThumbUp';
+import ThumbUp from '@mui/icons-material/ThumbUp';
 import { useTranslate, useUpdate, useNotify, useRedirect } from 'react-admin';
 import { Review } from '../../types/basicTypes';
 
