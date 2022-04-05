@@ -8,7 +8,7 @@ export const ActivityList = ({ ...props }) => {
                 <TextField source="id" />
                 <TextField source="tokenId" />
                 <FunctionField label="Timestamp" render={(record: any) => `${format(
-                    new Date((record.timesteamp ?? new Date().getTime()) * 1000 + new Date().getTimezoneOffset() * 60 * 1000),
+                    new Date((record.timestamp * 1000 ?? new Date().getTime()) + new Date().getTimezoneOffset() * 60 * 1000),
                     'dd/MM/yyyy - HH : mm : ss',
                 )}`} />
                 <TextField source="kind" />
