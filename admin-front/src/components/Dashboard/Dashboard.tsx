@@ -63,36 +63,34 @@ export const Dashboard = () => {
     perm()
   }, [])
 
-  const dataProvider = useDataProvider()
   const [totalNFTPriceRevenue, setTotalNFTPriceRevenue] = React.useState<number>(0)
   const [totalNFTCount24h, setTotalNFTCount24h] = React.useState<number>(0)
-  const [roles, setRoles] = React.useState<{[i:string]: number}>()
+  const [roles, setRoles] = React.useState<{ [i: string]: number }>()
 
   const [topBuyers, setTopBuyers] = React.useState([])
   const [mostViewed, setMostViewed] = React.useState([])
 
+
   const fetchTopBuyers = () => {
-    axios.get('https://kanvas.tzconnect.berlin/api/users/topBuyers', {
+    axios.get(process.env.REACT_APP_STORE_BASE_URL + 'api/users/topBuyers', {
       withCredentials: true
     })
       .then(response => {
         setTopBuyers(response.data.topBuyers)
       })
       .catch(error => {
-        notify('An error happened while fetching the top buyers')
         console.log(error)
       })
   }
 
   const fetchMostViewed = () => {
-    axios.get('https://kanvas.tzconnect.berlin/api/nfts?pageSize=8&orderBy=views&orderDirection=desc', {
+    axios.get(process.env.REACT_APP_STORE_BASE_URL + 'api/nfts?pageSize=8&orderBy=views&orderDirection=desc', {
       withCredentials: true
     })
       .then(response => {
         setMostViewed(response.data.nfts)
       })
       .catch(error => {
-        notify('An error happened while fetching the most viewed nfts')
         console.log(error)
       })
   }
@@ -108,7 +106,7 @@ export const Dashboard = () => {
         const price = response.data ? response.data.value : undefined;
         setTotalNFTPriceRevenue(price ?? 0)
       }).catch(error => {
-        notify('An error happened while fetching total revenue')
+        // notify('An error happened while fetching total revenue')
         console.log(error)
       })
   }
@@ -124,7 +122,7 @@ export const Dashboard = () => {
         const count = response.data ? response.data.value : undefined;
         setTotalNFTCount24h(count ?? 0)
       }).catch(error => {
-        notify('An error happened while fetching nft count')
+        // notify('An error happened while fetching nft count')
         console.log(error)
       })
   }
@@ -136,10 +134,11 @@ export const Dashboard = () => {
       }
     })
       .then(response => {
-        const newRoles : { [i: string]: number; } = {}
-        setRoles(response.data.data.map((role: any) =>  newRoles[role.role_label] = role.id))
+        const newRoles: { [i: string]: number; } = {}
+        setRoles(response.data.data.map((role: any) => newRoles[role.role_label] = role.id))
       }).catch(error => {
-        notify(`An error occured while fetching the roles`);
+        console.log(error)
+        // notify(`An error occured while fetching the roles`);
       })
   }
 
@@ -164,7 +163,7 @@ export const Dashboard = () => {
       <div style={styles.flexColumn as React.CSSProperties}>
         <Welcome />
         {
-          (roles ? permissions.indexOf(roles["admin"]) !== -1 : false) ? (
+          (roles ? permissions.indexOf(roles["admin"]) !== -1 : false) && (
             <>
               <CardWithIcon
                 to="/"
@@ -182,7 +181,7 @@ export const Dashboard = () => {
               </div>
               <VerticalSpacer />
             </>
-          ) : <></>
+          )
         }
         <CardWithIcon
           to="/"
@@ -192,23 +191,28 @@ export const Dashboard = () => {
         >
           <List>
             {
-              topBuyers.map((user: any, index: number) =>
-                <ListItem >
-                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.userAddress}`} target="_blank">
-                    <ListItemAvatar >
-                      <Avatar src={user.userPicture} />
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={`username - ${index}`}
-                    />
-                    <div className={classes.spacer} />
-                    <ListItemText
-                      primary={`33 ꜩ`}
-                      className={classes.alignRight}
-                    />
-                  </a>
-                </ListItem>
-              )
+              topBuyers && topBuyers.length ?
+                topBuyers.map((user: any, index: number) =>
+                  <ListItem >
+                    <a className={classes.link} href={process.env.REACT_APP_STORE_BASE_URL + `profile/${user?.userAddress}`} target="_blank">
+                      <ListItemAvatar >
+                        <Avatar src={user.userPicture} />
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={user.userName}
+                      />
+                      <div className={classes.spacer} />
+                      <ListItemText
+                        primary={`${user.totalPaid} ꜩ`}
+                        className={classes.alignRight}
+                      />
+                    </a>
+                  </ListItem>
+                )
+                :
+                <div style={{ minHeight: '5rem', height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#949494' }}>
+                  No Data
+                </div>
             }
           </List>
         </CardWithIcon>
@@ -220,7 +224,7 @@ export const Dashboard = () => {
         <Welcome />
       </div>
       {
-        (roles ? permissions.indexOf(roles["admin"]) !== -1 : false) ? (
+        (roles ? permissions.indexOf(roles["admin"]) !== -1 : false) && (
           <>
             <CardWithIcon
               to="/"
@@ -238,37 +242,43 @@ export const Dashboard = () => {
             </div>
             <VerticalSpacer />
           </>
-        ) : <></>
+        )
       }
 
-        <CardWithIcon
-          to="/"
-          icon={PeopleAltRoundedIcon}
-          title="Top buyers"
-          subtitle={topBuyers.length ?? 0}
-        >
-          <List>
-            {
+      <CardWithIcon
+        to="/"
+        icon={PeopleAltRoundedIcon}
+        title="Top buyers"
+        subtitle={topBuyers.length ?? 0}
+      >
+        <List>
+          {
+            topBuyers && topBuyers.length ?
               topBuyers.map((user: any, index: number) =>
                 <ListItem >
-                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.userAddress}`} target="_blank">
+                  <a className={classes.link} href={process.env.REACT_APP_STORE_BASE_URL + `profile/${user?.userAddress}`} target="_blank">
                     <ListItemAvatar >
                       <Avatar src={user.userPicture} />
                     </ListItemAvatar>
                     <ListItemText
-                      primary={`username - ${index}`}
+                      primary={user.userName}
                     />
                     <div className={classes.spacer} />
                     <ListItemText
-                      primary={`33 ꜩ`}
+                      primary={`${user.totalPaid} ꜩ`}
                       className={classes.alignRight}
                     />
                   </a>
                 </ListItem>
               )
-            }
-          </List>
-        </CardWithIcon>
+
+              :
+              <div style={{ minHeight: '5rem', height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#949494' }}>
+                No Data
+              </div>
+          }
+        </List>
+      </CardWithIcon>
 
     </div>
   ) : (
@@ -277,7 +287,7 @@ export const Dashboard = () => {
       <div style={styles.flex}>
         <div style={styles.leftCol}>
           {
-            (roles ? permissions.indexOf(roles["admin"]) !== -1 : false) ? (
+            (roles ? permissions.indexOf(roles["admin"]) !== -1 : false) && (
               <>
                 <CardWithIcon
                   to="/"
@@ -295,17 +305,23 @@ export const Dashboard = () => {
                 </div>
                 <VerticalSpacer />
               </>
-            ) : undefined
+            )
           }
 
-            <CardWithIcon
-              to=""
-              icon={InsertPhotoIcon}
-              title="Most viewed"
-              subtitle={mostViewed.length ?? 0}
-            >
-              <ListNftThumbnail nfts={mostViewed ?? []} />
-            </CardWithIcon>
+          <CardWithIcon
+            to=""
+            icon={InsertPhotoIcon}
+            title="Most viewed"
+            subtitle={mostViewed.length ?? 0}
+          >
+            <ListNftThumbnail nfts={mostViewed ?? []} />
+            {
+              !mostViewed || (mostViewed && mostViewed.length === 0) &&
+                <div style={{ minHeight: '5rem', height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#949494' }}>
+                  No Data
+                </div>
+            }
+          </CardWithIcon>
         </div>
         <div style={styles.rightCol}>
           <div style={styles.flex}>
@@ -317,23 +333,28 @@ export const Dashboard = () => {
             >
               <List>
                 {
-                  topBuyers.map((user: any, index: number) =>
-                    <ListItem >
-                      <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.userAddress}`} target="_blank">
-                        <ListItemAvatar >
-                          <Avatar src={user.userPicture} />
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={user.userName}
-                        />
-                        <div className={classes.spacer} />
-                        <ListItemText
-                          primary={`${user.totalPaid} ꜩ`}
-                          className={classes.alignRight}
-                        />
-                      </a>
-                    </ListItem>
-                  )
+                  topBuyers && topBuyers.length ?
+                    topBuyers.map((user: any, index: number) =>
+                      <ListItem >
+                        <a className={classes.link} href={process.env.REACT_APP_STORE_BASE_URL + `profile/${user?.userAddress}`} target="_blank">
+                          <ListItemAvatar >
+                            <Avatar src={user.userPicture} />
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={user.userName}
+                          />
+                          <div className={classes.spacer} />
+                          <ListItemText
+                            primary={`${user.totalPaid} ꜩ`}
+                            className={classes.alignRight}
+                          />
+                        </a>
+                      </ListItem>
+                    )
+                    :
+                    <div style={{ minHeight: '5rem', height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#949494' }}>
+                      No Data
+                    </div>
                 }
               </List>
             </CardWithIcon>
