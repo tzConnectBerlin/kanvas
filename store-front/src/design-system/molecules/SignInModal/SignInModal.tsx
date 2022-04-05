@@ -33,8 +33,6 @@ interface SignInModalProps {
     open: boolean;
     setCurrentLoggedUser: Function;
     listCart: Function;
-    redirectAfterSignIn: boolean;
-    setRedirectAfterSignIn: (input: boolean) => void;
 }
 
 interface IUserParams {
@@ -105,8 +103,6 @@ export const SignInModal: FC<SignInModalProps> = ({
         },
         { manual: true },
     );
-
-    const history = useHistory();
 
     // Sign expression function to sign user in
     const signExpression = async (
@@ -288,11 +284,6 @@ export const SignInModal: FC<SignInModalProps> = ({
                 'Kanvas - address',
                 registerUserResponse.data.userAddress,
             );
-
-            if (props.redirectAfterSignIn)
-                history.push(`/store`);
-
-            props.setRedirectAfterSignIn(true)
         }
     }, [registerUserResponse.data]);
 

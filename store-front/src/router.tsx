@@ -109,7 +109,6 @@ const Router = () => {
 
     const [cartOpen, setCartOpen] = useState(false);
     const [loginOpen, setLoginOpen] = useState(false);
-    const [redirectAfterSignIn, setRedirectAfterSignIn] = useState(true);
 
     return (
         <ThemeProvider
@@ -132,13 +131,11 @@ const Router = () => {
                     setCartOpen={setCartOpen}
                     switchTheme={handleSelectTheme}
                     selectedTheme={selectedTheme}
-                    nftsInCartNumber={nftsInCart.length}
+                    nftsInCartNumber={nftsInCart ? nftsInCart.length : 0}
                     notifications={0}
                     listCart={listCart}
                     loginOpen={loginOpen}
                     setLoginOpen={setLoginOpen}
-                    redirectAfterSignIn={redirectAfterSignIn}
-                    setRedirectAfterSignIn={setRedirectAfterSignIn}
                 />
 
                 <ScrollToTop>
@@ -178,7 +175,7 @@ const Router = () => {
                             path="/checkout"
                             render={() => (
                                 <Checkout
-                                    nftsInCart={nftsInCart}
+                                    nftsInCart={nftsInCart ?? []}
                                     setNftsInCart={setNftsInCart}
                                     listCart={listCart}
                                     setLoginOpen={setLoginOpen}
