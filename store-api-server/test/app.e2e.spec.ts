@@ -48,9 +48,7 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
   afterEach(async () => {
-    if (app) {
-      await app.close();
-    }
+    await app.close();
   });
 
   skipOnPriorFail('should be defined', () => expect(app).toBeDefined());

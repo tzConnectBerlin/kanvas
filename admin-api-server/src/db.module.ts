@@ -1,16 +1,10 @@
-import { Module } from '@nestjs/common';
-import * as dotenv from 'dotenv';
+import { Module, Logger, Inject } from '@nestjs/common';
 import { assertEnv } from './utils';
-import {
-  PG_CONNECTION,
-  PG_CONNECTION_STORE_REPLICATION,
-  PG_CONNECTION_STORE,
-} from './constants';
+import { PG_CONNECTION, PG_CONNECTION_STORE_REPLICATION } from './constants';
 import { Client, types } from 'pg';
 import * as Pool from 'pg-pool';
-export type DbPool = Pool<Client>;
 
-dotenv.config();
+export type DbPool = Pool<Client>;
 
 // Read postgres TIMESTAMP WITHOUT TIME ZONE values as UTC+0 Date
 types.setTypeParser(
@@ -20,43 +14,73 @@ types.setTypeParser(
   },
 );
 
-export const dbPool = new Pool({
-  host: assertEnv('PGHOST'),
-  port: Number(assertEnv('PGPORT')),
-  user: assertEnv('PGUSER'),
-  password: assertEnv('PGPASSWORD'),
-  database: assertEnv('PGDATABASE'),
-});
+interface Wrap {
+  dbPool?: DbPool;
+  storeDbPool?: DbPool;
+}
+
+const wrapPool = {
+  provide: 'PG_POOL_WRAP',
+  useValue: <Wrap>{ dbPool: undefined, storeDbPool: undefined },
+};
+
 const dbProvider = {
   provide: PG_CONNECTION,
-  useValue: dbPool,
+  inject: ['PG_POOL_WRAP'],
+  useFactory: async (w: Wrap) => {
+    if (typeof w.dbPool !== 'undefined') {
+      return w.dbPool;
+    }
+    w.dbPool = new Pool({
+      host: assertEnv('PGHOST'),
+      port: Number(assertEnv('PGPORT')),
+      user: assertEnv('PGUSER'),
+      password: assertEnv('PGPASSWORD'),
+      database: assertEnv('PGDATABASE'),
+    });
+    return w.dbPool;
+  },
 };
 
-export const storeReplDbPool = new Pool({
-  host: assertEnv('PGHOST'),
-  port: Number(assertEnv('PGPORT')),
-  user: assertEnv('PGUSER'),
-  password: assertEnv('PGPASSWORD'),
-  database: 'store_replication',
-});
 const dbStoreReplProvider = {
   provide: PG_CONNECTION_STORE_REPLICATION,
-  useValue: storeReplDbPool,
-};
-
-const dbStoreProvider = {
-  provide: PG_CONNECTION_STORE,
-  useValue: new Pool({
-    host: assertEnv('STORE_PGHOST'),
-    port: Number(assertEnv('STORE_PGPORT')),
-    user: assertEnv('STORE_PGUSER'),
-    password: assertEnv('STORE_PGPASSWORD'),
-    database: assertEnv('STORE_PGDATABASE'),
-  }),
+  inject: ['PG_POOL_WRAP'],
+  useFactory: async (w: Wrap) => {
+    if (typeof w.storeDbPool !== 'undefined') {
+      return w.storeDbPool;
+    }
+    w.storeDbPool = new Pool({
+      host: assertEnv('PGHOST'),
+      port: Number(assertEnv('PGPORT')),
+      user: assertEnv('PGUSER'),
+      password: assertEnv('PGPASSWORD'),
+      database: 'store_replication',
+    });
+    return w.storeDbPool;
+  },
 };
 
 @Module({
-  providers: [dbProvider, dbStoreReplProvider, dbStoreProvider],
-  exports: [dbProvider, dbStoreReplProvider, dbStoreProvider],
+  providers: [wrapPool, dbProvider, dbStoreReplProvider],
+  exports: [dbProvider, dbStoreReplProvider],
 })
-export class DbModule {}
+export class DbModule {
+  constructor(@Inject('PG_POOL_WRAP') private w: Wrap) {}
+
+  async onModuleDestroy() {
+    if (typeof this.w.dbPool === 'undefined') {
+      Logger.warn(
+        `pool already uninitialized! stacktrace: ${new Error().stack}`,
+      );
+      return;
+    }
+    Logger.log('closing db connection..');
+
+    await this.w.dbPool.end();
+    this.w.dbPool = undefined;
+    await this.w.storeDbPool.end();
+    this.w.storeDbPool = undefined;
+
+    Logger.log('db connection closed');
+  }
+}

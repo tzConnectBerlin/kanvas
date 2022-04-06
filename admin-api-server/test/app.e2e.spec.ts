@@ -2,8 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
-import { dbPool, storeReplDbPool } from 'src/db.module';
 import { Roles } from 'src/role/entities/role.entity';
+import { assertEnv } from 'src/utils';
+import * as Pool from 'pg-pool';
 
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {
@@ -32,7 +33,11 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+    app.enableShutdownHooks();
     await app.init();
+  });
+  afterEach(async () => {
+    await app.close();
   });
 
   it(`/ (GET) => NOT FOUND (make sure the nestjs's Hello World page is gone)`, () => {
@@ -2429,8 +2434,28 @@ describe('AppController (e2e)', () => {
   });
 });
 
+function newDbConn() {
+  return new Pool({
+    host: assertEnv('PGHOST'),
+    port: Number(assertEnv('PGPORT')),
+    user: assertEnv('PGUSER'),
+    password: assertEnv('PGPASSWORD'),
+    database: assertEnv('PGDATABASE'),
+  });
+}
+function newStoreReplConn() {
+  return new Pool({
+    host: assertEnv('PGHOST'),
+    port: Number(assertEnv('PGPORT')),
+    user: assertEnv('PGUSER'),
+    password: assertEnv('PGPASSWORD'),
+    database: 'store_replication',
+  });
+}
+
 async function emulateNftSale(userId: number, nftIds: number[], at: Date) {
-  const qryRes = await storeReplDbPool.query(
+  const storeRepl = newStoreReplConn();
+  const qryRes = await storeRepl.query(
     `
 INSERT INTO nft_order (
   user_id, order_at
@@ -2443,7 +2468,7 @@ RETURNING id
 
   const orderId = qryRes.rows[0]['id'];
 
-  await storeReplDbPool.query(
+  await storeRepl.query(
     `
 INSERT INTO mtm_nft_order_nft (
   nft_order_id, nft_id
@@ -2453,7 +2478,7 @@ SELECT $1, UNNEST($2::INTEGER[])
     [orderId, nftIds],
   );
 
-  await storeReplDbPool.query(
+  await storeRepl.query(
     `
 INSERT INTO payment (
   payment_id, status, nft_order_id, provider, expires_at
@@ -2462,17 +2487,20 @@ VALUES ('bla', 'succeeded', $1, 'test_provider', now())
     `,
     [orderId],
   );
+
+  await storeRepl.end();
 }
 
 async function queryStoreDbNft(nftId: number) {
-  const qryRes = await storeReplDbPool.query(
+  const storeRepl = newStoreReplConn();
+  const qryRes = await storeRepl.query(
     `
 SELECT *
 FROM nft
 WHERE id = $1`,
     [nftId],
   );
-  const qryResCats = await storeReplDbPool.query(
+  const qryResCats = await storeRepl.query(
     `
 SELECT nft_category_id
 FROM mtm_nft_category
@@ -2481,6 +2509,7 @@ ORDER BY 1`,
     [nftId],
   );
 
+  await storeRepl.end();
   return {
     nft: qryRes.rows[0],
     categories: qryResCats.rows.map((row: any) => row['nft_category_id']),
@@ -2488,7 +2517,9 @@ ORDER BY 1`,
 }
 
 async function alignAdminNftNextIdWithStoreNfts() {
-  const qryRes = await storeReplDbPool.query(
+  const db = newDbConn();
+  const storeRepl = newStoreReplConn();
+  const qryRes = await storeRepl.query(
     `
 SELECT MAX(id) as max_id FROM nft
     `,
@@ -2497,12 +2528,14 @@ SELECT MAX(id) as max_id FROM nft
 
   const setLastId = qryRes.rows[0]['max_id'];
 
-  await dbPool.query(
+  await db.query(
     `
 SELECT setval('nft_id_seq', $1)
     `,
     [setLastId],
   );
+  await storeRepl.end();
+  await db.end();
 }
 
 async function loginUser(

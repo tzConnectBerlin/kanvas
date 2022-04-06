@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import {
   PG_CONNECTION,
-  PG_CONNECTION_STORE,
   FILE_PREFIX,
   STM_CONFIG_FILE,
   NFT_PUBLISH_STATE,
@@ -26,10 +25,12 @@ import { CategoryEntity } from 'src/category/entity/category.entity';
 import { Lock } from 'async-await-mutex-lock';
 import { cryptoUtils } from 'sotez';
 import axios from 'axios';
-const fs = require('fs');
+import { watch, FSWatcher } from 'fs';
+// const fs = require('fs');
 
 @Injectable()
 export class NftService {
+  stmFileWatcher: FSWatcher;
   stm: StateTransitionMachine;
   nftLock: Lock<number>;
   CONTENT_TYPE = 'content_uri';
@@ -39,28 +40,35 @@ export class NftService {
   constructor(
     @Inject(S3Service) private s3Service: S3Service,
     @Inject(PG_CONNECTION) private db: DbPool,
-    @Inject(PG_CONNECTION_STORE) private dbStore: DbPool,
     @Inject(CategoryService) private categoryService: CategoryService,
     private readonly roleService: RoleService,
   ) {
     const stmConfigFile = STM_CONFIG_FILE;
     this.stm = new StateTransitionMachine(stmConfigFile);
     this.nftLock = new Lock<number>();
-    fs.watch(stmConfigFile, (event: any /* , filename: any */) => {
-      if (event !== 'change') {
-        Logger.log(`ignored stm config file event: ${event}`);
-        return;
-      }
-      try {
-        Logger.log('State transition machine config changed, reloading..');
-        this.stm = new StateTransitionMachine(stmConfigFile);
-        Logger.log('State transition machine config reloaded');
-      } catch (err: any) {
-        Logger.warn(
-          `State transition machine config reload failed, err: ${err}`,
-        );
-      }
-    });
+
+    this.stmFileWatcher = watch(
+      stmConfigFile,
+      (event: any /* , filename: any */) => {
+        if (event !== 'change' && event !== 'rename') {
+          Logger.log(`ignored stm config file event: ${event}`);
+          return;
+        }
+        try {
+          Logger.log('State transition machine config changed, reloading..');
+          this.stm = new StateTransitionMachine(stmConfigFile);
+          Logger.log('State transition machine config reloaded');
+        } catch (err: any) {
+          Logger.warn(
+            `State transition machine config reload failed, err: ${err}`,
+          );
+        }
+      },
+    );
+  }
+
+  beforeApplicationShutdown() {
+    this.stmFileWatcher.close();
   }
 
   getAttributes(): any {
@@ -307,6 +315,8 @@ WHERE id = $1
     } catch (err: any) {
       await dbTx.query('ROLLBACK');
       throw err;
+    } finally {
+      dbTx.release();
     }
   }
 

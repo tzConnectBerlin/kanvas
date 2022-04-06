@@ -31,6 +31,7 @@
     "@types/got": "^9.6.12",
     "@types/passport-jwt": "^3.0.6",
     "@types/pg": "^8.6.1",
+    "@types/pg-pool": "^2.0.3",
     "@types/ramda": "^0.27.47",
     "@types/tmp": "^0.2.3",
     "@types/uuid": "^8.3.1",

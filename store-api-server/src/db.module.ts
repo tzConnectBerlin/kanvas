@@ -1,7 +1,10 @@
 import { Logger, Module, Inject } from '@nestjs/common';
 import { assertEnv } from './utils';
 import { PG_CONNECTION } from './constants';
-import { Pool, types } from 'pg';
+import { Client, types } from 'pg';
+import * as Pool from 'pg-pool';
+
+export type DbPool = Pool<Client>;
 
 // Read postgres TIMESTAMP WITHOUT TIME ZONE values as UTC+0 Date
 types.setTypeParser(
@@ -11,45 +14,49 @@ types.setTypeParser(
   },
 );
 
-const dbWrap = {
-  provide: 'PG_CONNECTION_WRAP',
-  useValue: { pool: null },
+interface Wrap {
+  dbPool?: DbPool;
+}
+
+const wrapPool = {
+  provide: 'PG_POOL_WRAP',
+  useValue: <Wrap>{ dbPool: undefined },
 };
 const dbProvider = {
   provide: PG_CONNECTION,
-  inject: ['PG_CONNECTION_WRAP'],
-  useFactory: (wrap: any) => {
-    if (wrap.pool) {
-      return wrap.pool;
+  inject: ['PG_POOL_WRAP'],
+  useFactory: (w: Wrap) => {
+    if (typeof w.dbPool !== 'undefined') {
+      return w.dbPool;
     }
-    wrap.pool = new Pool({
+    w.dbPool = new Pool({
       host: assertEnv('PGHOST'),
       port: Number(assertEnv('PGPORT')),
       user: assertEnv('PGUSER'),
       password: assertEnv('PGPASSWORD'),
       database: assertEnv('PGDATABASE'),
     });
-    return wrap.pool;
+    return w.dbPool;
   },
 };
 
 @Module({
-  providers: [dbWrap, dbProvider],
+  providers: [wrapPool, dbProvider],
   exports: [dbProvider],
 })
 export class DbModule {
-  constructor(@Inject('PG_CONNECTION_WRAP') private wrap: any) {}
+  constructor(@Inject('PG_POOL_WRAP') private w: Wrap) {}
 
   async onModuleDestroy() {
-    if (this.wrap.pool == null) {
-      console.log(
+    if (typeof this.w.dbPool === 'undefined') {
+      Logger.warn(
         `pool already uninitialized! stacktrace: ${new Error().stack}`,
       );
       return;
     }
-    Logger.log('shutting down the pg connection pool..');
-    await this.wrap.pool.end();
-    this.wrap.pool = null;
-    Logger.log('pg connection closed');
+    Logger.log('closing db connection..');
+    await this.w.dbPool.end();
+    this.w.dbPool = undefined;
+    Logger.log('db connection closed');
   }
 }
