@@ -92,7 +92,7 @@ DROP FUNCTION nft_ids_filtered(
   INTEGER, INTEGER,
   TIMESTAMP WITHOUT TIME ZONE,
   TEXT);
-ALTER FUNCTION __nft_ids_filtered_v1 RENAME TO __nfts_ids_filtered;
+ALTER FUNCTION __nfts_ids_filtered_v1 RENAME TO nft_ids_filtered;
 
 COMMIT;
 

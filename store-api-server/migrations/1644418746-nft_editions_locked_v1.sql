@@ -18,6 +18,6 @@ COMMIT;
 
 BEGIN;
 
-DROP FUNCTION nft_editions_locked(INTEGER[], TEXT, TEXT);
+DROP FUNCTION nft_editions_locked(INTEGER);
 
 COMMIT;

@@ -30,7 +30,7 @@ const skipOnPriorFail = (name: string, action: any) => {
 };
 
 describe('AppController (e2e)', () => {
-  let app: INestApplication;
+  let app: any;
   let paymentService: PaymentService;
   let userService: UserService;
 
@@ -44,7 +44,13 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+    app.enableShutdownHooks();
     await app.init();
+  });
+  afterEach(async () => {
+    if (app) {
+      await app.close();
+    }
   });
 
   skipOnPriorFail('should be defined', () => expect(app).toBeDefined());
@@ -82,6 +88,7 @@ describe('AppController (e2e)', () => {
         request(app.getHttpServer()).post('/nfts/27'),
         request(app.getHttpServer()).post('/nfts/28'),
       ]);
+
       for (const post of posts) {
         expect(post.statusCode).toEqual(201);
       }
@@ -103,13 +110,6 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'verify caching works as intended on one of the cached endpoints',
     async () => {
-      const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [AppModule],
-      }).compile();
-      app = moduleFixture.createNestApplication();
-      app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-      await app.init();
-
       let res = await request(app.getHttpServer())
         .get('/nfts')
         .query({ orderBy: 'views', orderDirection: 'desc', pageSize: '3' });
@@ -908,6 +908,8 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     '/users/cart verify expiration (by setting very small expiration timeout)',
     async () => {
+      await app.close();
+
       const origExpiration = process.env.CART_EXPIRATION_MILLI_SECS;
       process.env.CART_EXPIRATION_MILLI_SECS = '0';
       const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -915,7 +917,10 @@ describe('AppController (e2e)', () => {
       }).compile();
       app = moduleFixture.createNestApplication();
       app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+      app.enableShutdownHooks();
       await app.init();
+
+      const userService = await moduleFixture.get(UserService);
 
       userService.CART_EXPIRATION_MILLI_SECS = 0;
       const add1 = await request(app.getHttpServer()).post(

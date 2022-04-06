@@ -69,7 +69,7 @@ FROM (
 ) AS view_counts
 JOIN nft_category AS cat
   on cat.id = view_counts.cat_id
-ORDER BY view_count
+ORDER BY view_count, cat.id
 `,
       [SEARCH_MAX_CATEGORIES],
     );

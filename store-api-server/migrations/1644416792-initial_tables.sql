@@ -114,10 +114,16 @@ DROP TABLE mtm_kanvas_user_nft;
 DROP TABLE mtm_cart_session_nft;
 DROP TABLE mtm_nft_order_nft;
 
+ALTER TABLE nft_order DROP CONSTRAINT nft_order_user_id_fkey;
+
 DROP TABLE kanvas_user;
 DROP TABLE nft;
 DROP TABLE nft_category;
 DROP TABLE cart_session;
+DROP TABLE payment;
 DROP TABLE nft_order;
+
+DROP TYPE payment_status;
+DROP TYPE payment_provider;
 
 COMMIT;
