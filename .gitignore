@@ -76,5 +76,7 @@ yarn-error.log*
 
 nginx.vars
 
-# vim
+# editor backup files
 *.swp
+*.*~
+[#]*[#]
