@@ -198,8 +198,7 @@ RETURNING id
     nftId: number,
     nftUpdates: NftUpdate[],
   ): Promise<NftEntity> {
-    await this.nftLock.acquire(nftId);
-    try {
+    return await this.withNftLock(nftId, async () => {
       const nfts = await this.#findByIds([nftId]);
       if (nfts.length === 0) {
         throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
@@ -256,17 +255,11 @@ RETURNING id
 
       await this.#updateNft(user, nft);
       return await this.getNft(user, nft.id);
-    } catch (err: any) {
-      throw err;
-    } finally {
-      this.nftLock.release(nftId);
-    }
+    });
   }
 
   async deleteNft(user: UserEntity, nftId: number) {
-    await this.nftLock.acquire(nftId);
-
-    try {
+    return await this.withNftLock(nftId, async () => {
       const nft = await this.#findOne(nftId);
       const actor = await this.#getActorForNft(user, nft);
       if (
@@ -289,9 +282,7 @@ RETURNING id
       }
 
       await this.#deleteNft(nftId);
-    } finally {
-      this.nftLock.release(nftId);
-    }
+    });
   }
 
   async #deleteNft(nftId: number) {
@@ -467,5 +458,17 @@ WHERE TARGET.value != EXCLUDED.value
       hexMsg = '0' + hexMsg;
     }
     return (await cryptoUtils.sign(hexMsg, privateKey)).sig;
+  }
+
+  async withNftLock<ResTy>(
+    nftId: number,
+    f: () => Promise<ResTy>,
+  ): Promise<ResTy> {
+    await this.nftLock.acquire(nftId);
+    try {
+      return await f();
+    } finally {
+      this.nftLock.release(nftId);
+    }
   }
 }
