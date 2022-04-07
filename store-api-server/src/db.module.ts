@@ -1,7 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module, Inject } from '@nestjs/common';
 import { assertEnv } from './utils';
 import { PG_CONNECTION } from './constants';
-import { Pool, types } from 'pg';
+import { Client, types } from 'pg';
+import * as Pool from 'pg-pool';
+
+export type DbPool = Pool<Client>;
 
 // Read postgres TIMESTAMP WITHOUT TIME ZONE values as UTC+0 Date
 types.setTypeParser(
@@ -11,19 +14,49 @@ types.setTypeParser(
   },
 );
 
+interface Wrap {
+  dbPool?: DbPool;
+}
+
+const wrapPool = {
+  provide: 'PG_POOL_WRAP',
+  useValue: <Wrap>{ dbPool: undefined },
+};
 const dbProvider = {
   provide: PG_CONNECTION,
-  useValue: new Pool({
-    host: assertEnv('PGHOST'),
-    port: Number(assertEnv('PGPORT')),
-    user: assertEnv('PGUSER'),
-    password: assertEnv('PGPASSWORD'),
-    database: assertEnv('PGDATABASE'),
-  }),
+  inject: ['PG_POOL_WRAP'],
+  useFactory: (w: Wrap) => {
+    if (typeof w.dbPool !== 'undefined') {
+      return w.dbPool;
+    }
+    w.dbPool = new Pool({
+      host: assertEnv('PGHOST'),
+      port: Number(assertEnv('PGPORT')),
+      user: assertEnv('PGUSER'),
+      password: assertEnv('PGPASSWORD'),
+      database: assertEnv('PGDATABASE'),
+    });
+    return w.dbPool;
+  },
 };
 
 @Module({
-  providers: [dbProvider],
+  providers: [wrapPool, dbProvider],
   exports: [dbProvider],
 })
-export class DbModule {}
+export class DbModule {
+  constructor(@Inject('PG_POOL_WRAP') private w: Wrap) {}
+
+  async onModuleDestroy() {
+    if (typeof this.w.dbPool === 'undefined') {
+      Logger.warn(
+        `pool already uninitialized! stacktrace: ${new Error().stack}`,
+      );
+      return;
+    }
+    Logger.log('closing db connection..');
+    await this.w.dbPool.end();
+    this.w.dbPool = undefined;
+    Logger.log('db connection closed');
+  }
+}

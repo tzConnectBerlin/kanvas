@@ -17,6 +17,9 @@ describe('NftService', () => {
 
     service = module.get<NftService>(NftService);
   });
+  afterEach(async () => {
+    service.beforeApplicationShutdown();
+  });
 
   it('should be defined', () => {
     expect(service).toBeDefined();

@@ -16,6 +16,7 @@ async function bootstrap() {
     }),
   );
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.enableShutdownHooks();
   await app.listen(port);
   console.log('Listening on ', port);
 }

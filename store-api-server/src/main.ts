@@ -13,6 +13,7 @@ async function bootstrap() {
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.use('/payment/stripe-webhook', raw({ type: 'application/json' }));
+  app.enableShutdownHooks();
 
   await app.listen(port);
   console.log('Listening on ', port);

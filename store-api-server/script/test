@@ -19,7 +19,10 @@ trap "docker kill $db_docker" EXIT
 
 echo "waiting for testdb setup.. (docker: $db_docker)"
 ./script/wait-db
-sleep 1  # sleeping for 1 more second, for db migrations to finish
+
+while [ "`HOST=$PGHOST PORT=$PGPORT LOGIN=$PGUSER PASSWORD=$PGPASSWORD ./script/shmig -t postgresql -d $PGDATABASE pending`" != "" ]; do
+    sleep 1
+done
 
 echo "running tests.."
 

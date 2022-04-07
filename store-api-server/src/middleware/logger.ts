@@ -17,6 +17,7 @@ export class StatsLogger {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async logStats() {
+    console.log('logging stats...');
     const store: any = this.cache.store;
 
     const countFunc = store.itemCount;
