@@ -226,7 +226,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
 
         if (timeLeft < 300000 && !isWarned) {
             toast.warning(
-                `Your card will expire in ${new Date(
+                `Your cart will expire in ${new Date(
                     timeLeft,
                 ).getMinutes()} minutes`,
             );
@@ -315,12 +315,19 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
         if (paymentIntentSecret.response?.status === 401) {
             return;
         }
-        if (paymentIntentSecret.error) {
+        if (paymentIntentSecret.error && paymentIntentSecret.error.response?.status !== 401) {
             toast.error('Something went wrong with the cart, please refresh')
         }
     }, [paymentIntentSecret])
 
     const [stripeOptions, setStripeOptions] = useState<StripeElementsOptions>({ clientSecret: undefined })
+
+
+    useEffect(() => {
+        if (selectedPaymentMethod) {
+            handleForwardStep()
+        }
+    }, [selectedPaymentMethod])
 
     return (
         <PageWrapper>

@@ -1,13 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CategoryService } from './category.service';
-import { DbMockModule } from '../../db_mock.module';
+import { DbMock } from 'src/mock/db.module';
+import { CacheMock } from 'src/mock/cache.module';
 
 describe('CategoryService', () => {
   let service: CategoryService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DbMockModule],
+      imports: [DbMock, CacheMock],
       providers: [CategoryService],
     }).compile();
 

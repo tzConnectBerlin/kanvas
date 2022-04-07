@@ -1,3 +1,4 @@
+import axios from 'axios';
 import {
   login,
   logout,
@@ -15,7 +16,7 @@ const authProvider = {
     return Promise.resolve();
   },
   checkError: ({ status }: { status: number }) => {
-    if (status === 401 || status === 403) {
+    if (status === 401) {
       logout();
       return Promise.reject();
     }
@@ -27,6 +28,7 @@ const authProvider = {
 
   getPermissions: async () => {
     const user = await getDecodedToken();
+
     return user ? Promise.resolve(user.scope) : Promise.reject();
   },
 };

@@ -8,7 +8,7 @@ import {
   Query,
   UseGuards,
   UploadedFiles,
-  UseInterceptors
+  UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
@@ -35,7 +35,7 @@ function pngFileFilter(req: any, file: any, callback: any) {
     )
   ) {
     req.fileValidationError = 'Invalid file type';
-    return callback(new Error('Invalid file type'), false);
+    return callback(new Error(`Invalid file type: ${file.mimetype}`), false);
   }
 
   return callback(null, true);
@@ -44,6 +44,12 @@ function pngFileFilter(req: any, file: any, callback: any) {
 @Controller('nft')
 export class NftController {
   constructor(private readonly nftService: NftService) {}
+
+  @Get('/attributes')
+  @UseGuards(JwtAuthGuard)
+  getAttributes() {
+    return this.nftService.getAttributes();
+  }
 
   @Get()
   @UseGuards(JwtAuthGuard)
@@ -58,7 +64,7 @@ export class NftController {
 
     validatePaginationParams(params, this.nftService.getSortableFields());
 
-    return { data: await this.nftService.findAll(params) };
+    return await this.nftService.findAll(params);
   }
 
   @Get(':id')
@@ -84,7 +90,7 @@ export class NftController {
     @UploadedFiles() filesArray?: any[],
   ): Promise<NftEntity> {
     let nftId = urlParams.id;
-    
+
     if (typeof nftId === 'undefined') {
       nftId = (await this.nftService.createNft(user)).id;
     }

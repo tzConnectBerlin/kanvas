@@ -2,8 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
-import { dbPool, storeReplDbPool } from 'src/db.module';
 import { Roles } from 'src/role/entities/role.entity';
+import { assertEnv } from 'src/utils';
+import * as Pool from 'pg-pool';
 
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {
@@ -32,7 +33,11 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+    app.enableShutdownHooks();
     await app.init();
+  });
+  afterEach(async () => {
+    await app.close();
   });
 
   it(`/ (GET) => NOT FOUND (make sure the nestjs's Hello World page is gone)`, () => {
@@ -83,16 +88,35 @@ describe('AppController (e2e)', () => {
         userName: 'Regular Joe',
         address: 'tz1bla',
         password: 'somepass',
-        roles: [Roles.editor],
+        roles: [Roles.editor, Roles.moderator],
       });
     expect(res.statusCode).toEqual(201);
     expect(res.body).toStrictEqual({
       id: 2,
-      roles: [Roles.editor],
+      roles: [Roles.editor, Roles.moderator],
       email: 'regular_joe@bigbrother.co',
       userName: 'Regular Joe',
       address: 'tz1bla',
     });
+  });
+
+  skipOnPriorFail('new user with 0 roles assigned is ok', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'admin@tzconnect.com',
+      'supersafepassword',
+    );
+    const res = await request(app.getHttpServer())
+      .post('/user')
+      .set('authorization', bearer)
+      .send({
+        email: 'ben@bigbrother.co',
+        userName: 'Ben',
+        address: 'tz1ben',
+        password: 'somepass',
+        roles: [],
+      });
+    expect(res.statusCode).toEqual(201);
   });
 
   skipOnPriorFail('PATCH /nft/:id fails requires to be logged in', async () => {
@@ -117,7 +141,7 @@ describe('AppController (e2e)', () => {
         .get('/nft')
         .set('authorization', bearer);
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toStrictEqual({ data: [] });
+      expect(res.body).toStrictEqual({ count: 0, data: [] });
     },
   );
 
@@ -161,6 +185,9 @@ describe('AppController (e2e)', () => {
         createdBy: 1,
         attributes: {},
         allowedActions: { name: 'string', create_ready: 'boolean' },
+        stateInfo: {
+          setup_nft: ['nft.name.length > 0', 'nft.create_ready'],
+        },
       });
     },
   );
@@ -190,6 +217,9 @@ describe('AppController (e2e)', () => {
         createdBy: 1,
         attributes: { name: 'test' },
         allowedActions: { name: 'string', create_ready: 'boolean' },
+        stateInfo: {
+          setup_nft: ['nft.create_ready'],
+        },
       });
     },
   );
@@ -213,7 +243,7 @@ describe('AppController (e2e)', () => {
       expect(res.statusCode).toEqual(200);
 
       expect(res.body.createdAt).toBeGreaterThan(0);
-      expect(res.body.updatedAt).toEqual(res.body.createdAt);
+      expect(res.body.updatedAt).toBeGreaterThan(0); // toEqual(res.body.createdAt);
       delete res.body.createdAt;
       delete res.body.updatedAt;
 
@@ -223,6 +253,9 @@ describe('AppController (e2e)', () => {
         createdBy: 1,
         attributes: { name: 'test' },
         allowedActions: { name: 'string', create_ready: 'boolean' },
+        stateInfo: {
+          setup_nft: ['nft.create_ready'],
+        },
       });
 
       const joe = await loginUser(app, 'regular_joe@bigbrother.co', 'somepass');
@@ -243,6 +276,9 @@ describe('AppController (e2e)', () => {
         createdBy: 1,
         attributes: { name: 'test' },
         allowedActions: {},
+        stateInfo: {
+          setup_nft: ['nft.create_ready'],
+        },
       });
     },
   );
@@ -365,14 +401,10 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail(
-    'NFT cannot be removed by anyone else than the creator',
+    'NFT cannot be removed by anyone else than the creator or an admin',
     async () => {
       const joe = await loginUser(app, 'regular_joe@bigbrother.co', 'somepass');
-      const admin = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const ben = await loginUser(app, 'ben@bigbrother.co', 'somepass');
       let res = await request(app.getHttpServer())
         .patch('/nft')
         .set('authorization', joe.bearer);
@@ -382,7 +414,7 @@ describe('AppController (e2e)', () => {
 
       res = await request(app.getHttpServer())
         .delete(`/nft/${nftId}`)
-        .set('authorization', admin.bearer);
+        .set('authorization', ben.bearer);
       expect(res.statusCode).toEqual(403);
     },
   );
@@ -449,6 +481,9 @@ describe('AppController (e2e)', () => {
         createdBy: 1,
         attributes: { name: 'test' },
         allowedActions: { name: 'string', create_ready: 'boolean' },
+        stateInfo: {
+          setup_nft: ['nft.create_ready'],
+        },
       });
 
       res = await request(app.getHttpServer())
@@ -467,6 +502,9 @@ describe('AppController (e2e)', () => {
         createdBy: 1,
         attributes: { name: 'modified name' },
         allowedActions: { name: 'string', create_ready: 'boolean' },
+        stateInfo: {
+          setup_nft: ['nft.create_ready'],
+        },
       });
 
       res = await request(app.getHttpServer())
@@ -490,6 +528,15 @@ describe('AppController (e2e)', () => {
           price: 'number',
           launch_at: 'date',
           proposed: 'boolean',
+        },
+        stateInfo: {
+          proposed: [
+            'nft.proposed',
+            'nft.editions_size > 0',
+            'nft.price > 0',
+            'nft.categories.length > 0',
+            'nft.launch_at >= Date.now()',
+          ],
         },
       });
     },
@@ -520,6 +567,7 @@ describe('AppController (e2e)', () => {
       }
 
       expect(res.body).toStrictEqual({
+        count: 6,
         data: [
           {
             id: 1,
@@ -585,7 +633,7 @@ describe('AppController (e2e)', () => {
     res = await request(app.getHttpServer())
       .get('/nft')
       .set('authorization', bearer)
-      .query({ range: JSON.stringify([1, 3]) });
+      .query({ range: JSON.stringify([1, 2]) });
     expect(res.statusCode).toEqual(200);
     expect(res.body.data.map((row: any) => row.id)).toStrictEqual([2, 3]);
 
@@ -616,7 +664,7 @@ describe('AppController (e2e)', () => {
       res = await request(app.getHttpServer())
         .get('/nft')
         .set('authorization', bearer)
-        .query({ range: JSON.stringify([2, 1]) });
+        .query({ range: JSON.stringify([2, -1]) });
       expect(res.statusCode).toEqual(400);
       res = await request(app.getHttpServer())
         .get('/nft')
@@ -675,6 +723,7 @@ describe('AppController (e2e)', () => {
       }
 
       expect(res.body).toStrictEqual({
+        count: 6,
         data: [
           {
             id: 1,
@@ -767,6 +816,7 @@ describe('AppController (e2e)', () => {
       }
 
       expect(res.body).toStrictEqual({
+        count: 6,
         data: [
           {
             id: 8,
@@ -832,6 +882,7 @@ describe('AppController (e2e)', () => {
       }
 
       expect(res.body).toStrictEqual({
+        count: 6,
         data: [
           {
             attributes: {
@@ -925,6 +976,7 @@ describe('AppController (e2e)', () => {
     }
 
     expect(res.body).toStrictEqual({
+      count: 4,
       data: [
         {
           id: 1,
@@ -969,6 +1021,7 @@ describe('AppController (e2e)', () => {
     }
 
     expect(res.body).toStrictEqual({
+      count: 1,
       data: [
         {
           id: 8,
@@ -995,6 +1048,7 @@ describe('AppController (e2e)', () => {
     }
 
     expect(res.body).toStrictEqual({
+      count: 5,
       data: [
         {
           id: 1,
@@ -1045,6 +1099,7 @@ describe('AppController (e2e)', () => {
     }
 
     expect(res.body).toStrictEqual({
+      count: 2,
       data: [
         {
           id: 3,
@@ -1077,6 +1132,7 @@ describe('AppController (e2e)', () => {
     }
 
     expect(res.body).toStrictEqual({
+      count: 2,
       data: [
         {
           id: 3,
@@ -1092,25 +1148,6 @@ describe('AppController (e2e)', () => {
         },
       ],
     });
-  });
-
-  skipOnPriorFail('new user with 0 roles assigned is ok', async () => {
-    const { bearer } = await loginUser(
-      app,
-      'admin@tzconnect.com',
-      'supersafepassword',
-    );
-    const res = await request(app.getHttpServer())
-      .post('/user')
-      .set('authorization', bearer)
-      .send({
-        email: 'ben@bigbrother.co',
-        userName: 'Ben',
-        address: 'tz1ben',
-        password: 'somepass',
-        roles: [],
-      });
-    expect(res.statusCode).toEqual(201);
   });
 
   skipOnPriorFail(`new user's roles must all be valid`, async () => {
@@ -1162,6 +1199,7 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 3,
       data: [
         {
           id: 1,
@@ -1175,7 +1213,7 @@ describe('AppController (e2e)', () => {
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
           address: 'tz1bla',
-          roles: [Roles.editor],
+          roles: [Roles.editor, Roles.moderator],
         },
         {
           id: 3,
@@ -1200,6 +1238,7 @@ describe('AppController (e2e)', () => {
       .query({ sort: JSON.stringify(['id', 'desc']) });
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 3,
       data: [
         {
           id: 3,
@@ -1213,7 +1252,7 @@ describe('AppController (e2e)', () => {
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
           address: 'tz1bla',
-          roles: [Roles.editor],
+          roles: [Roles.editor, Roles.moderator],
         },
         {
           id: 1,
@@ -1241,6 +1280,7 @@ describe('AppController (e2e)', () => {
       });
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 3,
       data: [
         {
           id: 3,
@@ -1254,7 +1294,7 @@ describe('AppController (e2e)', () => {
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
           address: 'tz1bla',
-          roles: [Roles.editor],
+          roles: [Roles.editor, Roles.moderator],
         },
       ],
     });
@@ -1275,6 +1315,7 @@ describe('AppController (e2e)', () => {
       });
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 3,
       data: [
         {
           id: 1,
@@ -1303,7 +1344,7 @@ describe('AppController (e2e)', () => {
       res = await request(app.getHttpServer())
         .get('/user')
         .set('authorization', bearer)
-        .query({ range: JSON.stringify([2, 1]) });
+        .query({ range: JSON.stringify([2, -1]) });
       expect(res.statusCode).toEqual(400);
       res = await request(app.getHttpServer())
         .get('/user')
@@ -1350,6 +1391,7 @@ describe('AppController (e2e)', () => {
         .query({ sort: JSON.stringify(['id']) });
       expect(res.statusCode).toEqual(200);
       expect(res.body).toEqual({
+        count: 3,
         data: [
           {
             id: 1,
@@ -1363,7 +1405,7 @@ describe('AppController (e2e)', () => {
             email: 'regular_joe@bigbrother.co',
             userName: 'Regular Joe',
             address: 'tz1bla',
-            roles: [Roles.editor],
+            roles: [Roles.editor, Roles.moderator],
           },
           {
             id: 3,
@@ -1381,6 +1423,7 @@ describe('AppController (e2e)', () => {
         .query({ sort: JSON.stringify(['email']) });
       expect(res.statusCode).toEqual(200);
       expect(res.body).toEqual({
+        count: 3,
         data: [
           {
             id: 1,
@@ -1401,7 +1444,7 @@ describe('AppController (e2e)', () => {
             email: 'regular_joe@bigbrother.co',
             userName: 'Regular Joe',
             address: 'tz1bla',
-            roles: [Roles.editor],
+            roles: [Roles.editor, Roles.moderator],
           },
         ],
       });
@@ -1412,6 +1455,7 @@ describe('AppController (e2e)', () => {
         .query({ sort: JSON.stringify(['userName']) });
       expect(res.statusCode).toEqual(200);
       expect(res.body).toEqual({
+        count: 3,
         data: [
           {
             id: 1,
@@ -1432,7 +1476,7 @@ describe('AppController (e2e)', () => {
             email: 'regular_joe@bigbrother.co',
             userName: 'Regular Joe',
             address: 'tz1bla',
-            roles: [Roles.editor],
+            roles: [Roles.editor, Roles.moderator],
           },
         ],
       });
@@ -1443,6 +1487,7 @@ describe('AppController (e2e)', () => {
         .query({ sort: JSON.stringify(['address']) });
       expect(res.statusCode).toEqual(200);
       expect(res.body).toEqual({
+        count: 3,
         data: [
           {
             id: 3,
@@ -1456,7 +1501,7 @@ describe('AppController (e2e)', () => {
             email: 'regular_joe@bigbrother.co',
             userName: 'Regular Joe',
             address: 'tz1bla',
-            roles: [Roles.editor],
+            roles: [Roles.editor, Roles.moderator],
           },
           {
             id: 1,
@@ -1474,6 +1519,7 @@ describe('AppController (e2e)', () => {
         .query({ sort: JSON.stringify(['roles']) });
       expect(res.statusCode).toEqual(200);
       expect(res.body).toEqual({
+        count: 3,
         data: [
           {
             id: 3,
@@ -1494,7 +1540,7 @@ describe('AppController (e2e)', () => {
             email: 'regular_joe@bigbrother.co',
             userName: 'Regular Joe',
             address: 'tz1bla',
-            roles: [Roles.editor],
+            roles: [Roles.editor, Roles.moderator],
           },
         ],
       });
@@ -1534,13 +1580,14 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 2,
       data: [
         {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
           address: 'tz1bla',
-          roles: [Roles.editor],
+          roles: [Roles.editor, Roles.moderator],
         },
         {
           address: 'tz1ben',
@@ -1565,13 +1612,14 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 2,
       data: [
         {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
           address: 'tz1bla',
-          roles: [Roles.editor],
+          roles: [Roles.editor, Roles.moderator],
         },
         {
           address: 'tz1ben',
@@ -1596,13 +1644,14 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 2,
       data: [
         {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
           address: 'tz1bla',
-          roles: [Roles.editor],
+          roles: [Roles.editor, Roles.moderator],
         },
         {
           address: 'tz1ben',
@@ -1627,13 +1676,14 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 1,
       data: [
         {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
           address: 'tz1bla',
-          roles: [Roles.editor],
+          roles: [Roles.editor, Roles.moderator],
         },
       ],
     });
@@ -1647,10 +1697,11 @@ describe('AppController (e2e)', () => {
     );
     const res = await request(app.getHttpServer())
       .get('/user')
-      .query({ userName: 'Regular Joe', roleIds: Roles.moderator })
+      .query({ userName: 'Regular Joe', roleIds: Roles.admin })
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({
+      count: 0,
       data: [],
     });
   });
@@ -1924,7 +1975,7 @@ describe('AppController (e2e)', () => {
       email: 'regular_joe@bigbrother.co',
       userName: 'Regular Joe',
       address: 'tz1bla',
-      roles: [Roles.editor],
+      roles: [Roles.editor, Roles.moderator],
     });
 
     res = await request(app.getHttpServer())
@@ -2011,44 +2062,6 @@ describe('AppController (e2e)', () => {
     },
   );
 
-  skipOnPriorFail('non admin cannot remove users', async () => {
-    const { bearer } = await loginUser(
-      app,
-      'regular_joe@bigbrother.co',
-      'somepass',
-    );
-
-    let res = await request(app.getHttpServer())
-      .get('/user')
-      .query({ userName: 'Regular Joe' })
-      .set('authorization', bearer);
-    const userId = res.body.data[0].id;
-
-    res = await request(app.getHttpServer())
-      .delete(`/user/${userId}`)
-      .set('authorization', bearer);
-    expect(res.statusCode).toEqual(403);
-  });
-
-  skipOnPriorFail('admin can remove users', async () => {
-    const { bearer } = await loginUser(
-      app,
-      'admin@tzconnect.com',
-      'supersafepassword',
-    );
-
-    let res = await request(app.getHttpServer())
-      .get('/user')
-      .query({ userName: 'Regular Joe' })
-      .set('authorization', bearer);
-    const userId = res.body.data[0].id;
-
-    res = await request(app.getHttpServer())
-      .delete(`/user/${userId}`)
-      .set('authorization', bearer);
-    expect(res.statusCode).toEqual(200);
-  });
-
   skipOnPriorFail(
     'admin can access analytics endpoints (part 2; after emulated sales)',
     async () => {
@@ -2125,6 +2138,12 @@ describe('AppController (e2e)', () => {
       'admin@tzconnect.com',
       'supersafepassword',
     );
+    const moderator = await loginUser(
+      app,
+      'regular_joe@bigbrother.co',
+      'somepass',
+    );
+
     let res = await request(app.getHttpServer())
       .patch('/nft')
       .set('authorization', bearer)
@@ -2157,10 +2176,19 @@ describe('AppController (e2e)', () => {
       .patch(`/nft/${nftId}`)
       .set('authorization', bearer)
       .send({
-        publish: JSON.stringify(true),
+        publish_vote: JSON.stringify('yes'),
         'image.png': JSON.stringify('someuri'),
         'thumbnail.png': JSON.stringify('somethumbnailuri'),
         description: JSON.stringify('some long description'),
+      });
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.state).toEqual('proposed'); // need 2 votes
+
+    res = await request(app.getHttpServer())
+      .patch(`/nft/${nftId}`)
+      .set('authorization', moderator.bearer)
+      .send({
+        publish_vote: JSON.stringify('yes'),
       });
     expect(res.statusCode).toEqual(200);
     expect(res.body.state).toEqual('finish');
@@ -2181,6 +2209,8 @@ describe('AppController (e2e)', () => {
         description: 'some long description',
         display_uri: null,
         thumbnail_uri: 'somethumbnailuri',
+        signature:
+          'sigsdWYgoHEU5tycRySdCFZKfj4N9D1GXWG63uXyDNdkepcsyna7Z43QDVF1jjT1pCiyhABvg1KrRXYPpuVuR5kMhLsiVV9r',
       },
       categories: [3, 4, 5],
     });
@@ -2194,6 +2224,12 @@ describe('AppController (e2e)', () => {
         'admin@tzconnect.com',
         'supersafepassword',
       );
+      const moderator = await loginUser(
+        app,
+        'regular_joe@bigbrother.co',
+        'somepass',
+      );
+
       let res = await request(app.getHttpServer())
         .patch('/nft')
         .set('authorization', bearer)
@@ -2231,18 +2267,195 @@ describe('AppController (e2e)', () => {
         .patch(`/nft/${nftId}`)
         .set('authorization', bearer)
         .send({
-          publish: JSON.stringify(true),
+          publish_vote: JSON.stringify('yes'),
           'image.png': JSON.stringify('someuri'),
           'thumbnail.png': JSON.stringify('somethumbnailuri'),
           description: JSON.stringify('some long description'),
         });
+      expect(res.statusCode).toEqual(200); // need 2 votes
+
+      res = await request(app.getHttpServer())
+        .patch(`/nft/${nftId}`)
+        .set('authorization', moderator.bearer)
+        .send({
+          publish_vote: JSON.stringify('yes'),
+        });
       expect(res.statusCode).toEqual(500);
     },
   );
+
+  skipOnPriorFail('NFT test voting behavior', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'admin@tzconnect.com',
+      'supersafepassword',
+    );
+    const moderator = await loginUser(
+      app,
+      'regular_joe@bigbrother.co',
+      'somepass',
+    );
+
+    let res = await request(app.getHttpServer())
+      .patch('/nft')
+      .set('authorization', bearer)
+      .send({
+        name: JSON.stringify('some name'),
+        create_ready: JSON.stringify(true),
+      });
+    expect(res.statusCode).toEqual(200);
+
+    const allowedCategories = await request(app.getHttpServer())
+      .get(`/categories/assignable`)
+      .set('authorization', bearer);
+
+    const nftId = res.body.id;
+    res = await request(app.getHttpServer())
+      .patch(`/nft/${nftId}`)
+      .set('authorization', bearer)
+      .send({
+        price: JSON.stringify(105),
+        categories: JSON.stringify([
+          ...allowedCategories.body.data.map((cat: any) => cat.id).slice(0, 3),
+        ]),
+        editions_size: JSON.stringify(4),
+        launch_at: JSON.stringify(Date.now() + 30 * 60 * 1000),
+        proposed: JSON.stringify(true),
+      });
+    expect(res.statusCode).toEqual(200);
+
+    res = await request(app.getHttpServer())
+      .patch(`/nft/${nftId}`)
+      .set('authorization', bearer)
+      .send({
+        publish_vote: JSON.stringify('yes'),
+        'image.png': JSON.stringify('someuri'),
+        'thumbnail.png': JSON.stringify('somethumbnailuri'),
+        description: JSON.stringify('some long description'),
+      });
+    expect(res.statusCode).toEqual(200); // need 2 votes
+
+    // allowed to 'unvote' by passing null
+    res = await request(app.getHttpServer())
+      .patch(`/nft/${nftId}`)
+      .set('authorization', bearer)
+      .send({
+        publish_vote: null,
+      });
+    expect(res.statusCode).toEqual(200);
+
+    res = await request(app.getHttpServer())
+      .patch(`/nft/${nftId}`)
+      .set('authorization', bearer)
+      .send({
+        publish_vote: JSON.stringify('yes'),
+      });
+    expect(res.statusCode).toEqual(200);
+
+    // allowed to vote no when having a yes active (negates the yes and adds to the no tally)
+    res = await request(app.getHttpServer())
+      .patch(`/nft/${nftId}`)
+      .set('authorization', bearer)
+      .send({
+        publish_vote: JSON.stringify('no'),
+      });
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.state).toEqual('setup_nft');
+  });
+
+  skipOnPriorFail('non admin cannot remove users', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'regular_joe@bigbrother.co',
+      'somepass',
+    );
+
+    let res = await request(app.getHttpServer())
+      .get('/user')
+      .query({ userName: 'Regular Joe' })
+      .set('authorization', bearer);
+    const userId = res.body.data[0].id;
+
+    res = await request(app.getHttpServer())
+      .delete(`/user/${userId}`)
+      .set('authorization', bearer);
+    expect(res.statusCode).toEqual(403);
+  });
+
+  skipOnPriorFail('admin can remove users', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'admin@tzconnect.com',
+      'supersafepassword',
+    );
+
+    let res = await request(app.getHttpServer())
+      .get('/user')
+      .query({ userName: 'Regular Joe' })
+      .set('authorization', bearer);
+    const userId = res.body.data[0].id;
+
+    res = await request(app.getHttpServer())
+      .delete(`/user/${userId}`)
+      .set('authorization', bearer);
+    expect(res.statusCode).toEqual(200);
+  });
+
+  skipOnPriorFail('GET /nft/attributes', async () => {
+    const { bearer } = await loginUser(
+      app,
+      'admin@tzconnect.com',
+      'supersafepassword',
+    );
+
+    const res = await request(app.getHttpServer())
+      .get('/nft/attributes')
+      .set('authorization', bearer);
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toStrictEqual({
+      name: 'string',
+      create_ready: 'boolean',
+      description: 'string',
+      'image.png': 'string',
+      'thumbnail.png': 'string',
+      price: 'number',
+      editions_size: 'number',
+      launch_at: 'date',
+      categories: 'number[]',
+      proposed: 'boolean',
+      publish_vote: 'votes',
+    });
+  });
+
+  skipOnPriorFail('GET /nft/attributes requires logged in user', async () => {
+    const res = await request(app.getHttpServer()).get('/nft/attributes');
+    expect(res.statusCode).toEqual(401);
+  });
 });
 
+function newDbConn() {
+  return new Pool({
+    host: assertEnv('PGHOST'),
+    port: Number(assertEnv('PGPORT')),
+    user: assertEnv('PGUSER'),
+    password: assertEnv('PGPASSWORD'),
+    database: assertEnv('PGDATABASE'),
+  });
+}
+function newStoreReplConn() {
+  return new Pool({
+    host: assertEnv('PGHOST'),
+    port: Number(assertEnv('PGPORT')),
+    user: assertEnv('PGUSER'),
+    password: assertEnv('PGPASSWORD'),
+    database: 'store_replication',
+  });
+}
+
 async function emulateNftSale(userId: number, nftIds: number[], at: Date) {
-  const qryRes = await storeReplDbPool.query(
+  const storeRepl = newStoreReplConn();
+  const qryRes = await storeRepl.query(
     `
 INSERT INTO nft_order (
   user_id, order_at
@@ -2255,7 +2468,7 @@ RETURNING id
 
   const orderId = qryRes.rows[0]['id'];
 
-  await storeReplDbPool.query(
+  await storeRepl.query(
     `
 INSERT INTO mtm_nft_order_nft (
   nft_order_id, nft_id
@@ -2265,7 +2478,7 @@ SELECT $1, UNNEST($2::INTEGER[])
     [orderId, nftIds],
   );
 
-  await storeReplDbPool.query(
+  await storeRepl.query(
     `
 INSERT INTO payment (
   payment_id, status, nft_order_id, provider, expires_at
@@ -2274,17 +2487,20 @@ VALUES ('bla', 'succeeded', $1, 'test_provider', now())
     `,
     [orderId],
   );
+
+  await storeRepl.end();
 }
 
 async function queryStoreDbNft(nftId: number) {
-  const qryRes = await storeReplDbPool.query(
+  const storeRepl = newStoreReplConn();
+  const qryRes = await storeRepl.query(
     `
 SELECT *
 FROM nft
 WHERE id = $1`,
     [nftId],
   );
-  const qryResCats = await storeReplDbPool.query(
+  const qryResCats = await storeRepl.query(
     `
 SELECT nft_category_id
 FROM mtm_nft_category
@@ -2293,6 +2509,7 @@ ORDER BY 1`,
     [nftId],
   );
 
+  await storeRepl.end();
   return {
     nft: qryRes.rows[0],
     categories: qryResCats.rows.map((row: any) => row['nft_category_id']),
@@ -2300,7 +2517,9 @@ ORDER BY 1`,
 }
 
 async function alignAdminNftNextIdWithStoreNfts() {
-  const qryRes = await storeReplDbPool.query(
+  const db = newDbConn();
+  const storeRepl = newStoreReplConn();
+  const qryRes = await storeRepl.query(
     `
 SELECT MAX(id) as max_id FROM nft
     `,
@@ -2309,12 +2528,14 @@ SELECT MAX(id) as max_id FROM nft
 
   const setLastId = qryRes.rows[0]['max_id'];
 
-  await dbPool.query(
+  await db.query(
     `
 SELECT setval('nft_id_seq', $1)
     `,
     [setLastId],
   );
+  await storeRepl.end();
+  await db.end();
 }
 
 async function loginUser(

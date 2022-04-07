@@ -8,6 +8,7 @@ import { CategoryService } from 'src/category/service/category.service';
 
 describe('NftController', () => {
   let controller: NftController;
+  let service: NftService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -17,6 +18,10 @@ describe('NftController', () => {
     }).compile();
 
     controller = module.get<NftController>(NftController);
+    service = module.get<NftService>(NftService);
+  });
+  afterEach(async () => {
+    service.beforeApplicationShutdown();
   });
 
   it('should be defined', () => {

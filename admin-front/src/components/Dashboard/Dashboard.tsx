@@ -2,10 +2,10 @@
 import * as React from 'react';
 import Welcome from './Welcome';
 import CardWithIcon from '../CardWithIcon';
-import EuroIcon from '@material-ui/icons/Euro';
-import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
-import ShoppingCartRoundedIcon from '@material-ui/icons/ShoppingCartRounded';
-import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
+import EuroIcon from '@mui/icons-material/Euro';
+import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
+import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded';
+import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
 import {
   Avatar,
   List,
@@ -19,6 +19,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { useDataProvider, useNotify } from 'react-admin';
 import ListNftThumbnail from '../ListNftThumbnail';
 import axios from 'axios';
+import authProvider from '../../auth/authProvider';
 
 
 const useStyles = makeStyles({
@@ -53,37 +54,43 @@ export const Dashboard = () => {
   const classes = useStyles()
   const notify = useNotify()
 
-  const dataProvider = useDataProvider()
+  const [permissions, setPermissions] = React.useState<number[]>([])
+
+  React.useEffect(() => {
+    const perm = async () => {
+      setPermissions(await authProvider.getPermissions())
+    }
+    perm()
+  }, [])
+
   const [totalNFTPriceRevenue, setTotalNFTPriceRevenue] = React.useState<number>(0)
   const [totalNFTCount24h, setTotalNFTCount24h] = React.useState<number>(0)
+  const [roles, setRoles] = React.useState<{ [i: string]: number }>()
 
   const [topBuyers, setTopBuyers] = React.useState([])
   const [mostViewed, setMostViewed] = React.useState([])
 
+
   const fetchTopBuyers = () => {
-    axios.get('https://kanvas.tzconnect.berlin/api/users/topBuyers', {
-      withCredentials: true, headers: {
-        'Content-type': 'application/json'
-      }
+    axios.get(process.env.REACT_APP_STORE_BASE_URL + 'api/users/topBuyers', {
+      withCredentials: true
     })
       .then(response => {
         setTopBuyers(response.data.topBuyers)
       })
       .catch(error => {
-        notify('An error happened while fetching the top buyers')
         console.log(error)
       })
   }
 
   const fetchMostViewed = () => {
-    axios.get('https://kanvas.tzconnect.berlin/api/nfts?pageSize=8&orderBy=views&orderDirection=desc', {
+    axios.get(process.env.REACT_APP_STORE_BASE_URL + 'api/nfts?pageSize=8&orderBy=views&orderDirection=desc', {
       withCredentials: true
     })
       .then(response => {
         setMostViewed(response.data.nfts)
       })
       .catch(error => {
-        notify('An error happened while fetching the most viewed nfts')
         console.log(error)
       })
   }
@@ -99,7 +106,7 @@ export const Dashboard = () => {
         const price = response.data ? response.data.value : undefined;
         setTotalNFTPriceRevenue(price ?? 0)
       }).catch(error => {
-        notify('An error happened while fetching total revenue')
+        // notify('An error happened while fetching total revenue')
         console.log(error)
       })
   }
@@ -115,8 +122,23 @@ export const Dashboard = () => {
         const count = response.data ? response.data.value : undefined;
         setTotalNFTCount24h(count ?? 0)
       }).catch(error => {
-        notify('An error happened while fetching nft count')
+        // notify('An error happened while fetching nft count')
         console.log(error)
+      })
+  }
+
+  const fetchRoles = () => {
+    axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/role', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
+      }
+    })
+      .then(response => {
+        const newRoles: { [i: string]: number; } = {}
+        setRoles(response.data.data.map((role: any) => newRoles[role.role_label] = role.id))
+      }).catch(error => {
+        console.log(error)
+        // notify(`An error occured while fetching the roles`);
       })
   }
 
@@ -125,6 +147,7 @@ export const Dashboard = () => {
     fetchMostViewed()
     fetchTotalRevenu()
     fetchNftCount24h()
+    fetchRoles()
   }, [])
 
 
@@ -139,45 +162,57 @@ export const Dashboard = () => {
     <div>
       <div style={styles.flexColumn as React.CSSProperties}>
         <Welcome />
-        <CardWithIcon
-          to="/"
-          icon={EuroIcon}
-          title="Total revenue"
-          subtitle={`${totalNFTPriceRevenue} EUR`}
-        />
-        <VerticalSpacer />
-        <CardWithIcon
-          to="/"
-          icon={ShoppingCartRoundedIcon}
-          title="Nb of sold nfts (24h)"
-          subtitle={totalNFTCount24h}
-        />
-        <VerticalSpacer />
+        {
+          (roles ? permissions.indexOf(roles["admin"]) !== -1 : false) && (
+            <>
+              <CardWithIcon
+                to="/"
+                icon={EuroIcon}
+                title="Total revenue"
+                subtitle={`${totalNFTPriceRevenue} EUR`}
+              />
+              <div style={styles.singleCol} >
+                <CardWithIcon
+                  to="/"
+                  icon={ShoppingCartRoundedIcon}
+                  title="Nb of sold nfts (24h)"
+                  subtitle={totalNFTCount24h.toString()}
+                />
+              </div>
+              <VerticalSpacer />
+            </>
+          )
+        }
         <CardWithIcon
           to="/"
           icon={PeopleAltRoundedIcon}
           title="Top buyers"
-          subtitle={topBuyers.length ?? 0}
+          subtitle={topBuyers ? topBuyers.length : 0 ?? 0}
         >
           <List>
             {
-              topBuyers.map((user: any, index: number) =>
-                <ListItem >
-                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.address ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
-                    <ListItemAvatar >
-                      <Avatar src="https://kanvas-files.s3.amazonaws.com/profilePicture_7" />
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={`username - ${index}`}
-                    />
-                    <div className={classes.spacer} />
-                    <ListItemText
-                      primary={`33 ꜩ`}
-                      className={classes.alignRight}
-                    />
-                  </a>
-                </ListItem>
-              )
+              topBuyers && topBuyers.length ?
+                topBuyers.map((user: any, index: number) =>
+                  <ListItem >
+                    <a className={classes.link} href={process.env.REACT_APP_STORE_BASE_URL + `profile/${user?.userAddress}`} target="_blank">
+                      <ListItemAvatar >
+                        <Avatar src={user.userPicture} />
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={user.userName}
+                      />
+                      <div className={classes.spacer} />
+                      <ListItemText
+                        primary={`${user.totalPaid} ꜩ`}
+                        className={classes.alignRight}
+                      />
+                    </a>
+                  </ListItem>
+                )
+                :
+                <div style={{ minHeight: '5rem', height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#949494' }}>
+                  No Data
+                </div>
             }
           </List>
         </CardWithIcon>
@@ -188,88 +223,105 @@ export const Dashboard = () => {
       <div style={styles.singleCol}>
         <Welcome />
       </div>
-      <div style={styles.flex}>
-        <CardWithIcon
-          to="/"
-          icon={EuroIcon}
-          title="Total revenue"
-          subtitle={`${totalNFTPriceRevenue} EUR`}
-        />
-        <Spacer />
-        <CardWithIcon
-          to="/"
-          icon={ShoppingCartRoundedIcon}
-          title="Nb of sold nfts (24h)"
-          subtitle={totalNFTCount24h}
-        />
-      </div>
-      <div style={styles.singleCol}>
-        {/* <OrderChart orders={recentOrders} /> */}
-      </div>
-      <div style={styles.singleCol}>
-        <CardWithIcon
-          to="/"
-          icon={PeopleAltRoundedIcon}
-          title="Top buyers"
-          subtitle={topBuyers.length ?? 0}
-        >
-          <List>
-            {
-              topBuyers.map((user: any, index: number) =>
-                <ListItem >
-                  <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.address ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
-                    <ListItemAvatar >
-                      <Avatar src="https://kanvas-files.s3.amazonaws.com/profilePicture_7" />
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={`username - ${index}`}
-                    />
-                    <div className={classes.spacer} />
-                    <ListItemText
-                      primary={`33 ꜩ`}
-                      className={classes.alignRight}
-                    />
-                  </a>
-                </ListItem>
-              )
-            }
-          </List>
-        </CardWithIcon>
-      </div>
-    </div>
-  ) : (
-    <>
-      <Welcome />
-      <div style={styles.flex}>
-        <div style={styles.leftCol}>
-          <div style={styles.flex}>
+      {
+        (roles ? permissions.indexOf(roles["admin"]) !== -1 : false) && (
+          <>
             <CardWithIcon
               to="/"
               icon={EuroIcon}
               title="Total revenue"
               subtitle={`${totalNFTPriceRevenue} EUR`}
             />
-            <Spacer />
-            <CardWithIcon
-              to="/"
-              icon={ShoppingCartRoundedIcon}
-              title="Nb of sold nfts (24h)"
-              subtitle={totalNFTCount24h}
-            />
-          </div>
-          <div style={styles.singleCol}>
-            {/* <OrderChart orders={recentOrders} /> */}
-          </div>
-          <div style={styles.singleCol}>
-            <CardWithIcon
-              to="/"
-              icon={InsertPhotoIcon}
-              title="Most viewed"
-              subtitle={mostViewed.length ?? 0}
-            >
-              <ListNftThumbnail nfts={mostViewed ?? []} />
-            </CardWithIcon>
-          </div>
+            <div style={styles.singleCol} >
+              <CardWithIcon
+                to="/"
+                icon={ShoppingCartRoundedIcon}
+                title="Nb of sold nfts (24h)"
+                subtitle={totalNFTCount24h.toString()}
+              />
+            </div>
+            <VerticalSpacer />
+          </>
+        )
+      }
+
+      <CardWithIcon
+        to="/"
+        icon={PeopleAltRoundedIcon}
+        title="Top buyers"
+        subtitle={topBuyers ? topBuyers.length : 0 ?? 0}
+      >
+        <List>
+          {
+            topBuyers && topBuyers.length ?
+              topBuyers.map((user: any, index: number) =>
+                <ListItem >
+                  <a className={classes.link} href={process.env.REACT_APP_STORE_BASE_URL + `profile/${user?.userAddress}`} target="_blank">
+                    <ListItemAvatar >
+                      <Avatar src={user.userPicture} />
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={user.userName}
+                    />
+                    <div className={classes.spacer} />
+                    <ListItemText
+                      primary={`${user.totalPaid} ꜩ`}
+                      className={classes.alignRight}
+                    />
+                  </a>
+                </ListItem>
+              )
+
+              :
+              <div style={{ minHeight: '5rem', height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#949494' }}>
+                No Data
+              </div>
+          }
+        </List>
+      </CardWithIcon>
+
+    </div>
+  ) : (
+    <>
+      <Welcome />
+      <div style={styles.flex}>
+        <div style={styles.leftCol}>
+          {
+            (roles ? permissions.indexOf(roles["admin"]) !== -1 : false) && (
+              <>
+                <CardWithIcon
+                  to="/"
+                  icon={EuroIcon}
+                  title="Total revenue"
+                  subtitle={`${totalNFTPriceRevenue} EUR`}
+                />
+                <div style={styles.singleCol} >
+                  <CardWithIcon
+                    to="/"
+                    icon={ShoppingCartRoundedIcon}
+                    title="Nb of sold nfts (24h)"
+                    subtitle={totalNFTCount24h.toString()}
+                  />
+                </div>
+                <VerticalSpacer />
+              </>
+            )
+          }
+
+          <CardWithIcon
+            to=""
+            icon={InsertPhotoIcon}
+            title="Most viewed"
+            subtitle={mostViewed ? mostViewed.length : 0 ?? 0}
+          >
+            <ListNftThumbnail nfts={mostViewed ?? []} />
+            {
+              !mostViewed || (mostViewed && mostViewed.length === 0) &&
+                <div style={{ minHeight: '5rem', height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#949494' }}>
+                  No Data
+                </div>
+            }
+          </CardWithIcon>
         </div>
         <div style={styles.rightCol}>
           <div style={styles.flex}>
@@ -277,27 +329,32 @@ export const Dashboard = () => {
               to="/"
               icon={PeopleAltRoundedIcon}
               title="Top buyers"
-              subtitle={topBuyers.length ?? 0}
+              subtitle={topBuyers ? topBuyers.length : 0 ?? 0}
             >
               <List>
                 {
-                  topBuyers.map((user: any, index: number) =>
-                    <ListItem >
-                      <a className={classes.link} href={`https://kanvas.tzconnect.berlin/profile/${user?.address ?? 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd'}`} target="_blank">
-                        <ListItemAvatar >
-                          <Avatar src={user.userPicture} />
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={user.userName}
-                        />
-                        <div className={classes.spacer} />
-                        <ListItemText
-                          primary={`${user.totalPaid} ꜩ`}
-                          className={classes.alignRight}
-                        />
-                      </a>
-                    </ListItem>
-                  )
+                  topBuyers && topBuyers.length ?
+                    topBuyers.map((user: any, index: number) =>
+                      <ListItem >
+                        <a className={classes.link} href={process.env.REACT_APP_STORE_BASE_URL + `profile/${user?.userAddress}`} target="_blank">
+                          <ListItemAvatar >
+                            <Avatar src={user.userPicture} />
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={user.userName}
+                          />
+                          <div className={classes.spacer} />
+                          <ListItemText
+                            primary={`${user.totalPaid} ꜩ`}
+                            className={classes.alignRight}
+                          />
+                        </a>
+                      </ListItem>
+                    )
+                    :
+                    <div style={{ minHeight: '5rem', height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#949494' }}>
+                      No Data
+                    </div>
                 }
               </List>
             </CardWithIcon>

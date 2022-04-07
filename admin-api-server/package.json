@@ -31,11 +31,13 @@
     "aws-sdk": "^2.1046.0",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.1",
+    "bs58check": "^2.1.2",
     "class-transformer": "0.4.0",
     "class-validator": "^0.13.1",
     "cookie-session": "^1.4.0",
     "dotenv": "^10.0.0",
     "joi": "^17.5.0",
+    "libsodium-wrappers": "^0.7.9",
     "nestjs-joi": "^1.5.1",
     "passport": "^0.5.0",
     "passport-jwt": "^4.0.0",
@@ -46,6 +48,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
+    "sotez": "12.0.0",
     "ts-results": "^3.3.0",
     "uuid": "^8.3.2"
   },
@@ -104,8 +107,8 @@
       "src/**/{!(nft_mock.service),}.ts"
     ],
     "coveragePathIgnorePatterns": [
-        "<rootDir>/node_modules/",
-        "<rootDir>/src/seeds"
+      "<rootDir>/node_modules/",
+      "<rootDir>/src/seeds"
     ],
     "coverageDirectory": "test/coverage",
     "testEnvironment": "node"

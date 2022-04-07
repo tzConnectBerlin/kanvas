@@ -8,7 +8,6 @@ import {
   Post,
   Query,
   UseGuards,
-  Response,
   HttpStatus,
   HttpException,
   Logger,
@@ -19,7 +18,6 @@ import { Roles } from 'src/role/entities/role.entity';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { RolesGuard } from 'src/role/role.guard';
 import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
-import { Response as Resp } from 'express';
 import { UserFilterParams, UserFilters } from '../params';
 import { UserEntity } from '../entities/user.entity';
 import {
@@ -41,7 +39,6 @@ export class UserController {
   @Get()
   @UseGuards(JwtAuthGuard)
   async findAll(
-    @Response() resp: Resp,
     @Query() filters: UserFilters,
     @Query('sort', new ParseJSONArrayPipe())
     sort?: [string, 'asc' | 'desc'],
@@ -58,14 +55,7 @@ export class UserController {
       'roles',
     ]);
 
-    const result = await this.userService.findAll(params);
-
-    return resp
-      .set({
-        'Access-Control-Expose-Headers': 'Content-Range',
-        'Content-range': result.count,
-      })
-      .json({ data: result.users });
+    return await this.userService.findAll(params);
   }
 
   @Get(':id')

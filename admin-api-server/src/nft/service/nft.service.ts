@@ -7,10 +7,11 @@ import {
 } from '@nestjs/common';
 import {
   PG_CONNECTION,
-  PG_CONNECTION_STORE,
   FILE_PREFIX,
   STM_CONFIG_FILE,
   NFT_PUBLISH_STATE,
+  STORE_API,
+  ADMIN_PRIVATE_KEY,
 } from 'src/constants';
 import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
@@ -22,10 +23,14 @@ import { S3Service } from './s3.service';
 import { CategoryService } from 'src/category/service/category.service';
 import { CategoryEntity } from 'src/category/entity/category.entity';
 import { Lock } from 'async-await-mutex-lock';
-const fs = require('fs');
+import { cryptoUtils } from 'sotez';
+import axios from 'axios';
+import { watch, FSWatcher } from 'fs';
+// const fs = require('fs');
 
 @Injectable()
 export class NftService {
+  stmFileWatcher: FSWatcher;
   stm: StateTransitionMachine;
   nftLock: Lock<number>;
   CONTENT_TYPE = 'content_uri';
@@ -35,44 +40,58 @@ export class NftService {
   constructor(
     @Inject(S3Service) private s3Service: S3Service,
     @Inject(PG_CONNECTION) private db: DbPool,
-    @Inject(PG_CONNECTION_STORE) private dbStore: DbPool,
     @Inject(CategoryService) private categoryService: CategoryService,
     private readonly roleService: RoleService,
   ) {
     const stmConfigFile = STM_CONFIG_FILE;
     this.stm = new StateTransitionMachine(stmConfigFile);
     this.nftLock = new Lock<number>();
-    fs.watch(stmConfigFile, (event: any /* , filename: any */) => {
-      if (event !== 'change') {
-        return;
-      }
-      try {
-        Logger.log('State transition machine config changed, reloading..');
-        this.stm = new StateTransitionMachine(stmConfigFile);
-        Logger.log('State transition machine config reloaded');
-      } catch (err: any) {
-        Logger.warn(
-          `State transition machine config reload failed, err: ${err}`,
-        );
-      }
-    });
+
+    this.stmFileWatcher = watch(
+      stmConfigFile,
+      (event: any /* , filename: any */) => {
+        if (event !== 'change' && event !== 'rename') {
+          Logger.log(`ignored stm config file event: ${event}`);
+          return;
+        }
+        try {
+          Logger.log('State transition machine config changed, reloading..');
+          this.stm = new StateTransitionMachine(stmConfigFile);
+          Logger.log('State transition machine config reloaded');
+        } catch (err: any) {
+          Logger.warn(
+            `State transition machine config reload failed, err: ${err}`,
+          );
+        }
+      },
+    );
+  }
+
+  beforeApplicationShutdown() {
+    this.stmFileWatcher.close();
+  }
+
+  getAttributes(): any {
+    return this.stm.getAttributes();
   }
 
   getSortableFields(): string[] {
     return [
       ...this.TOP_LEVEL_IDENTIFIERS,
-      ...Object.keys(this.stm.getAttributes()),
+      ...Object.keys(this.getAttributes()),
     ];
   }
 
-  async findAll(params: NftFilterParams): Promise<NftEntity[]> {
+  async findAll(
+    params: NftFilterParams,
+  ): Promise<{ count: number; data: NftEntity[] }> {
     let orderBy = params.orderBy;
     if (
       Object.keys(this.stm.getAttributes()).some(
         (ident: string) => ident === orderBy,
       )
     ) {
-      orderBy = `attributes->>'${orderBy}'`;
+      orderBy = `naturalsort(attributes->>'${orderBy}')`;
     }
 
     const qryRes = await this.db.query(
@@ -92,7 +111,8 @@ SELECT
   nft.created_by,
   nft.created_at,
   COALESCE(attr.last_updated_at, nft.created_at) AS updated_at,
-  attr.attributes
+  attr.attributes,
+  COUNT(1) OVER () AS total_matched_nfts
 FROM nft
 LEFT JOIN attr
   ON nft.id = attr.nft_id
@@ -106,29 +126,34 @@ LIMIT  ${params.pageSize}
     );
 
     if (qryRes.rowCount === 0) {
-      return [];
+      return { data: [], count: 0 };
     }
-    return qryRes.rows.map((row: any) => {
-      const nft = <NftEntity>{
-        id: row['id'],
-        state: row['state'],
-        createdBy: row['created_by'],
-        createdAt: Math.floor(row['created_at'].getTime() / 1000),
-        updatedAt: Math.floor(row['updated_at'].getTime() / 1000),
-        attributes: {},
-      };
-      for (const key of Object.keys(row['attributes'] || [])) {
-        nft.attributes[key] = JSON.parse(row['attributes'][key]);
-      }
-      return nft;
-    });
+
+    return {
+      data: qryRes.rows.map((row: any) => {
+        const nft = <NftEntity>{
+          id: row['id'],
+          state: row['state'],
+          createdBy: row['created_by'],
+          createdAt: Math.floor(row['created_at'].getTime() / 1000),
+          updatedAt: Math.floor(row['updated_at'].getTime() / 1000),
+          attributes: {},
+        };
+        for (const key of Object.keys(row['attributes'] || [])) {
+          nft.attributes[key] = JSON.parse(row['attributes'][key]);
+        }
+        return nft;
+      }),
+      count: Number(qryRes.rows[0]['total_matched_nfts']),
+    };
   }
 
   async #findByIds(nftIds: number[]): Promise<NftEntity[]> {
     const filterParams = new NftFilterParams();
 
     filterParams.filters.nftIds = nftIds;
-    return await this.findAll(filterParams);
+    filterParams.pageSize = nftIds.length;
+    return (await this.findAll(filterParams)).data;
   }
 
   async #findOne(nftId: number): Promise<NftEntity> {
@@ -147,6 +172,7 @@ LIMIT  ${params.pageSize}
     return {
       ...nft,
       allowedActions: this.stm.getAllowedActions(actor, nft),
+      stateInfo: this.stm.tryMoveNft(nft),
     };
   }
 
@@ -180,8 +206,7 @@ RETURNING id
     nftId: number,
     nftUpdates: NftUpdate[],
   ): Promise<NftEntity> {
-    await this.nftLock.acquire(nftId);
-    try {
+    return await this.withNftLock(nftId, async () => {
       const nfts = await this.#findByIds([nftId]);
       if (nfts.length === 0) {
         throw new HttpException(`nft does not exist`, HttpStatus.BAD_REQUEST);
@@ -196,7 +221,9 @@ RETURNING id
         );
       }
 
-      for (let nftUpdate of nftUpdates) {
+      for (let i = 0; i < nftUpdates.length; i++) {
+        let nftUpdate = nftUpdates[i];
+
         // Check if attribute is of type content in order to upload to ipfs
         if (typeof nftUpdate.file !== 'undefined') {
           nftUpdate = await this.#uploadContent(
@@ -213,6 +240,10 @@ RETURNING id
           nftUpdate.attribute,
           nftUpdate.value,
         );
+
+        if (i == nftUpdates.length - 1) {
+          this.stm.tryMoveNft(nft);
+        }
 
         if (stmRes.status != STMResultStatus.OK) {
           switch (stmRes.status) {
@@ -232,31 +263,37 @@ RETURNING id
 
       await this.#updateNft(user, nft);
       return await this.getNft(user, nft.id);
-    } catch (err: any) {
-      throw err;
-    } finally {
-      this.nftLock.release(nftId);
-    }
+    });
   }
 
   async deleteNft(user: UserEntity, nftId: number) {
-    await this.nftLock.acquire(nftId);
-    const nft = await this.#findOne(nftId);
-    if (nft.createdBy !== user.id) {
-      throw new HttpException(
-        'no permission to delete this nft (only the creator may)',
-        HttpStatus.FORBIDDEN,
-      );
-    }
-    if (
-      !this.DELETABLE_IN_STATES.some((state: string) => nft.state === state)
-    ) {
-      throw new HttpException(
-        'no permission to delete this nft (nft is not in a state where it may still be deleted)',
-        HttpStatus.FORBIDDEN,
-      );
-    }
+    return await this.withNftLock(nftId, async () => {
+      const nft = await this.#findOne(nftId);
+      const actor = await this.#getActorForNft(user, nft);
+      if (
+        !actor.roles.some(
+          (userRole) => userRole === 'creator' || userRole === 'admin',
+        )
+      ) {
+        throw new HttpException(
+          'no permission to delete this nft (only the creator may)',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+      if (
+        !this.DELETABLE_IN_STATES.some((state: string) => nft.state === state)
+      ) {
+        throw new HttpException(
+          'no permission to delete this nft (nft is not in a state where it may still be deleted)',
+          HttpStatus.FORBIDDEN,
+        );
+      }
 
+      await this.#deleteNft(nftId);
+    });
+  }
+
+  async #deleteNft(nftId: number) {
     const dbTx = await this.db.connect();
     try {
       await dbTx.query(`BEGIN`);
@@ -279,7 +316,7 @@ WHERE id = $1
       await dbTx.query('ROLLBACK');
       throw err;
     } finally {
-      this.nftLock.release(nftId);
+      dbTx.release();
     }
   }
 
@@ -403,49 +440,45 @@ WHERE TARGET.value != EXCLUDED.value
     await this.#assertNftPublishable(nft);
     const attr = nft.attributes;
 
-    const launchAt = new Date();
-    launchAt.setTime(attr.launch_at);
+    const signed = await this.#signNumber(nft.id, ADMIN_PRIVATE_KEY);
 
-    const storeDbTx = await this.dbStore.connect();
+    return await axios.post(STORE_API + '/nfts/create', {
+      id: nft.id,
+      name: attr.name,
+      description: attr.description,
+
+      artifactUri: attr['image.png'],
+      thumbnailUri: attr['thumbnail.png'],
+
+      price: attr.price,
+      categories: attr.categories,
+      editionsSize: attr.editions_size,
+      launchAt: attr.launch_at,
+
+      signature: signed,
+    });
+
+    Logger.log(`Published NFT ${nft.id} to the store database`);
+  }
+
+  async #signNumber(n: number, privateKey): Promise<string> {
+    let hexMsg = n.toString(16);
+    if (hexMsg.length & 1) {
+      // hex is of uneven length, sotez expects an even number of hexadecimal characters
+      hexMsg = '0' + hexMsg;
+    }
+    return (await cryptoUtils.sign(hexMsg, privateKey)).sig;
+  }
+
+  async withNftLock<ResTy>(
+    nftId: number,
+    f: () => Promise<ResTy>,
+  ): Promise<ResTy> {
+    await this.nftLock.acquire(nftId);
     try {
-      await storeDbTx.query(`BEGIN`);
-      await storeDbTx.query(
-        `
-INSERT INTO nft (
-  id, nft_name, artifact_uri, thumbnail_uri, description, launch_at, price, editions_size
-)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      `,
-        [
-          nft.id,
-          attr.name,
-          attr['image.png'],
-          attr['thumbnail.png'],
-          attr.description,
-          launchAt.toUTCString(),
-          attr.price,
-          attr.editions_size,
-        ],
-      );
-
-      await storeDbTx.query(
-        `
-INSERT INTO mtm_nft_category (
-  nft_id, nft_category_id
-)
-SELECT $1, UNNEST($2::INTEGER[])
-      `,
-        [nft.id, attr.categories],
-      );
-
-      await storeDbTx.query(`COMMIT`);
-      Logger.log(`Published NFT ${nft.id} to the store database`);
-    } catch (err: any) {
-      Logger.error(`failed to publish nft (id=${nft.id}), err: ${err}`);
-      await storeDbTx.query(`ROLLBACK`);
-      throw err;
+      return await f();
     } finally {
-      storeDbTx.release();
+      this.nftLock.release(nftId);
     }
   }
 }

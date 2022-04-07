@@ -1,4 +1,5 @@
 import { Box, Paper, Stack, Typography } from '@mui/material';
+import { format } from 'date-fns';
 import {
   Record,
   List,
@@ -10,7 +11,6 @@ import {
   Create,
   ImageInput,
   ImageField,
-  DateField,
   NumberInput,
   NumberField,
   useGetOne,
@@ -18,16 +18,15 @@ import {
   NullableBooleanInput,
   ReferenceArrayInput,
   SelectArrayInput,
-  SingleFieldList,
   ChipField,
   number,
   minValue,
-  useDataProvider,
   useNotify,
   useRefresh,
   useRedirect,
   ReferenceField,
-  DateTimeInput
+  DateTimeInput,
+  FunctionField
 } from 'react-admin';
 // import { DateTimeInput } from 'react-admin-date-inputs';
 import { CustomDeleteButton } from './Buttons/CustomDeleteButton';
@@ -58,42 +57,80 @@ const useStyle = makeStyles({
   }
 })
 
-export const NftList = ({ ...props }) => (
-  <List {...props}
-    actions={<ToolbarActions />}
-    bulkActionButtons={<CustomDeleteButton {...props} />}
-  >
-    <Datagrid rowClick="edit">
-      <TextField source="id" />
-      <TextField source="attributes.name" label="Name" />
-      <TextField source="state" label="Current State" />
-      <NumberField source="attributes.price" label='Price' />
-      <NumberField source="attributes.editions_size" label='Token amount' />
-      <DateField source="createdAt" label="Created at" showTime />
-      <DateField source="updatedAt" label="Last updated at" showTime />
-      <ReferenceField label="Created by" source="createdBy" reference="user">
-        <ChipField source="userName" />
-      </ReferenceField>
-    </Datagrid>
-  </List>
-);
+export const NftList = ({ ...props }) => {
+
+  const renderState = (state: 'creation' | 'setup_nft' | 'proposed' | 'prototype' | 'finish') => {
+    switch (state) {
+      case 'creation':
+        return 'Ready for creative';
+      case 'setup_nft':
+        return 'Ready for commercials';
+      case 'proposed':
+        return 'Settings completed';
+      case 'prototype':
+        return 'Ready to publish';
+      case 'finish':
+        return 'Published';
+      default:
+        return state;
+    }
+  }
+
+  return (
+    <>
+      <Stack direction="row">
+        {`States are: 'Ready for creative' ->  'Ready for commercials' -> 'Settings completed' -> 'Ready to publish' -> 'Published'`}
+      </Stack>
+      <List {...props}
+        actions={<ToolbarActions />}
+        bulkActionButtons={<CustomDeleteButton {...props} />}
+        sort={{ field: "id", order: "DESC" }}
+      >
+        <Datagrid rowClick="edit">
+          <TextField source="id" />
+          <TextField source="attributes.name" label="Name" />
+          <FunctionField label="Current state" render={(record: any) => renderState(record.state)} />
+          <NumberField source="attributes.price" label='Price' />
+          <NumberField source="attributes.editions_size" label='Token amount' />
+          <FunctionField label="Creation time" render={(record: any) => `${format(
+            record.createdAt * 1000 ? new Date(record.createdAt * 1000) : new Date(),
+            'dd/MM/yyyy - HH : mm : ss',
+          )}`} />
+          <FunctionField label="Last updated" render={(record: any) => `${format(
+            record.updatedAt * 1000 ? new Date(record.updatedAt * 1000) : new Date(),
+            'dd/MM/yyyy - HH : mm : ss',
+          )}`} />
+          <ReferenceField label="Created by" source="createdBy" reference="user">
+            <ChipField source="userName" />
+          </ReferenceField>
+        </Datagrid>
+      </List>
+    </>
+  )
+};
 
 interface InbutSelectorProps {
   attributesName: string;
   label: string;
-  type: "string" | "boolean" | "number" | "content_uri" | "number[]" | "votes" | "date";
+  type: "string" | "boolean" | "number" | "content_uri" | "number[]" | "votes" | "date" | "none";
   record?: any;
+  numberValueArray?: string[];
 }
 
 const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
 
-  const validateNumber = [number(), minValue(0)]
+  const validateNumber = [number(), minValue(0)];
+  const validateDate = (value: any) => {
+    if (value < new Date().getTime()) return 'Date must be in the future'
+    return undefined
+  };
+
   const classes = useStyle()
 
   if (props.type === 'string') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} />;
   if (props.type === 'number') return <NumberInput source={`attributes.${props.attributesName}`} label={props.label} validate={validateNumber} />;
   if (props.type === 'boolean') return <BooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
-  if (props.type === 'date') return <DateTimeInput source={`attributes.${props.attributesName}`} label={props.label} />;
+  if (props.type === 'date') return <DateTimeInput source={`attributes.${props.attributesName}`} label={props.label} value={props.record * 1000} validate={validateDate} />;
   if (props.type === 'number[]') {
     return (
       <ReferenceArrayInput source="attributes.categories" label="categories" reference="categories/assignable">
@@ -101,7 +138,10 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
       </ReferenceArrayInput>
     );
   }
-  if (props.type === 'votes') return <NullableBooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
+  if (props.type === 'votes') return <NullableBooleanInput source={`attributes.${props.attributesName}`} label={props.label}
+    format={(val: 'yes' | 'no') => val === 'yes' ? true : val === 'no' ? false : undefined}
+    parse={(val: string) => val === 'true' ? 'yes' : 'no'}
+  />;
   if (props.type === 'content_uri') {
 
     return (
@@ -113,15 +153,159 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
   else return null
 }
 
+const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
+
+  const notify = useNotify()
+
+  const [voters, setVoters] = React.useState<Record[]>([])
+  const [votersCalled, setVotersCalled] = React.useState<boolean>(false)
+
+  const getVoters = () => {
+    const instantVoters: any[] = []
+    props.record.proposal_vote?.yes?.concat(props.record.proposal_vote.no).map(async (id: number) => {
+      const res = await axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + `/user/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
+        }
+      })
+      if (res.data.error === 400) return notify(res.data.error?.message);
+      instantVoters.push(res.data)
+    })
+    setVoters(instantVoters)
+  }
+
+  React.useEffect(() => {
+    if (props.type !== 'votes') return;
+    if (voters.length > 0 || votersCalled) return;
+    setVotersCalled(true)
+    getVoters()
+  }, [])
+
+  if (!props.record || !props.type) return null;
+
+  if (props.type === 'string' || props.type === 'number') {
+    return <Stack direction="column">
+      <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
+        {props.label}
+      </Typography>
+      <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
+        {
+          props.record[props.attributesName]}
+      </Typography>
+    </Stack>
+  }
+  if (props.type === 'date') {
+    return <Stack direction="column">
+      <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
+        {props.label}
+      </Typography>
+      <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
+        {format(new Date(props.record[props.attributesName]), 'PPP')}
+      </Typography>
+    </Stack>
+  }
+  if (props.type === 'number[]') {
+    return (
+      < Stack direction="row" >
+        <Stack direction="column">
+          <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
+            {props.label}
+          </Typography>
+          <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
+            {
+              props.numberValueArray?.map((value: string) => value ? `${value}, ` : '')
+            }
+          </Typography>
+        </Stack>
+      </Stack >
+    );
+  }
+  if (props.type === 'votes') {
+    return <Stack direction="column">
+      <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
+        {props.label}
+      </Typography>
+      <Stack direction="row">
+        <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
+          <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold' }}>
+            Accepted:
+          </Typography>
+          {
+            props.record[props.attributesName] &&
+            props.record[props.attributesName] !== null &&
+            props.record[props.attributesName]['yes'].map(
+              (id: number, index: number) =>
+                voters.map(voter => {
+                  if (voter.id === id) {
+                    return index === props.record[props.attributesName]['yes'].length - 1 ? `${voter.userName}` : `${voter.userName}, `
+                  }
+                })
+            )}
+        </Typography>
+      </Stack>
+      <Stack direction="row">
+        <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
+          <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold' }}>
+            Rejected:
+          </Typography>
+          {
+            props.record[props.attributesName] &&
+            props.record[props.attributesName] !== null &&
+            props.record[props.attributesName]['no'].map(
+              (id: number, index: number) =>
+                voters.map(voter => {
+                  if (voter.id === id) {
+                    return index === props.record[props.attributesName]['no'].length - 1 ? `${voter.userName}` : `${voter.userName}, `
+                  }
+                })
+            )}
+        </Typography>
+      </Stack>
+    </Stack>
+  };
+
+  if (props.type === 'content_uri' && props.attributesName !== 'image.png') {
+    return <Stack direction="column">
+      <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
+        {props.label}
+
+      </Typography>
+      <img src={props.record[props.attributesName]} style={{ maxWidth: '100px', maxHeight: '100px' }} />
+    </Stack>
+  }
+  else return null
+}
+
 const NftAside = ({ ...props }) => {
 
-  const dataProvider = useDataProvider()
-  const [categories, setCategories] = React.useState<Record[]>([])
+  const [formKeys, setFormKeys] = React.useState<string[]>([])
 
   React.useEffect(() => {
     if (!props.record) return;
     if (!props.record.attributes) return;
-    if (!categories) return;
+
+    setFormKeys(Object.keys(props.record.attributes))
+  }, [props.record])
+
+
+  const [categories, setCategories] = React.useState<Record[]>([])
+  const [categoriesCalled, setCategoriesCalled] = React.useState<boolean>(false)
+  const [attributesTypes, setAttributesTypes] = React.useState()
+
+  const getAttributesTypes = () => {
+    axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/nft/attributes', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
+      }
+    })
+      .then((response: any) => {
+        setAttributesTypes(response.data)
+      }).catch((error: any) => {
+        console.log(error)
+      })
+  }
+
+  const getAssignableCategories = () => {
     axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/categories/assignable', {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
@@ -132,7 +316,20 @@ const NftAside = ({ ...props }) => {
       }).catch((error: any) => {
         console.log(error)
       })
-  }, [props])
+  }
+
+  React.useEffect(() => {
+    if (!props.record) return;
+    if (!props.record.attributes) return;
+
+    if (categories.length > 0 || categoriesCalled) return;
+    setCategoriesCalled(true)
+    getAssignableCategories()
+  }, [props.record])
+
+  React.useEffect(() => {
+    getAttributesTypes()
+  }, [])
 
   return (
     <Paper style={{ width: 750, marginLeft: '1em' }}>
@@ -151,51 +348,17 @@ const NftAside = ({ ...props }) => {
 
           <Stack direction="column" sx={{ flexStart: 'end', width: '60%' }}>
             {
-              props.record &&
-              Object.keys(props.record?.attributes)?.map(attrKey => {
-
-
-                if (attrKey === "proposal_reject_0") return;
-                if (attrKey === "image.png") return;
-                if (categories.length > 0 && attrKey === "categories") return (
-                  <Stack direction="row">
-                    <Stack direction="column">
-                      <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
-                        {attrKey[0].toUpperCase() + attrKey.replace('_', ' ').slice(1)}
-                      </Typography>
-                      <Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
-                        {categories.map(category => {
-                          if (!category) return;
-                          return category.name + (categories.indexOf(category) === categories.length - 1 ? '' : ', ')
-                        }
-                        )
-                        }
-                      </Typography>
-                    </Stack>
-                  </Stack>
-                )
-                return (
-                  <Stack direction="row">
-                    <Stack direction="column">
-                      <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
-                        {attrKey[0].toUpperCase() + attrKey.replace('_', ' ').slice(1)}
-                      </Typography>
-                      {
-                        attrKey === 'thumbnail.png' ?
-                          <img src={props.record?.attributes["thumbnail.png"]} style={{ margin: 'auto', maxWidth: '100px', maxHeight: '100px' }} />
-                          :
-                         (<Typography variant="body2" style={{ fontFamily: 'Poppins Medium', marginLeft: '1em', marginBottom: '1em', marginTop: '0.5em' }}>
-                            {
-                              attrKey === 'launch_at' ?
-                                new Date(props.record.attributes[attrKey]).toString()
-                                :
-                                props.record.attributes[attrKey]
-                            }
-                          </Typography>)
-                      }
-                    </Stack>
-                  </Stack>)
-              })
+              formKeys.length > 0 && attributesTypes &&
+              formKeys.map(key => {
+                return <FieldSelector
+                  attributesName={key}
+                  label={key[0].toUpperCase() + key.replace('_', ' ').slice(1)}
+                  type={attributesTypes[key] as 'string' | 'boolean' | 'number' | 'content_uri' | 'number[]' | 'votes' | 'date'}
+                  record={props.record.attributes}
+                  numberValueArray={key === 'categories' ? categories.map((category: Record) => category?.name) : []}
+                />
+              }
+              )
             }
           </Stack>
         </Stack>
@@ -266,7 +429,6 @@ export const NftEdit = (props: any) => {
 export const NftCreate = ({ ...props }) => {
 
   const classes = useStyle()
-
 
   const notify = useNotify();
   const refresh = useRefresh();

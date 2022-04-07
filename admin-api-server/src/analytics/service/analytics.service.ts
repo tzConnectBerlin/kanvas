@@ -68,46 +68,58 @@ export class AnalyticsService {
     );
   }
 
-  async getActivities(params: ActivityFilterParams): Promise<Activity[]> {
+  async getActivities(
+    params: ActivityFilterParams,
+  ): Promise<{ data: Activity[]; count: number }> {
     const qryRes = await this.storeRepl.query(
       `
 SELECT
-  at,
+  timestamp,
   kind,
   "from",
   "to",
   token_id AS "tokenId",
   price,
-  amount
+  amount,
+  ROW_NUMBER() OVER (ORDER BY timestamp, kind, "from", "to", token_id) AS id,
+  COUNT(1) OVER () AS total_activity_count
 FROM (
   SELECT
-    level_timestamp AS at,
+    lvl.baked_at AS timestamp,
     'mint' AS kind,
     NULL AS "from",
     owner AS "to",
-    token_id,
+    mint.token_id,
     NULL::NUMERIC AS price,
-    amount
-  FROM onchain_kanvas."entry.mint_tokens.noname_ordered"
+    mint.amount
+  FROM onchain_kanvas."entry.mint_tokens.noname" AS mint
+  JOIN que_pasa.tx_contexts AS ctx
+    ON ctx.id = mint.tx_context_id
+  JOIN que_pasa.levels AS lvl
+    ON lvl.level = ctx.level
 
   UNION ALL
 
   SELECT
-    level_timestamp AS at,
+    lvl.baked_at AS timestamp,
     'transfer' AS kind,
     tr_from.from_ AS "from",
     tr_dest.to_ AS "to",
     tr_dest.token_id,
     NULL::NUMERIC AS price,
     tr_dest.amount
-  FROM onchain_kanvas."entry.transfer.noname_ordered" AS tr_from
+  FROM onchain_kanvas."entry.transfer.noname" AS tr_from
   JOIN onchain_kanvas."entry.transfer.noname.txs" AS tr_dest
     ON tr_dest.noname_id = tr_from.id
+  JOIN que_pasa.tx_contexts AS ctx
+    ON ctx.id = tr_from.tx_context_id
+  JOIN que_pasa.levels AS lvl
+    ON lvl.level = ctx.level
 
   UNION ALL
 
   SELECT
-    nft_order.order_at AS at,
+    nft_order.order_at AS timestamp,
     'sale' AS kind,
     NULL AS "from",
     usr.address AS "to",
@@ -135,18 +147,26 @@ LIMIT ${params.pageSize}
       [params.filters.kind, params.filters.from, params.filters.to],
     );
 
-    return qryRes.rows.map(
-      (row: any) =>
-        <Activity>{
-          timestamp: row['at'],
-          kind: row['kind'],
-          from: row['from'],
-          to: row['to'],
-          tokenId: Number(row['tokenId']),
-          price: Number(row['price']),
-          amount: Number(row['amount']),
-        },
-    );
+    if (qryRes.rowCount === 0) {
+      return { data: [], count: 0 };
+    }
+
+    return {
+      data: qryRes.rows.map(
+        (row: any) =>
+          <Activity>{
+            id: row['id'],
+            timestamp: Math.floor(row['timestamp'].getTime() / 1000),
+            kind: row['kind'],
+            from: row['from'],
+            to: row['to'],
+            tokenId: Number(row['tokenId']),
+            price: Number(row['price']),
+            amount: Number(row['amount']),
+          },
+      ),
+      count: Number(qryRes.rows[0]['total_activity_count']),
+    };
   }
 
   async #timeseries(params: MetricParams) {

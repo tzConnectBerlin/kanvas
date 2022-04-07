@@ -4,13 +4,11 @@ import { evalExpr, execExpr } from './expr';
 import { Nft, Actor } from './types';
 import * as log from 'log';
 
-interface StateTransition {}
-
 interface State {
   transitions: [
     {
       next_state: string;
-      when: string;
+      when: string[];
       do?: string;
     },
   ];
@@ -62,7 +60,7 @@ export class StateTransitionMachine {
   }
 
   getAllowedActions(actor: Actor, nft: Nft): any {
-    let res: any = {};
+    const res: any = {};
 
     const st: State | undefined = this.states[nft.state];
     if (typeof st === 'undefined') {
@@ -87,7 +85,7 @@ export class StateTransitionMachine {
     actor: Actor,
     nft: Nft,
     attr: string,
-    v?: string,
+    v?: string | null,
   ): STMResult {
     const st = this.states[nft.state];
     const isAllowed =
@@ -105,11 +103,7 @@ export class StateTransitionMachine {
 
     switch (this.attrTypes[attr]) {
       case 'votes':
-        if (v === 'true') {
-          this.#tryAttributeAddVote(nft, attr, actor.id);
-        } else {
-          this.#tryAttributeRemoveVote(nft, attr, actor.id);
-        }
+        this.#attributeSetVote(nft, actor.id, attr, v);
         break;
       default:
         this.#attributeSet(nft, attr, v);
@@ -117,66 +111,115 @@ export class StateTransitionMachine {
     }
 
     log.notice(`nft.id ${nft.id}: '${attr}' ${v} (by actor.id ${actor.id})`);
-    this.tryMoveNft(nft);
 
     return <STMResult>{
       status: STMResultStatus.OK,
     };
   }
 
-  #attributeSet(nft: Nft, attr: string, v?: string) {
-    if (typeof v === 'undefined') {
+  #attributeSet(nft: Nft, attr: string, v?: string | null) {
+    if (isBottom(v)) {
       nft.attributes[attr] = null;
       return;
     }
-    nft.attributes[attr] = JSON.parse(v);
-    log.info(`type of attribute '${attr}' is '${typeof nft.attributes[attr]}'`);
+
+    /* eslint-disable  @typescript-eslint/no-non-null-assertion */
+    nft.attributes[attr] = JSON.parse(v!);
   }
 
-  #tryAttributeRemoveVote(nft: Nft, attr: string, actorId: number) {
-    if (!nft.attributes.hasOwnProperty(attr)) {
-      throw `cannot remove actor id from non existing attr ${attr}, nft=${JSON.stringify(
-        nft,
-      )}`;
+  #attributeSetVote(
+    nft: Nft,
+    actorId: number,
+    attr: string,
+    v?: string | null,
+  ) {
+    if (isBottom(v)) {
+      this.#removeVote(nft, actorId, attr, 'no');
+      this.#removeVote(nft, actorId, attr, 'yes');
+      return;
     }
-    nft.attributes[attr] = nft.attributes[attr].filter(
+    if (v === '"yes"') {
+      this.#addVote(nft, actorId, attr, 'yes');
+      this.#removeVote(nft, actorId, attr, 'no');
+    } else if (v === '"no"') {
+      this.#addVote(nft, actorId, attr, 'no');
+      this.#removeVote(nft, actorId, attr, 'yes');
+    } else {
+      throw `bad vote value ${v}`;
+    }
+  }
+
+  #addVote(nft: Nft, actorId: number, attr: string, side: 'yes' | 'no') {
+    if (
+      !nft.attributes.hasOwnProperty(attr) ||
+      isBottom(nft.attributes[attr])
+    ) {
+      nft.attributes[attr] = {
+        yes: [],
+        no: [],
+      };
+    }
+    if (nft.attributes[attr][side].some((id: number) => id === actorId)) {
+      log.notice(
+        `actor with id ${actorId} already voted ${side} nft with attr '${attr}', nft=${JSON.stringify(
+          nft,
+        )}'`,
+      );
+      return;
+    }
+    nft.attributes[attr][side].push(actorId);
+  }
+
+  #removeVote(nft: Nft, actorId: number, attr: string, side: 'yes' | 'no') {
+    if (!nft.attributes.hasOwnProperty(attr)) {
+      return;
+    }
+    nft.attributes[attr][side] = nft.attributes[attr][side].filter(
       (id: number) => id !== actorId,
     );
   }
 
-  #tryAttributeAddVote(nft: Nft, attr: string, actorId: number) {
-    if (!nft.attributes.hasOwnProperty(attr)) {
-      nft.attributes[attr] = [];
-    }
-    if (nft.attributes[attr].some((id: number) => id === actorId)) {
-      throw `actor with id ${actorId} already signed nft with attr '${attr}', nft=${JSON.stringify(
-        nft,
-      )}'`;
-    }
-    nft.attributes[attr].push(actorId);
-  }
-
   // move nft if possible to a new state
-  // returns true if moved and adjusts nft in memory
-  // returns false if not moved
-  tryMoveNft(nft: Nft): boolean {
+  // returns for each possible transition target the list of conditions that
+  // were not met (and if we did transition, returns []).
+  tryMoveNft(nft: Nft): any {
     const st = this.states[nft.state];
 
-    for (const transition of st.transitions) {
-      if (evalExpr<boolean>(nft, transition.when, false)) {
+    const unmetTransitionConditions: any = {};
+    for (const transition of st?.transitions || []) {
+      let allSucceed = true;
+
+      unmetTransitionConditions[transition.next_state] = [];
+      for (const condition of transition.when) {
+        if (!evalExpr<boolean>(nft, condition, false)) {
+          allSucceed = false;
+
+          unmetTransitionConditions[transition.next_state].push(condition);
+        }
+      }
+
+      if (allSucceed) {
         log.notice(
           `nft.id ${nft.id} ${nft.state} -> ${
             transition.next_state
           }, attrs=${JSON.stringify(nft.attributes)}`,
         );
+
         nft.state = transition.next_state;
         if (typeof transition.do !== 'undefined') {
           execExpr(nft, transition.do);
         }
-        return true;
+        return {};
       }
     }
 
-    return false;
+    return unmetTransitionConditions;
   }
+}
+
+function isBottom(v: any): boolean {
+  // note: v here is checked for Javascripts' bottom values (null and undefined)
+  //       because undefined coerces into null. And its safe because nothing
+  //       else coerces into null (other than null itself).
+  return v == null;
 }

@@ -13,7 +13,8 @@ yarn link roles_stm || exit 1
 yarn install || exit 1
 yarn build || exit 1
 
-source .env || exit 1
+set -a
+. .env
 
-./script/migrate up || exit 1
-yarn seed 2>/dev/null &
+INIT_QUEPASA=false ./script/migrate || exit 1
+yarn seed 2>/dev/null

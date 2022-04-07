@@ -22,14 +22,25 @@ import { TextArrayField } from './TextArrayField';
 import ToolbarActions from './ToolbarActions';
 import axios from 'axios';
 
-// Get this from config file
-const rolesEnum = {
-  1: 'superadmin',
-  2: 'editor',
-  3: 'creator',
-};
-
 export const UserList = ({ ...props }) => {
+
+  const [roles, setRoles] = React.useState<{ [i: number]: string; }>({})
+  const notify = useNotify();
+
+  React.useEffect(() => {
+    axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/role', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
+      }
+    })
+      .then(response => {
+        const newRoles: { [i: number]: string; } = {}
+        setRoles(response.data.data.map((role: any) => newRoles[role.id] = role.role_label.charAt(0).toUpperCase() + role.role_label.slice(1)))
+      }).catch(error => {
+        notify(`An error occured while fetching the roles`);
+      })
+  }, [])
+
   return (
     <List
       actions={<ToolbarActions />}
@@ -41,7 +52,7 @@ export const UserList = ({ ...props }) => {
         <TextField source="userName" />
         <TextField source="address" />
         <EmailField source="email" />
-        <TextArrayField source="roles" value={rolesEnum}>
+        <TextArrayField source="roles" value={roles}>
           <SingleFieldList>
             <ChipField />
           </SingleFieldList>
@@ -78,9 +89,10 @@ export const UserEdit = ({ ...props }) => {
       }
     })
       .then(response => {
-        setRoles(response.data.data.map((role: any) =>  ({ id: role.id, name: role.role_label.charAt(0).toUpperCase() + role.role_label.slice(1) })))
+        setRoles(response.data.data.map((role: any) => ({ id: role.id, name: role.role_label.charAt(0).toUpperCase() + role.role_label.slice(1) })))
       }).catch(error => {
         notify(`An error occured while fetching the roles`);
+        console.log(error)
       })
   }, [])
 
@@ -119,13 +131,14 @@ export const UserCreate = ({ ...props }) => {
   const [roles, setRoles] = React.useState([])
 
   React.useEffect(() => {
+
     axios.get(process.env.REACT_APP_API_SERVER_BASE_URL + '/role', {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`
       }
     })
       .then(response => {
-        setRoles(response.data.data.map((role: any) =>  ({ id: role.id, name: role.role_label.charAt(0).toUpperCase() + role.role_label.slice(1) })))
+        setRoles(response.data.data.map((role: any) => ({ id: role.id, name: role.role_label.charAt(0).toUpperCase() + role.role_label.slice(1) })))
       }).catch(error => {
         notify(`An error occured while fetching the roles`);
       })

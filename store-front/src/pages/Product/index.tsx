@@ -4,6 +4,7 @@ import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 
+import { format } from 'date-fns';
 import { FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, CardMedia, Skeleton, Stack, Theme } from '@mui/material';
@@ -22,7 +23,7 @@ export interface ProductPageProps {
     listCart: Function;
 }
 
-const StyledA = styled.a<{theme? : Theme}>`
+const StyledA = styled.a<{ theme?: Theme }>`
     color: ${props => props.theme.palette.primary.dark};
     text-decoration: none;
 
@@ -57,7 +58,7 @@ const StyledMetadataStack = styled(Stack)`
     }
 `;
 
-const StyledCardMedia = styled(CardMedia)<{ component?: string; alt: string }>`
+const StyledCardMedia = styled(CardMedia) <{ component?: string; alt: string }>`
     object-fit: contain;
     max-height: 75vh;
     /* min-height: 35rem; */
@@ -98,7 +99,7 @@ const StyledWrapperIcon = styled.div<{ theme?: Theme }>`
     }
 `;
 
-const StyledFullscreenIcon = styled(FullscreenIcon)<{ theme?: Theme }>`
+const StyledFullscreenIcon = styled(FullscreenIcon) <{ theme?: Theme }>`
     margin: 0 !important;
     height: 1.8rem;
     width: 1.8rem;
@@ -214,7 +215,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
         if (nftResponse.data) {
             setLaunchTime(
                 new Date(nftResponse.data.launchAt * 1000).getTime() -
-                    new Date().getTime(),
+                new Date().getTime()
             );
         }
         if (nftResponse.error) {
@@ -226,7 +227,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
             setTimeout(() => {
                 setLaunchTime(
                     new Date(nftResponse.data.launchAt! * 1000).getTime() -
-                        new Date().getTime(),
+                    new Date().getTime() - new Date().getTimezoneOffset(),
                 );
             }, 1000);
         }
@@ -241,10 +242,10 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                     onClick={
                         fullScreenView
                             ? () => {
-                                  setFullScreenView(false);
-                                  document.body.style.overflow = '';
-                              }
-                            : () => {}
+                                setFullScreenView(false);
+                                document.body.style.overflow = '';
+                            }
+                            : () => { }
                     }
                     open={fullScreenView}
                 />
@@ -303,11 +304,11 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 onClick={
                                     !fullScreenView
                                         ? () => {
-                                              setFullScreenView(true);
-                                              document.body.style.overflow =
-                                                  'hidden';
-                                          }
-                                        : () => {}
+                                            setFullScreenView(true);
+                                            document.body.style.overflow =
+                                                'hidden';
+                                        }
+                                        : () => { }
                                 }
                             >
                                 <StyledFullscreenIcon />
@@ -376,8 +377,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     color="#757575"
                                 >
                                     {nftResponse.loading ||
-                                    (comfortLoader &&
-                                        (!launchTime || launchTime < 0))
+                                        (comfortLoader &&
+                                            (!launchTime || launchTime < 0))
                                         ? undefined
                                         : t('product.description.part_3')}
                                 </Typography>
@@ -389,19 +390,16 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 >
                                     {nftResponse.loading || comfortLoader ? (
                                         <Skeleton width="8rem" height="2rem" />
-                                    ) : launchTime && launchTime > 0 ? (
-                                        `${new Date(
-                                            launchTime,
-                                        ).getDate()} days - ${new Date(
-                                            launchTime,
-                                        ).getHours()} : ${new Date(
-                                            launchTime,
-                                        ).getMinutes()} : ${new Date(
-                                            launchTime,
-                                        ).getSeconds()}`
-                                    ) : (
-                                        'NFT has been dropped'
-                                    )}
+                                    ) : launchTime &&
+                                        launchTime > 0 ?
+                                        `${new Date(launchTime).getDate() - 1} day${new Date(launchTime).getDate() > 2 ? 's' : ''
+                                        } - ${format(
+                                            new Date(launchTime + new Date().getTimezoneOffset() * 60 * 1000 ) ,
+                                            'HH : mm : ss',
+                                        )}`
+                                        : (
+                                            'NFT has been dropped'
+                                        )}
                                 </Typography>
                             </>
                         )}
@@ -422,7 +420,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             sx={{ pt: 2, mb: 1 }}
                         >
                             {nftResponse.loading ||
-                            comfortLoader ? undefined : (
+                                comfortLoader ? undefined : (
                                 <>
                                     {nftResponse.data?.categories.map(
                                         (category: ICategory) => (
@@ -464,15 +462,15 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             sx={{ pt: 2, mb: 1 }}
                         >
                             {nftResponse.loading ||
-                            comfortLoader ? undefined : (
+                                comfortLoader ? undefined : (
                                 <Typography
                                     size="body1"
                                     weight="Medium"
                                     type="link"
                                 >
-                                <StyledA href={`https://cloudflare-ipfs.com/ipfs/${nftResponse.data?.ipfsHash.slice('ipfs://'.length)}`} target='_blank'>
-                                    {nftResponse.data?.ipfsHash}
-                                </StyledA>
+                                    <StyledA href={`https://cloudflare-ipfs.com/ipfs/${nftResponse.data?.ipfsHash?.slice('ipfs://'.length)}`} target='_blank'>
+                                        {nftResponse.data?.ipfsHash}
+                                    </StyledA>
                                 </Typography>
                             )}
                         </Typography>
@@ -497,8 +495,8 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     {nftResponse.loading || comfortLoader
                                         ? undefined
                                         : nftResponse.data?.editionsAvailable +
-                                          '/' +
-                                          nftResponse.data?.editionsSize}
+                                        '/' +
+                                        nftResponse.data?.editionsSize}
                                 </Typography>
                             </Stack>
                             <Stack direction="column">
@@ -519,7 +517,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                     sx={{ pt: 2, mb: 1 }}
                                 >
                                     {nftResponse.loading ||
-                                    comfortLoader ? undefined : (
+                                        comfortLoader ? undefined : (
                                         <>{nftResponse.data?.price} ꜩ</>
                                     )}
                                 </Typography>
@@ -534,12 +532,12 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 launchTime! > 0
                                     ? 'Not dropped yet'
                                     : props.nftsInCart.filter(
-                                          (nft) =>
-                                              Number(nft.id) ===
-                                              nftResponse.data?.id,
-                                      ).length > 0
-                                    ? 'Already in cart'
-                                    : t('product.button_1')
+                                        (nft) =>
+                                            Number(nft.id) ===
+                                            nftResponse.data?.id,
+                                    ).length > 0
+                                        ? 'Already in cart'
+                                        : t('product.button_1')
                             }
                             disabled={
                                 nftResponse.loading ||
@@ -549,7 +547,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                         Number(nft.id) === nftResponse.data?.id,
                                 ).length > 0 ||
                                 Number(nftResponse.data?.editionsAvailable) ===
-                                    0 ||
+                                0 ||
                                 launchTime! > 0
                             }
                             sx={{ marginTop: '3rem !important' }}

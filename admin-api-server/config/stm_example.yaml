@@ -9,21 +9,18 @@ attributes:
   categories: number[]
   launch_at: date
   proposed: boolean
-  proposal_accept: votes
-  proposal_reject: votes
-  prototype_accept: votes
-  prototype_reject: votes
-
+  proposal_vote: votes
+  prototype_vote: votes
 
 states:
   creation:
     state_transitions:
     - next_state: setup_nft
-      when: |
-        nft.name.length > 0 &&
-        nft.description.length > 0 &&
-        nft['image.png'].length > 0 &&
-        nft['thumbnail.png'].length > 0
+      when:
+      - nft.name.length > 0
+      - nft.description.length > 0
+      - nft['image.png'].length > 0
+      - nft['thumbnail.png'].length > 0
     mutables:
     - attributes: [name, image.png, thumbnail.png, description]
       by_roles: [creator]
@@ -31,12 +28,12 @@ states:
   setup_nft:
     state_transitions:
     - next_state: proposed
-      when: |
-        nft.proposed &&
-        nft.editions_size > 0 &&
-        nft.price > 0 &&
-        nft.categories.length > 0 &&
-        nft.launch_at >= Date.now()
+      when:
+      - nft.proposed
+      - nft.editions_size > 0
+      - nft.price > 0
+      - nft.price < 1000000
+      - nft.categories.length > 0
     mutables:
     - attributes: [price, editions_size, proposed, categories, launch_at]
       by_roles: [editor, creator, admin]
@@ -44,8 +41,8 @@ states:
   proposed:
     state_transitions:
     - next_state: setup_nft
-      when: |
-        nft.proposal_reject.length > 0
+      when:
+      - nft.proposal_vote.no.length == 1
       do: |
         {
           // Storing rejected state for future reference inside 'proposal_reject_x',
@@ -64,22 +61,32 @@ states:
             }
           }
 
-          nft.proposal_reject = [];
+          nft.proposal_vote = null;
           nft.proposed = false;
         }
     - next_state: prototype
-      when: |
-        nft.proposal_accept.length == 1
+      when:
+      - nft.proposal_vote.yes.length >= 1
     mutables:
-    - attributes: [proposal_accept, proposal_reject]
-      by_roles: [moderator, admin]
+    - attributes: [proposal_vote]
+      by_roles: [moderator]
 
   prototype:
     state_transitions:
     - next_state: finish
-      when: 'nft.prototype_accept.length == 3'
+      when:
+      - nft.prototype_vote.yes.length >= 1
     - next_state: setup_nft
-      when: 'nft.prototype_reject.length > 0'
+      when:
+      - nft.prototype_vote.no.length >= 1
+      do: |
+        {
+          // TODO: save state as it was under 'prototype_reject_..'
+
+          nft.proposed = false;
+          nft.proposal_vote = null;
+          nft.propotype_vote = null;
+        }
     mutables:
-    - attributes: [prototype_accept, prototype_reject]
+    - attributes: [prototype_vote]
       by_roles: [moderator]

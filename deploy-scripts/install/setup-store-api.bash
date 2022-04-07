@@ -8,4 +8,4 @@ set -a
 . .env
 set +a
 
-./script/migrate
+INIT_QUEPASA=false ./script/migrate

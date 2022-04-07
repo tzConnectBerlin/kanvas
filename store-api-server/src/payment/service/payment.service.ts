@@ -7,7 +7,6 @@ import { MintService } from '../../nft/service/mint.service';
 import { Err } from 'ts-results';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { assertEnv } from 'src/utils';
-import { Lock } from 'async-await-mutex-lock';
 
 export enum PaymentStatus {
   CREATED = 'created',

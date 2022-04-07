@@ -90,7 +90,7 @@ export const queryParamsToPaginationParams = (
 
   if (typeof range !== 'undefined' && range.length === 2) {
     res.pageOffset = range[0];
-    res.pageSize = range[1] - range[0];
+    res.pageSize = range[1];
   }
 
   return res;
@@ -112,4 +112,10 @@ export function parseNumberParam(v: string): number {
     throw new HttpException(`${v} is not a number`, HttpStatus.BAD_REQUEST);
   }
   return res;
+}
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }

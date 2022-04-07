@@ -189,9 +189,9 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
             );
         }, 60000);
 
-        if (timeLeft < 300000 && !isWarned) {
+        if (timeLeft < 300000 && !isWarned && props.nftsInCart.length > 0) {
             toast.warning(
-                `Your card will expire in ${new Date(
+                `Your cart will expire in ${new Date(
                     timeLeft,
                 ).getMinutes()} minutes`,
             );
@@ -231,7 +231,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         weight="Medium"
                         sx={{ marginTop: '1rem', marginRight: '1rem' }}
                     >
-                        {props.nftsInCart.length > 0 && (
+                        {props.nftsInCart?.length > 0 && (
                             <>{props.nftsInCart.length} - items </>
                         )}
                     </Typography>
@@ -258,7 +258,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 }`}
                             />
                         ))
-                    ) : props.nftsInCart.length > 0 ? (
+                    ) : props.nftsInCart?.length > 0 ? (
                         <>
                             {props.nftsInCart.map((nft) => (
                                 <ShoppingCartItem
@@ -316,7 +316,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                         </Typography>
                     )}
 
-                    {props.nftsInCart.length > 0 && (
+                    {props.nftsInCart?.length > 0 && (
                         <Typography
                             size="subtitle2"
                             weight="Medium"
@@ -341,7 +341,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                 props.closeCart();
                                 history.push('/checkout');
                             }}
-                            disabled={props.nftsInCart.length === 0}
+                            disabled={props.nftsInCart?.length === 0}
                             loading={checkoutResponse.loading}
                             sx={{
                                 bottom: 0,

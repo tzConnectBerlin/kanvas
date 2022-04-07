@@ -47,8 +47,7 @@ const dataProvider = (
     const { field, order } = params.sort;
 
     const rangeStart = (page - 1) * perPage;
-    const rangeEnd = page * perPage - 1;
-
+    const rangeEnd = perPage;
 
     let query = {}
     if (resource === 'analytics/sales/priceVolume/snapshot') {
@@ -86,7 +85,8 @@ const dataProvider = (
       return {
         data: json?.data,
         total: json?.count ?? 1,
-    }});
+      }
+    });
   },
 
   getOne: (resource, params) =>
@@ -201,13 +201,13 @@ const dataProvider = (
   },
 
   delete: (resource, params) =>
-    httpClient(`${apiUrl}/${resource}/${params.id}`, {
+     httpClient(`${apiUrl}/${resource}/${params.id}`, {
       method: 'DELETE',
       headers: new Headers({
         'Content-Type': 'text/plain',
         Authorization: `Bearer ${getToken()}`,
       }),
-    }).then(({ json }) => ({ data: json })),
+    }).then(() => ({ data: params.previousData as any })),
 
   // simple-rest doesn't handle filters on DELETE route, so we fallback to calling DELETE n times instead
   deleteMany: (resource, params) =>
@@ -222,7 +222,7 @@ const dataProvider = (
         }),
       ),
     ).then((responses) => ({
-      data: responses.map(({ json }) => json.id),
+      data: responses.map(({ json }) => json),
     })),
 });
 
@@ -257,7 +257,6 @@ const toFormData = (data: any, resource = '') => {
     if (data[key]) {
       // contains .png
       if (key.startsWith('files')) {
-
         data[key].map((file: any, index: number) => {
           try {
             Object.defineProperty(file, 'name', {
@@ -265,7 +264,9 @@ const toFormData = (data: any, resource = '') => {
               value: key.slice('files'.length).toLowerCase()
             });
 
-            formData.append('files[]', file[Object.keys(file)[0]].rawFile, Object.keys(file)[0].toLowerCase());
+            Object.keys(file).map((key: any, index: number) => {
+              formData.append('files[]', file[Object.keys(file)[index]].rawFile, Object.keys(file)[index].toLowerCase());
+            })
           } catch (error: any) {
             console.log(error)
           }

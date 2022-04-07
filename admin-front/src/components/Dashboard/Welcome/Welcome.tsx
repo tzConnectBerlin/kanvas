@@ -1,9 +1,10 @@
 
-import HomeIcon from '@material-ui/icons/Home';
-import UsersIcon from '@material-ui/icons/Group';
+import HomeIcon from '@mui/icons-material/Home';
+import UsersIcon from '@mui/icons-material/Group';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { Box, Card, CardActions, Button, Typography } from '@material-ui/core';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -46,6 +47,7 @@ const useStyles = makeStyles(theme => ({
 
 export const Welcome = () => {
     const classes = useStyles();
+    const history = useHistory()
 
     const projectName = "Kanvas";
 
@@ -73,9 +75,9 @@ export const Welcome = () => {
                         </Button>
                         <Button
                             variant="contained"
-                            href="/user"
                             className='MuiButton-containedPrimary'
                             startIcon={<UsersIcon />}
+                            onClick={() => history.push('/user')}
                         >
                            Users
                         </Button>
