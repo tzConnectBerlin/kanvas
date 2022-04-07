@@ -155,7 +155,7 @@ LIMIT ${params.pageSize}
       data: qryRes.rows.map(
         (row: any) =>
           <Activity>{
-            id: row['id'],
+            id: Number(row['id']),
             timestamp: Math.floor(row['timestamp'].getTime() / 1000),
             kind: row['kind'],
             from: row['from'],

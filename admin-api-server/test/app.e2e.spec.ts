@@ -2146,7 +2146,7 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         data: [
           {
-            id: '1',
+            id: 1,
             timestamp: 819167040,
             kind: 'sale',
             from: null,
@@ -2156,7 +2156,7 @@ describe('AppController (e2e)', () => {
             amount: 1,
           },
           {
-            id: '2',
+            id: 2,
             timestamp: 819167040,
             kind: 'sale',
             from: null,
@@ -2166,7 +2166,7 @@ describe('AppController (e2e)', () => {
             amount: 1,
           },
           {
-            id: '3',
+            id: 3,
             timestamp: 819167040,
             kind: 'sale',
             from: null,
@@ -2176,7 +2176,7 @@ describe('AppController (e2e)', () => {
             amount: 1,
           },
           {
-            id: '4',
+            id: 4,
             timestamp: 819203040,
             kind: 'sale',
             from: null,
@@ -2186,7 +2186,7 @@ describe('AppController (e2e)', () => {
             amount: 1,
           },
           {
-            id: '5',
+            id: 5,
             timestamp: 819203040,
             kind: 'sale',
             from: null,
@@ -2196,7 +2196,7 @@ describe('AppController (e2e)', () => {
             amount: 1,
           },
           {
-            id: '6',
+            id: 6,
             timestamp: 819203040,
             kind: 'sale',
             from: null,
@@ -2206,7 +2206,7 @@ describe('AppController (e2e)', () => {
             amount: 1,
           },
           {
-            id: '7',
+            id: 7,
             timestamp: 819203040,
             kind: 'sale',
             from: null,
@@ -2216,7 +2216,7 @@ describe('AppController (e2e)', () => {
             amount: 1,
           },
           {
-            id: '8',
+            id: 8,
             timestamp: 819203040,
             kind: 'sale',
             from: null,
@@ -2226,7 +2226,7 @@ describe('AppController (e2e)', () => {
             amount: 1,
           },
           {
-            id: '9',
+            id: 9,
             timestamp: 819203640,
             kind: 'sale',
             from: null,
@@ -2236,7 +2236,7 @@ describe('AppController (e2e)', () => {
             amount: 1,
           },
           {
-            id: '10',
+            id: 10,
             timestamp: 819203640,
             kind: 'sale',
             from: null,
