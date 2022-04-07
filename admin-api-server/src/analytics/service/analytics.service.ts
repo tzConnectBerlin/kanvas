@@ -85,7 +85,7 @@ SELECT
   COUNT(1) OVER () AS total_activity_count
 FROM (
   SELECT
-    lvl.baked_at AS timestamp,
+    lvl.baked_at AT TIME ZONE 'UTC' AS timestamp,
     'mint' AS kind,
     NULL AS "from",
     owner AS "to",
@@ -101,7 +101,7 @@ FROM (
   UNION ALL
 
   SELECT
-    lvl.baked_at AS timestamp,
+    lvl.baked_at AT TIME ZONE 'UTC' AS timestamp,
     'transfer' AS kind,
     tr_from.from_ AS "from",
     tr_dest.to_ AS "to",

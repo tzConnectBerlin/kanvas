@@ -11,10 +11,12 @@ QUEPASA_VERSION=1.2.0
 [ -z $PGDATABASE ] && export PGDATABASE=dev_database
 
 
+./script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1
+
 if [[ ${INIT_QUEPASA:-'true'} == "true" ]]; then
     # to set up the database schema of onchain_kanvas:
     source $SCRIPT_DIR/../../config/.env-kanvas
-    export DATABASE_URL="host=$PGHOST dbname=$PGDATABASE user=$PGUSER password=$PGPASSWORD port=$PGPORT"
+    export DATABASE_URL="host=$PGHOST dbname=store_replication user=$PGUSER password=$PGPASSWORD port=$PGPORT"
 
     docker run \
         -v $SCRIPT_DIR/../../config:/config \
@@ -26,4 +28,3 @@ if [[ ${INIT_QUEPASA:-'true'} == "true" ]]; then
         || exit 1 # >/dev/null 2>&1 || exit 1
 fi
 
-./script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1
