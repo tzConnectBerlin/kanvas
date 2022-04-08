@@ -1796,6 +1796,11 @@ describe('AppController (e2e)', () => {
         .get('/analytics/sales/nftCount/timeseries')
         .set('authorization', bearer);
       expect(res.statusCode).toEqual(403);
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/activities')
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(403);
     },
   );
 
@@ -1839,6 +1844,12 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(res.statusCode).toEqual(200);
       expect(res.body).toStrictEqual({ data: [] });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/activities')
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toStrictEqual({ count: 0, data: [] });
     },
   );
 
@@ -2126,6 +2137,116 @@ describe('AppController (e2e)', () => {
           { timestamp: 819165600, value: 3 },
           { timestamp: 819201600, value: 8 },
         ],
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/activities')
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toStrictEqual({
+        data: [
+          {
+            id: 1,
+            timestamp: 819167040,
+            kind: 'sale',
+            from: null,
+            to: 'addr',
+            tokenId: 4,
+            price: 43,
+            amount: 1,
+          },
+          {
+            id: 2,
+            timestamp: 819167040,
+            kind: 'sale',
+            from: null,
+            to: 'addr',
+            tokenId: 7,
+            price: 98,
+            amount: 1,
+          },
+          {
+            id: 3,
+            timestamp: 819167040,
+            kind: 'sale',
+            from: null,
+            to: 'addr',
+            tokenId: 10,
+            price: 92,
+            amount: 1,
+          },
+          {
+            id: 4,
+            timestamp: 819203040,
+            kind: 'sale',
+            from: null,
+            to: 'tz1',
+            tokenId: 2,
+            price: 78,
+            amount: 1,
+          },
+          {
+            id: 5,
+            timestamp: 819203040,
+            kind: 'sale',
+            from: null,
+            to: 'tz1',
+            tokenId: 4,
+            price: 43,
+            amount: 1,
+          },
+          {
+            id: 6,
+            timestamp: 819203040,
+            kind: 'sale',
+            from: null,
+            to: 'tz1',
+            tokenId: 10,
+            price: 92,
+            amount: 1,
+          },
+          {
+            id: 7,
+            timestamp: 819203040,
+            kind: 'sale',
+            from: null,
+            to: 'tz1',
+            tokenId: 11,
+            price: 41,
+            amount: 1,
+          },
+          {
+            id: 8,
+            timestamp: 819203040,
+            kind: 'sale',
+            from: null,
+            to: 'tz1',
+            tokenId: 27,
+            price: 12,
+            amount: 1,
+          },
+          {
+            id: 9,
+            timestamp: 819203640,
+            kind: 'sale',
+            from: null,
+            to: 'addr',
+            tokenId: 1,
+            price: 1,
+            amount: 1,
+          },
+          {
+            id: 10,
+            timestamp: 819203640,
+            kind: 'sale',
+            from: null,
+            to: 'addr',
+            tokenId: 3,
+            price: 104,
+            amount: 1,
+          },
+        ],
+        count: 11,
       });
     },
   );
