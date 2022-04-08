@@ -5,7 +5,7 @@ File                      | % Stmts | % Branch | % Funcs | % Lines | Uncovered L
 
 --------------------------|---------|----------|---------|---------|-------------------------------------------------------
 
-All files                 |   87.51 |    70.58 |   87.01 |   86.28 |                                                       
+All files                 |   88.76 |    71.32 |   90.25 |   87.65 |                                                       
 
  src                      |   83.57 |    69.69 |   85.71 |   82.57 |                                                       
 
@@ -21,23 +21,23 @@ All files                 |   87.51 |    70.58 |   87.01 |   86.28 |
 
   utils.ts                |   90.74 |       85 |   85.71 |   90.38 | 7,12-13,29,112                                        
 
- src/analytics            |   78.94 |      100 |       0 |   76.47 |                                                       
+ src/analytics            |   84.21 |      100 |      25 |   82.35 |                                                       
 
   analytics.module.ts     |     100 |      100 |     100 |     100 |                                                       
 
-  params.ts               |   66.66 |      100 |       0 |   66.66 | 11,16,21,27                                           
+  params.ts               |      75 |      100 |      25 |      75 | 11,16,21                                              
 
- src/analytics/controller |   91.11 |    83.33 |   77.77 |   90.69 |                                                       
+ src/analytics/controller |     100 |    83.33 |     100 |     100 |                                                       
 
-  analytics.controller.ts |   91.11 |    83.33 |   77.77 |   90.69 | 100-112,140                                           
+  analytics.controller.ts |     100 |    83.33 |     100 |     100 | 124                                                   
 
  src/analytics/entity     |     100 |      100 |     100 |     100 |                                                       
 
   analytics.entity.ts     |     100 |      100 |     100 |     100 |                                                       
 
- src/analytics/service    |   86.11 |     87.5 |   81.81 |   85.29 |                                                       
+ src/analytics/service    |     100 |      100 |     100 |     100 |                                                       
 
-  analytics.service.ts    |   86.11 |     87.5 |   81.81 |   85.29 | 74-157                                                
+  analytics.service.ts    |     100 |      100 |     100 |     100 |                                                       
 
  src/auth                 |     100 |      100 |     100 |     100 |                                                       
 
