@@ -2,41 +2,37 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
-source .env
+if [ -z $COUNTRY_IP_DEFINITIONS_FILE ]; then
+    echo "warning: cannot fill country,ip_country tables for VAT, COUNTRY_IP_DEFINITIONS_FILE env var not set"
+    exit 1
+fi
 
-set -u
+echo $COUNTRY_IP_DEFINITIONS_FILE
+cat $COUNTRY_IP_DEFINITIONS_FILE
 
-country_ip_definitions_file=$1
-[ -z $PGHOST ] && export PGHOST=localhost
-[ -z $PGUSER ] && export PGUSER=user
-[ -z $PGPASSWORD ] && export PGPASSWORD=pwd
-[ -z $PGDATABASE ] && export PGDATABASE=db
-[ -z $PGPORT ] && export PGPORT=420
-
-export PGHOST
-export PGPORT
-export PGUSER
-export PGPASSWORD
-export PGDATABASE
-
-psql -1 < $country_ip_definitions_file
-
+psql -1 < $COUNTRY_IP_DEFINITIONS_FILE
 psql -c "$(cat<<EOF
 
 BEGIN;
 
 INSERT INTO country (country_short, country_long)
-SELECT DISTINCT countryshort, countrylong FROM ipcountry;
+SELECT DISTINCT
+    countryshort,
+    countrylong
+FROM ipcountry;
 
 INSERT INTO ip_country (ip_from, ip_to, country_id)
-SELECT ipfrom, ipto, country.id 
+SELECT
+    ipfrom,
+    ipto,
+    country.id
 FROM ipcountry
 JOIN country
-ON ipcountry.countryshort = country.country_short;
+  ON ipcountry.countryshort = country.country_short;
 
-DROP TABLE ipcountry;
+-- DROP TABLE ipcountry;
 
-END;
+COMMIT;
 
 EOF
 )"
