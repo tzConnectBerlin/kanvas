@@ -114,35 +114,35 @@ export class PaymentService {
   }
 
   async createStripePayment(
-    amount: number,
+    amountBaseUnit: number,
     user: UserEntity,
-    ipAddress: string
+    ipAddress: string,
   ): Promise<StripePaymentIntent> {
+    const vatRate = await this.getVatRate(ipAddress);
 
-    const amountInBaseCurrency = amount * 100
+    if (typeof vatRate === 'undefined') {
+      throw Error('Country not supported');
+    }
+
+    const amountVatExcl = amountBaseUnit * 100;
+    const amountVatIncl = amountVatExcl + amountVatExcl * (vatRate / 100.0);
 
     const paymentIntent = await this.stripe.paymentIntents.create({
-      amount: amountInBaseCurrency,
+      amount: amountVatIncl,
       currency: 'eur', // Have to change this to handle different currencies
       automatic_payment_methods: {
         enabled: false,
       },
     });
 
-    const vatRate = await this.getVatRate(ipAddress)
-
-    if (typeof vatRate === 'undefined') {
-      throw Error('Country not supported')
-    }
-
     // add multiple currency later on
     return {
-      amount: amountInBaseCurrency,
+      amount: amountVatExcl,
       currency: 'eur',
       clientSecret: paymentIntent.client_secret,
       id: paymentIntent.id,
-      vatAmount: amountInBaseCurrency + amountInBaseCurrency * (vatRate/100),
-      vatRate: vatRate
+      vatAmount: amountVatIncl,
+      vatRate: vatRate,
     };
   }
 
@@ -464,30 +464,38 @@ ORDER BY payment.id DESC
     };
   }
 
-  // Note rate is already devided by a hundred and should be between 0 and 100
-  async getVatRate(ipAddress: string) : Promise<number | undefined> {
-    const intIpAddress = this.dot2num(ipAddress)
+  // Note: returned value is a percentage (number between 0 and 100)
+  async getVatRate(ipAddress: string): Promise<number | undefined> {
+    const intIpAddress = this.dot2num(ipAddress);
 
     const qryRes = await this.conn.query(
-    `
-SELECT rate
-FROM vat
+      `
+SELECT
+  country.id as country_id,
+  vat.rate
+FROM ip_country
 LEFT JOIN country
-ON country.vat_id = vat.id
-LEFT JOIN ip_country
-ON ip_country.country_id = country.id
-WHERE country.id = ip_country.country_id
-AND ip_country.ip_from < 281470698520830
-AND 281470698520830 < ip_country.ip_to
-AND country.vat_id = vat.id
-      `, [intIpAddress]
+  ON country.id = ip_country.country_id
+LEFT JOIN vat
+  ON vat.id = country.vat_id
+WHERE ip_country.ip_from <= $1
+  AND ip_country.ip_to >= $1
+      `,
+      [intIpAddress],
     );
 
-    return qryRes.rows[0]['rate']
+    if (qryRes.rows[0]['country_id'] === null) {
+      Logger.warn(`Unmapped country for ip address ${ipAddress}`);
+    }
+
+    return qryRes.rows[0]['rate'];
   }
 
-  dot2num(IpDoted: string) {
-      var d = IpDoted.split('.');
-      return ((((((+d[0])*256)+(+d[1]))*256)+(+d[2]))*256)+(+d[3]);
+  dot2num(ip: string) {
+    const ipParts = ip.split('.');
+    return (
+      ((+ipParts[0] * 256 + +ipParts[1]) * 256 + +ipParts[2]) * 256 +
+      +ipParts[3]
+    );
   }
 }

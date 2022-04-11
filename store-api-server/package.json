@@ -106,7 +106,7 @@
     "collectCoverageFrom": [
       "src/**/{!(nft_mock.service),}.ts"
     ],
-    "coverageDirectory": "test/coverage",
+    "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   }
 }
