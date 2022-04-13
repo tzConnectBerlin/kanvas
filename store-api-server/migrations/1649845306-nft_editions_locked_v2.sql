@@ -11,14 +11,14 @@ AS $$
   SELECT
     (SELECT count(1) FROM mtm_kanvas_user_nft WHERE nft_id = nft_editions_locked.id) as owned,
     (
-      SELECT count(1) FROM mtm_cart_session_nft WHERE nft_id = nft_editions_locked.id
+      (SELECT count(1) FROM mtm_cart_session_nft WHERE nft_id = nft_editions_locked.id)
     +
-      SELECT count(1)
+      (SELECT count(1)
       FROM mtm_nft_order_nft AS mtm
       JOIN payment
         ON payment.nft_order_id = mtm.nft_order_id
       WHERE nft_id = nft_editions_locked.id
-        AND payment.status IN ('created', 'processing')
+        AND payment.status IN ('created', 'processing'))
     ) as reserved
 $$ LANGUAGE SQL;
 
