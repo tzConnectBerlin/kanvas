@@ -1,4 +1,10 @@
-import { Logger, Injectable, Inject } from '@nestjs/common';
+import {
+  HttpStatus,
+  HttpException,
+  Logger,
+  Injectable,
+  Inject,
+} from '@nestjs/common';
 import {
   UserEntity,
   ProfileEntity,
@@ -17,6 +23,7 @@ import { Result, Err, Ok } from 'ts-results';
 import { S3Service } from '../../s3.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { assertEnv } from 'src/utils';
+import { DbPool, DbTransaction, withTransaction } from 'src/db.module';
 const generate = require('meaningful-string');
 
 interface CartMeta {
@@ -35,7 +42,7 @@ export class UserService {
   CART_EXPIRATION_MILLI_SECS = Number(assertEnv('CART_EXPIRATION_MILLI_SECS'));
 
   constructor(
-    @Inject(PG_CONNECTION) private conn: any,
+    @Inject(PG_CONNECTION) private conn: DbPool,
     private readonly s3Service: S3Service,
     private readonly mintService: MintService,
     public readonly nftService: NftService,
@@ -179,8 +186,9 @@ WHERE address = $1
 
   async getUserCartSession(
     userId: number,
+    dbTx: DbTransaction | DbPool = this.conn,
   ): Promise<Result<string | undefined, string>> {
-    const qryRes = await this.conn.query(
+    const qryRes = await dbTx.query(
       `
 SELECT cart_session
 FROM kanvas_user
@@ -270,8 +278,11 @@ WHERE session_id = $1
     return newSession;
   }
 
-  async cartList(session: string): Promise<UserCart> {
-    const cartMeta = await this.getCartMeta(session);
+  async cartList(
+    session: string,
+    dbTx: DbTransaction | DbPool = this.conn,
+  ): Promise<UserCart> {
+    const cartMeta = await this.getCartMeta(session, dbTx);
     if (typeof cartMeta === 'undefined') {
       return {
         nfts: [],
@@ -279,7 +290,7 @@ WHERE session_id = $1
       };
     }
 
-    const nftIds = await this.getCartNftIds(cartMeta.id);
+    const nftIds = await this.getCartNftIds(cartMeta.id, dbTx);
     if (nftIds.length === 0) {
       return {
         nfts: [],
@@ -292,8 +303,11 @@ WHERE session_id = $1
     };
   }
 
-  async getCartNftIds(cartId: number): Promise<number[]> {
-    const qryRes = await this.conn.query(
+  async getCartNftIds(
+    cartId: number,
+    dbTx: DbTransaction | DbPool = this.conn,
+  ): Promise<number[]> {
+    const qryRes = await dbTx.query(
       `
 SELECT nft_id
 FROM mtm_cart_session_nft
@@ -303,12 +317,10 @@ WHERE cart_session_id = $1`,
     return qryRes.rows.map((row: any) => row['nft_id']);
   }
 
-  async cartAdd(session: string, nftId: number): Promise<Result<null, string>> {
+  async cartAdd(session: string, nftId: number) {
     const cartMeta = await this.touchCart(session);
 
-    const dbTx = await this.conn.connect();
-    try {
-      await dbTx.query('BEGIN');
+    return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       await dbTx.query(
         `
 INSERT INTO mtm_cart_session_nft(
@@ -329,24 +341,20 @@ WHERE nft.id = $1`,
         [nftId],
       );
       if (qryRes.rows[0]['editions_locked'] > qryRes.rows[0]['editions_size']) {
-        dbTx.query('ROLLBACK');
-        return Err('All editions of this nft have been reserved/bought');
+        throw new HttpException(
+          'All editions of this nft have been reserved/bought',
+          HttpStatus.BAD_REQUEST,
+        );
       }
       if (qryRes.rows[0]['launch_at'] > new Date()) {
-        dbTx.query('ROLLBACK');
-        return Err('This nft is not yet for sale');
+        throw new HttpException(
+          'This nft is not yet for sale',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
-      await dbTx.query('COMMIT');
-    } catch (err) {
-      await dbTx.query('ROLLBACK');
-      throw err;
-    } finally {
-      dbTx.release();
-    }
-
-    await this.resetCartExpiration(cartMeta.id);
-    return Ok(null);
+      await this.resetCartExpiration(cartMeta.id, dbTx);
+    });
   }
 
   async cartRemove(session: string, nftId: number): Promise<boolean> {
@@ -367,9 +375,12 @@ WHERE cart_session_id = $1
     return true;
   }
 
-  async resetCartExpiration(cartId: number) {
+  async resetCartExpiration(
+    cartId: number,
+    dbTx: DbTransaction | DbPool = this.conn,
+  ) {
     const expiresAt = this.newCartExpiration();
-    await this.conn.query(
+    await dbTx.query(
       `
 UPDATE cart_session
 SET expires_at = $2
@@ -412,8 +423,11 @@ RETURNING id, expires_at`,
     );
   }
 
-  async getCartMeta(session: string): Promise<CartMeta | undefined> {
-    const qryRes = await this.conn.query(
+  async getCartMeta(
+    session: string,
+    dbTx: DbTransaction | DbPool = this.conn,
+  ): Promise<CartMeta | undefined> {
+    const qryRes = await dbTx.query(
       `
 SELECT id, expires_at, order_id
 FROM cart_session

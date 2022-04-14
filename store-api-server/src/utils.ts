@@ -2,6 +2,7 @@ import { Ok, Err } from 'ts-results';
 import { HttpException } from '@nestjs/common';
 import { Response } from 'express';
 import { Cache } from 'cache-manager';
+import { Lock } from 'async-await-mutex-lock';
 
 export async function wrapCache<T>(
   cache: Cache,
@@ -78,4 +79,17 @@ export function sleep(ms: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+}
+
+export async function withKeyLocked<LockKeyTy, ResTy>(
+  lock: Lock<LockKeyTy>,
+  key: LockKeyTy,
+  f: () => Promise<ResTy>,
+): Promise<ResTy> {
+  await lock.acquire(key);
+  try {
+    return await f();
+  } finally {
+    lock.release(key);
+  }
 }

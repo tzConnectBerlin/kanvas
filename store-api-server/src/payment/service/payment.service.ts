@@ -7,6 +7,7 @@ import { MintService } from '../../nft/service/mint.service';
 import { Err } from 'ts-results';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { assertEnv } from 'src/utils';
+import { DbTransaction, withTransaction, DbPool } from 'src/db.module';
 
 export enum PaymentStatus {
   CREATED = 'created',
@@ -17,7 +18,7 @@ export enum PaymentStatus {
   FAILED = 'failed',
 }
 
-export enum PaymentProviderEnum {
+export enum PaymentProvider {
   STRIPE = 'stripe',
   TEST = 'test_provider',
 }
@@ -28,7 +29,7 @@ interface NftOrder {
   orderAt: number;
 }
 
-export interface StripePaymentIntent {
+export interface PaymentIntent {
   amount: number;
   currency: string;
   clientSecret: string;
@@ -41,7 +42,11 @@ export class PaymentService {
     ? require('stripe')(process.env.STRIPE_SECRET)
     : undefined;
 
-  FINAL_STATES = [PaymentStatus.FAILED, PaymentStatus.SUCCEEDED];
+  FINAL_STATES = [
+    PaymentStatus.FAILED,
+    PaymentStatus.SUCCEEDED,
+    PaymentStatus.CANCELED,
+  ];
 
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
@@ -91,32 +96,148 @@ export class PaymentService {
     }
   }
 
-  // Prepare the cart, order and amount for payment
-  async preparePayment(
+  async createPayment(
     userId: number,
-    provider: PaymentProviderEnum,
+    paymentProvider: PaymentProvider,
+  ): Promise<PaymentIntent> {
+    return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+      const preparedOrder = await this.#createOrder(
+        dbTx,
+        userId,
+        paymentProvider,
+      );
+      let paymentIntent = await this.#createPaymentIntent(
+        preparedOrder.amount,
+        paymentProvider,
+      );
+      await this.#registerPayment(
+        dbTx,
+        paymentProvider,
+        paymentIntent.id,
+        preparedOrder.nftOrder.id,
+      );
+      return paymentIntent;
+    }).catch((err: any) => {
+      Logger.error(`Err on creating nft order (userId=${userId}, err: ${err}`);
+      throw err;
+    });
+  }
+
+  // Prepare the cart, order and amount for payment
+  async #createOrder(
+    dbTx: DbTransaction,
+    userId: number,
+    provider: PaymentProvider,
   ): Promise<{ amount: number; nftOrder: NftOrder }> {
-    const cartSessionRes = await this.userService.getUserCartSession(userId);
+    const cartSessionRes = await this.userService.getUserCartSession(
+      userId,
+      dbTx,
+    );
 
     if (!cartSessionRes.ok || typeof cartSessionRes.val !== 'string') {
       throw cartSessionRes.val;
     }
     const cartSession: string = cartSessionRes.val;
 
-    const cartList = await this.userService.cartList(cartSession);
-    const nftOrder = await this.createNftOrder(cartSession, userId, provider);
-
-    const amount = cartList.nfts.reduce((sum, nft) => sum + nft.price, 0);
+    const nftOrder = await this.#registerOrder(
+      dbTx,
+      cartSession,
+      userId,
+      provider,
+    );
+    const cartList = await this.userService.cartList(cartSession, dbTx);
+    const amount = cartList.nfts.reduce((sum, nft) => sum + nft.price, 0) * 100; // TODO: decide about how to represent decimals (cents)
 
     return { amount: amount, nftOrder: nftOrder };
   }
 
-  async createStripePayment(
+  async #registerOrder(
+    dbTx: DbTransaction,
+    session: string,
+    userId: number,
+    provider: PaymentProvider,
+  ): Promise<NftOrder> {
+    const cartMeta = await this.userService.getCartMeta(session, dbTx);
+    if (typeof cartMeta === 'undefined') {
+      throw Err(`registerOrder err: cart should not be empty`);
+    }
+
+    try {
+      if (
+        cartMeta.orderId &&
+        typeof cartMeta.orderId !== 'undefined' &&
+        (await this.#nftOrderHasPaymentEntry(cartMeta.orderId, dbTx))
+      ) {
+        await this.cancelNftOrderId(dbTx, cartMeta.orderId, provider);
+      }
+
+      const orderAt = new Date();
+
+      const orderQryRes = await dbTx.query(
+        `
+INSERT INTO nft_order (
+  user_id, order_at
+)
+VALUES ($1, $2)
+RETURNING id`,
+        [userId, orderAt.toUTCString()],
+      );
+      const nftOrderId: number = orderQryRes.rows[0]['id'];
+
+      await dbTx.query(
+        `
+INSERT INTO mtm_nft_order_nft (
+  nft_order_id, nft_id
+)
+SELECT $1, nft_id
+FROM mtm_cart_session_nft
+WHERE cart_session_id = $2
+        `,
+        [nftOrderId, cartMeta.id],
+      );
+
+      await dbTx.query(
+        `
+UPDATE cart_session
+SET order_id = $1
+WHERE id = $2
+        `,
+        [nftOrderId, cartMeta.id],
+      );
+
+      return <NftOrder>{
+        id: nftOrderId,
+        orderAt: Math.floor(orderAt.getTime() / 1000),
+        userId: userId,
+      };
+    } catch (err: any) {
+      Logger.error(
+        `Err on creating order in db (provider=${provider}, cartSessionId=${cartMeta.id}, err: ${err}`,
+      );
+      throw err;
+    }
+  }
+
+  async #createPaymentIntent(
     amount: number,
-    user: UserEntity,
-  ): Promise<StripePaymentIntent> {
+    paymentProvider: PaymentProvider,
+  ): Promise<PaymentIntent> {
+    switch (paymentProvider) {
+      case PaymentProvider.STRIPE:
+        return await this.#createStripePaymentIntent(amount);
+      case PaymentProvider.TEST:
+        return {
+          amount,
+          currency: 'eur',
+          clientSecret: '..',
+          id: `stripe_test_id${new Date().getTime().toString()}`,
+        };
+    }
+  }
+
+  async #createStripePaymentIntent(amount: number): Promise<PaymentIntent> {
     const paymentIntent = await this.stripe.paymentIntents.create({
-      amount: amount * 100,
+      amount,
       currency: 'eur', // Have to change this to handle different currencies
       automatic_payment_methods: {
         enabled: false,
@@ -125,35 +246,28 @@ export class PaymentService {
 
     // add multiple currency later on
     return {
-      amount: amount * 100,
+      amount,
       currency: 'eur',
       clientSecret: paymentIntent.client_secret,
       id: paymentIntent.id,
     };
   }
 
-  newOrderExpiration(): Date {
-    const expiresAt = new Date();
-    expiresAt.setTime(
-      expiresAt.getTime() + Number(assertEnv('ORDER_EXPIRATION_MILLI_SECS')),
-    );
-    return expiresAt;
-  }
-
-  async createPayment(
-    provider: PaymentProviderEnum,
+  async #registerPayment(
+    dbTx: DbTransaction,
+    provider: PaymentProvider,
     paymentId: string,
     nftOrderId: number,
   ) {
     try {
-      const expireAt = this.newOrderExpiration();
-      await this.conn.query(
+      const expireAt = this.#newPaymentExpiration();
+      await dbTx.query(
         `
-  INSERT INTO payment (
-    payment_id, status, nft_order_id, provider, expires_at
-  )
-  VALUES ($1, $2, $3, $4, $5)
-  RETURNING id`,
+INSERT INTO payment (
+  payment_id, status, nft_order_id, provider, expires_at
+)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id`,
         [
           paymentId,
           PaymentStatus.CREATED,
@@ -170,14 +284,20 @@ export class PaymentService {
     }
   }
 
+  #newPaymentExpiration(): Date {
+    const expiresAt = new Date();
+    expiresAt.setTime(
+      expiresAt.getTime() + Number(assertEnv('ORDER_EXPIRATION_MILLI_SECS')),
+    );
+    return expiresAt;
+  }
+
   async editPaymentStatus(
     paymentId: string,
     status: PaymentStatus,
   ): Promise<PaymentStatus | undefined> {
-    const tx = await this.conn.connect();
-    try {
-      await tx.query('BEGIN');
-      const qryPrevStatus = await tx.query(
+    return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+      const qryPrevStatus = await dbTx.query(
         `
 SELECT status
 FROM payment
@@ -186,163 +306,99 @@ WHERE payment_id = $1
         [paymentId],
       );
 
-      await tx.query(
+      await dbTx.query(
         `
 UPDATE payment
 SET status = $1
 WHERE payment_id = $2
-  AND NOT status = ANY($3::payment_status[])`,
+  AND NOT status = ANY($3)
+        `,
         [status, paymentId, this.FINAL_STATES],
       );
-
-      await tx.query('commit');
 
       return qryPrevStatus.rows[0]
         ? qryPrevStatus.rows[0]['status']
         : undefined;
-    } catch (err) {
-      await tx.query('ROLLBACK');
+    }).catch((err: any) => {
       Logger.error(
         `Err on updating payment status in db (paymentId=${paymentId}, newStatus=${status}), err: ${err}`,
       );
       throw err;
-    } finally {
-      tx.release();
-    }
+    });
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
   async deleteExpiredPayments() {
-    const canceledPaymentsIds = await this.conn.query(
+    const cancelOrderIds = await this.conn.query(
       `
-      UPDATE payment
-      SET status = $1
-      WHERE expires_at < now() AT TIME ZONE 'UTC'
-        AND status IN ($2, $3)
-      RETURNING payment_id, expires_at
+SELECT
+  nft_order_id,
+  provider,
+  expires_at
+FROM payment
+WHERE expires_at < now() AT TIME ZONE 'UTC'
+  AND status = ANY($1)
     `,
-      [
-        PaymentStatus.TIMED_OUT,
-        PaymentStatus.CREATED,
-        PaymentStatus.PROCESSING,
-      ],
+      [[PaymentStatus.CREATED, PaymentStatus.PROCESSING]],
     );
 
-    for (const row of canceledPaymentsIds.rows) {
-      try {
-        await this.stripe.paymentIntents.cancel(row['payment_id']);
+    for (const row of cancelOrderIds.rows) {
+      await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+        await this.cancelNftOrderId(
+          dbTx,
+          Number(row['nft_order_id']),
+          row['provider'],
+          PaymentStatus.TIMED_OUT,
+        );
         Logger.warn(
           `canceled following expired order session: ${row['payment_id']}`,
         );
-      } catch (err: any) {
-        Logger.error(
-          `failed to cancel expired order (paymentId=${row['payment_id']}), err: ${err}`,
-        );
-      }
+      });
     }
   }
 
-  async cancelNftOrderId(orderId: number, provider: PaymentProviderEnum) {
-    const paymentIntentId = await this.conn.query(
+  async cancelNftOrderId(
+    dbTx: DbTransaction,
+    orderId: number,
+    provider: PaymentProvider,
+    newStatus:
+      | PaymentStatus.CANCELED
+      | PaymentStatus.TIMED_OUT = PaymentStatus.CANCELED,
+  ) {
+    const paymentIntentId = await dbTx.query(
       `
 UPDATE payment
 SET status = $2
 WHERE nft_order_id = $1
-AND status IN ($3, $4, $5)
+AND status = ANY($3)
 RETURNING payment_id
       `,
       [
         orderId,
-        PaymentStatus.CANCELED,
-        PaymentStatus.CREATED,
-        PaymentStatus.PROCESSING,
-        PaymentStatus.TIMED_OUT,
+        newStatus,
+        [
+          PaymentStatus.CREATED,
+          PaymentStatus.PROCESSING,
+          PaymentStatus.TIMED_OUT,
+        ],
       ],
     );
 
-    if (!paymentIntentId.rowCount) {
-      return;
+    if (paymentIntentId.rowCount === 0) {
+      throw Err(
+        `paymentIntentCancel failed (orderId=${orderId}), err: no payment exists with matching orderId and cancellable status`,
+      );
     }
 
     try {
-      if (provider === PaymentProviderEnum.STRIPE) {
+      if (provider === PaymentProvider.STRIPE) {
         await this.stripe.paymentIntents.cancel(
           paymentIntentId.rows[0]['payment_id'],
         );
       }
     } catch (err: any) {
-      throw Err(`paymentIntentCancel failed (orderId=${orderId}), err: ${err}`);
+      throw Err(`Err on canceling nft order (orderId=${orderId}, err: ${err}`);
     }
-  }
-
-  async createNftOrder(
-    session: string,
-    userId: number,
-    provider: PaymentProviderEnum,
-  ): Promise<NftOrder> {
-    const cartMeta = await this.userService.getCartMeta(session);
-    if (typeof cartMeta === 'undefined') {
-      throw Err(`createNftOrder err: cart should not be empty`);
-    }
-
-    if (cartMeta.orderId && typeof cartMeta.orderId !== 'undefined') {
-      await this.cancelNftOrderId(cartMeta.orderId, provider);
-    }
-
-    let nftOrderId: number;
-    const orderAt = new Date();
-
-    const tx = await this.conn.connect();
-    try {
-      await tx.query('BEGIN');
-      const nftQryRes = await tx.query(
-        `
-INSERT INTO nft_order (
-  user_id, order_at
-)
-VALUES ($1, $2)
-RETURNING id`,
-        [userId, orderAt.toUTCString()],
-      );
-      nftOrderId = nftQryRes.rows[0]['id'];
-
-      await tx.query(
-        `
-INSERT INTO mtm_nft_order_nft (
-  nft_order_id, nft_id
-)
-SELECT $1, nft_id
-FROM mtm_cart_session_nft
-WHERE cart_session_id = $2
-        `,
-        [nftOrderId, cartMeta.id],
-      );
-
-      await tx.query(
-        `
-UPDATE cart_session
-SET order_id = $1
-WHERE id = $2
-        `,
-        [nftOrderId, cartMeta.id],
-      );
-
-      await tx.query('COMMIT');
-    } catch (err) {
-      Logger.error(
-        `Err on creating nft order (userId=${userId}, cartSession=${session}), err: ${err}`,
-      );
-      await tx.query('ROLLBACK');
-      throw err;
-    } finally {
-      tx.release();
-    }
-
-    return <NftOrder>{
-      id: nftOrderId,
-      orderAt: Math.floor(orderAt.getTime() / 1000),
-      userId: userId,
-    };
   }
 
   async getPaymentOrderId(paymentId: string): Promise<number> {
@@ -375,10 +431,7 @@ WHERE nft_order.id = $1
   async orderCheckout(orderId: number): Promise<boolean> {
     const userAddress = await this.getOrderUserAddress(orderId);
 
-    const dbTx = await this.conn.connect();
-    try {
-      await dbTx.query(`BEGIN`);
-
+    return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       const nftIds = await this.#assignOrderNftsToUser(dbTx, orderId);
       if (nftIds.length === 0) {
         return false;
@@ -389,17 +442,29 @@ WHERE nft_order.id = $1
       // should be solved asynchronously to the checkout process itself.
       this.mintService.transfer_nfts(nfts, userAddress);
 
-      await dbTx.query(`COMMIT`);
-    } catch (err: any) {
-      await dbTx.query(`ROLLBACK`);
+      return true;
+    }).catch((err: any) => {
       Logger.error(
         `failed to checkout order (orderId=${orderId}), err: ${err}`,
       );
       throw err;
-    } finally {
-      dbTx.release();
-    }
-    return true;
+    });
+  }
+
+  async #nftOrderHasPaymentEntry(
+    orderId: number,
+    dbTx: DbTransaction | DbPool = this.conn,
+  ): Promise<boolean> {
+    const qryRes = await dbTx.query(
+      `
+SELECT 1
+FROM payment
+WHERE nft_order_id = $1
+  AND NOT status = ANY($2)
+      `,
+      [orderId, this.FINAL_STATES],
+    );
+    return qryRes.rowCount === 1;
   }
 
   async #assignOrderNftsToUser(dbTx: any, orderId: number): Promise<number[]> {

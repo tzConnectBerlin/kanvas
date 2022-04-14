@@ -1,10 +1,11 @@
 import { Logger, Module, Inject } from '@nestjs/common';
 import { assertEnv } from './utils';
 import { PG_CONNECTION } from './constants';
-import { Client, types } from 'pg';
+import { Client, types, PoolClient } from 'pg';
 import * as Pool from 'pg-pool';
 
 export type DbPool = Pool<Client>;
+export type DbTransaction = PoolClient;
 
 // Read postgres TIMESTAMP WITHOUT TIME ZONE values as UTC+0 Date
 types.setTypeParser(
@@ -58,5 +59,22 @@ export class DbModule {
     await this.w.dbPool.end();
     this.w.dbPool = undefined;
     Logger.log('db connection closed');
+  }
+}
+
+export async function withTransaction<ResTy>(
+  dbPool: DbPool,
+  f: (dbTx: DbTransaction) => Promise<ResTy>,
+): Promise<ResTy> {
+  const dbTx = await dbPool.connect();
+  try {
+    const res = await f(dbTx);
+    await dbTx.query(`COMMIT`);
+    return res;
+  } catch (err: any) {
+    await dbTx.query(`ROLLBACK`);
+    throw err;
+  } finally {
+    dbTx.release();
   }
 }

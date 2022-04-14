@@ -32,6 +32,7 @@ import {
   PG_FOREIGN_KEY_VIOLATION_ERRCODE,
   PROFILE_PICTURE_MAX_BYTES,
 } from '../../constants';
+import { DbTransaction, withTransaction } from 'src/db.module';
 
 interface EditProfile {
   userName?: string;
@@ -168,34 +169,32 @@ export class UserController {
       user,
     );
 
-    const addedRes = await this.userService
-      .cartAdd(cartSession, nftId)
-      .catch((err: any) => {
-        if (err?.code === PG_FOREIGN_KEY_VIOLATION_ERRCODE) {
-          throw new HttpException(
-            'This nft does not exist',
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-        if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
-          throw new HttpException(
-            'This nft is already in the cart',
-            HttpStatus.BAD_REQUEST,
-          );
-        }
+    await this.userService.cartAdd(cartSession, nftId).catch((err: any) => {
+      if (err instanceof HttpException) {
+        throw err;
+      }
 
-        Logger.error(
-          `Error on adding nft to cart. cartSession=${cartSession}, nftId=${nftId}, err: ${err}`,
-        );
+      if (err?.code === PG_FOREIGN_KEY_VIOLATION_ERRCODE) {
         throw new HttpException(
-          'Something went wrong',
-          HttpStatus.INTERNAL_SERVER_ERROR,
+          'This nft does not exist',
+          HttpStatus.BAD_REQUEST,
         );
-      });
+      }
+      if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
+        throw new HttpException(
+          'This nft is already in the cart',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
 
-    if (!addedRes.ok) {
-      throw new HttpException(addedRes.val, HttpStatus.BAD_REQUEST);
-    }
+      Logger.error(
+        `Error on adding nft to cart. cartSession=${cartSession}, nftId=${nftId}, err: ${err}`,
+      );
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    });
   }
 
   @Post('cart/remove/:nftId')

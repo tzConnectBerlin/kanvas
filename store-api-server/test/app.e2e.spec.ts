@@ -4,7 +4,7 @@ import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { RATE_LIMIT } from 'src/constants';
 import {
-  PaymentProviderEnum,
+  PaymentProvider,
   PaymentService,
   PaymentStatus,
 } from 'src/payment/service/payment.service';
@@ -1163,41 +1163,13 @@ describe('AppController (e2e)', () => {
     },
   );
 
-  skipOnPriorFail(
-    'stripe payment: create a correct intent payment method',
-    async () => {
-      const { bearer, id } = await loginUser(app, 'addr', 'admin');
-
-      // nft price: 43
-      const add1 = await request(app.getHttpServer())
-        .post('/users/cart/add/4')
-        .set('authorization', bearer);
-      expect(add1.statusCode).toEqual(201);
-
-      // nft price: 104
-      const add2 = await request(app.getHttpServer())
-        .post('/users/cart/add/1')
-        .set('authorization', bearer);
-      expect(add2.statusCode).toEqual(201);
-
-      const preparedPayment = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      expect(preparedPayment.amount).toEqual(44);
-
-      const remove1 = await request(app.getHttpServer())
-        .post('/users/cart/remove/4')
-        .set('authorization', bearer);
-      expect(remove1.statusCode).toEqual(204);
-
-      // nft price: 104
-      const remove2 = await request(app.getHttpServer())
-        .post('/users/cart/remove/1')
-        .set('authorization', bearer);
-      expect(remove2.statusCode).toEqual(204);
-    },
-  );
+  //let reservedDuringOrder = await request(app.getHttpServer()).post(
+  //  '/nfts/1',
+  //);
+  //expect(
+  //  reservedDuringOrder.body.editionsSize -
+  //    reservedDuringOrder.body.editionsAvailable,
+  //).toEqual(1);
 
   skipOnPriorFail(
     'stripe payment: Payment status should change to succeeded if payment is successfull',
@@ -1217,15 +1189,7 @@ describe('AppController (e2e)', () => {
       expect(add2.statusCode).toEqual(201);
 
       // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment.nftOrder.id,
-      );
+      await paymentService.createPayment(id, PaymentProvider.TEST);
 
       // Give webhook handler function success event
       const { payment_id } =
@@ -1290,15 +1254,7 @@ describe('AppController (e2e)', () => {
       expect(add2.statusCode).toEqual(201);
 
       // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment.nftOrder.id,
-      );
+      await paymentService.createPayment(id, PaymentProvider.TEST);
 
       // Give webhook handler function success event
       const { payment_id } =
@@ -1375,14 +1331,9 @@ describe('AppController (e2e)', () => {
       expect(add2.statusCode).toEqual(201);
 
       // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment = await paymentService.preparePayment(
+      const preparedOrder = await paymentService.createPayment(
         id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment.nftOrder.id,
+        PaymentProvider.TEST,
       );
 
       // Give webhook handler function success event
@@ -1399,7 +1350,7 @@ describe('AppController (e2e)', () => {
         },
       };
 
-      // Calling success status
+      // Calling fail status
       await paymentService.webhookHandler(constructedEvent);
 
       // Check cart_session deleted
@@ -1455,15 +1406,7 @@ describe('AppController (e2e)', () => {
 
       // Create one payment intent (we are not calling the stripe api)
       try {
-        const preparedPayment = await paymentService.preparePayment(
-          id,
-          PaymentProviderEnum.TEST,
-        );
-        await paymentService.createPayment(
-          PaymentProviderEnum.STRIPE,
-          `stripe_test_id${new Date().getTime().toString()}`,
-          preparedPayment.nftOrder.id,
-        );
+        await paymentService.createPayment(id, PaymentProvider.TEST);
       } catch (err) {
         Logger.log(err);
       }
@@ -1497,14 +1440,9 @@ describe('AppController (e2e)', () => {
       // Check canceled payment don't get to timeout
 
       // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment2 = await paymentService.preparePayment(
+      const preparedOrder2 = await paymentService.createPayment(
         id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment2.nftOrder.id,
+        PaymentProvider.TEST,
       );
 
       const payment3Data = await paymentService.getPaymentIdForLatestUserOrder(
@@ -1534,15 +1472,7 @@ describe('AppController (e2e)', () => {
       expect(stillCanceled.status).toEqual(PaymentStatus.CANCELED);
 
       // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment3 = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment3.nftOrder.id,
-      );
+      await paymentService.createPayment(id, PaymentProvider.TEST);
 
       const created = await paymentService.getPaymentIdForLatestUserOrder(id);
       expect(created.status).toEqual(PaymentStatus.CREATED);
@@ -1552,16 +1482,7 @@ describe('AppController (e2e)', () => {
       const timedOut = await paymentService.getPaymentIdForLatestUserOrder(id);
       expect(timedOut.status).toEqual(PaymentStatus.TIMED_OUT);
 
-      // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment4 = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment4.nftOrder.id,
-      );
+      await paymentService.createPayment(id, PaymentProvider.TEST);
 
       const payment4Data = await paymentService.getPaymentIdForLatestUserOrder(
         id,
@@ -1591,15 +1512,7 @@ describe('AppController (e2e)', () => {
       expect(timedOutResponse.status).toEqual(PaymentStatus.TIMED_OUT);
 
       // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment5 = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment5.nftOrder.id,
-      );
+      await paymentService.createPayment(id, PaymentProvider.TEST);
 
       const payment5Data = await paymentService.getPaymentIdForLatestUserOrder(
         id,
@@ -1640,16 +1553,7 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment.nftOrder.id,
-      );
+      await paymentService.createPayment(id, PaymentProvider.TEST);
 
       // Give webhook handler function success event
       const { payment_id } =
@@ -1707,16 +1611,7 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment.nftOrder.id,
-      );
+      await paymentService.createPayment(id, PaymentProvider.TEST);
 
       // Give webhook handler function success event
       const { payment_id } =
