@@ -1163,18 +1163,17 @@ describe('AppController (e2e)', () => {
     },
   );
 
-  //let reservedDuringOrder = await request(app.getHttpServer()).post(
-  //  '/nfts/1',
-  //);
-  //expect(
-  //  reservedDuringOrder.body.editionsSize -
-  //    reservedDuringOrder.body.editionsAvailable,
-  //).toEqual(1);
+  const getLockedCount = async (nftId: number) => {
+    const resp = await request(app.getHttpServer()).post(`/nfts/${nftId}`);
+    return resp.body.editionsSize - resp.body.editionsAvailable;
+  };
 
   skipOnPriorFail(
     'stripe payment: Payment status should change to succeeded if payment is successfull',
     async () => {
       const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+
+      expect(await getLockedCount(1)).toEqual(0);
 
       // nft price: 43 id: 4
       const add1 = await request(app.getHttpServer())
@@ -1188,19 +1187,26 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(add2.statusCode).toEqual(201);
 
+      // 1 edition reserved by the cart
+      expect(await getLockedCount(1)).toEqual(1);
+
       // Create one payment intent (we are not calling the stripe api)
       await paymentService.createPayment(id, PaymentProvider.TEST);
 
+      // 1 edition reserved by the order
+      expect(await getLockedCount(1)).toEqual(1);
+
       // Give webhook handler function success event
-      const { payment_id } =
-        await paymentService.getPaymentIdForLatestUserOrder(id);
+      const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
+        id,
+      );
 
       // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.succeeded',
         data: {
           object: {
-            id: payment_id,
+            id: paymentId,
           },
         },
       };
@@ -1208,14 +1214,15 @@ describe('AppController (e2e)', () => {
       // Calling success status
       await paymentService.webhookHandler(constructedEvent);
 
+      // 1 edition locked because it is now owned
+      expect(await getLockedCount(1)).toEqual(1);
+
       // Check cart_session deleted
       const old_cart_session = await userService.getUserCartSession(id);
       expect(old_cart_session.val).toBeNull();
 
       // Check payment status changed to succeeded
-      const { status } = await paymentService.getPaymentIdForLatestUserOrder(
-        id,
-      );
+      const { status } = await paymentService.getPaymentForLatestUserOrder(id);
       expect(status).toEqual(PaymentStatus.SUCCEEDED);
 
       // Check NFT ownership transfer
@@ -1241,6 +1248,8 @@ describe('AppController (e2e)', () => {
     async () => {
       const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
 
+      expect(await getLockedCount(2)).toEqual(0);
+
       // nft price: 43 id: 4
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/5')
@@ -1253,25 +1262,35 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(add2.statusCode).toEqual(201);
 
+      // 1 edition locked by cart (reservation)
+      expect(await getLockedCount(2)).toEqual(1);
+
       // Create one payment intent (we are not calling the stripe api)
       await paymentService.createPayment(id, PaymentProvider.TEST);
 
       // Give webhook handler function success event
-      const { payment_id } =
-        await paymentService.getPaymentIdForLatestUserOrder(id);
+      const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
+        id,
+      );
+
+      // 1 edition locked by order, cart is ignored (otherwise it'd lock 2 editions, not what we want)
+      expect(await getLockedCount(2)).toEqual(1);
 
       // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.canceled',
         data: {
           object: {
-            id: payment_id,
+            id: paymentId,
           },
         },
       };
 
       // Changing to canceled status
       await paymentService.webhookHandler(constructedEvent);
+
+      // 1 edition still locked by cart (reservation)
+      expect(await getLockedCount(2)).toEqual(1);
 
       // Check cart_session still here
       const old_cart_session = await userService.getUserCartSession(id);
@@ -1280,7 +1299,7 @@ describe('AppController (e2e)', () => {
       expect(old_cart_session.ok).toEqual(true);
 
       // Check payment status changed to canceled
-      const t = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const t = await paymentService.getPaymentForLatestUserOrder(id);
 
       expect(t.status).toEqual(PaymentStatus.CANCELED);
 
@@ -1310,6 +1329,9 @@ describe('AppController (e2e)', () => {
         .post('/users/cart/remove/2')
         .set('authorization', bearer);
       expect(remove2.statusCode).toEqual(204);
+
+      // 0 editions locked now that the cart is cleared too
+      expect(await getLockedCount(2)).toEqual(0);
     },
   );
 
@@ -1337,15 +1359,16 @@ describe('AppController (e2e)', () => {
       );
 
       // Give webhook handler function success event
-      const { payment_id } =
-        await paymentService.getPaymentIdForLatestUserOrder(id);
+      const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
+        id,
+      );
 
       // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.payment_failed',
         data: {
           object: {
-            id: payment_id,
+            id: paymentId,
           },
         },
       };
@@ -1359,9 +1382,7 @@ describe('AppController (e2e)', () => {
       expect(old_cart_session.ok).toEqual(true);
 
       // Check payment status changed to canceled
-      const { status } = await paymentService.getPaymentIdForLatestUserOrder(
-        id,
-      );
+      const { status } = await paymentService.getPaymentForLatestUserOrder(id);
       expect(status).toEqual(PaymentStatus.FAILED);
 
       const userNfts = await request(app.getHttpServer())
@@ -1411,15 +1432,16 @@ describe('AppController (e2e)', () => {
         Logger.log(err);
       }
 
-      const { payment_id } =
-        await paymentService.getPaymentIdForLatestUserOrder(id);
+      const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
+        id,
+      );
 
       // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.payment_failed',
         data: {
           object: {
-            id: payment_id,
+            id: paymentId,
           },
         },
       };
@@ -1427,14 +1449,12 @@ describe('AppController (e2e)', () => {
       await paymentService.webhookHandler(constructedEvent);
 
       // Check failed payment don't get to timeout
-      const failed = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const failed = await paymentService.getPaymentForLatestUserOrder(id);
       expect(failed.status).toEqual(PaymentStatus.FAILED);
 
       await paymentService.deleteExpiredPayments();
 
-      const stillFailed = await paymentService.getPaymentIdForLatestUserOrder(
-        id,
-      );
+      const stillFailed = await paymentService.getPaymentForLatestUserOrder(id);
       expect(stillFailed.status).toEqual(PaymentStatus.FAILED);
 
       // Check canceled payment don't get to timeout
@@ -1445,7 +1465,7 @@ describe('AppController (e2e)', () => {
         PaymentProvider.TEST,
       );
 
-      const payment3Data = await paymentService.getPaymentIdForLatestUserOrder(
+      const payment3Data = await paymentService.getPaymentForLatestUserOrder(
         id,
       );
 
@@ -1454,19 +1474,19 @@ describe('AppController (e2e)', () => {
         type: 'payment_intent.canceled',
         data: {
           object: {
-            id: payment3Data.payment_id,
+            id: payment3Data.paymentId,
           },
         },
       };
 
       await paymentService.webhookHandler(constructedEvent3);
 
-      const canceled = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const canceled = await paymentService.getPaymentForLatestUserOrder(id);
       expect(canceled.status).toEqual(PaymentStatus.CANCELED);
 
       await paymentService.deleteExpiredPayments();
 
-      const stillCanceled = await paymentService.getPaymentIdForLatestUserOrder(
+      const stillCanceled = await paymentService.getPaymentForLatestUserOrder(
         id,
       );
       expect(stillCanceled.status).toEqual(PaymentStatus.CANCELED);
@@ -1474,17 +1494,17 @@ describe('AppController (e2e)', () => {
       // Create one payment intent (we are not calling the stripe api)
       await paymentService.createPayment(id, PaymentProvider.TEST);
 
-      const created = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const created = await paymentService.getPaymentForLatestUserOrder(id);
       expect(created.status).toEqual(PaymentStatus.CREATED);
 
       await paymentService.deleteExpiredPayments();
 
-      const timedOut = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const timedOut = await paymentService.getPaymentForLatestUserOrder(id);
       expect(timedOut.status).toEqual(PaymentStatus.TIMED_OUT);
 
       await paymentService.createPayment(id, PaymentProvider.TEST);
 
-      const payment4Data = await paymentService.getPaymentIdForLatestUserOrder(
+      const payment4Data = await paymentService.getPaymentForLatestUserOrder(
         id,
       );
 
@@ -1493,28 +1513,26 @@ describe('AppController (e2e)', () => {
         type: 'payment_intent.processing',
         data: {
           object: {
-            id: payment4Data.payment_id,
+            id: payment4Data.paymentId,
           },
         },
       };
 
       await paymentService.webhookHandler(constructedEvent5);
 
-      const processing = await paymentService.getPaymentIdForLatestUserOrder(
-        id,
-      );
+      const processing = await paymentService.getPaymentForLatestUserOrder(id);
       expect(processing.status).toEqual(PaymentStatus.PROCESSING);
 
       await paymentService.deleteExpiredPayments();
 
       const timedOutResponse =
-        await paymentService.getPaymentIdForLatestUserOrder(id);
+        await paymentService.getPaymentForLatestUserOrder(id);
       expect(timedOutResponse.status).toEqual(PaymentStatus.TIMED_OUT);
 
       // Create one payment intent (we are not calling the stripe api)
       await paymentService.createPayment(id, PaymentProvider.TEST);
 
-      const payment5Data = await paymentService.getPaymentIdForLatestUserOrder(
+      const payment5Data = await paymentService.getPaymentForLatestUserOrder(
         id,
       );
 
@@ -1523,19 +1541,19 @@ describe('AppController (e2e)', () => {
         type: 'payment_intent.succeeded',
         data: {
           object: {
-            id: payment5Data.payment_id,
+            id: payment5Data.paymentId,
           },
         },
       };
 
       await paymentService.webhookHandler(constructedEvent2);
 
-      const success = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const success = await paymentService.getPaymentForLatestUserOrder(id);
       expect(success.status).toEqual(PaymentStatus.SUCCEEDED);
 
       await paymentService.deleteExpiredPayments();
 
-      const stillSuccess = await paymentService.getPaymentIdForLatestUserOrder(
+      const stillSuccess = await paymentService.getPaymentForLatestUserOrder(
         id,
       );
       expect(stillSuccess.status).toEqual(PaymentStatus.SUCCEEDED);
@@ -1556,15 +1574,16 @@ describe('AppController (e2e)', () => {
       await paymentService.createPayment(id, PaymentProvider.TEST);
 
       // Give webhook handler function success event
-      const { payment_id } =
-        await paymentService.getPaymentIdForLatestUserOrder(id);
+      const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
+        id,
+      );
 
       // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.payment_failed',
         data: {
           object: {
-            id: payment_id,
+            id: paymentId,
           },
         },
       };
@@ -1572,7 +1591,7 @@ describe('AppController (e2e)', () => {
       // Calling success status
       await paymentService.webhookHandler(constructedEvent);
 
-      const failed = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const failed = await paymentService.getPaymentForLatestUserOrder(id);
       expect(failed.status).toEqual(PaymentStatus.FAILED);
 
       // reconstruct success event from stripe
@@ -1580,7 +1599,7 @@ describe('AppController (e2e)', () => {
         type: 'payment_intent.succeeded',
         data: {
           object: {
-            id: failed.payment_id,
+            id: failed.paymentId,
           },
         },
       };
@@ -1588,9 +1607,7 @@ describe('AppController (e2e)', () => {
       // Calling success status
       await paymentService.webhookHandler(constructedEvent2);
 
-      const stillFailed = await paymentService.getPaymentIdForLatestUserOrder(
-        id,
-      );
+      const stillFailed = await paymentService.getPaymentForLatestUserOrder(id);
       expect(stillFailed.status).toEqual(PaymentStatus.FAILED);
 
       const cleanupCart = await request(app.getHttpServer())
@@ -1614,15 +1631,16 @@ describe('AppController (e2e)', () => {
       await paymentService.createPayment(id, PaymentProvider.TEST);
 
       // Give webhook handler function success event
-      const { payment_id } =
-        await paymentService.getPaymentIdForLatestUserOrder(id);
+      const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
+        id,
+      );
 
       // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.succeeded',
         data: {
           object: {
-            id: payment_id,
+            id: paymentId,
           },
         },
       };
@@ -1630,7 +1648,7 @@ describe('AppController (e2e)', () => {
       // Calling success status
       await paymentService.webhookHandler(constructedEvent);
 
-      const success = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const success = await paymentService.getPaymentForLatestUserOrder(id);
       expect(success.status).toEqual(PaymentStatus.SUCCEEDED);
 
       // reconstruct success event from stripe
@@ -1638,7 +1656,7 @@ describe('AppController (e2e)', () => {
         type: 'payment_intent.payment_failed',
         data: {
           object: {
-            id: payment_id,
+            id: paymentId,
           },
         },
       };
@@ -1646,7 +1664,7 @@ describe('AppController (e2e)', () => {
       // Calling success status
       await paymentService.webhookHandler(constructedEvent2);
 
-      const stillSuccess = await paymentService.getPaymentIdForLatestUserOrder(
+      const stillSuccess = await paymentService.getPaymentForLatestUserOrder(
         id,
       );
       expect(stillSuccess.status).toEqual(PaymentStatus.SUCCEEDED);

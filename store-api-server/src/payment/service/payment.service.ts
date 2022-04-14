@@ -46,6 +46,7 @@ export class PaymentService {
     PaymentStatus.FAILED,
     PaymentStatus.SUCCEEDED,
     PaymentStatus.CANCELED,
+    PaymentStatus.TIMED_OUT,
   ];
 
   constructor(
@@ -487,9 +488,9 @@ RETURNING nft_id
   }
 
   // Test functions
-  async getPaymentIdForLatestUserOrder(
+  async getPaymentForLatestUserOrder(
     userId: number,
-  ): Promise<{ payment_id: string; order_id: number; status: PaymentStatus }> {
+  ): Promise<{ paymentId: string; orderId: number; status: PaymentStatus }> {
     const qryRes = await this.conn.query(
       `
 SELECT payment_id, status, nft_order.id as order_id
@@ -509,8 +510,8 @@ ORDER BY payment.id DESC
     );
 
     return {
-      payment_id: qryRes.rows[0]['payment_id'],
-      order_id: qryRes.rows[0]['order_id'],
+      paymentId: qryRes.rows[0]['payment_id'],
+      orderId: qryRes.rows[0]['order_id'],
       status: qryRes.rows[0]['status'],
     };
   }

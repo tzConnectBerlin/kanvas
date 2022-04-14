@@ -122,13 +122,12 @@ SELECT $1, UNNEST($2::INTEGER[])
     return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       await insert(dbTx);
       await uploadToIpfs(dbTx);
-
-      await dbTx.query(`COMMIT`);
-      Logger.log(`Created new NFT ${newNft.id}`);
     }).catch((err: any) => {
       Logger.error(`failed to publish nft (id=${newNft.id}), err: ${err}`);
       throw err;
     });
+
+    Logger.log(`Created new NFT ${newNft.id}`);
   }
 
   async search(str: string): Promise<NftEntity[]> {

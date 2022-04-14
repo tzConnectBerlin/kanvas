@@ -9,8 +9,8 @@ CREATE FUNCTION nft_editions_locked(INT)
   RETURNS TABLE(reserved BIGINT, owned BIGINT)
 AS $$
   SELECT
-    count(cart_nfts) FILTER (WHERE nft_order IS NULL)
-    + count(order_nfts) FILTER (WHERE nft_order IS NOT NULL) AS reserved,
+    count(cart_nfts) FILTER (WHERE payment IS NULL)
+    + count(order_nfts) FILTER (WHERE payment IS NOT NULL) AS reserved,
     (SELECT count(1) FROM mtm_kanvas_user_nft WHERE nft_id = $1) AS owned
   FROM cart_session AS cart
   LEFT JOIN mtm_cart_session_nft AS cart_nfts
