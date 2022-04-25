@@ -12,6 +12,7 @@ import { LoggerMiddleware, StatsLogger } from './middleware/logger';
 import { CookieSessionMiddleware } from './middleware/cookie_session';
 import { ProxiedThrottlerGuard } from './decoraters/proxied_throttler';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CurrencyConverter } from './currency-converter.service';
 import {
   RATE_LIMIT_TTL,
   RATE_LIMIT,
@@ -42,6 +43,7 @@ import {
   providers: [
     StatsLogger,
     { provide: APP_GUARD, useClass: ProxiedThrottlerGuard },
+    CurrencyConverter,
   ],
 })
 export class AppModule {
