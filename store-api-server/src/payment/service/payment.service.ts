@@ -1,6 +1,5 @@
-import { Injectable, Inject, HttpStatus, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { PG_CONNECTION } from 'src/constants';
-import { UserEntity } from 'src/user/entity/user.entity';
 import { UserService } from 'src/user/service/user.service';
 import { NftService } from '../../nft/service/nft.service';
 import { MintService } from '../../nft/service/mint.service';
@@ -8,6 +7,8 @@ import { Err } from 'ts-results';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { assertEnv } from 'src/utils';
 import { DbTransaction, withTransaction, DbPool } from 'src/db.module';
+// import { Tezpay } from 'tezpay-server';
+import { v4 as uuidv4 } from 'uuid';
 
 export enum PaymentStatus {
   CREATED = 'created',
@@ -19,6 +20,7 @@ export enum PaymentStatus {
 }
 
 export enum PaymentProvider {
+  TEZPAY = 'tezpay',
   STRIPE = 'stripe',
   TEST = 'test_provider',
 }
@@ -49,12 +51,16 @@ export class PaymentService {
     PaymentStatus.TIMED_OUT,
   ];
 
+  tezpay: any;
+
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
     private readonly mintService: MintService,
     private readonly userService: UserService,
     private readonly nftService: NftService,
-  ) {}
+  ) {
+    this.tezpay = 0; // new Tezpay();
+  }
 
   async webhookHandler(constructedEvent: any) {
     let paymentStatus: PaymentStatus;
@@ -80,21 +86,10 @@ export class PaymentService {
         throw Err('Unknown stripe webhook event');
     }
 
-    const previousStatus = await this.editPaymentStatus(
+    await this.#updatePaymentStatus(
       constructedEvent.data.object.id,
       paymentStatus,
     );
-
-    if (
-      !this.FINAL_STATES.includes(previousStatus!) &&
-      paymentStatus === PaymentStatus.SUCCEEDED
-    ) {
-      const orderId = await this.getPaymentOrderId(
-        constructedEvent.data.object.id,
-      );
-      await this.orderCheckout(orderId);
-      await this.userService.deleteCartSession(orderId);
-    }
   }
 
   async createPayment(
@@ -165,11 +160,10 @@ export class PaymentService {
 
     try {
       if (
-        cartMeta.orderId &&
         typeof cartMeta.orderId !== 'undefined' &&
         (await this.#nftOrderHasPaymentEntry(cartMeta.orderId, dbTx))
       ) {
-        await this.cancelNftOrderId(dbTx, cartMeta.orderId, provider);
+        await this.cancelNftOrderId(dbTx, cartMeta.orderId);
       }
 
       const orderAt = new Date();
@@ -224,6 +218,8 @@ WHERE id = $2
     paymentProvider: PaymentProvider,
   ): Promise<PaymentIntent> {
     switch (paymentProvider) {
+      case PaymentProvider.TEZPAY:
+        return await this.#createTezPaymentIntent(amount);
       case PaymentProvider.STRIPE:
         return await this.#createStripePaymentIntent(amount);
       case PaymentProvider.TEST:
@@ -251,6 +247,22 @@ WHERE id = $2
       currency: 'eur',
       clientSecret: paymentIntent.client_secret,
       id: paymentIntent.id,
+    };
+  }
+
+  async #createTezPaymentIntent(amount: number): Promise<PaymentIntent> {
+    // TODO: convert amount from base currency to tez
+
+    const id = uuidv4();
+    const tezpayIntent = await this.tezpay.init_payment({
+      external_id: id,
+      tez_amount: amount,
+    });
+    return {
+      amount,
+      currency: 'tez',
+      clientSecret: tezpayIntent.message,
+      id,
     };
   }
 
@@ -293,39 +305,48 @@ RETURNING id`,
     return expiresAt;
   }
 
-  async editPaymentStatus(
-    paymentId: string,
-    status: PaymentStatus,
-  ): Promise<PaymentStatus | undefined> {
-    return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
-      const qryPrevStatus = await dbTx.query(
-        `
+  async #updatePaymentStatus(paymentId: string, newStatus: PaymentStatus) {
+    const previousStatus = await withTransaction(
+      this.conn,
+      async (dbTx: DbTransaction) => {
+        const qryPrevStatus = await dbTx.query(
+          `
 SELECT status
 FROM payment
 WHERE payment_id = $1
         `,
-        [paymentId],
-      );
+          [paymentId],
+        );
 
-      await dbTx.query(
-        `
+        await dbTx.query(
+          `
 UPDATE payment
 SET status = $1
 WHERE payment_id = $2
   AND NOT status = ANY($3)
         `,
-        [status, paymentId, this.FINAL_STATES],
-      );
+          [newStatus, paymentId, this.FINAL_STATES],
+        );
 
-      return qryPrevStatus.rows[0]
-        ? qryPrevStatus.rows[0]['status']
-        : undefined;
-    }).catch((err: any) => {
+        return qryPrevStatus.rows[0]
+          ? qryPrevStatus.rows[0]['status']
+          : undefined;
+      },
+    ).catch((err: any) => {
       Logger.error(
-        `Err on updating payment status in db (paymentId=${paymentId}, newStatus=${status}), err: ${err}`,
+        `Err on updating payment status in db (paymentId=${paymentId}, newStatus=${newStatus}), err: ${err}`,
       );
       throw err;
     });
+
+    if (
+      newStatus === PaymentStatus.SUCCEEDED &&
+      !this.FINAL_STATES.includes(previousStatus!)
+    ) {
+      const orderId = await this.getPaymentOrderId(paymentId);
+      await this.orderCheckout(orderId);
+      await this.userService.deleteCartSession(orderId);
+    }
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
@@ -334,7 +355,6 @@ WHERE payment_id = $2
       `
 SELECT
   nft_order_id,
-  provider,
   expires_at
 FROM payment
 WHERE expires_at < now() AT TIME ZONE 'UTC'
@@ -348,7 +368,6 @@ WHERE expires_at < now() AT TIME ZONE 'UTC'
         await this.cancelNftOrderId(
           dbTx,
           Number(row['nft_order_id']),
-          row['provider'],
           PaymentStatus.TIMED_OUT,
         );
         Logger.warn(
@@ -358,21 +377,44 @@ WHERE expires_at < now() AT TIME ZONE 'UTC'
     }
   }
 
+  @Cron(CronExpression.EVERY_MINUTE)
+  async checkPendingTezpays() {
+    const pendingPaymentIds = await this.conn.query(
+      `
+SELECT
+  payment_id
+FROM payment
+WHERE provider = $1
+  AND status = $2
+    `,
+      [PaymentProvider.TEZPAY, PaymentStatus.CREATED],
+    );
+
+    for (const row of pendingPaymentIds.rows) {
+      const paymentId = row['payment_id'];
+      const paymentStatus = this.tezpay.get_payment(row['payment_id'], 3);
+
+      // TODO \/  \/   filler code
+      if (paymentStatus === 'done') {
+        this.#updatePaymentStatus(paymentId, PaymentStatus.SUCCEEDED);
+      }
+    }
+  }
+
   async cancelNftOrderId(
     dbTx: DbTransaction,
     orderId: number,
-    provider: PaymentProvider,
     newStatus:
       | PaymentStatus.CANCELED
       | PaymentStatus.TIMED_OUT = PaymentStatus.CANCELED,
   ) {
-    const paymentIntentId = await dbTx.query(
+    const payment = await dbTx.query(
       `
 UPDATE payment
 SET status = $2
 WHERE nft_order_id = $1
 AND status = ANY($3)
-RETURNING payment_id
+RETURNING payment_id, provider
       `,
       [
         orderId,
@@ -385,17 +427,15 @@ RETURNING payment_id
       ],
     );
 
-    if (paymentIntentId.rowCount === 0) {
+    if (payment.rowCount === 0) {
       throw Err(
         `paymentIntentCancel failed (orderId=${orderId}), err: no payment exists with matching orderId and cancellable status`,
       );
     }
 
     try {
-      if (provider === PaymentProvider.STRIPE) {
-        await this.stripe.paymentIntents.cancel(
-          paymentIntentId.rows[0]['payment_id'],
-        );
+      if (payment.rows[0]['provider'] === PaymentProvider.STRIPE) {
+        await this.stripe.paymentIntents.cancel(payment.rows[0]['payment_id']);
       }
     } catch (err: any) {
       throw Err(`Err on canceling nft order (orderId=${orderId}, err: ${err}`);

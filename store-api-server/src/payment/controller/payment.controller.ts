@@ -3,6 +3,7 @@ import {
   HttpException,
   Post,
   Req,
+  Body,
   Headers,
   HttpStatus,
   UseGuards,
@@ -66,12 +67,18 @@ export class PaymentController {
   @UseGuards(JwtAuthGuard)
   async createPaymentIntent(
     @CurrentUser() user: UserEntity,
+    @Body() paymentKind: PaymentProvider,
   ): Promise<PaymentIntent> {
-    try {
-      return await this.paymentService.createPayment(
-        user.id,
-        PaymentProvider.STRIPE,
+    if (
+      ![PaymentProvider.TEZPAY, PaymentProvider.STRIPE].includes(paymentKind)
+    ) {
+      throw new HttpException(
+        'Unsupported payment kind',
+        HttpStatus.BAD_REQUEST,
       );
+    }
+    try {
+      return await this.paymentService.createPayment(user.id, paymentKind);
     } catch (err: any) {
       Logger.error(err);
       throw new HttpException(
