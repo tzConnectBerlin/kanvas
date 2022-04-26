@@ -342,6 +342,7 @@ ORDER BY 1
     orderBy: string = 'nft_id',
     orderDirection: string = 'asc',
     inCurrency: string = BASE_CURRENCY,
+    inBaseUnit: boolean = true,
     dbConn: any = this.conn,
   ): Promise<NftEntity[]> {
     try {
@@ -383,6 +384,7 @@ FROM nfts_by_id($1, $2, $3)`,
           price: this.currencyService.convertToCurrency(
             Number(nftRow['price']),
             inCurrency,
+            inBaseUnit,
           ),
           editionsSize: editions,
           editionsAvailable: editions - (reserved + owned),

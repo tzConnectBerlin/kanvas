@@ -11,7 +11,7 @@ export interface NftEntity {
   displayUri?: string;
   thumbnailUri?: string;
 
-  price: number;
+  price: string;
   categories: CategoryEntity[];
   editionsSize: number;
   editionsAvailable: number;

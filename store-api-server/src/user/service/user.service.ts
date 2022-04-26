@@ -18,6 +18,7 @@ import {
   PG_CONNECTION,
   PG_UNIQUE_VIOLATION_ERRCODE,
   NUM_TOP_BUYERS,
+  BASE_CURRENCY,
 } from '../../constants';
 import { Result, Err, Ok } from 'ts-results';
 import { S3Service } from '../../s3.service';
@@ -280,6 +281,8 @@ WHERE session_id = $1
 
   async cartList(
     session: string,
+    inCurrency: string = BASE_CURRENCY,
+    inBaseUnit: boolean = false,
     dbTx: DbTransaction | DbPool = this.conn,
   ): Promise<UserCart> {
     const cartMeta = await this.getCartMeta(session, dbTx);
@@ -298,7 +301,13 @@ WHERE session_id = $1
       };
     }
     return {
-      nfts: await this.nftService.findByIds(nftIds, 'nft_id', 'asc'),
+      nfts: await this.nftService.findByIds(
+        nftIds,
+        'nft_id',
+        'asc',
+        inCurrency,
+        inBaseUnit,
+      ),
       expiresAt: cartMeta.expiresAt,
     };
   }

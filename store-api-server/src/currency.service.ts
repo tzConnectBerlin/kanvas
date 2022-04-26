@@ -23,11 +23,19 @@ export class CurrencyService {
   }
 
   convertToCurrency(
-    baseAmount: number,
+    baseUnitAmount: number,
     toCurrency: string,
+    inBaseUnit: boolean = false,
     maxAge: Duration = Duration.fromObject({ minutes: 30 }),
-  ): number {
-    return baseAmount * this.#getRate(toCurrency, maxAge);
+  ): string {
+    if (inBaseUnit && toCurrency === BASE_CURRENCY) {
+      return baseUnitAmount.toFixed(0);
+    }
+
+    const decimals = SUPPORTED_CURRENCIES[toCurrency];
+    return (baseUnitAmount * this.#getRate(toCurrency, maxAge)).toFixed(
+      decimals,
+    );
   }
 
   convertFromCurrency(
@@ -41,9 +49,13 @@ export class CurrencyService {
     return amount / this.#getRate(fromCurrency, maxAge);
   }
 
-  #getRate(toCurrency: string, maxAge: Duration): number {
+  #getRate(
+    toCurrency: string,
+    maxAge: Duration,
+    inBaseUnit: boolean = false,
+  ): number {
     if (toCurrency === BASE_CURRENCY) {
-      return Math.pow(10, -this.baseCurrencyDecimals);
+      return inBaseUnit ? 1 : Math.pow(10, -this.baseCurrencyDecimals);
     }
 
     if (!this.currencies.includes(toCurrency)) {
@@ -60,7 +72,14 @@ export class CurrencyService {
       throw errMsg;
     }
 
-    return this.rates[toCurrency] * Math.pow(10, -this.baseCurrencyDecimals);
+    return (
+      this.rates[toCurrency] *
+      Math.pow(
+        10,
+        -this.baseCurrencyDecimals +
+          (inBaseUnit ? SUPPORTED_CURRENCIES[toCurrency] : 0),
+      )
+    );
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
