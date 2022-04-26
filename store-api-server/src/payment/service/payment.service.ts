@@ -235,10 +235,7 @@ WHERE id = $2
       case PaymentProvider.TEZPAY:
         return await this.#createTezPaymentIntent(baseUnitAmount);
       case PaymentProvider.STRIPE:
-        return await this.#createStripePaymentIntent(
-          baseUnitAmount,
-          currency,
-        );
+        return await this.#createStripePaymentIntent(baseUnitAmount, currency);
       case PaymentProvider.TEST:
         return {
           amount: this.currencyService.convertToCurrency(
@@ -285,6 +282,7 @@ WHERE id = $2
     const amount = this.currencyService.convertToCurrency(
       baseUnitAmount,
       'XTZ',
+      true,
     );
     const tezpayIntent = await this.tezpay.init_payment({
       external_id: id,

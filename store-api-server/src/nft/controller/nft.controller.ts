@@ -19,6 +19,7 @@ import { NftEntity, CreateNft } from '../entity/nft.entity';
 import { FilterParams, PaginationParams, SearchParam } from '../params';
 import { wrapCache } from 'src/utils';
 import { BASE_CURRENCY } from 'src/constants';
+import { validateRequestedCurrency } from 'src/paramUtils';
 
 @Controller('nfts')
 export class NftController {
@@ -34,14 +35,20 @@ export class NftController {
   }
 
   @Get()
-  async getFiltered(@Res() resp: Response, @Query() params: FilterParams) {
+  async getFiltered(
+    @Res() resp: Response,
+    @Query() params: FilterParams,
+    @Query() currency: string = BASE_CURRENCY,
+  ) {
+    validateRequestedCurrency(currency);
     this.#validateFilterParams(params);
+
     return await wrapCache(
       this.cache,
       resp,
       'nft.findNftsWithFilter' + JSON.stringify(params),
       () => {
-        return this.nftService.findNftsWithFilter(params);
+        return this.nftService.findNftsWithFilter(params, currency);
       },
     );
   }
@@ -68,6 +75,8 @@ export class NftController {
     @Param('id') id: number,
     @Query('currency') currency: string = BASE_CURRENCY,
   ): Promise<NftEntity> {
+    validateRequestedCurrency(currency);
+
     id = Number(id);
     if (isNaN(id)) {
       throw new HttpException(

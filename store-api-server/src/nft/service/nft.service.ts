@@ -170,7 +170,10 @@ LIMIT $3
       .filter(Boolean);
   }
 
-  async findNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {
+  async findNftsWithFilter(
+    params: FilterParams,
+    currency: string,
+  ): Promise<NftEntityPage> {
     const orderByMapping = new Map([
       ['id', 'nft_id'],
       ['createdAt', 'nft_created_at'],
@@ -244,6 +247,7 @@ FROM price_bounds($1, $2, $3)`,
         nftIds.rows.map((row: any) => row.nft_id),
         orderBy,
         params.orderDirection,
+        currency,
       );
       if (typeof params.userAddress !== 'undefined') {
         await this.#addNftOwnerStatus(params.userAddress, res.nfts);
