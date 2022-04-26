@@ -433,12 +433,22 @@ RETURNING payment_id, provider
       );
     }
 
+    const provider = payment.rows[0]['provider'];
+    const paymentId = payment.rows[0]['payment_id'];
+
     try {
-      if (payment.rows[0]['provider'] === PaymentProvider.STRIPE) {
-        await this.stripe.paymentIntents.cancel(payment.rows[0]['payment_id']);
+      switch (provider) {
+        case PaymentProvider.STRIPE:
+          await this.stripe.paymentIntents.cancel(paymentId);
+          break;
+        case PaymentProvider.TEZPAY:
+          //await this.tezpay.cancel(paymentId);
+          break;
       }
     } catch (err: any) {
-      throw Err(`Err on canceling nft order (orderId=${orderId}, err: ${err}`);
+      throw Err(
+        `Err on canceling nft order (orderId=${orderId}, provider=${provider}), err: ${err}`,
+      );
     }
   }
 
