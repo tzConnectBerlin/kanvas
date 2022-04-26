@@ -15,11 +15,13 @@ import {
   ADMIN_PUBLIC_KEY,
   SEARCH_MAX_NFTS,
   SEARCH_SIMILARITY_LIMIT,
+  BASE_CURRENCY,
 } from 'src/constants';
 import { sleep } from 'src/utils';
 import { cryptoUtils } from 'sotez';
 import { IpfsService } from './ipfs.service';
 import { DbTransaction, withTransaction } from 'src/db.module';
+import { CurrencyService } from 'src/currency.service';
 
 @Injectable()
 export class NftService {
@@ -27,6 +29,7 @@ export class NftService {
     @Inject(PG_CONNECTION) private conn: any,
     private readonly categoryService: CategoryService,
     private ipfsService: IpfsService,
+    private currencyService: CurrencyService,
   ) {}
 
   async createNft(newNft: CreateNft) {
@@ -97,7 +100,12 @@ SELECT $1, UNNEST($2::INTEGER[])
     };
 
     const uploadToIpfs = async (dbTx: any) => {
-      const nftEntity: NftEntity = await this.byId(newNft.id, false, dbTx);
+      const nftEntity: NftEntity = await this.byId(
+        newNft.id,
+        BASE_CURRENCY,
+        false,
+        dbTx,
+      );
 
       const MAX_ATTEMPTS = 10;
       const BACKOFF_MS = 1000;
@@ -252,10 +260,17 @@ FROM price_bounds($1, $2, $3)`,
 
   async byId(
     id: number,
+    inCurrency: string,
     incrViewCount: boolean = true,
     dbConn: any = this.conn,
   ): Promise<NftEntity> {
-    const nfts = await this.findByIds([id], 'nft_id', 'asc', dbConn);
+    const nfts = await this.findByIds(
+      [id],
+      'nft_id',
+      'asc',
+      inCurrency,
+      dbConn,
+    );
     if (nfts.length === 0) {
       throw new HttpException(
         'NFT with the requested id does not exist',
@@ -326,6 +341,7 @@ ORDER BY 1
     nftIds: number[],
     orderBy: string = 'nft_id',
     orderDirection: string = 'asc',
+    inCurrency: string = BASE_CURRENCY,
     dbConn: any = this.conn,
   ): Promise<NftEntity[]> {
     try {
@@ -364,7 +380,10 @@ FROM nfts_by_id($1, $2, $3)`,
           artifactUri: nftRow['artifact_uri'],
           displayUri: nftRow['display_uri'],
           thumbnailUri: nftRow['thumbnail_uri'],
-          price: Number(nftRow['price']),
+          price: this.currencyService.convertToCurrency(
+            Number(nftRow['price']),
+            inCurrency,
+          ),
           editionsSize: editions,
           editionsAvailable: editions - (reserved + owned),
           createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),

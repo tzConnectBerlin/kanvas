@@ -18,6 +18,7 @@ import { CategoryService } from 'src/category/service/category.service';
 import { NftEntity, CreateNft } from '../entity/nft.entity';
 import { FilterParams, PaginationParams, SearchParam } from '../params';
 import { wrapCache } from 'src/utils';
+import { BASE_CURRENCY } from 'src/constants';
 
 @Controller('nfts')
 export class NftController {
@@ -63,7 +64,10 @@ export class NftController {
   }
 
   @Post('/:id')
-  async byId(@Param('id') id: number): Promise<NftEntity> {
+  async byId(
+    @Param('id') id: number,
+    @Query('currency') inCurrency: string = BASE_CURRENCY,
+  ): Promise<NftEntity> {
     id = Number(id);
     if (isNaN(id)) {
       throw new HttpException(
@@ -71,7 +75,7 @@ export class NftController {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return await this.nftService.byId(id);
+    return await this.nftService.byId(id, inCurrency);
   }
 
   #validateFilterParams(params: FilterParams): void {

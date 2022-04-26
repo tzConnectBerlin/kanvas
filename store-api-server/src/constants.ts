@@ -23,3 +23,6 @@ export const CACHE_TTL = Number(process.env['CACHE_TTL'] || 60); // in seconds
 export const CACHE_SIZE = Number(process.env['CACHE_SIZE'] || 10_000); // in max number of items in the cache
 
 export const NUM_TOP_BUYERS = 12;
+
+export const BASE_CURRENCY = process.env['BASE_CURRENCY'] || 'EUR';
+export const SUPPORTED_CURRENCIES = ['USD', 'GBP', 'EUR'];
