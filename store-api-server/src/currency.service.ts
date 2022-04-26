@@ -6,7 +6,11 @@ import { BASE_CURRENCY, SUPPORTED_CURRENCIES } from 'src/constants';
 
 @Injectable()
 export class CurrencyService {
-  currencies: string[] = SUPPORTED_CURRENCIES.filter((c) => c != BASE_CURRENCY);
+  currencies: string[] = Object.keys(SUPPORTED_CURRENCIES).filter(
+    (c) => c != BASE_CURRENCY,
+  );
+
+  baseCurrencyDecimals = SUPPORTED_CURRENCIES[BASE_CURRENCY];
 
   rates: { [key: string]: number };
   lastUpdatedAt: DateTime;
@@ -19,14 +23,11 @@ export class CurrencyService {
   }
 
   convertToCurrency(
-    amount: number,
+    baseAmount: number,
     toCurrency: string,
     maxAge: Duration = Duration.fromObject({ minutes: 30 }),
   ): number {
-    if (toCurrency === BASE_CURRENCY) {
-      return amount;
-    }
-    return amount * this.#getRate(toCurrency, maxAge);
+    return baseAmount * this.#getRate(toCurrency, maxAge);
   }
 
   convertFromCurrency(
@@ -40,9 +41,13 @@ export class CurrencyService {
     return amount / this.#getRate(fromCurrency, maxAge);
   }
 
-  #getRate(toCurrency: string, maxAge: Duration) {
+  #getRate(toCurrency: string, maxAge: Duration): number {
+    if (toCurrency === BASE_CURRENCY) {
+      return Math.pow(10, -this.baseCurrencyDecimals);
+    }
+
     if (!this.currencies.includes(toCurrency)) {
-      const errMsg = `cannot convert currency to ${toCurrency}, it's not supported`;
+      const errMsg = `cannot convert currency to unsupported ${toCurrency}`;
       Logger.error(errMsg);
       throw errMsg;
     }
@@ -55,7 +60,7 @@ export class CurrencyService {
       throw errMsg;
     }
 
-    return this.rates[toCurrency];
+    return this.rates[toCurrency] * Math.pow(10, -this.baseCurrencyDecimals);
   }
 
   @Cron(CronExpression.EVERY_MINUTE)

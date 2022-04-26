@@ -24,5 +24,10 @@ export const CACHE_SIZE = Number(process.env['CACHE_SIZE'] || 10_000); // in max
 
 export const NUM_TOP_BUYERS = 12;
 
+// key is the currency ticker, value is the number of decimals
+export const SUPPORTED_CURRENCIES: { [key: string]: number } = {
+  USD: 2,
+  GBP: 2,
+  EUR: 2,
+};
 export const BASE_CURRENCY = process.env['BASE_CURRENCY'] || 'EUR';
-export const SUPPORTED_CURRENCIES = ['USD', 'GBP', 'EUR'];
