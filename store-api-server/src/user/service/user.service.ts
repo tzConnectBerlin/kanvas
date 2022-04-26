@@ -281,7 +281,7 @@ WHERE session_id = $1
 
   async cartList(
     session: string,
-    inCurrency: string = BASE_CURRENCY,
+    currency: string = BASE_CURRENCY,
     inBaseUnit: boolean = false,
     dbTx: DbTransaction | DbPool = this.conn,
   ): Promise<UserCart> {
@@ -305,7 +305,7 @@ WHERE session_id = $1
         nftIds,
         'nft_id',
         'asc',
-        inCurrency,
+        currency,
         inBaseUnit,
       ),
       expiresAt: cartMeta.expiresAt,

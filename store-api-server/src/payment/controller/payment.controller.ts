@@ -18,6 +18,8 @@ import {
 } from 'src/payment/service/payment.service';
 import { UserEntity } from 'src/user/entity/user.entity';
 import { UserService } from 'src/user/service/user.service';
+import { BASE_CURRENCY } from 'src/constants';
+import { validateRequestedCurrency } from 'src/paramUtils';
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -67,18 +69,23 @@ export class PaymentController {
   @UseGuards(JwtAuthGuard)
   async createPaymentIntent(
     @CurrentUser() user: UserEntity,
-    @Body() paymentKind: PaymentProvider,
+    @Body() currency: string = BASE_CURRENCY,
   ): Promise<PaymentIntent> {
-    if (
-      ![PaymentProvider.TEZPAY, PaymentProvider.STRIPE].includes(paymentKind)
-    ) {
-      throw new HttpException(
-        'Unsupported payment kind',
-        HttpStatus.BAD_REQUEST,
-      );
+    validateRequestedCurrency(currency);
+
+    let paymentProvider: PaymentProvider;
+    if (currency === 'XTZ') {
+      paymentProvider = PaymentProvider.TEZPAY;
+    } else {
+      paymentProvider = PaymentProvider.STRIPE;
     }
+
     try {
-      return await this.paymentService.createPayment(user.id, paymentKind);
+      return await this.paymentService.createPayment(
+        user.id,
+        paymentProvider,
+        currency,
+      );
     } catch (err: any) {
       Logger.error(err);
       throw new HttpException(

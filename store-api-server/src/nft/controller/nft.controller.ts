@@ -66,7 +66,7 @@ export class NftController {
   @Post('/:id')
   async byId(
     @Param('id') id: number,
-    @Query('currency') inCurrency: string = BASE_CURRENCY,
+    @Query('currency') currency: string = BASE_CURRENCY,
   ): Promise<NftEntity> {
     id = Number(id);
     if (isNaN(id)) {
@@ -75,7 +75,7 @@ export class NftController {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return await this.nftService.byId(id, inCurrency);
+    return await this.nftService.byId(id, currency);
   }
 
   #validateFilterParams(params: FilterParams): void {

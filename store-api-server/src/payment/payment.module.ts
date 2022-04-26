@@ -4,9 +4,10 @@ import { DbModule } from 'src/db.module';
 import { PaymentService } from './service/payment.service';
 import { UserModule } from 'src/user/user.module';
 import { NftModule } from 'src/nft/nft.module';
+import { CurrencyModule } from 'src/currency.module';
 
 @Module({
-  imports: [DbModule, UserModule, NftModule],
+  imports: [DbModule, UserModule, NftModule, CurrencyModule],
   controllers: [PaymentController],
   providers: [PaymentService],
 })

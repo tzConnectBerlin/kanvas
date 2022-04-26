@@ -9,6 +9,8 @@ import { assertEnv } from 'src/utils';
 import { DbTransaction, withTransaction, DbPool } from 'src/db.module';
 // import { Tezpay } from 'tezpay-server';
 import { v4 as uuidv4 } from 'uuid';
+import { CurrencyService } from 'src/currency.service';
+import { BASE_CURRENCY, SUPPORTED_CURRENCIES } from 'src/constants';
 
 export enum PaymentStatus {
   CREATED = 'created',
@@ -32,7 +34,7 @@ interface NftOrder {
 }
 
 export interface PaymentIntent {
-  amount: number;
+  amount: string;
   currency: string;
   clientSecret: string;
   id: string;
@@ -58,6 +60,7 @@ export class PaymentService {
     private readonly mintService: MintService,
     private readonly userService: UserService,
     private readonly nftService: NftService,
+    private readonly currencyService: CurrencyService,
   ) {
     this.tezpay = 0; // new Tezpay();
   }
@@ -95,6 +98,7 @@ export class PaymentService {
   async createPayment(
     userId: number,
     paymentProvider: PaymentProvider,
+    currency: string,
   ): Promise<PaymentIntent> {
     return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       const preparedOrder = await this.#createOrder(
@@ -103,8 +107,9 @@ export class PaymentService {
         paymentProvider,
       );
       let paymentIntent = await this.#createPaymentIntent(
-        preparedOrder.amount,
+        preparedOrder.baseUnitAmount,
         paymentProvider,
+        currency,
       );
       await this.#registerPayment(
         dbTx,
@@ -124,7 +129,7 @@ export class PaymentService {
     dbTx: DbTransaction,
     userId: number,
     provider: PaymentProvider,
-  ): Promise<{ amount: number; nftOrder: NftOrder }> {
+  ): Promise<{ baseUnitAmount: number; nftOrder: NftOrder }> {
     const cartSessionRes = await this.userService.getUserCartSession(
       userId,
       dbTx,
@@ -141,10 +146,18 @@ export class PaymentService {
       userId,
       provider,
     );
-    const cartList = await this.userService.cartList(cartSession, dbTx);
-    const amount = cartList.nfts.reduce((sum, nft) => sum + nft.price, 0) * 100; // TODO: decide about how to represent decimals (cents)
+    const cartList = await this.userService.cartList(
+      cartSession,
+      BASE_CURRENCY,
+      true,
+      dbTx,
+    );
+    const baseUnitAmount = cartList.nfts.reduce(
+      (sum, nft) => sum + Number(nft.price),
+      0,
+    );
 
-    return { amount: amount, nftOrder: nftOrder };
+    return { baseUnitAmount: baseUnitAmount, nftOrder: nftOrder };
   }
 
   async #registerOrder(
@@ -214,53 +227,72 @@ WHERE id = $2
   }
 
   async #createPaymentIntent(
-    amount: number,
+    baseUnitAmount: number,
     paymentProvider: PaymentProvider,
+    currency: string,
   ): Promise<PaymentIntent> {
     switch (paymentProvider) {
       case PaymentProvider.TEZPAY:
-        return await this.#createTezPaymentIntent(amount);
+        return await this.#createTezPaymentIntent(baseUnitAmount);
       case PaymentProvider.STRIPE:
-        return await this.#createStripePaymentIntent(amount);
+        return await this.#createStripePaymentIntent(
+          baseUnitAmount,
+          currency,
+        );
       case PaymentProvider.TEST:
         return {
-          amount,
-          currency: 'eur',
+          amount: this.currencyService.convertToCurrency(
+            baseUnitAmount,
+            currency,
+          ),
+          currency: currency,
           clientSecret: '..',
           id: `stripe_test_id${new Date().getTime().toString()}`,
         };
     }
   }
 
-  async #createStripePaymentIntent(amount: number): Promise<PaymentIntent> {
+  async #createStripePaymentIntent(
+    baseUnitAmount: number,
+    currency: string,
+  ): Promise<PaymentIntent> {
+    const amount = this.currencyService.convertToCurrency(
+      baseUnitAmount,
+      currency,
+      true,
+    );
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount,
-      currency: 'eur', // Have to change this to handle different currencies
+      currency: currency,
       automatic_payment_methods: {
         enabled: false,
       },
     });
 
-    // add multiple currency later on
+    const decimals = SUPPORTED_CURRENCIES[currency];
     return {
-      amount,
-      currency: 'eur',
+      amount: (Number(amount) * Math.pow(10, -decimals)).toFixed(decimals),
+      currency: currency,
       clientSecret: paymentIntent.client_secret,
       id: paymentIntent.id,
     };
   }
 
-  async #createTezPaymentIntent(amount: number): Promise<PaymentIntent> {
-    // TODO: convert amount from base currency to tez
-
+  async #createTezPaymentIntent(
+    baseUnitAmount: number,
+  ): Promise<PaymentIntent> {
     const id = uuidv4();
+    const amount = this.currencyService.convertToCurrency(
+      baseUnitAmount,
+      'XTZ',
+    );
     const tezpayIntent = await this.tezpay.init_payment({
       external_id: id,
       tez_amount: amount,
     });
     return {
       amount,
-      currency: 'tez',
+      currency: 'XTZ',
       clientSecret: tezpayIntent.message,
       id,
     };

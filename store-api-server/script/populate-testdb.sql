@@ -52,6 +52,9 @@ set launch_at = now() AT TIME ZONE 'UTC' + interval '1 hour',
     description = 'its a mountain'
 where id = 3;
 
+-- lazy way of upping these very low prices now that we're taking into account decimals in the API
+update nft set price = price * 100;
+
 insert into nft_category (
   category, description
 )

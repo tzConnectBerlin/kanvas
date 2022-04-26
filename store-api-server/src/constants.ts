@@ -29,5 +29,6 @@ export const SUPPORTED_CURRENCIES: { [key: string]: number } = {
   USD: 2,
   GBP: 2,
   EUR: 2,
+  XTZ: 5,
 };
 export const BASE_CURRENCY = process.env['BASE_CURRENCY'] || 'EUR';

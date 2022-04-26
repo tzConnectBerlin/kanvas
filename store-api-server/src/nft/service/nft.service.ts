@@ -260,7 +260,7 @@ FROM price_bounds($1, $2, $3)`,
 
   async byId(
     id: number,
-    inCurrency: string,
+    currency: string,
     incrViewCount: boolean = true,
     dbConn: any = this.conn,
   ): Promise<NftEntity> {
@@ -268,7 +268,8 @@ FROM price_bounds($1, $2, $3)`,
       [id],
       'nft_id',
       'asc',
-      inCurrency,
+      currency,
+      false,
       dbConn,
     );
     if (nfts.length === 0) {
@@ -341,8 +342,8 @@ ORDER BY 1
     nftIds: number[],
     orderBy: string = 'nft_id',
     orderDirection: string = 'asc',
-    inCurrency: string = BASE_CURRENCY,
-    inBaseUnit: boolean = true,
+    currency: string = BASE_CURRENCY,
+    inBaseUnit: boolean = false,
     dbConn: any = this.conn,
   ): Promise<NftEntity[]> {
     try {
@@ -383,7 +384,7 @@ FROM nfts_by_id($1, $2, $3)`,
           thumbnailUri: nftRow['thumbnail_uri'],
           price: this.currencyService.convertToCurrency(
             Number(nftRow['price']),
-            inCurrency,
+            currency,
             inBaseUnit,
           ),
           editionsSize: editions,

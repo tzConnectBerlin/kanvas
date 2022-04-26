@@ -32,10 +32,16 @@ export class CurrencyService {
       return baseUnitAmount.toFixed(0);
     }
 
-    const decimals = SUPPORTED_CURRENCIES[toCurrency];
-    return (baseUnitAmount * this.#getRate(toCurrency, maxAge)).toFixed(
+    const decimals = inBaseUnit ? 0 : SUPPORTED_CURRENCIES[toCurrency];
+    const res = (baseUnitAmount * this.#getRate(toCurrency, maxAge)).toFixed(
       decimals,
     );
+    Logger.log(
+      `converted ${baseUnitAmount} to ${toCurrency} (inBaseUnit? ${JSON.stringify(
+        inBaseUnit,
+      )})`,
+    );
+    return res;
   }
 
   convertFromCurrency(
