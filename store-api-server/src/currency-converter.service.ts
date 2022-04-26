@@ -1,21 +1,30 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import axios from 'axios';
+import {DateTime, Duration} from 'luxon';
 
 @Injectable()
 export class CurrencyConverter {
   rates: { [key: string]: number };
+  lastUpdatedAt: DateTime;
   baseCurrency: string;
   currencies: string[];
 
   constructor() {
-    // todo, make configurable
     this.rates = {};
+
+    // todo, make configurable
     this.baseCurrency = 'EUR';
     this.currencies = ['USD', 'GBP', 'XTZ'];
   }
 
-  getConversionRate(toCurrency: string): number {
+  getConversionRate(toCurrency: string, maxAge: Duration = Duration.fromObject({ minutes: 30 })): number {
+    const ratesAge = DateTime.utc().diff(this.lastUpdatedAt);
+    if (ratesAge > maxAge) {
+      const errMsg = "currency rates' last update is too long ago, cannot safely convert currencies";
+      Logger.error(`${errMsg} (rates update age is ${ratesAge}`);
+      throw errMsg;
+    }
     return this.rates[toCurrency];
   }
 
@@ -36,9 +45,10 @@ export class CurrencyConverter {
             this.baseCurrency
           }`;
         }
+        this.lastUpdatedAt = DateTime.utc();
         Logger.log(logMsg);
       })
-      .catch(function (error: any) {
+      .catch((error: any) => {
         Logger.error(
           `failed to get currency rates from coinbase-api, err: ${error}`,
         );
