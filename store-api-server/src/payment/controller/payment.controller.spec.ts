@@ -9,6 +9,7 @@ import { NftService } from 'src/nft/service/nft.service';
 import { IpfsService } from 'src/nft/service/ipfs.service';
 import { MintService } from 'src/nft/service/mint.service';
 import { CategoryService } from 'src/category/service/category.service';
+import { CurrencyService } from 'src/currency.service';
 
 describe('PaymentController', () => {
   let controller: PaymentController;
@@ -25,6 +26,7 @@ describe('PaymentController', () => {
         CategoryService,
         PaymentService,
         IpfsService,
+        CurrencyService,
       ],
     }).compile();
 

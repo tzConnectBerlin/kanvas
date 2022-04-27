@@ -8,6 +8,7 @@ import { MintService } from 'src/nft/service/mint.service';
 import { CategoryService } from 'src/category/service/category.service';
 import { DbMock } from 'src/mock/db.module';
 import { CacheMock } from 'src/mock/cache.module';
+import { CurrencyService } from 'src/currency.service';
 
 describe('PaymentService', () => {
   let service: PaymentService;
@@ -23,6 +24,7 @@ describe('PaymentService', () => {
         CategoryService,
         PaymentService,
         IpfsService,
+        CurrencyService,
       ],
     }).compile();
 

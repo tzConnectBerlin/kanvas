@@ -247,8 +247,14 @@ FROM price_bounds($1, $2, $3)`,
         numberOfPages: 0,
         firstRequestAt: filters.firstRequestAt,
         nfts: [],
-        lowerPriceBound: Number(priceBounds.rows[0].min_price),
-        upperPriceBound: Number(priceBounds.rows[0].max_price),
+        lowerPriceBound: this.currencyService.convertToCurrency(
+          Number(priceBounds.rows[0].min_price),
+          currency,
+        ),
+        upperPriceBound: this.currencyService.convertToCurrency(
+          Number(priceBounds.rows[0].max_price),
+          currency,
+        ),
       };
       if (nftIds.rows.length === 0) {
         return res;

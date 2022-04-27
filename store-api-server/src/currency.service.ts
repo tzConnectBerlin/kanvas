@@ -4,6 +4,30 @@ import axios from 'axios';
 import { DateTime, Duration } from 'luxon';
 import { BASE_CURRENCY, SUPPORTED_CURRENCIES } from 'src/constants';
 
+async function getRatesFromCoinbase(
+  currencies: string[],
+): Promise<{ [key: string]: number }> {
+  return await axios
+    .get('https://api.coinbase.com/v2/exchange-rates', {
+      params: {
+        currency: BASE_CURRENCY,
+      },
+    })
+    .then((resp: any) => {
+      const res: { [key: string]: number } = {};
+      for (const curr of currencies) {
+        res[curr] = resp.data.data.rates[curr];
+      }
+      return res;
+    })
+    .catch((error: any) => {
+      Logger.error(
+        `failed to get currency rates from coinbase-api, err: ${error}`,
+      );
+      throw error;
+    });
+}
+
 @Injectable()
 export class CurrencyService {
   currencies: string[] = Object.keys(SUPPORTED_CURRENCIES).filter(
@@ -14,6 +38,7 @@ export class CurrencyService {
 
   rates: { [key: string]: number };
   lastUpdatedAt: DateTime;
+  getNewRatesFunc: any = getRatesFromCoinbase;
 
   constructor() {
     this.rates = {};
@@ -87,27 +112,15 @@ export class CurrencyService {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async updateRates() {
-    await axios
-      .get('https://api.coinbase.com/v2/exchange-rates', {
-        params: {
-          currency: BASE_CURRENCY,
-        },
-      })
-      .then((resp: any) => {
-        let logMsg = 'new rates:';
-        for (const curr of this.currencies) {
-          this.rates[curr] = Number(resp.data.data.rates[curr]);
+    const ratesData = await this.getNewRatesFunc(this.currencies);
 
-          logMsg += `  ${this.rates[curr].toFixed(3)} ${curr}/${BASE_CURRENCY}`;
-        }
-        this.lastUpdatedAt = DateTime.utc();
-        Logger.log(logMsg);
-      })
-      .catch((error: any) => {
-        Logger.error(
-          `failed to get currency rates from coinbase-api, err: ${error}`,
-        );
-        throw error;
-      });
+    let logMsg = 'new rates:';
+    for (const curr of this.currencies) {
+      this.rates[curr] = Number(ratesData[curr]);
+
+      logMsg += `  ${this.rates[curr].toFixed(3)} ${curr}/${BASE_CURRENCY}`;
+    }
+    this.lastUpdatedAt = DateTime.utc();
+    Logger.log(logMsg);
   }
 }

@@ -185,7 +185,7 @@ describe('AppController (e2e)', () => {
         'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
       thumbnailUri:
         'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
-      price: 1,
+      price: '0.10',
       editionsSize: 4,
       editionsAvailable: 4,
       categories: [
@@ -223,8 +223,8 @@ describe('AppController (e2e)', () => {
         currentPage: 1,
         numberOfPages: 0,
         nfts: [],
-        lowerPriceBound: 0,
-        upperPriceBound: 0,
+        lowerPriceBound: '0.00',
+        upperPriceBound: '0.00',
       });
     },
   );
@@ -241,8 +241,8 @@ describe('AppController (e2e)', () => {
         currentPage: 1,
         numberOfPages: 0,
         nfts: [],
-        lowerPriceBound: 0,
-        upperPriceBound: 0,
+        lowerPriceBound: '0.00',
+        upperPriceBound: '0.00',
       });
     },
   );
@@ -278,7 +278,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
-            price: 1,
+            price: '0.10',
             editionsSize: 4,
             editionsAvailable: 4,
             categories: [
@@ -301,7 +301,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2202&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2202&q=80',
-            price: 78,
+            price: '7.80',
             editionsSize: 2,
             editionsAvailable: 2,
             categories: [
@@ -323,7 +323,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
-            price: 104,
+            price: '10.40',
             editionsSize: 6,
             editionsAvailable: 6,
             categories: [
@@ -345,7 +345,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            price: 43,
+            price: '4.30',
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -368,7 +368,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
             thumbnailUri:
               'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
-            price: 92,
+            price: '9.20',
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -391,7 +391,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1506809211073-d0785aaad75e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2656&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1506809211073-d0785aaad75e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2656&q=80',
-            price: 41,
+            price: '4.10',
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -414,7 +414,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1633957897986-70e83293f3ff?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1986&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1633957897986-70e83293f3ff?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1986&q=80',
-            price: 36,
+            price: '3.60',
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -436,7 +436,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1599790772272-d1425cd3242e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
             thumbnailUri:
               'https://images.unsplash.com/photo-1599790772272-d1425cd3242e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
-            price: 642,
+            price: '64.20',
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -459,7 +459,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
-            price: 3432,
+            price: '343.20',
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -471,8 +471,8 @@ describe('AppController (e2e)', () => {
             ],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 3432,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '343.20',
       });
     },
   );
@@ -496,8 +496,8 @@ describe('AppController (e2e)', () => {
         currentPage: 1,
         numberOfPages: 0,
         nfts: [],
-        lowerPriceBound: 0,
-        upperPriceBound: 0,
+        lowerPriceBound: '0.00',
+        upperPriceBound: '0.00',
       });
     },
   );
@@ -598,7 +598,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
           thumbnailUri:
             'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
-          price: 3432,
+          price: '343.20',
           editionsSize: 8,
           editionsAvailable: 8,
           categories: [
@@ -1175,13 +1175,11 @@ describe('AppController (e2e)', () => {
 
       expect(await getLockedCount(1)).toEqual(0);
 
-      // nft price: 43 id: 4
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      // nft price: 104 id: 1
       const add2 = await request(app.getHttpServer())
         .post('/users/cart/add/1')
         .set('authorization', bearer);
@@ -1191,7 +1189,7 @@ describe('AppController (e2e)', () => {
       expect(await getLockedCount(1)).toEqual(1);
 
       // Create one payment intent (we are not calling the stripe api)
-      await paymentService.createPayment(id, PaymentProvider.TEST);
+      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
 
       // 1 edition reserved by the order
       expect(await getLockedCount(1)).toEqual(1);
@@ -1250,13 +1248,11 @@ describe('AppController (e2e)', () => {
 
       expect(await getLockedCount(2)).toEqual(0);
 
-      // nft price: 43 id: 4
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/5')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      // nft price: 43 id: 4
       const add2 = await request(app.getHttpServer())
         .post('/users/cart/add/2')
         .set('authorization', bearer);
@@ -1266,7 +1262,7 @@ describe('AppController (e2e)', () => {
       expect(await getLockedCount(2)).toEqual(1);
 
       // Create one payment intent (we are not calling the stripe api)
-      await paymentService.createPayment(id, PaymentProvider.TEST);
+      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
 
       // Give webhook handler function success event
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
@@ -1324,7 +1320,6 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(remove1.statusCode).toEqual(204);
 
-      // nft price: 104
       const remove2 = await request(app.getHttpServer())
         .post('/users/cart/remove/2')
         .set('authorization', bearer);
@@ -1340,13 +1335,11 @@ describe('AppController (e2e)', () => {
     async () => {
       const { bearer, id } = await loginUser(app, 'addr', 'admin');
 
-      // nft price: 43 id: 4
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/7')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      // nft price: 43 id: 4
       const add2 = await request(app.getHttpServer())
         .post('/users/cart/add/6')
         .set('authorization', bearer);
@@ -1356,6 +1349,7 @@ describe('AppController (e2e)', () => {
       const preparedOrder = await paymentService.createPayment(
         id,
         PaymentProvider.TEST,
+        'EUR',
       );
 
       // Give webhook handler function success event
@@ -1406,7 +1400,6 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(remove1.statusCode).toEqual(204);
 
-      // nft price: 104
       const remove2 = await request(app.getHttpServer())
         .post('/users/cart/remove/6')
         .set('authorization', bearer);
@@ -1419,7 +1412,6 @@ describe('AppController (e2e)', () => {
     async () => {
       const { bearer, id } = await loginUser(app, 'addr', 'admin');
 
-      // nft price: 43 id: 4
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
         .set('authorization', bearer);
@@ -1427,7 +1419,7 @@ describe('AppController (e2e)', () => {
 
       // Create one payment intent (we are not calling the stripe api)
       try {
-        await paymentService.createPayment(id, PaymentProvider.TEST);
+        await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
       } catch (err) {
         Logger.log(err);
       }
@@ -1463,6 +1455,7 @@ describe('AppController (e2e)', () => {
       const preparedOrder2 = await paymentService.createPayment(
         id,
         PaymentProvider.TEST,
+        'EUR',
       );
 
       const payment3Data = await paymentService.getPaymentForLatestUserOrder(
@@ -1492,7 +1485,7 @@ describe('AppController (e2e)', () => {
       expect(stillCanceled.status).toEqual(PaymentStatus.CANCELED);
 
       // Create one payment intent (we are not calling the stripe api)
-      await paymentService.createPayment(id, PaymentProvider.TEST);
+      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
 
       const created = await paymentService.getPaymentForLatestUserOrder(id);
       expect(created.status).toEqual(PaymentStatus.CREATED);
@@ -1502,7 +1495,7 @@ describe('AppController (e2e)', () => {
       const timedOut = await paymentService.getPaymentForLatestUserOrder(id);
       expect(timedOut.status).toEqual(PaymentStatus.TIMED_OUT);
 
-      await paymentService.createPayment(id, PaymentProvider.TEST);
+      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
 
       const payment4Data = await paymentService.getPaymentForLatestUserOrder(
         id,
@@ -1530,7 +1523,7 @@ describe('AppController (e2e)', () => {
       expect(timedOutResponse.status).toEqual(PaymentStatus.TIMED_OUT);
 
       // Create one payment intent (we are not calling the stripe api)
-      await paymentService.createPayment(id, PaymentProvider.TEST);
+      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
 
       const payment5Data = await paymentService.getPaymentForLatestUserOrder(
         id,
@@ -1565,13 +1558,12 @@ describe('AppController (e2e)', () => {
     async () => {
       const { bearer, id } = await loginUser(app, 'addr', 'admin');
 
-      // nft price: 43 id: 4
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      await paymentService.createPayment(id, PaymentProvider.TEST);
+      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
 
       // Give webhook handler function success event
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
@@ -1622,13 +1614,12 @@ describe('AppController (e2e)', () => {
     async () => {
       const { bearer, id } = await loginUser(app, 'addr', 'admin');
 
-      // nft price: 43 id: 4
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      await paymentService.createPayment(id, PaymentProvider.TEST);
+      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
 
       // Give webhook handler function success event
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
@@ -1702,7 +1693,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
-            price: 1,
+            price: '0.10',
             editionsSize: 4,
             editionsAvailable: 3,
             categories: [
@@ -1725,7 +1716,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            price: 43,
+            price: '4.30',
             editionsSize: 8,
             editionsAvailable: 1,
             categories: [
@@ -1738,8 +1729,8 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 43,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '4.30',
       });
     },
   );
@@ -1775,7 +1766,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
-            price: 1,
+            price: '0.10',
             editionsSize: 4,
             editionsAvailable: 3,
             categories: [
@@ -1788,8 +1779,8 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending'],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 43,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '4.30',
       });
     },
   );
@@ -1824,7 +1815,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            price: 43,
+            price: '4.30',
             editionsSize: 8,
             editionsAvailable: 1,
             categories: [
@@ -1837,8 +1828,8 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 43,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '4.30',
       });
     },
   );
@@ -1877,7 +1868,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            price: 43,
+            price: '4.30',
             editionsSize: 8,
             editionsAvailable: 1,
             categories: [
@@ -1890,8 +1881,8 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 43,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '4.30',
       });
     },
   );
@@ -1930,7 +1921,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            price: 43,
+            price: '4.30',
             editionsSize: 8,
             editionsAvailable: 1,
             categories: [
@@ -1943,8 +1934,8 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 43,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '4.30',
       });
     },
   );
@@ -1983,7 +1974,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            price: 43,
+            price: '4.30',
             editionsSize: 8,
             editionsAvailable: 1,
             categories: [
@@ -1996,8 +1987,8 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 43,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '4.30',
       });
     },
   );
@@ -2036,7 +2027,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            price: 43,
+            price: '4.30',
             editionsSize: 8,
             editionsAvailable: 1,
             categories: [
@@ -2049,8 +2040,8 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 43,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '4.30',
       });
     },
   );
@@ -2118,7 +2109,7 @@ describe('AppController (e2e)', () => {
           userName: 'admin',
           userAddress: 'addr',
           userPicture: null,
-          totalPaid: '130',
+          totalPaid: '13.00',
         },
       ],
     });
@@ -2325,7 +2316,7 @@ describe('AppController (e2e)', () => {
 
         artifactUri: 'some_s3_uri',
 
-        price: 5,
+        price: '0.50',
         categories: [10],
         editionsSize: 4,
 
@@ -2348,7 +2339,7 @@ describe('AppController (e2e)', () => {
 
         artifactUri: 'some_s3_uri',
 
-        price: 5,
+        price: '0.50',
         categories: [10],
         editionsSize: 4,
 
