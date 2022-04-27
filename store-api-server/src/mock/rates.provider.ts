@@ -30,8 +30,6 @@ async function mockRatesFunc(
   return res;
 }
 
-async function mockBadRatesFunc(
-  currencies: string,
-): Promise<{ [key: string]: number }> {
+async function mockBadRatesFunc(_: string): Promise<{ [key: string]: number }> {
   throw 'err';
 }
