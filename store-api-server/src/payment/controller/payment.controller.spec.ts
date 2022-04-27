@@ -10,6 +10,7 @@ import { IpfsService } from 'src/nft/service/ipfs.service';
 import { MintService } from 'src/nft/service/mint.service';
 import { CategoryService } from 'src/category/service/category.service';
 import { CurrencyService } from 'src/currency.service';
+import { mockedRatesProvider } from 'src/mock/rates.provider';
 
 describe('PaymentController', () => {
   let controller: PaymentController;
@@ -26,6 +27,7 @@ describe('PaymentController', () => {
         CategoryService,
         PaymentService,
         IpfsService,
+        mockedRatesProvider,
         CurrencyService,
       ],
     }).compile();

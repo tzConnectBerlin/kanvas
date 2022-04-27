@@ -1,32 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import axios from 'axios';
 import { DateTime, Duration } from 'luxon';
 import { BASE_CURRENCY, SUPPORTED_CURRENCIES } from 'src/constants';
 
-async function getRatesFromCoinbase(
-  currencies: string[],
-): Promise<{ [key: string]: number }> {
-  return await axios
-    .get('https://api.coinbase.com/v2/exchange-rates', {
-      params: {
-        currency: BASE_CURRENCY,
-      },
-    })
-    .then((resp: any) => {
-      const res: { [key: string]: number } = {};
-      for (const curr of currencies) {
-        res[curr] = resp.data.data.rates[curr];
-      }
-      return res;
-    })
-    .catch((error: any) => {
-      Logger.error(
-        `failed to get currency rates from coinbase-api, err: ${error}`,
-      );
-      throw error;
-    });
-}
+export const coinbaseRatesProvider = {
+  provide: 'RATES GETTER',
+  useValue: getRatesFromCoinbase,
+};
 
 @Injectable()
 export class CurrencyService {
@@ -38,9 +19,11 @@ export class CurrencyService {
 
   rates: { [key: string]: number };
   lastUpdatedAt: DateTime;
-  getNewRatesFunc: any = getRatesFromCoinbase;
+  getNewRatesFunc: any;
 
-  constructor() {
+  constructor(@Inject('RATES GETTER') getNewRatesFunc: any) {
+    this.getNewRatesFunc = getNewRatesFunc;
+
     this.rates = {};
     this.lastUpdatedAt = DateTime.fromSeconds(0, { zone: 'UTC' });
 
@@ -123,4 +106,28 @@ export class CurrencyService {
     this.lastUpdatedAt = DateTime.utc();
     Logger.log(logMsg);
   }
+}
+
+async function getRatesFromCoinbase(
+  currencies: string[],
+): Promise<{ [key: string]: number }> {
+  return await axios
+    .get('https://api.coinbase.com/v2/exchange-rates', {
+      params: {
+        currency: BASE_CURRENCY,
+      },
+    })
+    .then((resp: any) => {
+      const res: { [key: string]: number } = {};
+      for (const curr of currencies) {
+        res[curr] = resp.data.data.rates[curr];
+      }
+      return res;
+    })
+    .catch((error: any) => {
+      Logger.error(
+        `failed to get currency rates from coinbase-api, err: ${error}`,
+      );
+      throw error;
+    });
 }

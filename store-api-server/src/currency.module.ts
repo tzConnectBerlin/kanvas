@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { CurrencyService } from './currency.service';
+import { coinbaseRatesProvider, CurrencyService } from './currency.service';
 
 @Module({
-  providers: [CurrencyService],
+  providers: [coinbaseRatesProvider, CurrencyService],
   exports: [CurrencyService],
 })
 export class CurrencyModule {}

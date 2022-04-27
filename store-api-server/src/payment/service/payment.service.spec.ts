@@ -9,6 +9,7 @@ import { CategoryService } from 'src/category/service/category.service';
 import { DbMock } from 'src/mock/db.module';
 import { CacheMock } from 'src/mock/cache.module';
 import { CurrencyService } from 'src/currency.service';
+import { mockedRatesProvider } from 'src/mock/rates.provider';
 
 describe('PaymentService', () => {
   let service: PaymentService;
@@ -24,6 +25,7 @@ describe('PaymentService', () => {
         CategoryService,
         PaymentService,
         IpfsService,
+        mockedRatesProvider,
         CurrencyService,
       ],
     }).compile();

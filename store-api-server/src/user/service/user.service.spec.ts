@@ -9,6 +9,7 @@ import { S3Service } from 'src/s3.service';
 import { DbMock } from 'src/mock/db.module';
 import { CacheMock } from 'src/mock/cache.module';
 import { CurrencyService } from 'src/currency.service';
+import { mockedRatesProvider } from 'src/mock/rates.provider';
 
 describe('UserService', () => {
   let service: UserService;
@@ -23,6 +24,7 @@ describe('UserService', () => {
         MintService,
         IpfsService,
         S3Service,
+        mockedRatesProvider,
         CurrencyService,
       ],
     }).compile();
