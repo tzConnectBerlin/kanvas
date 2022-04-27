@@ -95,7 +95,13 @@ export class CurrencyService {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async updateRates() {
-    const ratesData = await this.getNewRatesFunc(this.currencies);
+    let ratesData;
+    try {
+      ratesData = await this.getNewRatesFunc(this.currencies);
+    } catch (err: any) {
+      Logger.error(err);
+      return;
+    }
 
     let logMsg = 'new rates:';
     for (const curr of this.currencies) {
