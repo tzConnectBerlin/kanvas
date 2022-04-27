@@ -37,33 +37,44 @@ export class NftController {
   @Get()
   async getFiltered(
     @Res() resp: Response,
-    @Query() params: FilterParams,
-    @Query() currency: string = BASE_CURRENCY,
+    @Query() filters: FilterParams,
+    @Query('currency') currency: string = BASE_CURRENCY,
   ) {
     validateRequestedCurrency(currency);
-    this.#validateFilterParams(params);
+    this.#validateFilterParams(filters);
 
     return await wrapCache(
       this.cache,
       resp,
-      'nft.findNftsWithFilter' + JSON.stringify(params),
+      'nft.findNftsWithFilter' + JSON.stringify(filters) + currency,
       () => {
-        return this.nftService.findNftsWithFilter(params, currency);
+        return this.nftService.findNftsWithFilter(filters, currency);
       },
     );
   }
 
   @Get('/search')
-  async search(@Res() resp: Response, @Query() params: SearchParam) {
+  async search(
+    @Res() resp: Response,
+    @Query() searchParams: SearchParam,
+    @Query('currency') currency: string = BASE_CURRENCY,
+  ) {
+    validateRequestedCurrency(currency);
+
     return await wrapCache(
       this.cache,
       resp,
-      'nft.search' + params.searchString,
+      'nft.search' + searchParams.searchString + currency,
       () => {
         return new Promise(async (resolve) => {
           resolve({
-            nfts: await this.nftService.search(params.searchString),
-            categories: await this.categoryService.search(params.searchString),
+            nfts: await this.nftService.search(
+              searchParams.searchString,
+              currency,
+            ),
+            categories: await this.categoryService.search(
+              searchParams.searchString,
+            ),
           });
         });
       },

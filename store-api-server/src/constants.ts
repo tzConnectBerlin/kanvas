@@ -31,4 +31,4 @@ export const SUPPORTED_CURRENCIES: { [key: string]: number } = {
   EUR: 2,
   XTZ: 5,
 };
-export const BASE_CURRENCY = process.env['BASE_CURRENCY'] || 'EUR';
+export const BASE_CURRENCY: string = process.env['BASE_CURRENCY'] || 'EUR';

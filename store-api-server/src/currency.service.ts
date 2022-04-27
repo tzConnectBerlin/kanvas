@@ -49,9 +49,6 @@ export class CurrencyService {
     fromCurrency: string,
     maxAge: Duration = Duration.fromObject({ minutes: 30 }),
   ): number {
-    if (fromCurrency === BASE_CURRENCY) {
-      return amount;
-    }
     return amount / this.#getRate(fromCurrency, maxAge);
   }
 

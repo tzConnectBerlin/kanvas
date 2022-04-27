@@ -5,9 +5,10 @@ import { DbModule } from 'src/db.module';
 import { NftModule } from 'src/nft/nft.module';
 import { CategoryService } from 'src/category/service/category.service';
 import { S3Service } from 'src/s3.service';
+import { CurrencyModule } from 'src/currency.module';
 
 @Module({
-  imports: [DbModule, NftModule],
+  imports: [DbModule, NftModule, CurrencyModule],
   controllers: [UserController],
   providers: [CategoryService, UserService, S3Service],
   exports: [UserService],

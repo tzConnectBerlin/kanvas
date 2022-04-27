@@ -138,7 +138,7 @@ SELECT $1, UNNEST($2::INTEGER[])
     Logger.log(`Created new NFT ${newNft.id}`);
   }
 
-  async search(str: string): Promise<NftEntity[]> {
+  async search(str: string, currency: string): Promise<NftEntity[]> {
     const nftIds = await this.conn.query(
       `
 SELECT id
@@ -163,6 +163,7 @@ LIMIT $3
       nftIds.rows.map((row: any) => row.id),
       'nft_id',
       'asc',
+      currency,
     );
 
     return nftIds.rows
@@ -171,7 +172,7 @@ LIMIT $3
   }
 
   async findNftsWithFilter(
-    params: FilterParams,
+    filters: FilterParams,
     currency: string,
   ): Promise<NftEntityPage> {
     const orderByMapping = new Map([
@@ -182,11 +183,11 @@ LIMIT $3
       ['views', 'view_count'],
     ]);
 
-    const orderBy = orderByMapping.get(params.orderBy);
+    const orderBy = orderByMapping.get(filters.orderBy);
     if (typeof orderBy === 'undefined') {
       Logger.error(
         'Error in nft.filter(), orderBy unmapped, request.orderBy: ' +
-          params.orderBy,
+          filters.orderBy,
       );
       throw new HttpException(
         'Something went wrong',
@@ -194,12 +195,25 @@ LIMIT $3
       );
     }
 
-    const offset = (params.page - 1) * params.pageSize;
-    const limit = params.pageSize;
+    if (typeof filters.priceAtLeast !== 'undefined') {
+      filters.priceAtLeast = this.currencyService.convertFromCurrency(
+        filters.priceAtLeast,
+        currency,
+      );
+    }
+    if (typeof filters.priceAtMost !== 'undefined') {
+      filters.priceAtMost = this.currencyService.convertFromCurrency(
+        filters.priceAtMost,
+        currency,
+      );
+    }
+
+    const offset = (filters.page - 1) * filters.pageSize;
+    const limit = filters.pageSize;
 
     let untilNft: string | undefined = undefined;
-    if (typeof params.firstRequestAt === 'number') {
-      untilNft = new Date(params.firstRequestAt * 1000).toISOString();
+    if (typeof filters.firstRequestAt === 'number') {
+      untilNft = new Date(filters.firstRequestAt * 1000).toISOString();
     }
 
     try {
@@ -208,13 +222,13 @@ LIMIT $3
 SELECT nft_id, total_nft_count
 FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [
-          params.userAddress,
-          params.categories,
-          params.priceAtLeast,
-          params.priceAtMost,
-          params.availability,
+          filters.userAddress,
+          filters.categories,
+          filters.priceAtLeast,
+          filters.priceAtMost,
+          filters.availability,
           orderBy,
-          params.orderDirection,
+          filters.orderDirection,
           offset,
           limit,
           untilNft,
@@ -225,13 +239,13 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         `
 SELECT min_price, max_price
 FROM price_bounds($1, $2, $3)`,
-        [params.userAddress, params.categories, untilNft],
+        [filters.userAddress, filters.categories, untilNft],
       );
 
       const res = <NftEntityPage>{
-        currentPage: params.page,
+        currentPage: filters.page,
         numberOfPages: 0,
-        firstRequestAt: params.firstRequestAt,
+        firstRequestAt: filters.firstRequestAt,
         nfts: [],
         lowerPriceBound: Number(priceBounds.rows[0].min_price),
         upperPriceBound: Number(priceBounds.rows[0].max_price),
@@ -241,16 +255,16 @@ FROM price_bounds($1, $2, $3)`,
       }
 
       res.numberOfPages = Math.ceil(
-        nftIds.rows[0].total_nft_count / params.pageSize,
+        nftIds.rows[0].total_nft_count / filters.pageSize,
       );
       res.nfts = await this.findByIds(
         nftIds.rows.map((row: any) => row.nft_id),
         orderBy,
-        params.orderDirection,
+        filters.orderDirection,
         currency,
       );
-      if (typeof params.userAddress !== 'undefined') {
-        await this.#addNftOwnerStatus(params.userAddress, res.nfts);
+      if (typeof filters.userAddress !== 'undefined') {
+        await this.#addNftOwnerStatus(filters.userAddress, res.nfts);
       }
       return res;
     } catch (err) {
