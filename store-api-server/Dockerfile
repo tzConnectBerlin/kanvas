@@ -1,5 +1,5 @@
+# note: expected build context is the git root directory
 FROM node
-WORKDIR /build
 ENV DEBIAN_FRONTEND=noninteractive
 ENV NODE_OPTIONS --openssl-legacy-provider
 ENV TZ=UTC
@@ -8,7 +8,19 @@ ENV TZ=UTC
 RUN apt update && apt upgrade -y
 RUN apt install -y postgresql
 
-ADD . .
+ADD store-api-server/ /build
+ADD lib/ /build/lib
+
+RUN mkdir /build/yarn_links
+
+WORKDIR /build/lib/
 RUN yarn install
+RUN yarn build
+RUN yarn link --link-folder /build/yarn_links
+
+WORKDIR /build
+RUN yarn install
+RUN yarn link --link-folder /build/yarn_links kanvas_lib
+RUN yarn build
 
 ENTRYPOINT yarn start

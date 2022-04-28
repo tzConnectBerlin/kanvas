@@ -2,7 +2,7 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import axios from 'axios';
 import { DateTime, Duration } from 'luxon';
-import { BASE_CURRENCY, SUPPORTED_CURRENCIES } from 'src/constants';
+import { BASE_CURRENCY, SUPPORTED_CURRENCIES } from './constants';
 
 export const coinbaseRatesProvider = {
   provide: 'RATES GETTER',

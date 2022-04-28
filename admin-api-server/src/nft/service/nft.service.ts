@@ -10,6 +10,8 @@ import {
   FILE_PREFIX,
   STM_CONFIG_FILE,
   NFT_PUBLISH_STATE,
+  NFT_DELIST_STATE,
+  NFT_RELIST_STATE,
   STORE_API,
   ADMIN_PRIVATE_KEY,
   SIGNATURE_PREFIX_CREATE_NFT,
@@ -217,13 +219,6 @@ RETURNING id
       const nft = nfts[0];
       const actor = await this.#getActorForNft(user, nft);
 
-      if (this.#isNftInPublishState(nft)) {
-        throw new HttpException(
-          `cannot update this nft, it is already published to the store`,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
       for (let i = 0; i < nftUpdates.length; i++) {
         let nftUpdate = nftUpdates[i];
 
@@ -423,7 +418,7 @@ WHERE TARGET.value != EXCLUDED.value
   }
 
   async #assertNftPublishable(nft: NftEntity) {
-    if (!this.#isNftInPublishState(nft)) {
+    if (nft.state !== NFT_PUBLISH_STATE) {
       throw `cannot publish nft that is not in the publish state (nft id=${nft.id}, nft state=${nft.state})`;
     }
     const attr = nft.attributes;

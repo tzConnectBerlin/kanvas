@@ -21,12 +21,12 @@ import { NftEntity, CreateNft } from '../entity/nft.entity';
 import { FilterParams, PaginationParams, SearchParam } from '../params';
 import { wrapCache } from 'src/utils';
 import {
-  BASE_CURRENCY,
   ADMIN_PUBLIC_KEY,
   SIGNATURE_PREFIX_CREATE_NFT,
   SIGNATURE_PREFIX_DELIST_NFT,
   SIGNATURE_PREFIX_RELIST_NFT,
 } from 'src/constants';
+import { BASE_CURRENCY } from 'kanvas_lib';
 import { validateRequestedCurrency } from 'src/paramUtils';
 
 @Controller('nfts')

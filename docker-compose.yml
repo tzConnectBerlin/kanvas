@@ -17,7 +17,9 @@ services:
       POSTGRES_DB: dev_database
 
   store-api:
-    build: ./store-api-server
+    build:
+      context: .
+      dockerfile: ./store-api-server/Dockerfile
     entrypoint: |-
       bash -c '
         set -e

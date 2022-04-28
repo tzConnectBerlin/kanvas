@@ -5,7 +5,7 @@ import { DbModule } from 'src/db.module';
 import { NftModule } from 'src/nft/nft.module';
 import { CategoryService } from 'src/category/service/category.service';
 import { S3Service } from 'src/s3.service';
-import { CurrencyModule } from 'src/currency.module';
+import { CurrencyModule } from 'kanvas_lib';
 
 @Module({
   imports: [DbModule, NftModule, CurrencyModule],

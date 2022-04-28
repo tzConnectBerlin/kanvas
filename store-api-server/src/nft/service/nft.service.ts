@@ -14,12 +14,11 @@ import {
   MINTER_ADDRESS,
   SEARCH_MAX_NFTS,
   SEARCH_SIMILARITY_LIMIT,
-  BASE_CURRENCY,
 } from 'src/constants';
+import { CurrencyService, BASE_CURRENCY } from 'kanvas_lib';
 import { sleep } from 'src/utils';
 import { IpfsService } from './ipfs.service';
 import { DbTransaction, withTransaction } from 'src/db.module';
-import { CurrencyService } from 'src/currency.service';
 
 @Injectable()
 export class NftService {
