@@ -4,7 +4,7 @@
 
 BEGIN;
 
-ADD TABLE nft_delisted (LIKE nft);
+CREATE TABLE nft_delisted (LIKE nft);
 
 COMMIT;
 

@@ -9,16 +9,24 @@ import {
   Param,
   Post,
   CACHE_MANAGER,
+  Logger,
   Inject,
 } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Response } from 'express';
+import { cryptoUtils } from 'sotez';
 import { NftService } from '../service/nft.service';
 import { CategoryService } from 'src/category/service/category.service';
 import { NftEntity, CreateNft } from '../entity/nft.entity';
 import { FilterParams, PaginationParams, SearchParam } from '../params';
 import { wrapCache } from 'src/utils';
-import { BASE_CURRENCY } from 'src/constants';
+import {
+  BASE_CURRENCY,
+  ADMIN_PUBLIC_KEY,
+  SIGNATURE_PREFIX_CREATE_NFT,
+  SIGNATURE_PREFIX_DELIST_NFT,
+  SIGNATURE_PREFIX_RELIST_NFT,
+} from 'src/constants';
 import { validateRequestedCurrency } from 'src/paramUtils';
 
 @Controller('nfts')
@@ -31,7 +39,33 @@ export class NftController {
 
   @Post('/create')
   async createNft(@Body() nft: CreateNft) {
+    await this.#verifySignature(
+      SIGNATURE_PREFIX_CREATE_NFT,
+      nft.id,
+      nft.signature,
+    );
+
     return await this.nftService.createNft(nft);
+  }
+
+  @Post('/delist/:id')
+  async delistNft(
+    @Param('id') nftId: number,
+    @Body('signature') signature: string,
+  ) {
+    await this.#verifySignature(SIGNATURE_PREFIX_DELIST_NFT, nftId, signature);
+
+    this.nftService.delistNft(nftId);
+  }
+
+  @Post('/relist/:id')
+  async relistNft(
+    @Param('id') nftId: number,
+    @Body('signature') signature: string,
+  ) {
+    await this.#verifySignature(SIGNATURE_PREFIX_RELIST_NFT, nftId, signature);
+
+    this.nftService.relistNft(nftId);
   }
 
   @Get()
@@ -136,6 +170,32 @@ export class NftController {
       throw new HttpException(
         `Requested orderBy ('${params.orderBy}') not supported`,
         HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async #verifySignature(hexPrefix: string, nftId: number, signature: string) {
+    let nftIdHex = nftId.toString(16);
+    if (nftIdHex.length & 1) {
+      // hex is of uneven length, sotez expects an even number of hexadecimal characters
+      nftIdHex = '0' + nftIdHex;
+    }
+
+    try {
+      if (
+        !(await cryptoUtils.verify(
+          hexPrefix + nftIdHex,
+          `${signature}`,
+          ADMIN_PUBLIC_KEY,
+        ))
+      ) {
+        throw new HttpException('Invalid signature', HttpStatus.UNAUTHORIZED);
+      }
+    } catch (err: any) {
+      Logger.warn(`Error on new nft signature validation, err: ${err}`);
+      throw new HttpException(
+        'Could not validate signature (it may be misshaped)',
+        HttpStatus.UNAUTHORIZED,
       );
     }
   }

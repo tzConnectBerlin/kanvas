@@ -12,13 +12,11 @@ import { FilterParams } from '../params';
 import {
   PG_CONNECTION,
   MINTER_ADDRESS,
-  ADMIN_PUBLIC_KEY,
   SEARCH_MAX_NFTS,
   SEARCH_SIMILARITY_LIMIT,
   BASE_CURRENCY,
 } from 'src/constants';
 import { sleep } from 'src/utils';
-import { cryptoUtils } from 'sotez';
 import { IpfsService } from './ipfs.service';
 import { DbTransaction, withTransaction } from 'src/db.module';
 import { CurrencyService } from 'src/currency.service';
@@ -33,32 +31,6 @@ export class NftService {
   ) {}
 
   async createNft(newNft: CreateNft) {
-    const validate = async () => {
-      let hexMsg = newNft.id.toString(16);
-      if (hexMsg.length & 1) {
-        // hex is of uneven length, sotez expects an even number of hexadecimal characters
-        hexMsg = '0' + hexMsg;
-      }
-
-      try {
-        if (
-          !(await cryptoUtils.verify(
-            hexMsg,
-            `${newNft.signature}`,
-            ADMIN_PUBLIC_KEY,
-          ))
-        ) {
-          throw new HttpException('Invalid signature', HttpStatus.UNAUTHORIZED);
-        }
-      } catch (err: any) {
-        Logger.warn(`Error on new nft signature validation, err: ${err}`);
-        throw new HttpException(
-          'Could not validate signature (it may be misshaped)',
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-    };
-
     const insert = async (dbTx: any) => {
       let launchAt: Date | undefined = undefined;
       if (typeof newNft.launchAt !== 'undefined') {
@@ -125,8 +97,6 @@ SELECT $1, UNNEST($2::INTEGER[])
       throw `failed to upload new nft to IPFS`;
     };
 
-    await validate();
-
     return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       await insert(dbTx);
       await uploadToIpfs(dbTx);
@@ -139,7 +109,7 @@ SELECT $1, UNNEST($2::INTEGER[])
   }
 
   async delistNft(nftId: number) {
-    await withTransaction(this.conn, (dbTx: DbTransaction) => {
+    await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       await dbTx.query(
         `
 INSERT INTO nft_delisted
@@ -155,11 +125,34 @@ WHERE id = $1
 DELETE FROM nft
 WHERE id = $1
         `,
+        [nftId],
       );
     });
   }
 
-  async search(str: string): Promise<NftEntity[]> {
+  async relistNft(nftId: number) {
+    await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+      await dbTx.query(
+        `
+INSERT INTO nft
+SELECT *
+FROM nft_delisted
+WHERE id = $1
+      `,
+        [nftId],
+      );
+
+      await dbTx.query(
+        `
+DELETE FROM nft_delisted
+WHERE id = $1
+        `,
+        [nftId],
+      );
+    });
+  }
+
+  async search(str: string, currency: string): Promise<NftEntity[]> {
     const nftIds = await this.conn.query(
       `
 SELECT id
