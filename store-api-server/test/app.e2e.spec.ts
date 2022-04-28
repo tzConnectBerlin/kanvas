@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger, INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
-import { RATE_LIMIT } from 'src/constants';
+import { RATE_LIMIT, SIGNATURE_PREFIX_CREATE_NFT } from 'src/constants';
 import {
   PaymentProvider,
   PaymentService,
@@ -2299,7 +2299,7 @@ describe('AppController (e2e)', () => {
     let hexMsg = nftId.toString(16);
     if (hexMsg.length & 1) {
       // hex is of uneven length, sotez expects an even number of hexadecimal characters
-      hexMsg = '0' + hexMsg;
+      hexMsg = SIGNATURE_PREFIX_CREATE_NFT + '0' + hexMsg;
     }
 
     const signed = await cryptoUtils.sign(
