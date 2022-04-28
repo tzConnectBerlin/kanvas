@@ -44,8 +44,8 @@ export class CurrencyService {
     const res = (baseUnitAmount * this.#getRate(toCurrency, maxAge)).toFixed(
       decimals,
     );
-    Logger.log(
-      `converted ${baseUnitAmount} to ${toCurrency} (inBaseUnit? ${JSON.stringify(
+    Logger.debug(
+      `converted ${baseUnitAmount} to ${res} ${toCurrency} (inBaseUnit? ${JSON.stringify(
         inBaseUnit,
       )})`,
     );

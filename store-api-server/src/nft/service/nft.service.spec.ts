@@ -4,8 +4,7 @@ import { CategoryService } from 'src/category/service/category.service';
 import { IpfsService } from 'src/nft/service/ipfs.service';
 import { DbMock } from 'src/mock/db.module';
 import { CacheMock } from 'src/mock/cache.module';
-import { CurrencyService } from 'src/currency.service';
-import { mockedRatesProvider } from 'src/mock/rates.provider';
+import { mockedRatesProvider, CurrencyService } from 'kanvas_lib';
 
 describe('NftService', () => {
   let service: NftService;

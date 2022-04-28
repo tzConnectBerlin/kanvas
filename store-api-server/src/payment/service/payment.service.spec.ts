@@ -8,8 +8,7 @@ import { MintService } from 'src/nft/service/mint.service';
 import { CategoryService } from 'src/category/service/category.service';
 import { DbMock } from 'src/mock/db.module';
 import { CacheMock } from 'src/mock/cache.module';
-import { CurrencyService } from 'src/currency.service';
-import { mockedRatesProvider } from 'src/mock/rates.provider';
+import { mockedRatesProvider, CurrencyService } from 'kanvas_lib';
 
 describe('PaymentService', () => {
   let service: PaymentService;
