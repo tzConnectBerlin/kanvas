@@ -21,7 +21,12 @@ export const RATE_LIMIT = Number(process.env['RATE_LIMIT'] || 100);
 export const STM_CONFIG_FILE =
   process.env['STM_CONFIG_FILE'] || './config/stm_example.yaml';
 export const NFT_PUBLISH_STATE = 'finish';
+export const NFT_DELIST_STATE = 'delist';
+export const NFT_RELIST_STATE = 'relist';
 
 export const STORE_API = process.env['STORE_API'] || 'http://localhost:3005';
 
 export const ADMIN_PRIVATE_KEY = assertEnv('ADMIN_PRIVATE_KEY');
+export const SIGNATURE_PREFIX_CREATE_NFT = '00';
+export const SIGNATURE_PREFIX_DELIST_NFT = '01';
+export const SIGNATURE_PREFIX_RELIST_NFT = '02';

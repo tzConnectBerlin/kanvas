@@ -12,6 +12,9 @@ import {
   NFT_PUBLISH_STATE,
   STORE_API,
   ADMIN_PRIVATE_KEY,
+  SIGNATURE_PREFIX_CREATE_NFT,
+  SIGNATURE_PREFIX_DELIST_NFT,
+  SIGNATURE_PREFIX_RELIST_NFT,
 } from 'src/constants';
 import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
@@ -389,8 +392,16 @@ WHERE TARGET.value != EXCLUDED.value
         [nft.id, setBy.id, attrNames, attrValues],
       );
 
-      if (this.#isNftInPublishState(nft)) {
-        await this.#publishNft(nft);
+      switch (nft.state) {
+        case NFT_PUBLISH_STATE:
+          await this.#publishNft(nft);
+          break;
+        case NFT_DELIST_STATE:
+          await this.#delistNft(nft);
+          break;
+        case NFT_RELIST_STATE:
+          await this.#relistNft(nft);
+          break;
       }
 
       await dbTx.query(`COMMIT`);
@@ -409,10 +420,6 @@ WHERE TARGET.value != EXCLUDED.value
       roles.push('creator');
     }
     return new Actor(user.id, roles);
-  }
-
-  #isNftInPublishState(nft: NftEntity): boolean {
-    return nft.state === NFT_PUBLISH_STATE;
   }
 
   async #assertNftPublishable(nft: NftEntity) {
@@ -440,7 +447,11 @@ WHERE TARGET.value != EXCLUDED.value
     await this.#assertNftPublishable(nft);
     const attr = nft.attributes;
 
-    const signed = await this.#signNumber(nft.id, ADMIN_PRIVATE_KEY);
+    const signed = await this.#signNftAction(
+      SIGNATURE_PREFIX_CREATE_NFT,
+      nft.id,
+      ADMIN_PRIVATE_KEY,
+    );
 
     return await axios.post(STORE_API + '/nfts/create', {
       id: nft.id,
@@ -461,13 +472,45 @@ WHERE TARGET.value != EXCLUDED.value
     Logger.log(`Published NFT ${nft.id} to the store database`);
   }
 
-  async #signNumber(n: number, privateKey): Promise<string> {
-    let hexMsg = n.toString(16);
-    if (hexMsg.length & 1) {
+  async #delistNft(nft: NftEntity) {
+    const signed = await this.#signNftAction(
+      SIGNATURE_PREFIX_DELIST_NFT,
+      nft.id,
+      ADMIN_PRIVATE_KEY,
+    );
+
+    return await axios.post(STORE_API + `/nfts/delist/${nft.id}`, {
+      signature: signed,
+    });
+
+    Logger.log(`Delisted NFT ${nft.id} from the store`);
+  }
+
+  async #relistNft(nft: NftEntity) {
+    const signed = await this.#signNftAction(
+      SIGNATURE_PREFIX_RELIST_NFT,
+      nft.id,
+      ADMIN_PRIVATE_KEY,
+    );
+
+    return await axios.post(STORE_API + `/nfts/relist/${nft.id}`, {
+      signature: signed,
+    });
+
+    Logger.log(`Relisted NFT ${nft.id} in the store`);
+  }
+
+  async #signNftAction(
+    hexPrefix: string,
+    nftId: number,
+    privateKey: string,
+  ): Promise<string> {
+    let nftIdHex = nftId.toString(16);
+    if (nftIdHex.length & 1) {
       // hex is of uneven length, sotez expects an even number of hexadecimal characters
-      hexMsg = '0' + hexMsg;
+      nftIdHex = '0' + nftIdHex;
     }
-    return (await cryptoUtils.sign(hexMsg, privateKey)).sig;
+    return (await cryptoUtils.sign(nftIdHex, privateKey)).sig;
   }
 
   async withNftLock<ResTy>(
