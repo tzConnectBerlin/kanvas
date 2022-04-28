@@ -4,7 +4,7 @@
 
 BEGIN;
 
-UPDATE TABLE nft ADD COLUMN delisted BOOLEAN NOT NULL DEFAULT FALSE;
+ADD TABLE nft_delisted (LIKE nft);
 
 COMMIT;
 
@@ -12,6 +12,6 @@ COMMIT;
 
 BEGIN;
 
-UPDATE TABLE nft DROP COLUMN delisted;
+DROP TABLE nft_delisted;
 
 COMMIT;

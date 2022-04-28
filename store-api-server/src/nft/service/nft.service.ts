@@ -138,7 +138,28 @@ SELECT $1, UNNEST($2::INTEGER[])
     Logger.log(`Created new NFT ${newNft.id}`);
   }
 
-  async search(str: string, currency: string): Promise<NftEntity[]> {
+  async delistNft(nftId: number) {
+    await withTransaction(this.conn, (dbTx: DbTransaction) => {
+      await dbTx.query(
+        `
+INSERT INTO nft_delisted
+SELECT *
+FROM nft
+WHERE id = $1
+      `,
+        [nftId],
+      );
+
+      await dbTx.query(
+        `
+DELETE FROM nft
+WHERE id = $1
+        `,
+      );
+    });
+  }
+
+  async search(str: string): Promise<NftEntity[]> {
     const nftIds = await this.conn.query(
       `
 SELECT id
