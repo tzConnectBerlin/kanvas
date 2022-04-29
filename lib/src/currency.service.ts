@@ -2,7 +2,7 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import axios from 'axios';
 import { DateTime, Duration } from 'luxon';
-import { BASE_CURRENCY, SUPPORTED_CURRENCIES } from './constants';
+import { BASE_CURRENCY, SUPPORTED_CURRENCIES, LOG_CURRENCY_RATES_UPDATES } from './constants';
 
 export const coinbaseRatesProvider = {
   provide: 'RATES GETTER',
@@ -20,6 +20,7 @@ export class CurrencyService {
   rates: { [key: string]: number };
   lastUpdatedAt: DateTime;
   getNewRatesFunc: any;
+  logUpdates: boolean = LOG_CURRENCY_RATES_UPDATES;
 
   constructor(@Inject('RATES GETTER') getNewRatesFunc: any) {
     this.getNewRatesFunc = getNewRatesFunc;
@@ -41,15 +42,9 @@ export class CurrencyService {
     }
 
     const decimals = inBaseUnit ? 0 : SUPPORTED_CURRENCIES[toCurrency];
-    const res = (baseUnitAmount * this.#getRate(toCurrency, maxAge)).toFixed(
+    return (baseUnitAmount * this.#getRate(toCurrency, maxAge)).toFixed(
       decimals,
     );
-    Logger.debug(
-      `converted ${baseUnitAmount} to ${res} ${toCurrency} (inBaseUnit? ${JSON.stringify(
-        inBaseUnit,
-      )})`,
-    );
-    return res;
   }
 
   convertFromCurrency(
@@ -70,17 +65,12 @@ export class CurrencyService {
     }
 
     if (!this.currencies.includes(toCurrency)) {
-      const errMsg = `cannot convert currency to unsupported ${toCurrency}`;
-      Logger.error(errMsg);
-      throw errMsg;
+      throw `cannot convert currency to unsupported ${toCurrency}`;
     }
 
     const ratesAge = DateTime.utc().diff(this.lastUpdatedAt);
     if (ratesAge > maxAge) {
-      const errMsg =
-        "currency rates' last update is too long ago, cannot safely convert currencies";
-      Logger.error(`${errMsg} (rates update age is ${ratesAge}`);
-      throw errMsg;
+      throw `currency rates' last update is too long ago, cannot safely convert currencies (rates update age is ${ratesAge})`;
     }
 
     return (
@@ -110,7 +100,9 @@ export class CurrencyService {
       logMsg += `  ${this.rates[curr].toFixed(3)} ${curr}/${BASE_CURRENCY}`;
     }
     this.lastUpdatedAt = DateTime.utc();
+    if (this.logUpdates) {
     Logger.log(logMsg);
+    }
   }
 }
 
@@ -131,9 +123,6 @@ async function getRatesFromCoinbase(
       return res;
     })
     .catch((error: any) => {
-      Logger.error(
-        `failed to get currency rates from coinbase-api, err: ${error}`,
-      );
-      throw error;
+      throw `failed to get currency rates from coinbase-api, err: ${error}`;
     });
 }

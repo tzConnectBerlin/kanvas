@@ -1,5 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Logger, INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  ConsoleLogger,
+  Logger,
+  INestApplication,
+  ValidationPipe,
+} from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { RATE_LIMIT, SIGNATURE_PREFIX_CREATE_NFT } from 'src/constants';

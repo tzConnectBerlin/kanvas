@@ -10,6 +10,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule, {
     cors: process.env.LOCAL_CORS === 'true',
+    logger: ['log', 'warn', 'error'],
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.use('/payment/stripe-webhook', raw({ type: 'application/json' }));

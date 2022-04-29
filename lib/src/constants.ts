@@ -6,3 +6,5 @@ export const SUPPORTED_CURRENCIES: { [key: string]: number } = {
   XTZ: 5,
 };
 export const BASE_CURRENCY: string = process.env['BASE_CURRENCY'] || 'EUR';
+
+export const LOG_CURRENCY_RATES_UPDATES: boolean = (process.env['LOG_CURRENCY_RATES_UPDATES'] || 'enable') === 'enable';
