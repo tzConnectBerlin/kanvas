@@ -23,7 +23,7 @@
     "@nestjs/jwt": "^8.0.0",
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-express": "^8.2.6",
-    "@nestjs/schedule": "^1.0.2",
+    "@nestjs/schedule": "1.0.2",
     "@nestjs/throttler": "^2.0.0",
     "@types/cache-manager": "^3.4.3",
     "@types/cookie-session": "^2.0.43",

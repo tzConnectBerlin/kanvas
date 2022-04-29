@@ -2104,7 +2104,7 @@ describe('AppController (e2e)', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body.timestamp).toBeGreaterThan(0);
       delete res.body.timestamp;
-      expect(res.body).toStrictEqual({ value: 680 });
+      expect(res.body).toStrictEqual({ value: 68 });
 
       res = await request(app.getHttpServer())
         .get('/analytics/sales/priceVolume/timeseries')
@@ -2113,8 +2113,8 @@ describe('AppController (e2e)', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body).toStrictEqual({
         data: [
-          { timestamp: 819165600, value: 233 },
-          { timestamp: 819201600, value: 447 },
+          { timestamp: 819165600, value: 23.3 },
+          { timestamp: 819201600, value: 44.7 },
         ],
       });
 
@@ -2152,7 +2152,7 @@ describe('AppController (e2e)', () => {
             from: null,
             to: 'addr',
             tokenId: 4,
-            price: 43,
+            price: '4.30',
             amount: 1,
           },
           {
@@ -2162,7 +2162,7 @@ describe('AppController (e2e)', () => {
             from: null,
             to: 'addr',
             tokenId: 7,
-            price: 98,
+            price: '9.80',
             amount: 1,
           },
           {
@@ -2172,7 +2172,7 @@ describe('AppController (e2e)', () => {
             from: null,
             to: 'addr',
             tokenId: 10,
-            price: 92,
+            price: '9.20',
             amount: 1,
           },
           {
@@ -2182,7 +2182,7 @@ describe('AppController (e2e)', () => {
             from: null,
             to: 'tz1',
             tokenId: 2,
-            price: 78,
+            price: '7.80',
             amount: 1,
           },
           {
@@ -2192,7 +2192,7 @@ describe('AppController (e2e)', () => {
             from: null,
             to: 'tz1',
             tokenId: 4,
-            price: 43,
+            price: '4.30',
             amount: 1,
           },
           {
@@ -2202,7 +2202,7 @@ describe('AppController (e2e)', () => {
             from: null,
             to: 'tz1',
             tokenId: 10,
-            price: 92,
+            price: '9.20',
             amount: 1,
           },
           {
@@ -2212,7 +2212,7 @@ describe('AppController (e2e)', () => {
             from: null,
             to: 'tz1',
             tokenId: 11,
-            price: 41,
+            price: '4.10',
             amount: 1,
           },
           {
@@ -2222,7 +2222,7 @@ describe('AppController (e2e)', () => {
             from: null,
             to: 'tz1',
             tokenId: 27,
-            price: 12,
+            price: '1.20',
             amount: 1,
           },
           {
@@ -2232,7 +2232,7 @@ describe('AppController (e2e)', () => {
             from: null,
             to: 'addr',
             tokenId: 1,
-            price: 1,
+            price: '0.10',
             amount: 1,
           },
           {
@@ -2242,7 +2242,7 @@ describe('AppController (e2e)', () => {
             from: null,
             to: 'addr',
             tokenId: 3,
-            price: 104,
+            price: '10.40',
             amount: 1,
           },
         ],
@@ -2331,7 +2331,7 @@ describe('AppController (e2e)', () => {
         display_uri: null,
         thumbnail_uri: 'somethumbnailuri',
         signature:
-          'sigsdWYgoHEU5tycRySdCFZKfj4N9D1GXWG63uXyDNdkepcsyna7Z43QDVF1jjT1pCiyhABvg1KrRXYPpuVuR5kMhLsiVV9r',
+          'sigXLxpqc2gGdUTb2hgqvwq2mjoAGVY3eY9HBQCQxDTiJ257kbaQ3BxrrM6kC7ppW3K2foNMW44xk5C1wcHh8uStmyFhxjRk',
       },
       categories: [3, 4, 5],
     });

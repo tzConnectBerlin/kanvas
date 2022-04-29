@@ -88,7 +88,9 @@ services:
       POSTGRES_DB: dev_database
 
   admin-api:
-    build: ./admin-api-server
+    build:
+      context: .
+      dockerfile: ./admin-api-server/Dockerfile
     entrypoint: |-
       bash -c '
         set -e

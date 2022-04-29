@@ -101,7 +101,7 @@ export class CurrencyService {
     }
     this.lastUpdatedAt = DateTime.utc();
     if (this.logUpdates) {
-    Logger.log(logMsg);
+      Logger.log(logMsg);
     }
   }
 }

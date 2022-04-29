@@ -14,10 +14,12 @@ import {
   NFT_RELIST_STATE,
   STORE_API,
   ADMIN_PRIVATE_KEY,
+} from 'src/constants';
+import {
   SIGNATURE_PREFIX_CREATE_NFT,
   SIGNATURE_PREFIX_DELIST_NFT,
   SIGNATURE_PREFIX_RELIST_NFT,
-} from 'src/constants';
+} from 'kanvas_lib';
 import { DbPool } from 'src/db.module';
 import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
 import { UserEntity } from 'src/user/entities/user.entity';
@@ -505,7 +507,7 @@ WHERE TARGET.value != EXCLUDED.value
       // hex is of uneven length, sotez expects an even number of hexadecimal characters
       nftIdHex = '0' + nftIdHex;
     }
-    return (await cryptoUtils.sign(nftIdHex, privateKey)).sig;
+    return (await cryptoUtils.sign(hexPrefix + nftIdHex, privateKey)).sig;
   }
 
   async withNftLock<ResTy>(

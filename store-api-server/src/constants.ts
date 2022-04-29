@@ -14,9 +14,6 @@ export const SEARCH_SIMILARITY_LIMIT = 0.4;
 
 export const MINTER_ADDRESS = assertEnv('MINTER_TZ_ADDRESS');
 export const ADMIN_PUBLIC_KEY = assertEnv('ADMIN_PUBLIC_KEY'); // this probably should be the revealed public key associated to the MINTER_ADDRESS (MINTER_ADDRESS is the public key hash)
-export const SIGNATURE_PREFIX_CREATE_NFT = '00';
-export const SIGNATURE_PREFIX_DELIST_NFT = '01';
-export const SIGNATURE_PREFIX_RELIST_NFT = '02';
 
 export const STORE_PUBLISHERS = ['Tezos'];
 
