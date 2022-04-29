@@ -109,45 +109,86 @@ SELECT $1, UNNEST($2::INTEGER[])
 
   async delistNft(nftId: number) {
     await withTransaction(this.conn, async (dbTx: DbTransaction) => {
-      await dbTx.query(
-        `
-INSERT INTO nft_delisted
-SELECT *
-FROM nft
-WHERE id = $1
-      `,
-        [nftId],
-      );
+      const tablesNftIdField: { [key: string]: string } = {
+        nft: 'id',
+        mtm_kanvas_user_nft: 'nft_id',
+        mtm_nft_category: 'nft_id',
+        mtm_nft_order_nft: 'nft_id',
+      };
+      const tables = [
+        'mtm_nft_order_nft',
+        'mtm_kanvas_user_nft',
+        'mtm_nft_category',
+        'nft',
+      ];
 
-      await dbTx.query(
-        `
-DELETE FROM nft
-WHERE id = $1
+      for (const table of tables) {
+        const nftIdField = tablesNftIdField[table];
+
+        const qryRes = await dbTx.query(
+          `
+INSERT INTO __${table}_delisted
+SELECT *
+FROM ${table}
+WHERE ${nftIdField} = $1
         `,
-        [nftId],
-      );
+          [nftId],
+        );
+      }
+      for (const table of tables) {
+        const nftIdField = tablesNftIdField[table];
+
+        await dbTx.query(
+          `
+DELETE FROM ${table}
+WHERE ${nftIdField} = $1
+        `,
+          [nftId],
+        );
+      }
     });
   }
 
   async relistNft(nftId: number) {
     await withTransaction(this.conn, async (dbTx: DbTransaction) => {
-      await dbTx.query(
-        `
-INSERT INTO nft
-SELECT *
-FROM nft_delisted
-WHERE id = $1
-      `,
-        [nftId],
-      );
+      const tablesNftIdField: { [key: string]: string } = {
+        nft: 'id',
+        mtm_kanvas_user_nft: 'nft_id',
+        mtm_nft_category: 'nft_id',
+        mtm_nft_order_nft: 'nft_id',
+      };
+      const tables = [
+        'nft',
+        'mtm_nft_order_nft',
+        'mtm_kanvas_user_nft',
+        'mtm_nft_category',
+      ];
 
-      await dbTx.query(
-        `
-DELETE FROM nft_delisted
-WHERE id = $1
+      for (const table of tables) {
+        const nftIdField = tablesNftIdField[table];
+
+        await dbTx.query(
+          `
+
+INSERT INTO ${table}
+SELECT *
+FROM __${table}_delisted
+WHERE ${nftIdField} = $1
         `,
-        [nftId],
-      );
+          [nftId],
+        );
+      }
+      for (const table of tables) {
+        const nftIdField = tablesNftIdField[table];
+
+        await dbTx.query(
+          `
+DELETE FROM __${table}_delisted
+WHERE ${nftIdField} = $1
+        `,
+          [nftId],
+        );
+      }
     });
   }
 

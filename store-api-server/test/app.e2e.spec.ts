@@ -8,7 +8,11 @@ import {
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { RATE_LIMIT } from 'src/constants';
-import { SIGNATURE_PREFIX_CREATE_NFT } from 'kanvas-api-lib';
+import {
+  SIGNATURE_PREFIX_CREATE_NFT,
+  SIGNATURE_PREFIX_DELIST_NFT,
+  SIGNATURE_PREFIX_RELIST_NFT,
+} from 'kanvas-api-lib';
 import {
   PaymentProvider,
   PaymentService,
@@ -2298,6 +2302,153 @@ describe('AppController (e2e)', () => {
         children: [],
       },
     ]);
+  });
+
+  skipOnPriorFail('/nft/delist: success case', async () => {
+    const nftId = 1;
+    let hexMsg = nftId.toString(16);
+    if (hexMsg.length & 1) {
+      // hex is of uneven length, sotez expects an even number of hexadecimal characters
+      hexMsg = SIGNATURE_PREFIX_DELIST_NFT + '0' + hexMsg;
+    }
+
+    const nftExistsPreCheck = await request(app.getHttpServer()).post(
+      `/nfts/${nftId}`,
+    );
+    expect(nftExistsPreCheck.statusCode).toEqual(201);
+
+    const topBuyersResBefore = await request(app.getHttpServer()).get(
+      '/users/topBuyers',
+    );
+    expect(topBuyersResBefore.statusCode).toEqual(200);
+    expect(topBuyersResBefore.body).toStrictEqual({
+      topBuyers: [
+        {
+          userId: 1,
+          userName: 'a beautiful username',
+          userAddress: 'addr',
+          userPicture: null,
+          totalPaid: '13.00',
+        },
+      ],
+    });
+
+    const ownedNftsBefore = await request(app.getHttpServer())
+      .get('/nfts')
+      .query({
+        userAddress: 'addr',
+        page: '1',
+        orderBy: 'id',
+      });
+    expect(ownedNftsBefore.statusCode).toEqual(200);
+    expect(ownedNftsBefore.body.nfts.map((nft: any) => nft.id)).toEqual([1, 4]);
+
+    const signed = await cryptoUtils.sign(
+      hexMsg,
+      assertEnv('ADMIN_PRIVATE_KEY'),
+    );
+
+    const delistRes = await request(app.getHttpServer())
+      .post(`/nfts/delist/${nftId}`)
+      .send({
+        signature: signed.sig,
+      });
+    expect(delistRes.statusCode).toEqual(201);
+
+    // need to sleep, to make sure nothing is served from the cache
+    await sleep(1000);
+
+    // nft no longer exists now
+    const nftExistsPostCheck = await request(app.getHttpServer()).post(
+      `/nfts/${nftId}`,
+    );
+    expect(nftExistsPostCheck.statusCode).toEqual(400);
+
+    // previous buys are no longer taken into the topBuyers sum
+    const topBuyersResAfter = await request(app.getHttpServer()).get(
+      '/users/topBuyers',
+    );
+    expect(topBuyersResAfter.statusCode).toEqual(200);
+    expect(topBuyersResAfter.body).toStrictEqual({
+      topBuyers: [
+        {
+          userId: 1,
+          userName: 'a beautiful username',
+          userAddress: 'addr',
+          userPicture: null,
+          totalPaid: '12.90',
+        },
+      ],
+    });
+
+    // the relisted nft is considered no longer owned by holders
+    const ownedNftsAfter = await request(app.getHttpServer())
+      .get('/nfts')
+      .query({
+        userAddress: 'addr',
+        page: '1',
+        orderBy: 'id',
+      });
+    expect(ownedNftsAfter.statusCode).toEqual(200);
+    expect(ownedNftsAfter.body.nfts.map((nft: any) => nft.id)).toEqual([4]);
+  });
+
+  skipOnPriorFail('/nft/relist: success case', async () => {
+    const nftId = 1;
+    let hexMsg = nftId.toString(16);
+    if (hexMsg.length & 1) {
+      // hex is of uneven length, sotez expects an even number of hexadecimal characters
+      hexMsg = SIGNATURE_PREFIX_RELIST_NFT + '0' + hexMsg;
+    }
+
+    const signed = await cryptoUtils.sign(
+      hexMsg,
+      assertEnv('ADMIN_PRIVATE_KEY'),
+    );
+
+    const relistRes = await request(app.getHttpServer())
+      .post(`/nfts/relist/${nftId}`)
+      .send({
+        signature: signed.sig,
+      });
+    expect(relistRes.statusCode).toEqual(201);
+
+    // need to sleep, to make sure nothing is served from the cache
+    await sleep(1000);
+
+    // nft exists again
+    const nftExistsPostCheck = await request(app.getHttpServer()).post(
+      `/nfts/${nftId}`,
+    );
+    expect(nftExistsPostCheck.statusCode).toEqual(201);
+
+    // previous buys are recovered and taken into the topBuyers sum
+    const topBuyersResAfter = await request(app.getHttpServer()).get(
+      '/users/topBuyers',
+    );
+    expect(topBuyersResAfter.statusCode).toEqual(200);
+    expect(topBuyersResAfter.body).toStrictEqual({
+      topBuyers: [
+        {
+          userId: 1,
+          userName: 'a beautiful username',
+          userAddress: 'addr',
+          userPicture: null,
+          totalPaid: '13.00',
+        },
+      ],
+    });
+
+    // the relisted nft is considered owned again by holders
+    const ownedNftsAfter = await request(app.getHttpServer())
+      .get('/nfts')
+      .query({
+        userAddress: 'addr',
+        page: '1',
+        orderBy: 'id',
+      });
+    expect(ownedNftsAfter.statusCode).toEqual(200);
+    expect(ownedNftsAfter.body.nfts.map((nft: any) => nft.id)).toEqual([1, 4]);
   });
 
   skipOnPriorFail('/nft/create: success case', async () => {

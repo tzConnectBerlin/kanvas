@@ -4,7 +4,10 @@
 
 BEGIN;
 
-CREATE TABLE nft_delisted (LIKE nft);
+CREATE TABLE __nft_delisted (LIKE nft);
+CREATE TABLE __mtm_kanvas_user_nft_delisted (LIKE mtm_kanvas_user_nft);
+CREATE TABLE __mtm_nft_category_delisted (LIKE mtm_nft_category);
+CREATE TABLE __mtm_nft_order_nft_delisted (LIKE mtm_nft_order_nft);
 
 COMMIT;
 
@@ -12,6 +15,9 @@ COMMIT;
 
 BEGIN;
 
-DROP TABLE nft_delisted;
+DROP TABLE __nft_delisted;
+DROP TABLE __mtm_kanvas_user_nft_delisted;
+DROP TABLE __mtm_nft_category_delisted;
+DROP TABLE __mtm_nft_order_nft_delisted;
 
 COMMIT;
