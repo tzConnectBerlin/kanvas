@@ -11,6 +11,8 @@ attributes:
   proposed: boolean
   proposal_vote: votes
   prototype_vote: votes
+  delist_vote: votes
+  relist_vote: votes
 
 states:
   creation:
@@ -89,4 +91,34 @@ states:
         }
     mutables:
     - attributes: [prototype_vote]
+      by_roles: [moderator]
+
+  finish:
+    state_transitions:
+    - next_state: delisted
+      when:
+      - nft.delist_vote.yes.length >= 2
+      do: |
+        {
+          // TODO: save state as it was under 'prototype_reject_..'
+
+          nft.relist_vote = null;
+        }
+    mutables:
+    - attributes: [delist_vote]
+      by_roles: [moderator]
+
+  delisted:
+    state_transitions:
+    - next_state: finish
+      when:
+      - nft.relist_vote.yes.length >= 2
+      do: |
+        {
+          // TODO: save state as it was under 'prototype_reject_..'
+
+          nft.delist_vote = null;
+        }
+    mutables:
+    - attributes: [relist_vote]
       by_roles: [moderator]

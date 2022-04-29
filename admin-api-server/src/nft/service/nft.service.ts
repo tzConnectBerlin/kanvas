@@ -11,7 +11,6 @@ import {
   STM_CONFIG_FILE,
   NFT_PUBLISH_STATE,
   NFT_DELIST_STATE,
-  NFT_RELIST_STATE,
   STORE_API,
   ADMIN_PRIVATE_KEY,
 } from 'src/constants';
@@ -364,6 +363,15 @@ WHERE id = $1
     const dbTx = await this.db.connect();
     try {
       await dbTx.query(`BEGIN`);
+
+      const oldState = await dbTx.query(
+        `
+SELECT state
+FROM nft
+WHERE id = $1
+      `,
+        [nft.id],
+      );
       dbTx.query(
         `
 UPDATE nft
@@ -391,13 +399,14 @@ WHERE TARGET.value != EXCLUDED.value
 
       switch (nft.state) {
         case NFT_PUBLISH_STATE:
-          await this.#publishNft(nft);
+          if (oldState.rows[0].state === NFT_DELIST_STATE) {
+            await this.#relistNft(nft);
+          } else {
+            await this.#publishNft(nft);
+          }
           break;
         case NFT_DELIST_STATE:
           await this.#delistNft(nft);
-          break;
-        case NFT_RELIST_STATE:
-          await this.#relistNft(nft);
           break;
       }
 
@@ -450,7 +459,7 @@ WHERE TARGET.value != EXCLUDED.value
       ADMIN_PRIVATE_KEY,
     );
 
-    return await axios.post(STORE_API + '/nfts/create', {
+    await axios.post(STORE_API + '/nfts/create', {
       id: nft.id,
       name: attr.name,
       description: attr.description,
@@ -476,7 +485,7 @@ WHERE TARGET.value != EXCLUDED.value
       ADMIN_PRIVATE_KEY,
     );
 
-    return await axios.post(STORE_API + `/nfts/delist/${nft.id}`, {
+    await axios.post(STORE_API + `/nfts/delist/${nft.id}`, {
       signature: signed,
     });
 
@@ -490,7 +499,7 @@ WHERE TARGET.value != EXCLUDED.value
       ADMIN_PRIVATE_KEY,
     );
 
-    return await axios.post(STORE_API + `/nfts/relist/${nft.id}`, {
+    await axios.post(STORE_API + `/nfts/relist/${nft.id}`, {
       signature: signed,
     });
 

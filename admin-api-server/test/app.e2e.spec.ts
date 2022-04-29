@@ -5,6 +5,7 @@ import { AppModule } from 'src/app.module';
 import { Roles } from 'src/role/entities/role.entity';
 import { assertEnv } from 'src/utils';
 import * as Pool from 'pg-pool';
+import axios from 'axios';
 
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {
@@ -2337,6 +2338,54 @@ describe('AppController (e2e)', () => {
     });
   });
 
+  skipOnPriorFail('NFT test delist from store db', async () => {
+    const moderator = await loginUser(
+      app,
+      'regular_joe@bigbrother.co',
+      'somepass',
+    );
+
+    const nftId = 35;
+    const delistRes = await request(app.getHttpServer())
+      .patch(`/nft/${nftId}`)
+      .set('authorization', moderator.bearer)
+      .send({
+        delist_vote: JSON.stringify('yes'),
+      });
+    expect(delistRes.statusCode).toEqual(200);
+
+    const nftRes = await axios({
+      url: process.env['STORE_API'] + `/nfts/${nftId}`,
+      method: 'POST',
+      validateStatus: () => true,
+    });
+    expect(nftRes.status).toEqual(400);
+  });
+
+  skipOnPriorFail('NFT test relist into store db', async () => {
+    const moderator = await loginUser(
+      app,
+      'regular_joe@bigbrother.co',
+      'somepass',
+    );
+
+    const nftId = 35;
+    const delistRes = await request(app.getHttpServer())
+      .patch(`/nft/${nftId}`)
+      .set('authorization', moderator.bearer)
+      .send({
+        relist_vote: JSON.stringify('yes'),
+      });
+    expect(delistRes.statusCode).toEqual(200);
+
+    const nftRes = await axios({
+      url: process.env['STORE_API'] + `/nfts/${nftId}`,
+      method: 'POST',
+      validateStatus: () => true,
+    });
+    expect(nftRes.status).toEqual(201);
+  });
+
   skipOnPriorFail(
     'NFT test publish to store db (fails if non valid category assigned)',
     async () => {
@@ -2537,6 +2586,7 @@ describe('AppController (e2e)', () => {
     expect(res.body).toStrictEqual({
       name: 'string',
       create_ready: 'boolean',
+      delist_vote: 'votes',
       description: 'string',
       'image.png': 'string',
       'thumbnail.png': 'string',
@@ -2546,6 +2596,7 @@ describe('AppController (e2e)', () => {
       categories: 'number[]',
       proposed: 'boolean',
       publish_vote: 'votes',
+      relist_vote: 'votes',
     });
   });
 

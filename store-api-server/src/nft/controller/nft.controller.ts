@@ -53,9 +53,17 @@ export class NftController {
     @Param('id') nftId: number,
     @Body('signature') signature: string,
   ) {
-    await this.#verifySignature(SIGNATURE_PREFIX_DELIST_NFT, nftId, signature);
+    nftId = Number(nftId);
+    if (nftId === NaN) {
+      throw new HttpException(`invalid nft id`, HttpStatus.BAD_REQUEST);
+    }
+    await this.#verifySignature(
+      SIGNATURE_PREFIX_DELIST_NFT,
+      Number(nftId),
+      signature,
+    );
 
-    this.nftService.delistNft(nftId);
+    await this.nftService.delistNft(nftId);
   }
 
   @Post('/relist/:id')
@@ -63,9 +71,13 @@ export class NftController {
     @Param('id') nftId: number,
     @Body('signature') signature: string,
   ) {
+    nftId = Number(nftId);
+    if (nftId === NaN) {
+      throw new HttpException(`invalid nft id`, HttpStatus.BAD_REQUEST);
+    }
     await this.#verifySignature(SIGNATURE_PREFIX_RELIST_NFT, nftId, signature);
 
-    this.nftService.relistNft(nftId);
+    await this.nftService.relistNft(nftId);
   }
 
   @Get()
