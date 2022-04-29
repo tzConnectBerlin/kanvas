@@ -4,7 +4,7 @@ import { NftService } from './service/nft.service';
 import { IpfsService } from './service/ipfs.service';
 import { CategoryModule } from 'src/category/category.module';
 import { DbModule } from 'src/db.module';
-import { CurrencyModule } from 'kanvas_lib';
+import { CurrencyModule } from 'kanvas-api-lib';
 import { MintService } from './service/mint.service';
 
 @Module({

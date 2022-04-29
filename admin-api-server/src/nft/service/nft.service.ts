@@ -19,9 +19,9 @@ import {
   SIGNATURE_PREFIX_CREATE_NFT,
   SIGNATURE_PREFIX_DELIST_NFT,
   SIGNATURE_PREFIX_RELIST_NFT,
-} from 'kanvas_lib';
+} from 'kanvas-api-lib';
 import { DbPool } from 'src/db.module';
-import { STMResultStatus, StateTransitionMachine, Actor } from 'roles_stm';
+import { STMResultStatus, StateTransitionMachine, Actor } from 'kanvas-stm-lib';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { NftEntity, NftUpdate } from '../entities/nft.entity';
 import { NftFilterParams } from '../params';

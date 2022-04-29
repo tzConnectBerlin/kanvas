@@ -13,7 +13,7 @@ import {
   CurrencyService,
   BASE_CURRENCY,
   SUPPORTED_CURRENCIES,
-} from 'kanvas_lib';
+} from 'kanvas-api-lib';
 
 export enum PaymentStatus {
   CREATED = 'created',

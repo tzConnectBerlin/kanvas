@@ -15,7 +15,7 @@ import {
   SEARCH_MAX_NFTS,
   SEARCH_SIMILARITY_LIMIT,
 } from 'src/constants';
-import { CurrencyService, BASE_CURRENCY } from 'kanvas_lib';
+import { CurrencyService, BASE_CURRENCY } from 'kanvas-api-lib';
 import { sleep } from 'src/utils';
 import { IpfsService } from './ipfs.service';
 import { DbTransaction, withTransaction } from 'src/db.module';

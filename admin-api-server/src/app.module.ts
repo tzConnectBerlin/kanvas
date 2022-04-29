@@ -12,7 +12,7 @@ import { CookieSessionMiddleware } from './middleware/cookie_session';
 import { ProxiedThrottlerGuard } from './decoraters/proxied_throttler';
 import { RATE_LIMIT_WINDOW_SECS, RATE_LIMIT } from 'src/constants';
 import { ScheduleModule } from '@nestjs/schedule';
-import { CurrencyModule } from 'kanvas_lib';
+import { CurrencyModule } from 'kanvas-api-lib';
 
 @Module({
   imports: [

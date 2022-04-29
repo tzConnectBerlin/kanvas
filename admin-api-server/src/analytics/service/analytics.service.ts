@@ -7,7 +7,7 @@ import {
 } from '../entity/analytics.entity';
 import { PG_CONNECTION_STORE_REPLICATION } from '../../constants';
 import { ActivityFilterParams } from '../params';
-import { BASE_CURRENCY, CurrencyService } from 'kanvas_lib';
+import { BASE_CURRENCY, CurrencyService } from 'kanvas-api-lib';
 
 @Injectable()
 export class AnalyticsService {

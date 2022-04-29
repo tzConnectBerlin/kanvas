@@ -26,7 +26,7 @@ import {
   SIGNATURE_PREFIX_CREATE_NFT,
   SIGNATURE_PREFIX_DELIST_NFT,
   SIGNATURE_PREFIX_RELIST_NFT,
-} from 'kanvas_lib';
+} from 'kanvas-api-lib';
 import { validateRequestedCurrency } from 'src/paramUtils';
 
 @Controller('nfts')

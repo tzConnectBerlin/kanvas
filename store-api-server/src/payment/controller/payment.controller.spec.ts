@@ -9,7 +9,7 @@ import { NftService } from 'src/nft/service/nft.service';
 import { IpfsService } from 'src/nft/service/ipfs.service';
 import { MintService } from 'src/nft/service/mint.service';
 import { CategoryService } from 'src/category/service/category.service';
-import { mockedRatesProvider, CurrencyService } from 'kanvas_lib';
+import { mockedRatesProvider, CurrencyService } from 'kanvas-api-lib';
 
 describe('PaymentController', () => {
   let controller: PaymentController;

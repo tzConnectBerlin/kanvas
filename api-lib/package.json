@@ -1,7 +1,7 @@
 {
-  "name": "kanvas_lib",
+  "name": "kanvas-api-lib",
   "version": "0.0.1",
-  "description": "shared library between admin-api and store-api",
+  "description": "shared library between the admin-api and the store-api",
   "author": "Rick Klomp",
   "license": "MIT",
   "private": true,

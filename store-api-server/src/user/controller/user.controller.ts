@@ -33,7 +33,7 @@ import {
   PG_FOREIGN_KEY_VIOLATION_ERRCODE,
   PROFILE_PICTURE_MAX_BYTES,
 } from '../../constants';
-import { BASE_CURRENCY } from 'kanvas_lib';
+import { BASE_CURRENCY } from 'kanvas-api-lib';
 
 interface EditProfile {
   userName?: string;

@@ -7,7 +7,8 @@ import {
 } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
-import { RATE_LIMIT, SIGNATURE_PREFIX_CREATE_NFT } from 'src/constants';
+import { RATE_LIMIT } from 'src/constants';
+import { SIGNATURE_PREFIX_CREATE_NFT } from 'kanvas-api-lib';
 import {
   PaymentProvider,
   PaymentService,

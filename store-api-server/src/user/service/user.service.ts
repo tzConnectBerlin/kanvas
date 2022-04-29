@@ -19,7 +19,7 @@ import {
   PG_UNIQUE_VIOLATION_ERRCODE,
   NUM_TOP_BUYERS,
 } from '../../constants';
-import { CurrencyService } from 'kanvas_lib';
+import { CurrencyService } from 'kanvas-api-lib';
 import { Result, Err, Ok } from 'ts-results';
 import { S3Service } from '../../s3.service';
 import { Cron, CronExpression } from '@nestjs/schedule';

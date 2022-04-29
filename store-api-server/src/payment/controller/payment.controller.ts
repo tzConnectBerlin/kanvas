@@ -18,7 +18,7 @@ import {
 } from 'src/payment/service/payment.service';
 import { UserEntity } from 'src/user/entity/user.entity';
 import { UserService } from 'src/user/service/user.service';
-import { BASE_CURRENCY } from 'kanvas_lib';
+import { BASE_CURRENCY } from 'kanvas-api-lib';
 import { validateRequestedCurrency } from 'src/paramUtils';
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;

@@ -9,7 +9,7 @@ import { IpfsService } from 'src/nft/service/ipfs.service';
 import { NftServiceMock } from '../service/nft_mock.service';
 import { CategoryService } from 'src/category/service/category.service';
 import { PaginationParams } from '../params';
-import { mockedRatesProvider, CurrencyService } from 'kanvas_lib';
+import { mockedRatesProvider, CurrencyService } from 'kanvas-api-lib';
 
 describe('NftController', () => {
   let controller: NftController;
