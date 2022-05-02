@@ -1,0 +1,3 @@
+[submodule "lib/tezpay"]
+	path = lib/tezpay
+	url = git@github.com:tzConnectBerlin/tezpay.git

@@ -475,7 +475,7 @@ RETURNING payment_id, provider
           await this.stripe.paymentIntents.cancel(paymentId);
           break;
         case PaymentProvider.TEZPAY:
-          // await this.tezpay.cancel(paymentId);
+          await this.tezpay.cancel_payment(paymentId);
           break;
       }
     } catch (err: any) {
