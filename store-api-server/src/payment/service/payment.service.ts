@@ -1,19 +1,23 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { PG_CONNECTION } from 'src/constants';
-import { UserService } from 'src/user/service/user.service';
-import { NftService } from '../../nft/service/nft.service';
-import { MintService } from '../../nft/service/mint.service';
-import { Err } from 'ts-results';
+import { PG_CONNECTION } from '../../constants.js';
+import { UserService } from '../../user/service/user.service.js';
+import { NftService } from '../../nft/service/nft.service.js';
+import { MintService } from '../../nft/service/mint.service.js';
+import ts_results from 'ts-results';
+const { Err } = ts_results;
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { assertEnv } from 'src/utils';
-import { DbTransaction, withTransaction, DbPool } from 'src/db.module';
-import { Tezpay } from 'tezpay-server';
+import { assertEnv } from '../../utils.js';
+import { DbTransaction, withTransaction, DbPool } from '../../db.module.js';
+import Tezpay from 'tezpay-server';
 import { v4 as uuidv4 } from 'uuid';
 import {
   CurrencyService,
   BASE_CURRENCY,
   SUPPORTED_CURRENCIES,
 } from 'kanvas-api-lib';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const stripe = require('stripe');
 
 export enum PaymentStatus {
   CREATED = 'created',
@@ -46,7 +50,7 @@ export interface PaymentIntent {
 @Injectable()
 export class PaymentService {
   stripe = process.env.STRIPE_SECRET
-    ? require('stripe')(process.env.STRIPE_SECRET)
+    ? stripe(process.env.STRIPE_SECRET)
     : undefined;
 
   FINAL_STATES = [
@@ -64,8 +68,10 @@ export class PaymentService {
     private readonly userService: UserService,
     private readonly nftService: NftService,
     private readonly currencyService: CurrencyService,
-  ) {
-    this.tezpay = new Tezpay();
+  ) {}
+
+  async initTezpay() {
+    this.tezpay = new (await Tezpay)();
   }
 
   async webhookHandler(constructedEvent: any) {

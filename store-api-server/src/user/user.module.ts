@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { UserController } from './controller/user.controller';
-import { UserService } from './service/user.service';
-import { DbModule } from 'src/db.module';
-import { NftModule } from 'src/nft/nft.module';
-import { CategoryService } from 'src/category/service/category.service';
-import { S3Service } from 'src/s3.service';
+import { UserController } from './controller/user.controller.js';
+import { UserService } from './service/user.service.js';
+import { DbModule } from '../db.module.js';
+import { NftModule } from '../nft/nft.module.js';
+import { CategoryService } from '../category/service/category.service.js';
+import { S3Service } from '../s3.service.js';
 import { CurrencyModule } from 'kanvas-api-lib';
 
 @Module({

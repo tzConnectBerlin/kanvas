@@ -9,17 +9,17 @@ import {
   UseGuards,
   Logger,
 } from '@nestjs/common';
-import { CurrentUser } from 'src/decoraters/user.decorator';
-import { JwtAuthGuard } from 'src/authentication/guards/jwt-auth.guard';
+import { CurrentUser } from '../../decoraters/user.decorator.js';
+import { JwtAuthGuard } from '../../authentication/guards/jwt-auth.guard.js';
 import {
   PaymentService,
   PaymentIntent,
   PaymentProvider,
-} from 'src/payment/service/payment.service';
-import { UserEntity } from 'src/user/entity/user.entity';
-import { UserService } from 'src/user/service/user.service';
+} from '../../payment/service/payment.service.js';
+import { UserEntity } from '../../user/entity/user.entity.js';
+import { UserService } from '../../user/service/user.service.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
-import { validateRequestedCurrency } from 'src/paramUtils';
+import { validateRequestedCurrency } from '../../paramUtils.js';
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 

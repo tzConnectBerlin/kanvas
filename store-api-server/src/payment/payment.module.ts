@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { PaymentController } from './controller/payment.controller';
-import { DbModule } from 'src/db.module';
-import { PaymentService } from './service/payment.service';
-import { UserModule } from 'src/user/user.module';
-import { NftModule } from 'src/nft/nft.module';
+import { PaymentController } from './controller/payment.controller.js';
+import { DbModule } from '../db.module.js';
+import { PaymentService } from './service/payment.service.js';
+import { UserModule } from '../user/user.module.js';
+import { NftModule } from '../nft/nft.module.js';
 import { CurrencyModule } from 'kanvas-api-lib';
 
 @Module({

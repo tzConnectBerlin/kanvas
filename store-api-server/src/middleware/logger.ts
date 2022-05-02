@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Cache } from 'cache-manager';
-import { CACHE_SIZE } from 'src/constants';
+import { CACHE_SIZE } from '../constants.js';
 
 @Injectable()
 export class StatsLogger {

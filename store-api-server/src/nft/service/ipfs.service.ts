@@ -1,11 +1,16 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import { Logger, Injectable, Inject } from '@nestjs/common';
-import { PG_CONNECTION, STORE_PUBLISHERS, MINTER_ADDRESS } from 'src/constants';
-import { NftEntity } from 'src/nft/entity/nft.entity';
+import {
+  PG_CONNECTION,
+  STORE_PUBLISHERS,
+  MINTER_ADDRESS,
+} from '../../constants.js';
+import { NftEntity } from '../../nft/entity/nft.entity.js';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import { createReadStream, createWriteStream } from 'fs';
-import * as FormData from 'form-data';
+//import FormData = require('form-data');
+import FormData from 'form-data';
 import * as tmp from 'tmp';
 
 axiosRetry(axios, {

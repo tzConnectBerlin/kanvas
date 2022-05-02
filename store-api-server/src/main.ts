@@ -1,9 +1,14 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
+// import { createRequire } from 'module';
+// const require = createRequire(import.meta.url);
+// require('dotenv').config();
 
-import { raw } from 'body-parser';
+import body_parser from 'body-parser';
+const { raw } = body_parser;
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { AppModule } from './app.module';
+import { AppModule } from './app.module.js';
 
 async function bootstrap() {
   const port = process.env['KANVAS_API_PORT'] || 3000;

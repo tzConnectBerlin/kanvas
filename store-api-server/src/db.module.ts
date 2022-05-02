@@ -1,8 +1,12 @@
 import { Logger, Module, Inject } from '@nestjs/common';
-import { assertEnv } from './utils';
-import { PG_CONNECTION } from './constants';
-import { Client, types, PoolClient } from 'pg';
-import * as Pool from 'pg-pool';
+import { Client, PoolClient } from 'pg';
+import pg from 'pg';
+const { types } = pg;
+import Pool from 'pg-pool';
+import { assertEnv } from './utils.js';
+import { PG_CONNECTION } from './constants.js';
+
+//import Pool = require('pg-pool'); // from 'pg-pool';
 
 export type DbPool = Pool<Client>;
 export type DbTransaction = PoolClient;

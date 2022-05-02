@@ -2,7 +2,7 @@ import { Module, CACHE_MANAGER } from '@nestjs/common';
 
 const cacheMockProvider = {
   provide: CACHE_MANAGER,
-  useFactory: jest.fn(),
+  useFactory: () => undefined, //jest.fn(),
 };
 
 @Module({

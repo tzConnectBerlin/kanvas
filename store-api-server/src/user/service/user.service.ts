@@ -11,20 +11,25 @@ import {
   UserCart,
   UserTotalPaid,
   NftOwnershipStatus,
-} from '../entity/user.entity';
-import { NftService } from '../../nft/service/nft.service';
-import { MintService } from '../../nft/service/mint.service';
+} from '../entity/user.entity.js';
+import { NftService } from '../../nft/service/nft.service.js';
+import { MintService } from '../../nft/service/mint.service.js';
 import {
   PG_CONNECTION,
   PG_UNIQUE_VIOLATION_ERRCODE,
   NUM_TOP_BUYERS,
-} from '../../constants';
+} from '../../constants.js';
 import { CurrencyService } from 'kanvas-api-lib';
-import { Result, Err, Ok } from 'ts-results';
-import { S3Service } from '../../s3.service';
+import { Result } from 'ts-results';
+import ts_results from 'ts-results';
+const { Ok, Err } = ts_results;
+import { S3Service } from '../../s3.service.js';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { assertEnv } from 'src/utils';
-import { DbPool, DbTransaction, withTransaction } from 'src/db.module';
+import { assertEnv } from '../../utils.js';
+import { DbPool, DbTransaction, withTransaction } from '../../db.module.js';
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 const generate = require('meaningful-string');
 
 interface CartMeta {

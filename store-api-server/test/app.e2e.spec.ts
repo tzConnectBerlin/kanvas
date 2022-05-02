@@ -5,9 +5,9 @@ import {
   INestApplication,
   ValidationPipe,
 } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from 'src/app.module';
-import { RATE_LIMIT } from 'src/constants';
+import request from 'supertest';
+import { AppModule } from '../dist/app.module.js';
+import { RATE_LIMIT } from '../dist/constants.js';
 import {
   SIGNATURE_PREFIX_CREATE_NFT,
   SIGNATURE_PREFIX_DELIST_NFT,
@@ -17,10 +17,11 @@ import {
   PaymentProvider,
   PaymentService,
   PaymentStatus,
-} from 'src/payment/service/payment.service';
-import { UserService } from 'src/user/service/user.service';
-import { assertEnv, sleep } from 'src/utils';
-import { cryptoUtils } from 'sotez';
+} from '../dist/payment/service/payment.service.js';
+import { UserService } from '../dist/user/service/user.service.js';
+import { assertEnv, sleep } from '../dist/utils.js';
+import sotez from 'sotez';
+const { cryptoUtils } = sotez;
 
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {

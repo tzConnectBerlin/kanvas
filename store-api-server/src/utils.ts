@@ -1,4 +1,5 @@
-import { Ok, Err } from 'ts-results';
+import ts_results from 'ts-results';
+const { Ok, Err } = ts_results;
 import { HttpException } from '@nestjs/common';
 import { Response } from 'express';
 import { Cache } from 'cache-manager';
@@ -57,23 +58,6 @@ export function findOne(predicate: any, xs: any[]) {
 //
 // testing utils
 //
-
-export async function expectErrWithHttpStatus(
-  expStatusCode: number,
-  f: () => Promise<any>,
-): Promise<void> {
-  try {
-    await f();
-  } catch (err: any) {
-    //Logger.error(err);
-    expect(err instanceof HttpException).toBe(true);
-
-    const gotStatusCode = err.getStatus();
-    expect(gotStatusCode).toEqual(expStatusCode);
-    return;
-  }
-  expect('expected HttpException').toBe('got no error');
-}
 
 export function sleep(ms: number) {
   return new Promise((resolve) => {

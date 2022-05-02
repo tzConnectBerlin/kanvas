@@ -1,4 +1,4 @@
-import { NftEntity } from 'src/nft/entity/nft.entity';
+import { NftEntity } from '../../nft/entity/nft.entity';
 
 export interface UserEntity {
   id: number;
