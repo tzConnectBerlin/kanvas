@@ -6,8 +6,8 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from '../dist/app.module.js';
-import { RATE_LIMIT } from '../dist/constants.js';
+import { AppModule } from '../src/app.module';
+import { RATE_LIMIT } from '../src/constants';
 import {
   SIGNATURE_PREFIX_CREATE_NFT,
   SIGNATURE_PREFIX_DELIST_NFT,
@@ -17,9 +17,9 @@ import {
   PaymentProvider,
   PaymentService,
   PaymentStatus,
-} from '../dist/payment/service/payment.service.js';
-import { UserService } from '../dist/user/service/user.service.js';
-import { assertEnv, sleep } from '../dist/utils.js';
+} from '../src/payment/service/payment.service';
+import { UserService } from '../src/user/service/user.service';
+import { assertEnv, sleep } from '../src/utils';
 import sotez from 'sotez';
 const { cryptoUtils } = sotez;
 
