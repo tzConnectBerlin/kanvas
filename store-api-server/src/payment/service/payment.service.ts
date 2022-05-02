@@ -7,7 +7,7 @@ import { Err } from 'ts-results';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { assertEnv } from 'src/utils';
 import { DbTransaction, withTransaction, DbPool } from 'src/db.module';
-// import { Tezpay } from 'tezpay-server';
+import { Tezpay } from 'tezpay-server';
 import { v4 as uuidv4 } from 'uuid';
 import {
   CurrencyService,
@@ -65,7 +65,7 @@ export class PaymentService {
     private readonly nftService: NftService,
     private readonly currencyService: CurrencyService,
   ) {
-    this.tezpay = 0; // new Tezpay();
+    this.tezpay = new Tezpay();
   }
 
   async webhookHandler(constructedEvent: any) {
@@ -425,11 +425,11 @@ WHERE provider = $1
 
     for (const row of pendingPaymentIds.rows) {
       const paymentId = row['payment_id'];
-      const paymentStatus = this.tezpay.get_payment(row['payment_id'], 3);
+      const paymentStatus = await this.tezpay.get_payment(paymentId);
 
-      // TODO \/  \/   filler code
-      if (paymentStatus === 'done') {
-        this.#updatePaymentStatus(paymentId, PaymentStatus.SUCCEEDED);
+      if (paymentStatus.is_paid_in_full) {
+        await this.#updatePaymentStatus(paymentId, PaymentStatus.SUCCEEDED);
+        Logger.log(`tezpay succeeded. payment_id=${paymentId}`);
       }
     }
   }
@@ -475,7 +475,7 @@ RETURNING payment_id, provider
           await this.stripe.paymentIntents.cancel(paymentId);
           break;
         case PaymentProvider.TEZPAY:
-          //await this.tezpay.cancel(paymentId);
+          // await this.tezpay.cancel(paymentId);
           break;
       }
     } catch (err: any) {
