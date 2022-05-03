@@ -9,7 +9,6 @@ import { NftEntity } from '../../nft/entity/nft.entity.js';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import { createReadStream, createWriteStream } from 'fs';
-//import FormData = require('form-data');
 import FormData from 'form-data';
 import * as tmp from 'tmp';
 

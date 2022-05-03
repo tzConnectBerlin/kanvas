@@ -6,8 +6,6 @@ import Pool from 'pg-pool';
 import { assertEnv } from './utils.js';
 import { PG_CONNECTION } from './constants.js';
 
-//import Pool = require('pg-pool'); // from 'pg-pool';
-
 export type DbPool = Pool<Client>;
 export type DbTransaction = PoolClient;
 
