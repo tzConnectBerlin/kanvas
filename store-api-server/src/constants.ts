@@ -1,6 +1,3 @@
-// import dotenv from 'dotenv';
-// dotenv.config();
-//
 import { assertEnv } from './utils.js';
 
 export const PG_CONNECTION = 'PG_CONNECTION';
