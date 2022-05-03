@@ -1,5 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import 'dotenv/config';
 
 import body_parser from 'body-parser';
 const { raw } = body_parser;

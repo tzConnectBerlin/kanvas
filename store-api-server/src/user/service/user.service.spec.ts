@@ -1,4 +1,3 @@
-//require('dotenv').config();
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { NftService } from '../../nft/service/nft.service';
