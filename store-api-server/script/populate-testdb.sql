@@ -52,6 +52,10 @@ set onsale_from = now() AT TIME ZONE 'UTC' + interval '1 hour',
     description = 'its a mountain'
 where id = 3;
 
+update nft
+set onsale_until = now() AT TIME ZONE 'UTC' + interval '1 hour'
+where id = 1;
+
 -- lazy way of upping these very low prices now that we're taking into account decimals in the API
 update nft set price = price * 10;
 

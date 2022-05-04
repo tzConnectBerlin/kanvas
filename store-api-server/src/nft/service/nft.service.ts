@@ -52,7 +52,7 @@ export class NftService {
 INSERT INTO nft (
   id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, onsale_from, onsale_until, price, editions_size
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       `,
 
         [
@@ -464,7 +464,8 @@ FROM nfts_by_id($1, $2, $3)`,
         const owned = Number(nftRow['editions_owned']);
 
         const launchAtMilliUnix = nftRow['onsale_from']?.getTime() || 0;
-        const onsaleUntilMilliUnix = nftRow['onsale_until']?.getTime() || 0;
+        const onsaleUntilMilliUnix =
+          nftRow['onsale_until']?.getTime() || undefined;
 
         const nft = <NftEntity>{
           id: nftRow['nft_id'],
@@ -483,7 +484,9 @@ FROM nfts_by_id($1, $2, $3)`,
           editionsAvailable: editions - (reserved + owned),
           createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
           launchAt: Math.floor(launchAtMilliUnix / 1000),
-          onsaleUntil: Math.floor(onsaleUntilMilliUnix / 1000),
+          onsaleUntil: onsaleUntilMilliUnix
+            ? Math.floor(onsaleUntilMilliUnix / 1000)
+            : undefined,
           categories: nftRow['categories'].map((categoryRow: any) => {
             return <CategoryEntity>{
               id: Number(categoryRow[0]),

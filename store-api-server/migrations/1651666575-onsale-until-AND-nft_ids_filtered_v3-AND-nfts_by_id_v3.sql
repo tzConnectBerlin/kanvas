@@ -7,6 +7,9 @@ BEGIN;
 ALTER TABLE nft RENAME COLUMN launch_at TO onsale_from;
 ALTER TABLE nft ADD COLUMN onsale_until TIMESTAMP WITHOUT TIME ZONE;
 
+ALTER TABLE __nft_delisted RENAME COLUMN launch_at TO onsale_from;
+ALTER TABLE __nft_delisted ADD COLUMN onsale_until TIMESTAMP WITHOUT TIME ZONE;
+
 ALTER FUNCTION nft_ids_filtered RENAME TO __nft_ids_filtered_v2;
 CREATE FUNCTION nft_ids_filtered(
     address TEXT, categories INTEGER[],
@@ -154,6 +157,9 @@ BEGIN;
 
 ALTER TABLE nft RENAME COLUMN onsale_from TO launch_at;
 ALTER TABLE nft DROP COLUMN onsale_until;
+
+ALTER TABLE __nft_delisted RENAME COLUMN onsale_from TO launch_at;
+ALTER TABLE __nft_delisted DROP COLUMN onsale_until;
 
 DROP FUNCTION nft_ids_filtered(
   TEXT, INTEGER[],
