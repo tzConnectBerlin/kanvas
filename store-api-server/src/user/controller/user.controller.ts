@@ -18,21 +18,21 @@ import {
 } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Response } from 'express';
-import { wrapCache } from 'src/utils';
+import { wrapCache } from '../../utils.js';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UserEntity } from '../entity/user.entity';
-import { UserService } from '../service/user.service';
-import { CurrentUser } from '../../decoraters/user.decorator';
-import { validateRequestedCurrency } from 'src/paramUtils';
+import { UserEntity } from '../entity/user.entity.js';
+import { UserService } from '../service/user.service.js';
+import { CurrentUser } from '../../decoraters/user.decorator.js';
+import { validateRequestedCurrency } from '../../paramUtils.js';
 import {
   JwtAuthGuard,
   JwtFailableAuthGuard,
-} from '../../authentication/guards/jwt-auth.guard';
+} from '../../authentication/guards/jwt-auth.guard.js';
 import {
   PG_UNIQUE_VIOLATION_ERRCODE,
   PG_FOREIGN_KEY_VIOLATION_ERRCODE,
   PROFILE_PICTURE_MAX_BYTES,
-} from '../../constants';
+} from '../../constants.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
 
 interface EditProfile {

@@ -9,11 +9,11 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { CurrentUser } from 'src/decoraters/user.decorator';
-import { UserEntity } from 'src/user/entity/user.entity';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { AuthenticationService } from '../service/authentication.service';
-import { PG_UNIQUE_VIOLATION_ERRCODE } from '../../constants';
+import { CurrentUser } from '../../decoraters/user.decorator.js';
+import { UserEntity } from '../../user/entity/user.entity.js';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard.js';
+import { AuthenticationService } from '../service/authentication.service.js';
+import { PG_UNIQUE_VIOLATION_ERRCODE } from '../../constants.js';
 
 @Controller('auth')
 export class AuthenticationController {

@@ -5,20 +5,24 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import { CreateNft, NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity';
-import { CategoryEntity } from 'src/category/entity/category.entity';
-import { CategoryService } from 'src/category/service/category.service';
-import { FilterParams } from '../params';
+import {
+  CreateNft,
+  NftEntity,
+  NftEntityPage,
+} from '../../nft/entity/nft.entity.js';
+import { CategoryEntity } from '../../category/entity/category.entity.js';
+import { CategoryService } from '../../category/service/category.service.js';
+import { FilterParams } from '../params.js';
 import {
   PG_CONNECTION,
   MINTER_ADDRESS,
   SEARCH_MAX_NFTS,
   SEARCH_SIMILARITY_LIMIT,
-} from 'src/constants';
+} from '../../constants.js';
 import { CurrencyService, BASE_CURRENCY } from 'kanvas-api-lib';
-import { sleep } from 'src/utils';
-import { IpfsService } from './ipfs.service';
-import { DbTransaction, withTransaction } from 'src/db.module';
+import { sleep } from '../../utils.js';
+import { IpfsService } from './ipfs.service.js';
+import { DbTransaction, withTransaction } from '../../db.module.js';
 
 @Injectable()
 export class NftService {

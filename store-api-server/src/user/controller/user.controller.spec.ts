@@ -1,15 +1,32 @@
+import { HttpException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from '../service/user.service';
-import { NftService } from 'src/nft/service/nft.service';
-import { MintService } from 'src/nft/service/mint.service';
-import { IpfsService } from 'src/nft/service/ipfs.service';
-import { S3Service } from 'src/s3.service';
-import { DbMock } from 'src/mock/db.module';
-import { CacheMock } from 'src/mock/cache.module';
-import { expectErrWithHttpStatus } from 'src/utils';
-import { CategoryService } from 'src/category/service/category.service';
+import { NftService } from '../../nft/service/nft.service';
+import { MintService } from '../../nft/service/mint.service';
+import { IpfsService } from '../../nft/service/ipfs.service';
+import { S3Service } from '../../s3.service';
+import { DbMock } from '../../mock/db.module';
+import { CacheMock } from '../../mock/cache.module';
+import { CategoryService } from '../../category/service/category.service';
 import { mockedRatesProvider, CurrencyService } from 'kanvas-api-lib';
+
+async function expectErrWithHttpStatus(
+  expStatusCode: number,
+  f: () => Promise<any>,
+): Promise<void> {
+  try {
+    await f();
+  } catch (err: any) {
+    //Logger.error(err);
+    expect(err instanceof HttpException).toBe(true);
+
+    const gotStatusCode = err.getStatus();
+    expect(gotStatusCode).toEqual(expStatusCode);
+    return;
+  }
+  expect('expected HttpException').toBe('got no error');
+}
 
 describe('UserController', () => {
   let controller: UserController;

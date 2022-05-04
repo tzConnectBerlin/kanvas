@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { NftController } from './controller/nft.controller';
-import { NftService } from './service/nft.service';
-import { IpfsService } from './service/ipfs.service';
-import { CategoryModule } from 'src/category/category.module';
-import { DbModule } from 'src/db.module';
+import { NftController } from './controller/nft.controller.js';
+import { NftService } from './service/nft.service.js';
+import { IpfsService } from './service/ipfs.service.js';
+import { CategoryModule } from '../category/category.module.js';
+import { DbModule } from '../db.module.js';
 import { CurrencyModule } from 'kanvas-api-lib';
-import { MintService } from './service/mint.service';
+import { MintService } from './service/mint.service.js';
 
 @Module({
   imports: [DbModule, CategoryModule, CurrencyModule],

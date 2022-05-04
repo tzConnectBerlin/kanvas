@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PG_CONNECTION } from 'src/constants';
+import { PG_CONNECTION } from '../constants.js';
 
 class dbConnMock {}
 

@@ -1,19 +1,23 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { PG_CONNECTION } from 'src/constants';
-import { UserService } from 'src/user/service/user.service';
-import { NftService } from '../../nft/service/nft.service';
-import { MintService } from '../../nft/service/mint.service';
-import { Err } from 'ts-results';
+import { PG_CONNECTION } from '../../constants.js';
+import { UserService } from '../../user/service/user.service.js';
+import { NftService } from '../../nft/service/nft.service.js';
+import { MintService } from '../../nft/service/mint.service.js';
+import ts_results from 'ts-results';
+const { Err } = ts_results;
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { assertEnv } from 'src/utils';
-import { DbTransaction, withTransaction, DbPool } from 'src/db.module';
-// import { Tezpay } from 'tezpay-server';
+import { assertEnv } from '../../utils.js';
+import { DbTransaction, withTransaction, DbPool } from '../../db.module.js';
+import Tezpay from 'tezpay-server';
 import { v4 as uuidv4 } from 'uuid';
 import {
   CurrencyService,
   BASE_CURRENCY,
   SUPPORTED_CURRENCIES,
 } from 'kanvas-api-lib';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const stripe = require('stripe');
 
 export enum PaymentStatus {
   CREATED = 'created',
@@ -46,7 +50,7 @@ export interface PaymentIntent {
 @Injectable()
 export class PaymentService {
   stripe = process.env.STRIPE_SECRET
-    ? require('stripe')(process.env.STRIPE_SECRET)
+    ? stripe(process.env.STRIPE_SECRET)
     : undefined;
 
   FINAL_STATES = [
@@ -64,8 +68,10 @@ export class PaymentService {
     private readonly userService: UserService,
     private readonly nftService: NftService,
     private readonly currencyService: CurrencyService,
-  ) {
-    this.tezpay = 0; // new Tezpay();
+  ) {}
+
+  async initTezpay() {
+    this.tezpay = new (await Tezpay)();
   }
 
   async webhookHandler(constructedEvent: any) {
@@ -425,11 +431,11 @@ WHERE provider = $1
 
     for (const row of pendingPaymentIds.rows) {
       const paymentId = row['payment_id'];
-      const paymentStatus = this.tezpay.get_payment(row['payment_id'], 3);
+      const paymentStatus = await this.tezpay.get_payment(paymentId);
 
-      // TODO \/  \/   filler code
-      if (paymentStatus === 'done') {
-        this.#updatePaymentStatus(paymentId, PaymentStatus.SUCCEEDED);
+      if (paymentStatus.is_paid_in_full) {
+        await this.#updatePaymentStatus(paymentId, PaymentStatus.SUCCEEDED);
+        Logger.log(`tezpay succeeded. payment_id=${paymentId}`);
       }
     }
   }
@@ -475,7 +481,7 @@ RETURNING payment_id, provider
           await this.stripe.paymentIntents.cancel(paymentId);
           break;
         case PaymentProvider.TEZPAY:
-          //await this.tezpay.cancel(paymentId);
+          await this.tezpay.cancel_payment(paymentId);
           break;
       }
     } catch (err: any) {

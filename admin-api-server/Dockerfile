@@ -7,7 +7,7 @@ ENV TZ=UTC
 RUN apt-get update && apt-get upgrade -y
 
 ADD admin-api-server/ /build
-ADD api-lib/ /build/api-lib
+ADD lib/ /build/lib/
 
 # need psql
 RUN apt update && apt upgrade -y
@@ -15,7 +15,7 @@ RUN apt install -y postgresql
 
 RUN mkdir /build/yarn_links
 
-WORKDIR /build/api-lib
+WORKDIR /build/lib/api-lib
 RUN yarn install
 RUN yarn build
 RUN yarn link --link-folder /build/yarn_links

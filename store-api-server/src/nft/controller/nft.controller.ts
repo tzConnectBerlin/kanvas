@@ -14,20 +14,21 @@ import {
 } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Response } from 'express';
-import { cryptoUtils } from 'sotez';
-import { NftService } from '../service/nft.service';
-import { CategoryService } from 'src/category/service/category.service';
-import { NftEntity, CreateNft } from '../entity/nft.entity';
-import { FilterParams, PaginationParams, SearchParam } from '../params';
-import { wrapCache } from 'src/utils';
-import { ADMIN_PUBLIC_KEY } from 'src/constants';
+import sotez from 'sotez';
+const { cryptoUtils } = sotez;
+import { NftService } from '../service/nft.service.js';
+import { CategoryService } from '../../category/service/category.service.js';
+import { NftEntity, CreateNft } from '../entity/nft.entity.js';
+import { FilterParams, PaginationParams, SearchParam } from '../params.js';
+import { wrapCache } from '../../utils.js';
+import { ADMIN_PUBLIC_KEY } from '../../constants.js';
 import {
   BASE_CURRENCY,
   SIGNATURE_PREFIX_CREATE_NFT,
   SIGNATURE_PREFIX_DELIST_NFT,
   SIGNATURE_PREFIX_RELIST_NFT,
 } from 'kanvas-api-lib';
-import { validateRequestedCurrency } from 'src/paramUtils';
+import { validateRequestedCurrency } from '../../paramUtils.js';
 
 @Controller('nfts')
 export class NftController {

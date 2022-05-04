@@ -1,4 +1,4 @@
-import { assertEnv } from './utils';
+import { assertEnv } from './utils.js';
 
 export const PG_CONNECTION = 'PG_CONNECTION';
 

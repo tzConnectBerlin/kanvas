@@ -1,7 +1,7 @@
 import { Logger, Injectable, Inject } from '@nestjs/common';
-import { PG_CONNECTION, MINTER_ADDRESS } from '../../constants';
-import { NftEntity } from '../entity/nft.entity';
-import { IpfsService } from './ipfs.service';
+import { PG_CONNECTION, MINTER_ADDRESS } from '../../constants.js';
+import { NftEntity } from '../entity/nft.entity.js';
+import { IpfsService } from './ipfs.service.js';
 import { Lock } from 'async-await-mutex-lock';
 
 interface Command {
