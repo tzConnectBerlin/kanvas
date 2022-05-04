@@ -364,7 +364,7 @@ WHERE id = $1
     try {
       await dbTx.query(`BEGIN`);
 
-      const oldState = await dbTx.query(
+      const oldStateQryRes = await dbTx.query(
         `
 SELECT state
 FROM nft
@@ -397,17 +397,20 @@ WHERE TARGET.value != EXCLUDED.value
         [nft.id, setBy.id, attrNames, attrValues],
       );
 
-      switch (nft.state) {
-        case NFT_PUBLISH_STATE:
-          if (oldState.rows[0].state === NFT_DELIST_STATE) {
-            await this.#relistNft(nft);
-          } else {
-            await this.#publishNft(nft);
-          }
-          break;
-        case NFT_DELIST_STATE:
-          await this.#delistNft(nft);
-          break;
+      const oldState = oldStateQryRes.rows[0].state;
+      if (nft.state !== oldState) {
+        switch (nft.state) {
+          case NFT_PUBLISH_STATE:
+            if (oldState === NFT_DELIST_STATE) {
+              await this.#relistNft(nft);
+            } else {
+              await this.#publishNft(nft);
+            }
+            break;
+          case NFT_DELIST_STATE:
+            await this.#delistNft(nft);
+            break;
+        }
       }
 
       await dbTx.query(`COMMIT`);
