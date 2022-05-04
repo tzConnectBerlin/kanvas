@@ -23,6 +23,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UserEntity } from '../entity/user.entity';
 import { UserService } from '../service/user.service';
 import { CurrentUser } from '../../decoraters/user.decorator';
+import { validateRequestedCurrency } from 'src/paramUtils';
 import {
   JwtAuthGuard,
   JwtFailableAuthGuard,
@@ -31,8 +32,8 @@ import {
   PG_UNIQUE_VIOLATION_ERRCODE,
   PG_FOREIGN_KEY_VIOLATION_ERRCODE,
   PROFILE_PICTURE_MAX_BYTES,
+  BASE_CURRENCY,
 } from '../../constants';
-import { DbTransaction, withTransaction } from 'src/db.module';
 
 interface EditProfile {
   userName?: string;
@@ -50,7 +51,9 @@ export class UserController {
   async getProfile(
     @CurrentUser() user?: UserEntity,
     @Query('userAddress') userAddress?: string,
+    @Query('currency') currency: string = BASE_CURRENCY,
   ) {
+    validateRequestedCurrency(currency);
     const address =
       userAddress ||
       (typeof user !== 'undefined' ? user.userAddress : undefined);
@@ -61,7 +64,7 @@ export class UserController {
       );
     }
 
-    const profile_res = await this.userService.getProfile(address);
+    const profile_res = await this.userService.getProfile(address, currency);
     if (!profile_res.ok) {
       if (typeof userAddress === 'undefined') {
         throw new HttpException(
@@ -128,12 +131,21 @@ export class UserController {
   }
 
   @Get('topBuyers')
-  async topBuyers(@Res() resp: Response) {
-    return await wrapCache(this.cache, resp, 'user.getTopBuyers', () => {
-      return this.userService.getTopBuyers().then((topBuyers) => {
-        return { topBuyers };
-      });
-    });
+  async topBuyers(
+    @Query('currency') currency: string = BASE_CURRENCY,
+    @Res() resp: Response,
+  ) {
+    validateRequestedCurrency(currency);
+    return await wrapCache(
+      this.cache,
+      resp,
+      'user.getTopBuyers' + currency,
+      () => {
+        return this.userService.getTopBuyers(currency).then((topBuyers) => {
+          return { topBuyers };
+        });
+      },
+    );
   }
 
   @Post('nftOwnership')
@@ -225,11 +237,14 @@ export class UserController {
   async cartList(
     @Session() cookieSession: any,
     @CurrentUser() user: UserEntity | undefined,
+    @Query('currency') currency: string = BASE_CURRENCY,
   ) {
+    validateRequestedCurrency(currency);
+
     const cartSession = await this.userService.getCartSession(
       cookieSession,
       user,
     );
-    return await this.userService.cartList(cartSession);
+    return await this.userService.cartList(cartSession, currency);
   }
 }

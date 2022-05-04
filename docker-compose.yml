@@ -24,7 +24,11 @@ services:
         ./script/wait-db
         INIT_QUEPASA=false ./script/migrate up
         if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
-          psql < script/populate-stagingdb.sql
+          if [ -v DEPLOYMENT ]; then
+            psql < script/populate-stagingdb.sql
+          else
+            psql < script/populate-testdb.sql
+          fi
         fi
         if [ "${STORE_API_ENABLED:-true}" != "false" ]; then
           yarn start
@@ -44,7 +48,7 @@ services:
       PGUSER: store_pguser
       PGPASSWORD: store_pgpass
       PGDATABASE: dev_database
-      
+
       KANVAS_API_PORT: 3000
 
 
@@ -120,7 +124,7 @@ services:
       STORE_PGUSER: store_pguser
       STORE_PGPASSWORD: store_pgpass
       STORE_PGDATABASE: dev_database
-      
+
       ADMIN_API_PORT: 3001
       STORE_API: http://store-api:3000
 

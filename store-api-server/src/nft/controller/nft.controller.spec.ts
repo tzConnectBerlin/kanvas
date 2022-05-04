@@ -9,6 +9,8 @@ import { IpfsService } from 'src/nft/service/ipfs.service';
 import { NftServiceMock } from '../service/nft_mock.service';
 import { CategoryService } from 'src/category/service/category.service';
 import { PaginationParams } from '../params';
+import { CurrencyService } from 'src/currency.service';
+import { mockedRatesProvider } from 'src/mock/rates.provider';
 
 describe('NftController', () => {
   let controller: NftController;
@@ -27,6 +29,8 @@ describe('NftController', () => {
           useClass: CacheMock,
         },
         CategoryService,
+        mockedRatesProvider,
+        CurrencyService,
         IpfsService,
       ],
     }).compile();

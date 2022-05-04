@@ -11,7 +11,7 @@ export interface NftEntity {
   displayUri?: string;
   thumbnailUri?: string;
 
-  price: number;
+  price: string;
   categories: CategoryEntity[];
   editionsSize: number;
   editionsAvailable: number;
@@ -41,8 +41,8 @@ export interface NftEntityPage {
   nfts: NftEntity[];
   currentPage: number;
   numberOfPages: number;
-  lowerPriceBound: number;
-  upperPriceBound: number;
+  lowerPriceBound: string;
+  upperPriceBound: string;
 }
 
 export interface SearchResult {

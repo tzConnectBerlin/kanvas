@@ -18,12 +18,14 @@ import {
   PG_CONNECTION,
   PG_UNIQUE_VIOLATION_ERRCODE,
   NUM_TOP_BUYERS,
+  BASE_CURRENCY,
 } from '../../constants';
 import { Result, Err, Ok } from 'ts-results';
 import { S3Service } from '../../s3.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { assertEnv } from 'src/utils';
 import { DbPool, DbTransaction, withTransaction } from 'src/db.module';
+import { CurrencyService } from 'src/currency.service';
 const generate = require('meaningful-string');
 
 interface CartMeta {
@@ -45,6 +47,7 @@ export class UserService {
     @Inject(PG_CONNECTION) private conn: DbPool,
     private readonly s3Service: S3Service,
     private readonly mintService: MintService,
+    private readonly currencyService: CurrencyService,
     public readonly nftService: NftService,
   ) {}
 
@@ -143,7 +146,10 @@ WHERE address = $1
     return Ok(res);
   }
 
-  async getProfile(address: string): Promise<Result<ProfileEntity, string>> {
+  async getProfile(
+    address: string,
+    currency: string,
+  ): Promise<Result<ProfileEntity, string>> {
     const userRes = await this.findByAddress(address);
     if (!userRes.ok) {
       return userRes;
@@ -151,16 +157,19 @@ WHERE address = $1
     const user = userRes.val;
     delete user.signedPayload;
 
-    const userNfts = await this.nftService.findNftsWithFilter({
-      page: 1,
-      pageSize: 1,
-      orderBy: 'id',
-      orderDirection: 'asc',
-      firstRequestAt: undefined,
-      categories: undefined,
-      userAddress: address,
-      availability: undefined,
-    });
+    const userNfts = await this.nftService.findNftsWithFilter(
+      {
+        page: 1,
+        pageSize: 1,
+        orderBy: 'id',
+        orderDirection: 'asc',
+        firstRequestAt: undefined,
+        categories: undefined,
+        userAddress: address,
+        availability: undefined,
+      },
+      currency,
+    );
 
     return new Ok({
       user: user,
@@ -203,7 +212,7 @@ WHERE id = $1`,
     return Ok(qryRes.rows[0]['cart_session']);
   }
 
-  async getTopBuyers(): Promise<UserTotalPaid[]> {
+  async getTopBuyers(currency: string): Promise<UserTotalPaid[]> {
     const qryRes = await this.conn.query(
       `
 SELECT
@@ -231,7 +240,10 @@ LIMIT $1
           userName: row['user_name'],
           userAddress: row['user_address'],
           userPicture: row['profile_pic_url'],
-          totalPaid: row['total_paid'],
+          totalPaid: this.currencyService.convertToCurrency(
+            row['total_paid'],
+            currency,
+          ),
         },
     );
   }
@@ -280,6 +292,8 @@ WHERE session_id = $1
 
   async cartList(
     session: string,
+    currency: string,
+    inBaseUnit: boolean = false,
     dbTx: DbTransaction | DbPool = this.conn,
   ): Promise<UserCart> {
     const cartMeta = await this.getCartMeta(session, dbTx);
@@ -298,7 +312,13 @@ WHERE session_id = $1
       };
     }
     return {
-      nfts: await this.nftService.findByIds(nftIds, 'nft_id', 'asc'),
+      nfts: await this.nftService.findByIds(
+        nftIds,
+        'nft_id',
+        'asc',
+        currency,
+        inBaseUnit,
+      ),
       expiresAt: cartMeta.expiresAt,
     };
   }

@@ -18,6 +18,8 @@ import { CategoryService } from 'src/category/service/category.service';
 import { NftEntity, CreateNft } from '../entity/nft.entity';
 import { FilterParams, PaginationParams, SearchParam } from '../params';
 import { wrapCache } from 'src/utils';
+import { BASE_CURRENCY } from 'src/constants';
+import { validateRequestedCurrency } from 'src/paramUtils';
 
 @Controller('nfts')
 export class NftController {
@@ -33,29 +35,46 @@ export class NftController {
   }
 
   @Get()
-  async getFiltered(@Res() resp: Response, @Query() params: FilterParams) {
-    this.#validateFilterParams(params);
+  async getFiltered(
+    @Res() resp: Response,
+    @Query() filters: FilterParams,
+    @Query('currency') currency: string = BASE_CURRENCY,
+  ) {
+    validateRequestedCurrency(currency);
+    this.#validateFilterParams(filters);
+
     return await wrapCache(
       this.cache,
       resp,
-      'nft.findNftsWithFilter' + JSON.stringify(params),
+      'nft.findNftsWithFilter' + JSON.stringify(filters) + currency,
       () => {
-        return this.nftService.findNftsWithFilter(params);
+        return this.nftService.findNftsWithFilter(filters, currency);
       },
     );
   }
 
   @Get('/search')
-  async search(@Res() resp: Response, @Query() params: SearchParam) {
+  async search(
+    @Res() resp: Response,
+    @Query() searchParams: SearchParam,
+    @Query('currency') currency: string = BASE_CURRENCY,
+  ) {
+    validateRequestedCurrency(currency);
+
     return await wrapCache(
       this.cache,
       resp,
-      'nft.search' + params.searchString,
+      'nft.search' + searchParams.searchString + currency,
       () => {
         return new Promise(async (resolve) => {
           resolve({
-            nfts: await this.nftService.search(params.searchString),
-            categories: await this.categoryService.search(params.searchString),
+            nfts: await this.nftService.search(
+              searchParams.searchString,
+              currency,
+            ),
+            categories: await this.categoryService.search(
+              searchParams.searchString,
+            ),
           });
         });
       },
@@ -63,7 +82,12 @@ export class NftController {
   }
 
   @Post('/:id')
-  async byId(@Param('id') id: number): Promise<NftEntity> {
+  async byId(
+    @Param('id') id: number,
+    @Query('currency') currency: string = BASE_CURRENCY,
+  ): Promise<NftEntity> {
+    validateRequestedCurrency(currency);
+
     id = Number(id);
     if (isNaN(id)) {
       throw new HttpException(
@@ -71,7 +95,7 @@ export class NftController {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return await this.nftService.byId(id);
+    return await this.nftService.byId(id, currency);
   }
 
   #validateFilterParams(params: FilterParams): void {

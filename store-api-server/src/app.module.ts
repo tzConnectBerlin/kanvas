@@ -12,6 +12,7 @@ import { LoggerMiddleware, StatsLogger } from './middleware/logger';
 import { CookieSessionMiddleware } from './middleware/cookie_session';
 import { ProxiedThrottlerGuard } from './decoraters/proxied_throttler';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CurrencyModule } from './currency.module';
 import {
   RATE_LIMIT_TTL,
   RATE_LIMIT,
@@ -29,6 +30,7 @@ import {
     AuthProviderModule,
     PaymentModule,
     DbModule,
+    CurrencyModule,
     ThrottlerModule.forRoot({
       ttl: RATE_LIMIT_TTL,
       limit: RATE_LIMIT,

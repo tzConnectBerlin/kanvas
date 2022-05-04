@@ -9,6 +9,8 @@ import { DbMock } from 'src/mock/db.module';
 import { CacheMock } from 'src/mock/cache.module';
 import { expectErrWithHttpStatus } from 'src/utils';
 import { CategoryService } from 'src/category/service/category.service';
+import { CurrencyService } from 'src/currency.service';
+import { mockedRatesProvider } from 'src/mock/rates.provider';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -24,6 +26,8 @@ describe('UserController', () => {
         MintService,
         IpfsService,
         S3Service,
+        mockedRatesProvider,
+        CurrencyService,
       ],
     }).compile();
 
