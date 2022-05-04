@@ -18,6 +18,7 @@ import {
   MINTER_ADDRESS,
   SEARCH_MAX_NFTS,
   SEARCH_SIMILARITY_LIMIT,
+  ENDING_SOON_DURATION,
 } from '../../constants.js';
 import { CurrencyService, BASE_CURRENCY } from 'kanvas-api-lib';
 import { sleep } from '../../utils.js';
@@ -284,13 +285,14 @@ LIMIT $3
       const nftIds = await this.conn.query(
         `
 SELECT nft_id, total_nft_count
-FROM nft_ids_filtered($1, $2, $3, $4, $5, '10 minutes', $6, $7, $8, $9, $10, $11)`,
+FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
         [
           filters.userAddress,
           filters.categories,
           filters.priceAtLeast,
           filters.priceAtMost,
           filters.availability,
+          ENDING_SOON_DURATION,
           orderBy,
           filters.orderDirection,
           offset,
