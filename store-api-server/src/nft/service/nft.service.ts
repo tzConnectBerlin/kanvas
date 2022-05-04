@@ -35,16 +35,21 @@ export class NftService {
 
   async createNft(newNft: CreateNft) {
     const insert = async (dbTx: any) => {
-      let launchAt: Date | undefined = undefined;
-      if (typeof newNft.launchAt !== 'undefined') {
-        launchAt = new Date();
-        launchAt.setTime(newNft.launchAt);
+      let onsaleFrom: Date | undefined = undefined;
+      if (typeof newNft.onsaleFrom !== 'undefined') {
+        onsaleFrom = new Date();
+        onsaleFrom.setTime(newNft.onsaleFrom);
+      }
+      let onsaleUntil: Date | undefined = undefined;
+      if (typeof newNft.onsaleUntil !== 'undefined') {
+        onsaleUntil = new Date();
+        onsaleUntil.setTime(newNft.onsaleUntil);
       }
 
       await dbTx.query(
         `
 INSERT INTO nft (
-  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, launch_at, price, editions_size
+  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, onsale_from, onsale_until, price, editions_size
 )
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       `,
@@ -57,7 +62,8 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
           newNft.displayUri,
           newNft.thumbnailUri,
           newNft.description,
-          launchAt?.toUTCString(),
+          onsaleFrom?.toUTCString(),
+          onsaleUntil?.toUTCString(),
           newNft.price,
           newNft.editionsSize,
         ],
@@ -278,7 +284,7 @@ LIMIT $3
       const nftIds = await this.conn.query(
         `
 SELECT nft_id, total_nft_count
-FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+FROM nft_ids_filtered($1, $2, $3, $4, $5, '10 minutes', $6, $7, $8, $9, $10, $11)`,
         [
           filters.userAddress,
           filters.categories,
@@ -445,7 +451,8 @@ SELECT
   editions_reserved,
   editions_owned,
   nft_created_at,
-  launch_at
+  onsale_from,
+  onsale_until
 FROM nfts_by_id($1, $2, $3)`,
         [nftIds, orderBy, orderDirection],
       );
@@ -454,7 +461,8 @@ FROM nfts_by_id($1, $2, $3)`,
         const reserved = Number(nftRow['editions_reserved']);
         const owned = Number(nftRow['editions_owned']);
 
-        const launchAtMilliUnix = nftRow['launch_at']?.getTime() || 0;
+        const launchAtMilliUnix = nftRow['onsale_from']?.getTime() || 0;
+        const onsaleUntilMilliUnix = nftRow['onsale_until']?.getTime() || 0;
 
         const nft = <NftEntity>{
           id: nftRow['nft_id'],
@@ -473,6 +481,7 @@ FROM nfts_by_id($1, $2, $3)`,
           editionsAvailable: editions - (reserved + owned),
           createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
           launchAt: Math.floor(launchAtMilliUnix / 1000),
+          onsaleUntil: Math.floor(onsaleUntilMilliUnix / 1000),
           categories: nftRow['categories'].map((categoryRow: any) => {
             return <CategoryEntity>{
               id: Number(categoryRow[0]),

@@ -473,7 +473,8 @@ WHERE TARGET.value != EXCLUDED.value
       price: attr.price,
       categories: attr.categories,
       editionsSize: attr.editions_size,
-      launchAt: attr.launch_at,
+      onsaleFrom: attr.onsale_from,
+      onsaleUntil: attr.onsale_until,
 
       signature: signed,
     });

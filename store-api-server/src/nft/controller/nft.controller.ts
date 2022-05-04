@@ -150,7 +150,7 @@ export class NftController {
       if (
         params.availability.some(
           (availabilityEntry: string) =>
-            !['upcoming', 'onSale', 'soldOut'].some(
+            !['upcoming', 'onSale', 'soldOut', 'endingSoon'].some(
               (elem) => elem === availabilityEntry,
             ),
         )
