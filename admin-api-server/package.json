@@ -24,6 +24,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-express": "^8.2.3",
+    "@nestjs/schedule": "1.0.2",
     "@nestjs/throttler": "^2.0.0",
     "@types/bcrypt": "^5.0.0",
     "@types/passport-local": "^1.0.34",

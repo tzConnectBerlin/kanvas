@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { SUPPORTED_CURRENCIES } from 'src/constants';
+import { SUPPORTED_CURRENCIES } from 'kanvas-api-lib';
 
 export function validateRequestedCurrency(currency: string) {
   if (!Object.keys(SUPPORTED_CURRENCIES).includes(currency)) {

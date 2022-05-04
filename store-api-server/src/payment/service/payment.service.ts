@@ -9,8 +9,11 @@ import { assertEnv } from 'src/utils';
 import { DbTransaction, withTransaction, DbPool } from 'src/db.module';
 // import { Tezpay } from 'tezpay-server';
 import { v4 as uuidv4 } from 'uuid';
-import { CurrencyService } from 'src/currency.service';
-import { BASE_CURRENCY, SUPPORTED_CURRENCIES } from 'src/constants';
+import {
+  CurrencyService,
+  BASE_CURRENCY,
+  SUPPORTED_CURRENCIES,
+} from 'kanvas-api-lib';
 
 export enum PaymentStatus {
   CREATED = 'created',

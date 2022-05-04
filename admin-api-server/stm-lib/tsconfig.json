@@ -11,7 +11,8 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
-    "noImplicitAny": false,
-    "allowJs": true
-  }
+    "strict": true,
+    "strictPropertyInitialization": false
+  },
+  "include": ["src", "declarations.d.ts"]
 }

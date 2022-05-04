@@ -14,6 +14,7 @@ export const SEARCH_SIMILARITY_LIMIT = 0.4;
 
 export const MINTER_ADDRESS = assertEnv('MINTER_TZ_ADDRESS');
 export const ADMIN_PUBLIC_KEY = assertEnv('ADMIN_PUBLIC_KEY'); // this probably should be the revealed public key associated to the MINTER_ADDRESS (MINTER_ADDRESS is the public key hash)
+
 export const STORE_PUBLISHERS = ['Tezos'];
 
 export const RATE_LIMIT_TTL = Number(process.env['RATE_LIMIT_TTL'] || 60); // in seconds
@@ -23,12 +24,3 @@ export const CACHE_TTL = Number(process.env['CACHE_TTL'] || 60); // in seconds
 export const CACHE_SIZE = Number(process.env['CACHE_SIZE'] || 10_000); // in max number of items in the cache
 
 export const NUM_TOP_BUYERS = 12;
-
-// key is the currency ticker, value is the number of decimals
-export const SUPPORTED_CURRENCIES: { [key: string]: number } = {
-  USD: 2,
-  GBP: 2,
-  EUR: 2,
-  XTZ: 5,
-};
-export const BASE_CURRENCY: string = process.env['BASE_CURRENCY'] || 'EUR';

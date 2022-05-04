@@ -18,14 +18,13 @@ import {
   PG_CONNECTION,
   PG_UNIQUE_VIOLATION_ERRCODE,
   NUM_TOP_BUYERS,
-  BASE_CURRENCY,
 } from '../../constants';
+import { CurrencyService } from 'kanvas-api-lib';
 import { Result, Err, Ok } from 'ts-results';
 import { S3Service } from '../../s3.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { assertEnv } from 'src/utils';
 import { DbPool, DbTransaction, withTransaction } from 'src/db.module';
-import { CurrencyService } from 'src/currency.service';
 const generate = require('meaningful-string');
 
 interface CartMeta {

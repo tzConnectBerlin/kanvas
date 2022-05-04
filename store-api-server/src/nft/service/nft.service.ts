@@ -12,16 +12,13 @@ import { FilterParams } from '../params';
 import {
   PG_CONNECTION,
   MINTER_ADDRESS,
-  ADMIN_PUBLIC_KEY,
   SEARCH_MAX_NFTS,
   SEARCH_SIMILARITY_LIMIT,
-  BASE_CURRENCY,
 } from 'src/constants';
+import { CurrencyService, BASE_CURRENCY } from 'kanvas-api-lib';
 import { sleep } from 'src/utils';
-import { cryptoUtils } from 'sotez';
 import { IpfsService } from './ipfs.service';
 import { DbTransaction, withTransaction } from 'src/db.module';
-import { CurrencyService } from 'src/currency.service';
 
 @Injectable()
 export class NftService {
@@ -33,32 +30,6 @@ export class NftService {
   ) {}
 
   async createNft(newNft: CreateNft) {
-    const validate = async () => {
-      let hexMsg = newNft.id.toString(16);
-      if (hexMsg.length & 1) {
-        // hex is of uneven length, sotez expects an even number of hexadecimal characters
-        hexMsg = '0' + hexMsg;
-      }
-
-      try {
-        if (
-          !(await cryptoUtils.verify(
-            hexMsg,
-            `${newNft.signature}`,
-            ADMIN_PUBLIC_KEY,
-          ))
-        ) {
-          throw new HttpException('Invalid signature', HttpStatus.UNAUTHORIZED);
-        }
-      } catch (err: any) {
-        Logger.warn(`Error on new nft signature validation, err: ${err}`);
-        throw new HttpException(
-          'Could not validate signature (it may be misshaped)',
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-    };
-
     const insert = async (dbTx: any) => {
       let launchAt: Date | undefined = undefined;
       if (typeof newNft.launchAt !== 'undefined') {
@@ -125,8 +96,6 @@ SELECT $1, UNNEST($2::INTEGER[])
       throw `failed to upload new nft to IPFS`;
     };
 
-    await validate();
-
     return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       await insert(dbTx);
       await uploadToIpfs(dbTx);
@@ -136,6 +105,91 @@ SELECT $1, UNNEST($2::INTEGER[])
     });
 
     Logger.log(`Created new NFT ${newNft.id}`);
+  }
+
+  async delistNft(nftId: number) {
+    await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+      const tablesNftIdField: { [key: string]: string } = {
+        nft: 'id',
+        mtm_kanvas_user_nft: 'nft_id',
+        mtm_nft_category: 'nft_id',
+        mtm_nft_order_nft: 'nft_id',
+      };
+      const tables = [
+        'mtm_nft_order_nft',
+        'mtm_kanvas_user_nft',
+        'mtm_nft_category',
+        'nft',
+      ];
+
+      for (const table of tables) {
+        const nftIdField = tablesNftIdField[table];
+
+        const qryRes = await dbTx.query(
+          `
+INSERT INTO __${table}_delisted
+SELECT *
+FROM ${table}
+WHERE ${nftIdField} = $1
+        `,
+          [nftId],
+        );
+      }
+      for (const table of tables) {
+        const nftIdField = tablesNftIdField[table];
+
+        await dbTx.query(
+          `
+DELETE FROM ${table}
+WHERE ${nftIdField} = $1
+        `,
+          [nftId],
+        );
+      }
+    });
+  }
+
+  async relistNft(nftId: number) {
+    await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+      const tablesNftIdField: { [key: string]: string } = {
+        nft: 'id',
+        mtm_kanvas_user_nft: 'nft_id',
+        mtm_nft_category: 'nft_id',
+        mtm_nft_order_nft: 'nft_id',
+      };
+      const tables = [
+        'nft',
+        'mtm_nft_order_nft',
+        'mtm_kanvas_user_nft',
+        'mtm_nft_category',
+      ];
+
+      for (const table of tables) {
+        const nftIdField = tablesNftIdField[table];
+
+        await dbTx.query(
+          `
+
+INSERT INTO ${table}
+SELECT *
+FROM __${table}_delisted
+WHERE ${nftIdField} = $1
+        `,
+          [nftId],
+        );
+      }
+      for (const table of tables) {
+        const nftIdField = tablesNftIdField[table];
+
+        await dbTx.query(
+          `
+DELETE FROM __${table}_delisted
+WHERE ${nftIdField} = $1
+        `,
+          [nftId],
+        );
+      }
+    });
   }
 
   async search(str: string, currency: string): Promise<NftEntity[]> {

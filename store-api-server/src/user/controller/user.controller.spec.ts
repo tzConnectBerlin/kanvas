@@ -9,8 +9,7 @@ import { DbMock } from 'src/mock/db.module';
 import { CacheMock } from 'src/mock/cache.module';
 import { expectErrWithHttpStatus } from 'src/utils';
 import { CategoryService } from 'src/category/service/category.service';
-import { CurrencyService } from 'src/currency.service';
-import { mockedRatesProvider } from 'src/mock/rates.provider';
+import { mockedRatesProvider, CurrencyService } from 'kanvas-api-lib';
 
 describe('UserController', () => {
   let controller: UserController;

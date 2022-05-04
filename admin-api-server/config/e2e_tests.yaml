@@ -10,6 +10,8 @@ attributes:
   categories: number[]
   proposed: boolean
   publish_vote: votes
+  delist_vote: votes
+  relist_vote: votes
 
 
 states:
@@ -55,3 +57,25 @@ states:
     mutables:
     - attributes: [publish_vote, image.png, thumbnail.png, description]
       by_roles: [moderator, admin]
+
+  finish:
+    state_transitions:
+    - next_state: delisted
+      when:
+      - nft.delist_vote.yes.length >= 1
+    mutables:
+    - attributes: [delist_vote]
+      by_roles: [moderator]
+
+  delisted:
+    state_transitions:
+    - next_state: finish
+      when:
+      - nft.relist_vote.yes.length >= 1
+      do: |
+        {
+          nft.delist_vote = null;
+        }
+    mutables:
+    - attributes: [relist_vote]
+      by_roles: [moderator]
