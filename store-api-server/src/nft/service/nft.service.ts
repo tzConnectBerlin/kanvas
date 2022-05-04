@@ -19,6 +19,7 @@ import {
 import { sleep } from 'src/utils';
 import { cryptoUtils } from 'sotez';
 import { IpfsService } from './ipfs.service';
+import { DbTransaction, withTransaction } from 'src/db.module';
 
 @Injectable()
 export class NftService {
@@ -118,22 +119,15 @@ SELECT $1, UNNEST($2::INTEGER[])
 
     await validate();
 
-    const dbTx = await this.conn.connect();
-    try {
-      await dbTx.query(`BEGIN`);
-
+    return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       await insert(dbTx);
       await uploadToIpfs(dbTx);
-
-      await dbTx.query(`COMMIT`);
-      Logger.log(`Created new NFT ${newNft.id}`);
-    } catch (err: any) {
+    }).catch((err: any) => {
       Logger.error(`failed to publish nft (id=${newNft.id}), err: ${err}`);
-      await dbTx.query(`ROLLBACK`);
       throw err;
-    } finally {
-      dbTx.release();
-    }
+    });
+
+    Logger.log(`Created new NFT ${newNft.id}`);
   }
 
   async search(str: string): Promise<NftEntity[]> {
