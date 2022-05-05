@@ -55,7 +55,7 @@ services:
 
 
   store-quepasa:
-    image: ghcr.io/tzconnectberlin/que-pasa:1.2.0
+    image: ghcr.io/tzconnectberlin/que-pasa:1.2.1
     entrypoint: |-
       bash -c '
         set -e -x
@@ -134,7 +134,7 @@ services:
 
 
   admin-quepasa:
-    image: ghcr.io/tzconnectberlin/que-pasa:1.2.0
+    image: ghcr.io/tzconnectberlin/que-pasa:1.2.1
     entrypoint: |-
       bash -c '
         set -e
