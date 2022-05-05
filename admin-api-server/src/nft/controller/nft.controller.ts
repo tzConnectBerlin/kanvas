@@ -13,22 +13,24 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
-import { MAX_FILE_UPLOADS_PER_CALL } from 'src/constants';
-import { NftEntity, NftUpdate } from '../entities/nft.entity';
-import { NftService } from '../service/nft.service';
-import { CurrentUser } from 'src/decoraters/user.decorator';
-import { UserEntity } from 'src/user/entities/user.entity';
-import { NftFilterParams, NftFilters } from '../params';
-import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
+import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard.js';
+import { MAX_FILE_UPLOADS_PER_CALL } from '../../constants.js';
+import { NftEntity, NftUpdate } from '../entities/nft.entity.js';
+import { NftService } from '../service/nft.service.js';
+import { CurrentUser } from '../../decoraters/user.decorator.js';
+import { UserEntity } from '../../user/entities/user.entity.js';
+import { NftFilterParams, NftFilters } from '../params.js';
+import { ParseJSONArrayPipe } from '../../pipes/ParseJSONArrayPipe.js';
 import {
   queryParamsToPaginationParams,
   validatePaginationParams,
-} from 'src/utils';
+} from '../../utils.js';
 import { ContentRestrictions } from 'kanvas-stm-lib';
 const filesizeHuman = require('filesize').partial({ standard: 'jedec' });
 
-let getContentRestrictions: (string) => ContentRestrictions;
+let getContentRestrictions: (
+  attrName: string,
+) => ContentRestrictions | undefined;
 function contentFilter(req: any, file: any, callback: any) {
   if (typeof getContentRestrictions === 'undefined') {
     return callback(null, true);
@@ -57,7 +59,9 @@ function contentFilter(req: any, file: any, callback: any) {
 @Controller('nft')
 export class NftController {
   constructor(private readonly nftService: NftService) {
-    getContentRestrictions = (attrName: string) => {
+    getContentRestrictions = (
+      attrName: string,
+    ): ContentRestrictions | undefined => {
       return this.nftService.getContentRestrictions(attrName);
     };
   }
@@ -163,7 +167,7 @@ export class NftController {
     filters?: NftFilters,
     sort?: string[],
     range?: number[],
-  ) {
+  ): NftFilterParams {
     return {
       ...new NftFilterParams(),
       ...queryParamsToPaginationParams(sort, range),

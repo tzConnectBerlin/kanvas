@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NftService } from './nft.service';
 import { S3Service } from './s3.service';
-import { DbMockModule } from 'src/db_mock.module';
-import { RoleService } from 'src/role/service/role.service';
-import { CategoryService } from 'src/category/service/category.service';
-import { sleep } from 'src/utils';
+import { DbMockModule } from '../../db_mock.module';
+import { RoleService } from '../../role/service/role.service';
+import { CategoryService } from '../../category/service/category.service';
+import { sleep } from '../../utils';
 
 describe('NftService', () => {
   let service: NftService;

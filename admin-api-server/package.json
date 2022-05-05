@@ -5,6 +5,7 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "type": "module",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
@@ -14,7 +15,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "seed": "NODE_PATH=. ts-node ./src/seeds/index.ts",
+    "seed": "node ./dist/src/seeds/index",
     "test": "./script/test"
   },
   "dependencies": {
@@ -27,7 +28,10 @@
     "@nestjs/schedule": "1.0.2",
     "@nestjs/throttler": "^2.0.0",
     "@types/bcrypt": "^5.0.0",
+    "@types/cron": "^1.7.3",
     "@types/passport-local": "^1.0.34",
+    "@types/uuid": "^8.3.4",
+    "@types/validator": "^13.7.2",
     "async-await-mutex-lock": "^1.0.7",
     "aws-sdk": "^2.1046.0",
     "bcrypt": "^5.0.1",
@@ -86,21 +90,19 @@
       "node_modules",
       "<rootDir>"
     ],
+    "extensionsToTreatAsEsm": [".ts"],
+    "globals": {
+    "ts-jest": {
+        "useESM": true
+      }
+    },
+    "moduleNameMapper": {
+    "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
     "moduleFileExtensions": [
       "js",
       "json",
       "ts"
-    ],
-    "testPathIgnorePatterns": [
-      "<rootDir>/node_modules/",
-      "<rootDir>/lib/"
-    ],
-    "modulePathIgnorePatterns": [
-      "<rootDir>/lib/"
-    ],
-    "transformIgnorePatterns": [
-      "<rootDir>/node_modules/",
-      "<rootDir>/lib/"
     ],
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
@@ -108,10 +110,6 @@
     },
     "collectCoverageFrom": [
       "src/**/{!(nft_mock.service),}.ts"
-    ],
-    "coveragePathIgnorePatterns": [
-      "<rootDir>/node_modules/",
-      "<rootDir>/src/seeds"
     ],
     "coverageDirectory": "test/coverage",
     "testEnvironment": "node"

@@ -12,18 +12,18 @@ import {
   HttpException,
   Logger,
 } from '@nestjs/common';
-import { UserService } from '../service/user.service';
-import { RolesDecorator } from 'src/role/role.decorator';
-import { Roles } from 'src/role/entities/role.entity';
-import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
-import { RolesGuard } from 'src/role/role.guard';
-import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
-import { UserFilterParams, UserFilters } from '../params';
-import { UserEntity } from '../entities/user.entity';
+import { UserService } from '../service/user.service.js';
+import { RolesDecorator } from '../../role/role.decorator.js';
+import { Roles } from '../../role/entities/role.entity.js';
+import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard.js';
+import { RolesGuard } from '../../role/role.guard.js';
+import { ParseJSONArrayPipe } from '../../pipes/ParseJSONArrayPipe.js';
+import { UserFilterParams, UserFilters } from '../params.js';
+import { UserEntity } from '../entities/user.entity.js';
 import {
   queryParamsToPaginationParams,
   validatePaginationParams,
-} from 'src/utils';
+} from '../../utils.js';
 
 @Controller('user')
 export class UserController {

@@ -1,14 +1,15 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { PG_CONNECTION } from 'src/constants';
-import { DbPool } from 'src/db.module';
-import { Roles } from '../entities/role.entity';
+import { PG_CONNECTION } from '../../constants.js';
+import { DbPool } from '../../db.module.js';
+import { Roles } from '../entities/role.entity.js';
 
 @Injectable()
 export class RoleService {
   constructor(@Inject(PG_CONNECTION) private db: DbPool) {}
   async createRoles() {
-    for (const roleId of Object.keys(Roles)) {
-      if (isNaN(Number(roleId))) {
+    for (const roleIdStr of Object.keys(Roles)) {
+      const roleId: number = Number(roleIdStr);
+      if (isNaN(roleId)) {
         continue;
       }
       await this.db.query(
