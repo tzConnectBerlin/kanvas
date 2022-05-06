@@ -45,7 +45,7 @@ export interface PaymentIntent {
   currency: string;
   clientSecret: string;
   id: string;
-  tezpayContract?: string;
+  receiverAddress?: string;
 }
 
 @Injectable()
@@ -305,7 +305,7 @@ WHERE id = $2
       currency: 'XTZ',
       clientSecret: tezpayIntent.message,
       id,
-      tezpayContract: 'TODO',
+      receiverAddress: tezpayIntent.receiver_address,
     };
   }
 
