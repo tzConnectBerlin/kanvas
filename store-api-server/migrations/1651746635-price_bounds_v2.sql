@@ -7,7 +7,7 @@ BEGIN;
 ALTER FUNCTION price_bounds RENAME TO __price_bounds_v1;
 CREATE FUNCTION price_bounds(
   address_filter TEXT, categories_filter INTEGER[],
-  availability_filter TEXT[], ends_soon_duration INTERVAL,
+  availability_filter TEXT[], ending_soon_duration INTERVAL,
   until_filter TIMESTAMP WITHOUT TIME ZONE)
 RETURNS TABLE(min_price NUMERIC, max_price NUMERIC)
 AS $$

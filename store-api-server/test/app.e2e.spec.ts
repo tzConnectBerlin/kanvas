@@ -548,7 +548,7 @@ describe('AppController (e2e)', () => {
 
     expect(res.body).toStrictEqual({
       currentPage: 1,
-      lowerPriceBound: '0.10',
+      lowerPriceBound: '10.40',
       nfts: [
         {
           artifactUri:

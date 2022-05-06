@@ -1,126 +1,126 @@
 
--------------------------------|---------|----------|---------|---------|--------------------------------------------------------------
+-------------------------------|---------|----------|---------|---------|------------------------------------------------------------------------------------------------------
 
-File                           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                            
+File                           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                                                    
 
--------------------------------|---------|----------|---------|---------|--------------------------------------------------------------
+-------------------------------|---------|----------|---------|---------|------------------------------------------------------------------------------------------------------
 
-All files                      |    36.9 |    25.09 |   30.09 |   34.57 |                                                              
+All files                      |   77.23 |    60.72 |      83 |    76.1 |                                                                                                      
 
- src                           |   55.78 |    43.47 |   63.15 |   54.34 |                                                              
+ src                           |   64.21 |    43.47 |   68.42 |   63.04 |                                                                                                      
 
-  app.module.ts                |     100 |      100 |     100 |     100 |                                                              
+  app.module.ts                |     100 |      100 |     100 |     100 |                                                                                                      
 
-  constants.ts                 |     100 |     87.5 |     100 |     100 | 23                                                           
+  constants.ts                 |     100 |     87.5 |     100 |     100 | 23                                                                                                   
 
-  db.module.ts                 |   59.25 |        0 |      80 |   57.69 | 33,55-58,71-80                                               
+  db.module.ts                 |   88.88 |        0 |     100 |   88.46 | 33,55-58                                                                                             
 
-  main.ts                      |       0 |        0 |       0 |       0 | 4-23                                                         
+  main.ts                      |       0 |        0 |       0 |       0 | 4-23                                                                                                 
 
-  paramUtils.ts                |      50 |        0 |     100 |      50 | 6                                                            
+  paramUtils.ts                |      50 |        0 |     100 |      50 | 6                                                                                                    
 
-  s3.service.ts                |   46.15 |        0 |      50 |   41.66 | 18-38                                                        
+  s3.service.ts                |   46.15 |        0 |      50 |   41.66 | 18-38                                                                                                
 
-  utils.ts                     |      44 |    33.33 |   55.55 |      44 | 25-31,40-54,73-77                                            
+  utils.ts                     |      44 |    33.33 |   55.55 |      44 | 25-31,40-54,73-77                                                                                    
 
- src/auth-provider             |     100 |      100 |     100 |     100 |                                                              
+ src/auth-provider             |     100 |      100 |     100 |     100 |                                                                                                      
 
-  auth-provider.module.ts      |     100 |      100 |     100 |     100 |                                                              
+  auth-provider.module.ts      |     100 |      100 |     100 |     100 |                                                                                                      
 
- src/auth-provider/service     |      50 |      100 |       0 |   33.33 |                                                              
+ src/auth-provider/service     |      50 |      100 |       0 |   33.33 |                                                                                                      
 
-  auth-provider.service.ts     |      50 |      100 |       0 |   33.33 | 7-10                                                         
+  auth-provider.service.ts     |      50 |      100 |       0 |   33.33 | 7-10                                                                                                 
 
- src/authentication            |     100 |      100 |     100 |     100 |                                                              
+ src/authentication            |     100 |      100 |     100 |     100 |                                                                                                      
 
-  authentication.module.ts     |     100 |      100 |     100 |     100 |                                                              
+  authentication.module.ts     |     100 |      100 |     100 |     100 |                                                                                                      
 
- src/authentication/controller |      35 |        0 |   16.66 |   31.57 |                                                              
+ src/authentication/controller |      70 |    77.77 |   83.33 |   68.42 |                                                                                                      
 
-  authentication.controller.ts |      35 |        0 |   16.66 |   31.57 | 25-34,41-49,55,60-71                                         
+  authentication.controller.ts |      70 |    77.77 |   83.33 |   68.42 | 25-34,68-71                                                                                          
 
- src/authentication/guards     |      40 |        0 |       0 |      25 |                                                              
+ src/authentication/guards     |      90 |       25 |     100 |    87.5 |                                                                                                      
 
-  jwt-auth.guard.ts            |      40 |        0 |       0 |      25 | 14-24                                                        
+  jwt-auth.guard.ts            |      90 |       25 |     100 |    87.5 | 19                                                                                                   
 
- src/authentication/service    |   18.42 |        0 |    12.5 |   16.21 |                                                              
+ src/authentication/service    |   84.21 |       75 |    87.5 |   83.78 |                                                                                                      
 
-  authentication.service.ts    |   18.42 |        0 |    12.5 |   16.21 | 32-134                                                       
+  authentication.service.ts    |   84.21 |       75 |    87.5 |   83.78 | 62-67,78,134                                                                                         
 
- src/authentication/strategy   |      75 |      100 |      50 |   66.66 |                                                              
+ src/authentication/strategy   |     100 |      100 |     100 |     100 |                                                                                                      
 
-  jwt-auth.strategy.ts         |      75 |      100 |      50 |   66.66 | 18                                                           
+  jwt-auth.strategy.ts         |     100 |      100 |     100 |     100 |                                                                                                      
 
- src/category                  |     100 |      100 |     100 |     100 |                                                              
+ src/category                  |     100 |      100 |     100 |     100 |                                                                                                      
 
-  category.module.ts           |     100 |      100 |     100 |     100 |                                                              
+  category.module.ts           |     100 |      100 |     100 |     100 |                                                                                                      
 
- src/category/controller       |   71.42 |      100 |   33.33 |   66.66 |                                                              
+ src/category/controller       |     100 |      100 |     100 |     100 |                                                                                                      
 
-  category.controller.ts       |   71.42 |      100 |   33.33 |   66.66 | 16-17                                                        
+  category.controller.ts       |     100 |      100 |     100 |     100 |                                                                                                      
 
- src/category/service          |   59.25 |    85.71 |      40 |   57.69 |                                                              
+ src/category/service          |   92.59 |      100 |     100 |    92.3 |                                                                                                      
 
-  category.service.ts          |   59.25 |    85.71 |      40 |   57.69 | 27-91                                                        
+  category.service.ts          |   92.59 |      100 |     100 |    92.3 | 90-91                                                                                                
 
- src/decoraters                |   66.66 |       50 |      50 |      60 |                                                              
+ src/decoraters                |     100 |       50 |     100 |     100 |                                                                                                      
 
-  proxied_throttler.ts         |     100 |       50 |     100 |     100 | 7                                                            
+  proxied_throttler.ts         |     100 |       50 |     100 |     100 | 7                                                                                                    
 
-  user.decorator.ts            |   33.33 |      100 |       0 |   33.33 | 5-6                                                          
+  user.decorator.ts            |     100 |      100 |     100 |     100 |                                                                                                      
 
- src/middleware                |   79.06 |    68.75 |    87.5 |    77.5 |                                                              
+ src/middleware                |   79.06 |    68.75 |    87.5 |    77.5 |                                                                                                      
 
-  cookie_session.ts            |     100 |      100 |     100 |     100 |                                                              
+  cookie_session.ts            |     100 |      100 |     100 |     100 |                                                                                                      
 
-  logger.ts                    |      75 |    66.66 |      80 |   73.52 | 20-33                                                        
+  logger.ts                    |      75 |    66.66 |      80 |   73.52 | 20-33                                                                                                
 
- src/mock                      |     100 |      100 |     100 |     100 |                                                              
+ src/mock                      |     100 |      100 |     100 |     100 |                                                                                                      
 
-  cache.module.ts              |     100 |      100 |     100 |     100 |                                                              
+  cache.module.ts              |     100 |      100 |     100 |     100 |                                                                                                      
 
-  db.module.ts                 |     100 |      100 |     100 |     100 |                                                              
+  db.module.ts                 |     100 |      100 |     100 |     100 |                                                                                                      
 
- src/nft                       |    87.5 |       50 |   72.72 |   85.18 |                                                              
+ src/nft                       |   90.62 |    66.66 |   72.72 |   88.88 |                                                                                                      
 
-  nft.module.ts                |     100 |      100 |     100 |     100 |                                                              
+  nft.module.ts                |     100 |      100 |     100 |     100 |                                                                                                      
 
-  params.ts                    |   86.66 |       50 |   72.72 |   84.61 | 31,51,56,81                                                  
+  params.ts                    |      90 |    66.66 |   72.72 |   88.46 | 31,51,56                                                                                             
 
- src/nft/controller            |   58.33 |       60 |   58.82 |   56.89 |                                                              
+ src/nft/controller            |   93.33 |    73.33 |     100 |    93.1 |                                                                                                      
 
-  nft.controller.ts            |   58.33 |       60 |   58.82 |   56.89 | 43-49,57-67,75-81,109-117,140,191-209                        
+  nft.controller.ts            |   93.33 |    73.33 |     100 |    93.1 | 59,77,140,205                                                                                        
 
- src/nft/service               |   30.76 |    28.91 |   22.72 |      30 |                                                              
+ src/nft/service               |    68.2 |    53.01 |   70.45 |   67.36 |                                                                                                      
 
-  ipfs.service.ts              |      14 |        0 |    7.14 |   12.24 | 20-29,44-81,89-192                                           
+  ipfs.service.ts              |      26 |       10 |   21.42 |   24.48 | 20-29,49-81,89-175,186-192                                                                           
 
-  mint.service.ts              |   23.07 |        0 |   16.66 |      20 | 32-39,47-120                                                 
+  mint.service.ts              |   76.92 |      100 |   83.33 |      76 | 35,53-63,74-89                                                                                       
 
-  nft.service.ts               |   39.49 |    47.05 |   33.33 |   39.65 | 38-235,253-257,264,270,281,339,343-344,389-427,505-506       
+  nft.service.ts               |   84.03 |    76.47 |   95.83 |   83.62 | 41-42,46-47,99-107,114-118,253-257,264,270,281,349-350,511-512                                       
 
- src/payment                   |     100 |      100 |     100 |     100 |                                                              
+ src/payment                   |     100 |      100 |     100 |     100 |                                                                                                      
 
-  payment.module.ts            |     100 |      100 |     100 |     100 |                                                              
+  payment.module.ts            |     100 |      100 |     100 |     100 |                                                                                                      
 
- src/payment/controller        |      28 |        0 |   33.33 |      25 |                                                              
+ src/payment/controller        |      28 |        0 |   33.33 |      25 |                                                                                                      
 
-  payment.controller.ts        |      28 |        0 |   33.33 |      25 | 38-65,74-91                                                  
+  payment.controller.ts        |      28 |        0 |   33.33 |      25 | 38-65,74-91                                                                                          
 
- src/payment/service           |   17.24 |     14.7 |    9.37 |   16.78 |                                                              
+ src/payment/service           |   72.41 |    52.94 |   81.25 |   72.02 |                                                                                                      
 
-  payment.service.ts           |   17.24 |     14.7 |    9.37 |   16.78 | 74-387,393-412,421-601                                       
+  payment.service.ts           |   72.41 |    52.94 |   81.25 |   72.02 | 74,94-98,131-132,148,180,188,231-234,245-247,265-300,332-335,375-378,433-438,470,481-488,527,537-540 
 
- src/user                      |     100 |      100 |     100 |     100 |                                                              
+ src/user                      |     100 |      100 |     100 |     100 |                                                                                                      
 
-  user.module.ts               |     100 |      100 |     100 |     100 |                                                              
+  user.module.ts               |     100 |      100 |     100 |     100 |                                                                                                      
 
- src/user/controller           |   19.35 |        0 |    7.14 |   18.64 |                                                              
+ src/user/controller           |   85.48 |    77.41 |     100 |   84.74 |                                                                                                      
 
-  user.controller.ts           |   19.35 |        0 |    7.14 |   18.64 | 56-80,95-116,126-127,138-145,158-169,179-205,219-232,242-248 
+  user.controller.ts           |   85.48 |    77.41 |     100 |   84.74 | 70,115-116,161-164,186,190,202-205                                                                   
 
- src/user/service              |   12.28 |        0 |    3.84 |   11.71 |                                                              
+ src/user/service              |   91.22 |    68.96 |     100 |   90.99 |                                                                                                      
 
-  user.service.ts              |   12.28 |        0 |    3.84 |   11.71 | 59-466,475-509                                               
+  user.service.ts              |   91.22 |    68.96 |     100 |   90.99 | 81,104-109,212,313,368,374                                                                           
 
--------------------------------|---------|----------|---------|---------|--------------------------------------------------------------
+-------------------------------|---------|----------|---------|---------|------------------------------------------------------------------------------------------------------

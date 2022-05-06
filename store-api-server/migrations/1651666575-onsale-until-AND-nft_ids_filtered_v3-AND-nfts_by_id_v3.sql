@@ -14,7 +14,7 @@ ALTER FUNCTION nft_ids_filtered RENAME TO __nft_ids_filtered_v2;
 CREATE FUNCTION nft_ids_filtered(
     address TEXT, categories INTEGER[],
     price_at_least NUMERIC, price_at_most NUMERIC,
-    availability TEXT[], ends_soon_duration INTERVAL,
+    availability TEXT[], ending_soon_duration INTERVAL,
     order_by TEXT, order_direction TEXT,
     "offset" INTEGER, "limit" INTEGER,
     until TIMESTAMP WITHOUT TIME ZONE,
@@ -81,7 +81,7 @@ BEGIN
       OFFSET $8
       LIMIT  $9
     ) q'
-    USING until, address, categories, price_at_least, price_at_most, availability, ends_soon_duration, "offset", "limit", minter_address;
+    USING until, address, categories, price_at_least, price_at_most, availability, ending_soon_duration, "offset", "limit", minter_address;
 END
 $$
 LANGUAGE plpgsql;

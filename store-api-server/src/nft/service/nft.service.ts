@@ -304,7 +304,7 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
       const priceBounds = await this.conn.query(
         `
 SELECT min_price, max_price
-FROM price_bounds($1, $2, $3, $4)`,
+FROM price_bounds($1, $2, $3, $4, $5)`,
         [
           filters.userAddress,
           filters.categories,
