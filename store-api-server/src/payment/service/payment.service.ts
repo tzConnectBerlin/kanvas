@@ -1,5 +1,5 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { PG_CONNECTION } from '../../constants.js';
+import { PG_CONNECTION, PAYPOINT_SCHEMA } from '../../constants.js';
 import { UserService } from '../../user/service/user.service.js';
 import { NftService } from '../../nft/service/nft.service.js';
 import { MintService } from '../../nft/service/mint.service.js';
@@ -45,6 +45,7 @@ export interface PaymentIntent {
   currency: string;
   clientSecret: string;
   id: string;
+  tezpayContract?: string;
 }
 
 @Injectable()
@@ -68,10 +69,12 @@ export class PaymentService {
     private readonly userService: UserService,
     private readonly nftService: NftService,
     private readonly currencyService: CurrencyService,
-  ) {}
-
-  async initTezpay() {
-    this.tezpay = new (await Tezpay)();
+  ) {
+    this.tezpay = new Tezpay({
+      paypoint_schema_name: PAYPOINT_SCHEMA,
+      db_pool: conn,
+      block_confirmations: 2,
+    });
   }
 
   async webhookHandler(constructedEvent: any) {
@@ -302,6 +305,7 @@ WHERE id = $2
       currency: 'XTZ',
       clientSecret: tezpayIntent.message,
       id,
+      tezpayContract: 'TODO',
     };
   }
 
