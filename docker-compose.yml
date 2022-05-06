@@ -74,8 +74,8 @@ services:
       PGDATABASE: dev_database
       DATABASE_URL: "postgres://store_pguser:store_pgpass@store-db:5432/dev_database"
       CONTRACT_SETTINGS: /config/kanvas.yaml
-      NODE_URL: http://art-basel.tzconnect.berlin:18732
-      BCD_NETWORK: hangzhou2net
+      NODE_URL: https://ithaca-archive.tzconnect.berlin
+      BCD_NETWORK: ithacanet
 
 
   admin-db:
@@ -153,5 +153,5 @@ services:
       PGDATABASE: store_replication
       DATABASE_URL: "postgres://admin_pguser:admin_pgpass@admin-db:5432/store_replication"
       CONTRACT_SETTINGS: /config/kanvas.yaml
-      NODE_URL: http://art-basel.tzconnect.berlin:18732
-      BCD_NETWORK: hangzhou2net
+      NODE_URL: https://ithaca-archive.tzconnect.berlin
+      BCD_NETWORK: ithacanet
