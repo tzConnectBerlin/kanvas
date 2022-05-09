@@ -164,6 +164,10 @@ export class PaymentService {
       true,
       dbTx,
     );
+    if (cartList.nfts.length === 0) {
+      throw `cannot create a payment order for an empty cart`;
+    }
+    console.log(cartList);
     const baseUnitAmount = cartList.nfts.reduce(
       (sum, nft) => sum + Number(nft.price),
       0,
@@ -291,6 +295,7 @@ WHERE id = $2
     baseUnitAmount: number,
   ): Promise<PaymentIntent> {
     const id = uuidv4();
+    console.log(`baseUnitAmount: ${baseUnitAmount}`);
     const amount = this.currencyService.convertToCurrency(
       baseUnitAmount,
       'XTZ',
@@ -298,7 +303,7 @@ WHERE id = $2
     );
     const tezpayIntent = await this.tezpay.init_payment({
       external_id: id,
-      tez_amount: amount,
+      mutez_amount: amount,
     });
     return {
       amount,

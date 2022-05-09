@@ -42,7 +42,7 @@ export class CurrencyService {
     }
 
     const decimals = inBaseUnit ? 0 : SUPPORTED_CURRENCIES[toCurrency];
-    return (baseUnitAmount * this.#getRate(toCurrency, maxAge)).toFixed(
+    return (baseUnitAmount * this.#getRate(toCurrency, maxAge, inBaseUnit)).toFixed(
       decimals,
     );
   }
