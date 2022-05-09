@@ -69,8 +69,11 @@ export class PaymentController {
   @UseGuards(JwtAuthGuard)
   async createPaymentIntent(
     @CurrentUser() user: UserEntity,
-    @Body() currency: string = BASE_CURRENCY,
+    @Body('currency') currency: string = BASE_CURRENCY,
   ): Promise<PaymentIntent> {
+
+    Logger.log(`createPaymentIntent: ${JSON.stringify(currency)}`);
+
     validateRequestedCurrency(currency);
 
     let paymentProvider: PaymentProvider;
