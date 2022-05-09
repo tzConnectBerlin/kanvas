@@ -482,7 +482,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                                                     <FlexSpacer />
                                                     {selectedPaymentMethod === 'stripe' && <StyledDoneIcon />}
                                                 </StyledPaymentStack>
-                                                <StyledPaymentStack direction="row" disabled={true} selected={selectedPaymentMethod === 'tezos'} onClick={() => { }} >
+                                                <StyledPaymentStack direction="row" selected={selectedPaymentMethod === 'tezos'} onClick={() => { selectPaymentMethod('tezos') }} >
                                                     <StyledImage src='img/tezos-logo.png' />
                                                     <Stack direction="column" >
                                                         <Typography
@@ -506,14 +506,6 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                                                     </Stack>
                                                     <FlexSpacer />
                                                     {selectedPaymentMethod === 'tezos' && <StyledDoneIcon />}
-                                                    {<Typography
-                                                        size="h5"
-                                                        weight="Light"
-                                                        display="initial !important"
-                                                        color='#c4c4c4'
-                                                    >
-                                                        {t("checkout.upcoming_payment_method")}
-                                                    </Typography>}
                                                 </StyledPaymentStack>
                                             </Stack>
                                         </Animated>
