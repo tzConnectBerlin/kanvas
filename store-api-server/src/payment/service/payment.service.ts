@@ -167,7 +167,6 @@ export class PaymentService {
     if (cartList.nfts.length === 0) {
       throw `cannot create a payment order for an empty cart`;
     }
-    console.log(cartList);
     const baseUnitAmount = cartList.nfts.reduce(
       (sum, nft) => sum + Number(nft.price),
       0,
@@ -295,7 +294,6 @@ WHERE id = $2
     baseUnitAmount: number,
   ): Promise<PaymentIntent> {
     const id = uuidv4();
-    console.log(`baseUnitAmount: ${baseUnitAmount}`);
     const amount = this.currencyService.convertToCurrency(
       baseUnitAmount,
       'XTZ',
