@@ -4,7 +4,7 @@ dotenv.config();
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
-import { BEHIND_PROXY } from './constants.js';
+import { BEHIND_PROXY } from './constants';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 var bodyParser = require('body-parser');
