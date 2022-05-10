@@ -410,15 +410,10 @@ WHERE expires_at < now() AT TIME ZONE 'UTC'
     );
 
     for (const row of cancelOrderIds.rows) {
+      const orderId = Number(row['nft_order_id']);
       await withTransaction(this.conn, async (dbTx: DbTransaction) => {
-        await this.cancelNftOrderId(
-          dbTx,
-          Number(row['nft_order_id']),
-          PaymentStatus.TIMED_OUT,
-        );
-        Logger.warn(
-          `canceled following expired order session: ${row['payment_id']}`,
-        );
+        await this.cancelNftOrderId(dbTx, orderId, PaymentStatus.TIMED_OUT);
+        Logger.warn(`canceled following expired order session: ${orderId}`);
       });
     }
   }
