@@ -6,6 +6,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module.js';
+import { BEHIND_PROXY } from './constants.js';
 
 async function bootstrap() {
   const port = process.env['KANVAS_API_PORT'] || 3000;
@@ -16,7 +17,9 @@ async function bootstrap() {
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.use('/payment/stripe-webhook', raw({ type: 'application/json' }));
-  app.set('trust proxy', 1);
+  if (BEHIND_PROXY) {
+    app.set('trust proxy', 1);
+  }
   app.enableShutdownHooks();
 
   await app.listen(port);

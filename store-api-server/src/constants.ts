@@ -24,3 +24,9 @@ export const CACHE_TTL = Number(process.env['CACHE_TTL'] || 60); // in seconds
 export const CACHE_SIZE = Number(process.env['CACHE_SIZE'] || 10_000); // in max number of items in the cache
 
 export const NUM_TOP_BUYERS = 12;
+
+// Enable this when for example NGINX sits between incoming traffic and the API.
+// It will enable things like the rate limiter to take the incoming IP address
+// from the X-Forwarded-For header.
+export const BEHIND_PROXY: boolean =
+  (process.env['BEHIND_PROXY'] || 'no') === 'yes';
