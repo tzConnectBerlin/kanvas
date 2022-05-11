@@ -28,6 +28,8 @@ import { Animated } from 'react-animated-css';
 import Success from '../../design-system/atoms/Success';
 import StripeCheckoutForm from '../../design-system/organismes/StripeCheckOutForm';
 
+import get_transfer_object  from '../../../../lib/tezpay/client/client.mjs';
+
 interface CheckoutProps {
     loading: boolean;
     expiresAt: string;
@@ -320,8 +322,19 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
             });
         }
 
-        if (paymentIntentSecret.data && selectedPaymentMethod === 'stripe') {
+        if (paymentIntentSecret.data && selectedPaymentMethod === 'tezos') {
             // tezpay client logic here.
+
+            console.log(paymentIntentSecret.data);
+
+            // let { amount, receiverAddress } = paymentIntentSecret.data;
+            // let message = 'Hello, world!';
+
+            // get_transfer_object(tezos, {
+            //     receiverAddress,
+            //     amount,
+            //     message,
+            // });
         }
 
         if (paymentIntentSecret.response?.status === 401) {
