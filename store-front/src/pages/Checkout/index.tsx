@@ -151,7 +151,7 @@ const StyledDoneIcon = styled(DoneIcon)<{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.primary.contrastText};
 `;
 
-const steps = ['Summary', 'Choose payment method', 'Proceed payment'];
+const steps = ['Summary', 'Payment method', 'Checkout'];
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PK_KEY!);
 
@@ -287,7 +287,9 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                 '/payment/create-payment-intent',
             method: 'POST',
             withCredentials: true,
-            data: {  currency: 'XTZ' }  ,
+            data: {
+                currency: selectedPaymentMethod === 'stripe' ? 'EUR' : 'XTZ',
+            },
             headers: {
                 Authorization: `Bearer ${localStorage.getItem(
                     'Kanvas - Bearer',
@@ -317,7 +319,9 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                 'You need to select at least one payment method to continue',
             );
             return false;
-        } else {
+        }
+
+        if (activeStep === 1 && selectedPaymentMethod) {
             getPaymentIntentSecret()
                 .then(() => {
                     setActiveStep(activeStep + 1);
@@ -329,9 +333,6 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                     }
                 });
         }
-        // if (activeStep === 1 && selectedPaymentMethod === 'tezos') {
-        //     alert("Tezos payment is not yet available");
-        // }
 
         if (activeStep === 3) {
             history.push(
@@ -341,16 +342,20 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
     };
 
     useEffect(() => {
-        if (paymentIntentSecret.data) {
+        if (paymentIntentSecret.data && selectedPaymentMethod === 'stripe') {
             const appearance = {
                 theme: 'flat' as 'flat',
             };
-            console.log(paymentIntentSecret.data);
-            // setStripeOptions({
-            //     appearance: appearance,
-            //     clientSecret: paymentIntentSecret.data.clientSecret,
-            // });
+            setStripeOptions({
+                appearance: appearance,
+                clientSecret: paymentIntentSecret.data.clientSecret,
+            });
         }
+
+        if (paymentIntentSecret.data && selectedPaymentMethod === 'stripe') {
+            // tezpay client logic here.
+        }
+
         if (paymentIntentSecret.response?.status === 401) {
             return;
         }
@@ -382,6 +387,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                     maxWidth: '100rem',
                     width: '100%',
                     alignItems: 'center',
+                    paddingBottom: '5rem',
                 }}
             >
                 <FlexSpacer minHeight={isMobile ? 6 : 8} />
@@ -624,6 +630,16 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                                                     <StyledDoneIcon />
                                                 )}
                                             </StyledPaymentStack>
+                                            {errorMessagePaymentMethod && (
+                                                <Typography
+                                                    size="h5"
+                                                    weight="Light"
+                                                    color="error"
+                                                    sx={{ pt: 2 }}
+                                                >
+                                                    {errorMessagePaymentMethod}
+                                                </Typography>
+                                            )}
                                         </Stack>
                                     </Animated>
                                 ) : (
@@ -653,21 +669,33 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                                         >
                                             {/* Strip data */}
                                             {stripeOptions.clientSecret !==
-                                                undefined && (
-                                                <Elements
-                                                    stripe={stripePromise}
-                                                    options={stripeOptions}
-                                                >
-                                                    <StripeCheckoutForm
-                                                        activeStep={activeStep}
-                                                        setActiveStep={
-                                                            setActiveStep
-                                                        }
-                                                        setNftsInCart={
-                                                            props.setNftsInCart
-                                                        }
-                                                    />
-                                                </Elements>
+                                                undefined &&
+                                                selectedPaymentMethod ===
+                                                    'stripe' && (
+                                                    <Elements
+                                                        stripe={stripePromise}
+                                                        options={stripeOptions}
+                                                    >
+                                                        <StripeCheckoutForm
+                                                            activeStep={
+                                                                activeStep
+                                                            }
+                                                            setActiveStep={
+                                                                setActiveStep
+                                                            }
+                                                            setNftsInCart={
+                                                                props.setNftsInCart
+                                                            }
+                                                        />
+                                                    </Elements>
+                                                )}
+
+                                            {selectedPaymentMethod ===
+                                                'tezos' && (
+                                                <p>
+                                                    Initializating payment with
+                                                    wallet...
+                                                </p>
                                             )}
                                         </Stack>
                                     </StyledAnimated>
@@ -735,15 +763,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                         />
                     )}
                 </Stack>
-                <Typography size="h5" weight="Light" color="error">
-                    {errorMessagePaymentMethod}
-                </Typography>
             </Stack>
-
-            <Prompt
-                when={activeStep < 3}
-                message="Are you sure you want to leave?"
-            />
 
             {/* Button validate step or go bvack to profile */}
         </PageWrapper>
