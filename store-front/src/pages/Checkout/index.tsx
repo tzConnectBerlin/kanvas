@@ -174,38 +174,6 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
 
     const [concernedDeletedNFT, setConcernedDeletedNft] = useState<number>();
 
-    const [showExitPrompt, setShowExitPrompt] = useState(false);
-
-    const initBeforeUnLoad = (showExitPrompt = false) => {
-        window.onbeforeunload = (event) => {
-            // Show prompt based on state
-            if (showExitPrompt && history.location.pathname === '/checkout') {
-                const e = event || window.event;
-                e.preventDefault();
-                if (e) {
-                    e.returnValue = '';
-                }
-                return '';
-            }
-        };
-    };
-
-    window.onload = function () {
-        initBeforeUnLoad(showExitPrompt);
-    };
-
-    // Re-Initialize the onbeforeunload event listener
-    useEffect(() => {
-        initBeforeUnLoad(showExitPrompt);
-    }, [showExitPrompt]);
-
-    useEffect(() => {
-        setShowExitPrompt(true);
-        return () => {
-            setShowExitPrompt(false);
-        };
-    }, []);
-
     const handleDeleteFromBasket = (nftId: number) => {
         if (activeStep > 1) {
             return false;
