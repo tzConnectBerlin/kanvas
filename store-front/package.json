@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@airgap/beacon-sdk": "^2.3.2",
+    "@airgap/beacon-sdk": "^3.0.0",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.0.0",
     "@material-ui/core": "^4.12.3",
@@ -18,7 +18,7 @@
     "@storybook/addon-docs": "^6.3.8",
     "@stripe/react-stripe-js": "^1.7.0",
     "@stripe/stripe-js": "^1.22.0",
-    "@taquito/beacon-wallet": "^10.1.2",
+    "@taquito/beacon-wallet": "^12.1.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
