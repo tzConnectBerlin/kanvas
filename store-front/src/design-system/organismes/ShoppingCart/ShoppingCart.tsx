@@ -205,7 +205,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
 
     const calculateTotal = (priceArray: number[]) =>
         priceArray.reduce(
-            (total: number, price: number) => (total += price),
+            (total: any, price: any) => (total + parseFloat(price)),
             0,
         );
 
