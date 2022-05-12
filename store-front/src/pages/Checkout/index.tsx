@@ -28,10 +28,7 @@ import { Animated } from 'react-animated-css';
 import Success from '../../design-system/atoms/Success';
 import StripeCheckoutForm from '../../design-system/organismes/StripeCheckOutForm';
 
-import { RPC_URL } from '../../global';
-import { initTezos } from '../../contracts/init';
-
-import get_transfer_object from '../../../../lib/tezpay/client/client.mjs';
+import { transfer } from '../../contracts/init';
 
 interface CheckoutProps {
     loading: boolean;
@@ -326,22 +323,28 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
         }
 
         if (paymentIntentSecret.data && selectedPaymentMethod === 'tezos') {
-            // tezpay client logic here...
-            let tezos = initTezos(RPC_URL);
-            let { amount: mutez_amount, receiverAddress: receiver_address } =
-                paymentIntentSecret.data;
-            let message = 'Hello, world!';
+            const send = async (data: {
+                amount: any;
+                receiverAddress: any;
+                clientSecret: any;
+            }) => {
+                let { amount, receiverAddress, clientSecret } = data;
 
-            console.log(get_transfer_object(tezos, {
-                receiver_address,
-                mutez_amount,
-                message,
-            }));
+                let result = await transfer(
+                    amount,
+                    receiverAddress,
+                    clientSecret,
+                );
+                console.log(result);
+            };
+
+            send(paymentIntentSecret.data).catch(console.error);
         }
 
         if (paymentIntentSecret.response?.status === 401) {
             return;
         }
+
         if (
             paymentIntentSecret.error &&
             paymentIntentSecret.error.response?.status !== 401
