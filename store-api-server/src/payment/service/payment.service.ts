@@ -1,4 +1,10 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  Logger,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { PG_CONNECTION, PAYPOINT_SCHEMA } from '../../constants.js';
 import { UserService } from '../../user/service/user.service.js';
 import { NftService } from '../../nft/service/nft.service.js';
@@ -105,6 +111,33 @@ export class PaymentService {
       constructedEvent.data.object.id,
       paymentStatus,
     );
+  }
+
+  async getPaymentStatus(
+    userId: number,
+    paymentId: string,
+  ): Promise<PaymentStatus> {
+    const qryRes = await this.conn.query(
+      `
+SELECT
+  payment.status
+FROM payment
+JOIN nft_order
+  ON nft_order.id = payment.nft_order_id
+WHERE user_id = $1
+  AND payment.payment_id = $2
+      `,
+      [userId, paymentId],
+    );
+
+    if (qryRes.rowCount === 0) {
+      throw new HttpException(
+        `logged in user does not have a payment with payment_id=${paymentId}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return qryRes.rows[0]['status'];
   }
 
   async createPayment(

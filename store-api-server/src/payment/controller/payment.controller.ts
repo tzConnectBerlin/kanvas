@@ -2,18 +2,22 @@ import {
   Controller,
   HttpException,
   Post,
+  Get,
   Req,
+  Param,
   Body,
   Headers,
   HttpStatus,
   UseGuards,
   Logger,
+  Header,
 } from '@nestjs/common';
 import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { JwtAuthGuard } from '../../authentication/guards/jwt-auth.guard.js';
 import {
   PaymentService,
   PaymentIntent,
+  PaymentStatus,
   PaymentProvider,
 } from '../../payment/service/payment.service.js';
 import { UserEntity } from '../../user/entity/user.entity.js';
@@ -71,7 +75,6 @@ export class PaymentController {
     @CurrentUser() user: UserEntity,
     @Body('currency') currency: string = BASE_CURRENCY,
   ): Promise<PaymentIntent> {
-
     Logger.log(`createPaymentIntent: ${JSON.stringify(currency)}`);
 
     validateRequestedCurrency(currency);
@@ -96,5 +99,17 @@ export class PaymentController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  @Get('/status/:payment_id')
+  @UseGuards(JwtAuthGuard)
+  @Header('cache-control', 'no-store,must-revalidate')
+  async getPaymentStatus(
+    @CurrentUser() user: UserEntity,
+    @Param('payment_id') paymentId: string,
+  ): Promise<{ status: PaymentStatus }> {
+    return {
+      status: await this.paymentService.getPaymentStatus(user.id, paymentId),
+    };
   }
 }
