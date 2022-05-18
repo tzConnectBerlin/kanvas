@@ -181,7 +181,7 @@ EOF
 function setup_nginx {
     sudo mv /etc/nginx/nginx.conf "/etc/nginx/nginx.conf.bak`ls -w 1 /etc/nginx | grep nginx.conf | wc -l`"
 
-    nginx_conf=$(cat <<EOF
+    export nginx_conf=$(cat <<EOF
 user  nginx;
 worker_processes  auto;
 
@@ -192,7 +192,6 @@ pid        /var/run/nginx.pid;
 events {
     worker_connections  1024;
 }
-
 
 http {
     include       /etc/nginx/mime.types;
@@ -212,6 +211,11 @@ http {
     #gzip  on;
 
     include /etc/nginx/conf.d/*.conf;
+
+    map \$http_upgrade \$connection_upgrade {
+        default upgrade;
+        '' close;
+    }
 
     server {
         root /var/www/html;
@@ -284,7 +288,7 @@ http {
 }
 EOF
 )
-    sudo echo "$nginx_conf" > /etc/nginx/nginx.conf
+    sudo --preserve-env=nginx_conf bash -c 'echo "$nginx_conf" > /etc/nginx/nginx.conf'
 
     sudo certbot --nginx
 }
