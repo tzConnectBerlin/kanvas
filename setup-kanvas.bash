@@ -217,7 +217,7 @@ http {
         root /var/www/html;
         index index.html index.htm index.nginx-debian.html;
 
-        server_name `take_env STORE_FRONT_URL global.env | sed 's/^https?:\/\///'`;
+        server_name `take_env STORE_FRONT_URL global.env | sed -E 's/^https?:\/\///'`;
         client_max_body_size 100M;
 
         location / {
@@ -253,7 +253,7 @@ http {
         root /var/www/html;
         index index.html index.htm index.nginx-debian.html;
 
-        server_name `take_env ADMIN_FRONT_URL global.env | sed 's/^https?:\/\///'`;
+        server_name `take_env ADMIN_FRONT_URL global.env | sed -E 's/^https?:\/\///'`;
         client_max_body_size 100M;
 
         location / {

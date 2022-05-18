@@ -65,4 +65,10 @@ sudo apt install nginx
 
 sudo apt install jq
 
+
+# need certbot
+
+sudo apt install snapd
+sudo snap install --classic certbot
+
 echo "reboot or logout->login for sudoless docker"
