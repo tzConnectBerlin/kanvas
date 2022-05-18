@@ -181,7 +181,7 @@ EOF
 function setup_nginx {
     sudo mv /etc/nginx/nginx.conf "/etc/nginx/nginx.conf.bak`ls -w 1 /etc/nginx | grep nginx.conf | wc -l`"
 
-    sudo bash -c "cat <<EOF > /etc/nginx/nginx.conf
+    nginx_conf=$(cat <<EOF
 user  nginx;
 worker_processes  auto;
 
@@ -198,9 +198,9 @@ http {
     include       /etc/nginx/mime.types;
     default_type  application/octet-stream;
 
-    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-                      '$status $body_bytes_sent "$http_referer" '
-                      '"$http_user_agent" "$http_x_forwarded_for"';
+    log_format  main  '\$remote_addr - \$remote_user [\$time_local] "\$request" '
+                      '\$status \$body_bytes_sent "\$http_referer" '
+                      '"\$http_user_agent" "\$http_x_forwarded_for"';
 
     access_log  /var/log/nginx/access.log  main;
 
@@ -283,7 +283,8 @@ http {
     }
 }
 EOF
-"
+)
+    sudo echo "$nginx_conf" > /etc/nginx/nginx.conf
 
     sudo certbot --nginx
 }
