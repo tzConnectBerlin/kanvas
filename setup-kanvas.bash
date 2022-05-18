@@ -179,9 +179,40 @@ EOF
 }
 
 function setup_nginx {
-    sudo cp /etc/nginx/nginx.conf "/etc/nginx/nginx.conf.bak`ls -w 1 /etc/nginx | grep nginx.conf | wc -l`"
+    sudo mv /etc/nginx/nginx.conf "/etc/nginx/nginx.conf.bak`ls -w 1 /etc/nginx | grep nginx.conf | wc -l`"
 
     sudo bash -c "cat <<EOF > /etc/nginx/nginx.conf
+user  nginx;
+worker_processes  auto;
+
+error_log  /var/log/nginx/error.log notice;
+pid        /var/run/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    include /etc/nginx/conf.d/*.conf;
+
     server {
         root /var/www/html;
         index index.html index.htm index.nginx-debian.html;
@@ -250,6 +281,7 @@ function setup_nginx {
             proxy_set_header Host \$host;
         }
     }
+}
 EOF
 "
 
@@ -263,9 +295,12 @@ step \
 step \
     'In global.env:
 - set STORE_API_URL (exact URL to the API, eg https://kanvas.tzconnect.berlin/api
+- set STORE_FRONT_URL
+- set ADMIN_API_URL
+- set ADMIN_FRONT_URL
 - is the store api behind a proxy (eg nginx)? set BEHIND_PROXY_STORE to: yes
 - is the admin api behind a proxy (eg nginx)? set BEHIND_PROXY_ADMIN to: yes
-- have a look at all other tweakable parameters' || exit 1
+- have a look at all other parameters in the "tweakable parameters" section' || exit 1
 
 step "$(cat <<EOF
 AWS S3 (https://s3.console.aws.amazon.com/s3/buckets):
@@ -278,13 +313,14 @@ create 2 new buckets called something like:
 NOTE: must set following options upon creation of each bucket:
 - ACLs enabled  (in "Object Ownership" section)
 - unset all in "Block Public Access settings for this bucket"
+(the rest of the options' defaults are fine)
 EOF
 )" || exit 1
 
 step 'Set in global.env AWS_S3_BUCKET_STORE and AWS_S3_BUCKET_ADMIN to what the buckets have been named in the previous step' || exit 1
 
 step \
-    'Set AWS_S3_ACCESS_KEY and AWS_S3_KEY_SECRET in global.env, these are related to your AWS account. Please find the correct values on their website.' || exit 1
+    'Set AWS_S3_ACCESS_KEY and AWS_S3_KEY_SECRET in global.env, these are related to your AWS account. Please find the correct values on their website (https://us-east-1.console.aws.amazon.com/iam/home#/security_credentials).' || exit 1
 
 step \
     'Stripe (https://dashboard.stripe.com/test/dashboard):
@@ -297,13 +333,13 @@ step \
 
 add a new endpoint for a new webhook:
 1. set the endpoint url to: `take_env STORE_API_URL global.env`/payment/stripe-webhook
-2. select 'payment intent' events
+2. under 'Select events' select all 'payment intent' events
 3. Add endpoint (click the button)
 4. Under the new webhook page, reveal the 'Signing secret', copy this value into STRIPE_WEBHOOK_SECRET in global.env"
 
 step \
     'Pinata (https://app.pinata.cloud/keys):
-1. add a new key with at least the following permissions:
+    1. add a new key with at least the following permissions (listed under "Pinning"):
     - pinFileToIPFS
     - pinJSONToIPFS
 2. save the API secret in global.env under PINATA_API_SECRET

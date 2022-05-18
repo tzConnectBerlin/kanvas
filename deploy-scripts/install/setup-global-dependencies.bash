@@ -60,4 +60,9 @@ echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
 echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" | sudo tee /etc/apt/preferences.d/99-nginx
 sudo apt install nginx
 
+
+# need jq
+
+sudo apt install jq
+
 echo "reboot or logout->login for sudoless docker"
