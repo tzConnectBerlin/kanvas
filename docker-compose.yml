@@ -5,65 +5,70 @@
 services:
   store-db:
     image: postgres:13
-    command:
-      - postgres
-      - -c
-      - wal_level=logical  # <- required for logical replication
     ports:
       - 54320:5432
     environment:
       POSTGRES_USER: store_pguser
       POSTGRES_PASSWORD: store_pgpass
       POSTGRES_DB: dev_database
+    command:
+      - postgres
+      - -c
+      - wal_level=logical  # <- required for logical replication
 
   store-api:
     build:
       context: .
       dockerfile: ./store-api-server/Dockerfile
-    entrypoint: |-
-      bash -c '
-        set -e
-        ./script/wait-db
-        INIT_QUEPASA=false ./script/migrate up
-        if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
-          if [ -v DEPLOYMENT ]; then
-            psql < script/populate-stagingdb.sql
-          else
-            psql < script/populate-testdb.sql
-          fi
-        fi
-        if [ "${STORE_API_ENABLED:-true}" != "false" ]; then
-          yarn start
-        fi
-      '
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 3005:3000
     links:
       - store-db
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    env_file:
-      - store-api-server/.env
     environment:
       PGHOST: store-db
       PGPORT: 5432
       PGUSER: store_pguser
       PGPASSWORD: store_pgpass
       PGDATABASE: dev_database
-
       KANVAS_API_PORT: 3000
+    env_file:
+      - store-api-server/.env
+    entrypoint: |-
+      bash -c '
+        set -e
+        ./script/wait-db
+        INIT_QUEPASA=false ./script/migrate up
+        if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
+          if [ "${DEPLOYMENT:-no}" == "yes" ]; then
+            psql < script/populate-stagingdb.sql
+          else
+            psql < script/populate-testdb.sql
+          fi
+        fi
+        if [ "${STORE_API_ENABLED:-yes}" == "yes" ]; then
+          yarn start
+        fi
+      '
 
+  store-front:
+    build: ./store-front
+    ports:
+      - 3000:3000
+    environment:
+      REACT_APP_PORT: 3000
+    entrypoint: |-
+      bash -c '
+        set -e
+
+        if [ "${STORE_FRONT_ENABLED:-no}" == "yes" ]; then
+          yarn start
+        fi
+      '
 
   store-quepasa:
     image: ghcr.io/tzconnectberlin/que-pasa:1.2.0
-    entrypoint: |-
-      bash -c '
-        set -e -x
-        while ! psql -d "$$DATABASE_URL" -c "select 1" ; do
-          sleep 1
-        done
-        /que-pasa/que-pasa --bcd-enable
-      '
     volumes:
       - ./config:/config
     environment:
@@ -74,9 +79,35 @@ services:
       PGDATABASE: dev_database
       DATABASE_URL: "postgres://store_pguser:store_pgpass@store-db:5432/dev_database"
       CONTRACT_SETTINGS: /config/kanvas.yaml
-      NODE_URL: http://art-basel.tzconnect.berlin:18732
-      BCD_NETWORK: hangzhou2net
+    env_file:
+      - config/.env-kanvas
+    entrypoint: |-
+      bash -c '
+        set -e
+        while ! psql -d "$$DATABASE_URL" -c "select 1" ; do
+          sleep 1
+        done
+        /que-pasa/que-pasa --bcd-enable
+      '
 
+  peppermint:
+    image: ghcr.io/tzconnectberlin/peppermint:1.1
+    volumes:
+      - ./config:/config
+    links:
+      - store-db
+    entrypoint: |-
+      bash -c '
+        set -e -x
+        while ! psql -d "$$DATABASE_URL" -c "select 1 from peppermint.operations" ; do
+          sleep 1
+        done
+
+        cp /config/peppermint.json config.json
+        node app.mjs
+      '
+    environment:
+      DATABASE_URL: "postgres://store_pguser:store_pgpass@store-db:5432/dev_database"
 
   admin-db:
     image: postgres:13
@@ -100,7 +131,7 @@ services:
           yarn seed
           ./script/setup-replication-sub
         fi
-        if [ "${ADMIN_API_ENABLED:-true}" != "false" ]; then
+        if [ "${ADMIN_API_ENABLED:-yes}" == "yes" ]; then
           yarn run start
         fi
       '
@@ -132,6 +163,20 @@ services:
       ADMIN_API_PORT: 3001
       STORE_API: http://store-api:3000
 
+  admin-front:
+    build: ./admin-front
+    ports:
+      - 5000:4000
+    environment:
+      REACT_APP_PORT: 4000
+    entrypoint: |-
+      bash -c '
+        set -e
+
+        if [ "${STORE_FRONT_ENABLED:-no}" == "yes" ]; then
+          yarn start
+        fi
+      '
 
   admin-quepasa:
     image: ghcr.io/tzconnectberlin/que-pasa:1.2.0
@@ -143,6 +188,8 @@ services:
         done
         /que-pasa/que-pasa --bcd-enable
       '
+    env_file:
+      - config/.env-kanvas
     volumes:
       - ./config:/config
     environment:
@@ -153,5 +200,3 @@ services:
       PGDATABASE: store_replication
       DATABASE_URL: "postgres://admin_pguser:admin_pgpass@admin-db:5432/store_replication"
       CONTRACT_SETTINGS: /config/kanvas.yaml
-      NODE_URL: http://art-basel.tzconnect.berlin:18732
-      BCD_NETWORK: hangzhou2net
