@@ -10,7 +10,7 @@ n=0
 function step {
     n=$(( n + 1 ))
     [ $start_from -gt $n ] && return
-    [[ $end_at -ne "0" && $end_at -gt $n ]] && return
+    [[ $end_at -ne 0 && $end_at -lt $n ]] && return
 
     if [ $n -gt 1 ]; then
         echo
@@ -398,7 +398,8 @@ step \
 Note: Certbot will prompt for your information to setup SSL' \
     setup_nginx || exit 1
 
-echo "########################
-### ALL DONE
+step \
+    'ALL DONE
 
-execute "./run-deployment.bash" to start kanvas'
+execute "./run-deployment.bash" to start kanvas' \
+    : || exit 1
