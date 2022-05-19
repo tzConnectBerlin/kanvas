@@ -48,7 +48,7 @@ services:
           fi
         fi
         if [ "${STORE_API_ENABLED:-yes}" == "yes" ]; then
-          yarn start
+          yarn start:prod
         fi
       '
 
@@ -132,7 +132,7 @@ services:
           ./script/setup-replication-sub
         fi
         if [ "${ADMIN_API_ENABLED:-yes}" == "yes" ]; then
-          yarn run start
+          yarn run start:prod
         fi
       '
     ports:

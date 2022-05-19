@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 start_from=${1:-0}
+end_at=${2:-0}
 
 tmpdir=`mktemp --directory`
 mintery="$tmpdir/mintery"
@@ -9,6 +10,7 @@ n=0
 function step {
     n=$(( n + 1 ))
     [ $start_from -gt $n ] && return
+    [[ $end_at -ne "0" && $end_at -gt $n ]] && return
 
     if [ $n -gt 1 ]; then
         echo
@@ -136,7 +138,7 @@ function setup_store_front {
 function setup_admin_front {
     cp_bak '' admin-front/.env || exit 1
 
-    replace_env REACT_APP_API_SERVER_BASE_URL  "`take_env STORE_API_URL global.env`" admin-front/.env || exit 1
+    replace_env REACT_APP_API_SERVER_BASE_URL  "`take_env ADMIN_API_URL global.env`" admin-front/.env || exit 1
     replace_env REACT_APP_STORE_BASE_URL  "`take_env STORE_FRONT_URL global.env`" admin-front/.env
 }
 
@@ -289,8 +291,9 @@ http {
 EOF
 )
     sudo --preserve-env=nginx_conf bash -c 'echo "$nginx_conf" > /etc/nginx/nginx.conf'
+    sudo certbot --nginx || exit
 
-    sudo certbot --nginx
+    sudo nginx -s reload
 }
 
 step \
@@ -390,7 +393,12 @@ step \
     'If running with nginx, continue. otherwise quit here.'
 
 step \
-    'Setting up the nginx config (this will append to the existing nginx config file)' \
+    'Setting up the nginx config (this will append to the existing nginx config file)
+
+Note: Certbot will prompt for your information to setup SSL' \
     setup_nginx || exit 1
 
-echo 'ALL DONE. execute "./run-deployment.bash" to start kanvas'
+echo "########################
+### ALL DONE
+
+execute "./run-deployment.bash" to start kanvas'
