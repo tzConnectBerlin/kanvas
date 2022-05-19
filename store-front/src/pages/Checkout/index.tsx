@@ -323,6 +323,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
         }
 
         if (paymentIntentSecret.data && selectedPaymentMethod === 'tezos') {
+
             const send = async (data: {
                 amount: any;
                 receiverAddress: any;
@@ -330,15 +331,17 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
             }) => {
                 let { amount, receiverAddress, clientSecret } = data;
 
-                let result = await transfer(
+               await transfer(
                     amount,
                     receiverAddress,
                     clientSecret,
                 );
-                console.log(result);
+
             };
 
-            send(paymentIntentSecret.data).catch(console.error);
+            send(paymentIntentSecret.data).then(() => {
+                setActiveStep(3);
+            })
         }
 
         if (paymentIntentSecret.response?.status === 401) {
@@ -351,7 +354,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
         ) {
             toast.error('Something went wrong with the cart, please refresh');
         }
-    }, [paymentIntentSecret]);
+    }, [paymentIntentSecret, selectedPaymentMethod]);
 
     const [stripeOptions, setStripeOptions] = useState<StripeElementsOptions>({
         clientSecret: undefined,

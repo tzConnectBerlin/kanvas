@@ -1,4 +1,4 @@
-import { DAppClientOptions, NetworkType } from '@airgap/beacon-sdk';
+import { NetworkType } from '@airgap/beacon-sdk';
 import { BeaconWallet } from '@taquito/beacon-wallet';
 import { TezosToolkit, MichelCodecPacker } from '@taquito/taquito';
 import { NETWORK, RPC_URL } from '../global';
@@ -28,8 +28,10 @@ export const transfer = async (
     amount: any,
     receiverAddress: any,
     message: any,
-): Promise<void> => {
-
+): Promise<any> => {
+    if (tezos === null) {
+        throw new Error('Edition contract not set or tezos not initialized');
+    }
 
     let paypoint_contract = await tezos.contract.at(receiverAddress);
     let transfer = paypoint_contract.methods
@@ -38,23 +40,16 @@ export const transfer = async (
     transfer.mutez = true;
     transfer.amount = amount;
 
-
     let result = await tezos.wallet
         .transfer(transfer)
         .send()
         .then((op: { confirmation: () => Promise<any> }) => {
             op.confirmation()
                 .then((result: { completed: any }) => {
-                    console.log(result);
-                    if (result.completed) {
-                        console.log('Transaction correctly processed!');
-                    } else {
-                        console.log('An error has occurred');
-                    }
+                    return result
                 })
                 .catch((err: any) => console.log(err));
         });
 
-    console.log(result);
     return result;
 };
