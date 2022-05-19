@@ -297,6 +297,10 @@ step \
     cp_bak global.env.example global.env || exit 1
 
 step \
+    'Setting up nested git repositories' \
+    git submodule update --init || exit 1
+
+step \
     'In global.env:
 - set STORE_API_URL (exact URL to the API, eg https://kanvas.tzconnect.berlin/api
 - set STORE_FRONT_URL
