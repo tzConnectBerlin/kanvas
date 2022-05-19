@@ -3,7 +3,10 @@
 start_from=${1:-0}
 end_at=${2:-0}
 
-tmpdir=`mktemp --directory`
+tmpdir=`basename $(mktemp -d -u)`
+mkdir "$tmpdir"
+trap "rm -rf $tmpdir" EXIT
+
 mintery="$tmpdir/mintery"
 
 n=0
