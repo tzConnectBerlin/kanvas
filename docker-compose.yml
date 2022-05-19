@@ -62,7 +62,7 @@ services:
       bash -c '
         set -e
 
-        if [ "${STORE_FRONT_ENABLED:-no}" == "yes" ]; then
+        if [ "${STORE_FRONT_ENABLED:-yes}" == "yes" ]; then
           yarn start
         fi
       '
@@ -173,7 +173,7 @@ services:
       bash -c '
         set -e
 
-        if [ "${STORE_FRONT_ENABLED:-no}" == "yes" ]; then
+        if [ "${STORE_FRONT_ENABLED:-yes}" == "yes" ]; then
           yarn start
         fi
       '
