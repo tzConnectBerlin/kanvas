@@ -435,8 +435,8 @@ const StorePage = () => {
                                 setSelectedCategories([]);
                                 setSelectedAvailability([]);
                                 setPriceFilterRange([
-                                    nftsResponse.data?.lowerPriceBound,
-                                    nftsResponse.data?.upperPriceBound,
+                                    Number(nftsResponse.data?.lowerPriceBound),
+                                    Number(nftsResponse.data?.upperPriceBound),
                                 ]);
                                 callNFTsEndpoint({
                                     handlePriceRange: false,
