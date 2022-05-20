@@ -286,8 +286,8 @@ http {
 }
 EOF
 )
-    sudo --preserve-env=nginx_conf bash -c 'echo "$nginx_conf" > /etc/nginx/nginx.conf'
-    sudo certbot --nginx || exit
+    sudo --preserve-env=nginx_conf bash -c 'echo "$nginx_conf" > /etc/nginx/nginx.conf' || exit 1
+    sudo certbot --nginx || exit 1
 
     sudo nginx -s reload
 }
@@ -402,4 +402,4 @@ step \
     'ALL DONE
 
 execute "./run-deployment.bash" to start kanvas' \
-    : || exit 1
+    :
