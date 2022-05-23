@@ -8,9 +8,13 @@ import { AppModule } from './app.module.js';
 
 async function bootstrap() {
   const port = process.env['KANVAS_API_PORT'] || 3000;
+  const corsConfig = {
+    credentials: true,
+    origin: true,
+  };
 
   const app = await NestFactory.create(AppModule, {
-    cors: process.env.LOCAL_CORS === 'true',
+    cors: process.env.LOCAL_CORS ? corsConfig : false,
     logger: ['log', 'warn', 'error'],
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
