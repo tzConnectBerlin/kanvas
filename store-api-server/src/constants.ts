@@ -25,6 +25,12 @@ export const CACHE_SIZE = Number(process.env['CACHE_SIZE'] || 10_000); // in max
 
 export const NUM_TOP_BUYERS = 12;
 
+// Enable this when for example NGINX sits between incoming traffic and the API.
+// It will enable things like the rate limiter to take the incoming IP address
+// from the X-Forwarded-For header.
+export const BEHIND_PROXY: boolean =
+  (process.env['BEHIND_PROXY'] || 'no') === 'yes';
+
 // See section '8.5.4. Interval Input' in https://www.postgresql.org/docs/9.1/datatype-datetime.html
 // for exactly what format this duration string should be in.
 export const ENDING_SOON_DURATION = '2 hours';

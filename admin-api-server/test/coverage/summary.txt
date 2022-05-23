@@ -7,17 +7,17 @@ File                      | % Stmts | % Branch | % Funcs | % Lines | Uncovered L
 
 All files                 |   89.25 |    72.66 |   90.32 |   88.21 |                                               
 
- src                      |   83.91 |    69.69 |   85.71 |   82.96 |                                               
+ src                      |   82.31 |    69.44 |   85.71 |   81.29 |                                               
 
   app.module.ts           |     100 |      100 |     100 |     100 |                                               
 
-  constants.ts            |     100 |       75 |     100 |     100 | 22-26                                         
+  constants.ts            |     100 |       80 |     100 |     100 | 22-26                                         
 
   db.module.ts            |   87.09 |        0 |     100 |    86.2 | 32,50,72-75                                   
 
   db_mock.module.ts       |     100 |      100 |     100 |     100 |                                               
 
-  main.ts                 |       0 |        0 |       0 |       0 | 1-23                                          
+  main.ts                 |       0 |        0 |       0 |       0 | 1-32                                          
 
   utils.ts                |   90.74 |       85 |   85.71 |   90.38 | 7,12-13,29,112                                
 
@@ -79,11 +79,11 @@ All files                 |   89.25 |    72.66 |   90.32 |   88.21 |
 
   user.decorator.ts       |     100 |      100 |     100 |     100 |                                               
 
- src/middleware           |     100 |    81.81 |     100 |     100 |                                               
+ src/middleware           |     100 |    61.53 |     100 |     100 |                                               
 
   cookie_session.ts       |     100 |      100 |     100 |     100 |                                               
 
-  logger.ts               |     100 |       80 |     100 |     100 | 14                                            
+  logger.ts               |     100 |    58.33 |     100 |     100 | 12-13                                         
 
  src/nft                  |     100 |       75 |     100 |     100 |                                               
 

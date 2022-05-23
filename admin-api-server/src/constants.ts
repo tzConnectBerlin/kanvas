@@ -26,3 +26,9 @@ export const NFT_DELIST_STATE = 'delisted';
 export const STORE_API = process.env['STORE_API'] || 'http://localhost:3005';
 
 export const ADMIN_PRIVATE_KEY = assertEnv('ADMIN_PRIVATE_KEY');
+
+// Enable this when for example NGINX sits between incoming traffic and the API.
+// It will enable things like the rate limiter to take the incoming IP address
+// from the X-Forwarded-For header.
+export const BEHIND_PROXY: boolean =
+  (process.env['BEHIND_PROXY'] || 'no') === 'yes';
