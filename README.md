@@ -138,7 +138,7 @@ Alternatively, there's also scripts in each components' `script/` directory that
 
 # API Docs
 
-There's currently only some documentation ready for the Store API:
+There's currently only documentation ready for the Store API:
 
 - https://tzconnectberlin.github.io/slate/#introduction
 
