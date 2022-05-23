@@ -31,4 +31,4 @@ RUN yarn link --link-folder /build/yarn_links kanvas-api-lib
 RUN yarn link --link-folder /build/yarn_links kanvas-stm-lib
 RUN yarn build
 
-ENTRYPOINT yarn start
+ENTRYPOINT yarn start:prod

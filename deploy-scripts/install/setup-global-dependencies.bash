@@ -51,4 +51,24 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 sudo gpasswd -a $USER docker
 
+
+# installing the correct nginx version (need a newer version than what apt by default provides)
+
+curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+    http://nginx.org/packages/ubuntu $(lsb_release -cs) -cs nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
+echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" | sudo tee /etc/apt/preferences.d/99-nginx
+sudo apt install nginx
+
+
+# need jq
+
+sudo apt install jq
+
+
+# need certbot
+
+sudo apt install snapd
+sudo snap install --classic certbot
+
 echo "reboot or logout->login for sudoless docker"
