@@ -184,6 +184,11 @@ describe('AppController (e2e)', () => {
     expect(res.body.launchAt).toBeGreaterThan(0);
     delete res.body.launchAt;
 
+    if (typeof res.body.onsaleUntil !== 'undefined') {
+      expect(res.body.onsaleUntil).toBeGreaterThan(0);
+      delete res.body.onsaleUntil;
+    }
+
     expect(res.body).toStrictEqual({
       id: 1,
       name: 'Cartoon',
@@ -271,6 +276,11 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -501,6 +511,11 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -509,6 +524,183 @@ describe('AppController (e2e)', () => {
         nfts: [],
         lowerPriceBound: '0.00',
         upperPriceBound: '0.00',
+      });
+    },
+  );
+
+  skipOnPriorFail('/nfts with upcoming filter', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/nfts')
+      .query({ availability: 'upcoming' });
+    expect(res.statusCode).toEqual(200);
+
+    for (const i in res.body.nfts) {
+      expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+      expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
+      delete res.body.nfts[i].createdAt;
+      delete res.body.nfts[i].launchAt;
+
+      if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+        expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+        delete res.body.nfts[i].onsaleUntil;
+      }
+    }
+
+    expect(res.body).toStrictEqual({
+      currentPage: 1,
+      lowerPriceBound: '10.40',
+      nfts: [
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 4,
+              name: 'Drawing',
+            },
+          ],
+          description: 'its a mountain',
+          displayUri:
+            'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+          editionsAvailable: 6,
+          editionsSize: 6,
+          id: 3,
+          ipfsHash: null,
+          name: 'Internet',
+          price: '10.40',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+        },
+      ],
+      numberOfPages: 1,
+      upperPriceBound: '10.40',
+    });
+  });
+
+  skipOnPriorFail('/nfts with endingSoon filter', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/nfts')
+      .query({ availability: 'endingSoon' });
+    expect(res.statusCode).toEqual(200);
+
+    for (const i in res.body.nfts) {
+      expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+      expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
+      delete res.body.nfts[i].createdAt;
+      delete res.body.nfts[i].launchAt;
+
+      if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+        expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+        delete res.body.nfts[i].onsaleUntil;
+      }
+    }
+
+    expect(res.body).toStrictEqual({
+      currentPage: 1,
+      numberOfPages: 1,
+      nfts: [
+        {
+          id: 1,
+          name: 'Cartoon',
+          description:
+            'Hey guys, here s the WL team ready to write some more code !',
+          ipfsHash: null,
+          artifactUri:
+            'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          displayUri:
+            'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          price: '0.10',
+          editionsSize: 4,
+          editionsAvailable: 4,
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 4,
+              name: 'Drawing',
+            },
+          ],
+        },
+      ],
+      lowerPriceBound: '0.10',
+      upperPriceBound: '0.10',
+    });
+  });
+
+  skipOnPriorFail(
+    '/nfts with 2 availability filters is a union (not intersection)',
+    async () => {
+      const res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ availability: 'upcoming,endingSoon' });
+      expect(res.statusCode).toEqual(200);
+
+      for (const i in res.body.nfts) {
+        expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
+        delete res.body.nfts[i].createdAt;
+        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
+      }
+
+      expect(res.body).toStrictEqual({
+        currentPage: 1,
+        lowerPriceBound: '0.10',
+        nfts: [
+          {
+            id: 1,
+            name: 'Cartoon',
+            description:
+              'Hey guys, here s the WL team ready to write some more code !',
+            ipfsHash: null,
+            artifactUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            displayUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            thumbnailUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            price: '0.10',
+            editionsSize: 4,
+            editionsAvailable: 4,
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 4,
+                name: 'Drawing',
+              },
+            ],
+          },
+          {
+            artifactUri:
+              'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 4,
+                name: 'Drawing',
+              },
+            ],
+            description: 'its a mountain',
+            displayUri:
+              'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+            editionsAvailable: 6,
+            editionsSize: 6,
+            id: 3,
+            ipfsHash: null,
+            name: 'Internet',
+            price: '10.40',
+            thumbnailUri:
+              'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+          },
+        ],
+        numberOfPages: 1,
+        upperPriceBound: '10.40',
       });
     },
   );
@@ -593,6 +785,11 @@ describe('AppController (e2e)', () => {
       expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
       delete res.body.nfts[i].createdAt;
       delete res.body.nfts[i].launchAt;
+
+      if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+        expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+        delete res.body.nfts[i].onsaleUntil;
+      }
     }
 
     expect(res.body).toStrictEqual({
@@ -1686,6 +1883,11 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -1759,6 +1961,11 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -1809,6 +2016,11 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -1862,6 +2074,11 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -1915,6 +2132,11 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -1968,6 +2190,11 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -2021,6 +2248,10 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({

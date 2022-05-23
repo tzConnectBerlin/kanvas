@@ -6,7 +6,7 @@ attributes:
   thumbnail.png: string
   price: number
   editions_size: number
-  launch_at: date
+  onsale_from: date
   categories: number[]
   proposed: boolean
   publish_vote: votes
@@ -33,9 +33,9 @@ states:
       - nft.editions_size > 0
       - nft.price > 0
       - nft.categories.length > 0
-      - nft.launch_at >= Date.now()
+      - nft.onsale_from >= Date.now()
     mutables:
-    - attributes: [price, editions_size, proposed, categories, launch_at]
+    - attributes: [price, editions_size, proposed, categories, onsale_from]
       by_roles: [editor, creator, admin]
 
   proposed:

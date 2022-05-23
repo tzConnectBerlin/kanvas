@@ -31,7 +31,9 @@ export interface CreateNft {
   price: number;
   categories: number[];
   editionsSize: number;
-  launchAt: number;
+
+  onsaleFrom?: number;
+  onsaleUntil?: number;
 
   signature: string;
 }
