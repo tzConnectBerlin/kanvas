@@ -45,6 +45,8 @@ build/Release
 
 # dotenv environment variables file
 .env
+.env.bak*
+.env_disabled_during_tests
 
 # next.js build output
 .next
@@ -82,3 +84,4 @@ nginx.vars
 [#]*[#]
 
 global.env
+global.env.bak*
