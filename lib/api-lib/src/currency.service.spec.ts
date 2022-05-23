@@ -195,27 +195,27 @@ describe('CurrencyService with a "working" rates provider', () => {
   const testcases6 = [
     {
       inp: 0,
-      exp: '0.00000', // XTZ has 5 decimals
+      exp: '0.000000', // XTZ has 6 decimals
     },
     {
       inp: 1,
-      exp: '0.02000',
+      exp: '0.020000',
     },
     {
       inp: 10,
-      exp: '0.20000',
+      exp: '0.200000',
     },
     {
       inp: 76,
-      exp: '1.52000',
+      exp: '1.520000',
     },
     {
       inp: 534,
-      exp: '10.68000',
+      exp: '10.680000',
     },
     {
       inp: 53400,
-      exp: '1068.00000',
+      exp: '1068.000000',
     },
   ];
 

@@ -3,7 +3,8 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
 PEPPERMINT_VERSION=ee538be4d156ffb456107587eb71f14671afb1c7
-QUEPASA_VERSION=1.2.1
+TEZPAY_VERSION=7229e80e49a4b697dc634011a935f6c102d8c42a
+QUEPASA_VERSION=1.2.3
 
 ./script/wait-db
 
@@ -19,11 +20,12 @@ if [[ ${INIT_QUEPASA:-'true'} == "true" ]]; then
         -e DATABASE_URL="$DATABASE_URL" \
         ghcr.io/tzconnectberlin/que-pasa:$QUEPASA_VERSION \
         --contract-settings /config/kanvas.yaml --only-migrate \
-        || exit 1 # >/dev/null 2>&1 || exit 1
+        || exit 1
 else
     ./script/wait-db 'select 1 from que_pasa.levels'
 fi
 
 curl "https://raw.githubusercontent.com/tzConnectBerlin/peppermint/${PEPPERMINT_VERSION}/database/schema.sql" 2>/dev/null | psql || exit 1
+curl "https://raw.githubusercontent.com/tzConnectBerlin/tezpay/${TEZPAY_VERSION}/server/database/schema.sql" 2>/dev/null | psql || exit 1
 
 ./script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1

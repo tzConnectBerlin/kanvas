@@ -28,3 +28,5 @@ export const NUM_TOP_BUYERS = 12;
 // See section '8.5.4. Interval Input' in https://www.postgresql.org/docs/9.1/datatype-datetime.html
 // for exactly what format this duration string should be in.
 export const ENDING_SOON_DURATION = '2 hours';
+
+export const PAYPOINT_SCHEMA = 'paypoint';

@@ -333,8 +333,8 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                             props.setSelectedFilters([]);
                             props.setAvailabilityFilter([]);
                             props.setPriceFilterRange([
-                                props.minRange,
-                                props.maxRange,
+                               Number(props.minRange),
+                                Number(props.maxRange),
                             ]);
                             callNFTsEndpoint({
                                 handlePriceRange: false,
@@ -516,8 +516,8 @@ export const StoreFilters: FC<StoreFiltersProps> = ({
                         {!props.loading &&
                             activeRef.indexOf('Price') === -1 && (
                                 <PriceFilter
-                                    minRange={props.minRange}
-                                    maxRange={props.maxRange}
+                                    minRange={Number(props.minRange)}
+                                    maxRange={Number(props.maxRange)}
                                     range={props.priceFilterRange}
                                     setRange={props.setPriceFilterRange}
                                     triggerPriceFilter={
