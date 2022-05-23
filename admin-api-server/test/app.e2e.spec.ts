@@ -389,7 +389,7 @@ describe('AppController (e2e)', () => {
           categories: JSON.stringify([2, 5, 10]),
           editions_size: JSON.stringify(4),
           proposed: JSON.stringify(true),
-          launch_at: JSON.stringify(Date.now() + 30 * 60 * 1000),
+          onsale_from: JSON.stringify(Date.now() + 30 * 60 * 1000),
         });
 
       expect(res.body.state).toEqual('proposed');
@@ -527,7 +527,7 @@ describe('AppController (e2e)', () => {
           categories: 'number[]',
           editions_size: 'number',
           price: 'number',
-          launch_at: 'date',
+          onsale_from: 'date',
           proposed: 'boolean',
         },
         stateInfo: {
@@ -536,7 +536,7 @@ describe('AppController (e2e)', () => {
             'nft.editions_size > 0',
             'nft.price > 0',
             'nft.categories.length > 0',
-            'nft.launch_at >= Date.now()',
+            'nft.onsale_from >= Date.now()',
           ],
         },
       });
@@ -564,7 +564,7 @@ describe('AppController (e2e)', () => {
         delete res.body.data[i].createdAt;
         delete res.body.data[i].updatedAt;
 
-        delete res.body.data[i].attributes.launch_at;
+        delete res.body.data[i].attributes.onsale_from;
       }
 
       expect(res.body).toStrictEqual({
@@ -720,7 +720,7 @@ describe('AppController (e2e)', () => {
         delete res.body.data[i].createdAt;
         delete res.body.data[i].updatedAt;
 
-        delete res.body.data[i].attributes.launch_at;
+        delete res.body.data[i].attributes.onsale_from;
       }
 
       expect(res.body).toStrictEqual({
@@ -813,7 +813,7 @@ describe('AppController (e2e)', () => {
         delete res.body.data[i].createdAt;
         delete res.body.data[i].updatedAt;
 
-        delete res.body.data[i].attributes.launch_at;
+        delete res.body.data[i].attributes.onsale_from;
       }
 
       expect(res.body).toStrictEqual({
@@ -879,7 +879,7 @@ describe('AppController (e2e)', () => {
         delete res.body.data[i].createdAt;
         delete res.body.data[i].updatedAt;
 
-        delete res.body.data[i].attributes.launch_at;
+        delete res.body.data[i].attributes.onsale_from;
       }
 
       expect(res.body).toStrictEqual({
@@ -2289,7 +2289,7 @@ describe('AppController (e2e)', () => {
           allowedCategories.body.data.map((cat: any) => cat.id).slice(0, 3),
         ),
         editions_size: JSON.stringify(4),
-        launch_at: JSON.stringify(Date.now() + 30 * 60 * 1000),
+        onsale_from: JSON.stringify(Date.now() + 30 * 60 * 1000),
         proposed: JSON.stringify(true),
       });
     expect(res.statusCode).toEqual(200);
@@ -2317,7 +2317,8 @@ describe('AppController (e2e)', () => {
 
     const storeNft = await queryStoreDbNft(nftId);
     delete storeNft.nft.created_at;
-    delete storeNft.nft.launch_at;
+    delete storeNft.nft.onsale_from;
+    delete storeNft.nft.onsale_until;
 
     expect(storeNft).toStrictEqual({
       nft: {
@@ -2428,7 +2429,7 @@ describe('AppController (e2e)', () => {
             ], // 0 here is definitely wrong
           ),
           editions_size: JSON.stringify(4),
-          launch_at: JSON.stringify(Date.now() + 30 * 60 * 1000),
+          onsale_from: JSON.stringify(Date.now() + 30 * 60 * 1000),
           proposed: JSON.stringify(true),
         });
       expect(res.statusCode).toEqual(200);
@@ -2489,7 +2490,7 @@ describe('AppController (e2e)', () => {
           ...allowedCategories.body.data.map((cat: any) => cat.id).slice(0, 3),
         ]),
         editions_size: JSON.stringify(4),
-        launch_at: JSON.stringify(Date.now() + 30 * 60 * 1000),
+        onsale_from: JSON.stringify(Date.now() + 30 * 60 * 1000),
         proposed: JSON.stringify(true),
       });
     expect(res.statusCode).toEqual(200);
@@ -2592,7 +2593,7 @@ describe('AppController (e2e)', () => {
       'thumbnail.png': 'string',
       price: 'number',
       editions_size: 'number',
-      launch_at: 'date',
+      onsale_from: 'date',
       categories: 'number[]',
       proposed: 'boolean',
       publish_vote: 'votes',

@@ -359,7 +359,7 @@ VALUES ($1, $2)`,
 SELECT
   (SELECT reserved + owned FROM nft_editions_locked($1)) AS editions_locked,
   nft.editions_size,
-  nft.launch_at
+  nft.onsale_from
 FROM nft
 WHERE nft.id = $1`,
         [nftId],
@@ -370,7 +370,7 @@ WHERE nft.id = $1`,
           HttpStatus.BAD_REQUEST,
         );
       }
-      if (qryRes.rows[0]['launch_at'] > new Date()) {
+      if (qryRes.rows[0]['onsale_from'] > new Date()) {
         throw new HttpException(
           'This nft is not yet for sale',
           HttpStatus.BAD_REQUEST,

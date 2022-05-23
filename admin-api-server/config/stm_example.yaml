@@ -7,7 +7,8 @@ attributes:
   price: number
   editions_size: number
   categories: number[]
-  launch_at: date
+  onsale_from: date
+  onsale_until: date
   proposed: boolean
   proposal_vote: votes
   prototype_vote: votes
@@ -37,7 +38,7 @@ states:
       - nft.price < 1000000
       - nft.categories.length > 0
     mutables:
-    - attributes: [price, editions_size, proposed, categories, launch_at]
+    - attributes: [price, editions_size, proposed, categories, onsale_from, onsale_until]
       by_roles: [editor, creator, admin]
 
   proposed:

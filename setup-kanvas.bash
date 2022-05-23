@@ -3,7 +3,10 @@
 start_from=${1:-0}
 end_at=${2:-0}
 
-tmpdir=`mktemp --directory`
+tmpdir=`basename $(mktemp -d -u)`
+mkdir "$tmpdir"
+trap "rm -rf $tmpdir" EXIT
+
 mintery="$tmpdir/mintery"
 
 n=0
@@ -283,8 +286,8 @@ http {
 }
 EOF
 )
-    sudo --preserve-env=nginx_conf bash -c 'echo "$nginx_conf" > /etc/nginx/nginx.conf'
-    sudo certbot --nginx || exit
+    sudo --preserve-env=nginx_conf bash -c 'echo "$nginx_conf" > /etc/nginx/nginx.conf' || exit 1
+    sudo certbot --nginx || exit 1
 
     sudo nginx -s reload
 }
@@ -292,6 +295,10 @@ EOF
 step \
     'Creating a fresh global.env file (note: if one already existed it will be backed up under a .bak extension)' \
     cp_bak global.env.example global.env || exit 1
+
+step \
+    'Setting up nested git repositories' \
+    git submodule update --init || exit 1
 
 step \
     'In global.env:
@@ -395,4 +402,4 @@ step \
     'ALL DONE
 
 execute "./run-deployment.bash" to start kanvas' \
-    : || exit 1
+    :

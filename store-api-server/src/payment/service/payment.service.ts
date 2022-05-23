@@ -1,5 +1,11 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
-import { PG_CONNECTION } from '../../constants.js';
+import {
+  Injectable,
+  Inject,
+  Logger,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import { PG_CONNECTION, PAYPOINT_SCHEMA } from '../../constants.js';
 import { UserService } from '../../user/service/user.service.js';
 import { NftService } from '../../nft/service/nft.service.js';
 import { MintService } from '../../nft/service/mint.service.js';
@@ -45,6 +51,7 @@ export interface PaymentIntent {
   currency: string;
   clientSecret: string;
   id: string;
+  receiverAddress?: string;
 }
 
 @Injectable()
@@ -68,10 +75,12 @@ export class PaymentService {
     private readonly userService: UserService,
     private readonly nftService: NftService,
     private readonly currencyService: CurrencyService,
-  ) {}
-
-  async initTezpay() {
-    this.tezpay = new (await Tezpay)();
+  ) {
+    this.tezpay = new Tezpay({
+      paypoint_schema_name: PAYPOINT_SCHEMA,
+      db_pool: conn,
+      block_confirmations: 2,
+    });
   }
 
   async webhookHandler(constructedEvent: any) {
@@ -102,6 +111,33 @@ export class PaymentService {
       constructedEvent.data.object.id,
       paymentStatus,
     );
+  }
+
+  async getPaymentStatus(
+    userId: number,
+    paymentId: string,
+  ): Promise<PaymentStatus> {
+    const qryRes = await this.conn.query(
+      `
+SELECT
+  payment.status
+FROM payment
+JOIN nft_order
+  ON nft_order.id = payment.nft_order_id
+WHERE user_id = $1
+  AND payment.payment_id = $2
+      `,
+      [userId, paymentId],
+    );
+
+    if (qryRes.rowCount === 0) {
+      throw new HttpException(
+        `logged in user does not have a payment with payment_id=${paymentId}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return qryRes.rows[0]['status'];
   }
 
   async createPayment(
@@ -161,6 +197,9 @@ export class PaymentService {
       true,
       dbTx,
     );
+    if (cartList.nfts.length === 0) {
+      throw `cannot create a payment order for an empty cart`;
+    }
     const baseUnitAmount = cartList.nfts.reduce(
       (sum, nft) => sum + Number(nft.price),
       0,
@@ -295,13 +334,14 @@ WHERE id = $2
     );
     const tezpayIntent = await this.tezpay.init_payment({
       external_id: id,
-      tez_amount: amount,
+      mutez_amount: amount,
     });
     return {
       amount,
       currency: 'XTZ',
       clientSecret: tezpayIntent.message,
       id,
+      receiverAddress: tezpayIntent.receiver_address,
     };
   }
 
@@ -403,15 +443,10 @@ WHERE expires_at < now() AT TIME ZONE 'UTC'
     );
 
     for (const row of cancelOrderIds.rows) {
+      const orderId = Number(row['nft_order_id']);
       await withTransaction(this.conn, async (dbTx: DbTransaction) => {
-        await this.cancelNftOrderId(
-          dbTx,
-          Number(row['nft_order_id']),
-          PaymentStatus.TIMED_OUT,
-        );
-        Logger.warn(
-          `canceled following expired order session: ${row['payment_id']}`,
-        );
+        await this.cancelNftOrderId(dbTx, orderId, PaymentStatus.TIMED_OUT);
+        Logger.warn(`canceled following expired order session: ${orderId}`);
       });
     }
   }
