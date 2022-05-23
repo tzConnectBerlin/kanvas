@@ -69,12 +69,13 @@ export async function withTransaction<ResTy>(
   f: (dbTx: DbTransaction) => Promise<ResTy>,
 ): Promise<ResTy> {
   const dbTx = await dbPool.connect();
+  await dbTx.query('BEGIN');
   try {
     const res = await f(dbTx);
-    await dbTx.query(`COMMIT`);
+    await dbTx.query('COMMIT');
     return res;
   } catch (err: any) {
-    await dbTx.query(`ROLLBACK`);
+    await dbTx.query('ROLLBACK');
     throw err;
   } finally {
     dbTx.release();

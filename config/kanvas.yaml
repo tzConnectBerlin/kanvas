@@ -1,3 +1,5 @@
 contracts:
 - name: "onchain_kanvas"
-  address: "KT1D9iJmbwoDcJUTvRuktHXEMgEZscLMjtuR"
+  address: "KT1H4DQkjA9ekhiKcuT5BJdvizyuRrZfW9vM"
+- name: "paypoint"
+  address: "KT1MZTPQFdEZKLXtdQzpuA4MFt5ZkmKqFqkq"
