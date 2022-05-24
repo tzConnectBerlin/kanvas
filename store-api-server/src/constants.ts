@@ -1,4 +1,4 @@
-import { assertEnv } from './utils';
+import { assertEnv } from './utils.js';
 
 export const PG_CONNECTION = 'PG_CONNECTION';
 
@@ -14,6 +14,7 @@ export const SEARCH_SIMILARITY_LIMIT = 0.4;
 
 export const MINTER_ADDRESS = assertEnv('MINTER_TZ_ADDRESS');
 export const ADMIN_PUBLIC_KEY = assertEnv('ADMIN_PUBLIC_KEY'); // this probably should be the revealed public key associated to the MINTER_ADDRESS (MINTER_ADDRESS is the public key hash)
+
 export const STORE_PUBLISHERS = ['Tezos'];
 
 export const RATE_LIMIT_TTL = Number(process.env['RATE_LIMIT_TTL'] || 60); // in seconds
@@ -23,3 +24,15 @@ export const CACHE_TTL = Number(process.env['CACHE_TTL'] || 60); // in seconds
 export const CACHE_SIZE = Number(process.env['CACHE_SIZE'] || 10_000); // in max number of items in the cache
 
 export const NUM_TOP_BUYERS = 12;
+
+// Enable this when for example NGINX sits between incoming traffic and the API.
+// It will enable things like the rate limiter to take the incoming IP address
+// from the X-Forwarded-For header.
+export const BEHIND_PROXY: boolean =
+  (process.env['BEHIND_PROXY'] || 'no') === 'yes';
+
+// See section '8.5.4. Interval Input' in https://www.postgresql.org/docs/9.1/datatype-datetime.html
+// for exactly what format this duration string should be in.
+export const ENDING_SOON_DURATION = '2 hours';
+
+export const PAYPOINT_SCHEMA = 'paypoint';

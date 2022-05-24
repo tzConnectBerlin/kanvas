@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CategoryController } from './category.controller';
 import { CategoryService } from '../service/category.service';
-import { DbMock } from 'src/mock/db.module';
-import { CacheMock } from 'src/mock/cache.module';
+import { DbMock } from '../../mock/db.module';
+import { CacheMock } from '../../mock/cache.module';
 
 describe('CategoryController', () => {
   let controller: CategoryController;

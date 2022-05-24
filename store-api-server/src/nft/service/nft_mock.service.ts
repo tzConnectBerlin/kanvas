@@ -1,10 +1,10 @@
-import { CategoryEntity } from 'src/category/entity/category.entity';
+import { CategoryEntity } from '../../category/entity/category.entity';
 import { FilterParams, PaginationParams } from '../params';
 import {
   NftEntity,
   NftEntityPage,
   SearchResult,
-} from 'src/nft/entity/nft.entity';
+} from '../../nft/entity/nft.entity';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 export class NftServiceMock {

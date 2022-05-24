@@ -138,11 +138,9 @@ Alternatively, there's also scripts in each components' `script/` directory that
 
 # API Docs
 
-There's currently only some documentation ready for the Store API:
+There's currently only documentation ready for the Store API:
 
 - https://tzconnectberlin.github.io/slate/#introduction
-
-It is outdated (missing a few newer endpoints) and may contain some errors. To be updated soon.
 
 
 # How we interact with the Tezos blockchain (read and write operations)

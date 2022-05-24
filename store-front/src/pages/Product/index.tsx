@@ -536,7 +536,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                             Number(nft.id) ===
                                             nftResponse.data?.id,
                                     ).length > 0
-                                        ? 'Already in cart'
+                                        ? 'Added to cart'
                                         : t('product.button_1')
                             }
                             disabled={

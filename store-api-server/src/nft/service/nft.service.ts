@@ -5,20 +5,25 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import { CreateNft, NftEntity, NftEntityPage } from 'src/nft/entity/nft.entity';
-import { CategoryEntity } from 'src/category/entity/category.entity';
-import { CategoryService } from 'src/category/service/category.service';
-import { FilterParams } from '../params';
+import {
+  CreateNft,
+  NftEntity,
+  NftEntityPage,
+} from '../../nft/entity/nft.entity.js';
+import { CategoryEntity } from '../../category/entity/category.entity.js';
+import { CategoryService } from '../../category/service/category.service.js';
+import { FilterParams } from '../params.js';
 import {
   PG_CONNECTION,
   MINTER_ADDRESS,
-  ADMIN_PUBLIC_KEY,
   SEARCH_MAX_NFTS,
   SEARCH_SIMILARITY_LIMIT,
-} from 'src/constants';
-import { sleep } from 'src/utils';
-import { cryptoUtils } from 'sotez';
-import { IpfsService } from './ipfs.service';
+  ENDING_SOON_DURATION,
+} from '../../constants.js';
+import { CurrencyService, BASE_CURRENCY } from 'kanvas-api-lib';
+import { sleep } from '../../utils.js';
+import { IpfsService } from './ipfs.service.js';
+import { DbTransaction, withTransaction } from '../../db.module.js';
 
 @Injectable()
 export class NftService {
@@ -26,48 +31,28 @@ export class NftService {
     @Inject(PG_CONNECTION) private conn: any,
     private readonly categoryService: CategoryService,
     private ipfsService: IpfsService,
+    private currencyService: CurrencyService,
   ) {}
 
   async createNft(newNft: CreateNft) {
-    const validate = async () => {
-      let hexMsg = newNft.id.toString(16);
-      if (hexMsg.length & 1) {
-        // hex is of uneven length, sotez expects an even number of hexadecimal characters
-        hexMsg = '0' + hexMsg;
-      }
-
-      try {
-        if (
-          !(await cryptoUtils.verify(
-            hexMsg,
-            `${newNft.signature}`,
-            ADMIN_PUBLIC_KEY,
-          ))
-        ) {
-          throw new HttpException('Invalid signature', HttpStatus.UNAUTHORIZED);
-        }
-      } catch (err: any) {
-        Logger.warn(`Error on new nft signature validation, err: ${err}`);
-        throw new HttpException(
-          'Could not validate signature (it may be misshaped)',
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-    };
-
     const insert = async (dbTx: any) => {
-      let launchAt: Date | undefined = undefined;
-      if (typeof newNft.launchAt !== 'undefined') {
-        launchAt = new Date();
-        launchAt.setTime(newNft.launchAt);
+      let onsaleFrom: Date | undefined = undefined;
+      if (typeof newNft.onsaleFrom !== 'undefined') {
+        onsaleFrom = new Date();
+        onsaleFrom.setTime(newNft.onsaleFrom);
+      }
+      let onsaleUntil: Date | undefined = undefined;
+      if (typeof newNft.onsaleUntil !== 'undefined') {
+        onsaleUntil = new Date();
+        onsaleUntil.setTime(newNft.onsaleUntil);
       }
 
       await dbTx.query(
         `
 INSERT INTO nft (
-  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, launch_at, price, editions_size
+  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, onsale_from, onsale_until, price, editions_size
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       `,
 
         [
@@ -78,7 +63,8 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
           newNft.displayUri,
           newNft.thumbnailUri,
           newNft.description,
-          launchAt?.toUTCString(),
+          onsaleFrom?.toUTCString(),
+          onsaleUntil?.toUTCString(),
           newNft.price,
           newNft.editionsSize,
         ],
@@ -96,7 +82,12 @@ SELECT $1, UNNEST($2::INTEGER[])
     };
 
     const uploadToIpfs = async (dbTx: any) => {
-      const nftEntity: NftEntity = await this.byId(newNft.id, false, dbTx);
+      const nftEntity: NftEntity = await this.byId(
+        newNft.id,
+        BASE_CURRENCY,
+        false,
+        dbTx,
+      );
 
       const MAX_ATTEMPTS = 10;
       const BACKOFF_MS = 1000;
@@ -116,27 +107,103 @@ SELECT $1, UNNEST($2::INTEGER[])
       throw `failed to upload new nft to IPFS`;
     };
 
-    await validate();
-
-    const dbTx = await this.conn.connect();
-    try {
-      await dbTx.query(`BEGIN`);
-
+    return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       await insert(dbTx);
       await uploadToIpfs(dbTx);
-
-      await dbTx.query(`COMMIT`);
-      Logger.log(`Created new NFT ${newNft.id}`);
-    } catch (err: any) {
+    }).catch((err: any) => {
       Logger.error(`failed to publish nft (id=${newNft.id}), err: ${err}`);
-      await dbTx.query(`ROLLBACK`);
       throw err;
-    } finally {
-      dbTx.release();
-    }
+    });
+
+    Logger.log(`Created new NFT ${newNft.id}`);
   }
 
-  async search(str: string): Promise<NftEntity[]> {
+  async delistNft(nftId: number) {
+    await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+      const tablesNftIdField: { [key: string]: string } = {
+        nft: 'id',
+        mtm_kanvas_user_nft: 'nft_id',
+        mtm_nft_category: 'nft_id',
+        mtm_nft_order_nft: 'nft_id',
+      };
+      const tables = [
+        'mtm_nft_order_nft',
+        'mtm_kanvas_user_nft',
+        'mtm_nft_category',
+        'nft',
+      ];
+
+      for (const table of tables) {
+        const nftIdField = tablesNftIdField[table];
+
+        const qryRes = await dbTx.query(
+          `
+INSERT INTO __${table}_delisted
+SELECT *
+FROM ${table}
+WHERE ${nftIdField} = $1
+        `,
+          [nftId],
+        );
+      }
+      for (const table of tables) {
+        const nftIdField = tablesNftIdField[table];
+
+        await dbTx.query(
+          `
+DELETE FROM ${table}
+WHERE ${nftIdField} = $1
+        `,
+          [nftId],
+        );
+      }
+    });
+  }
+
+  async relistNft(nftId: number) {
+    await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+      const tablesNftIdField: { [key: string]: string } = {
+        nft: 'id',
+        mtm_kanvas_user_nft: 'nft_id',
+        mtm_nft_category: 'nft_id',
+        mtm_nft_order_nft: 'nft_id',
+      };
+      const tables = [
+        'nft',
+        'mtm_nft_order_nft',
+        'mtm_kanvas_user_nft',
+        'mtm_nft_category',
+      ];
+
+      for (const table of tables) {
+        const nftIdField = tablesNftIdField[table];
+
+        await dbTx.query(
+          `
+
+INSERT INTO ${table}
+SELECT *
+FROM __${table}_delisted
+WHERE ${nftIdField} = $1
+        `,
+          [nftId],
+        );
+      }
+      for (const table of tables) {
+        const nftIdField = tablesNftIdField[table];
+
+        await dbTx.query(
+          `
+DELETE FROM __${table}_delisted
+WHERE ${nftIdField} = $1
+        `,
+          [nftId],
+        );
+      }
+    });
+  }
+
+  async search(str: string, currency: string): Promise<NftEntity[]> {
     const nftIds = await this.conn.query(
       `
 SELECT id
@@ -161,6 +228,7 @@ LIMIT $3
       nftIds.rows.map((row: any) => row.id),
       'nft_id',
       'asc',
+      currency,
     );
 
     return nftIds.rows
@@ -168,7 +236,10 @@ LIMIT $3
       .filter(Boolean);
   }
 
-  async findNftsWithFilter(params: FilterParams): Promise<NftEntityPage> {
+  async findNftsWithFilter(
+    filters: FilterParams,
+    currency: string,
+  ): Promise<NftEntityPage> {
     const orderByMapping = new Map([
       ['id', 'nft_id'],
       ['createdAt', 'nft_created_at'],
@@ -177,11 +248,11 @@ LIMIT $3
       ['views', 'view_count'],
     ]);
 
-    const orderBy = orderByMapping.get(params.orderBy);
+    const orderBy = orderByMapping.get(filters.orderBy);
     if (typeof orderBy === 'undefined') {
       Logger.error(
         'Error in nft.filter(), orderBy unmapped, request.orderBy: ' +
-          params.orderBy,
+          filters.orderBy,
       );
       throw new HttpException(
         'Something went wrong',
@@ -189,27 +260,41 @@ LIMIT $3
       );
     }
 
-    const offset = (params.page - 1) * params.pageSize;
-    const limit = params.pageSize;
+    if (typeof filters.priceAtLeast !== 'undefined') {
+      filters.priceAtLeast = this.currencyService.convertFromCurrency(
+        filters.priceAtLeast,
+        currency,
+      );
+    }
+    if (typeof filters.priceAtMost !== 'undefined') {
+      filters.priceAtMost = this.currencyService.convertFromCurrency(
+        filters.priceAtMost,
+        currency,
+      );
+    }
+
+    const offset = (filters.page - 1) * filters.pageSize;
+    const limit = filters.pageSize;
 
     let untilNft: string | undefined = undefined;
-    if (typeof params.firstRequestAt === 'number') {
-      untilNft = new Date(params.firstRequestAt * 1000).toISOString();
+    if (typeof filters.firstRequestAt === 'number') {
+      untilNft = new Date(filters.firstRequestAt * 1000).toISOString();
     }
 
     try {
       const nftIds = await this.conn.query(
         `
 SELECT nft_id, total_nft_count
-FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
         [
-          params.userAddress,
-          params.categories,
-          params.priceAtLeast,
-          params.priceAtMost,
-          params.availability,
+          filters.userAddress,
+          filters.categories,
+          filters.priceAtLeast,
+          filters.priceAtMost,
+          filters.availability,
+          ENDING_SOON_DURATION,
           orderBy,
-          params.orderDirection,
+          filters.orderDirection,
           offset,
           limit,
           untilNft,
@@ -219,32 +304,45 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
       const priceBounds = await this.conn.query(
         `
 SELECT min_price, max_price
-FROM price_bounds($1, $2, $3)`,
-        [params.userAddress, params.categories, untilNft],
+FROM price_bounds($1, $2, $3, $4, $5)`,
+        [
+          filters.userAddress,
+          filters.categories,
+          filters.availability,
+          ENDING_SOON_DURATION,
+          untilNft,
+        ],
       );
 
       const res = <NftEntityPage>{
-        currentPage: params.page,
+        currentPage: filters.page,
         numberOfPages: 0,
-        firstRequestAt: params.firstRequestAt,
+        firstRequestAt: filters.firstRequestAt,
         nfts: [],
-        lowerPriceBound: Number(priceBounds.rows[0].min_price),
-        upperPriceBound: Number(priceBounds.rows[0].max_price),
+        lowerPriceBound: this.currencyService.convertToCurrency(
+          Number(priceBounds.rows[0].min_price),
+          currency,
+        ),
+        upperPriceBound: this.currencyService.convertToCurrency(
+          Number(priceBounds.rows[0].max_price),
+          currency,
+        ),
       };
       if (nftIds.rows.length === 0) {
         return res;
       }
 
       res.numberOfPages = Math.ceil(
-        nftIds.rows[0].total_nft_count / params.pageSize,
+        nftIds.rows[0].total_nft_count / filters.pageSize,
       );
       res.nfts = await this.findByIds(
         nftIds.rows.map((row: any) => row.nft_id),
         orderBy,
-        params.orderDirection,
+        filters.orderDirection,
+        currency,
       );
-      if (typeof params.userAddress !== 'undefined') {
-        await this.#addNftOwnerStatus(params.userAddress, res.nfts);
+      if (typeof filters.userAddress !== 'undefined') {
+        await this.#addNftOwnerStatus(filters.userAddress, res.nfts);
       }
       return res;
     } catch (err) {
@@ -258,10 +356,18 @@ FROM price_bounds($1, $2, $3)`,
 
   async byId(
     id: number,
+    currency: string,
     incrViewCount: boolean = true,
     dbConn: any = this.conn,
   ): Promise<NftEntity> {
-    const nfts = await this.findByIds([id], 'nft_id', 'asc', dbConn);
+    const nfts = await this.findByIds(
+      [id],
+      'nft_id',
+      'asc',
+      currency,
+      false,
+      dbConn,
+    );
     if (nfts.length === 0) {
       throw new HttpException(
         'NFT with the requested id does not exist',
@@ -332,6 +438,8 @@ ORDER BY 1
     nftIds: number[],
     orderBy: string = 'nft_id',
     orderDirection: string = 'asc',
+    currency: string = BASE_CURRENCY,
+    inBaseUnit: boolean = false,
     dbConn: any = this.conn,
   ): Promise<NftEntity[]> {
     try {
@@ -351,7 +459,8 @@ SELECT
   editions_reserved,
   editions_owned,
   nft_created_at,
-  launch_at
+  onsale_from,
+  onsale_until
 FROM nfts_by_id($1, $2, $3)`,
         [nftIds, orderBy, orderDirection],
       );
@@ -360,7 +469,9 @@ FROM nfts_by_id($1, $2, $3)`,
         const reserved = Number(nftRow['editions_reserved']);
         const owned = Number(nftRow['editions_owned']);
 
-        const launchAtMilliUnix = nftRow['launch_at']?.getTime() || 0;
+        const launchAtMilliUnix = nftRow['onsale_from']?.getTime() || 0;
+        const onsaleUntilMilliUnix =
+          nftRow['onsale_until']?.getTime() || undefined;
 
         const nft = <NftEntity>{
           id: nftRow['nft_id'],
@@ -370,11 +481,18 @@ FROM nfts_by_id($1, $2, $3)`,
           artifactUri: nftRow['artifact_uri'],
           displayUri: nftRow['display_uri'],
           thumbnailUri: nftRow['thumbnail_uri'],
-          price: Number(nftRow['price']),
+          price: this.currencyService.convertToCurrency(
+            Number(nftRow['price']),
+            currency,
+            inBaseUnit,
+          ),
           editionsSize: editions,
           editionsAvailable: editions - (reserved + owned),
           createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
           launchAt: Math.floor(launchAtMilliUnix / 1000),
+          onsaleUntil: onsaleUntilMilliUnix
+            ? Math.floor(onsaleUntilMilliUnix / 1000)
+            : undefined,
           categories: nftRow['categories'].map((categoryRow: any) => {
             return <CategoryEntity>{
               id: Number(categoryRow[0]),

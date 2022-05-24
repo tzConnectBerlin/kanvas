@@ -50,6 +50,7 @@ echo "starting the store api in the background"
 # enabling job control with set -m here, this will enforce a new process group
 # for the following background spawned store api, which in turn will allow
 # proper kill of all child processes by kill on process group id.
+mv $SCRIPT_DIR/../../store-api-server/.env $SCRIPT_DIR/../../store-api-server/.env_disabled_during_tests
 set -m
 (
     cd $SCRIPT_DIR/../../store-api-server
@@ -59,7 +60,7 @@ set -m
 ) &
 store_api_pid=$!
 set +m
-trap "docker kill $db_docker; kill -- -$store_api_pid" EXIT
+trap "docker kill $db_docker; kill -- -$store_api_pid; mv $SCRIPT_DIR/../../store-api-server/.env_disabled_during_tests $SCRIPT_DIR/../../store-api-server/.env" EXIT
 
 yarn run seed || exit 1
 

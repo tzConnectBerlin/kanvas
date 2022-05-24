@@ -1,23 +1,16 @@
 import { Module } from '@nestjs/common';
-import { UserController } from './controller/user.controller';
-import { UserService } from './service/user.service';
-import { NftService } from 'src/nft/service/nft.service';
-import { DbModule } from 'src/db.module';
-import { MintService } from 'src/nft/service/mint.service';
-import { S3Service } from 'src/s3.service';
-import { IpfsService } from 'src/nft/service/ipfs.service';
-import { CategoryService } from 'src/category/service/category.service';
+import { UserController } from './controller/user.controller.js';
+import { UserService } from './service/user.service.js';
+import { DbModule } from '../db.module.js';
+import { NftModule } from '../nft/nft.module.js';
+import { CategoryService } from '../category/service/category.service.js';
+import { S3Service } from '../s3.service.js';
+import { CurrencyModule } from 'kanvas-api-lib';
 
 @Module({
-  imports: [DbModule],
+  imports: [DbModule, NftModule, CurrencyModule],
   controllers: [UserController],
-  providers: [
-    CategoryService,
-    IpfsService,
-    NftService,
-    UserService,
-    S3Service,
-    MintService,
-  ],
+  providers: [CategoryService, UserService, S3Service],
+  exports: [UserService],
 })
 export class UserModule {}

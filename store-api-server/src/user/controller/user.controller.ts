@@ -18,20 +18,22 @@ import {
 } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Response } from 'express';
-import { wrapCache } from 'src/utils';
+import { wrapCache } from '../../utils.js';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UserEntity } from '../entity/user.entity';
-import { UserService } from '../service/user.service';
-import { CurrentUser } from '../../decoraters/user.decorator';
+import { UserEntity } from '../entity/user.entity.js';
+import { UserService } from '../service/user.service.js';
+import { CurrentUser } from '../../decoraters/user.decorator.js';
+import { validateRequestedCurrency } from '../../paramUtils.js';
 import {
   JwtAuthGuard,
   JwtFailableAuthGuard,
-} from '../../authentication/guards/jwt-auth.guard';
+} from '../../authentication/guards/jwt-auth.guard.js';
 import {
   PG_UNIQUE_VIOLATION_ERRCODE,
   PG_FOREIGN_KEY_VIOLATION_ERRCODE,
   PROFILE_PICTURE_MAX_BYTES,
-} from '../../constants';
+} from '../../constants.js';
+import { BASE_CURRENCY } from 'kanvas-api-lib';
 
 interface EditProfile {
   userName?: string;
@@ -49,7 +51,9 @@ export class UserController {
   async getProfile(
     @CurrentUser() user?: UserEntity,
     @Query('userAddress') userAddress?: string,
+    @Query('currency') currency: string = BASE_CURRENCY,
   ) {
+    validateRequestedCurrency(currency);
     const address =
       userAddress ||
       (typeof user !== 'undefined' ? user.userAddress : undefined);
@@ -60,7 +64,7 @@ export class UserController {
       );
     }
 
-    const profile_res = await this.userService.getProfile(address);
+    const profile_res = await this.userService.getProfile(address, currency);
     if (!profile_res.ok) {
       if (typeof userAddress === 'undefined') {
         throw new HttpException(
@@ -127,12 +131,21 @@ export class UserController {
   }
 
   @Get('topBuyers')
-  async topBuyers(@Res() resp: Response) {
-    return await wrapCache(this.cache, resp, 'user.getTopBuyers', () => {
-      return this.userService.getTopBuyers().then((topBuyers) => {
-        return { topBuyers };
-      });
-    });
+  async topBuyers(
+    @Query('currency') currency: string = BASE_CURRENCY,
+    @Res() resp: Response,
+  ) {
+    validateRequestedCurrency(currency);
+    return await wrapCache(
+      this.cache,
+      resp,
+      'user.getTopBuyers' + currency,
+      () => {
+        return this.userService.getTopBuyers(currency).then((topBuyers) => {
+          return { topBuyers };
+        });
+      },
+    );
   }
 
   @Post('nftOwnership')
@@ -168,34 +181,32 @@ export class UserController {
       user,
     );
 
-    const addedRes = await this.userService
-      .cartAdd(cartSession, nftId)
-      .catch((err: any) => {
-        if (err?.code === PG_FOREIGN_KEY_VIOLATION_ERRCODE) {
-          throw new HttpException(
-            'This nft does not exist',
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-        if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
-          throw new HttpException(
-            'This nft is already in the cart',
-            HttpStatus.BAD_REQUEST,
-          );
-        }
+    await this.userService.cartAdd(cartSession, nftId).catch((err: any) => {
+      if (err instanceof HttpException) {
+        throw err;
+      }
 
-        Logger.error(
-          `Error on adding nft to cart. cartSession=${cartSession}, nftId=${nftId}, err: ${err}`,
-        );
+      if (err?.code === PG_FOREIGN_KEY_VIOLATION_ERRCODE) {
         throw new HttpException(
-          'Something went wrong',
-          HttpStatus.INTERNAL_SERVER_ERROR,
+          'This nft does not exist',
+          HttpStatus.BAD_REQUEST,
         );
-      });
+      }
+      if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
+        throw new HttpException(
+          'This nft is already in the cart',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
 
-    if (!addedRes.ok) {
-      throw new HttpException(addedRes.val, HttpStatus.BAD_REQUEST);
-    }
+      Logger.error(
+        `Error on adding nft to cart. cartSession=${cartSession}, nftId=${nftId}, err: ${err}`,
+      );
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    });
   }
 
   @Post('cart/remove/:nftId')
@@ -226,11 +237,14 @@ export class UserController {
   async cartList(
     @Session() cookieSession: any,
     @CurrentUser() user: UserEntity | undefined,
+    @Query('currency') currency: string = BASE_CURRENCY,
   ) {
+    validateRequestedCurrency(currency);
+
     const cartSession = await this.userService.getCartSession(
       cookieSession,
       user,
     );
-    return await this.userService.cartList(cartSession);
+    return await this.userService.cartList(cartSession, currency);
   }
 }

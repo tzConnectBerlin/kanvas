@@ -1,14 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DbMock } from 'src/mock/db.module';
-import { CacheMock } from 'src/mock/cache.module';
-import { PaymentController } from './payment.controller';
-import { PaymentService } from '../service/payment.service';
-import { UserService } from 'src/user/service/user.service';
-import { S3Service } from 'src/s3.service';
-import { NftService } from 'src/nft/service/nft.service';
-import { IpfsService } from 'src/nft/service/ipfs.service';
-import { MintService } from 'src/nft/service/mint.service';
-import { CategoryService } from 'src/category/service/category.service';
+import { DbMock } from '../../mock/db.module.js';
+import { CacheMock } from '../../mock/cache.module.js';
+import { PaymentController } from './payment.controller.js';
+import { PaymentService } from '../service/payment.service.js';
+import { UserService } from '../../user/service/user.service.js';
+import { S3Service } from '../../s3.service.js';
+import { NftService } from '../../nft/service/nft.service.js';
+import { IpfsService } from '../../nft/service/ipfs.service.js';
+import { MintService } from '../../nft/service/mint.service.js';
+import { CategoryService } from '../../category/service/category.service.js';
+import { mockedRatesProvider, CurrencyService } from 'kanvas-api-lib';
 
 describe('PaymentController', () => {
   let controller: PaymentController;
@@ -25,6 +26,8 @@ describe('PaymentController', () => {
         CategoryService,
         PaymentService,
         IpfsService,
+        mockedRatesProvider,
+        CurrencyService,
       ],
     }).compile();
 

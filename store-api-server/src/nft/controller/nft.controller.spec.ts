@@ -2,13 +2,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException, CACHE_MANAGER } from '@nestjs/common';
 import { NftController } from './nft.controller';
-import { DbMock } from 'src/mock/db.module';
-import { CacheMock } from 'src/mock/cache.module';
+import { DbMock } from '../../mock/db.module';
+import { CacheMock } from '../../mock/cache.module';
 import { NftService } from '../service/nft.service';
-import { IpfsService } from 'src/nft/service/ipfs.service';
+import { IpfsService } from '../../nft/service/ipfs.service';
 import { NftServiceMock } from '../service/nft_mock.service';
-import { CategoryService } from 'src/category/service/category.service';
+import { CategoryService } from '../../category/service/category.service';
 import { PaginationParams } from '../params';
+import { mockedRatesProvider, CurrencyService } from 'kanvas-api-lib';
 
 describe('NftController', () => {
   let controller: NftController;
@@ -27,6 +28,8 @@ describe('NftController', () => {
           useClass: CacheMock,
         },
         CategoryService,
+        mockedRatesProvider,
+        CurrencyService,
         IpfsService,
       ],
     }).compile();

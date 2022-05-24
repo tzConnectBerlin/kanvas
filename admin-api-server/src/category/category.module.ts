@@ -7,5 +7,6 @@ import { DbModule } from 'src/db.module';
   imports: [DbModule],
   controllers: [CategoryController],
   providers: [CategoryService],
+  exports: [CategoryService],
 })
 export class CategoryModule {}

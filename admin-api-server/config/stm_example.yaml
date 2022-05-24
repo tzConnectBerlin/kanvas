@@ -7,10 +7,13 @@ attributes:
   price: number
   editions_size: number
   categories: number[]
-  launch_at: date
+  onsale_from: date
+  onsale_until: date
   proposed: boolean
   proposal_vote: votes
   prototype_vote: votes
+  delist_vote: votes
+  relist_vote: votes
 
 states:
   creation:
@@ -35,7 +38,7 @@ states:
       - nft.price < 1000000
       - nft.categories.length > 0
     mutables:
-    - attributes: [price, editions_size, proposed, categories, launch_at]
+    - attributes: [price, editions_size, proposed, categories, onsale_from, onsale_until]
       by_roles: [editor, creator, admin]
 
   proposed:
@@ -89,4 +92,34 @@ states:
         }
     mutables:
     - attributes: [prototype_vote]
+      by_roles: [moderator]
+
+  finish:
+    state_transitions:
+    - next_state: delisted
+      when:
+      - nft.delist_vote.yes.length >= 2
+      do: |
+        {
+          // TODO: save state as it was under 'prototype_reject_..'
+
+          nft.relist_vote = null;
+        }
+    mutables:
+    - attributes: [delist_vote]
+      by_roles: [moderator]
+
+  delisted:
+    state_transitions:
+    - next_state: finish
+      when:
+      - nft.relist_vote.yes.length >= 2
+      do: |
+        {
+          // TODO: save state as it was under 'prototype_reject_..'
+
+          nft.delist_vote = null;
+        }
+    mutables:
+    - attributes: [relist_vote]
       by_roles: [moderator]

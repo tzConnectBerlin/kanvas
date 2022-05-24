@@ -21,6 +21,6 @@ export interface Activity {
   from: string;
   to: string;
   tokenId: number;
-  price: number;
+  price: string;
   amount: number;
 }

@@ -1,4 +1,4 @@
-import { NftEntity } from 'src/nft/entity/nft.entity';
+import { NftEntity } from '../../nft/entity/nft.entity';
 
 export interface UserEntity {
   id: number;
@@ -24,7 +24,7 @@ export interface UserTotalPaid {
   userId: number;
   userName: string;
   userPicture?: string;
-  totalPaid: number;
+  totalPaid: string;
 }
 
 export interface NftOwnershipStatus {
