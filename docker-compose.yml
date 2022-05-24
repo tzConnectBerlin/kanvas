@@ -15,6 +15,7 @@ services:
       - postgres
       - -c
       - wal_level=logical  # <- required for logical replication
+    restart: on-failure
 
   store-api:
     build:
@@ -51,6 +52,7 @@ services:
           yarn start:prod
         fi
       '
+    restart: on-failure
 
   store-front:
     build: ./store-front
@@ -63,12 +65,13 @@ services:
         set -e
 
         if [ "${STORE_FRONT_ENABLED:-yes}" == "yes" ]; then
-          yarn start
+          yarn start:prod
         fi
       '
+    restart: on-failure
 
   store-quepasa:
-    image: ghcr.io/tzconnectberlin/que-pasa:1.2.0
+    image: ghcr.io/tzconnectberlin/que-pasa:1.2.3
     volumes:
       - ./config:/config
     environment:
@@ -89,6 +92,7 @@ services:
         done
         /que-pasa/que-pasa --bcd-enable
       '
+    restart: on-failure
 
   peppermint:
     image: ghcr.io/tzconnectberlin/peppermint:1.1
@@ -108,6 +112,7 @@ services:
       '
     environment:
       DATABASE_URL: "postgres://store_pguser:store_pgpass@store-db:5432/dev_database"
+    restart: on-failure
 
   admin-db:
     image: postgres:13
@@ -117,6 +122,7 @@ services:
       POSTGRES_USER: admin_pguser
       POSTGRES_PASSWORD: admin_pgpass
       POSTGRES_DB: dev_database
+    restart: on-failure
 
   admin-api:
     build:
@@ -124,7 +130,7 @@ services:
       dockerfile: ./admin-api-server/Dockerfile
     entrypoint: |-
       bash -c '
-        set -e
+        set -e -x
         ./script/wait-db
         INIT_QUEPASA=false ./script/migrate
         if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
@@ -162,6 +168,7 @@ services:
 
       ADMIN_API_PORT: 3001
       STORE_API: http://store-api:3000
+    restart: on-failure
 
   admin-front:
     build: ./admin-front
@@ -174,12 +181,13 @@ services:
         set -e
 
         if [ "${STORE_FRONT_ENABLED:-yes}" == "yes" ]; then
-          yarn start
+          yarn start:prod
         fi
       '
+    restart: on-failure
 
   admin-quepasa:
-    image: ghcr.io/tzconnectberlin/que-pasa:1.2.1
+    image: ghcr.io/tzconnectberlin/que-pasa:1.2.3
     entrypoint: |-
       bash -c '
         set -e
@@ -200,3 +208,4 @@ services:
       PGDATABASE: store_replication
       DATABASE_URL: "postgres://admin_pguser:admin_pgpass@admin-db:5432/store_replication"
       CONTRACT_SETTINGS: /config/kanvas.yaml
+    restart: on-failure
