@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+export PGHOST=localhost
+export PGPORT=54321
+export PGUSER=admin_pguser
+export PGPASSWORD=admin_pgpass
+export PGDATABASE=dev_database
+export STORE_PGHOST=store-db
+export STORE_PGPORT=5432
+export STORE_PGUSER=store_pguser
+export STORE_PGPASSWORD=store_pgpass
+export STORE_PGDATABASE=dev_database
+export EXTERNAL_STORE_PGPORT=54320
+export EXTERNAL_STORE_PGHOST=localhost
+
+./admin-api-server/script/setup-replication-sub
