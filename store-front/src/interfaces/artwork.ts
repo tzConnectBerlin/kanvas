@@ -11,7 +11,11 @@ export interface INft {
     artistName?: string;
     description: string;
     ipfsHash?: string;
+
+    artifactUri: string;
     displayUri: string;
+    thumbnailUri: string;
+
     price: number;
     creator?: string;
     startDate?: string;
@@ -19,5 +23,5 @@ export interface INft {
     editionsSize: string;
     launchAt: number;
     categories: ICategory[];
-    ownerStatuses?: ('pending' | 'owned')[]
+    ownerStatuses?: ('pending' | 'owned')[];
 }

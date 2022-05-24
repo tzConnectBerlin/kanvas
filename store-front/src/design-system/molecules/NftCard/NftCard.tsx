@@ -20,7 +20,10 @@ export interface NftCardProps {
     height?: number;
     ipfsHash?: string;
     openFilters?: boolean;
+
     displayUri?: string;
+    thumbnailUri?: string;
+
     launchAt?: number;
     editionsAvailable?: number;
     nftCardMode?: 'user';
@@ -159,9 +162,9 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
         }
     }, [launchTime]);
 
-    const loadImage = async (imageUrl: string) => {
+    const loadImage = async (imageUrl: string, spinner: boolean = true) => {
         let img;
-        setComponentLoading(true);
+        // setComponentLoading(spinner);
 
         const imageLoadPromise = new Promise((resolve) => {
             img = new Image();
@@ -199,11 +202,24 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
             <StyledImgWrapper>
                 <StyledImg
                     data-object-fit="cover"
-                    src={props.displayUri}
+                    src={props.thumbnailUri}
                     alt={props.name}
                     willDrop={!launchTime ? false : launchTime > 0}
                     onLoad={() =>
-                        props.displayUri ? loadImage(props.displayUri) : undefined
+                        props.thumbnailUri ? loadImage(props.thumbnailUri) : undefined
+                    }
+                    onMouseEnter={e => {
+                            if (props.displayUri && e.currentTarget.src != props.displayUri) {
+                                e.currentTarget.src = props.displayUri;
+                                loadImage(props.displayUri, false);
+                            }
+                        }
+                    }
+                    onMouseLeave={e => {
+                            if (props.thumbnailUri && e.currentTarget.src != props.thumbnailUri) {
+                                e.currentTarget.src = props.thumbnailUri;
+                            }
+                        }
                     }
                     style={{
                         filter: `${componentLoading ? 'blur(20px)' : 'none'}`,

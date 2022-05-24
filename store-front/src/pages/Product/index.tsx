@@ -295,10 +295,11 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 alignItems: 'flex-end',
                             }}
                         >
-                            <StyledCardMedia
-                                component="img"
-                                image={nftResponse.data?.displayUri}
-                                alt="random"
+                            <CardMedia
+                                component="video"
+                                src={nftResponse.data?.artifactUri}
+                                autoPlay
+                                controls
                             />
                             <StyledWrapperIcon
                                 onClick={
