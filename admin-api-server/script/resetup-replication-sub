@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR
+
+set -a
+. ../.env
+set +a
+
+function msg_wait {
+    echo "$@ (press any button to proceed, or ^C to stop)"
+    read -s -n 1
+}
+
+msg_wait 'please make sure que-pasa is not running. if it is, stop it before proceeding here..' || exit 1
+
+PGDATABASE=store_replication psql -c 'DROP SUBSCRIPTION store_sub' || exit 1
+psql -c 'drop database store_replication' || exit 1
+psql -c 'create database store_replication' || exit 1
+
+./setup-replication-sub
