@@ -1,22 +1,35 @@
-import { Logger, Injectable, Inject } from '@nestjs/common';
+import {
+  HttpStatus,
+  HttpException,
+  Logger,
+  Injectable,
+  Inject,
+} from '@nestjs/common';
 import {
   UserEntity,
   ProfileEntity,
   UserCart,
   UserTotalPaid,
   NftOwnershipStatus,
-} from '../entity/user.entity';
-import { NftService } from '../../nft/service/nft.service';
-import { MintService } from '../../nft/service/mint.service';
+} from '../entity/user.entity.js';
+import { NftService } from '../../nft/service/nft.service.js';
+import { MintService } from '../../nft/service/mint.service.js';
 import {
   PG_CONNECTION,
   PG_UNIQUE_VIOLATION_ERRCODE,
   NUM_TOP_BUYERS,
-} from '../../constants';
-import { Result, Err, Ok } from 'ts-results';
-import { S3Service } from '../../s3.service';
+} from '../../constants.js';
+import { CurrencyService } from 'kanvas-api-lib';
+import { Result } from 'ts-results';
+import ts_results from 'ts-results';
+const { Ok, Err } = ts_results;
+import { S3Service } from '../../s3.service.js';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { assertEnv } from 'src/utils';
+import { assertEnv } from '../../utils.js';
+import { DbPool, DbTransaction, withTransaction } from '../../db.module.js';
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 const generate = require('meaningful-string');
 
 interface CartMeta {
@@ -35,9 +48,10 @@ export class UserService {
   CART_EXPIRATION_MILLI_SECS = Number(assertEnv('CART_EXPIRATION_MILLI_SECS'));
 
   constructor(
-    @Inject(PG_CONNECTION) private conn: any,
+    @Inject(PG_CONNECTION) private conn: DbPool,
     private readonly s3Service: S3Service,
     private readonly mintService: MintService,
+    private readonly currencyService: CurrencyService,
     public readonly nftService: NftService,
   ) {}
 
@@ -136,7 +150,10 @@ WHERE address = $1
     return Ok(res);
   }
 
-  async getProfile(address: string): Promise<Result<ProfileEntity, string>> {
+  async getProfile(
+    address: string,
+    currency: string,
+  ): Promise<Result<ProfileEntity, string>> {
     const userRes = await this.findByAddress(address);
     if (!userRes.ok) {
       return userRes;
@@ -144,16 +161,19 @@ WHERE address = $1
     const user = userRes.val;
     delete user.signedPayload;
 
-    const userNfts = await this.nftService.findNftsWithFilter({
-      page: 1,
-      pageSize: 1,
-      orderBy: 'id',
-      orderDirection: 'asc',
-      firstRequestAt: undefined,
-      categories: undefined,
-      userAddress: address,
-      availability: undefined,
-    });
+    const userNfts = await this.nftService.findNftsWithFilter(
+      {
+        page: 1,
+        pageSize: 1,
+        orderBy: 'id',
+        orderDirection: 'asc',
+        firstRequestAt: undefined,
+        categories: undefined,
+        userAddress: address,
+        availability: undefined,
+      },
+      currency,
+    );
 
     return new Ok({
       user: user,
@@ -179,8 +199,9 @@ WHERE address = $1
 
   async getUserCartSession(
     userId: number,
+    dbTx: DbTransaction | DbPool = this.conn,
   ): Promise<Result<string | undefined, string>> {
-    const qryRes = await this.conn.query(
+    const qryRes = await dbTx.query(
       `
 SELECT cart_session
 FROM kanvas_user
@@ -195,7 +216,7 @@ WHERE id = $1`,
     return Ok(qryRes.rows[0]['cart_session']);
   }
 
-  async getTopBuyers(): Promise<UserTotalPaid[]> {
+  async getTopBuyers(currency: string): Promise<UserTotalPaid[]> {
     const qryRes = await this.conn.query(
       `
 SELECT
@@ -223,7 +244,10 @@ LIMIT $1
           userName: row['user_name'],
           userAddress: row['user_address'],
           userPicture: row['profile_pic_url'],
-          totalPaid: row['total_paid'],
+          totalPaid: this.currencyService.convertToCurrency(
+            row['total_paid'],
+            currency,
+          ),
         },
     );
   }
@@ -270,8 +294,13 @@ WHERE session_id = $1
     return newSession;
   }
 
-  async cartList(session: string): Promise<UserCart> {
-    const cartMeta = await this.getCartMeta(session);
+  async cartList(
+    session: string,
+    currency: string,
+    inBaseUnit: boolean = false,
+    dbTx: DbTransaction | DbPool = this.conn,
+  ): Promise<UserCart> {
+    const cartMeta = await this.getCartMeta(session, dbTx);
     if (typeof cartMeta === 'undefined') {
       return {
         nfts: [],
@@ -279,7 +308,7 @@ WHERE session_id = $1
       };
     }
 
-    const nftIds = await this.getCartNftIds(cartMeta.id);
+    const nftIds = await this.getCartNftIds(cartMeta.id, dbTx);
     if (nftIds.length === 0) {
       return {
         nfts: [],
@@ -287,13 +316,22 @@ WHERE session_id = $1
       };
     }
     return {
-      nfts: await this.nftService.findByIds(nftIds, 'nft_id', 'asc'),
+      nfts: await this.nftService.findByIds(
+        nftIds,
+        'nft_id',
+        'asc',
+        currency,
+        inBaseUnit,
+      ),
       expiresAt: cartMeta.expiresAt,
     };
   }
 
-  async getCartNftIds(cartId: number): Promise<number[]> {
-    const qryRes = await this.conn.query(
+  async getCartNftIds(
+    cartId: number,
+    dbTx: DbTransaction | DbPool = this.conn,
+  ): Promise<number[]> {
+    const qryRes = await dbTx.query(
       `
 SELECT nft_id
 FROM mtm_cart_session_nft
@@ -303,12 +341,10 @@ WHERE cart_session_id = $1`,
     return qryRes.rows.map((row: any) => row['nft_id']);
   }
 
-  async cartAdd(session: string, nftId: number): Promise<Result<null, string>> {
+  async cartAdd(session: string, nftId: number) {
     const cartMeta = await this.touchCart(session);
 
-    const dbTx = await this.conn.connect();
-    try {
-      await dbTx.query('BEGIN');
+    return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       await dbTx.query(
         `
 INSERT INTO mtm_cart_session_nft(
@@ -323,30 +359,26 @@ VALUES ($1, $2)`,
 SELECT
   (SELECT reserved + owned FROM nft_editions_locked($1)) AS editions_locked,
   nft.editions_size,
-  nft.launch_at
+  nft.onsale_from
 FROM nft
 WHERE nft.id = $1`,
         [nftId],
       );
       if (qryRes.rows[0]['editions_locked'] > qryRes.rows[0]['editions_size']) {
-        dbTx.query('ROLLBACK');
-        return Err('All editions of this nft have been reserved/bought');
+        throw new HttpException(
+          'All editions of this nft have been reserved/bought',
+          HttpStatus.BAD_REQUEST,
+        );
       }
-      if (qryRes.rows[0]['launch_at'] > new Date()) {
-        dbTx.query('ROLLBACK');
-        return Err('This nft is not yet for sale');
+      if (qryRes.rows[0]['onsale_from'] > new Date()) {
+        throw new HttpException(
+          'This nft is not yet for sale',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
-      await dbTx.query('COMMIT');
-    } catch (err) {
-      await dbTx.query('ROLLBACK');
-      throw err;
-    } finally {
-      dbTx.release();
-    }
-
-    await this.resetCartExpiration(cartMeta.id);
-    return Ok(null);
+      await this.resetCartExpiration(cartMeta.id, dbTx);
+    });
   }
 
   async cartRemove(session: string, nftId: number): Promise<boolean> {
@@ -367,9 +399,12 @@ WHERE cart_session_id = $1
     return true;
   }
 
-  async resetCartExpiration(cartId: number) {
+  async resetCartExpiration(
+    cartId: number,
+    dbTx: DbTransaction | DbPool = this.conn,
+  ) {
     const expiresAt = this.newCartExpiration();
-    await this.conn.query(
+    await dbTx.query(
       `
 UPDATE cart_session
 SET expires_at = $2
@@ -412,8 +447,11 @@ RETURNING id, expires_at`,
     );
   }
 
-  async getCartMeta(session: string): Promise<CartMeta | undefined> {
-    const qryRes = await this.conn.query(
+  async getCartMeta(
+    session: string,
+    dbTx: DbTransaction | DbPool = this.conn,
+  ): Promise<CartMeta | undefined> {
+    const qryRes = await dbTx.query(
       `
 SELECT id, expires_at, order_id
 FROM cart_session

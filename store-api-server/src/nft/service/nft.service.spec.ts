@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NftService } from './nft.service';
-import { CategoryService } from 'src/category/service/category.service';
-import { IpfsService } from 'src/nft/service/ipfs.service';
-import { DbMock } from 'src/mock/db.module';
-import { CacheMock } from 'src/mock/cache.module';
+import { CategoryService } from '../../category/service/category.service';
+import { IpfsService } from '../../nft/service/ipfs.service';
+import { DbMock } from '../../mock/db.module';
+import { CacheMock } from '../../mock/cache.module';
+import { mockedRatesProvider, CurrencyService } from 'kanvas-api-lib';
 
 describe('NftService', () => {
   let service: NftService;
@@ -11,7 +12,13 @@ describe('NftService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DbMock, CacheMock],
-      providers: [NftService, CategoryService, IpfsService],
+      providers: [
+        NftService,
+        CategoryService,
+        mockedRatesProvider,
+        CurrencyService,
+        IpfsService,
+      ],
     }).compile();
 
     service = module.get<NftService>(NftService);

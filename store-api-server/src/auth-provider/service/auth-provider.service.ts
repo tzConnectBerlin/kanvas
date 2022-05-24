@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AuthProviderEntity } from '../entity/auth-provider.entity';
+import { AuthProviderEntity } from '../entity/auth-provider.entity.js';
 
 @Injectable()
 export class AuthProviderService {

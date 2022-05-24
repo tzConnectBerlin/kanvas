@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Result, Err, Ok } from 'ts-results';
-import { S3 } from 'aws-sdk';
+import { Result } from 'ts-results';
+import ts_results from 'ts-results';
+const { Ok, Err } = ts_results;
+import aws_sdk from 'aws-sdk';
+const { S3 } = aws_sdk;
 
 const AWS_S3_BUCKET = process.env.AWS_S3_BUCKET;
 

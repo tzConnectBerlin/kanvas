@@ -9,15 +9,26 @@ import {
   Param,
   Post,
   CACHE_MANAGER,
+  Logger,
   Inject,
 } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Response } from 'express';
-import { NftService } from '../service/nft.service';
-import { CategoryService } from 'src/category/service/category.service';
-import { NftEntity, CreateNft } from '../entity/nft.entity';
-import { FilterParams, PaginationParams, SearchParam } from '../params';
-import { wrapCache } from 'src/utils';
+import sotez from 'sotez';
+const { cryptoUtils } = sotez;
+import { NftService } from '../service/nft.service.js';
+import { CategoryService } from '../../category/service/category.service.js';
+import { NftEntity, CreateNft } from '../entity/nft.entity.js';
+import { FilterParams, PaginationParams, SearchParam } from '../params.js';
+import { wrapCache } from '../../utils.js';
+import { ADMIN_PUBLIC_KEY } from '../../constants.js';
+import {
+  BASE_CURRENCY,
+  SIGNATURE_PREFIX_CREATE_NFT,
+  SIGNATURE_PREFIX_DELIST_NFT,
+  SIGNATURE_PREFIX_RELIST_NFT,
+} from 'kanvas-api-lib';
+import { validateRequestedCurrency } from '../../paramUtils.js';
 
 @Controller('nfts')
 export class NftController {
@@ -29,33 +40,88 @@ export class NftController {
 
   @Post('/create')
   async createNft(@Body() nft: CreateNft) {
+    await this.#verifySignature(
+      SIGNATURE_PREFIX_CREATE_NFT,
+      nft.id,
+      nft.signature,
+    );
+
     return await this.nftService.createNft(nft);
   }
 
+  @Post('/delist/:id')
+  async delistNft(
+    @Param('id') nftId: number,
+    @Body('signature') signature: string,
+  ) {
+    nftId = Number(nftId);
+    if (nftId === NaN) {
+      throw new HttpException(`invalid nft id`, HttpStatus.BAD_REQUEST);
+    }
+    await this.#verifySignature(
+      SIGNATURE_PREFIX_DELIST_NFT,
+      Number(nftId),
+      signature,
+    );
+
+    await this.nftService.delistNft(nftId);
+  }
+
+  @Post('/relist/:id')
+  async relistNft(
+    @Param('id') nftId: number,
+    @Body('signature') signature: string,
+  ) {
+    nftId = Number(nftId);
+    if (nftId === NaN) {
+      throw new HttpException(`invalid nft id`, HttpStatus.BAD_REQUEST);
+    }
+    await this.#verifySignature(SIGNATURE_PREFIX_RELIST_NFT, nftId, signature);
+
+    await this.nftService.relistNft(nftId);
+  }
+
   @Get()
-  async getFiltered(@Res() resp: Response, @Query() params: FilterParams) {
-    this.#validateFilterParams(params);
+  async getFiltered(
+    @Res() resp: Response,
+    @Query() filters: FilterParams,
+    @Query('currency') currency: string = BASE_CURRENCY,
+  ) {
+    validateRequestedCurrency(currency);
+    this.#validateFilterParams(filters);
+
     return await wrapCache(
       this.cache,
       resp,
-      'nft.findNftsWithFilter' + JSON.stringify(params),
+      'nft.findNftsWithFilter' + JSON.stringify(filters) + currency,
       () => {
-        return this.nftService.findNftsWithFilter(params);
+        return this.nftService.findNftsWithFilter(filters, currency);
       },
     );
   }
 
   @Get('/search')
-  async search(@Res() resp: Response, @Query() params: SearchParam) {
+  async search(
+    @Res() resp: Response,
+    @Query() searchParams: SearchParam,
+    @Query('currency') currency: string = BASE_CURRENCY,
+  ) {
+    validateRequestedCurrency(currency);
+
     return await wrapCache(
       this.cache,
       resp,
-      'nft.search' + params.searchString,
+      'nft.search' + searchParams.searchString + currency,
       () => {
         return new Promise(async (resolve) => {
           resolve({
-            nfts: await this.nftService.search(params.searchString),
-            categories: await this.categoryService.search(params.searchString),
+            nfts: await this.nftService.search(
+              searchParams.searchString,
+              currency,
+            ),
+            categories: await this.categoryService.search(
+              searchParams.searchString,
+            ),
           });
         });
       },
@@ -63,7 +129,12 @@ export class NftController {
   }
 
   @Post('/:id')
-  async byId(@Param('id') id: number): Promise<NftEntity> {
+  async byId(
+    @Param('id') id: number,
+    @Query('currency') currency: string = BASE_CURRENCY,
+  ): Promise<NftEntity> {
+    validateRequestedCurrency(currency);
+
     id = Number(id);
     if (isNaN(id)) {
       throw new HttpException(
@@ -71,7 +142,7 @@ export class NftController {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return await this.nftService.byId(id);
+    return await this.nftService.byId(id, currency);
   }
 
   #validateFilterParams(params: FilterParams): void {
@@ -79,7 +150,7 @@ export class NftController {
       if (
         params.availability.some(
           (availabilityEntry: string) =>
-            !['upcoming', 'onSale', 'soldOut'].some(
+            !['upcoming', 'onSale', 'soldOut', 'endingSoon'].some(
               (elem) => elem === availabilityEntry,
             ),
         )
@@ -112,6 +183,32 @@ export class NftController {
       throw new HttpException(
         `Requested orderBy ('${params.orderBy}') not supported`,
         HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async #verifySignature(hexPrefix: string, nftId: number, signature: string) {
+    let nftIdHex = nftId.toString(16);
+    if (nftIdHex.length & 1) {
+      // hex is of uneven length, sotez expects an even number of hexadecimal characters
+      nftIdHex = '0' + nftIdHex;
+    }
+
+    try {
+      if (
+        !(await cryptoUtils.verify(
+          hexPrefix + nftIdHex,
+          `${signature}`,
+          ADMIN_PUBLIC_KEY,
+        ))
+      ) {
+        throw new HttpException('Invalid signature', HttpStatus.UNAUTHORIZED);
+      }
+    } catch (err: any) {
+      Logger.warn(`Error on new nft signature validation, err: ${err}`);
+      throw new HttpException(
+        'Could not validate signature (it may be misshaped)',
+        HttpStatus.UNAUTHORIZED,
       );
     }
   }

@@ -1,10 +1,14 @@
 import { JwtService } from '@nestjs/jwt';
-import { UserEntity } from 'src/user/entity/user.entity';
-import { UserService } from 'src/user/service/user.service';
-import { ITokenPayload } from 'src/interfaces/token.interface';
+import { UserEntity } from '../../user/entity/user.entity.js';
+import { UserService } from '../../user/service/user.service.js';
+import { ITokenPayload } from '../../interfaces/token.interface.js';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Result, Ok } from 'ts-results';
+import { Result } from 'ts-results';
+import ts_results from 'ts-results';
+const { Ok } = ts_results;
 
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 const bcrypt = require('bcrypt');
 
 interface IAuthentication {

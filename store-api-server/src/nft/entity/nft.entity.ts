@@ -1,4 +1,4 @@
-import { CategoryEntity } from 'src/category/entity/category.entity';
+import { CategoryEntity } from '../../category/entity/category.entity.js';
 
 export interface NftEntity {
   id: number;
@@ -11,7 +11,7 @@ export interface NftEntity {
   displayUri?: string;
   thumbnailUri?: string;
 
-  price: number;
+  price: string;
   categories: CategoryEntity[];
   editionsSize: number;
   editionsAvailable: number;
@@ -31,7 +31,9 @@ export interface CreateNft {
   price: number;
   categories: number[];
   editionsSize: number;
-  launchAt: number;
+
+  onsaleFrom?: number;
+  onsaleUntil?: number;
 
   signature: string;
 }
@@ -41,8 +43,8 @@ export interface NftEntityPage {
   nfts: NftEntity[];
   currentPage: number;
   numberOfPages: number;
-  lowerPriceBound: number;
-  upperPriceBound: number;
+  lowerPriceBound: string;
+  upperPriceBound: string;
 }
 
 export interface SearchResult {

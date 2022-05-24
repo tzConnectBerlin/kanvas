@@ -2,36 +2,37 @@ import {
   Controller,
   HttpException,
   Post,
+  Get,
   Req,
+  Param,
+  Body,
   Headers,
   HttpStatus,
   UseGuards,
   Logger,
+  Header,
 } from '@nestjs/common';
-import { CurrentUser } from 'src/decoraters/user.decorator';
-import { JwtAuthGuard } from 'src/authentication/guards/jwt-auth.guard';
+import { CurrentUser } from '../../decoraters/user.decorator.js';
+import { JwtAuthGuard } from '../../authentication/guards/jwt-auth.guard.js';
 import {
-  PaymentProviderEnum,
   PaymentService,
+  PaymentIntent,
   PaymentStatus,
-  StripePaymentIntent,
-} from 'src/payment/service/payment.service';
-import { UserEntity } from 'src/user/entity/user.entity';
-import { Lock } from 'async-await-mutex-lock';
-import { UserService } from 'src/user/service/user.service';
+  PaymentProvider,
+} from '../../payment/service/payment.service.js';
+import { UserEntity } from '../../user/entity/user.entity.js';
+import { UserService } from '../../user/service/user.service.js';
+import { BASE_CURRENCY } from 'kanvas-api-lib';
+import { validateRequestedCurrency } from '../../paramUtils.js';
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 @Controller('payment')
 export class PaymentController {
-  nftLock: Lock<number>;
-
   constructor(
     private paymentService: PaymentService,
     private userService: UserService,
-  ) {
-    this.nftLock = new Lock<number>();
-  }
+  ) {}
 
   @Post('/stripe-webhook')
   async stripeWebhook(
@@ -70,35 +71,45 @@ export class PaymentController {
 
   @Post('/create-payment-intent')
   @UseGuards(JwtAuthGuard)
-  async createPayment(
+  async createPaymentIntent(
     @CurrentUser() user: UserEntity,
-  ): Promise<StripePaymentIntent> {
-    await this.nftLock.acquire(user.id);
+    @Body('currency') currency: string = BASE_CURRENCY,
+  ): Promise<PaymentIntent> {
+    Logger.log(`createPaymentIntent: ${JSON.stringify(currency)}`);
+
+    validateRequestedCurrency(currency);
+
+    let paymentProvider: PaymentProvider;
+    if (currency === 'XTZ') {
+      paymentProvider = PaymentProvider.TEZPAY;
+    } else {
+      paymentProvider = PaymentProvider.STRIPE;
+    }
 
     try {
-      const preparedPayment = await this.paymentService.preparePayment(
+      return await this.paymentService.createPayment(
         user.id,
-        PaymentProviderEnum.STRIPE,
+        paymentProvider,
+        currency,
       );
-      const stripePaymentIntent = await this.paymentService.createStripePayment(
-        preparedPayment.amount,
-        user,
-      );
-      await this.paymentService.createPayment(
-        PaymentProviderEnum.STRIPE,
-        stripePaymentIntent.id,
-        preparedPayment.nftOrder.id,
-      );
-
-      return stripePaymentIntent;
     } catch (err: any) {
       Logger.error(err);
       throw new HttpException(
         'Unable to place the order',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
-    } finally {
-      this.nftLock.release(user.id);
     }
+  }
+
+  @Get('/status/:payment_id')
+  @UseGuards(JwtAuthGuard)
+  @Header('cache-control', 'no-store,must-revalidate')
+  async getPaymentStatus(
+    @CurrentUser() user: UserEntity,
+    @Param('payment_id') paymentId: string,
+  ): Promise<{ status: PaymentStatus }> {
+    return {
+      status: await this.paymentService.getPaymentStatus(user.id, paymentId),
+    };
   }
 }

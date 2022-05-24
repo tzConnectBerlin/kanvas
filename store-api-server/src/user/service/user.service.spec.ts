@@ -1,13 +1,13 @@
-//require('dotenv').config();
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
-import { NftService } from 'src/nft/service/nft.service';
-import { MintService } from 'src/nft/service/mint.service';
-import { CategoryService } from 'src/category/service/category.service';
-import { IpfsService } from 'src/nft/service/ipfs.service';
-import { S3Service } from 'src/s3.service';
-import { DbMock } from 'src/mock/db.module';
-import { CacheMock } from 'src/mock/cache.module';
+import { NftService } from '../../nft/service/nft.service';
+import { MintService } from '../../nft/service/mint.service';
+import { CategoryService } from '../../category/service/category.service';
+import { IpfsService } from '../../nft/service/ipfs.service';
+import { S3Service } from '../../s3.service';
+import { DbMock } from '../../mock/db.module';
+import { CacheMock } from '../../mock/cache.module';
+import { mockedRatesProvider, CurrencyService } from 'kanvas-api-lib';
 
 describe('UserService', () => {
   let service: UserService;
@@ -22,6 +22,8 @@ describe('UserService', () => {
         MintService,
         IpfsService,
         S3Service,
+        mockedRatesProvider,
+        CurrencyService,
       ],
     }).compile();
 

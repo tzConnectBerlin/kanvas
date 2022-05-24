@@ -5,12 +5,12 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import { CategoryEntity } from '../entity/category.entity';
+import { CategoryEntity } from '../entity/category.entity.js';
 import {
   PG_CONNECTION,
   SEARCH_SIMILARITY_LIMIT,
   SEARCH_MAX_CATEGORIES,
-} from '../../constants';
+} from '../../constants.js';
 
 interface CategoryQueryResponse {
   id: number;

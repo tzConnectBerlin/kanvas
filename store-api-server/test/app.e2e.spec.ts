@@ -1,16 +1,27 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Logger, INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from 'src/app.module';
-import { RATE_LIMIT } from 'src/constants';
 import {
-  PaymentProviderEnum,
+  ConsoleLogger,
+  Logger,
+  INestApplication,
+  ValidationPipe,
+} from '@nestjs/common';
+import request from 'supertest';
+import { AppModule } from '../src/app.module';
+import { RATE_LIMIT } from '../src/constants';
+import {
+  SIGNATURE_PREFIX_CREATE_NFT,
+  SIGNATURE_PREFIX_DELIST_NFT,
+  SIGNATURE_PREFIX_RELIST_NFT,
+} from 'kanvas-api-lib';
+import {
+  PaymentProvider,
   PaymentService,
   PaymentStatus,
-} from 'src/payment/service/payment.service';
-import { UserService } from 'src/user/service/user.service';
-import { assertEnv, sleep } from 'src/utils';
-import { cryptoUtils } from 'sotez';
+} from '../src/payment/service/payment.service';
+import { UserService } from '../src/user/service/user.service';
+import { assertEnv, sleep } from '../src/utils';
+import sotez from 'sotez';
+const { cryptoUtils } = sotez;
 
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {
@@ -173,6 +184,11 @@ describe('AppController (e2e)', () => {
     expect(res.body.launchAt).toBeGreaterThan(0);
     delete res.body.launchAt;
 
+    if (typeof res.body.onsaleUntil !== 'undefined') {
+      expect(res.body.onsaleUntil).toBeGreaterThan(0);
+      delete res.body.onsaleUntil;
+    }
+
     expect(res.body).toStrictEqual({
       id: 1,
       name: 'Cartoon',
@@ -185,7 +201,7 @@ describe('AppController (e2e)', () => {
         'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
       thumbnailUri:
         'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
-      price: 1,
+      price: '0.10',
       editionsSize: 4,
       editionsAvailable: 4,
       categories: [
@@ -223,8 +239,8 @@ describe('AppController (e2e)', () => {
         currentPage: 1,
         numberOfPages: 0,
         nfts: [],
-        lowerPriceBound: 0,
-        upperPriceBound: 0,
+        lowerPriceBound: '0.00',
+        upperPriceBound: '0.00',
       });
     },
   );
@@ -241,8 +257,8 @@ describe('AppController (e2e)', () => {
         currentPage: 1,
         numberOfPages: 0,
         nfts: [],
-        lowerPriceBound: 0,
-        upperPriceBound: 0,
+        lowerPriceBound: '0.00',
+        upperPriceBound: '0.00',
       });
     },
   );
@@ -260,6 +276,11 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -278,7 +299,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
-            price: 1,
+            price: '0.10',
             editionsSize: 4,
             editionsAvailable: 4,
             categories: [
@@ -301,7 +322,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2202&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2202&q=80',
-            price: 78,
+            price: '7.80',
             editionsSize: 2,
             editionsAvailable: 2,
             categories: [
@@ -323,7 +344,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
-            price: 104,
+            price: '10.40',
             editionsSize: 6,
             editionsAvailable: 6,
             categories: [
@@ -345,7 +366,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            price: 43,
+            price: '4.30',
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -368,7 +389,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
             thumbnailUri:
               'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
-            price: 92,
+            price: '9.20',
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -391,7 +412,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1506809211073-d0785aaad75e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2656&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1506809211073-d0785aaad75e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2656&q=80',
-            price: 41,
+            price: '4.10',
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -414,7 +435,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1633957897986-70e83293f3ff?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1986&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1633957897986-70e83293f3ff?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1986&q=80',
-            price: 36,
+            price: '3.60',
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -436,7 +457,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1599790772272-d1425cd3242e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
             thumbnailUri:
               'https://images.unsplash.com/photo-1599790772272-d1425cd3242e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
-            price: 642,
+            price: '64.20',
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -459,7 +480,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
-            price: 3432,
+            price: '343.20',
             editionsSize: 8,
             editionsAvailable: 8,
             categories: [
@@ -471,8 +492,8 @@ describe('AppController (e2e)', () => {
             ],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 3432,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '343.20',
       });
     },
   );
@@ -490,14 +511,196 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
         currentPage: 1,
         numberOfPages: 0,
         nfts: [],
-        lowerPriceBound: 0,
-        upperPriceBound: 0,
+        lowerPriceBound: '0.00',
+        upperPriceBound: '0.00',
+      });
+    },
+  );
+
+  skipOnPriorFail('/nfts with upcoming filter', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/nfts')
+      .query({ availability: 'upcoming' });
+    expect(res.statusCode).toEqual(200);
+
+    for (const i in res.body.nfts) {
+      expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+      expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
+      delete res.body.nfts[i].createdAt;
+      delete res.body.nfts[i].launchAt;
+
+      if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+        expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+        delete res.body.nfts[i].onsaleUntil;
+      }
+    }
+
+    expect(res.body).toStrictEqual({
+      currentPage: 1,
+      lowerPriceBound: '10.40',
+      nfts: [
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 4,
+              name: 'Drawing',
+            },
+          ],
+          description: 'its a mountain',
+          displayUri:
+            'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+          editionsAvailable: 6,
+          editionsSize: 6,
+          id: 3,
+          ipfsHash: null,
+          name: 'Internet',
+          price: '10.40',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+        },
+      ],
+      numberOfPages: 1,
+      upperPriceBound: '10.40',
+    });
+  });
+
+  skipOnPriorFail('/nfts with endingSoon filter', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/nfts')
+      .query({ availability: 'endingSoon' });
+    expect(res.statusCode).toEqual(200);
+
+    for (const i in res.body.nfts) {
+      expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+      expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
+      delete res.body.nfts[i].createdAt;
+      delete res.body.nfts[i].launchAt;
+
+      if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+        expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+        delete res.body.nfts[i].onsaleUntil;
+      }
+    }
+
+    expect(res.body).toStrictEqual({
+      currentPage: 1,
+      numberOfPages: 1,
+      nfts: [
+        {
+          id: 1,
+          name: 'Cartoon',
+          description:
+            'Hey guys, here s the WL team ready to write some more code !',
+          ipfsHash: null,
+          artifactUri:
+            'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          displayUri:
+            'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          price: '0.10',
+          editionsSize: 4,
+          editionsAvailable: 4,
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 4,
+              name: 'Drawing',
+            },
+          ],
+        },
+      ],
+      lowerPriceBound: '0.10',
+      upperPriceBound: '0.10',
+    });
+  });
+
+  skipOnPriorFail(
+    '/nfts with 2 availability filters is a union (not intersection)',
+    async () => {
+      const res = await request(app.getHttpServer())
+        .get('/nfts')
+        .query({ availability: 'upcoming,endingSoon' });
+      expect(res.statusCode).toEqual(200);
+
+      for (const i in res.body.nfts) {
+        expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
+        delete res.body.nfts[i].createdAt;
+        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
+      }
+
+      expect(res.body).toStrictEqual({
+        currentPage: 1,
+        lowerPriceBound: '0.10',
+        nfts: [
+          {
+            id: 1,
+            name: 'Cartoon',
+            description:
+              'Hey guys, here s the WL team ready to write some more code !',
+            ipfsHash: null,
+            artifactUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            displayUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            thumbnailUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            price: '0.10',
+            editionsSize: 4,
+            editionsAvailable: 4,
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 4,
+                name: 'Drawing',
+              },
+            ],
+          },
+          {
+            artifactUri:
+              'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 4,
+                name: 'Drawing',
+              },
+            ],
+            description: 'its a mountain',
+            displayUri:
+              'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+            editionsAvailable: 6,
+            editionsSize: 6,
+            id: 3,
+            ipfsHash: null,
+            name: 'Internet',
+            price: '10.40',
+            thumbnailUri:
+              'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
+          },
+        ],
+        numberOfPages: 1,
+        upperPriceBound: '10.40',
       });
     },
   );
@@ -582,6 +785,11 @@ describe('AppController (e2e)', () => {
       expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
       delete res.body.nfts[i].createdAt;
       delete res.body.nfts[i].launchAt;
+
+      if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+        expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+        delete res.body.nfts[i].onsaleUntil;
+      }
     }
 
     expect(res.body).toStrictEqual({
@@ -598,7 +806,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
           thumbnailUri:
             'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
-          price: 3432,
+          price: '343.20',
           editionsSize: 8,
           editionsAvailable: 8,
           categories: [
@@ -1163,80 +1371,48 @@ describe('AppController (e2e)', () => {
     },
   );
 
-  skipOnPriorFail(
-    'stripe payment: create a correct intent payment method',
-    async () => {
-      const { bearer, id } = await loginUser(app, 'addr', 'admin');
-
-      // nft price: 43
-      const add1 = await request(app.getHttpServer())
-        .post('/users/cart/add/4')
-        .set('authorization', bearer);
-      expect(add1.statusCode).toEqual(201);
-
-      // nft price: 104
-      const add2 = await request(app.getHttpServer())
-        .post('/users/cart/add/1')
-        .set('authorization', bearer);
-      expect(add2.statusCode).toEqual(201);
-
-      const preparedPayment = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      expect(preparedPayment.amount).toEqual(44);
-
-      const remove1 = await request(app.getHttpServer())
-        .post('/users/cart/remove/4')
-        .set('authorization', bearer);
-      expect(remove1.statusCode).toEqual(204);
-
-      // nft price: 104
-      const remove2 = await request(app.getHttpServer())
-        .post('/users/cart/remove/1')
-        .set('authorization', bearer);
-      expect(remove2.statusCode).toEqual(204);
-    },
-  );
+  const getLockedCount = async (nftId: number) => {
+    const resp = await request(app.getHttpServer()).post(`/nfts/${nftId}`);
+    return resp.body.editionsSize - resp.body.editionsAvailable;
+  };
 
   skipOnPriorFail(
     'stripe payment: Payment status should change to succeeded if payment is successfull',
     async () => {
       const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
 
-      // nft price: 43 id: 4
+      expect(await getLockedCount(1)).toEqual(0);
+
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      // nft price: 104 id: 1
       const add2 = await request(app.getHttpServer())
         .post('/users/cart/add/1')
         .set('authorization', bearer);
       expect(add2.statusCode).toEqual(201);
 
+      // 1 edition reserved by the cart
+      expect(await getLockedCount(1)).toEqual(1);
+
       // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment.nftOrder.id,
-      );
+      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
+
+      // 1 edition reserved by the order
+      expect(await getLockedCount(1)).toEqual(1);
 
       // Give webhook handler function success event
-      const { payment_id } =
-        await paymentService.getPaymentIdForLatestUserOrder(id);
+      const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
+        id,
+      );
 
       // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.succeeded',
         data: {
           object: {
-            id: payment_id,
+            id: paymentId,
           },
         },
       };
@@ -1244,14 +1420,15 @@ describe('AppController (e2e)', () => {
       // Calling success status
       await paymentService.webhookHandler(constructedEvent);
 
+      // 1 edition locked because it is now owned
+      expect(await getLockedCount(1)).toEqual(1);
+
       // Check cart_session deleted
       const old_cart_session = await userService.getUserCartSession(id);
       expect(old_cart_session.val).toBeNull();
 
       // Check payment status changed to succeeded
-      const { status } = await paymentService.getPaymentIdForLatestUserOrder(
-        id,
-      );
+      const { status } = await paymentService.getPaymentForLatestUserOrder(id);
       expect(status).toEqual(PaymentStatus.SUCCEEDED);
 
       // Check NFT ownership transfer
@@ -1277,45 +1454,47 @@ describe('AppController (e2e)', () => {
     async () => {
       const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
 
-      // nft price: 43 id: 4
+      expect(await getLockedCount(2)).toEqual(0);
+
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/5')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      // nft price: 43 id: 4
       const add2 = await request(app.getHttpServer())
         .post('/users/cart/add/2')
         .set('authorization', bearer);
       expect(add2.statusCode).toEqual(201);
 
+      // 1 edition locked by cart (reservation)
+      expect(await getLockedCount(2)).toEqual(1);
+
       // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment.nftOrder.id,
-      );
+      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
 
       // Give webhook handler function success event
-      const { payment_id } =
-        await paymentService.getPaymentIdForLatestUserOrder(id);
+      const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
+        id,
+      );
+
+      // 1 edition locked by order, cart is ignored (otherwise it'd lock 2 editions, not what we want)
+      expect(await getLockedCount(2)).toEqual(1);
 
       // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.canceled',
         data: {
           object: {
-            id: payment_id,
+            id: paymentId,
           },
         },
       };
 
       // Changing to canceled status
       await paymentService.webhookHandler(constructedEvent);
+
+      // 1 edition still locked by cart (reservation)
+      expect(await getLockedCount(2)).toEqual(1);
 
       // Check cart_session still here
       const old_cart_session = await userService.getUserCartSession(id);
@@ -1324,7 +1503,7 @@ describe('AppController (e2e)', () => {
       expect(old_cart_session.ok).toEqual(true);
 
       // Check payment status changed to canceled
-      const t = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const t = await paymentService.getPaymentForLatestUserOrder(id);
 
       expect(t.status).toEqual(PaymentStatus.CANCELED);
 
@@ -1349,11 +1528,13 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(remove1.statusCode).toEqual(204);
 
-      // nft price: 104
       const remove2 = await request(app.getHttpServer())
         .post('/users/cart/remove/2')
         .set('authorization', bearer);
       expect(remove2.statusCode).toEqual(204);
+
+      // 0 editions locked now that the cart is cleared too
+      expect(await getLockedCount(2)).toEqual(0);
     },
   );
 
@@ -1362,44 +1543,39 @@ describe('AppController (e2e)', () => {
     async () => {
       const { bearer, id } = await loginUser(app, 'addr', 'admin');
 
-      // nft price: 43 id: 4
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/7')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      // nft price: 43 id: 4
       const add2 = await request(app.getHttpServer())
         .post('/users/cart/add/6')
         .set('authorization', bearer);
       expect(add2.statusCode).toEqual(201);
 
       // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment = await paymentService.preparePayment(
+      const preparedOrder = await paymentService.createPayment(
         id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment.nftOrder.id,
+        PaymentProvider.TEST,
+        'EUR',
       );
 
       // Give webhook handler function success event
-      const { payment_id } =
-        await paymentService.getPaymentIdForLatestUserOrder(id);
+      const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
+        id,
+      );
 
       // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.payment_failed',
         data: {
           object: {
-            id: payment_id,
+            id: paymentId,
           },
         },
       };
 
-      // Calling success status
+      // Calling fail status
       await paymentService.webhookHandler(constructedEvent);
 
       // Check cart_session deleted
@@ -1408,9 +1584,7 @@ describe('AppController (e2e)', () => {
       expect(old_cart_session.ok).toEqual(true);
 
       // Check payment status changed to canceled
-      const { status } = await paymentService.getPaymentIdForLatestUserOrder(
-        id,
-      );
+      const { status } = await paymentService.getPaymentForLatestUserOrder(id);
       expect(status).toEqual(PaymentStatus.FAILED);
 
       const userNfts = await request(app.getHttpServer())
@@ -1434,7 +1608,6 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(remove1.statusCode).toEqual(204);
 
-      // nft price: 104
       const remove2 = await request(app.getHttpServer())
         .post('/users/cart/remove/6')
         .set('authorization', bearer);
@@ -1447,7 +1620,6 @@ describe('AppController (e2e)', () => {
     async () => {
       const { bearer, id } = await loginUser(app, 'addr', 'admin');
 
-      // nft price: 43 id: 4
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
         .set('authorization', bearer);
@@ -1455,28 +1627,21 @@ describe('AppController (e2e)', () => {
 
       // Create one payment intent (we are not calling the stripe api)
       try {
-        const preparedPayment = await paymentService.preparePayment(
-          id,
-          PaymentProviderEnum.TEST,
-        );
-        await paymentService.createPayment(
-          PaymentProviderEnum.STRIPE,
-          `stripe_test_id${new Date().getTime().toString()}`,
-          preparedPayment.nftOrder.id,
-        );
+        await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
       } catch (err) {
         Logger.log(err);
       }
 
-      const { payment_id } =
-        await paymentService.getPaymentIdForLatestUserOrder(id);
+      const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
+        id,
+      );
 
       // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.payment_failed',
         data: {
           object: {
-            id: payment_id,
+            id: paymentId,
           },
         },
       };
@@ -1484,30 +1649,24 @@ describe('AppController (e2e)', () => {
       await paymentService.webhookHandler(constructedEvent);
 
       // Check failed payment don't get to timeout
-      const failed = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const failed = await paymentService.getPaymentForLatestUserOrder(id);
       expect(failed.status).toEqual(PaymentStatus.FAILED);
 
       await paymentService.deleteExpiredPayments();
 
-      const stillFailed = await paymentService.getPaymentIdForLatestUserOrder(
-        id,
-      );
+      const stillFailed = await paymentService.getPaymentForLatestUserOrder(id);
       expect(stillFailed.status).toEqual(PaymentStatus.FAILED);
 
       // Check canceled payment don't get to timeout
 
       // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment2 = await paymentService.preparePayment(
+      const preparedOrder2 = await paymentService.createPayment(
         id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment2.nftOrder.id,
+        PaymentProvider.TEST,
+        'EUR',
       );
 
-      const payment3Data = await paymentService.getPaymentIdForLatestUserOrder(
+      const payment3Data = await paymentService.getPaymentForLatestUserOrder(
         id,
       );
 
@@ -1516,54 +1675,37 @@ describe('AppController (e2e)', () => {
         type: 'payment_intent.canceled',
         data: {
           object: {
-            id: payment3Data.payment_id,
+            id: payment3Data.paymentId,
           },
         },
       };
 
       await paymentService.webhookHandler(constructedEvent3);
 
-      const canceled = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const canceled = await paymentService.getPaymentForLatestUserOrder(id);
       expect(canceled.status).toEqual(PaymentStatus.CANCELED);
 
       await paymentService.deleteExpiredPayments();
 
-      const stillCanceled = await paymentService.getPaymentIdForLatestUserOrder(
+      const stillCanceled = await paymentService.getPaymentForLatestUserOrder(
         id,
       );
       expect(stillCanceled.status).toEqual(PaymentStatus.CANCELED);
 
       // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment3 = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment3.nftOrder.id,
-      );
+      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
 
-      const created = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const created = await paymentService.getPaymentForLatestUserOrder(id);
       expect(created.status).toEqual(PaymentStatus.CREATED);
 
       await paymentService.deleteExpiredPayments();
 
-      const timedOut = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const timedOut = await paymentService.getPaymentForLatestUserOrder(id);
       expect(timedOut.status).toEqual(PaymentStatus.TIMED_OUT);
 
-      // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment4 = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment4.nftOrder.id,
-      );
+      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
 
-      const payment4Data = await paymentService.getPaymentIdForLatestUserOrder(
+      const payment4Data = await paymentService.getPaymentForLatestUserOrder(
         id,
       );
 
@@ -1572,36 +1714,26 @@ describe('AppController (e2e)', () => {
         type: 'payment_intent.processing',
         data: {
           object: {
-            id: payment4Data.payment_id,
+            id: payment4Data.paymentId,
           },
         },
       };
 
       await paymentService.webhookHandler(constructedEvent5);
 
-      const processing = await paymentService.getPaymentIdForLatestUserOrder(
-        id,
-      );
+      const processing = await paymentService.getPaymentForLatestUserOrder(id);
       expect(processing.status).toEqual(PaymentStatus.PROCESSING);
 
       await paymentService.deleteExpiredPayments();
 
       const timedOutResponse =
-        await paymentService.getPaymentIdForLatestUserOrder(id);
+        await paymentService.getPaymentForLatestUserOrder(id);
       expect(timedOutResponse.status).toEqual(PaymentStatus.TIMED_OUT);
 
       // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment5 = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment5.nftOrder.id,
-      );
+      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
 
-      const payment5Data = await paymentService.getPaymentIdForLatestUserOrder(
+      const payment5Data = await paymentService.getPaymentForLatestUserOrder(
         id,
       );
 
@@ -1610,19 +1742,19 @@ describe('AppController (e2e)', () => {
         type: 'payment_intent.succeeded',
         data: {
           object: {
-            id: payment5Data.payment_id,
+            id: payment5Data.paymentId,
           },
         },
       };
 
       await paymentService.webhookHandler(constructedEvent2);
 
-      const success = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const success = await paymentService.getPaymentForLatestUserOrder(id);
       expect(success.status).toEqual(PaymentStatus.SUCCEEDED);
 
       await paymentService.deleteExpiredPayments();
 
-      const stillSuccess = await paymentService.getPaymentIdForLatestUserOrder(
+      const stillSuccess = await paymentService.getPaymentForLatestUserOrder(
         id,
       );
       expect(stillSuccess.status).toEqual(PaymentStatus.SUCCEEDED);
@@ -1634,33 +1766,24 @@ describe('AppController (e2e)', () => {
     async () => {
       const { bearer, id } = await loginUser(app, 'addr', 'admin');
 
-      // nft price: 43 id: 4
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment.nftOrder.id,
-      );
+      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
 
       // Give webhook handler function success event
-      const { payment_id } =
-        await paymentService.getPaymentIdForLatestUserOrder(id);
+      const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
+        id,
+      );
 
       // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.payment_failed',
         data: {
           object: {
-            id: payment_id,
+            id: paymentId,
           },
         },
       };
@@ -1668,7 +1791,7 @@ describe('AppController (e2e)', () => {
       // Calling success status
       await paymentService.webhookHandler(constructedEvent);
 
-      const failed = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const failed = await paymentService.getPaymentForLatestUserOrder(id);
       expect(failed.status).toEqual(PaymentStatus.FAILED);
 
       // reconstruct success event from stripe
@@ -1676,7 +1799,7 @@ describe('AppController (e2e)', () => {
         type: 'payment_intent.succeeded',
         data: {
           object: {
-            id: failed.payment_id,
+            id: failed.paymentId,
           },
         },
       };
@@ -1684,9 +1807,7 @@ describe('AppController (e2e)', () => {
       // Calling success status
       await paymentService.webhookHandler(constructedEvent2);
 
-      const stillFailed = await paymentService.getPaymentIdForLatestUserOrder(
-        id,
-      );
+      const stillFailed = await paymentService.getPaymentForLatestUserOrder(id);
       expect(stillFailed.status).toEqual(PaymentStatus.FAILED);
 
       const cleanupCart = await request(app.getHttpServer())
@@ -1701,33 +1822,24 @@ describe('AppController (e2e)', () => {
     async () => {
       const { bearer, id } = await loginUser(app, 'addr', 'admin');
 
-      // nft price: 43 id: 4
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      // Create one payment intent (we are not calling the stripe api)
-      const preparedPayment = await paymentService.preparePayment(
-        id,
-        PaymentProviderEnum.TEST,
-      );
-      await paymentService.createPayment(
-        PaymentProviderEnum.TEST,
-        `stripe_test_id${new Date().getTime().toString()}`,
-        preparedPayment.nftOrder.id,
-      );
+      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
 
       // Give webhook handler function success event
-      const { payment_id } =
-        await paymentService.getPaymentIdForLatestUserOrder(id);
+      const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
+        id,
+      );
 
       // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.succeeded',
         data: {
           object: {
-            id: payment_id,
+            id: paymentId,
           },
         },
       };
@@ -1735,7 +1847,7 @@ describe('AppController (e2e)', () => {
       // Calling success status
       await paymentService.webhookHandler(constructedEvent);
 
-      const success = await paymentService.getPaymentIdForLatestUserOrder(id);
+      const success = await paymentService.getPaymentForLatestUserOrder(id);
       expect(success.status).toEqual(PaymentStatus.SUCCEEDED);
 
       // reconstruct success event from stripe
@@ -1743,7 +1855,7 @@ describe('AppController (e2e)', () => {
         type: 'payment_intent.payment_failed',
         data: {
           object: {
-            id: payment_id,
+            id: paymentId,
           },
         },
       };
@@ -1751,7 +1863,7 @@ describe('AppController (e2e)', () => {
       // Calling success status
       await paymentService.webhookHandler(constructedEvent2);
 
-      const stillSuccess = await paymentService.getPaymentIdForLatestUserOrder(
+      const stillSuccess = await paymentService.getPaymentForLatestUserOrder(
         id,
       );
       expect(stillSuccess.status).toEqual(PaymentStatus.SUCCEEDED);
@@ -1771,6 +1883,11 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -1789,7 +1906,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
-            price: 1,
+            price: '0.10',
             editionsSize: 4,
             editionsAvailable: 3,
             categories: [
@@ -1812,7 +1929,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            price: 43,
+            price: '4.30',
             editionsSize: 8,
             editionsAvailable: 1,
             categories: [
@@ -1825,8 +1942,8 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 43,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '4.30',
       });
     },
   );
@@ -1844,6 +1961,11 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -1862,7 +1984,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
-            price: 1,
+            price: '0.10',
             editionsSize: 4,
             editionsAvailable: 3,
             categories: [
@@ -1875,8 +1997,8 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending'],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 43,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '4.30',
       });
     },
   );
@@ -1894,6 +2016,11 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -1911,7 +2038,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            price: 43,
+            price: '4.30',
             editionsSize: 8,
             editionsAvailable: 1,
             categories: [
@@ -1924,8 +2051,8 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 43,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '4.30',
       });
     },
   );
@@ -1947,6 +2074,11 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -1964,7 +2096,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            price: 43,
+            price: '4.30',
             editionsSize: 8,
             editionsAvailable: 1,
             categories: [
@@ -1977,8 +2109,8 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 43,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '4.30',
       });
     },
   );
@@ -2000,6 +2132,11 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -2017,7 +2154,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            price: 43,
+            price: '4.30',
             editionsSize: 8,
             editionsAvailable: 1,
             categories: [
@@ -2030,8 +2167,8 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 43,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '4.30',
       });
     },
   );
@@ -2053,6 +2190,11 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -2070,7 +2212,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            price: 43,
+            price: '4.30',
             editionsSize: 8,
             editionsAvailable: 1,
             categories: [
@@ -2083,8 +2225,8 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 43,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '4.30',
       });
     },
   );
@@ -2106,6 +2248,10 @@ describe('AppController (e2e)', () => {
         expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
         delete res.body.nfts[i].launchAt;
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
       }
 
       expect(res.body).toStrictEqual({
@@ -2123,7 +2269,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            price: 43,
+            price: '4.30',
             editionsSize: 8,
             editionsAvailable: 1,
             categories: [
@@ -2136,8 +2282,8 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
-        lowerPriceBound: 1,
-        upperPriceBound: 43,
+        lowerPriceBound: '0.10',
+        upperPriceBound: '4.30',
       });
     },
   );
@@ -2205,7 +2351,7 @@ describe('AppController (e2e)', () => {
           userName: 'admin',
           userAddress: 'addr',
           userPicture: null,
-          totalPaid: '130',
+          totalPaid: '13.00',
         },
       ],
     });
@@ -2390,12 +2536,159 @@ describe('AppController (e2e)', () => {
     ]);
   });
 
+  skipOnPriorFail('/nft/delist: success case', async () => {
+    const nftId = 1;
+    let hexMsg = nftId.toString(16);
+    if (hexMsg.length & 1) {
+      // hex is of uneven length, sotez expects an even number of hexadecimal characters
+      hexMsg = SIGNATURE_PREFIX_DELIST_NFT + '0' + hexMsg;
+    }
+
+    const nftExistsPreCheck = await request(app.getHttpServer()).post(
+      `/nfts/${nftId}`,
+    );
+    expect(nftExistsPreCheck.statusCode).toEqual(201);
+
+    const topBuyersResBefore = await request(app.getHttpServer()).get(
+      '/users/topBuyers',
+    );
+    expect(topBuyersResBefore.statusCode).toEqual(200);
+    expect(topBuyersResBefore.body).toStrictEqual({
+      topBuyers: [
+        {
+          userId: 1,
+          userName: 'a beautiful username',
+          userAddress: 'addr',
+          userPicture: null,
+          totalPaid: '13.00',
+        },
+      ],
+    });
+
+    const ownedNftsBefore = await request(app.getHttpServer())
+      .get('/nfts')
+      .query({
+        userAddress: 'addr',
+        page: '1',
+        orderBy: 'id',
+      });
+    expect(ownedNftsBefore.statusCode).toEqual(200);
+    expect(ownedNftsBefore.body.nfts.map((nft: any) => nft.id)).toEqual([1, 4]);
+
+    const signed = await cryptoUtils.sign(
+      hexMsg,
+      assertEnv('ADMIN_PRIVATE_KEY'),
+    );
+
+    const delistRes = await request(app.getHttpServer())
+      .post(`/nfts/delist/${nftId}`)
+      .send({
+        signature: signed.sig,
+      });
+    expect(delistRes.statusCode).toEqual(201);
+
+    // need to sleep, to make sure nothing is served from the cache
+    await sleep(1000);
+
+    // nft no longer exists now
+    const nftExistsPostCheck = await request(app.getHttpServer()).post(
+      `/nfts/${nftId}`,
+    );
+    expect(nftExistsPostCheck.statusCode).toEqual(400);
+
+    // previous buys are no longer taken into the topBuyers sum
+    const topBuyersResAfter = await request(app.getHttpServer()).get(
+      '/users/topBuyers',
+    );
+    expect(topBuyersResAfter.statusCode).toEqual(200);
+    expect(topBuyersResAfter.body).toStrictEqual({
+      topBuyers: [
+        {
+          userId: 1,
+          userName: 'a beautiful username',
+          userAddress: 'addr',
+          userPicture: null,
+          totalPaid: '12.90',
+        },
+      ],
+    });
+
+    // the relisted nft is considered no longer owned by holders
+    const ownedNftsAfter = await request(app.getHttpServer())
+      .get('/nfts')
+      .query({
+        userAddress: 'addr',
+        page: '1',
+        orderBy: 'id',
+      });
+    expect(ownedNftsAfter.statusCode).toEqual(200);
+    expect(ownedNftsAfter.body.nfts.map((nft: any) => nft.id)).toEqual([4]);
+  });
+
+  skipOnPriorFail('/nft/relist: success case', async () => {
+    const nftId = 1;
+    let hexMsg = nftId.toString(16);
+    if (hexMsg.length & 1) {
+      // hex is of uneven length, sotez expects an even number of hexadecimal characters
+      hexMsg = SIGNATURE_PREFIX_RELIST_NFT + '0' + hexMsg;
+    }
+
+    const signed = await cryptoUtils.sign(
+      hexMsg,
+      assertEnv('ADMIN_PRIVATE_KEY'),
+    );
+
+    const relistRes = await request(app.getHttpServer())
+      .post(`/nfts/relist/${nftId}`)
+      .send({
+        signature: signed.sig,
+      });
+    expect(relistRes.statusCode).toEqual(201);
+
+    // need to sleep, to make sure nothing is served from the cache
+    await sleep(1000);
+
+    // nft exists again
+    const nftExistsPostCheck = await request(app.getHttpServer()).post(
+      `/nfts/${nftId}`,
+    );
+    expect(nftExistsPostCheck.statusCode).toEqual(201);
+
+    // previous buys are recovered and taken into the topBuyers sum
+    const topBuyersResAfter = await request(app.getHttpServer()).get(
+      '/users/topBuyers',
+    );
+    expect(topBuyersResAfter.statusCode).toEqual(200);
+    expect(topBuyersResAfter.body).toStrictEqual({
+      topBuyers: [
+        {
+          userId: 1,
+          userName: 'a beautiful username',
+          userAddress: 'addr',
+          userPicture: null,
+          totalPaid: '13.00',
+        },
+      ],
+    });
+
+    // the relisted nft is considered owned again by holders
+    const ownedNftsAfter = await request(app.getHttpServer())
+      .get('/nfts')
+      .query({
+        userAddress: 'addr',
+        page: '1',
+        orderBy: 'id',
+      });
+    expect(ownedNftsAfter.statusCode).toEqual(200);
+    expect(ownedNftsAfter.body.nfts.map((nft: any) => nft.id)).toEqual([1, 4]);
+  });
+
   skipOnPriorFail('/nft/create: success case', async () => {
     const nftId = 100000;
     let hexMsg = nftId.toString(16);
     if (hexMsg.length & 1) {
       // hex is of uneven length, sotez expects an even number of hexadecimal characters
-      hexMsg = '0' + hexMsg;
+      hexMsg = SIGNATURE_PREFIX_CREATE_NFT + '0' + hexMsg;
     }
 
     const signed = await cryptoUtils.sign(
@@ -2412,7 +2705,7 @@ describe('AppController (e2e)', () => {
 
         artifactUri: 'some_s3_uri',
 
-        price: 5,
+        price: '0.50',
         categories: [10],
         editionsSize: 4,
 
@@ -2435,7 +2728,7 @@ describe('AppController (e2e)', () => {
 
         artifactUri: 'some_s3_uri',
 
-        price: 5,
+        price: '0.50',
         categories: [10],
         editionsSize: 4,
 

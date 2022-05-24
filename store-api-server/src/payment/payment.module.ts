@@ -1,25 +1,14 @@
 import { Module } from '@nestjs/common';
-import { PaymentController } from './controller/payment.controller';
-import { DbModule } from 'src/db.module';
-import { PaymentService } from './service/payment.service';
-import { UserService } from 'src/user/service/user.service';
-import { S3Service } from 'src/s3.service';
-import { NftService } from 'src/nft/service/nft.service';
-import { MintService } from 'src/nft/service/mint.service';
-import { CategoryService } from 'src/category/service/category.service';
-import { IpfsService } from 'src/nft/service/ipfs.service';
+import { PaymentController } from './controller/payment.controller.js';
+import { DbModule } from '../db.module.js';
+import { PaymentService } from './service/payment.service.js';
+import { UserModule } from '../user/user.module.js';
+import { NftModule } from '../nft/nft.module.js';
+import { CurrencyModule } from 'kanvas-api-lib';
 
 @Module({
-  imports: [DbModule],
+  imports: [DbModule, UserModule, NftModule, CurrencyModule],
   controllers: [PaymentController],
-  providers: [
-    CategoryService,
-    MintService,
-    PaymentService,
-    UserService,
-    S3Service,
-    NftService,
-    IpfsService,
-  ],
+  providers: [PaymentService],
 })
 export class PaymentModule {}

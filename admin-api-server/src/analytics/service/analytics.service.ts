@@ -1,10 +1,4 @@
-import {
-  Logger,
-  HttpStatus,
-  HttpException,
-  Injectable,
-  Inject,
-} from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import {
   Resolution,
   MetricEntity,
@@ -13,11 +7,13 @@ import {
 } from '../entity/analytics.entity';
 import { PG_CONNECTION_STORE_REPLICATION } from '../../constants';
 import { ActivityFilterParams } from '../params';
+import { BASE_CURRENCY, CurrencyService } from 'kanvas-api-lib';
 
 @Injectable()
 export class AnalyticsService {
   constructor(
     @Inject(PG_CONNECTION_STORE_REPLICATION) private storeRepl: any,
+    private readonly currencyService: CurrencyService,
   ) {}
 
   async getSnapshotSalesNftCount(params: MetricParams): Promise<MetricEntity> {
@@ -36,7 +32,12 @@ export class AnalyticsService {
 
     return <MetricEntity>{
       timestamp: Math.floor(qryRes.rows[0]['timestamp'].getTime() / 1000),
-      value: Number(qryRes.rows[0]['price_volume']) || 0,
+      value: Number(
+        this.currencyService.convertToCurrency(
+          Number(qryRes.rows[0]['price_volume'] || 0),
+          BASE_CURRENCY,
+        ),
+      ),
     };
   }
 
@@ -63,7 +64,12 @@ export class AnalyticsService {
       (row: any) =>
         <MetricEntity>{
           timestamp: Math.floor(row['timestamp'].getTime() / 1000),
-          value: Number(row['price_volume']),
+          value: Number(
+            this.currencyService.convertToCurrency(
+              Number(row['price_volume']),
+              BASE_CURRENCY,
+            ),
+          ),
         },
     );
   }
@@ -161,7 +167,10 @@ LIMIT ${params.pageSize}
             from: row['from'],
             to: row['to'],
             tokenId: Number(row['tokenId']),
-            price: Number(row['price']),
+            price: this.currencyService.convertToCurrency(
+              Number(row['price']),
+              BASE_CURRENCY,
+            ),
             amount: Number(row['amount']),
           },
       ),

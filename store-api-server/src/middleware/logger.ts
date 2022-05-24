@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Cache } from 'cache-manager';
-import { CACHE_SIZE } from 'src/constants';
+import { CACHE_SIZE, BEHIND_PROXY } from '../constants.js';
 
 @Injectable()
 export class StatsLogger {
@@ -44,7 +44,7 @@ export class LoggerMiddleware implements NestMiddleware {
     const { ip, method, originalUrl } = request;
     const userAgent = request.get('user-agent') || '';
     const cookieSession = request.session?.uuid.slice(0, 5) || '';
-    const realIp = request.get('x-real-ip') || ip;
+    const realIp = BEHIND_PROXY ? request.get('X-Forwarded-For') || ip : ip;
 
     const fields = [
       method,
