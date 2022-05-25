@@ -32,6 +32,7 @@ import {
   PG_UNIQUE_VIOLATION_ERRCODE,
   PG_FOREIGN_KEY_VIOLATION_ERRCODE,
   PROFILE_PICTURE_MAX_BYTES,
+  PROFILE_PICTURES_ENABLED,
 } from '../../constants.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
 
@@ -87,6 +88,13 @@ export class UserController {
     @CurrentUser() currentUser: UserEntity,
     @UploadedFile() picture?: any,
   ) {
+    if (!PROFILE_PICTURES_ENABLED) {
+      throw new HttpException(
+        'editing profile pictures is not enabled',
+        HttpStatus.NOT_IMPLEMENTED,
+      );
+    }
+
     if (typeof picture === 'undefined') {
       throw new HttpException(
         'no profile picture attached',

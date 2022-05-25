@@ -4,6 +4,9 @@ import App from './App';
 import ReactDOM from 'react-dom';
 import reportWebVitals from './reportWebVitals';
 import { IntlProvider } from 'react-intl';
+import { PROFILE_PICTURES_ENABLED } from './global';
+
+console.log(`TESET: ${PROFILE_PICTURES_ENABLED}`);
 
 const locale = 'en';
 
