@@ -2299,8 +2299,8 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer)
       .send({
         publish_vote: JSON.stringify('yes'),
-        'image.png': JSON.stringify('someuri'),
-        'thumbnail.png': JSON.stringify('somethumbnailuri'),
+        image: JSON.stringify('someuri'),
+        thumbnail: JSON.stringify('somethumbnailuri'),
         description: JSON.stringify('some long description'),
       });
     expect(res.statusCode).toEqual(200);
@@ -2439,8 +2439,8 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer)
         .send({
           publish_vote: JSON.stringify('yes'),
-          'image.png': JSON.stringify('someuri'),
-          'thumbnail.png': JSON.stringify('somethumbnailuri'),
+          image: JSON.stringify('someuri'),
+          thumbnail: JSON.stringify('somethumbnailuri'),
           description: JSON.stringify('some long description'),
         });
       expect(res.statusCode).toEqual(200); // need 2 votes
@@ -2500,8 +2500,8 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer)
       .send({
         publish_vote: JSON.stringify('yes'),
-        'image.png': JSON.stringify('someuri'),
-        'thumbnail.png': JSON.stringify('somethumbnailuri'),
+        image: JSON.stringify('someuri'),
+        thumbnail: JSON.stringify('somethumbnailuri'),
         description: JSON.stringify('some long description'),
       });
     expect(res.statusCode).toEqual(200); // need 2 votes
@@ -2589,8 +2589,8 @@ describe('AppController (e2e)', () => {
       create_ready: 'boolean',
       delist_vote: 'votes',
       description: 'string',
-      'image.png': 'string',
-      'thumbnail.png': 'string',
+      image: 'string',
+      thumbnail: 'string',
       price: 'number',
       editions_size: 'number',
       onsale_from: 'date',

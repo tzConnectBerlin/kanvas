@@ -446,35 +446,6 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 </>
                             )}
                         </Typography>
-                        <Typography
-                            size="body1"
-                            weight="SemiBold"
-                            sx={{ pt: 4 }}
-                            color="#757575"
-                        >
-                            {nftResponse.loading || comfortLoader
-                                ? undefined
-                                : t('product.description.ipfs')}
-                        </Typography>
-
-                        <Typography
-                            size="h5"
-                            weight="Light"
-                            sx={{ pt: 2, mb: 1 }}
-                        >
-                            {nftResponse.loading ||
-                                comfortLoader ? undefined : (
-                                <Typography
-                                    size="body1"
-                                    weight="Medium"
-                                    type="link"
-                                >
-                                    <StyledA href={`https://cloudflare-ipfs.com/ipfs/${nftResponse.data?.ipfsHash?.slice('ipfs://'.length)}`} target='_blank'>
-                                        {nftResponse.data?.ipfsHash}
-                                    </StyledA>
-                                </Typography>
-                            )}
-                        </Typography>
                         <Stack direction="row" spacing={10}>
                             <Stack direction="column">
                                 <Typography

@@ -953,46 +953,9 @@ describe('AppController (e2e)', () => {
         nftCount: 0,
         user: {
           id: 1,
-          userName: 'admin',
           userAddress: 'addr',
           profilePicture: null,
         },
-      });
-    },
-  );
-
-  skipOnPriorFail(
-    '/users/profile/edit/check: non existing name => OK',
-    async () => {
-      const { bearer } = await loginUser(app, 'addr', 'admin');
-
-      const res = await request(app.getHttpServer())
-        .get('/users/profile/edit/check')
-        .set('authorization', bearer)
-        .query({ userName: 'this is available' });
-
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toStrictEqual({
-        userName: 'this is available',
-        available: true,
-      });
-    },
-  );
-
-  skipOnPriorFail(
-    '/users/profile/edit/check: taken name => OK w/ available: false',
-    async () => {
-      const { bearer } = await loginUser(app, 'addr', 'admin');
-
-      const res = await request(app.getHttpServer())
-        .get('/users/profile/edit/check')
-        .set('authorization', bearer)
-        .query({ userName: 'admin' }); // <- not available
-
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toStrictEqual({
-        userName: 'admin',
-        available: false,
       });
     },
   );
@@ -1016,7 +979,6 @@ describe('AppController (e2e)', () => {
         nftCount: 0,
         user: {
           id: 1,
-          userName: 'admin',
           userAddress: 'addr',
           profilePicture: null,
         },
@@ -1044,7 +1006,6 @@ describe('AppController (e2e)', () => {
         nftCount: 0,
         user: {
           id: 2,
-          userName: 'test user',
           userAddress: 'tz1',
           profilePicture: null,
         },
@@ -2348,7 +2309,6 @@ describe('AppController (e2e)', () => {
       topBuyers: [
         {
           userId: 1,
-          userName: 'admin',
           userAddress: 'addr',
           userPicture: null,
           totalPaid: '13.00',
@@ -2357,66 +2317,8 @@ describe('AppController (e2e)', () => {
     });
   });
 
-  skipOnPriorFail('/users/profile/edit: change username', async () => {
-    const { bearer } = await loginUser(app, 'addr', 'admin');
-
-    let res = await request(app.getHttpServer())
-      .post('/users/profile/edit')
-      .set('authorization', bearer)
-      .send({ userName: 'a beautiful username' });
-
-    expect(res.statusCode).toEqual(201);
-
-    res = await request(app.getHttpServer())
-      .get('/users/profile')
-      .set('authorization', bearer);
-
-    // cannot test this accurately because currently the testdb is populated
-    // with now() timestamps
-    expect(res.body.user?.createdAt).toBeGreaterThan(0);
-    delete res.body.user?.createdAt;
-
-    expect(res.body).toStrictEqual({
-      nftCount: 2,
-      user: {
-        id: 1,
-        userName: 'a beautiful username',
-        userAddress: 'addr',
-        profilePicture: null,
-      },
-    });
-  });
-
   skipOnPriorFail(
-    '/users/profile/edit: change username to what it already was => its ok',
-    async () => {
-      const { bearer } = await loginUser(app, 'addr', 'admin');
-
-      const res = await request(app.getHttpServer())
-        .post('/users/profile/edit')
-        .set('authorization', bearer)
-        .send({ userName: 'a beautiful username' });
-
-      expect(res.statusCode).toEqual(201);
-    },
-  );
-
-  skipOnPriorFail(
-    '/users/profile/edit: change username to what someone else already has => FORBIDDEN',
-    async () => {
-      const { bearer } = await loginUser(app, 'addr', 'admin');
-
-      const res = await request(app.getHttpServer())
-        .post('/users/profile/edit')
-        .set('authorization', bearer)
-        .send({ userName: 'test user' });
-
-      expect(res.statusCode).toEqual(403);
-    },
-  );
-
-  skipOnPriorFail(
-    '/users/profile/edit: not changing username nor profile picture => BAD REQUEST',
+    '/users/profile/edit: not changing the profile picture => BAD REQUEST',
     async () => {
       const { bearer } = await loginUser(app, 'addr', 'admin');
 
@@ -2557,7 +2459,6 @@ describe('AppController (e2e)', () => {
       topBuyers: [
         {
           userId: 1,
-          userName: 'a beautiful username',
           userAddress: 'addr',
           userPicture: null,
           totalPaid: '13.00',
@@ -2605,7 +2506,6 @@ describe('AppController (e2e)', () => {
       topBuyers: [
         {
           userId: 1,
-          userName: 'a beautiful username',
           userAddress: 'addr',
           userPicture: null,
           totalPaid: '12.90',
@@ -2663,7 +2563,6 @@ describe('AppController (e2e)', () => {
       topBuyers: [
         {
           userId: 1,
-          userName: 'a beautiful username',
           userAddress: 'addr',
           userPicture: null,
           totalPaid: '13.00',

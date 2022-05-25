@@ -30,7 +30,7 @@ export interface NftCardProps {
     ownerStatus?: 'pending' | 'owned';
 }
 
-const StyledCard = styled(Card) <{ theme?: Theme }>`
+const StyledCard = styled(Card)<{ theme?: Theme }>`
     &.MuiPaper-root {
         background-image: none !important;
         background-color: ${(props) => props.theme.palette.background.default};
@@ -97,14 +97,24 @@ const StyledImg = styled.img<{ theme?: Theme; willDrop: boolean }>`
     opacity: ${(props) => (props.willDrop ? '0.4' : '1')} !important;
 `;
 
-const AvailabilityWrapper = styled.div<{ inStock: boolean; willDrop: boolean; pending?: boolean }>`
+const AvailabilityWrapper = styled.div<{
+    inStock: boolean;
+    willDrop: boolean;
+    pending?: boolean;
+}>`
     position: absolute;
 
     top: 1rem;
     right: 1rem;
 
     background-color: ${(props) =>
-        props.pending ? '#dadd10' : props.inStock ? (props.willDrop ? '#136dff' : '#00ca00') : 'red'};
+        props.pending
+            ? '#dadd10'
+            : props.inStock
+            ? props.willDrop
+                ? '#136dff'
+                : '#00ca00'
+            : 'red'};
 
     padding-left: 0.5rem;
     padding-right: 0.5rem;
@@ -125,7 +135,7 @@ const StyledWapper = styled.div`
     align-items: center;
 `;
 
-const StyledCardContent = styled(CardContent) <{ theme?: Theme }>`
+const StyledCardContent = styled(CardContent)<{ theme?: Theme }>`
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -241,7 +251,8 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     flexGrow: 1,
                 }}
             >
-                {(props.nftCardMode !== 'user' || props.ownerStatus === 'pending') &&
+                {(props.nftCardMode !== 'user' ||
+                    props.ownerStatus === 'pending') && (
                     <AvailabilityWrapper
                         inStock={(props.editionsAvailable ?? 0) > 0}
                         willDrop={!launchTime ? false : launchTime > 0}
@@ -252,94 +263,47 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                             size="body2"
                             color="white"
                         >
-                            {props.ownerStatus === 'pending' ?
-                                'Pending'
-                                :
-                                (props.editionsAvailable ?? 0) > 0
-                                    ? !launchTime
-                                        ? false
-                                        : launchTime > 0
-                                            ? 'Drop'
-                                            : 'In stock'
-                                    : 'Sold out'}
+                            {props.ownerStatus === 'pending'
+                                ? 'Pending'
+                                : (props.editionsAvailable ?? 0) > 0
+                                ? !launchTime
+                                    ? false
+                                    : launchTime > 0
+                                    ? 'Drop'
+                                    : 'In stock'
+                                : 'Sold out'}
                         </Typography>
                     </AvailabilityWrapper>
-                }
-                <Stack
-                    direction="row"
-                    sx={{
-                        width: '100%',
-                        justifyContent: 'center',
-                    }}
+                )}
+
+                <Typography
+                    weight="SemiBold"
+                    display="initial !important"
+                    noWrap
+                    size="h3"
                 >
+                    {props.name}
+                </Typography>
+
+                {props.nftCardMode === 'user' &&
+                props.ownerStatus === 'pending' ? (
                     <Stack
                         direction="column"
                         sx={{
-                            width: '100%',
-                            minWidth: '60%',
-                            marginBottom: '1rem',
+                            flexFlow: 'wrap',
                         }}
                     >
-                        <Typography
-                            weight="SemiBold"
-                            display="initial !important"
-                            noWrap
-                            size="h3"
-                            sx={{ width: '90%' }}
-                        >
-                            {props.name}
-                        </Typography>
-
-                        <Typography
-                            weight="Light"
-                            size="body"
-                            display="initial !important"
-                            noWrap
-                            sx={{ width: '85%' }}
-                        >
-                            {props.ipfsHash}
-                        </Typography>
+                        <FlexSpacer />
+                        <CustomCircularProgress height={1.2} />
                     </Stack>
-
-                    {props.nftCardMode === 'user' && props.ownerStatus === 'pending' ?
-                        <Stack
-                            direction="column"
-                            sx={{
-                                width: '30%',
-                                marginTop: '0.6rem',
-                                flexFlow: 'wrap',
-                            }}
-                        >
-                            <FlexSpacer />
-                            <CustomCircularProgress height={1.2} />
-
-                        </Stack>
-                        :
-                        props.nftCardMode !== 'user' &&
-                            <Box
-                                display="flex"
-                                flexDirection="row"
-                                marginLeft="auto"
-                            >
-                                <Typography
-                                    weight="SemiBold"
-                                    size="h4"
-                                    marginLeft="auto"
-                                >
-                                    {' '}
-                                    {props.price ? props.price : '- '}
-                                </Typography>
-
-                                <Typography
-                                    weight="Currency"
-                                    size="h4"
-                                    marginLeft="auto"
-                                >
-                                    <TezosLogo width="18px" margin="0 0.2rem" />
-                                </Typography>
-                            </Box>
-                    }
-                </Stack>
+                ) : (
+                    props.nftCardMode !== 'user' && (
+                        <Typography weight="Medium" size="h4">
+                            {' '}
+                            {props.price ? props.price : '- '}
+                        </Typography>
+                    )
+                )}
 
                 <Box
                     display="flex"
@@ -350,9 +314,15 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     <Typography weight="Light" size="body">
                         {launchTime &&
                             launchTime > 0 &&
-                            `${new Date(launchTime).getDate() - 1} day${new Date(launchTime).getDate() > 2 ? 's' : ''
+                            `${new Date(launchTime).getDate() - 1} day${
+                                new Date(launchTime).getDate() > 2 ? 's' : ''
                             } - ${format(
-                                new Date(launchTime + new Date().getTimezoneOffset() * 60 * 1000),
+                                new Date(
+                                    launchTime +
+                                        new Date().getTimezoneOffset() *
+                                            60 *
+                                            1000,
+                                ),
                                 'HH : mm : ss',
                             )}`}
                     </Typography>
