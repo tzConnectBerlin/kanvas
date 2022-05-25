@@ -1,8 +1,8 @@
 attributes:
   name: string
   description: string
-  image.png: content_uri
-  thumbnail.png: content_uri
+  image: content_uri
+  thumbnail: content_uri
   create_ready: boolean
   price: number
   editions_size: number
@@ -22,10 +22,10 @@ states:
       when:
       - nft.name.length > 0
       - nft.description.length > 0
-      - nft['image.png'].length > 0
-      - nft['thumbnail.png'].length > 0
+      - nft.image.length > 0
+      - nft.thumbnail.length > 0
     mutables:
-    - attributes: [name, image.png, thumbnail.png, description]
+    - attributes: [name, image, thumbnail, description]
       by_roles: [creator]
 
   setup_nft:
