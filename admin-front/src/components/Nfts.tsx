@@ -343,7 +343,7 @@ const NftAside = ({ ...props }) => {
         <Stack direction="row" sx={{ position: 'relative', alignItems: 'flex-end', margin: '2em', height: '100%', flexGrow: 1 }} spacing={3}>
 
           <Box sx={{ minHeight: '100px', display: 'flex', flexDirection: "column", flexGrow: 1, justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
-            <img src={props.record?.attributes.image]} style={{ margin: 'auto', maxWidth: '80%', maxHeight: '80%' }} />
+            <img src={props.record?.attributes.image} style={{ margin: 'auto', maxWidth: '80%', maxHeight: '80%' }} />
           </Box>
 
           <Stack direction="column" sx={{ flexStart: 'end', width: '60%' }}>
