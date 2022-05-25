@@ -23,10 +23,8 @@ export const EditProfile: FC<EditProfileProps> = () => {
     const history = useHistory();
 
     const [initialValues, setInitialValues] = useState<{
-        userName: string;
         profilePicture: string;
     }>({
-        userName: '',
         profilePicture: '',
     });
     const location = useLocation<{ currentUser: IUser }>();
@@ -49,25 +47,8 @@ export const EditProfile: FC<EditProfileProps> = () => {
         { manual: true },
     );
 
-    const [checkIfUsernameValidResponse, checkIfUsernameValid] = useAxios(
-        {
-            url:
-                process.env.REACT_APP_API_SERVER_BASE_URL +
-                `/users/profile/edit/check`,
-            method: 'GET',
-            withCredentials: true,
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem(
-                    'Kanvas - Bearer',
-                )}`,
-            },
-        },
-        { manual: true },
-    );
-
     useEffect(() => {
         setInitialValues({
-            userName: location.state?.currentUser?.userName ?? '',
             profilePicture: location.state?.currentUser?.profilePicture ?? '',
         });
     }, []);
@@ -77,7 +58,6 @@ export const EditProfile: FC<EditProfileProps> = () => {
 
         const data = new FormData();
         data.append('profilePicture', body.profilePicture);
-        data.append('userName', body.userName);
 
         const comfortEditLoader = setTimeout(() => {
             editUser({ data: data });
@@ -126,8 +106,6 @@ export const EditProfile: FC<EditProfileProps> = () => {
                 <ProfileForm
                     initialValues={initialValues}
                     submit={handleFormSubmit}
-                    checkIfUsernameValidResponse={checkIfUsernameValidResponse}
-                    checkIfUserNameValid={checkIfUsernameValid}
                     loading={editUserResponse.loading || comfortEditLoader}
                 />
             </StyledStack>

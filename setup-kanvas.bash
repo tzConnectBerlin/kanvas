@@ -129,6 +129,8 @@ function setup_store_api {
     replace_env ADMIN_PUBLIC_KEY  "`take_env ADMIN_PUB_KEY global.env`" store-api-server/.env || exit 1
 
     replace_env BEHIND_PROXY "`take_env BEHIND_PROXY_STORE global.env`" store-api-server/.env
+
+    replace_env PROFILE_PICTURES_ENABLED "`take_env PROFILE_PICTURES_ENABLED global.env`" store-api-server/.env
 }
 
 function setup_store_front {
@@ -136,6 +138,8 @@ function setup_store_front {
 
     replace_env REACT_APP_API_SERVER_BASE_URL  "`take_env STORE_API_URL global.env`" store-front/.env || exit 1
     replace_env REACT_APP_STRIPE_PK_KEY  "`take_env STRIPE_PUB_KEY global.env`" store-front/.env
+
+    replace_env PROFILE_PICTURES_ENABLED "`take_env PROFILE_PICTURES_ENABLED global.env`" store-api-server/.env
 }
 
 function setup_admin_front {

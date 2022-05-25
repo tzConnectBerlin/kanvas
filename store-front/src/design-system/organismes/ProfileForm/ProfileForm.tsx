@@ -19,8 +19,6 @@ interface ProfileFormProps {
     initialValues: any;
     submit: Function;
     loading: boolean;
-    checkIfUserNameValid: Function;
-    checkIfUsernameValidResponse: ResponseValues<any, boolean, any>;
 }
 
 const StyledStack = styled(Stack)`
@@ -102,12 +100,6 @@ const StyledClearContent = styled(ClearRounded)<{ theme?: Theme }>`
     color: ${(props) => props.theme.palette.text.primary};
 `;
 
-const validationSchema = yup.object({
-    userName: yup
-        .string()
-        .min(3, 'Username must be at least 3 characters length'),
-});
-
 let Element = Scroll.Element;
 
 const StyledForm = styled.form`
@@ -125,7 +117,6 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
         useState<unknown>(undefined);
 
     const [comfortLoader, setComfortLoader] = useState(false);
-    const [isUserNameValid, setIsUserNameValid] = useState(true);
     const [dropZoneErrorMessage, setDropZoneErrorMessage] = useState<
         string | null
     >(null);
@@ -146,7 +137,6 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
 
     const formik = useFormik({
         initialValues: props.initialValues,
-        validationSchema: validationSchema,
         enableReinitialize: true,
         onSubmit: async (values) => {
             props.submit({
@@ -185,36 +175,6 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
         }
     }, []);
 
-    // useEffect for username verification
-    useEffect(() => {
-        if (
-            formik.values.userName.length >= 3 &&
-            formik.values.userName !== props.initialValues.userName
-        ) {
-            setComfortLoader(true);
-            const delayUserNameAvailabilitySearch = setTimeout(() => {
-                props.checkIfUserNameValid({
-                    params: {
-                        userName: formik.values.userName,
-                    },
-                });
-                setComfortLoader(false);
-            }, 800);
-            return () => {
-                clearTimeout(delayUserNameAvailabilitySearch);
-            };
-        }
-    }, [formik.values.userName]);
-
-    useEffect(() => {
-        if (props.checkIfUsernameValidResponse.data) {
-            setComfortLoader(false);
-            setIsUserNameValid(
-                props.checkIfUsernameValidResponse.data.available,
-            );
-        }
-    }, [props.checkIfUsernameValidResponse.data]);
-
     return (
         <Box component="form" autoComplete="off">
             <StyledForm onSubmit={formik.handleSubmit}>
@@ -248,59 +208,6 @@ export const ProfileForm: FC<ProfileFormProps> = ({ ...props }) => {
                     {' '}
                     {dropZoneErrorMessage}{' '}
                 </Typography>
-
-                <FlexSpacer minHeight={4} />
-
-                <StyledStack direction="column" spacing={4}>
-                    <Typography size="h3" weight="Medium">
-                        {' '}
-                        Enter a username*{' '}
-                    </Typography>
-                    <Element name="userName">
-                        <StyledInput
-                            id="userName"
-                            name="userName"
-                            placeholder="Type Here"
-                            onFocus={() => scrollTo('userName')}
-                            onBlur={formik.handleBlur}
-                            onChange={(event) => {
-                                formik.handleChange(event);
-                                sessionStorage.setItem(
-                                    'userName',
-                                    event.currentTarget.value,
-                                );
-                            }}
-                            variant="standard"
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="start">
-                                        {' '}
-                                        {comfortLoader ||
-                                        props.checkIfUsernameValidResponse
-                                            .loading ? (
-                                            <CustomCircularProgress
-                                                height={1}
-                                            />
-                                        ) : null}{' '}
-                                    </InputAdornment>
-                                ),
-                            }}
-                            error={
-                                (formik.touched.userName &&
-                                    Boolean(formik.errors.userName)) ||
-                                !isUserNameValid
-                            }
-                            helperText={
-                                (formik.touched.userName &&
-                                    formik.errors.userName) ||
-                                (!isUserNameValid
-                                    ? 'Username already taken'
-                                    : '')
-                            }
-                            value={formik.values.userName}
-                        />
-                    </Element>
-                </StyledStack>
 
                 <FlexSpacer minHeight={4} />
 

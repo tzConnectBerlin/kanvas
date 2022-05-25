@@ -2,7 +2,6 @@ import { NftEntity } from '../../nft/entity/nft.entity';
 
 export interface UserEntity {
   id: number;
-  userName: string;
   userAddress: string;
   createdAt: number; // in UTC UNIX
   profilePicture: string;
@@ -22,7 +21,6 @@ export interface UserCart {
 
 export interface UserTotalPaid {
   userId: number;
-  userName: string;
   userPicture?: string;
   totalPaid: string;
 }

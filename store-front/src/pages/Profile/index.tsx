@@ -246,7 +246,6 @@ const Profile: FC<ProfileProps> = () => {
     const editProfile = () => {
         if (userResponse.data?.user) {
             const currentUser = {
-                userName: userResponse.data?.user.userName,
                 profilePicture: userResponse.data?.user.profilePicture,
             };
             history.push({
