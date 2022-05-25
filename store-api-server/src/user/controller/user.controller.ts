@@ -35,10 +35,6 @@ import {
 } from '../../constants.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
 
-interface EditProfile {
-  userName?: string;
-}
-
 @Controller('users')
 export class UserController {
   constructor(
@@ -89,45 +85,24 @@ export class UserController {
   )
   async editProfile(
     @CurrentUser() currentUser: UserEntity,
-    @Body() editFields: EditProfile,
     @UploadedFile() picture?: any,
   ) {
-    if (
-      typeof editFields.userName === 'undefined' &&
-      typeof picture === 'undefined'
-    ) {
+    if (typeof picture === 'undefined') {
       throw new HttpException(
-        'neither username nor profile picture change requested',
+        'no profile picture attached',
         HttpStatus.BAD_REQUEST,
       );
     }
 
     try {
-      await this.userService.edit(currentUser.id, editFields.userName, picture);
+      await this.userService.edit(currentUser.id, picture);
     } catch (err: any) {
-      if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
-        throw new HttpException(
-          'This username is already taken',
-          HttpStatus.FORBIDDEN,
-        );
-      }
-
       Logger.warn(err);
       throw new HttpException(
         'Failed to edit profile',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-  }
-
-  @Get('/profile/edit/check')
-  @UseGuards(JwtAuthGuard)
-  async checkAllowedEdit(@Query('userName') userName: string) {
-    const available = await this.userService.isNameAvailable(userName);
-    return {
-      userName: userName,
-      available: available,
-    };
   }
 
   @Get('topBuyers')

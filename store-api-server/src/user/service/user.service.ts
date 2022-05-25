@@ -56,67 +56,35 @@ export class UserService {
   ) {}
 
   async create(user: UserEntity): Promise<UserEntity> {
-    const generateRandomName = typeof user.userName === 'undefined';
-    let lastErr = null;
-
-    for (let i = 0; i < this.RANDOM_NAME_MAX_RETRIES; i++) {
-      if (generateRandomName) {
-        user.userName = generate.meaningful(this.RANDOM_NAME_OPTIONS);
-      }
-
-      try {
-        const qryRes = await this.conn.query(
-          `
-INSERT INTO kanvas_user(
-  user_name, address, signed_payload
-)
-VALUES ($1, $2, $3)
-RETURNING id`,
-          [user.userName, user.userAddress, user.signedPayload],
-        );
-
-        return { ...user, id: qryRes.rows[0]['id'] };
-      } catch (err: any) {
-        if (!generateRandomName || err?.code !== PG_UNIQUE_VIOLATION_ERRCODE) {
-          throw err;
-        }
-        lastErr = err;
-      }
-    }
-    throw lastErr;
-  }
-
-  async isNameAvailable(name: string): Promise<boolean> {
     const qryRes = await this.conn.query(
       `
-SELECT 1
-FROM kanvas_user
-WHERE user_name = $1
-    `,
-      [name],
+INSERT INTO kanvas_user(
+  address, signed_payload
+)
+VALUES ($1, $2)
+RETURNING id`,
+      [user.userAddress, user.signedPayload],
     );
-    return qryRes.rowCount === 0;
+
+    return { ...user, id: qryRes.rows[0]['id'] };
   }
 
-  async edit(userId: number, name?: string, picture?: string) {
+  async edit(userId: number, picture: string) {
     let profilePicture: string | undefined;
-    if (typeof picture !== 'undefined') {
-      const fileName = `profilePicture_${userId}`;
-      const s3PathRes = await this.s3Service.uploadFile(picture, fileName);
-      if (!s3PathRes.ok) {
-        throw s3PathRes.val;
-      }
-      profilePicture = s3PathRes.val;
+    const fileName = `profilePicture_${userId}`;
+    const s3PathRes = await this.s3Service.uploadFile(picture, fileName);
+    if (!s3PathRes.ok) {
+      throw s3PathRes.val;
     }
+    profilePicture = s3PathRes.val;
     await this.conn.query(
       `
 UPDATE kanvas_user
 SET
-  user_name = coalesce($2, user_name),
-  picture_url = coalesce($3, picture_url)
+  picture_url = $2
 WHERE id = $1
 `,
-      [userId, name, profilePicture],
+      [userId, profilePicture],
     );
   }
 
@@ -125,7 +93,6 @@ WHERE id = $1
       `
 SELECT
   usr.id,
-  usr.user_name,
   usr.address,
   usr.picture_url,
   usr.signed_payload,
@@ -140,7 +107,6 @@ WHERE address = $1
     }
     const res = {
       id: qryRes.rows[0]['id'],
-      userName: qryRes.rows[0]['user_name'],
       userAddress: qryRes.rows[0]['address'],
       createdAt: Math.floor(qryRes.rows[0]['created_at'].getTime() / 1000),
       profilePicture: qryRes.rows[0]['picture_url'],
@@ -221,7 +187,6 @@ WHERE id = $1`,
       `
 SELECT
   usr.id AS user_id,
-  usr.user_name,
   usr.address AS user_address,
   usr.picture_url AS profile_pic_url,
   SUM(nft.price) AS total_paid
@@ -230,8 +195,8 @@ JOIN nft
   ON nft.id = mtm.nft_id
 join kanvas_user AS usr
   ON usr.id = mtm.kanvas_user_id
-GROUP BY 1, 2, 3, 4
-ORDER BY 5 DESC
+GROUP BY 1, 2, 3
+ORDER BY 4 DESC
 LIMIT $1
       `,
       [NUM_TOP_BUYERS],
@@ -241,7 +206,6 @@ LIMIT $1
       (row: any) =>
         <UserTotalPaid>{
           userId: row['user_id'],
-          userName: row['user_name'],
           userAddress: row['user_address'],
           userPicture: row['profile_pic_url'],
           totalPaid: this.currencyService.convertToCurrency(

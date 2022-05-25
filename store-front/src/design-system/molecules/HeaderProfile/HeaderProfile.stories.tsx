@@ -19,7 +19,6 @@ Primary.args = {
     user: {
         profilePicture:
             'https://dart-creator-image-storage.fra1.digitaloceanspaces.com/undefined_profile_picture',
-        userName: 'aurelia_durand',
         userAddress: 'tz1KhMoukVbwDXRZ7EUuDm7K9K5EmJSGewxd',
     },
 };
