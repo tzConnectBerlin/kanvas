@@ -2,8 +2,8 @@ attributes:
   name: string
   create_ready: boolean
   description: string
-  image.png: string
-  thumbnail.png: string
+  image: string
+  thumbnail: string
   price: number
   editions_size: number
   onsale_from: date
@@ -43,8 +43,8 @@ states:
     - next_state: finish
       when:
       - nft.publish_vote.yes.length >= 2
-      - nft['image.png'].length > 0
-      - nft['thumbnail.png'].length > 0
+      - nft.image.length > 0
+      - nft.thumbnail.length > 0
       - nft.description.length > 0
     - next_state: setup_nft
       when:
@@ -55,7 +55,7 @@ states:
           nft.publish_vote = null;
         }
     mutables:
-    - attributes: [publish_vote, image.png, thumbnail.png, description]
+    - attributes: [publish_vote, image, thumbnail, description]
       by_roles: [moderator, admin]
 
   finish:

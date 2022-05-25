@@ -264,7 +264,7 @@ const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
     </Stack>
   };
 
-  if (props.type === 'content_uri' && props.attributesName !== 'image.png') {
+  if (props.type === 'content_uri' && props.attributesName !== 'image') {
     return <Stack direction="column">
       <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
         {props.label}
