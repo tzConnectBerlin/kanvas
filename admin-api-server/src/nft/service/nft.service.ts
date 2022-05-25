@@ -467,8 +467,8 @@ WHERE TARGET.value != EXCLUDED.value
       name: attr.name,
       description: attr.description,
 
-      artifactUri: attr['image.png'],
-      thumbnailUri: attr['thumbnail.png'],
+      artifactUri: attr.image,
+      thumbnailUri: attr.thumbnail,
 
       price: attr.price,
       categories: attr.categories,
