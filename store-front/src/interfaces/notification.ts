@@ -18,6 +18,8 @@ export enum NotificationEnum {
 export enum CurrencyEnum {
     TEZ = 'ꜩ',
     DOLLAR = '$',
+    EURO = '€',
+    POUND = '£',
 }
 
 export interface ISaleInfo {

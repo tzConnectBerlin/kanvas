@@ -16,6 +16,7 @@ const useCurrency = () => {
 
     const handleCurrency = (value: any) => {
         console.log(`Currency changed to ${value}`);
+        localStorage.setItem('Kanvas - currency', value);
         setCurrency(value);
     };
 
@@ -23,7 +24,8 @@ const useCurrency = () => {
 };
 
 const CurrencyProvider: FC<{}> = ({ children }) => {
-    const [currency, setCurrency] = useState(BASE_CURRENCY);
+    const base = localStorage.getItem('Kanvas - currency') ? localStorage.getItem('Kanvas - currency') : BASE_CURRENCY;
+    const [currency, setCurrency] = useState(base);
 
     console.log(`CurrencyProvider: ${currency}`);
 
