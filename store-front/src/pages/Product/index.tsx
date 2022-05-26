@@ -15,6 +15,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { ICategory } from '../../interfaces/category';
 import CircularProgress from '../../design-system/atoms/CircularProgress';
+import { useCurrency} from '../../currency'
 
 export interface ProductPageProps {
     theme?: Theme;
@@ -149,6 +150,8 @@ interface IProductParam {
 
 export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
     const { t } = useTranslation(['translation']);
+    const {value} = useCurrency();
+
 
     const history = useHistory();
     const { id } = useParams<IProductParam>();
@@ -157,6 +160,9 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/${id}`,
             method: 'POST',
+            params: {
+                currency: value,
+            }
         },
         { manual: true },
     );
@@ -489,7 +495,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 >
                                     {nftResponse.loading ||
                                         comfortLoader ? undefined : (
-                                        <>{nftResponse.data?.price} ꜩ</>
+                                        <>{nftResponse.data?.price} {value}</>
                                     )}
                                 </Typography>
                             </Stack>

@@ -13,6 +13,7 @@ export interface INft {
     ipfsHash?: string;
     displayUri: string;
     price: number;
+    currency: string;
     creator?: string;
     startDate?: string;
     editionsAvailable: string;

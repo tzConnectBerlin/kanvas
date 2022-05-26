@@ -8,14 +8,13 @@ import { useTranslation } from 'react-i18next';
 import { Typography } from '../../design-system/atoms/Typography';
 import NftGrid from '../../design-system/organismes/NftGrid';
 import Hero from '../../design-system/organismes/Hero';
-import mockNft from '../../_mocks/mockNft';
 import { KukaiEmbed } from 'kukai-embed';
 import { BeaconWallet } from '@taquito/beacon-wallet';
 import { CustomButton } from '../../design-system/atoms/Button';
 import useAxios from 'axios-hooks';
 
 import { useHistory } from 'react-router';
-import UsersGrid from '../../design-system/organismes/UsersGrid';
+import { useCurrency} from '../../currency'
 
 interface HomePageProps {
     theme?: Theme;
@@ -66,6 +65,7 @@ const HomePage: FC<HomePageProps> = () => {
     const { t } = useTranslation(['translation']);
 
     const history = useHistory();
+    const {value} = useCurrency();
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -81,6 +81,8 @@ const HomePage: FC<HomePageProps> = () => {
             pageSize: 4,
             orderBy: 'id',
             orderDirection: 'desc',
+            currency : value
+
         },
         headers: {
             Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,
@@ -94,6 +96,7 @@ const HomePage: FC<HomePageProps> = () => {
             pageSize: 8,
             orderBy: 'views',
             orderDirection: 'desc',
+            currency: value,
         },
         headers: {
             Authorization: `Bearer ${localStorage.getItem('Kanvas - Bearer')}`,

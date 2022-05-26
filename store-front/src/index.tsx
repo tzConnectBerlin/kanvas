@@ -4,13 +4,16 @@ import App from './App';
 import ReactDOM from 'react-dom';
 import reportWebVitals from './reportWebVitals';
 import { IntlProvider } from 'react-intl';
+import { CurrencyProvider } from './currency';
 
 const locale = 'en';
 
 const setupAndRender = async () => {
     ReactDOM.render(
         <IntlProvider locale={locale} defaultLocale="en">
-            <App />
+            <CurrencyProvider>
+                <App />
+            </CurrencyProvider>
         </IntlProvider>,
         document.getElementById('root'),
     );

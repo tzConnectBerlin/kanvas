@@ -1,6 +1,6 @@
 import { Box } from '@mui/system';
 import Grid from '@mui/material/Grid';
-import { FC, useState } from 'react';
+import { FC, useState, useContext } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import { SelectChangeEvent, Chip, Theme } from '@mui/material';
@@ -9,6 +9,8 @@ import { Copyright } from '../../atoms/Copyright';
 import { useTranslation } from 'react-i18next';
 import CustomSelect from '../../atoms/Select';
 import i18next from 'i18next';
+import { useCurrency} from '../../../currency'
+
 
 export interface FooterProps {
     selectedTheme?: string;
@@ -90,12 +92,11 @@ const StyledLink = styled(Link)<{ theme?: Theme }>`
 
 export const Footer: FC<FooterProps> = () => {
     const { t } = useTranslation(['translation']);
+    const { value, onChange } = useCurrency();
 
     const [selectedLanguage, setSelectedLanguage] = useState<string>(
         i18next.language,
     );
-
-    const [selectedCurrency, setSelectedCurrency] = useState<string>();
 
     return (
         <StyledBox>
@@ -313,21 +314,25 @@ export const Footer: FC<FooterProps> = () => {
                             id="currencySelect"
                             availableOptions={[
                                 {
-                                    value: 'en',
+                                    value: 'USD',
                                     label: 'USD ($)',
                                 },
                                 {
-                                    value: 'fr',
+                                    value: 'EUR',
                                     label: 'EUR (€)',
                                 },
                                 {
-                                    value: 'de',
+                                    value: 'GBP',
+                                    label: 'GBP (£)'
+                                },
+                                {
+                                    value: 'XTZ',
                                     label: 'Tez (ꜩ)',
                                 },
                             ]}
-                            selectedOption={selectedCurrency ?? 'en'}
+                            selectedOption={value}
                             triggerFunction={(event: SelectChangeEvent) => {
-                                setSelectedCurrency(event.target.value);
+                                onChange(event.target.value);
                             }}
                             disabled={false}
                             customSize="small"

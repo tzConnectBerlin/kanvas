@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import CircularProgress from '../../atoms/CircularProgress';
 import CustomCircularProgress from '../../atoms/CircularProgress';
 import FlexSpacer from '../../atoms/FlexSpacer';
+import { useCurrency } from '../../../currency';
 
 export interface NftCardProps {
     loading?: boolean;
@@ -144,6 +145,7 @@ const StyledCardContent = styled(CardContent)<{ theme?: Theme }>`
 export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
     const history = useHistory();
     const [componentLoading, setComponentLoading] = useState(true);
+    const { value } = useCurrency();
 
     const [launchTime, setLaunchTime] = useState<number>(
         new Date(props.launchAt!).getTime() - new Date().getTime(),
@@ -286,7 +288,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     props.nftCardMode !== 'user' && (
                         <Typography weight="Medium" size="h4">
                             {' '}
-                            {props.price ? props.price : '- '}
+                            {props.price ? props.price : '- '} {value}
                         </Typography>
                     )
                 )}

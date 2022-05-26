@@ -6,6 +6,7 @@ import FlexSpacer from '../../design-system/atoms/FlexSpacer';
 import PageWrapper from '../../design-system/commons/PageWrapper';
 import StoreFilters from '../../design-system/organismes/StoreFilters';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import { useCurrency} from '../../currency'
 
 import { useEffect, useState } from 'react';
 import {
@@ -113,6 +114,8 @@ const StorePage = () => {
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const history = useHistory();
+    
+    const {value} = useCurrency();
 
     // Pagination state
     const [selectedPage, setSelectedPage] = useState<number>(1);
@@ -145,10 +148,13 @@ const StorePage = () => {
     const [onInit, setOnInit] = useState(true);
 
     // Api calls for the categories and the nfts
-    const [nftsResponse, getNfts] = useAxios(
-        process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts',
-        { manual: true },
-    );
+    const [nftsResponse, getNfts] = useAxios({
+        url: process.env.REACT_APP_API_SERVER_BASE_URL + '/nfts',
+        params: {
+            currency: value
+        }
+    });
+    
     const [categoriesResponse, getCategories] = useAxios(
         process.env.REACT_APP_API_SERVER_BASE_URL + '/categories',
         { manual: true },
@@ -172,6 +178,7 @@ const StorePage = () => {
             getNfts({
                 withCredentials: true,
                 params: {
+                    currency: value,
                     page: params.page ?? 1,
                     pageSize: 12,
                     categories:
