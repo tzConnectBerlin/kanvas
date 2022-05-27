@@ -77,3 +77,10 @@ export async function withKeyLocked<LockKeyTy, ResTy>(
     lock.release(key);
   }
 }
+
+export function nowUtcWithOffset(offsetMs: number): Date {
+  const d = new Date();
+
+  d.setTime(d.getTime() + offsetMs);
+  return d;
+}

@@ -18,6 +18,7 @@ import {
   PG_CONNECTION,
   PG_UNIQUE_VIOLATION_ERRCODE,
   NUM_TOP_BUYERS,
+  CART_EXPIRATION_MILLI_SECS,
 } from '../../constants.js';
 import { CurrencyService } from 'kanvas-api-lib';
 import { Result } from 'ts-results';
@@ -25,7 +26,7 @@ import ts_results from 'ts-results';
 const { Ok, Err } = ts_results;
 import { S3Service } from '../../s3.service.js';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { assertEnv } from '../../utils.js';
+import { assertEnv, nowUtcWithOffset } from '../../utils.js';
 import { DbPool, DbTransaction, withTransaction } from '../../db.module.js';
 
 import { createRequire } from 'module';
@@ -45,7 +46,6 @@ export class UserService {
     joinBy: '_',
   };
   RANDOM_NAME_MAX_RETRIES = 5;
-  CART_EXPIRATION_MILLI_SECS = Number(assertEnv('CART_EXPIRATION_MILLI_SECS'));
 
   constructor(
     @Inject(PG_CONNECTION) private conn: DbPool,
@@ -457,10 +457,7 @@ RETURNING session_id`,
   }
 
   newCartExpiration(): Date {
-    const expiresAt = new Date();
-
-    expiresAt.setTime(expiresAt.getTime() + this.CART_EXPIRATION_MILLI_SECS);
-    return expiresAt;
+    return nowUtcWithOffset(CART_EXPIRATION_MILLI_SECS);
   }
 
   async getCartSession(

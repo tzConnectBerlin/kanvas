@@ -5,14 +5,18 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { PG_CONNECTION, PAYPOINT_SCHEMA } from '../../constants.js';
+import {
+  PG_CONNECTION,
+  PAYPOINT_SCHEMA,
+  PAYMENT_PROMISE_DEADLINE_MS,
+} from '../../constants.js';
 import { UserService } from '../../user/service/user.service.js';
 import { NftService } from '../../nft/service/nft.service.js';
 import { MintService } from '../../nft/service/mint.service.js';
 import ts_results from 'ts-results';
 const { Err } = ts_results;
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { assertEnv } from '../../utils.js';
+import { assertEnv, nowUtcWithOffset } from '../../utils.js';
 import { DbTransaction, withTransaction, DbPool } from '../../db.module.js';
 import Tezpay from 'tezpay-server';
 import { v4 as uuidv4 } from 'uuid';
@@ -111,6 +115,28 @@ export class PaymentService {
       constructedEvent.data.object.id,
       paymentStatus,
     );
+  }
+
+  async promisePaid(userId: number, paymentId: string) {
+    const qryRes = await this.conn.query(
+      `
+UPDATE payment
+SET promised_deadline = $3
+WHERE user_id = $1
+  AND payment_id = $2
+  AND promised_deadline IS NULL
+  AND status IN ('created', 'processing')
+  AND provider = 'tezpay'
+      `,
+      [userId, paymentId, nowUtcWithOffset(PAYMENT_PROMISE_DEADLINE_MS)],
+    );
+
+    if (qryRes.rowCount === 0) {
+      throw new HttpException(
+        `logged in user (id=${userId}) does not have an unfinished payment with payment_id=${paymentId} that hasn't been promised payment yet`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   async getPaymentStatus(
