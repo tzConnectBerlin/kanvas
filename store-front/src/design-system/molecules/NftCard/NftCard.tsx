@@ -286,7 +286,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
                     props.nftCardMode !== 'user' && (
                         <Typography weight="Medium" size="h4">
                             {' '}
-                            {props.price ? props.price : '- '}
+                            {props.price ? props.price : '- '} €
                         </Typography>
                     )
                 )}
