@@ -489,7 +489,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 >
                                     {nftResponse.loading ||
                                         comfortLoader ? undefined : (
-                                        <>{nftResponse.data?.price} ꜩ</>
+                                        <>{nftResponse.data?.price} €</>
                                     )}
                                 </Typography>
                             </Stack>

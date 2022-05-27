@@ -403,7 +403,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                                                     props.nftsInCart.map(
                                                         (nft) => nft.price,
                                                     ),
-                                                )} ꜩ`}
+                                                )} €`}
                                             </Typography>
                                         </Stack>
                                     </>
