@@ -36,3 +36,6 @@ export const BEHIND_PROXY: boolean =
 export const ENDING_SOON_DURATION = '2 hours';
 
 export const PAYPOINT_SCHEMA = 'paypoint';
+
+export const PROFILE_PICTURES_ENABLED: boolean =
+  (process.env['PROFILE_PICTURES_ENABLED'] || 'no') === 'yes';

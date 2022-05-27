@@ -9,6 +9,7 @@ import { Skeleton, Stack, Theme } from '@mui/material';
 import { IUser } from '../../../interfaces/user';
 import { CustomButton } from '../../atoms/Button';
 import { Animated } from 'react-animated-css';
+import { PROFILE_PICTURES_ENABLED } from '../../../global';
 
 interface HeaderProfileProps {
     user: IUser;
@@ -104,6 +105,12 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                 >
                     <Avatar
                         src={`${props.user?.profilePicture}`}
+                        onClick={() => {
+                            if (PROFILE_PICTURES_ENABLED && localStorage.getItem('Kanvas - address') ===
+                                props.user?.userAddress) {
+                                props.editProfile()
+                            }
+                        }}
                         height={150}
                         width={150}
                         loading={props.loading}
@@ -114,41 +121,6 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                     direction="column"
                     sx={{ width: '100%', justifyContent: 'center' }}
                 >
-                    <Stack
-                        direction="row"
-                        spacing={2}
-                        sx={{ alignItems: 'center', width: '100%' }}
-                    >
-                        <Typography
-                            size="h2"
-                            weight="SemiBold"
-                            noWrap={true}
-                            align="left"
-                            sx={{ marginRight: '2rem' }}
-                            display="block"
-                        >
-                            {' '}
-                            {props.loading ? (
-                                <Skeleton width="15rem" />
-                            ) : (
-                                props.user?.userName
-                            )}{' '}
-                        </Typography>
-
-                        <FlexSpacer minWidth={0} />
-
-                        {
-                            // Here goes validation if user profile is logged in user
-                            localStorage.getItem('Kanvas - address') ===
-                            props.user?.userAddress ? (
-                                <CustomButton
-                                    size="medium"
-                                    onClick={() => props.editProfile()}
-                                    label="Edit profile"
-                                />
-                            ) : undefined
-                        }
-                    </Stack>
                     <AddressStack
                         direction="row"
                         spacing={2}
@@ -284,21 +256,6 @@ export const HeaderProfile: FC<HeaderProfileProps> = ({ ...props }) => {
                         marginTop: '1rem',
                     }}
                 >
-                    <Typography
-                        fontSize={'1.6em'}
-                        weight="SemiBold"
-                        noWrap={true}
-                        align="right"
-                        display="block"
-                    >
-                        {' '}
-                        {props.loading ? (
-                            <Skeleton width="15rem" />
-                        ) : (
-                            props.user?.userName
-                        )}{' '}
-                    </Typography>
-
                     <AddressStack
                         direction="row"
                         spacing={2}

@@ -8,6 +8,8 @@ ADD . /build
 
 WORKDIR /build
 
+RUN yarn global add serve
+
 RUN yarn install
 RUN yarn build
 

@@ -53,7 +53,6 @@ export const UsersGrid: FC<UsersGridProps> = ({ ...props }) => {
                             }`}
                         >
                             <UsersCard
-                                name={user.userName}
                                 index={index + 1}
                                 amountBought={user.totalPaid}
                                 profilePicture={user.userPicture}

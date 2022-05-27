@@ -8,8 +8,7 @@ ADD . /build
 
 WORKDIR /build
 
-RUN pwd
-RUN ls
+RUN yarn global add serve
 
 RUN yarn install
 RUN yarn build
