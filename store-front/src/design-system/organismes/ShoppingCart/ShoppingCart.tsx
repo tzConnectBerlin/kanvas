@@ -299,7 +299,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                         props.nftsInCart.map(
                                             (nft) => nft.price,
                                         ),
-                                    )} ꜩ`}
+                                    )} €`}
                                 </Typography>
                             </StyledStackWrapper>
                         </>

@@ -142,7 +142,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     overflow: 'clip',
                 }}
             >
-                {`${nft!.price} ꜩ`}
+                {`${nft!.price} €`}
             </Typography>
         </Stack>
     );
