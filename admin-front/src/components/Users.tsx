@@ -50,7 +50,6 @@ export const UserList = ({ ...props }) => {
       <Datagrid rowClick="edit">
         <TextField source="id" />
         <TextField source="userName" />
-        <TextField source="address" />
         <EmailField source="email" />
         <TextArrayField source="roles" value={roles}>
           <SingleFieldList>
@@ -101,7 +100,6 @@ export const UserEdit = ({ ...props }) => {
       <SimpleForm>
         <TextInput source="id" disabled />
         <TextInput source="userName" disabled />
-        <TextInput source="address" disabled />
         <TextInput source="email" disabled />
         {props.permissions?.includes(1) && (
           <SelectArrayInput
@@ -148,7 +146,6 @@ export const UserCreate = ({ ...props }) => {
     <Create onSuccess={onSuccess} {...props}>
       <SimpleForm>
         <TextInput source="userName" />
-        <TextInput source="address" />
         <TextInput source="email" />
         <PasswordInput source="password" />
         <SelectArrayInput

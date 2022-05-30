@@ -20,7 +20,6 @@ export const seedUser = async () => {
   await userService.create({
     password: 'supersafepassword',
     roles: [Roles.admin],
-    address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
     email: 'admin@tzconnect.com',
     userName: 'admin',
     id: 1,
