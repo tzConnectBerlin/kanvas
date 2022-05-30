@@ -10,6 +10,7 @@ import Typography from '../../atoms/Typography';
 import CustomCircularProgress from '../../atoms/CircularProgress';
 import { useHistory } from 'react-router-dom';
 import FlexSpacer from '../../atoms/FlexSpacer';
+import { useCurrency } from '../../../currency';
 
 interface ShoppingCartItemProps {
     loading: boolean;
@@ -43,6 +44,8 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
     const navigateTo = (pathname: string) => {
         history.push({ pathname: pathname });
     };
+
+    const {value} = useCurrency();
 
     return props.loading ? (
         <Stack
@@ -142,7 +145,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     overflow: 'clip',
                 }}
             >
-                {`${nft!.price} ꜩ`}
+                {`${nft!.price} ${value}`}
             </Typography>
         </Stack>
     );

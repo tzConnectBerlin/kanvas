@@ -28,6 +28,8 @@ import { INft } from './interfaces/artwork';
 import { toast } from 'react-toastify';
 import { Checkout } from './pages/Checkout';
 
+import { useCurrency } from './currency'
+
 const StyledBrowserRouter = styled(BrowserRouter)<{ theme?: Theme }>`
     display: block;
 
@@ -47,6 +49,8 @@ const Router = () => {
         localStorage.getItem('Kanvas - theme') as 'light' | 'dark',
     );
 
+    const { value } = useCurrency();
+
     const darkThemeResponsive = responsiveFontSizes(darkTheme);
     const lightThemeResponsive = responsiveFontSizes(lightTheme);
 
@@ -57,6 +61,9 @@ const Router = () => {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/cart/list`,
             method: 'POST',
             withCredentials: true,
+            params: {
+                currency: value
+            }
         },
         { manual: true },
     );

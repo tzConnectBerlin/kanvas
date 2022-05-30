@@ -150,7 +150,7 @@ export const ArtworkCard: FC<ArtworkCardProps> = ({ ...props }) => {
                         color={price ? '' : '#C4C4C4'}
                     >
                         {' '}
-                        {price ? price + ' ꜩ ' : ''}{' '}
+                        {price ? price + '  ' : ''}{' '}
                     </Typography>
                     <Stack direction="column">
                         <Typography

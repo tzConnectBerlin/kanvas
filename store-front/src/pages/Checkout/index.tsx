@@ -18,6 +18,7 @@ import ShoppingCartItem from '../../design-system/molecules/ShoppingCartItem';
 import { Animated } from 'react-animated-css';
 import Success from '../../design-system/atoms/Success';
 import StripeCheckoutForm from '../../design-system/organismes/StripeCheckOutForm';
+import { useCurrency } from '../../currency';
 
 interface CheckoutProps {
     loading: boolean;
@@ -132,6 +133,8 @@ const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PK_KEY!);
 export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
     const history = useHistory();
     const isMobile = useMediaQuery('(max-width: 874px)');
+
+    const {value} = useCurrency();
 
     const [activeStep, setActiveStep] = useState<number>(0)
 
@@ -403,7 +406,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
                                                     props.nftsInCart.map(
                                                         (nft) => nft.price,
                                                     ),
-                                                )} ꜩ`}
+                                                )} ${value}`}
                                             </Typography>
                                         </Stack>
                                     </>

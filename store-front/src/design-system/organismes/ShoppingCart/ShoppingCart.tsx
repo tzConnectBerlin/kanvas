@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 import { Stack, Theme } from '@mui/material';
 import { INft } from '../../../interfaces/artwork';
 import { useHistory } from 'react-router-dom';
-
+import { useCurrency } from '../../../currency';
 interface ShoppingCartProps {
     nftsInCart: INft[];
     setNftsInCart: Function;
@@ -98,6 +98,8 @@ export const StyledStackWrapper = styled(Stack)<{ theme?: Theme }>`
 export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
     const history = useHistory();
     const [timeLeft, setTimeLeft] = useState<number>();
+
+    const {value} = useCurrency();
 
     const [deleteFromCartResponse, deleteFromCart] = useAxios('', {
         manual: true,
@@ -299,7 +301,7 @@ export const ShoppingCart: FC<ShoppingCartProps> = ({ ...props }) => {
                                         props.nftsInCart.map(
                                             (nft) => nft.price,
                                         ),
-                                    )} ꜩ`}
+                                    )} ${value}`}
                                 </Typography>
                             </StyledStackWrapper>
                         </>
