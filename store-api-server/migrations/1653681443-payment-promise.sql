@@ -4,8 +4,8 @@
 
 BEGIN;
 
-ALTER TABLE payment ADD COLUMN promised_deadline TIMESTAMP WITHOUT TIME ZONE;
-CREATE INDEX ON payment(promised_deadline);
+ALTER TABLE payment ADD COLUMN fulfillment_promised_deadline TIMESTAMP WITHOUT TIME ZONE;
+CREATE INDEX ON payment(fulfillment_promised_deadline);
 
 COMMIT;
 
@@ -13,6 +13,6 @@ COMMIT;
 
 BEGIN;
 
-ALTER TABLE payment DROP COLUMN promised_deadline;
+ALTER TABLE payment DROP COLUMN fulfillment_promised_deadline;
 
 COMMIT;

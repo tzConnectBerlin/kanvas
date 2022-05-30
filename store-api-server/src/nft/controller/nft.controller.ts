@@ -19,7 +19,12 @@ const { cryptoUtils } = sotez;
 import { NftService } from '../service/nft.service.js';
 import { CategoryService } from '../../category/service/category.service.js';
 import { NftEntity, CreateNft } from '../entity/nft.entity.js';
-import { FilterParams, PaginationParams, SearchParam } from '../params.js';
+import {
+  FilterParams,
+  PaginationParams,
+  SearchParam,
+  validatePaginationParams,
+} from '../params.js';
 import { wrapCache } from '../../utils.js';
 import { ADMIN_PUBLIC_KEY } from '../../constants.js';
 import {
@@ -162,29 +167,7 @@ export class NftController {
       }
     }
 
-    this.#validatePaginationParams(params);
-  }
-
-  #validatePaginationParams(params: PaginationParams): void {
-    if (params.page < 1 || params.pageSize < 1) {
-      throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST);
-    }
-    if (!['asc', 'desc'].some((elem) => elem === params.orderDirection)) {
-      throw new HttpException(
-        `Requested orderDirection ('${params.orderDirection}') not supported`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    if (
-      !['id', 'name', 'price', 'views', 'createdAt'].some(
-        (elem) => elem === params.orderBy,
-      )
-    ) {
-      throw new HttpException(
-        `Requested orderBy ('${params.orderBy}') not supported`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    validatePaginationParams(params);
   }
 
   async #verifySignature(hexPrefix: string, nftId: number, signature: string) {

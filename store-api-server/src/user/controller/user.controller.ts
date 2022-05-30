@@ -2,6 +2,7 @@ import {
   Session,
   HttpException,
   Inject,
+  Header,
   HttpStatus,
   Body,
   Param,
@@ -34,6 +35,10 @@ import {
   PROFILE_PICTURE_MAX_BYTES,
   PROFILE_PICTURES_ENABLED,
 } from '../../constants.js';
+import {
+  PaginationParams,
+  validatePaginationParams,
+} from '../../nft/params.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
 
 @Controller('users')
@@ -46,10 +51,12 @@ export class UserController {
   @Get('/profile')
   @UseGuards(JwtFailableAuthGuard)
   async getProfile(
+    @Query() paginationParams: PaginationParams,
     @CurrentUser() user?: UserEntity,
     @Query('userAddress') userAddress?: string,
     @Query('currency') currency: string = BASE_CURRENCY,
   ) {
+    validatePaginationParams(paginationParams);
     validateRequestedCurrency(currency);
     const address =
       userAddress ||
@@ -61,8 +68,13 @@ export class UserController {
       );
     }
 
-    const profile_res = await this.userService.getProfile(address, currency);
-    if (!profile_res.ok) {
+    const profileRes = await this.userService.getProfile(
+      address,
+      paginationParams,
+      currency,
+      user?.id,
+    );
+    if (!profileRes.ok) {
       if (typeof userAddress === 'undefined') {
         throw new HttpException(
           'Failed to find user associated to JWT',
@@ -74,7 +86,7 @@ export class UserController {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return profile_res.val;
+    return profileRes.val;
   }
 
   @Post('/profile/edit')
@@ -131,25 +143,14 @@ export class UserController {
     );
   }
 
-  @Post('nftOwnership')
+  @Get('nftOwnershipsPending')
   @UseGuards(JwtAuthGuard)
-  async nftOwnershipStatus(
-    @CurrentUser() user: UserEntity,
-    @Query('nftIds') nftIdsQuery: string,
-  ) {
-    let nftIds: number[];
-    try {
-      nftIds = nftIdsQuery.split(',').map((v: string) => Number(v));
-      if (nftIds.some((id: number) => Number.isNaN(id))) {
-        throw `one or more requested nftIds is NaN`;
-      }
-    } catch (err: any) {
-      throw new HttpException(
-        'Bad nftIds query parameter, expected comma separated nft id numbers',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    return await this.userService.getNftOwnershipStatuses(user, nftIds);
+  @Header('cache-control', 'no-store,must-revalidate')
+  async nftOwnershipStatus(@CurrentUser() user: UserEntity) {
+    return await this.userService.getNftOwnershipStatuses(
+      user.userAddress,
+      user.id,
+    );
   }
 
   @Post('cart/add/:nftId')

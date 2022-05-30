@@ -43,6 +43,7 @@ export interface NftEntityPage {
   nfts: NftEntity[];
   currentPage: number;
   numberOfPages: number;
+  totalNftCount: number;
   lowerPriceBound: string;
   upperPriceBound: string;
 }
