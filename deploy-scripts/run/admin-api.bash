@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 cd $(git rev-parse --show-toplevel)/admin-api-server
 
-yarn run start || tee logs.txt
+yarn run start:prod || tee logs.txt
