@@ -35,6 +35,8 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const generate = require('meaningful-string');
 
+const STATUS_PAYMENT_PROCESSING = 'payment processing';
+
 interface CartMeta {
   id: number;
   expiresAt: number;
@@ -130,7 +132,7 @@ WHERE address = $1
     const user = userRes.val;
     delete user.signedPayload;
 
-    const [owned, statuses] = await Promise.all([
+    let [owned, statuses] = await Promise.all([
       this.nftService.findNftsWithFilter(
         {
           firstRequestAt: undefined,
@@ -143,10 +145,15 @@ WHERE address = $1
       ),
       this.getNftOwnershipStatuses(address, loggedInUserId),
     ]);
+    for (const nft of owned.nfts) {
+      nft.ownerStatuses = statuses[nft.id].filter(
+        (status: string) => status !== STATUS_PAYMENT_PROCESSING,
+      );
+    }
 
     const paymentPromisedNftIds = Object.keys(statuses)
       .filter((nftId: any) => {
-        return statuses[nftId].includes('payment processing');
+        return statuses[nftId].includes(STATUS_PAYMENT_PROCESSING);
       })
       .map((nftId: string) => Number(nftId));
     let paymentPromisedNfts = await this.nftService.findByIds(
@@ -155,24 +162,16 @@ WHERE address = $1
       'asc',
       currency,
     );
-    paymentPromisedNfts = paymentPromisedNfts.slice(
-      (pagination.page - 1) * pagination.pageSize,
-      pagination.page * pagination.pageSize,
-    );
-
-    let collection = owned;
-    collection.nfts = [...paymentPromisedNfts, ...owned.nfts].slice(
-      0,
-      pagination.pageSize,
-    );
-
-    for (const nft of collection.nfts) {
-      nft.ownerStatuses = statuses[nft.id];
+    for (const nft of paymentPromisedNfts) {
+      nft.ownerStatuses = statuses[nft.id].filter(
+        (status: string) => status === STATUS_PAYMENT_PROCESSING,
+      );
     }
 
     return new Ok({
       user: user,
-      collection: collection,
+      collection: owned,
+      pendingOwnership: paymentPromisedNfts,
     });
   }
 
@@ -204,7 +203,7 @@ UNION ALL
 
 SELECT
   mtm.nft_id,
-  'payment processing' AS owner_status,
+  $4 AS owner_status,
   count(1) AS num_editions
 FROM nft_order
 JOIN kanvas_user AS usr
@@ -222,7 +221,7 @@ GROUP BY 1, 2
 
 ORDER BY 1
 `,
-      [MINTER_ADDRESS, address, loggedInUserId],
+      [MINTER_ADDRESS, address, loggedInUserId, STATUS_PAYMENT_PROCESSING],
     );
     const ownerStatuses: any = {};
     for (const row of qryRes.rows) {
