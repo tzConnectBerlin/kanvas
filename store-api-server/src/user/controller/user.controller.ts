@@ -147,10 +147,19 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Header('cache-control', 'no-store,must-revalidate')
   async nftOwnershipStatus(@CurrentUser() user: UserEntity) {
-    return await this.userService.getNftOwnershipStatuses(
+    const statuses = await this.userService.getNftOwnershipStatuses(
       user.userAddress,
       user.id,
     );
+
+    let res: any = [];
+    for (const nftId of Object.keys(statuses)) {
+      res.push({
+        nftId: nftId,
+        ownerStatuses: statuses[Number(nftId)],
+      });
+    }
+    return res;
   }
 
   @Post('cart/add/:nftId')

@@ -329,7 +329,7 @@ FROM price_bounds($1, $2, $3, $4, $5)`,
         return res;
       }
 
-      res.totalNftCount = nftIds.rows[0].total_nft_count;
+      res.totalNftCount = Number(nftIds.rows[0].total_nft_count);
       res.numberOfPages = Math.ceil(res.totalNftCount / filters.pageSize);
       res.nfts = await this.findByIds(
         nftIds.rows.map((row: any) => row.nft_id),

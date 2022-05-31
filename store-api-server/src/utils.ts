@@ -78,9 +78,9 @@ export async function withKeyLocked<LockKeyTy, ResTy>(
   }
 }
 
-export function nowUtcWithOffset(offsetMs: number): Date {
+export function nowUtcWithOffset(offsetMs: number): string {
   const d = new Date();
 
   d.setTime(d.getTime() + offsetMs);
-  return d;
+  return d.toISOString();
 }

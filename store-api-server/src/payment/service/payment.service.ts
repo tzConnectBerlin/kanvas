@@ -8,7 +8,8 @@ import {
 import {
   PG_CONNECTION,
   PAYPOINT_SCHEMA,
-  PAYMENT_PROMISE_DEADLINE_MS,
+  PAYMENT_PROMISE_DEADLINE_MILLI_SECS,
+  ORDER_EXPIRATION_MILLI_SECS,
 } from '../../constants.js';
 import { UserService } from '../../user/service/user.service.js';
 import { NftService } from '../../nft/service/nft.service.js';
@@ -122,6 +123,7 @@ export class PaymentService {
       `
 UPDATE payment
 SET
+  expires_at = greatest($3, expires_at),
   fulfillment_promised_deadline = $3,
   status = 'processing'
 WHERE payment_id = $2
@@ -133,7 +135,11 @@ WHERE payment_id = $2
     WHERE nft_order.id = payment.nft_order_id
       AND user_id = $1
   )`,
-      [userId, paymentId, nowUtcWithOffset(PAYMENT_PROMISE_DEADLINE_MS)],
+      [
+        userId,
+        paymentId,
+        nowUtcWithOffset(PAYMENT_PROMISE_DEADLINE_MILLI_SECS),
+      ],
     );
 
     if (qryRes.rowCount === 0) {
@@ -409,9 +415,7 @@ RETURNING id`,
 
   #newPaymentExpiration(): Date {
     const expiresAt = new Date();
-    expiresAt.setTime(
-      expiresAt.getTime() + Number(assertEnv('ORDER_EXPIRATION_MILLI_SECS')),
-    );
+    expiresAt.setTime(expiresAt.getTime() + ORDER_EXPIRATION_MILLI_SECS);
     return expiresAt;
   }
 
@@ -508,6 +512,7 @@ WHERE provider = $1
       | PaymentStatus.CANCELED
       | PaymentStatus.TIMED_OUT = PaymentStatus.CANCELED,
   ) {
+    console.log(`canceling: ${orderId}`);
     const payment = await dbTx.query(
       `
 UPDATE payment

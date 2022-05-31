@@ -1,3 +1,5 @@
+begin;
+
 insert into kanvas_user (
   address, signed_payload
 )
@@ -129,5 +131,4 @@ values
   (3, 33),
   (3, 34);
 
-
-
+commit;

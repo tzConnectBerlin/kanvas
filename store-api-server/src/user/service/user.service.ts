@@ -50,6 +50,7 @@ export class UserService {
     joinBy: '_',
   };
   RANDOM_NAME_MAX_RETRIES = 5;
+  CART_EXPIRATION_MILLI_SECS = CART_EXPIRATION_MILLI_SECS;
 
   constructor(
     @Inject(PG_CONNECTION) private conn: DbPool,
@@ -193,11 +194,15 @@ UNION ALL
 SELECT
   nft_id,
   'pending' AS owner_status,
-  purchased_editions_pending_transfer(nfts_purchased.nft_id, $2, $1) as num_editions
-FROM kanvas_user
-JOIN mtm_kanvas_user_nft AS nfts_purchased
-  ON nfts_purchased.kanvas_user_id = kanvas_user.id
-WHERE kanvas_user.address = $2
+  purchased_editions_pending_transfer(nft_id, $2, $1) as num_editions
+FROM (
+  SELECT DISTINCT
+    nfts_purchased.nft_id
+  FROM kanvas_user
+  JOIN mtm_kanvas_user_nft AS nfts_purchased
+    ON nfts_purchased.kanvas_user_id = kanvas_user.id
+  WHERE kanvas_user.address = $2
+) q
 
 UNION ALL
 
@@ -223,6 +228,7 @@ ORDER BY 1
 `,
       [MINTER_ADDRESS, address, loggedInUserId, STATUS_PAYMENT_PROCESSING],
     );
+
     const ownerStatuses: any = {};
     for (const row of qryRes.rows) {
       ownerStatuses[row.nft_id] = [
@@ -444,7 +450,7 @@ UPDATE cart_session
 SET expires_at = $2
 WHERE id = $1
   `,
-      [cartId, expiresAt.toUTCString()],
+      [cartId, expiresAt],
     );
   }
 
@@ -462,7 +468,7 @@ INSERT INTO cart_session (
 )
 VALUES ($1, $2)
 RETURNING id, expires_at`,
-      [session, expiresAt.toUTCString()],
+      [session, expiresAt],
     );
     return {
       id: qryRes.rows[0]['id'],
@@ -529,8 +535,8 @@ RETURNING session_id`,
     );
   }
 
-  newCartExpiration(): Date {
-    return nowUtcWithOffset(CART_EXPIRATION_MILLI_SECS);
+  newCartExpiration(): string {
+    return nowUtcWithOffset(this.CART_EXPIRATION_MILLI_SECS);
   }
 
   async getCartSession(

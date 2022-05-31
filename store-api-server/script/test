@@ -15,7 +15,7 @@ if [[ "$?" != "0" ]]; then
     echo failed to start testdb, cannot run tests
     exit 1
 fi
-trap "docker kill $db_docker" EXIT
+# trap "docker kill $db_docker" EXIT
 
 echo "waiting for testdb setup.. (docker: $db_docker)"
 ./script/wait-db
