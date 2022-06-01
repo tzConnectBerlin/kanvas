@@ -101,6 +101,15 @@ export class PaymentController {
     }
   }
 
+  @Post('/promise-paid')
+  @UseGuards(JwtAuthGuard)
+  async promisePaymentPaid(
+    @CurrentUser() user: UserEntity,
+    @Body('payment_id') paymentId: string,
+  ) {
+    await this.paymentService.promisePaid(user.id, paymentId);
+  }
+
   @Get('/status/:payment_id')
   @UseGuards(JwtAuthGuard)
   @Header('cache-control', 'no-store,must-revalidate')
