@@ -11,8 +11,16 @@ import { BEHIND_PROXY } from './constants.js';
 async function bootstrap() {
   const port = process.env['KANVAS_API_PORT'] || 3000;
 
+  let cors: any = false;
+  if (process.env.LOCAL_CORS === 'true') {
+    cors = {
+      credentials: true,
+      origin: true,
+    };
+  }
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    cors: process.env.LOCAL_CORS === 'true',
+    cors: cors,
     logger: ['log', 'warn', 'error'],
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));

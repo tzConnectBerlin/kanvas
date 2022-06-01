@@ -51,7 +51,6 @@ export class UserController {
       'id',
       'email',
       'userName',
-      'address',
       'roles',
     ]);
 

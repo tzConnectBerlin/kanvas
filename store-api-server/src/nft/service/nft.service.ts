@@ -5,11 +5,7 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import {
-  CreateNft,
-  NftEntity,
-  NftEntityPage,
-} from '../../nft/entity/nft.entity.js';
+import { CreateNft, NftEntity, NftEntityPage } from '../entity/nft.entity.js';
 import { CategoryEntity } from '../../category/entity/category.entity.js';
 import { CategoryService } from '../../category/service/category.service.js';
 import { FilterParams } from '../params.js';
@@ -317,6 +313,7 @@ FROM price_bounds($1, $2, $3, $4, $5)`,
       const res = <NftEntityPage>{
         currentPage: filters.page,
         numberOfPages: 0,
+        totalNftCount: 0,
         firstRequestAt: filters.firstRequestAt,
         nfts: [],
         lowerPriceBound: this.currencyService.convertToCurrency(
@@ -332,18 +329,14 @@ FROM price_bounds($1, $2, $3, $4, $5)`,
         return res;
       }
 
-      res.numberOfPages = Math.ceil(
-        nftIds.rows[0].total_nft_count / filters.pageSize,
-      );
+      res.totalNftCount = Number(nftIds.rows[0].total_nft_count);
+      res.numberOfPages = Math.ceil(res.totalNftCount / filters.pageSize);
       res.nfts = await this.findByIds(
         nftIds.rows.map((row: any) => row.nft_id),
         orderBy,
         filters.orderDirection,
         currency,
       );
-      if (typeof filters.userAddress !== 'undefined') {
-        await this.#addNftOwnerStatus(filters.userAddress, res.nfts);
-      }
       return res;
     } catch (err) {
       Logger.error('Error on nft filtered query, err: ' + err);
@@ -389,49 +382,6 @@ WHERE id = $1
 `,
       [id],
     );
-  }
-
-  async getNftOwnerStatus(address: string, nftIds: number[]) {
-    const qryRes = await this.conn.query(
-      `
-SELECT
-  idx_assets_nat AS nft_id,
-  'owned' AS owner_status,
-  assets_nat AS num_editions
-FROM onchain_kanvas."storage.ledger_live" AS ledger_now
-WHERE ledger_now.idx_assets_address = $2
-  AND ledger_now.idx_assets_nat = ANY($3)
-
-UNION ALL
-
-SELECT
-  nft_id,
-  'pending' AS owner_status,
-  purchased_editions_pending_transfer(nft_id, $2, $1) as num_editions
-FROM UNNEST($3::integer[]) as nft_id
-
-ORDER BY 1
-`,
-      [MINTER_ADDRESS, address, nftIds],
-    );
-    const ownerStatuses: any = {};
-    for (const row of qryRes.rows) {
-      ownerStatuses[row.nft_id] = [
-        ...(ownerStatuses[row.nft_id] || []),
-        ...Array(Number(row.num_editions)).fill(row.owner_status),
-      ];
-    }
-    return ownerStatuses;
-  }
-
-  async #addNftOwnerStatus(address: string, nfts: NftEntity[]) {
-    const ownerStatuses = await this.getNftOwnerStatus(
-      address,
-      nfts.map((nft: NftEntity) => nft.id),
-    );
-    for (const nft of nfts) {
-      nft.ownerStatuses = ownerStatuses[nft.id];
-    }
   }
 
   async findByIds(

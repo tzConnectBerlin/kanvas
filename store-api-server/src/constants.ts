@@ -39,3 +39,14 @@ export const PAYPOINT_SCHEMA = 'paypoint';
 
 export const PROFILE_PICTURES_ENABLED: boolean =
   (process.env['PROFILE_PICTURES_ENABLED'] || 'no') === 'yes';
+
+export const CART_EXPIRATION_MILLI_SECS = Number(
+  process.env['CART_EXPIRATION_MILLI_SECS'] || 60 * 60 * 1000,
+);
+export const PAYMENT_PROMISE_DEADLINE_MILLI_SECS = Number(
+  process.env['PAYMENT_PROMISE_DEADLINE_MILLI_SECS'] || 600 * 1000,
+);
+
+export const ORDER_EXPIRATION_MILLI_SECS = Number(
+  process.env['ORDER_EXPIRATION_MILLI_SECS'] || 3600 * 1000,
+);

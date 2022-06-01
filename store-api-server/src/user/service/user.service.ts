@@ -12,12 +12,15 @@ import {
   UserTotalPaid,
   NftOwnershipStatus,
 } from '../entity/user.entity.js';
+import { NftEntity } from '../../nft/entity/nft.entity.js';
 import { NftService } from '../../nft/service/nft.service.js';
-import { MintService } from '../../nft/service/mint.service.js';
+import { PaginationParams } from '../../nft/params.js';
 import {
   PG_CONNECTION,
   PG_UNIQUE_VIOLATION_ERRCODE,
+  MINTER_ADDRESS,
   NUM_TOP_BUYERS,
+  CART_EXPIRATION_MILLI_SECS,
 } from '../../constants.js';
 import { CurrencyService } from 'kanvas-api-lib';
 import { Result } from 'ts-results';
@@ -25,12 +28,14 @@ import ts_results from 'ts-results';
 const { Ok, Err } = ts_results;
 import { S3Service } from '../../s3.service.js';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { assertEnv } from '../../utils.js';
+import { assertEnv, nowUtcWithOffset } from '../../utils.js';
 import { DbPool, DbTransaction, withTransaction } from '../../db.module.js';
 
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const generate = require('meaningful-string');
+
+const STATUS_PAYMENT_PROCESSING = 'payment processing';
 
 interface CartMeta {
   id: number;
@@ -45,12 +50,11 @@ export class UserService {
     joinBy: '_',
   };
   RANDOM_NAME_MAX_RETRIES = 5;
-  CART_EXPIRATION_MILLI_SECS = Number(assertEnv('CART_EXPIRATION_MILLI_SECS'));
+  CART_EXPIRATION_MILLI_SECS = CART_EXPIRATION_MILLI_SECS;
 
   constructor(
     @Inject(PG_CONNECTION) private conn: DbPool,
     private readonly s3Service: S3Service,
-    private readonly mintService: MintService,
     private readonly currencyService: CurrencyService,
     public readonly nftService: NftService,
   ) {}
@@ -118,7 +122,9 @@ WHERE address = $1
 
   async getProfile(
     address: string,
+    pagination: PaginationParams,
     currency: string,
+    loggedInUserId?: number,
   ): Promise<Result<ProfileEntity, string>> {
     const userRes = await this.findByAddress(address);
     if (!userRes.ok) {
@@ -127,40 +133,110 @@ WHERE address = $1
     const user = userRes.val;
     delete user.signedPayload;
 
-    const userNfts = await this.nftService.findNftsWithFilter(
-      {
-        page: 1,
-        pageSize: 1,
-        orderBy: 'id',
-        orderDirection: 'asc',
-        firstRequestAt: undefined,
-        categories: undefined,
-        userAddress: address,
-        availability: undefined,
-      },
+    let [owned, statuses] = await Promise.all([
+      this.nftService.findNftsWithFilter(
+        {
+          firstRequestAt: undefined,
+          categories: undefined,
+          userAddress: address,
+          availability: undefined,
+          ...pagination,
+        },
+        currency,
+      ),
+      this.getNftOwnershipStatuses(address, loggedInUserId),
+    ]);
+    for (const nft of owned.nfts) {
+      nft.ownerStatuses = statuses[nft.id].filter(
+        (status: string) => status !== STATUS_PAYMENT_PROCESSING,
+      );
+    }
+
+    const paymentPromisedNftIds = Object.keys(statuses)
+      .filter((nftId: any) => {
+        return statuses[nftId].includes(STATUS_PAYMENT_PROCESSING);
+      })
+      .map((nftId: string) => Number(nftId));
+    let paymentPromisedNfts = await this.nftService.findByIds(
+      paymentPromisedNftIds,
+      'nft_id',
+      'asc',
       currency,
     );
+    for (const nft of paymentPromisedNfts) {
+      nft.ownerStatuses = statuses[nft.id].filter(
+        (status: string) => status === STATUS_PAYMENT_PROCESSING,
+      );
+    }
 
     return new Ok({
       user: user,
-      nftCount: userNfts.numberOfPages,
+      collection: owned,
+      pendingOwnership: paymentPromisedNfts,
     });
   }
 
   async getNftOwnershipStatuses(
-    user: UserEntity,
-    nftIds: number[],
-  ): Promise<NftOwnershipStatus[]> {
-    const statuses = await this.nftService.getNftOwnerStatus(
-      user.userAddress,
-      nftIds,
+    address: string,
+    loggedInUserId?: number,
+  ): Promise<{ [key: number]: string[] }> {
+    const qryRes = await this.conn.query(
+      `
+SELECT
+  idx_assets_nat AS nft_id,
+  'owned' AS owner_status,
+  assets_nat AS num_editions
+FROM onchain_kanvas."storage.ledger_live" AS ledger_now
+WHERE ledger_now.idx_assets_address = $2
+
+UNION ALL
+
+SELECT
+  nft_id,
+  'pending' AS owner_status,
+  purchased_editions_pending_transfer(nft_id, $2, $1) as num_editions
+FROM (
+  SELECT DISTINCT
+    nfts_purchased.nft_id
+  FROM kanvas_user
+  JOIN mtm_kanvas_user_nft AS nfts_purchased
+    ON nfts_purchased.kanvas_user_id = kanvas_user.id
+  WHERE kanvas_user.address = $2
+) q
+
+UNION ALL
+
+SELECT
+  mtm.nft_id,
+  $4 AS owner_status,
+  count(1) AS num_editions
+FROM nft_order
+JOIN kanvas_user AS usr
+  ON usr.id = nft_order.user_id
+JOIN payment
+  ON payment.nft_order_id = nft_order.id
+JOIN mtm_nft_order_nft AS mtm
+  ON mtm.nft_order_id = nft_order.id
+WHERE usr.id = $3
+  AND usr.address = $2
+  AND payment.status = 'processing'
+  AND payment.provider = 'tezpay'  -- currently this is the only provider where payments are dealt with asynchronously
+  AND payment.fulfillment_promised_deadline > now() AT TIME ZONE 'UTC'
+GROUP BY 1, 2
+
+ORDER BY 1
+`,
+      [MINTER_ADDRESS, address, loggedInUserId, STATUS_PAYMENT_PROCESSING],
     );
-    return Object.keys(statuses).map((nftId: any) => {
-      return {
-        nftId: nftId,
-        ownerStatuses: statuses[nftId],
-      };
-    });
+
+    const ownerStatuses: any = {};
+    for (const row of qryRes.rows) {
+      ownerStatuses[row.nft_id] = [
+        ...(ownerStatuses[row.nft_id] || []),
+        ...Array(Number(row.num_editions)).fill(row.owner_status),
+      ];
+    }
+    return ownerStatuses;
   }
 
   async getUserCartSession(
@@ -374,7 +450,7 @@ UPDATE cart_session
 SET expires_at = $2
 WHERE id = $1
   `,
-      [cartId, expiresAt.toUTCString()],
+      [cartId, expiresAt],
     );
   }
 
@@ -392,7 +468,7 @@ INSERT INTO cart_session (
 )
 VALUES ($1, $2)
 RETURNING id, expires_at`,
-      [session, expiresAt.toUTCString()],
+      [session, expiresAt],
     );
     return {
       id: qryRes.rows[0]['id'],
@@ -400,8 +476,11 @@ RETURNING id, expires_at`,
     };
   }
 
-  async deleteCartSession(orderId: number) {
-    await this.conn.query(
+  async deleteCartSession(
+    orderId: number,
+    dbTx: DbTransaction | DbPool = this.conn,
+  ) {
+    await dbTx.query(
       `
       DELETE FROM
       cart_session
@@ -456,11 +535,8 @@ RETURNING session_id`,
     );
   }
 
-  newCartExpiration(): Date {
-    const expiresAt = new Date();
-
-    expiresAt.setTime(expiresAt.getTime() + this.CART_EXPIRATION_MILLI_SECS);
-    return expiresAt;
+  newCartExpiration(): string {
+    return nowUtcWithOffset(this.CART_EXPIRATION_MILLI_SECS);
   }
 
   async getCartSession(

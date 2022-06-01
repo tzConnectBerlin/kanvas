@@ -82,3 +82,25 @@ function parseNumberParam(v: string): number {
   }
   return res;
 }
+
+export function validatePaginationParams(params: PaginationParams): void {
+  if (params.page < 1 || params.pageSize < 1) {
+    throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST);
+  }
+  if (!['asc', 'desc'].some((elem) => elem === params.orderDirection)) {
+    throw new HttpException(
+      `Requested orderDirection ('${params.orderDirection}') not supported`,
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+  if (
+    !['id', 'name', 'price', 'views', 'createdAt'].some(
+      (elem) => elem === params.orderBy,
+    )
+  ) {
+    throw new HttpException(
+      `Requested orderBy ('${params.orderBy}') not supported`,
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}

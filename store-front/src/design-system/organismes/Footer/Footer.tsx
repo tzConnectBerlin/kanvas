@@ -19,7 +19,6 @@ const StyledBox = styled(Box)<{ theme?: Theme }>`
     position: relative;
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
     min-height: 10rem;
     height: 100%;
     padding: 2rem 0 1rem;
@@ -96,6 +95,8 @@ export const Footer: FC<FooterProps> = () => {
         i18next.language,
     );
 
+    const [selectedCurrency, setSelectedCurrency] = useState<string>();
+
     return (
         <StyledBox>
             <Grid
@@ -142,7 +143,7 @@ export const Footer: FC<FooterProps> = () => {
                             size="h5"
                             weight="SemiBold"
                             gutterBottom
-                            sx={{ marginTop: '1rem' }}
+                        
                         >
                             {t('footer.headline_1.title')}
                         </Typography>
@@ -169,7 +170,7 @@ export const Footer: FC<FooterProps> = () => {
                             size="h5"
                             weight="SemiBold"
                             gutterBottom
-                            sx={{ marginTop: '1rem' }}
+                        
                         >
                             {t('footer.headline_2.title')}
                         </Typography>
@@ -195,7 +196,7 @@ export const Footer: FC<FooterProps> = () => {
                         item
                         xs={6}
                         md={3}
-                        sx={{ height: '7rem', marginTop: '1rem' }}
+                        sx={{ height: '7rem' }}
                     >
                         <Typography weight="SemiBold" size="h5" gutterBottom>
                             {t('footer.headline_3.title')}
@@ -223,7 +224,7 @@ export const Footer: FC<FooterProps> = () => {
                         </Box>
                     </Grid>
 
-                    <Grid item xs={6} md={3} sx={{ marginTop: '1rem' }}>
+                    <Grid item xs={6} md={3}>
                         <Typography weight="SemiBold" size="h5" gutterBottom>
                             {t('footer.headline_4.title')}
                         </Typography>
@@ -299,6 +300,34 @@ export const Footer: FC<FooterProps> = () => {
                             triggerFunction={(event: SelectChangeEvent) => {
                                 setSelectedLanguage(event.target.value);
                                 i18next.changeLanguage(event.target.value);
+                            }}
+                            disabled={false}
+                            customSize="small"
+                        />
+
+                        <Typography weight="SemiBold" size="h5" gutterBottom>
+                            {t('footer.headline_6.title')}
+                        </Typography>
+
+                        <CustomSelect
+                            id="currencySelect"
+                            availableOptions={[
+                                {
+                                    value: 'en',
+                                    label: 'USD ($)',
+                                },
+                                {
+                                    value: 'fr',
+                                    label: 'EUR (€)',
+                                },
+                                {
+                                    value: 'de',
+                                    label: 'Tez (ꜩ)',
+                                },
+                            ]}
+                            selectedOption={selectedCurrency ?? 'en'}
+                            triggerFunction={(event: SelectChangeEvent) => {
+                                setSelectedCurrency(event.target.value);
                             }}
                             disabled={false}
                             customSize="small"

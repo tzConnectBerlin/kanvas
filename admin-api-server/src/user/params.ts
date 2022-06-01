@@ -20,11 +20,6 @@ export class UserFilters {
   userName?: string[];
 
   @IsArray()
-  @Transform(({ value }) => parseStringArray(value))
-  @IsOptional()
-  address?: string[];
-
-  @IsArray()
   @Transform(({ value }) =>
     parseStringArray(value)?.map((v: string) => parseNumberParam(v)),
   )

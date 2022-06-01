@@ -87,7 +87,6 @@ describe('AppController (e2e)', () => {
       .send({
         email: 'regular_joe@bigbrother.co',
         userName: 'Regular Joe',
-        address: 'tz1bla',
         password: 'somepass',
         roles: [Roles.editor, Roles.moderator],
       });
@@ -97,7 +96,6 @@ describe('AppController (e2e)', () => {
       roles: [Roles.editor, Roles.moderator],
       email: 'regular_joe@bigbrother.co',
       userName: 'Regular Joe',
-      address: 'tz1bla',
     });
   });
 
@@ -113,7 +111,6 @@ describe('AppController (e2e)', () => {
       .send({
         email: 'ben@bigbrother.co',
         userName: 'Ben',
-        address: 'tz1ben',
         password: 'somepass',
         roles: [],
       });
@@ -1163,7 +1160,6 @@ describe('AppController (e2e)', () => {
       .send({
         email: 'hank@bigbrother.co',
         userName: 'Hank',
-        address: 'tz1hank',
         password: 'somepass',
         roles: [2, 0], // 0 is invalid here
       });
@@ -1182,7 +1178,6 @@ describe('AppController (e2e)', () => {
       .send({
         email: 'jane@bigbrother.co',
         userName: 'Jane',
-        address: 'tz1blb',
         password: 'pass',
         roles: [3],
       });
@@ -1206,21 +1201,18 @@ describe('AppController (e2e)', () => {
           id: 1,
           email: 'admin@tzconnect.com',
           userName: 'admin',
-          address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
           roles: [Roles.admin],
         },
         {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
-          address: 'tz1bla',
           roles: [Roles.editor, Roles.moderator],
         },
         {
           id: 3,
           email: 'ben@bigbrother.co',
           userName: 'Ben',
-          address: 'tz1ben',
           roles: [],
         },
       ],
@@ -1245,21 +1237,18 @@ describe('AppController (e2e)', () => {
           id: 3,
           email: 'ben@bigbrother.co',
           userName: 'Ben',
-          address: 'tz1ben',
           roles: [],
         },
         {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
-          address: 'tz1bla',
           roles: [Roles.editor, Roles.moderator],
         },
         {
           id: 1,
           email: 'admin@tzconnect.com',
           userName: 'admin',
-          address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
           roles: [Roles.admin],
         },
       ],
@@ -1287,14 +1276,12 @@ describe('AppController (e2e)', () => {
           id: 3,
           email: 'ben@bigbrother.co',
           userName: 'Ben',
-          address: 'tz1ben',
           roles: [],
         },
         {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
-          address: 'tz1bla',
           roles: [Roles.editor, Roles.moderator],
         },
       ],
@@ -1322,7 +1309,6 @@ describe('AppController (e2e)', () => {
           id: 1,
           email: 'admin@tzconnect.com',
           userName: 'admin',
-          address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
           roles: [Roles.admin],
         },
       ],
@@ -1379,7 +1365,7 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail(
-    'users list is sortable by id,email,userName,address,roles',
+    'users list is sortable by id,email,userName,roles',
     async () => {
       const { bearer } = await loginUser(
         app,
@@ -1398,21 +1384,18 @@ describe('AppController (e2e)', () => {
             id: 1,
             email: 'admin@tzconnect.com',
             userName: 'admin',
-            address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
             roles: [Roles.admin],
           },
           {
             id: 2,
             email: 'regular_joe@bigbrother.co',
             userName: 'Regular Joe',
-            address: 'tz1bla',
             roles: [Roles.editor, Roles.moderator],
           },
           {
             id: 3,
             email: 'ben@bigbrother.co',
             userName: 'Ben',
-            address: 'tz1ben',
             roles: [],
           },
         ],
@@ -1430,21 +1413,18 @@ describe('AppController (e2e)', () => {
             id: 1,
             email: 'admin@tzconnect.com',
             userName: 'admin',
-            address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
             roles: [Roles.admin],
           },
           {
             id: 3,
             email: 'ben@bigbrother.co',
             userName: 'Ben',
-            address: 'tz1ben',
             roles: [],
           },
           {
             id: 2,
             email: 'regular_joe@bigbrother.co',
             userName: 'Regular Joe',
-            address: 'tz1bla',
             roles: [Roles.editor, Roles.moderator],
           },
         ],
@@ -1462,54 +1442,19 @@ describe('AppController (e2e)', () => {
             id: 1,
             email: 'admin@tzconnect.com',
             userName: 'admin',
-            address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
             roles: [Roles.admin],
           },
           {
             id: 3,
             email: 'ben@bigbrother.co',
             userName: 'Ben',
-            address: 'tz1ben',
             roles: [],
           },
           {
             id: 2,
             email: 'regular_joe@bigbrother.co',
             userName: 'Regular Joe',
-            address: 'tz1bla',
             roles: [Roles.editor, Roles.moderator],
-          },
-        ],
-      });
-
-      res = await request(app.getHttpServer())
-        .get('/user')
-        .set('authorization', bearer)
-        .query({ sort: JSON.stringify(['address']) });
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toEqual({
-        count: 3,
-        data: [
-          {
-            id: 3,
-            email: 'ben@bigbrother.co',
-            userName: 'Ben',
-            address: 'tz1ben',
-            roles: [],
-          },
-          {
-            id: 2,
-            email: 'regular_joe@bigbrother.co',
-            userName: 'Regular Joe',
-            address: 'tz1bla',
-            roles: [Roles.editor, Roles.moderator],
-          },
-          {
-            id: 1,
-            email: 'admin@tzconnect.com',
-            userName: 'admin',
-            address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
-            roles: [Roles.admin],
           },
         ],
       });
@@ -1526,21 +1471,18 @@ describe('AppController (e2e)', () => {
             id: 3,
             email: 'ben@bigbrother.co',
             userName: 'Ben',
-            address: 'tz1ben',
             roles: [],
           },
           {
             id: 1,
             email: 'admin@tzconnect.com',
             userName: 'admin',
-            address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
             roles: [Roles.admin],
           },
           {
             id: 2,
             email: 'regular_joe@bigbrother.co',
             userName: 'Regular Joe',
-            address: 'tz1bla',
             roles: [Roles.editor, Roles.moderator],
           },
         ],
@@ -1587,43 +1529,9 @@ describe('AppController (e2e)', () => {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
-          address: 'tz1bla',
           roles: [Roles.editor, Roles.moderator],
         },
         {
-          address: 'tz1ben',
-          email: 'ben@bigbrother.co',
-          id: 3,
-          roles: [],
-          userName: 'Ben',
-        },
-      ],
-    });
-  });
-
-  skipOnPriorFail('/user has filter on address', async () => {
-    const { bearer } = await loginUser(
-      app,
-      'regular_joe@bigbrother.co',
-      'somepass',
-    );
-    const res = await request(app.getHttpServer())
-      .get('/user')
-      .query({ address: 'tz1bla,tz1ben,some address that doesnt exist' })
-      .set('authorization', bearer);
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toEqual({
-      count: 2,
-      data: [
-        {
-          id: 2,
-          email: 'regular_joe@bigbrother.co',
-          userName: 'Regular Joe',
-          address: 'tz1bla',
-          roles: [Roles.editor, Roles.moderator],
-        },
-        {
-          address: 'tz1ben',
           email: 'ben@bigbrother.co',
           id: 3,
           roles: [],
@@ -1651,11 +1559,9 @@ describe('AppController (e2e)', () => {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
-          address: 'tz1bla',
           roles: [Roles.editor, Roles.moderator],
         },
         {
-          address: 'tz1ben',
           email: 'ben@bigbrother.co',
           id: 3,
           roles: [],
@@ -1683,7 +1589,6 @@ describe('AppController (e2e)', () => {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
-          address: 'tz1bla',
           roles: [Roles.editor, Roles.moderator],
         },
       ],
@@ -1986,7 +1891,6 @@ describe('AppController (e2e)', () => {
       id: 2,
       email: 'regular_joe@bigbrother.co',
       userName: 'Regular Joe',
-      address: 'tz1bla',
       roles: [Roles.editor, Roles.moderator],
     });
 
@@ -2003,7 +1907,6 @@ describe('AppController (e2e)', () => {
       id: 2,
       email: 'regular_joe@bigbrother.co',
       userName: 'Regular Joe',
-      address: 'tz1bla',
       roles: [],
     });
 
@@ -2021,7 +1924,6 @@ describe('AppController (e2e)', () => {
       id: 2,
       email: 'regular_joe@bigbrother.co',
       userName: 'Regular Joe',
-      address: 'tz1bla',
       roles: [Roles.editor, Roles.moderator],
     });
   });
