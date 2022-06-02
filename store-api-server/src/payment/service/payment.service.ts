@@ -119,8 +119,9 @@ export class PaymentService {
   }
 
   async promisePaid(userId: number, paymentId: string) {
-    const qryRes = await this.conn.query(
-      `
+    return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+      const qryRes = await dbTx.query(
+        `
 UPDATE payment
 SET
   expires_at = greatest($3, expires_at),
@@ -135,19 +136,22 @@ WHERE payment_id = $2
     WHERE nft_order.id = payment.nft_order_id
       AND user_id = $1
   )`,
-      [
-        userId,
-        paymentId,
-        nowUtcWithOffset(PAYMENT_PROMISE_DEADLINE_MILLI_SECS),
-      ],
-    );
-
-    if (qryRes.rowCount === 0) {
-      throw new HttpException(
-        `logged in user (id=${userId}) does not have an unfinished payment with payment_id=${paymentId} that hasn't been promised payment yet`,
-        HttpStatus.BAD_REQUEST,
+        [
+          userId,
+          paymentId,
+          nowUtcWithOffset(PAYMENT_PROMISE_DEADLINE_MILLI_SECS),
+        ],
       );
-    }
+      if (qryRes.rowCount === 0) {
+        throw new HttpException(
+          `logged in user (id=${userId}) does not have an unfinished payment with payment_id=${paymentId} that hasn't been promised payment yet`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const orderId = await this.getPaymentOrderId(paymentId, dbTx);
+      await this.userService.dropCartByOrderId(orderId, dbTx);
+    });
   }
 
   async getPaymentStatus(
@@ -512,7 +516,6 @@ WHERE provider = $1
       | PaymentStatus.CANCELED
       | PaymentStatus.TIMED_OUT = PaymentStatus.CANCELED,
   ) {
-    console.log(`canceling: ${orderId}`);
     const payment = await dbTx.query(
       `
 UPDATE payment
@@ -557,8 +560,11 @@ RETURNING payment_id, provider
     }
   }
 
-  async getPaymentOrderId(paymentId: string): Promise<number> {
-    const qryRes = await this.conn.query(
+  async getPaymentOrderId(
+    paymentId: string,
+    dbTx: DbTransaction | DbPool = this.conn,
+  ): Promise<number> {
+    const qryRes = await dbTx.query(
       `
 SELECT nft_order_id
 FROM payment
@@ -598,7 +604,7 @@ WHERE nft_order.id = $1
       // should be solved asynchronously to the checkout process itself.
       this.mintService.transfer_nfts(nfts, userAddress);
 
-      await this.userService.deleteCartSession(orderId, dbTx);
+      await this.userService.dropCartByOrderId(orderId, dbTx);
     } catch (err: any) {
       Logger.error(
         `failed to checkout order (orderId=${orderId}), err: ${err}`,
