@@ -13,7 +13,7 @@ export const SEARCH_MAX_CATEGORIES = 6;
 export const SEARCH_SIMILARITY_LIMIT = 0.4;
 
 export const MINTER_ADDRESS = assertEnv('MINTER_TZ_ADDRESS');
-export const ADMIN_PUBLIC_KEY = assertEnv('ADMIN_PUBLIC_KEY'); // this probably should be the revealed public key associated to the MINTER_ADDRESS (MINTER_ADDRESS is the public key hash)
+export const ADMIN_PUBLIC_KEY = assertEnv('ADMIN_PUBLIC_KEY'); // this should be the revealed public key associated to the MINTER_ADDRESS (MINTER_ADDRESS is the public key hash)
 
 export const STORE_PUBLISHERS = ['Tezos'];
 
@@ -50,6 +50,12 @@ export const PAYMENT_PROMISE_DEADLINE_MILLI_SECS = Number(
 export const ORDER_EXPIRATION_MILLI_SECS = Number(
   process.env['ORDER_EXPIRATION_MILLI_SECS'] || 3600 * 1000,
 );
+
+export const WERT_PRIV_KEY: string | undefined = process.env['WERT_PRIV_KEY'];
+export const WERT_PUB_KEY: string | undefined = process.env['WERT_PUB_KEY'];
+
+export const TEZPAY_PAYPOINT_ADDRESS: string =
+  process.env['TEZPAY_PAYPOINT_ADDRESS'] || '';
 
 export const SIGNED_LOGIN_ENABLED: boolean =
   (process.env['SIGNED_LOGIN_ENABLED'] || 'no') === 'yes';

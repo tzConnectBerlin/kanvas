@@ -8,7 +8,7 @@ set +a
 
 export $(grep --regexp='^ADMIN_PRIVATE_KEY' ../admin-api-server/.env.test | xargs)
 
-db_docker=`DBSETUP_LOG=quiet DOCKER_ARGS='-d' ./script/local-db 2>/dev/null`
+db_docker=`DBSETUP_LOG=quie DOCKER_ARGS='-d' ./script/local-db 2>/dev/null`
 if [[ "$?" != "0" ]]; then
     process=`docker ps | grep $PGPORT | awk '{print $1}'`
     docker kill $process

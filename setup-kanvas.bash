@@ -28,6 +28,8 @@ $1
     if [ "$#" -eq "1" ]; then
         echo "this is a manual step. press any key when ready to continue or ^C to quit"
         read -s -n 1
+    elif [ "${DRY_RUN:-false}" == "true" ]; then
+        echo "(dry run): ${@:2}"
     else
         ${@:2}
     fi
@@ -65,7 +67,9 @@ function cp_bak {
 
     [ -f "$2" ] && {
         bakCount=`ls -w 1 | grep --extended-regexp "^$2\.bak[0-9]+$" | wc -l`
-        mv "$2" "$2.bak$bakCount"
+        bakFile="$2.bak$bakCount"
+        [ "${bakFile::1}" != '.' ] && bakFile=".$bakFile"
+        mv "$2" "$bakFile"
     }
 
     if [ "$1" == '' ]; then

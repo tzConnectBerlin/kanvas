@@ -74,22 +74,26 @@ export class PaymentController {
   @UseGuards(JwtAuthGuard)
   async createPaymentIntent(
     @CurrentUser() user: UserEntity,
+    @Body('paymentProvider')
+    paymentProvider: PaymentProvider = PaymentProvider.STRIPE,
     @Body('currency') currency: string = BASE_CURRENCY,
   ): Promise<PaymentIntent> {
     Logger.log(`createPaymentIntent: ${JSON.stringify(currency)}`);
 
     validateRequestedCurrency(currency);
-
-    let paymentProvider: PaymentProvider;
-    if (currency === 'XTZ') {
-      paymentProvider = PaymentProvider.TEZPAY;
-    } else {
-      paymentProvider = PaymentProvider.STRIPE;
+    if (
+      (currency === 'XTZ' && paymentProvider !== PaymentProvider.TEZPAY) ||
+      (currency !== 'XTZ' && paymentProvider === PaymentProvider.TEZPAY)
+    ) {
+      throw new HttpException(
+        'currency is not compatible with paymentProvider',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     try {
       let paymentIntent = await this.paymentService.createPayment(
-        user.id,
+        user,
         paymentProvider,
         currency,
       );
