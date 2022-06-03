@@ -2454,10 +2454,10 @@ describe('AppController (e2e)', () => {
       hexMsg = SIGNATURE_PREFIX_DELIST_NFT + '0' + hexMsg;
     }
 
-    const nftExistsPreCheck = await request(app.getHttpServer()).post(
+    const nftExistsBeforeCheck = await request(app.getHttpServer()).post(
       `/nfts/${nftId}`,
     );
-    expect(nftExistsPreCheck.statusCode).toEqual(201);
+    expect(nftExistsBeforeCheck.statusCode).toEqual(201);
 
     const topBuyersResBefore = await request(app.getHttpServer()).get(
       '/users/topBuyers',
@@ -2500,10 +2500,10 @@ describe('AppController (e2e)', () => {
     await sleep(1000);
 
     // nft no longer exists now
-    const nftExistsPostCheck = await request(app.getHttpServer()).post(
+    const nftExistsAfterCheck = await request(app.getHttpServer()).post(
       `/nfts/${nftId}`,
     );
-    expect(nftExistsPostCheck.statusCode).toEqual(400);
+    expect(nftExistsAfterCheck.statusCode).toEqual(400);
 
     // previous buys are no longer taken into the topBuyers sum
     const topBuyersResAfter = await request(app.getHttpServer()).get(
@@ -2557,10 +2557,10 @@ describe('AppController (e2e)', () => {
     await sleep(1000);
 
     // nft exists again
-    const nftExistsPostCheck = await request(app.getHttpServer()).post(
+    const nftExistsAfterCheck = await request(app.getHttpServer()).post(
       `/nfts/${nftId}`,
     );
-    expect(nftExistsPostCheck.statusCode).toEqual(201);
+    expect(nftExistsAfterCheck.statusCode).toEqual(201);
 
     // previous buys are recovered and taken into the topBuyers sum
     const topBuyersResAfter = await request(app.getHttpServer()).get(
@@ -2663,25 +2663,29 @@ describe('AppController (e2e)', () => {
       .send({ currency: 'XTZ' });
     expect(paymentIntentRes.status).toEqual(201);
 
-    const resPre = await request(app.getHttpServer())
+    const resBefore = await request(app.getHttpServer())
       .get('/users/profile')
       .set('authorization', bearer);
-    expect(resPre.statusCode).toEqual(200);
-    expect(resPre.body.user?.createdAt).toBeGreaterThan(0);
-    delete resPre.body.user?.createdAt;
+    expect(resBefore.statusCode).toEqual(200);
+    expect(resBefore.body.user?.createdAt).toBeGreaterThan(0);
+    delete resBefore.body.user?.createdAt;
 
-    for (const i in resPre.body.collection.nfts) {
-      expect(resPre.body.collection.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(resPre.body.collection.nfts[i].launchAt).toBeGreaterThan(0);
-      delete resPre.body.collection.nfts[i].createdAt;
-      delete resPre.body.collection.nfts[i].launchAt;
-      if (typeof resPre.body.collection.nfts[i].onsaleUntil !== 'undefined') {
-        expect(resPre.body.collection.nfts[i].onsaleUntil).toBeGreaterThan(0);
-        delete resPre.body.collection.nfts[i].onsaleUntil;
+    for (const i in resBefore.body.collection.nfts) {
+      expect(resBefore.body.collection.nfts[i].createdAt).toBeGreaterThan(0);
+      expect(resBefore.body.collection.nfts[i].launchAt).toBeGreaterThan(0);
+      delete resBefore.body.collection.nfts[i].createdAt;
+      delete resBefore.body.collection.nfts[i].launchAt;
+      if (
+        typeof resBefore.body.collection.nfts[i].onsaleUntil !== 'undefined'
+      ) {
+        expect(resBefore.body.collection.nfts[i].onsaleUntil).toBeGreaterThan(
+          0,
+        );
+        delete resBefore.body.collection.nfts[i].onsaleUntil;
       }
     }
 
-    expect(resPre.body).toStrictEqual({
+    expect(resBefore.body).toStrictEqual({
       collection: {
         currentPage: 1,
         lowerPriceBound: '0.10',
@@ -2746,42 +2750,116 @@ describe('AppController (e2e)', () => {
       },
     });
 
+    const cartBefore = await request(app.getHttpServer())
+      .post('/users/cart/list')
+      .set('authorization', bearer);
+    delete cartBefore.body.expiresAt;
+    for (const i in cartBefore.body.nfts) {
+      expect(cartBefore.body.nfts[i].createdAt).toBeGreaterThan(0);
+      expect(cartBefore.body.nfts[i].launchAt).toBeGreaterThan(0);
+      delete cartBefore.body.nfts[i].createdAt;
+      delete cartBefore.body.nfts[i].launchAt;
+      if (typeof cartBefore.body.nfts[i].onsaleUntil !== 'undefined') {
+        expect(cartBefore.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+        delete cartBefore.body.nfts[i].onsaleUntil;
+      }
+    }
+    expect(cartBefore.body).toEqual({
+      nfts: [
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 5,
+              name: 'Painting',
+            },
+          ],
+          description: 'Paintings from my twelve year old nephew',
+          displayUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          editionsAvailable: 7,
+          editionsSize: 8,
+          id: 8,
+          ipfsHash: null,
+          name: 'An didn t stop improving',
+          price: '23.20',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+        },
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 6,
+              name: 'Sculpture',
+            },
+          ],
+          description:
+            'Bronze sculpture of Antonin DVORAK who lived from 1841 - 1904',
+          displayUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+          editionsAvailable: 7,
+          editionsSize: 8,
+          id: 10,
+          ipfsHash: null,
+          name: 'Antonin DVORAK',
+          price: '9.20',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+        },
+      ],
+    });
+
     const promisePaidRes = await request(app.getHttpServer())
       .post('/payment/promise-paid')
       .send({ payment_id: paymentIntentRes.body.clientSecret })
       .set('authorization', bearer);
-    console.log(paymentIntentRes.body);
-    console.log(promisePaidRes.body);
     expect(promisePaidRes.status).toEqual(201);
 
-    const resPost = await request(app.getHttpServer())
+    const cartAfter = await request(app.getHttpServer())
+      .post('/users/cart/list')
+      .set('authorization', bearer);
+    delete cartAfter.body.expiresAt;
+    expect(cartAfter.body).toEqual({
+      nfts: [],
+    });
+
+    const resAfter = await request(app.getHttpServer())
       .get('/users/profile')
       .set('authorization', bearer);
-    expect(resPost.statusCode).toEqual(200);
-    expect(resPost.body.user?.createdAt).toBeGreaterThan(0);
-    delete resPost.body.user?.createdAt;
-    for (const i in resPost.body.collection.nfts) {
-      expect(resPost.body.collection.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(resPost.body.collection.nfts[i].launchAt).toBeGreaterThan(0);
-      delete resPost.body.collection.nfts[i].createdAt;
-      delete resPost.body.collection.nfts[i].launchAt;
-      if (typeof resPost.body.collection.nfts[i].onsaleUntil !== 'undefined') {
-        expect(resPost.body.collection.nfts[i].onsaleUntil).toBeGreaterThan(0);
-        delete resPost.body.collection.nfts[i].onsaleUntil;
+    expect(resAfter.statusCode).toEqual(200);
+    expect(resAfter.body.user?.createdAt).toBeGreaterThan(0);
+    delete resAfter.body.user?.createdAt;
+    for (const i in resAfter.body.collection.nfts) {
+      expect(resAfter.body.collection.nfts[i].createdAt).toBeGreaterThan(0);
+      expect(resAfter.body.collection.nfts[i].launchAt).toBeGreaterThan(0);
+      delete resAfter.body.collection.nfts[i].createdAt;
+      delete resAfter.body.collection.nfts[i].launchAt;
+      if (typeof resAfter.body.collection.nfts[i].onsaleUntil !== 'undefined') {
+        expect(resAfter.body.collection.nfts[i].onsaleUntil).toBeGreaterThan(0);
+        delete resAfter.body.collection.nfts[i].onsaleUntil;
       }
     }
-    for (const i in resPost.body.pendingOwnership) {
-      expect(resPost.body.pendingOwnership[i].createdAt).toBeGreaterThan(0);
-      expect(resPost.body.pendingOwnership[i].launchAt).toBeGreaterThan(0);
-      delete resPost.body.pendingOwnership[i].createdAt;
-      delete resPost.body.pendingOwnership[i].launchAt;
-      if (typeof resPost.body.pendingOwnership[i].onsaleUntil !== 'undefined') {
-        expect(resPost.body.pendingOwnership[i].onsaleUntil).toBeGreaterThan(0);
-        delete resPost.body.pendingOwnership[i].onsaleUntil;
+    for (const i in resAfter.body.pendingOwnership) {
+      expect(resAfter.body.pendingOwnership[i].createdAt).toBeGreaterThan(0);
+      expect(resAfter.body.pendingOwnership[i].launchAt).toBeGreaterThan(0);
+      delete resAfter.body.pendingOwnership[i].createdAt;
+      delete resAfter.body.pendingOwnership[i].launchAt;
+      if (
+        typeof resAfter.body.pendingOwnership[i].onsaleUntil !== 'undefined'
+      ) {
+        expect(resAfter.body.pendingOwnership[i].onsaleUntil).toBeGreaterThan(
+          0,
+        );
+        delete resAfter.body.pendingOwnership[i].onsaleUntil;
       }
     }
 
-    expect(resPost.body).toStrictEqual({
+    expect(resAfter.body).toStrictEqual({
       collection: {
         currentPage: 1,
         lowerPriceBound: '0.10',
@@ -2895,10 +2973,10 @@ describe('AppController (e2e)', () => {
     });
 
     // and finally, only logged in user sees their own pending nfts
-    const resPostOtherUser = await request(app.getHttpServer())
+    const resAfterOtherUser = await request(app.getHttpServer())
       .get('/users/profile')
       .query({ userAddress: 'addr' });
-    expect(resPostOtherUser.body.pendingOwnership).toEqual([]);
+    expect(resAfterOtherUser.body.pendingOwnership).toEqual([]);
   });
 });
 

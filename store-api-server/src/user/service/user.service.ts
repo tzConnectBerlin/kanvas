@@ -476,7 +476,7 @@ RETURNING id, expires_at`,
     };
   }
 
-  async deleteCartSession(
+  async dropCartByOrderId(
     orderId: number,
     dbTx: DbTransaction | DbPool = this.conn,
   ) {
