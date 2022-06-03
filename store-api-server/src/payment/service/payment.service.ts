@@ -493,9 +493,9 @@ SELECT
   payment_id
 FROM payment
 WHERE provider = $1
-  AND status = $2
+  AND status IN ('created', 'processing')
     `,
-      [PaymentProvider.TEZPAY, PaymentStatus.CREATED],
+      [PaymentProvider.TEZPAY],
     );
 
     for (const row of pendingPaymentIds.rows) {
