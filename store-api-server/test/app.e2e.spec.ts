@@ -1108,8 +1108,6 @@ describe('AppController (e2e)', () => {
     async () => {
       await app.close();
 
-      const origExpiration = process.env.CART_EXPIRATION_MILLI_SECS;
-      process.env.CART_EXPIRATION_MILLI_SECS = '0';
       const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [AppModule],
       }).compile();
@@ -1121,6 +1119,7 @@ describe('AppController (e2e)', () => {
       const userService = await moduleFixture.get(UserService);
 
       userService.CART_EXPIRATION_MILLI_SECS = 0;
+      userService.CART_EXPIRATION_AT_MINUTE_END = false;
       const add1 = await request(app.getHttpServer()).post(
         '/users/cart/add/12',
       );
@@ -1137,8 +1136,6 @@ describe('AppController (e2e)', () => {
 
       const idList = list.body.nfts.map((nft: any) => nft.id);
       expect(idList).toEqual([]);
-
-      process.env.CART_EXPIRATION_MILLI_SECS = origExpiration;
     },
   );
 

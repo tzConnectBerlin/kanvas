@@ -393,7 +393,7 @@ WHERE id = $2
     nftOrderId: number,
   ) {
     try {
-      const expireAt = this.#newPaymentExpiration();
+      const expireAt = nowUtcWithOffset(ORDER_EXPIRATION_MILLI_SECS);
       await dbTx.query(
         `
 INSERT INTO payment (
@@ -401,13 +401,7 @@ INSERT INTO payment (
 )
 VALUES ($1, $2, $3, $4, $5)
 RETURNING id`,
-        [
-          paymentId,
-          PaymentStatus.CREATED,
-          nftOrderId,
-          provider,
-          expireAt.toUTCString(),
-        ],
+        [paymentId, PaymentStatus.CREATED, nftOrderId, provider, expireAt],
       );
     } catch (err: any) {
       Logger.error(
@@ -415,12 +409,6 @@ RETURNING id`,
       );
       throw err;
     }
-  }
-
-  #newPaymentExpiration(): Date {
-    const expiresAt = new Date();
-    expiresAt.setTime(expiresAt.getTime() + ORDER_EXPIRATION_MILLI_SECS);
-    return expiresAt;
   }
 
   async #updatePaymentStatus(paymentId: string, newStatus: PaymentStatus) {
@@ -470,7 +458,7 @@ SELECT
   nft_order_id,
   expires_at
 FROM payment
-WHERE expires_at < now() AT TIME ZONE 'UTC'
+WHERE expires_at <= now() AT TIME ZONE 'UTC'
   AND status = ANY($1)
     `,
       [[PaymentStatus.CREATED, PaymentStatus.PROCESSING]],
