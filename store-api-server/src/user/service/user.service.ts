@@ -28,7 +28,7 @@ import ts_results from 'ts-results';
 const { Ok, Err } = ts_results;
 import { S3Service } from '../../s3.service.js';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { assertEnv, nowUtcWithOffset } from '../../utils.js';
+import { assertEnv } from '../../utils.js';
 import { DbPool, DbTransaction, withTransaction } from '../../db.module.js';
 
 import { createRequire } from 'module';
@@ -45,12 +45,8 @@ interface CartMeta {
 
 @Injectable()
 export class UserService {
-  RANDOM_NAME_OPTIONS = {
-    numberUpto: 20,
-    joinBy: '_',
-  };
-  RANDOM_NAME_MAX_RETRIES = 5;
   CART_EXPIRATION_MILLI_SECS = CART_EXPIRATION_MILLI_SECS;
+  CART_EXPIRATION_AT_MINUTE_END = true;
 
   constructor(
     @Inject(PG_CONNECTION) private conn: DbPool,
@@ -443,14 +439,13 @@ WHERE cart_session_id = $1
     cartId: number,
     dbTx: DbTransaction | DbPool = this.conn,
   ) {
-    const expiresAt = this.newCartExpiration();
     await dbTx.query(
       `
 UPDATE cart_session
 SET expires_at = $2
 WHERE id = $1
   `,
-      [cartId, expiresAt],
+      [cartId, this.newCartExpiration()],
     );
   }
 
@@ -518,10 +513,7 @@ ORDER BY expires_at DESC
     const deletedSessions = await this.conn.query(
       `
 DELETE FROM cart_session AS sess
-WHERE expires_at < now() AT TIME ZONE 'UTC'
-  AND (
-    sess.order_id IS NULL OR (SELECT status FROM payment where payment.nft_order_id = sess.order_id) NOT IN ('processing')
-  )
+WHERE expires_at <= now() AT TIME ZONE 'UTC'
 RETURNING session_id`,
     );
     if (deletedSessions.rows.length === 0) {
@@ -536,7 +528,13 @@ RETURNING session_id`,
   }
 
   newCartExpiration(): string {
-    return nowUtcWithOffset(this.CART_EXPIRATION_MILLI_SECS);
+    const d = new Date();
+
+    d.setTime(d.getTime() + this.CART_EXPIRATION_MILLI_SECS);
+    if (this.CART_EXPIRATION_AT_MINUTE_END) {
+      d.setTime(d.setSeconds(0, 0));
+    }
+    return d.toISOString();
   }
 
   async getCartSession(
