@@ -52,7 +52,19 @@ export class AuthenticationController {
 
   @Post('login')
   async login(@Body() user: UserEntity): Promise<any> {
-    return this.authService.login(user);
+    try {
+      return await this.authService.login(user);
+    } catch (err: any) {
+      if (!(err instanceof HttpException)) {
+        throw err;
+      }
+
+      if (err.getStatus() === 400) {
+        await this.register(user);
+
+        return await this.authService.login(user);
+      }
+    }
   }
 
   @Post('register')
