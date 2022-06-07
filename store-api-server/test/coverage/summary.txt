@@ -5,13 +5,13 @@ File                           | % Stmts | % Branch | % Funcs | % Lines | Uncove
 
 -------------------------------|---------|----------|---------|---------|-----------------------------------------------------------------------------------------------------------------
 
-All files                      |    77.2 |    59.92 |   82.84 |   76.16 |                                                                                                                 
+All files                      |   77.15 |    60.13 |   82.84 |   76.12 |                                                                                                                 
 
- src                           |   64.54 |    48.57 |      70 |   63.55 |                                                                                                                 
+ src                           |   64.86 |    48.64 |      70 |   63.88 |                                                                                                                 
 
   app.module.ts                |     100 |      100 |     100 |     100 |                                                                                                                 
 
-  constants.ts                 |     100 |    77.77 |     100 |     100 | 23,41-44,51                                                                                                     
+  constants.ts                 |     100 |       75 |     100 |     100 | 23,41-44,51-55                                                                                                  
 
   db.module.ts                 |   89.28 |        0 |     100 |   88.88 | 33,55-58                                                                                                        
 
@@ -35,17 +35,17 @@ All files                      |    77.2 |    59.92 |   82.84 |   76.16 |
 
   authentication.module.ts     |     100 |      100 |     100 |     100 |                                                                                                                 
 
- src/authentication/controller |      70 |    77.77 |   83.33 |   68.42 |                                                                                                                 
+ src/authentication/controller |   66.66 |    71.42 |   83.33 |   65.38 |                                                                                                                 
 
-  authentication.controller.ts |      70 |    77.77 |   83.33 |   68.42 | 25-34,68-71                                                                                                     
+  authentication.controller.ts |   66.66 |    71.42 |   83.33 |   65.38 | 28-37,62,66-68,85-88                                                                                            
 
  src/authentication/guards     |      90 |       25 |     100 |    87.5 |                                                                                                                 
 
   jwt-auth.guard.ts            |      90 |       25 |     100 |    87.5 | 19                                                                                                              
 
- src/authentication/service    |   84.21 |       75 |    87.5 |   83.78 |                                                                                                                 
+ src/authentication/service    |   85.36 |    78.57 |    87.5 |      85 |                                                                                                                 
 
-  authentication.service.ts    |   84.21 |       75 |    87.5 |   83.78 | 60-65,76,131                                                                                                    
+  authentication.service.ts    |   85.36 |    78.57 |    87.5 |      85 | 63-68,79,132                                                                                                    
 
  src/authentication/strategy   |     100 |      100 |     100 |     100 |                                                                                                                 
 

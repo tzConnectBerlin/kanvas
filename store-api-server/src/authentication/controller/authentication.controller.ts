@@ -13,7 +13,10 @@ import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { UserEntity } from '../../user/entity/user.entity.js';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard.js';
 import { AuthenticationService } from '../service/authentication.service.js';
-import { PG_UNIQUE_VIOLATION_ERRCODE } from '../../constants.js';
+import {
+  PG_UNIQUE_VIOLATION_ERRCODE,
+  SIGNED_LOGIN_ENABLED,
+} from '../../constants.js';
 
 @Controller('auth')
 export class AuthenticationController {
@@ -59,10 +62,12 @@ export class AuthenticationController {
         throw err;
       }
 
-      if (err.getStatus() === 400) {
+      if (err.getStatus() === 400 && !SIGNED_LOGIN_ENABLED) {
         await this.register(user);
 
         return await this.authService.login(user);
+      } else {
+        throw err;
       }
     }
   }

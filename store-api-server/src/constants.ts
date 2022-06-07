@@ -51,5 +51,5 @@ export const ORDER_EXPIRATION_MILLI_SECS = Number(
   process.env['ORDER_EXPIRATION_MILLI_SECS'] || 3600 * 1000,
 );
 
-export const SIGNED_LOGIN_ENABLED =
+export const SIGNED_LOGIN_ENABLED: boolean =
   (process.env['SIGNED_LOGIN_ENABLED'] || 'no') === 'yes';
