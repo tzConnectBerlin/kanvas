@@ -48,17 +48,17 @@ export class IpfsService {
 
     const qryRes = await dbTx.query(
       `
-SELECT ipfs_hash, signature
+SELECT metadata_ipfs, signature
 FROM nft
 WHERE id = $1
     `,
       [nft.id],
     );
-    if (qryRes.rows[0]['ipfs_hash'] != null) {
-      return qryRes.rows[0]['ipfs_hash'];
+    if (qryRes.rows[0]['metadata_ipfs'] != null) {
+      return qryRes.rows[0]['metadata_ipfs'];
     }
 
-    const [artifactIpfsUri, displayIpfsUri, thumbnailIpfsUri] = [
+    const [artifactIpfs, displayIpfs, thumbnailIpfs] = [
       await this.#pinUri(nft.artifactUri),
       await (nft.displayUri !== nft.artifactUri
         ? this.#pinUri(nft.displayUri!)
@@ -70,29 +70,42 @@ WHERE id = $1
 
     const metadata = this.#nftMetadataJson(
       nft,
-      artifactIpfsUri,
-      displayIpfsUri ?? artifactIpfsUri,
-      thumbnailIpfsUri ?? displayIpfsUri ?? artifactIpfsUri,
+      artifactIpfs,
+      displayIpfs ?? artifactIpfs,
+      thumbnailIpfs ?? displayIpfs ?? artifactIpfs,
       qryRes.rows[0]['signature'],
     );
-    const ipfsHash = await this.#pinJson(metadata);
+    const metadataIpfs = await this.#pinJson(metadata);
 
-    await this.#updateNftIpfsHash(nft.id, ipfsHash, dbTx);
-    return ipfsHash;
+    await this.#updateNftIpfsHashes(
+      nft.id,
+      metadataIpfs,
+      artifactIpfs,
+      displayIpfs,
+      thumbnailIpfs,
+      dbTx,
+    );
+    return metadataIpfs;
   }
 
-  async #updateNftIpfsHash(
+  async #updateNftIpfsHashes(
     nftId: number,
-    ipfsHash: string,
+    metadataIpfs: string,
+    artifactIpfs: string,
+    displayIpfs?: string,
+    thumbnailIpfs?: string,
     dbTx: any = this.conn,
   ) {
     await dbTx.query(
       `
 UPDATE nft
-SET ipfs_hash = $1
-WHERE id = $2
+SET metadata_ipfs = $2,
+    artifact_ipfs = $3,
+    display_ipfs = $4,
+    thumbnail_ipfs = $5
+WHERE id = $1
       `,
-      [ipfsHash, nftId],
+      [nftId, metadataIpfs, artifactIpfs, displayIpfs, thumbnailIpfs],
     );
   }
 

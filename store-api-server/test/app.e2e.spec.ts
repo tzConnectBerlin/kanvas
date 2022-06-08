@@ -213,6 +213,10 @@ describe('AppController (e2e)', () => {
           nested: 10,
         },
       },
+      metadataIpfs: null,
+      artifactIpfs: null,
+      displayIpfs: null,
+      thumbnailIpfs: null,
       artifactUri:
         'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
       displayUri:
@@ -317,8 +321,11 @@ describe('AppController (e2e)', () => {
             metadata: {
               test: {
                 nested: 10,
-              },
             },
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -343,6 +350,10 @@ describe('AppController (e2e)', () => {
               'Framley Parsonage - Was it not a Lie?,1860. John Everett Millais (d.1896) and Dalziel Brothers',
             ipfsHash: null,
             metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2202&q=80',
             displayUri:
@@ -366,6 +377,10 @@ describe('AppController (e2e)', () => {
             description: 'its a mountain',
             ipfsHash: null,
             metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             displayUri:
@@ -389,6 +404,10 @@ describe('AppController (e2e)', () => {
             description: 'What s better then a cat in a city ?',
             ipfsHash: null,
             metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -413,6 +432,10 @@ describe('AppController (e2e)', () => {
               'Bronze sculpture of Antonin DVORAK who lived from 1841 - 1904',
             ipfsHash: null,
             metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -437,6 +460,10 @@ describe('AppController (e2e)', () => {
               'Inventor of the korean language. This is the statue in Seoul South Korea of him.',
             ipfsHash: null,
             metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1506809211073-d0785aaad75e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2656&q=80',
             displayUri:
@@ -461,6 +488,10 @@ describe('AppController (e2e)', () => {
               'The humanoid robot TOCABI. I both led the design and took the photo. It is a full-size (real) humanoid robot that can also be used as an avatar for teleoperation.',
             ipfsHash: null,
             metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1633957897986-70e83293f3ff?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1986&q=80',
             displayUri:
@@ -484,6 +515,10 @@ describe('AppController (e2e)', () => {
             description: 'You look lost in thought.',
             ipfsHash: null,
             metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1599790772272-d1425cd3242e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -508,6 +543,10 @@ describe('AppController (e2e)', () => {
               'In South Korea these sculptures are part of the light festival. Dragon vs. Tiger.',
             ipfsHash: null,
             metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             displayUri:
@@ -603,6 +642,10 @@ describe('AppController (e2e)', () => {
           id: 3,
           ipfsHash: null,
           metadata: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
           name: 'Internet',
           price: '10.40',
           thumbnailUri:
@@ -648,6 +691,10 @@ describe('AppController (e2e)', () => {
               nested: 10,
             },
           },
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
           artifactUri:
             'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
           displayUri:
@@ -705,8 +752,11 @@ describe('AppController (e2e)', () => {
             metadata: {
               test: {
                 nested: 10,
-              },
             },
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -742,6 +792,10 @@ describe('AppController (e2e)', () => {
             id: 3,
             ipfsHash: null,
             metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             name: 'Internet',
             price: '10.40',
             thumbnailUri:
@@ -851,6 +905,10 @@ describe('AppController (e2e)', () => {
             'In South Korea these sculptures are part of the light festival. Dragon vs. Tiger.',
           ipfsHash: null,
           metadata: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
           artifactUri:
             'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
           displayUri:
@@ -2050,6 +2108,10 @@ describe('AppController (e2e)', () => {
               test: {
                 nested: 10,
               },
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '1-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '1-thumbnail-ipfs-hash',
             },
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
@@ -2074,6 +2136,10 @@ describe('AppController (e2e)', () => {
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....', // Note: this is now non-null, because it's been purchased at least once
             metadata: null,
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -2133,6 +2199,10 @@ describe('AppController (e2e)', () => {
               test: {
                 nested: 10,
               },
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '1-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '1-thumbnail-ipfs-hash',
             },
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
@@ -2188,7 +2258,11 @@ describe('AppController (e2e)', () => {
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
+            metadataIpfs: 'ipfs://.....',
             metadata: null,
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -2248,6 +2322,10 @@ describe('AppController (e2e)', () => {
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
             metadata: null,
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -2307,6 +2385,10 @@ describe('AppController (e2e)', () => {
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
             metadata: null,
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -2367,6 +2449,10 @@ describe('AppController (e2e)', () => {
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
             metadata: null,
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -2425,6 +2511,10 @@ describe('AppController (e2e)', () => {
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
             metadata: null,
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -3049,6 +3139,10 @@ describe('AppController (e2e)', () => {
               test: {
                 nested: 10,
               },
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '1-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '1-thumbnail-ipfs-hash',
             },
             name: 'Cartoon',
             ownerStatuses: ['pending'],
@@ -3074,6 +3168,10 @@ describe('AppController (e2e)', () => {
             id: 4,
             ipfsHash: 'ipfs://.....',
             metadata: null,
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
             name: 'The cat & the city',
             ownerStatuses: ['pending', 'pending', 'pending'],
             price: '4.30',
@@ -3152,6 +3250,10 @@ describe('AppController (e2e)', () => {
           id: 8,
           ipfsHash: null,
           metadata: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
           name: 'An didn t stop improving',
           price: '23.20',
           thumbnailUri:
@@ -3176,6 +3278,10 @@ describe('AppController (e2e)', () => {
           id: 10,
           ipfsHash: null,
           metadata: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
           name: 'Antonin DVORAK',
           price: '9.20',
           thumbnailUri:
@@ -3256,6 +3362,10 @@ describe('AppController (e2e)', () => {
               test: {
                 nested: 10,
               },
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '1-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '1-thumbnail-ipfs-hash',
             },
             name: 'Cartoon',
             ownerStatuses: ['pending'],
@@ -3281,6 +3391,10 @@ describe('AppController (e2e)', () => {
             id: 4,
             ipfsHash: 'ipfs://.....',
             metadata: null,
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
             name: 'The cat & the city',
             ownerStatuses: ['pending', 'pending', 'pending'],
             price: '4.30',
@@ -3335,6 +3449,10 @@ describe('AppController (e2e)', () => {
           id: 8,
           ipfsHash: null,
           metadata: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
           name: 'An didn t stop improving',
           ownerStatuses: ['payment processing'],
           price: '23.20',
@@ -3360,6 +3478,10 @@ describe('AppController (e2e)', () => {
           id: 10,
           ipfsHash: null,
           metadata: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
           name: 'Antonin DVORAK',
           ownerStatuses: ['payment processing'],
           price: '9.20',
