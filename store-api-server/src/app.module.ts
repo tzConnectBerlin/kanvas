@@ -6,7 +6,6 @@ import { CurrencyModule } from 'kanvas-api-lib';
 import { CategoryModule } from './category/category.module.js';
 import { NftModule } from './nft/nft.module.js';
 import { UserModule } from './user/user.module.js';
-import { AuthProviderModule } from './auth-provider/auth-provider.module.js';
 import { AuthenticationModule } from './authentication/authentication.module.js';
 import { DbModule } from './db.module.js';
 import { PaymentModule } from './payment/payment.module.js';
@@ -29,7 +28,6 @@ import {
     CategoryModule,
     NftModule,
     UserModule,
-    AuthProviderModule,
     PaymentModule,
     DbModule,
     CurrencyModule,
