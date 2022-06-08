@@ -456,19 +456,30 @@ WHERE id = $1
     }
 
     const expiresAt = this.newCartExpiration();
-    const qryRes = await this.conn.query(
-      `
+
+    try {
+      const qryRes = await this.conn.query(
+        `
 INSERT INTO cart_session (
   session_id, expires_at
 )
 VALUES ($1, $2)
 RETURNING id, expires_at`,
-      [session, expiresAt],
-    );
-    return {
-      id: qryRes.rows[0]['id'],
-      expiresAt: qryRes.rows[0]['expires_at'],
-    };
+        [session, expiresAt],
+      );
+      return {
+        id: qryRes.rows[0]['id'],
+        expiresAt: qryRes.rows[0]['expires_at'],
+      };
+    } catch (err: any) {
+      if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
+        const cartMeta = await this.getCartMeta(session);
+        if (typeof cartMeta !== 'undefined') {
+          return cartMeta;
+        }
+      }
+      throw err;
+    }
   }
 
   async dropCartByOrderId(
