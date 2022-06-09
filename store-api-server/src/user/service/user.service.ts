@@ -215,9 +215,7 @@ JOIN mtm_nft_order_nft AS mtm
   ON mtm.nft_order_id = nft_order.id
 WHERE usr.id = $3
   AND usr.address = $2
-  AND payment.status = 'processing'
-  AND payment.provider = 'tezpay'  -- currently this is the only provider where payments are dealt with asynchronously
-  AND payment.fulfillment_promised_deadline > now() AT TIME ZONE 'UTC'
+  AND payment.status IN ('promised', 'processing')
 GROUP BY 1, 2
 
 ORDER BY 1
