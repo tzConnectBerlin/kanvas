@@ -2664,6 +2664,7 @@ describe('AppController (e2e)', () => {
     delete paymentIntentRes.body.clientSecret;
     expect(Number(paymentIntentRes.body.amount)).toBeGreaterThan(0);
     delete paymentIntentRes.body.amount;
+    delete paymentIntentRes.body.expiresAt;
     for (const i in paymentIntentRes.body.nfts) {
       expect(Number(paymentIntentRes.body.nfts[i].price)).toBeGreaterThan(0);
       expect(paymentIntentRes.body.nfts[i].createdAt).toBeGreaterThan(0);
@@ -2729,6 +2730,7 @@ describe('AppController (e2e)', () => {
     const paymentOrderNfts = await request(app.getHttpServer())
       .get(`/payment/nfts/${intentId}`)
       .set('authorization', bearer);
+    delete paymentOrderNfts.body.expiresAt;
     for (const i in paymentOrderNfts.body.nfts) {
       expect(Number(paymentOrderNfts.body.nfts[i].price)).toBeGreaterThan(0);
       expect(paymentOrderNfts.body.nfts[i].createdAt).toBeGreaterThan(0);

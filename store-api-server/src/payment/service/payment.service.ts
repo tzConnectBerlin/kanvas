@@ -62,6 +62,7 @@ export interface PaymentIntent {
   id: string;
   receiverAddress?: string;
   nfts?: NftEntity[];
+  expiresAt?: number;
 }
 
 @Injectable()
@@ -162,10 +163,11 @@ WHERE payment_id = $2
   async getPaymentNfts(
     userId: number,
     paymentId: string,
-  ): Promise<{ currency: string; nfts: NftEntity[] }> {
+  ): Promise<{ currency: string; nfts: NftEntity[]; expiresAt: number }> {
     const orderNftsQryRes = await this.conn.query(
       `
 SELECT
+  payment.expires_at,
   nft_order.currency,
   mtm.nft_id,
   mtm.price
@@ -180,6 +182,7 @@ WHERE user_id = $1
       [userId, paymentId],
     );
     const currency = orderNftsQryRes.rows[0]['currency'];
+    const expiresAt: number = orderNftsQryRes.rows[0]['expires_at'];
     const nfts = await this.nftService.findByIds(
       orderNftsQryRes.rows.map((row: any) => row['nft_id']),
     );
@@ -199,6 +202,7 @@ WHERE user_id = $1
     return {
       currency: currency,
       nfts: nfts,
+      expiresAt: expiresAt,
     };
   }
 

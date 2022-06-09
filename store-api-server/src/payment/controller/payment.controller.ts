@@ -93,9 +93,12 @@ export class PaymentController {
         paymentProvider,
         currency,
       );
-      paymentIntent.nfts = (
-        await this.paymentService.getPaymentNfts(user.id, paymentIntent.id)
-      ).nfts;
+      const orderDetails = await this.paymentService.getPaymentNfts(
+        user.id,
+        paymentIntent.id,
+      );
+      paymentIntent.nfts = orderDetails.nfts;
+      paymentIntent.expiresAt = orderDetails.expiresAt;
       return paymentIntent;
     } catch (err: any) {
       Logger.error(err);
@@ -120,7 +123,7 @@ export class PaymentController {
   async getPaymentNfts(
     @CurrentUser() user: UserEntity,
     @Param('payment_id') paymentId: string,
-  ): Promise<{ currency: string; nfts: NftEntity[] }> {
+  ): Promise<{ expiresAt: number; currency: string; nfts: NftEntity[] }> {
     return await this.paymentService.getPaymentNfts(user.id, paymentId);
   }
 
