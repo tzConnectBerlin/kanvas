@@ -24,6 +24,7 @@ import { UserEntity } from '../../user/entity/user.entity.js';
 import { UserService } from '../../user/service/user.service.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
 import { validateRequestedCurrency } from '../../paramUtils.js';
+import { NftEntity } from '../../nft/entity/nft.entity.js';
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -87,11 +88,15 @@ export class PaymentController {
     }
 
     try {
-      return await this.paymentService.createPayment(
+      let paymentIntent = await this.paymentService.createPayment(
         user.id,
         paymentProvider,
         currency,
       );
+      paymentIntent.nfts = (
+        await this.paymentService.getPaymentNfts(user.id, paymentIntent.id)
+      ).nfts;
+      return paymentIntent;
     } catch (err: any) {
       Logger.error(err);
       throw new HttpException(
@@ -108,6 +113,15 @@ export class PaymentController {
     @Body('payment_id') paymentId: string,
   ) {
     await this.paymentService.promisePaid(user.id, paymentId);
+  }
+
+  @Get('/nfts/:payment_id')
+  @UseGuards(JwtAuthGuard)
+  async getPaymentNfts(
+    @CurrentUser() user: UserEntity,
+    @Param('payment_id') paymentId: string,
+  ): Promise<{ currency: string; nfts: NftEntity[] }> {
+    return await this.paymentService.getPaymentNfts(user.id, paymentId);
   }
 
   @Get('/status/:payment_id')
