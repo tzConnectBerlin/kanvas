@@ -2659,6 +2659,137 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer)
       .send({ currency: 'XTZ' });
     expect(paymentIntentRes.status).toEqual(201);
+    const intentId = paymentIntentRes.body.id;
+    delete paymentIntentRes.body.id;
+    delete paymentIntentRes.body.clientSecret;
+    expect(Number(paymentIntentRes.body.amount)).toBeGreaterThan(0);
+    delete paymentIntentRes.body.amount;
+    for (const i in paymentIntentRes.body.nfts) {
+      expect(Number(paymentIntentRes.body.nfts[i].price)).toBeGreaterThan(0);
+      expect(paymentIntentRes.body.nfts[i].createdAt).toBeGreaterThan(0);
+      expect(paymentIntentRes.body.nfts[i].launchAt).toBeGreaterThan(0);
+      delete paymentIntentRes.body.nfts[i].price;
+      delete paymentIntentRes.body.nfts[i].createdAt;
+      delete paymentIntentRes.body.nfts[i].launchAt;
+      if (typeof paymentIntentRes.body.nfts[i].onsaleUntil !== 'undefined') {
+        expect(paymentIntentRes.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+        delete paymentIntentRes.body.nfts[i].onsaleUntil;
+      }
+    }
+    expect(paymentIntentRes.body).toEqual({
+      currency: 'XTZ',
+      nfts: [
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 5,
+              name: 'Painting',
+            },
+          ],
+          description: 'Paintings from my twelve year old nephew',
+          displayUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          editionsAvailable: 7,
+          editionsSize: 8,
+          id: 8,
+          ipfsHash: null,
+          name: 'An didn t stop improving',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+        },
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 6,
+              name: 'Sculpture',
+            },
+          ],
+          description:
+            'Bronze sculpture of Antonin DVORAK who lived from 1841 - 1904',
+          displayUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+          editionsAvailable: 7,
+          editionsSize: 8,
+          id: 10,
+          ipfsHash: null,
+          name: 'Antonin DVORAK',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+        },
+      ],
+      receiverAddress: 'KT1MZTPQFdEZKLXtdQzpuA4MFt5ZkmKqFqkq',
+    });
+
+    const paymentOrderNfts = await request(app.getHttpServer())
+      .get(`/payment/nfts/${intentId}`)
+      .set('authorization', bearer);
+    for (const i in paymentOrderNfts.body.nfts) {
+      expect(Number(paymentOrderNfts.body.nfts[i].price)).toBeGreaterThan(0);
+      expect(paymentOrderNfts.body.nfts[i].createdAt).toBeGreaterThan(0);
+      expect(paymentOrderNfts.body.nfts[i].launchAt).toBeGreaterThan(0);
+      delete paymentOrderNfts.body.nfts[i].price;
+      delete paymentOrderNfts.body.nfts[i].createdAt;
+      delete paymentOrderNfts.body.nfts[i].launchAt;
+      if (typeof paymentOrderNfts.body.nfts[i].onsaleUntil !== 'undefined') {
+        expect(paymentOrderNfts.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+        delete paymentOrderNfts.body.nfts[i].onsaleUntil;
+      }
+    }
+    expect(paymentOrderNfts.status).toEqual(200);
+    expect(paymentOrderNfts.body).toEqual({
+      currency: 'XTZ',
+      nfts: [
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 5,
+              name: 'Painting',
+            },
+          ],
+          description: 'Paintings from my twelve year old nephew',
+          displayUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          editionsAvailable: 7,
+          editionsSize: 8,
+          id: 8,
+          ipfsHash: null,
+          name: 'An didn t stop improving',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+        },
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 6,
+              name: 'Sculpture',
+            },
+          ],
+          description:
+            'Bronze sculpture of Antonin DVORAK who lived from 1841 - 1904',
+          displayUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+          editionsAvailable: 7,
+          editionsSize: 8,
+          id: 10,
+          ipfsHash: null,
+          name: 'Antonin DVORAK',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+        },
+      ],
+    });
 
     const resBefore = await request(app.getHttpServer())
       .get('/users/profile')
@@ -2813,7 +2944,7 @@ describe('AppController (e2e)', () => {
 
     const promisePaidRes = await request(app.getHttpServer())
       .post('/payment/promise-paid')
-      .send({ payment_id: paymentIntentRes.body.clientSecret })
+      .send({ payment_id: intentId })
       .set('authorization', bearer);
     expect(promisePaidRes.status).toEqual(201);
 
