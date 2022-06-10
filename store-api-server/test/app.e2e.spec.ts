@@ -1609,9 +1609,9 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail(
-    'stripe payment: Payment status should change to timeout if payment has expired, and in CREATED OR PROCESSING state',
+    'stripe payment: Payment status should change to timeout if payment has expired, and in CREATED OR PROMISED state',
     async () => {
-      const { bearer, id } = await loginUser(app, 'addr', 'admin');
+      const { bearer, id: userId } = await loginUser(app, 'addr', 'admin');
 
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
@@ -1619,16 +1619,10 @@ describe('AppController (e2e)', () => {
       expect(add1.statusCode).toEqual(201);
 
       // Create one payment intent (we are not calling the stripe api)
-      try {
-        await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
-      } catch (err) {
-        Logger.log(err);
-      }
-
+      await paymentService.createPayment(userId, PaymentProvider.TEST, 'EUR');
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
-        id,
+        userId,
       );
-
       // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.payment_failed',
@@ -1638,32 +1632,25 @@ describe('AppController (e2e)', () => {
           },
         },
       };
-
       await paymentService.webhookHandler(constructedEvent);
-
       // Check failed payment don't get to timeout
-      const failed = await paymentService.getPaymentForLatestUserOrder(id);
+      const failed = await paymentService.getPaymentForLatestUserOrder(userId);
       expect(failed.status).toEqual(PaymentStatus.FAILED);
-
+      // Check canceled payment don't get to timeout
       await paymentService.deleteExpiredPayments();
-
-      const stillFailed = await paymentService.getPaymentForLatestUserOrder(id);
+      const stillFailed = await paymentService.getPaymentForLatestUserOrder(
+        userId,
+      );
       expect(stillFailed.status).toEqual(PaymentStatus.FAILED);
 
-      // Check canceled payment don't get to timeout
-
-      // Create one payment intent (we are not calling the stripe api)
       const preparedOrder2 = await paymentService.createPayment(
-        id,
+        userId,
         PaymentProvider.TEST,
         'EUR',
       );
-
       const payment3Data = await paymentService.getPaymentForLatestUserOrder(
-        id,
+        userId,
       );
-
-      // reconstruct success event from stripe
       const constructedEvent3 = {
         type: 'payment_intent.canceled',
         data: {
@@ -1672,36 +1659,58 @@ describe('AppController (e2e)', () => {
           },
         },
       };
-
       await paymentService.webhookHandler(constructedEvent3);
-
-      const canceled = await paymentService.getPaymentForLatestUserOrder(id);
+      const canceled = await paymentService.getPaymentForLatestUserOrder(
+        userId,
+      );
       expect(canceled.status).toEqual(PaymentStatus.CANCELED);
-
       await paymentService.deleteExpiredPayments();
-
       const stillCanceled = await paymentService.getPaymentForLatestUserOrder(
-        id,
+        userId,
       );
       expect(stillCanceled.status).toEqual(PaymentStatus.CANCELED);
 
-      // Create one payment intent (we are not calling the stripe api)
-      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
-
-      const created = await paymentService.getPaymentForLatestUserOrder(id);
+      await paymentService.createPayment(userId, PaymentProvider.TEST, 'EUR');
+      const created = await paymentService.getPaymentForLatestUserOrder(userId);
       expect(created.status).toEqual(PaymentStatus.CREATED);
-
       await paymentService.deleteExpiredPayments();
-
-      const timedOut = await paymentService.getPaymentForLatestUserOrder(id);
+      const timedOut = await paymentService.getPaymentForLatestUserOrder(
+        userId,
+      );
       expect(timedOut.status).toEqual(PaymentStatus.TIMED_OUT);
 
-      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
-
-      const payment4Data = await paymentService.getPaymentForLatestUserOrder(
-        id,
+      await paymentService.createPayment(userId, PaymentProvider.TEST, 'EUR');
+      const promisePaid = await paymentService.getPaymentForLatestUserOrder(
+        userId,
       );
+      const promisePaidPostResp = await request(app.getHttpServer())
+        .post('/payment/promise-paid')
+        .set('authorization', bearer)
+        .send({ payment_id: promisePaid.paymentId });
+      expect(promisePaidPostResp.statusCode).toEqual(201);
+      const promised = await paymentService.getPaymentForLatestUserOrder(
+        userId,
+      );
+      expect(promised.status).toEqual(PaymentStatus.PROMISED);
+      await paymentService.deleteExpiredPayments();
+      const promisedTimedOut =
+        await paymentService.getPaymentForLatestUserOrder(userId);
+      expect(promisedTimedOut.status).toEqual(PaymentStatus.TIMED_OUT);
 
+      // need to re-add cart item, promise-paid drops the active cart session
+      const readd = await request(app.getHttpServer())
+        .post('/users/cart/add/4')
+        .set('authorization', bearer);
+      expect(readd.statusCode).toEqual(201);
+
+      await await paymentService.createPayment(
+        userId,
+        PaymentProvider.TEST,
+        'EUR',
+      );
+      const payment4Data = await paymentService.getPaymentForLatestUserOrder(
+        userId,
+      );
       // reconstruct success event from stripe
       const constructedEvent5 = {
         type: 'payment_intent.processing',
@@ -1711,25 +1720,26 @@ describe('AppController (e2e)', () => {
           },
         },
       };
-
       await paymentService.webhookHandler(constructedEvent5);
-
-      const processing = await paymentService.getPaymentForLatestUserOrder(id);
-      expect(processing.status).toEqual(PaymentStatus.PROCESSING);
-
-      await paymentService.deleteExpiredPayments();
-
-      const timedOutResponse =
-        await paymentService.getPaymentForLatestUserOrder(id);
-      expect(timedOutResponse.status).toEqual(PaymentStatus.TIMED_OUT);
-
-      // Create one payment intent (we are not calling the stripe api)
-      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
-
-      const payment5Data = await paymentService.getPaymentForLatestUserOrder(
-        id,
+      const processing = await paymentService.getPaymentForLatestUserOrder(
+        userId,
       );
+      expect(processing.status).toEqual(PaymentStatus.PROCESSING);
+      await paymentService.deleteExpiredPayments();
+      const processingDidNotTimeout =
+        await paymentService.getPaymentForLatestUserOrder(userId);
+      expect(processingDidNotTimeout.status).toEqual(PaymentStatus.PROCESSING);
 
+      // need to re-add cart item, changing state to PROCESSING drops the active cart session
+      const readd2 = await request(app.getHttpServer())
+        .post('/users/cart/add/4')
+        .set('authorization', bearer);
+      expect(readd2.statusCode).toEqual(201);
+
+      await paymentService.createPayment(userId, PaymentProvider.TEST, 'EUR');
+      const payment5Data = await paymentService.getPaymentForLatestUserOrder(
+        userId,
+      );
       // reconstruct success event from stripe
       const constructedEvent2 = {
         type: 'payment_intent.succeeded',
@@ -1739,16 +1749,12 @@ describe('AppController (e2e)', () => {
           },
         },
       };
-
       await paymentService.webhookHandler(constructedEvent2);
-
-      const success = await paymentService.getPaymentForLatestUserOrder(id);
+      const success = await paymentService.getPaymentForLatestUserOrder(userId);
       expect(success.status).toEqual(PaymentStatus.SUCCEEDED);
-
       await paymentService.deleteExpiredPayments();
-
       const stillSuccess = await paymentService.getPaymentForLatestUserOrder(
-        id,
+        userId,
       );
       expect(stillSuccess.status).toEqual(PaymentStatus.SUCCEEDED);
     },
@@ -1923,7 +1929,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
             editionsSize: 8,
-            editionsAvailable: 1,
+            editionsAvailable: 0,
             categories: [
               {
                 id: 4,
@@ -2032,7 +2038,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
             editionsSize: 8,
-            editionsAvailable: 1,
+            editionsAvailable: 0,
             categories: [
               {
                 id: 4,
@@ -2090,7 +2096,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
             editionsSize: 8,
-            editionsAvailable: 1,
+            editionsAvailable: 0,
             categories: [
               {
                 id: 4,
@@ -2148,7 +2154,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
             editionsSize: 8,
-            editionsAvailable: 1,
+            editionsAvailable: 0,
             categories: [
               {
                 id: 4,
@@ -2207,7 +2213,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
             editionsSize: 8,
-            editionsAvailable: 1,
+            editionsAvailable: 0,
             categories: [
               {
                 id: 4,
@@ -2264,7 +2270,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
             editionsSize: 8,
-            editionsAvailable: 1,
+            editionsAvailable: 0,
             categories: [
               {
                 id: 4,
@@ -2301,7 +2307,7 @@ describe('AppController (e2e)', () => {
       { nftId: '1', ownerStatuses: ['pending'] },
       {
         nftId: '4',
-        ownerStatuses: ['pending', 'pending', 'pending'],
+        ownerStatuses: ['pending', 'pending', 'pending', 'payment processing'],
       },
     ]);
   });
@@ -2814,6 +2820,20 @@ describe('AppController (e2e)', () => {
         delete resBefore.body.collection.nfts[i].onsaleUntil;
       }
     }
+    for (const i in resBefore.body.pendingOwnership) {
+      expect(resBefore.body.pendingOwnership[i].createdAt).toBeGreaterThan(0);
+      expect(resBefore.body.pendingOwnership[i].launchAt).toBeGreaterThan(0);
+      delete resBefore.body.pendingOwnership[i].createdAt;
+      delete resBefore.body.pendingOwnership[i].launchAt;
+      if (
+        typeof resBefore.body.pendingOwnership[i].onsaleUntil !== 'undefined'
+      ) {
+        expect(resBefore.body.pendingOwnership[i].onsaleUntil).toBeGreaterThan(
+          0,
+        );
+        delete resBefore.body.pendingOwnership[i].onsaleUntil;
+      }
+    }
 
     expect(resBefore.body).toStrictEqual({
       collection: {
@@ -2857,7 +2877,7 @@ describe('AppController (e2e)', () => {
             description: 'What s better then a cat in a city ?',
             displayUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            editionsAvailable: 1,
+            editionsAvailable: 0,
             editionsSize: 8,
             id: 4,
             ipfsHash: 'ipfs://.....',
@@ -2872,7 +2892,31 @@ describe('AppController (e2e)', () => {
         totalNftCount: 2,
         upperPriceBound: '4.30',
       },
-      pendingOwnership: [], // nothing yet
+      pendingOwnership: [
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 4,
+              name: 'Drawing',
+            },
+          ],
+          description: 'What s better then a cat in a city ?',
+          displayUri:
+            'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+          editionsAvailable: 0,
+          editionsSize: 8,
+          id: 4,
+          ipfsHash: 'ipfs://.....',
+          name: 'The cat & the city',
+          ownerStatuses: ['payment processing'],
+          price: '4.30',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+        },
+      ], // nothing new yet (just what was already in processing state from a previous test
       user: {
         id: 1,
         userAddress: 'addr',
@@ -3031,7 +3075,7 @@ describe('AppController (e2e)', () => {
             description: 'What s better then a cat in a city ?',
             displayUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
-            editionsAvailable: 1,
+            editionsAvailable: 0,
             editionsSize: 8,
             id: 4,
             ipfsHash: 'ipfs://.....',
@@ -3047,6 +3091,29 @@ describe('AppController (e2e)', () => {
         upperPriceBound: '4.30',
       },
       pendingOwnership: [
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 4,
+              name: 'Drawing',
+            },
+          ],
+          description: 'What s better then a cat in a city ?',
+          displayUri:
+            'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+          editionsAvailable: 0,
+          editionsSize: 8,
+          id: 4,
+          ipfsHash: 'ipfs://.....',
+          name: 'The cat & the city',
+          ownerStatuses: ['payment processing'],
+          price: '4.30',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+        },
         {
           artifactUri:
             'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
