@@ -33,6 +33,7 @@ const stripe = require('stripe');
 
 export enum PaymentStatus {
   CREATED = 'created',
+  PROMISED = 'promised',
   PROCESSING = 'processing',
   CANCELED = 'canceled',
   TIMED_OUT = 'timedOut',
@@ -131,11 +132,9 @@ export class PaymentService {
 UPDATE payment
 SET
   expires_at = greatest($3, expires_at),
-  fulfillment_promised_deadline = $3,
-  status = 'processing'
+  status = 'promised'
 WHERE payment_id = $2
   AND status = 'created'
-  AND provider = 'tezpay'
   AND EXISTS (
     SELECT 1
     FROM nft_order
@@ -426,9 +425,9 @@ WHERE id = $2
 INSERT INTO payment (
   payment_id, status, nft_order_id, provider, expires_at
 )
-VALUES ($1, $2, $3, $4, $5)
+VALUES ($1, 'created', $2, $3, $4)
 RETURNING id`,
-        [paymentId, PaymentStatus.CREATED, nftOrderId, provider, expireAt],
+        [paymentId, nftOrderId, provider, expireAt],
       );
     } catch (err: any) {
       Logger.error(
@@ -439,42 +438,55 @@ RETURNING id`,
   }
 
   async #updatePaymentStatus(paymentId: string, newStatus: PaymentStatus) {
-    await withTransaction(this.conn, async (dbTx: DbTransaction) => {
-      const qryPrevStatus = await dbTx.query(
-        `
+    const prevStatus = await withTransaction(
+      this.conn,
+      async (dbTx: DbTransaction) => {
+        const qryPrevStatus = await dbTx.query(
+          `
 SELECT status
 FROM payment
 WHERE payment_id = $1
         `,
-        [paymentId],
-      );
-      const prevStatus = qryPrevStatus.rows[0]
-        ? qryPrevStatus.rows[0]['status']
-        : undefined;
+          [paymentId],
+        );
+        if (qryPrevStatus.rowCount === 0) {
+          throw `Cannot update payment status of unknown paymentId=${paymentId} (attempted new status was: ${newStatus})`;
+        }
+        const prevStatus = qryPrevStatus.rows[0]['status'];
 
-      await dbTx.query(
-        `
+        await dbTx.query(
+          `
 UPDATE payment
 SET status = $1
 WHERE payment_id = $2
   AND NOT status = ANY($3)
         `,
-        [newStatus, paymentId, this.FINAL_STATES],
-      );
+          [newStatus, paymentId, this.FINAL_STATES],
+        );
 
-      if (
-        newStatus === PaymentStatus.SUCCEEDED &&
-        !this.FINAL_STATES.includes(prevStatus)
-      ) {
-        const orderId = await this.getPaymentOrderId(paymentId);
-        await this.#orderCheckout(orderId, dbTx);
-      }
-    }).catch((err: any) => {
+        if (newStatus === PaymentStatus.PROCESSING) {
+          const orderId = await this.getPaymentOrderId(paymentId, dbTx);
+          await this.userService.dropCartByOrderId(orderId, dbTx);
+        }
+
+        return prevStatus;
+      },
+    ).catch((err: any) => {
       Logger.error(
         `Err on updating payment status in db (paymentId=${paymentId}, newStatus=${newStatus}), err: ${err}`,
       );
       throw err;
     });
+
+    Logger.log(`Payment with id=${paymentId}: ${prevStatus}->${newStatus}`);
+
+    if (
+      newStatus === PaymentStatus.SUCCEEDED &&
+      !this.FINAL_STATES.includes(prevStatus)
+    ) {
+      const orderId = await this.getPaymentOrderId(paymentId);
+      await this.#orderCheckout(orderId);
+    }
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
@@ -486,9 +498,8 @@ SELECT
   expires_at
 FROM payment
 WHERE expires_at <= now() AT TIME ZONE 'UTC'
-  AND status = ANY($1)
+  AND status IN ('created', 'promised')
     `,
-      [[PaymentStatus.CREATED, PaymentStatus.PROCESSING]],
     );
 
     for (const row of cancelOrderIds.rows) {
@@ -507,10 +518,9 @@ WHERE expires_at <= now() AT TIME ZONE 'UTC'
 SELECT
   payment_id
 FROM payment
-WHERE provider = $1
-  AND status IN ('created', 'processing')
+WHERE provider = 'tezpay'
+  AND status IN ('created', 'promised')
     `,
-      [PaymentProvider.TEZPAY],
     );
 
     for (const row of pendingPaymentIds.rows) {
@@ -536,18 +546,10 @@ WHERE provider = $1
 UPDATE payment
 SET status = $2
 WHERE nft_order_id = $1
-AND status = ANY($3)
+AND status IN ('created', 'promised', 'timedOut')
 RETURNING payment_id, provider
       `,
-      [
-        orderId,
-        newStatus,
-        [
-          PaymentStatus.CREATED,
-          PaymentStatus.PROCESSING,
-          PaymentStatus.TIMED_OUT,
-        ],
-      ],
+      [orderId, newStatus],
     );
 
     if (payment.rowCount === 0) {
@@ -605,8 +607,8 @@ WHERE nft_order.id = $1
     return qryRes.rows[0]['address'];
   }
 
-  async #orderCheckout(orderId: number, dbTx: DbTransaction) {
-    try {
+  async #orderCheckout(orderId: number) {
+    await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       const userAddress = await this.getOrderUserAddress(orderId);
 
       const nftIds = await this.#assignOrderNftsToUser(dbTx, orderId);
@@ -620,12 +622,12 @@ WHERE nft_order.id = $1
       this.mintService.transfer_nfts(nfts, userAddress);
 
       await this.userService.dropCartByOrderId(orderId, dbTx);
-    } catch (err: any) {
+    }).catch((err: any) => {
       Logger.error(
         `failed to checkout order (orderId=${orderId}), err: ${err}`,
       );
       throw err;
-    }
+    });
   }
 
   async #nftOrderHasPaymentEntry(
