@@ -12,6 +12,7 @@ import {
   ORDER_EXPIRATION_MILLI_SECS,
   WERT_PRIV_KEY,
   WERT_PUB_KEY,
+  WERT_ALLOWED_FIAT,
   TEZPAY_PAYPOINT_ADDRESS,
 } from '../../constants.js';
 import { UserService } from '../../user/service/user.service.js';
@@ -414,6 +415,12 @@ WHERE id = $2
       throw new HttpException(
         'Wert payment provider not supported by this API instance',
         HttpStatus.NOT_IMPLEMENTED,
+      );
+    }
+    if (!WERT_ALLOWED_FIAT.includes(fiatCurrency)) {
+      throw new HttpException(
+        `requested fiat (${fiatCurrency}) is not supported by Wert`,
+        HttpStatus.BAD_REQUEST,
       );
     }
 

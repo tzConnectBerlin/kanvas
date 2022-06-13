@@ -80,6 +80,11 @@ export class PaymentController {
   ): Promise<PaymentIntent> {
     validateRequestedCurrency(currency);
 
+    if (currency === 'XTZ') {
+      // temporary for backwards compatibility, until frontend has been updated
+      paymentProvider = PaymentProvider.TEZPAY;
+    }
+
     try {
       let paymentIntent = await this.paymentService.createPayment(
         user,
@@ -94,6 +99,9 @@ export class PaymentController {
       paymentIntent.expiresAt = orderDetails.expiresAt;
       return paymentIntent;
     } catch (err: any) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
       Logger.error(err);
       throw new HttpException(
         'Unable to place the order',
