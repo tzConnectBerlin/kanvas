@@ -241,28 +241,25 @@ WHERE user_id = $1
 
   async createPayment(
     usr: UserEntity,
-    paymentProvider: PaymentProvider,
+    provider: PaymentProvider,
     currency: string,
   ): Promise<PaymentIntent> {
-    if (paymentProvider === PaymentProvider.WERT) {
-      currency = 'XTZ';
-    }
     return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       const preparedOrder = await this.#createOrder(
         dbTx,
         usr.id,
-        paymentProvider,
+        provider,
         currency,
       );
       let paymentIntent = await this.#createPaymentIntent(
         usr.userAddress,
         preparedOrder.currencyUnitAmount,
-        paymentProvider,
+        provider,
         currency,
       );
       await this.#registerPayment(
         dbTx,
-        paymentProvider,
+        provider,
         paymentIntent.id,
         preparedOrder.id,
       );
@@ -279,6 +276,10 @@ WHERE user_id = $1
     provider: PaymentProvider,
     currency: string,
   ): Promise<NftOrder> {
+    if (provider === PaymentProvider.WERT) {
+      currency = 'XTZ';
+    }
+
     const cartSessionRes = await this.userService.getUserCartSession(
       userId,
       dbTx,
@@ -368,11 +369,17 @@ WHERE id = $2
   async #createPaymentIntent(
     userAddress: string,
     currencyUnitAmount: number,
-    paymentProvider: PaymentProvider,
+    provider: PaymentProvider,
     currency: string,
   ): Promise<PaymentIntent> {
-    switch (paymentProvider) {
+    switch (provider) {
       case PaymentProvider.TEZPAY:
+        if (currency !== 'XTZ') {
+          throw new HttpException(
+            `currency (${currency}) is not supported for stripe`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
         return await this.#createTezPaymentIntent(currencyUnitAmount);
       case PaymentProvider.STRIPE:
         return await this.#createStripePaymentIntent(
@@ -383,6 +390,7 @@ WHERE id = $2
         return await this.#createWertPaymentIntent(
           userAddress,
           currencyUnitAmount,
+          currency,
         );
       case PaymentProvider.TEST:
         return {
@@ -397,10 +405,14 @@ WHERE id = $2
   async #createWertPaymentIntent(
     userAddress: string,
     mutezAmount: number,
+    fiatCurrency: string,
   ): Promise<PaymentIntent> {
-    if (typeof WERT_PRIV_KEY === 'undefined') {
+    if (
+      typeof WERT_PRIV_KEY === 'undefined' ||
+      typeof TEZPAY_PAYPOINT_ADDRESS === 'undefined'
+    ) {
       throw new HttpException(
-        'wert payment provider not supported by this API instance',
+        'Wert payment provider not supported by this API instance',
         HttpStatus.NOT_IMPLEMENTED,
       );
     }
@@ -408,7 +420,6 @@ WHERE id = $2
     const tezpayIntent = await this.#createTezPaymentIntent(mutezAmount);
 
     const decimals = SUPPORTED_CURRENCIES['XTZ'];
-    let paymentIntent: any;
     const signedData = signSmartContractData(
       {
         address: userAddress,
@@ -435,7 +446,10 @@ WHERE id = $2
       clientSecret: tezpayIntent.clientSecret,
       id: tezpayIntent.id,
       other: {
-        signedData: signedData,
+        wertData: {
+          ...signedData,
+          currency: fiatCurrency,
+        },
       },
     };
   }
@@ -444,6 +458,19 @@ WHERE id = $2
     currencyUnitAmount: number,
     currency: string,
   ): Promise<PaymentIntent> {
+    if (typeof this.stripe === 'undefined') {
+      throw new HttpException(
+        'stripe payment provider not supported by this API instance',
+        HttpStatus.NOT_IMPLEMENTED,
+      );
+    }
+    if (currency === 'XTZ') {
+      throw new HttpException(
+        'currency (XTZ) is not supported for stripe',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount: currencyUnitAmount,
       currency: currency,

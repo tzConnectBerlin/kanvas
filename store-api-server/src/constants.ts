@@ -54,8 +54,8 @@ export const ORDER_EXPIRATION_MILLI_SECS = Number(
 export const WERT_PRIV_KEY: string | undefined = process.env['WERT_PRIV_KEY'];
 export const WERT_PUB_KEY: string | undefined = process.env['WERT_PUB_KEY'];
 
-export const TEZPAY_PAYPOINT_ADDRESS: string =
-  process.env['TEZPAY_PAYPOINT_ADDRESS'] || '';
+export const TEZPAY_PAYPOINT_ADDRESS: string | undefined =
+  process.env['TEZPAY_PAYPOINT_ADDRESS'];
 
 export const SIGNED_LOGIN_ENABLED: boolean =
   (process.env['SIGNED_LOGIN_ENABLED'] || 'no') === 'yes';

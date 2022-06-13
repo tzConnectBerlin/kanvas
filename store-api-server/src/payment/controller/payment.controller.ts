@@ -78,18 +78,7 @@ export class PaymentController {
     paymentProvider: PaymentProvider = PaymentProvider.STRIPE,
     @Body('currency') currency: string = BASE_CURRENCY,
   ): Promise<PaymentIntent> {
-    Logger.log(`createPaymentIntent: ${JSON.stringify(currency)}`);
-
     validateRequestedCurrency(currency);
-    if (
-      (currency === 'XTZ' && paymentProvider !== PaymentProvider.TEZPAY) ||
-      (currency !== 'XTZ' && paymentProvider === PaymentProvider.TEZPAY)
-    ) {
-      throw new HttpException(
-        'currency is not compatible with paymentProvider',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
 
     try {
       let paymentIntent = await this.paymentService.createPayment(
