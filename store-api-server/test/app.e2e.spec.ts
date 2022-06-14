@@ -2758,7 +2758,7 @@ describe('AppController (e2e)', () => {
     }
     expect(paymentOrderNfts.status).toEqual(200);
     expect(paymentOrderNfts.body).toEqual({
-      currency: 'XTZ',
+      currency: 'EUR',
       nfts: [
         {
           artifactUri:
