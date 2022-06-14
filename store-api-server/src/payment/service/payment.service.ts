@@ -10,6 +10,10 @@ import {
   PAYPOINT_SCHEMA,
   PAYMENT_PROMISE_DEADLINE_MILLI_SECS,
   ORDER_EXPIRATION_MILLI_SECS,
+  WERT_PRIV_KEY,
+  WERT_PUB_KEY,
+  WERT_ALLOWED_FIAT,
+  TEZPAY_PAYPOINT_ADDRESS,
 } from '../../constants.js';
 import { UserService } from '../../user/service/user.service.js';
 import { NftService } from '../../nft/service/nft.service.js';
@@ -21,11 +25,13 @@ import { assertEnv, nowUtcWithOffset } from '../../utils.js';
 import { DbTransaction, withTransaction, DbPool } from '../../db.module.js';
 import Tezpay from 'tezpay-server';
 import { v4 as uuidv4 } from 'uuid';
+import { UserEntity } from '../../user/entity/user.entity.js';
 import {
   CurrencyService,
   BASE_CURRENCY,
   SUPPORTED_CURRENCIES,
 } from 'kanvas-api-lib';
+import { signSmartContractData } from '@wert-io/widget-sc-signer';
 import { createRequire } from 'module';
 import { NftEntity } from '../../nft/entity/nft.entity.js';
 const require = createRequire(import.meta.url);
@@ -44,6 +50,7 @@ export enum PaymentStatus {
 export enum PaymentProvider {
   TEZPAY = 'tezpay',
   STRIPE = 'stripe',
+  WERT = 'wert',
   TEST = 'test_provider',
 }
 
@@ -64,6 +71,7 @@ export interface PaymentIntent {
   receiverAddress?: string;
   nfts?: NftEntity[];
   expiresAt?: number;
+  other?: any;
 }
 
 @Injectable()
@@ -180,26 +188,13 @@ WHERE user_id = $1
       `,
       [userId, paymentId],
     );
-    const currency = orderNftsQryRes.rows[0]['currency'];
     const expiresAt: number = orderNftsQryRes.rows[0]['expires_at'];
     const nfts = await this.nftService.findByIds(
       orderNftsQryRes.rows.map((row: any) => row['nft_id']),
     );
 
-    let priceById: { [key: number]: string } = {};
-    const decimals = SUPPORTED_CURRENCIES[currency];
-    for (const row of orderNftsQryRes.rows) {
-      priceById[row['nft_id']] = (
-        Number(row['price']) * Math.pow(10, -decimals)
-      ).toFixed(decimals);
-    }
-
-    for (const nft of nfts) {
-      nft.price = priceById[nft.id];
-    }
-
     return {
-      currency: currency,
+      currency: BASE_CURRENCY,
       nfts: nfts,
       expiresAt: expiresAt,
     };
@@ -233,31 +228,32 @@ WHERE user_id = $1
   }
 
   async createPayment(
-    userId: number,
-    paymentProvider: PaymentProvider,
+    usr: UserEntity,
+    provider: PaymentProvider,
     currency: string,
   ): Promise<PaymentIntent> {
     return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       const preparedOrder = await this.#createOrder(
         dbTx,
-        userId,
-        paymentProvider,
+        usr.id,
+        provider,
         currency,
       );
       let paymentIntent = await this.#createPaymentIntent(
+        usr.userAddress,
         preparedOrder.currencyUnitAmount,
-        paymentProvider,
+        provider,
         currency,
       );
       await this.#registerPayment(
         dbTx,
-        paymentProvider,
+        provider,
         paymentIntent.id,
         preparedOrder.id,
       );
       return paymentIntent;
     }).catch((err: any) => {
-      Logger.error(`Err on creating nft order (userId=${userId}, err: ${err}`);
+      Logger.error(`Err on creating nft order (userId=${usr.id}, err: ${err}`);
       throw err;
     });
   }
@@ -268,6 +264,10 @@ WHERE user_id = $1
     provider: PaymentProvider,
     currency: string,
   ): Promise<NftOrder> {
+    if (provider === PaymentProvider.WERT) {
+      currency = 'XTZ';
+    }
+
     const cartSessionRes = await this.userService.getUserCartSession(
       userId,
       dbTx,
@@ -355,18 +355,34 @@ WHERE id = $2
   }
 
   async #createPaymentIntent(
-    baseUnitAmount: number,
-    paymentProvider: PaymentProvider,
+    userAddress: string,
+    currencyUnitAmount: number,
+    provider: PaymentProvider,
     currency: string,
   ): Promise<PaymentIntent> {
-    switch (paymentProvider) {
+    switch (provider) {
       case PaymentProvider.TEZPAY:
-        return await this.#createTezPaymentIntent(baseUnitAmount);
+        if (currency !== 'XTZ') {
+          throw new HttpException(
+            `currency (${currency}) is not supported for stripe`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        return await this.#createTezPaymentIntent(currencyUnitAmount);
       case PaymentProvider.STRIPE:
-        return await this.#createStripePaymentIntent(baseUnitAmount, currency);
+        return await this.#createStripePaymentIntent(
+          currencyUnitAmount,
+          currency,
+        );
+      case PaymentProvider.WERT:
+        return await this.#createWertPaymentIntent(
+          userAddress,
+          currencyUnitAmount,
+          currency,
+        );
       case PaymentProvider.TEST:
         return {
-          amount: baseUnitAmount.toFixed(0),
+          amount: currencyUnitAmount.toFixed(0),
           currency: currency,
           clientSecret: '..',
           id: `stripe_test_id${new Date().getTime().toString()}`,
@@ -374,10 +390,81 @@ WHERE id = $2
     }
   }
 
+  async #createWertPaymentIntent(
+    userAddress: string,
+    mutezAmount: number,
+    fiatCurrency: string,
+  ): Promise<PaymentIntent> {
+    if (
+      typeof WERT_PRIV_KEY === 'undefined' ||
+      typeof TEZPAY_PAYPOINT_ADDRESS === 'undefined'
+    ) {
+      throw new HttpException(
+        'Wert payment provider not supported by this API instance',
+        HttpStatus.NOT_IMPLEMENTED,
+      );
+    }
+    if (!WERT_ALLOWED_FIAT.includes(fiatCurrency)) {
+      throw new HttpException(
+        `requested fiat (${fiatCurrency}) is not supported by Wert`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const tezpayIntent = await this.#createTezPaymentIntent(mutezAmount);
+
+    const decimals = SUPPORTED_CURRENCIES['XTZ'];
+    const signedData = signSmartContractData(
+      {
+        address: userAddress,
+        commodity: 'XTZ',
+        commodity_amount: Number(
+          (Number(tezpayIntent.amount) * Math.pow(10, -decimals)).toFixed(
+            decimals,
+          ),
+        ),
+        pk_id: 'key1',
+        sc_id: new Buffer(tezpayIntent.clientSecret).toString('hex'),
+        sc_address: TEZPAY_PAYPOINT_ADDRESS,
+        sc_input_data: new Buffer(`{
+            "entrypoint": "pay",
+            "value": {"string":"${tezpayIntent.clientSecret}"}
+          }`).toString('hex'),
+      },
+      WERT_PRIV_KEY,
+    );
+
+    return {
+      amount: mutezAmount.toFixed(0),
+      currency: 'XTZ',
+      clientSecret: tezpayIntent.clientSecret,
+      id: tezpayIntent.id,
+      other: {
+        wertData: {
+          ...signedData,
+          currency: fiatCurrency,
+        },
+      },
+    };
+  }
+
   async #createStripePaymentIntent(
     currencyUnitAmount: number,
     currency: string,
   ): Promise<PaymentIntent> {
+    if (typeof this.stripe === 'undefined') {
+      throw new HttpException(
+        'stripe payment provider not supported by this API instance',
+        HttpStatus.NOT_IMPLEMENTED,
+      );
+    }
+    if (currency === 'XTZ') {
+      throw new HttpException(
+        'currency (XTZ) is not supported for stripe',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount: currencyUnitAmount,
       currency: currency,
@@ -418,6 +505,9 @@ WHERE id = $2
     paymentId: string,
     nftOrderId: number,
   ) {
+    if (provider === PaymentProvider.WERT) {
+      provider = PaymentProvider.TEZPAY;
+    }
     try {
       const expireAt = nowUtcWithOffset(ORDER_EXPIRATION_MILLI_SECS);
       await dbTx.query(

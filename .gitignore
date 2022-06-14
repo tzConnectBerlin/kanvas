@@ -84,4 +84,4 @@ nginx.vars
 [#]*[#]
 
 global.env
-global.env.bak*
+.*.bak*

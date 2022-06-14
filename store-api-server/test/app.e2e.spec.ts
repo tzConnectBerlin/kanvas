@@ -18,6 +18,7 @@ import {
   PaymentService,
   PaymentStatus,
 } from '../src/payment/service/payment.service';
+import { UserEntity } from '../src/user/entity/user.entity';
 import { UserService } from '../src/user/service/user.service';
 import { assertEnv, sleep } from '../src/utils';
 import sotez from 'sotez';
@@ -1369,6 +1370,7 @@ describe('AppController (e2e)', () => {
     'stripe payment: Payment status should change to succeeded if payment is successfull',
     async () => {
       const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      const usr = <UserEntity>{ userAddress: address, id: id };
 
       expect(await getLockedCount(1)).toEqual(0);
 
@@ -1387,7 +1389,7 @@ describe('AppController (e2e)', () => {
 
       // Create one payment intent (we are not calling the stripe api)
       const intentRes = await paymentService.createPayment(
-        id,
+        usr,
         PaymentProvider.TEST,
         'EUR',
       );
@@ -1446,6 +1448,7 @@ describe('AppController (e2e)', () => {
     'stripe payment: Payment status should change to cancel if payment is canceled, nft should not be transferred',
     async () => {
       const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      const usr = <UserEntity>{ userAddress: address, id: id };
 
       expect(await getLockedCount(2)).toEqual(0);
 
@@ -1463,7 +1466,7 @@ describe('AppController (e2e)', () => {
       expect(await getLockedCount(2)).toEqual(1);
 
       // Create one payment intent (we are not calling the stripe api)
-      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(usr, PaymentProvider.TEST, 'EUR');
 
       // Give webhook handler function success event
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
@@ -1534,7 +1537,8 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'stripe payment: Payment status should change to failed if payment has failed, nft should not be transferred',
     async () => {
-      const { bearer, id } = await loginUser(app, 'addr', 'admin');
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      const usr = <UserEntity>{ userAddress: address, id: id };
 
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/7')
@@ -1548,7 +1552,7 @@ describe('AppController (e2e)', () => {
 
       // Create one payment intent (we are not calling the stripe api)
       const preparedOrder = await paymentService.createPayment(
-        id,
+        usr,
         PaymentProvider.TEST,
         'EUR',
       );
@@ -1611,7 +1615,8 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'stripe payment: Payment status should change to timeout if payment has expired, and in CREATED OR PROMISED state',
     async () => {
-      const { bearer, id: userId } = await loginUser(app, 'addr', 'admin');
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      const usr = <UserEntity>{ userAddress: address, id: id };
 
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
@@ -1619,9 +1624,9 @@ describe('AppController (e2e)', () => {
       expect(add1.statusCode).toEqual(201);
 
       // Create one payment intent (we are not calling the stripe api)
-      await paymentService.createPayment(userId, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(usr, PaymentProvider.TEST, 'EUR');
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
-        userId,
+        usr.id,
       );
       // reconstruct success event from stripe
       const constructedEvent = {
@@ -1634,22 +1639,22 @@ describe('AppController (e2e)', () => {
       };
       await paymentService.webhookHandler(constructedEvent);
       // Check failed payment don't get to timeout
-      const failed = await paymentService.getPaymentForLatestUserOrder(userId);
+      const failed = await paymentService.getPaymentForLatestUserOrder(usr.id);
       expect(failed.status).toEqual(PaymentStatus.FAILED);
       // Check canceled payment don't get to timeout
       await paymentService.deleteExpiredPayments();
       const stillFailed = await paymentService.getPaymentForLatestUserOrder(
-        userId,
+        usr.id,
       );
       expect(stillFailed.status).toEqual(PaymentStatus.FAILED);
 
       const preparedOrder2 = await paymentService.createPayment(
-        userId,
+        usr,
         PaymentProvider.TEST,
         'EUR',
       );
       const payment3Data = await paymentService.getPaymentForLatestUserOrder(
-        userId,
+        usr.id,
       );
       const constructedEvent3 = {
         type: 'payment_intent.canceled',
@@ -1661,27 +1666,27 @@ describe('AppController (e2e)', () => {
       };
       await paymentService.webhookHandler(constructedEvent3);
       const canceled = await paymentService.getPaymentForLatestUserOrder(
-        userId,
+        usr.id,
       );
       expect(canceled.status).toEqual(PaymentStatus.CANCELED);
       await paymentService.deleteExpiredPayments();
       const stillCanceled = await paymentService.getPaymentForLatestUserOrder(
-        userId,
+        usr.id,
       );
       expect(stillCanceled.status).toEqual(PaymentStatus.CANCELED);
 
-      await paymentService.createPayment(userId, PaymentProvider.TEST, 'EUR');
-      const created = await paymentService.getPaymentForLatestUserOrder(userId);
+      await paymentService.createPayment(usr, PaymentProvider.TEST, 'EUR');
+      const created = await paymentService.getPaymentForLatestUserOrder(usr.id);
       expect(created.status).toEqual(PaymentStatus.CREATED);
       await paymentService.deleteExpiredPayments();
       const timedOut = await paymentService.getPaymentForLatestUserOrder(
-        userId,
+        usr.id,
       );
       expect(timedOut.status).toEqual(PaymentStatus.TIMED_OUT);
 
-      await paymentService.createPayment(userId, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(usr, PaymentProvider.TEST, 'EUR');
       const promisePaid = await paymentService.getPaymentForLatestUserOrder(
-        userId,
+        usr.id,
       );
       const promisePaidPostResp = await request(app.getHttpServer())
         .post('/payment/promise-paid')
@@ -1689,12 +1694,12 @@ describe('AppController (e2e)', () => {
         .send({ payment_id: promisePaid.paymentId });
       expect(promisePaidPostResp.statusCode).toEqual(201);
       const promised = await paymentService.getPaymentForLatestUserOrder(
-        userId,
+        usr.id,
       );
       expect(promised.status).toEqual(PaymentStatus.PROMISED);
       await paymentService.deleteExpiredPayments();
       const promisedTimedOut =
-        await paymentService.getPaymentForLatestUserOrder(userId);
+        await paymentService.getPaymentForLatestUserOrder(usr.id);
       expect(promisedTimedOut.status).toEqual(PaymentStatus.TIMED_OUT);
 
       // need to re-add cart item, promise-paid drops the active cart session
@@ -1704,12 +1709,12 @@ describe('AppController (e2e)', () => {
       expect(readd.statusCode).toEqual(201);
 
       await await paymentService.createPayment(
-        userId,
+        usr,
         PaymentProvider.TEST,
         'EUR',
       );
       const payment4Data = await paymentService.getPaymentForLatestUserOrder(
-        userId,
+        usr.id,
       );
       // reconstruct success event from stripe
       const constructedEvent5 = {
@@ -1722,12 +1727,12 @@ describe('AppController (e2e)', () => {
       };
       await paymentService.webhookHandler(constructedEvent5);
       const processing = await paymentService.getPaymentForLatestUserOrder(
-        userId,
+        usr.id,
       );
       expect(processing.status).toEqual(PaymentStatus.PROCESSING);
       await paymentService.deleteExpiredPayments();
       const processingDidNotTimeout =
-        await paymentService.getPaymentForLatestUserOrder(userId);
+        await paymentService.getPaymentForLatestUserOrder(usr.id);
       expect(processingDidNotTimeout.status).toEqual(PaymentStatus.PROCESSING);
 
       // need to re-add cart item, changing state to PROCESSING drops the active cart session
@@ -1736,9 +1741,9 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(readd2.statusCode).toEqual(201);
 
-      await paymentService.createPayment(userId, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(usr, PaymentProvider.TEST, 'EUR');
       const payment5Data = await paymentService.getPaymentForLatestUserOrder(
-        userId,
+        usr.id,
       );
       // reconstruct success event from stripe
       const constructedEvent2 = {
@@ -1750,11 +1755,11 @@ describe('AppController (e2e)', () => {
         },
       };
       await paymentService.webhookHandler(constructedEvent2);
-      const success = await paymentService.getPaymentForLatestUserOrder(userId);
+      const success = await paymentService.getPaymentForLatestUserOrder(usr.id);
       expect(success.status).toEqual(PaymentStatus.SUCCEEDED);
       await paymentService.deleteExpiredPayments();
       const stillSuccess = await paymentService.getPaymentForLatestUserOrder(
-        userId,
+        usr.id,
       );
       expect(stillSuccess.status).toEqual(PaymentStatus.SUCCEEDED);
     },
@@ -1763,14 +1768,15 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'stripe payment: Payment status should not change from FAILED',
     async () => {
-      const { bearer, id } = await loginUser(app, 'addr', 'admin');
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      const usr = <UserEntity>{ userAddress: address, id: id };
 
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(usr, PaymentProvider.TEST, 'EUR');
 
       // Give webhook handler function success event
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
@@ -1819,14 +1825,15 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'stripe payment: Payment status should not change from SUCCEEDED',
     async () => {
-      const { bearer, id } = await loginUser(app, 'addr', 'admin');
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      const usr = <UserEntity>{ userAddress: address, id: id };
 
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(usr, PaymentProvider.TEST, 'EUR');
 
       // Give webhook handler function success event
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
@@ -2663,7 +2670,7 @@ describe('AppController (e2e)', () => {
     const paymentIntentRes = await request(app.getHttpServer())
       .post('/payment/create-payment-intent')
       .set('authorization', bearer)
-      .send({ currency: 'XTZ' });
+      .send({ currency: 'XTZ', paymentProvider: 'tezpay' });
     expect(paymentIntentRes.status).toEqual(201);
     const intentId = paymentIntentRes.body.id;
     delete paymentIntentRes.body.id;
@@ -2751,7 +2758,7 @@ describe('AppController (e2e)', () => {
     }
     expect(paymentOrderNfts.status).toEqual(200);
     expect(paymentOrderNfts.body).toEqual({
-      currency: 'XTZ',
+      currency: 'EUR',
       nfts: [
         {
           artifactUri:

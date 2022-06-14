@@ -74,22 +74,20 @@ export class PaymentController {
   @UseGuards(JwtAuthGuard)
   async createPaymentIntent(
     @CurrentUser() user: UserEntity,
+    @Body('paymentProvider')
+    paymentProvider: PaymentProvider = PaymentProvider.STRIPE,
     @Body('currency') currency: string = BASE_CURRENCY,
   ): Promise<PaymentIntent> {
-    Logger.log(`createPaymentIntent: ${JSON.stringify(currency)}`);
-
     validateRequestedCurrency(currency);
 
-    let paymentProvider: PaymentProvider;
     if (currency === 'XTZ') {
+      // temporary for backwards compatibility, until frontend has been updated
       paymentProvider = PaymentProvider.TEZPAY;
-    } else {
-      paymentProvider = PaymentProvider.STRIPE;
     }
 
     try {
       let paymentIntent = await this.paymentService.createPayment(
-        user.id,
+        user,
         paymentProvider,
         currency,
       );
@@ -101,6 +99,9 @@ export class PaymentController {
       paymentIntent.expiresAt = orderDetails.expiresAt;
       return paymentIntent;
     } catch (err: any) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
       Logger.error(err);
       throw new HttpException(
         'Unable to place the order',
