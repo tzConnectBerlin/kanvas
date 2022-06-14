@@ -67,9 +67,11 @@ function cp_bak {
 
     [ -f "$2" ] && {
         bakCount=`ls -w 1 | grep --extended-regexp "^$2\.bak[0-9]+$" | wc -l`
-        bakFile="$2.bak$bakCount"
-        [ "${bakFile::1}" != '.' ] && bakFile=".$bakFile"
-        mv "$2" "$bakFile"
+        bakFilePath="$2.bak$bakCount"
+        bakPath=`dirname "$bakFilePath"`
+        bakFileName=`basename "$bakFilePath"`
+        [ "${bakFileName::1}" != '.' ] && bakFileName=".$bakFileName"
+        mv "$2" "$bakPath/$bakFileName"
     }
 
     if [ "$1" == '' ]; then
