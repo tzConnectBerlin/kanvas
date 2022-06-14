@@ -180,26 +180,13 @@ WHERE user_id = $1
       `,
       [userId, paymentId],
     );
-    const currency = orderNftsQryRes.rows[0]['currency'];
     const expiresAt: number = orderNftsQryRes.rows[0]['expires_at'];
     const nfts = await this.nftService.findByIds(
       orderNftsQryRes.rows.map((row: any) => row['nft_id']),
     );
 
-    let priceById: { [key: number]: string } = {};
-    const decimals = SUPPORTED_CURRENCIES[currency];
-    for (const row of orderNftsQryRes.rows) {
-      priceById[row['nft_id']] = (
-        Number(row['price']) * Math.pow(10, -decimals)
-      ).toFixed(decimals);
-    }
-
-    for (const nft of nfts) {
-      nft.price = priceById[nft.id];
-    }
-
     return {
-      currency: currency,
+      currency: BASE_CURRENCY,
       nfts: nfts,
       expiresAt: expiresAt,
     };
