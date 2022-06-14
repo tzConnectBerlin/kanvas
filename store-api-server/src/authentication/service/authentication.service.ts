@@ -9,15 +9,11 @@ import { SIGNED_LOGIN_ENABLED } from '../../constants.js';
 const { Ok } = ts_results;
 
 import { createRequire } from 'module';
+
+import type { IAuthentication } from './authentication.js';
+
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcrypt');
-
-interface IAuthentication {
-  id: number;
-  userAddress: string;
-  token: string;
-  maxAge: string;
-}
 
 @Injectable()
 export class AuthenticationService {

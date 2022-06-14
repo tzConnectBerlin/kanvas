@@ -1,4 +1,4 @@
-import { CategoryEntity } from '../../category/entity/category.entity.js';
+import type { CategoryEntity } from '../../category/entity/category.entity.js';
 
 export interface NftEntity {
   id: number;
