@@ -14,10 +14,10 @@ import {
   SIGNATURE_PREFIX_RELIST_NFT,
 } from 'kanvas-api-lib';
 import {
-  PaymentProvider,
   PaymentService,
   PaymentStatus,
 } from '../src/payment/service/payment.service';
+import { PaymentProvider } from '../src/payment/entity/payment.entity.js';
 import { UserEntity } from '../src/user/entity/user.entity';
 import { UserService } from '../src/user/service/user.service';
 import { assertEnv, sleep } from '../src/utils';

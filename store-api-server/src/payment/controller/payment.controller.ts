@@ -17,13 +17,13 @@ import { JwtAuthGuard } from '../../authentication/guards/jwt-auth.guard.js';
 import {
   PaymentService,
   PaymentStatus,
-  PaymentProvider,
 } from '../../payment/service/payment.service.js';
 import { UserEntity } from '../../user/entity/user.entity.js';
 import { UserService } from '../../user/service/user.service.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
 import { validateRequestedCurrency } from '../../paramUtils.js';
 import { NftEntity } from '../../nft/entity/nft.entity.js';
+import { PaymentProvider } from '../../payment/entity/payment.entity.js';
 
 import type { PaymentIntent } from '../../payment/entity/payment.entity.js';
 

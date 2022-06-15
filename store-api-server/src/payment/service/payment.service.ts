@@ -33,6 +33,7 @@ import {
 } from 'kanvas-api-lib';
 import { signSmartContractData } from '@wert-io/widget-sc-signer';
 import { createRequire } from 'module';
+import { PaymentProvider } from '../entity/payment.entity.js';
 
 import type { NftEntity } from '../../nft/entity/nft.entity.js';
 import type { PaymentIntent } from '../entity/payment.entity.js';
@@ -48,13 +49,6 @@ export enum PaymentStatus {
   TIMED_OUT = 'timedOut',
   SUCCEEDED = 'succeeded',
   FAILED = 'failed',
-}
-
-export enum PaymentProvider {
-  TEZPAY = 'tezpay',
-  STRIPE = 'stripe',
-  WERT = 'wert',
-  TEST = 'test_provider',
 }
 
 interface NftOrder {

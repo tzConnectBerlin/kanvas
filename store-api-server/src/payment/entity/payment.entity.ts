@@ -10,3 +10,10 @@ export interface PaymentIntent {
   expiresAt?: number;
   other?: any;
 }
+
+export enum PaymentProvider {
+  TEZPAY = 'tezpay',
+  STRIPE = 'stripe',
+  WERT = 'wert',
+  TEST = 'test_provider',
+}
