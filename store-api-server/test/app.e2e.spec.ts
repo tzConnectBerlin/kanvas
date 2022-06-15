@@ -73,6 +73,17 @@ describe('AppController (e2e)', () => {
   // - these tests expect responses related to a database that has been filled
   //   with data in store-api-server/script/populate-testdb.sql
 
+  skipOnPriorFail(`/constants (GET) => success`, async () => {
+    const resp = await request(app.getHttpServer()).get('/constants');
+    expect(resp.statusCode).toEqual(200);
+
+    expect(resp.body).toEqual({
+      baseCurrency: 'EUR',
+      cartMaxItems: 10,
+      supportedCurrencies: ['USD', 'GBP', 'EUR', 'XTZ'],
+    });
+  });
+
   skipOnPriorFail(
     '/nfts?orderBy=view is determined by number of POST /nfts/:id per id',
     async () => {

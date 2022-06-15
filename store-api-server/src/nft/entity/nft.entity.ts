@@ -17,6 +17,7 @@ export interface NftEntity {
   editionsAvailable: number;
   launchAt: number;
   ownerStatuses?: string[];
+  metadata?: any;
 }
 
 export interface CreateNft {
