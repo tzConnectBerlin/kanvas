@@ -380,6 +380,17 @@ WHERE cart_session_id = $1`,
     const cartMeta = await this.touchCart(session);
 
     return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+      // first lock this session, cannot allow multiple adds concurrently because
+      // it'd break the MAX_CART_ITEMS assertion
+      await dbTx.query(
+        `
+SELECT 1
+FROM cart_session
+WHERE id = $1
+FOR UPDATE
+`,
+        [cartMeta.id],
+      );
       const cartSizeQryResp = await dbTx.query(
         `
 SELECT
@@ -389,8 +400,7 @@ WHERE cart_session_id = $1
         `,
         [cartMeta.id],
       );
-
-      if (cartSizeQryResp.rows[0]['cart_size'] >= CART_MAX_ITEMS) {
+      if (Number(cartSizeQryResp.rows[0]['cart_size']) > CART_MAX_ITEMS) {
         throw new HttpException('cart is full', HttpStatus.BAD_REQUEST);
       }
 
