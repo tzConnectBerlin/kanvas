@@ -16,7 +16,6 @@ import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { JwtAuthGuard } from '../../authentication/guards/jwt-auth.guard.js';
 import {
   PaymentService,
-  PaymentIntent,
   PaymentStatus,
   PaymentProvider,
 } from '../../payment/service/payment.service.js';
@@ -25,6 +24,8 @@ import { UserService } from '../../user/service/user.service.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
 import { validateRequestedCurrency } from '../../paramUtils.js';
 import { NftEntity } from '../../nft/entity/nft.entity.js';
+
+import type { PaymentIntent } from '../../payment/entity/payment.entity.js';
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
