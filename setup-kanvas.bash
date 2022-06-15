@@ -66,12 +66,12 @@ function cp_bak {
     # special case: if $1 -eq '' then this behaves as a "touch_bak"
 
     [ -f "$2" ] && {
-        bakCount=`ls -w 1 | grep --extended-regexp "^$2\.bak[0-9]+$" | wc -l`
-        bakFilePath="$2.bak$bakCount"
+        bakFilePath="$2.bak"
         bakPath=`dirname "$bakFilePath"`
         bakFileName=`basename "$bakFilePath"`
         [ "${bakFileName::1}" != '.' ] && bakFileName=".$bakFileName"
-        mv "$2" "$bakPath/$bakFileName"
+        bakCount=`ls -w 1 -a "$bakPath" | grep --extended-regexp "^$bakFileName[0-9]+$" | wc -l`
+        mv -v "$2" "$bakPath/$bakFileName$bakCount"
     }
 
     if [ "$1" == '' ]; then
