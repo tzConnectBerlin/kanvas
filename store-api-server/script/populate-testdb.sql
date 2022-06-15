@@ -131,4 +131,6 @@ values
   (3, 33),
   (3, 34);
 
+update nft set metadata = '{"test": {"nested": 10}}' where id = 1;
+
 commit;

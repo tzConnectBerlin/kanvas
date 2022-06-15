@@ -196,7 +196,11 @@ describe('AppController (e2e)', () => {
       description:
         'Hey guys, here s the WL team ready to write some more code !',
       ipfsHash: null,
-      metadata: null,
+      metadata: {
+        test: {
+          nested: 10,
+        },
+      },
       artifactUri:
         'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
       displayUri:
@@ -298,7 +302,11 @@ describe('AppController (e2e)', () => {
             description:
               'Hey guys, here s the WL team ready to write some more code !',
             ipfsHash: null,
-            metadata: null,
+            metadata: {
+              test: {
+                nested: 10,
+              },
+            },
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -623,7 +631,11 @@ describe('AppController (e2e)', () => {
           description:
             'Hey guys, here s the WL team ready to write some more code !',
           ipfsHash: null,
-          metadata: null,
+          metadata: {
+            test: {
+              nested: 10,
+            },
+          },
           artifactUri:
             'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
           displayUri:
@@ -678,7 +690,11 @@ describe('AppController (e2e)', () => {
             description:
               'Hey guys, here s the WL team ready to write some more code !',
             ipfsHash: null,
-            metadata: null,
+            metadata: {
+              test: {
+                nested: 10,
+              },
+            },
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -1921,7 +1937,11 @@ describe('AppController (e2e)', () => {
             description:
               'Hey guys, here s the WL team ready to write some more code !',
             ipfsHash: 'ipfs://.....', // Note: this is now non-null, because it's been purchased at least once
-            metadata: null,
+            metadata: {
+              test: {
+                nested: 10,
+              },
+            },
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -2000,7 +2020,11 @@ describe('AppController (e2e)', () => {
             description:
               'Hey guys, here s the WL team ready to write some more code !',
             ipfsHash: 'ipfs://.....',
-            metadata: null,
+            metadata: {
+              test: {
+                nested: 10,
+              },
+            },
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -2892,7 +2916,11 @@ describe('AppController (e2e)', () => {
             editionsSize: 4,
             id: 1,
             ipfsHash: 'ipfs://.....',
-            metadata: null,
+            metadata: {
+              test: {
+                nested: 10,
+              },
+            },
             name: 'Cartoon',
             ownerStatuses: ['pending'],
             price: '0.10',
@@ -3095,7 +3123,11 @@ describe('AppController (e2e)', () => {
             editionsSize: 4,
             id: 1,
             ipfsHash: 'ipfs://.....',
-            metadata: null,
+            metadata: {
+              test: {
+                nested: 10,
+              },
+            },
             name: 'Cartoon',
             ownerStatuses: ['pending'],
             price: '0.10',
