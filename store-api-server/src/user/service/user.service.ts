@@ -21,6 +21,7 @@ import {
   MINTER_ADDRESS,
   NUM_TOP_BUYERS,
   CART_EXPIRATION_MILLI_SECS,
+  CART_MAX_ITEMS,
 } from '../../constants.js';
 import { CurrencyService } from 'kanvas-api-lib';
 import { Result } from 'ts-results';
@@ -379,6 +380,20 @@ WHERE cart_session_id = $1`,
     const cartMeta = await this.touchCart(session);
 
     return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+      const cartSizeQryResp = await dbTx.query(
+        `
+SELECT
+  count(1) AS cart_size
+FROM mtm_cart_session_nft
+WHERE cart_session_id = $1
+        `,
+        [cartMeta.id],
+      );
+
+      if (cartSizeQryResp.rows[0]['cart_size'] >= CART_MAX_ITEMS) {
+        throw new HttpException('cart is full', HttpStatus.BAD_REQUEST);
+      }
+
       await dbTx.query(
         `
 INSERT INTO mtm_cart_session_nft(
