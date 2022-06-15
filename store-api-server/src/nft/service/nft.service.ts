@@ -410,7 +410,8 @@ SELECT
   editions_owned,
   nft_created_at,
   onsale_from,
-  onsale_until
+  onsale_until,
+  metadata
 FROM nfts_by_id($1, $2, $3)`,
         [nftIds, orderBy, orderDirection],
       );
@@ -450,6 +451,7 @@ FROM nfts_by_id($1, $2, $3)`,
               description: categoryRow[2],
             };
           }),
+          metadata: nftRow['metadata'],
         };
 
         nft.displayUri ??= nft.artifactUri;
