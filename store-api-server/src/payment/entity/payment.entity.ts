@@ -17,3 +17,5 @@ export enum PaymentProvider {
   WERT = 'wert',
   TEST = 'test_provider',
 }
+
+export type PaymentProviderString = `${PaymentProvider}`;
