@@ -60,3 +60,7 @@ export const TEZPAY_PAYPOINT_ADDRESS: string | undefined =
 
 export const SIGNED_LOGIN_ENABLED: boolean =
   (process.env['SIGNED_LOGIN_ENABLED'] || 'no') === 'yes';
+
+export const CART_MAX_ITEMS: number = Number(
+  process.env['CART_MAX_ITEMS'] || 10,
+);
