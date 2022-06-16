@@ -1,4 +1,5 @@
 import {
+  Session,
   Controller,
   HttpException,
   Post,
@@ -73,6 +74,7 @@ export class PaymentController {
   @Post('/create-payment-intent')
   @UseGuards(JwtAuthGuard)
   async createPaymentIntent(
+    @Session() cookieSession: any,
     @CurrentUser() user: UserEntity,
     @Body('paymentProvider')
     paymentProvider: PaymentProvider = PaymentProvider.STRIPE,
@@ -88,6 +90,7 @@ export class PaymentController {
     try {
       let paymentIntent = await this.paymentService.createPayment(
         user,
+        cookieSession.uuid,
         paymentProvider,
         currency,
       );
