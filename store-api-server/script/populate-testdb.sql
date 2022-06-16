@@ -132,5 +132,6 @@ values
   (3, 34);
 
 update nft set metadata = '{"test": {"nested": 10}}' where id = 1;
+update nft_category set metadata = '{"test": {"nested": true}}' where id = 1;
 
 commit;
