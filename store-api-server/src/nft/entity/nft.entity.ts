@@ -5,7 +5,12 @@ export interface NftEntity {
   createdAt: number;
   name: string;
   description: string;
-  ipfsHash?: string;
+
+  ipfsHash?: string; // deprecated by metadataIpfs field
+  metadataIpfs?: string;
+  artifactIpfs?: string;
+  displayIpfs?: string;
+  thumbnailIpfs?: string;
 
   artifactUri: string;
   displayUri?: string;
