@@ -22,6 +22,7 @@ import { UserEntity } from '../src/user/entity/user.entity';
 import { UserService } from '../src/user/service/user.service';
 import { assertEnv, sleep } from '../src/utils';
 import sotez from 'sotez';
+import { v4 as uuidv4 } from 'uuid';
 const { cryptoUtils } = sotez;
 
 let anyTestFailed = false;
@@ -1490,6 +1491,7 @@ describe('AppController (e2e)', () => {
       // Create one payment intent (we are not calling the stripe api)
       const intentRes = await paymentService.createPayment(
         usr,
+        uuidv4(),
         PaymentProvider.TEST,
         'EUR',
       );
@@ -1566,7 +1568,12 @@ describe('AppController (e2e)', () => {
       expect(await getLockedCount(2)).toEqual(1);
 
       // Create one payment intent (we are not calling the stripe api)
-      await paymentService.createPayment(usr, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
+      );
 
       // Give webhook handler function success event
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
@@ -1653,6 +1660,7 @@ describe('AppController (e2e)', () => {
       // Create one payment intent (we are not calling the stripe api)
       const preparedOrder = await paymentService.createPayment(
         usr,
+        uuidv4(),
         PaymentProvider.TEST,
         'EUR',
       );
@@ -1724,7 +1732,12 @@ describe('AppController (e2e)', () => {
       expect(add1.statusCode).toEqual(201);
 
       // Create one payment intent (we are not calling the stripe api)
-      await paymentService.createPayment(usr, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
+      );
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
         usr.id,
       );
@@ -1750,6 +1763,7 @@ describe('AppController (e2e)', () => {
 
       const preparedOrder2 = await paymentService.createPayment(
         usr,
+        uuidv4(),
         PaymentProvider.TEST,
         'EUR',
       );
@@ -1775,7 +1789,12 @@ describe('AppController (e2e)', () => {
       );
       expect(stillCanceled.status).toEqual(PaymentStatus.CANCELED);
 
-      await paymentService.createPayment(usr, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
+      );
       const created = await paymentService.getPaymentForLatestUserOrder(usr.id);
       expect(created.status).toEqual(PaymentStatus.CREATED);
       await paymentService.deleteExpiredPayments();
@@ -1784,7 +1803,12 @@ describe('AppController (e2e)', () => {
       );
       expect(timedOut.status).toEqual(PaymentStatus.TIMED_OUT);
 
-      await paymentService.createPayment(usr, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
+      );
       const promisePaid = await paymentService.getPaymentForLatestUserOrder(
         usr.id,
       );
@@ -1810,6 +1834,7 @@ describe('AppController (e2e)', () => {
 
       await await paymentService.createPayment(
         usr,
+        uuidv4(),
         PaymentProvider.TEST,
         'EUR',
       );
@@ -1841,7 +1866,12 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(readd2.statusCode).toEqual(201);
 
-      await paymentService.createPayment(usr, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
+      );
       const payment5Data = await paymentService.getPaymentForLatestUserOrder(
         usr.id,
       );
@@ -1876,7 +1906,12 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      await paymentService.createPayment(usr, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
+      );
 
       // Give webhook handler function success event
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
@@ -1933,7 +1968,12 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      await paymentService.createPayment(usr, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
+      );
 
       // Give webhook handler function success event
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(

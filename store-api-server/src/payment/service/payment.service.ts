@@ -229,9 +229,12 @@ WHERE user_id = $1
 
   async createPayment(
     usr: UserEntity,
+    cookieSession: string,
     provider: PaymentProvider,
     currency: string,
   ): Promise<PaymentIntent> {
+    await this.userService.ensureUserCartSession(usr.id, cookieSession);
+
     return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       const preparedOrder = await this.#createOrder(
         dbTx,
