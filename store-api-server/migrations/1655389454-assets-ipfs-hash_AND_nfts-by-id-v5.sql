@@ -1,5 +1,5 @@
--- Migration: multi-ipfs-hash
--- Created at: 2022-06-08 13:26:45
+-- Migration: assets-ipfs-hash_AND_nfts-by-id-v5
+-- Created at: 2022-06-16 16:24:14
 -- ====  UP  ====
 
 BEGIN;
@@ -14,7 +14,7 @@ ALTER TABLE __nft_delisted ADD COLUMN artifact_ipfs TEXT;
 ALTER TABLE __nft_delisted ADD COLUMN display_ipfs TEXT;
 ALTER TABLE __nft_delisted ADD COLUMN thumbnail_ipfs TEXT;
 
-ALTER FUNCTION nfts_by_id RENAME TO __nfts_by_id_v3;
+ALTER FUNCTION nfts_by_id RENAME TO __nfts_by_id_v4;
 CREATE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT)
   RETURNS TABLE(
     nft_id INTEGER,
@@ -34,7 +34,8 @@ CREATE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT)
     editions_size INTEGER,
     editions_reserved BIGINT,
     editions_owned BIGINT,
-    categories TEXT[][])
+    categories TEXT[][],
+    metadata JSONB)
 AS $$
 BEGIN
   IF orderDirection NOT IN ('asc', 'desc') THEN
@@ -71,7 +72,8 @@ BEGIN
       editions_size,
       availability.reserved AS editions_reserved,
       availability.owned AS editions_owned,
-      cat.categories
+      cat.categories,
+      metadata
     FROM nft
     JOIN nft_categories AS cat
       ON cat.nft_id = nft.id
@@ -100,6 +102,6 @@ ALTER TABLE __nft_delisted DROP COLUMN display_ipfs;
 ALTER TABLE __nft_delisted DROP COLUMN thumbnail_ipfs;
 
 DROP FUNCTION nfts_by_id(INTEGER[], TEXT, TEXT);
-ALTER FUNCTION __nfts_by_id_v3 RENAME TO nfts_by_id;
+ALTER FUNCTION __nfts_by_id_v4 RENAME TO nfts_by_id;
 
 COMMIT;

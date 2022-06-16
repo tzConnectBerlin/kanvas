@@ -321,6 +321,7 @@ describe('AppController (e2e)', () => {
             metadata: {
               test: {
                 nested: 10,
+              },
             },
             metadataIpfs: null,
             artifactIpfs: null,
@@ -752,6 +753,7 @@ describe('AppController (e2e)', () => {
             metadata: {
               test: {
                 nested: 10,
+              },
             },
             metadataIpfs: null,
             artifactIpfs: null,
@@ -2108,11 +2110,11 @@ describe('AppController (e2e)', () => {
               test: {
                 nested: 10,
               },
+            },
             metadataIpfs: 'ipfs://.....',
             artifactIpfs: '1-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '1-thumbnail-ipfs-hash',
-            },
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -2199,11 +2201,11 @@ describe('AppController (e2e)', () => {
               test: {
                 nested: 10,
               },
+            },
             metadataIpfs: 'ipfs://.....',
             artifactIpfs: '1-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '1-thumbnail-ipfs-hash',
-            },
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -2976,6 +2978,10 @@ describe('AppController (e2e)', () => {
           editionsSize: 8,
           id: 8,
           ipfsHash: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
           metadata: null,
           name: 'An didn t stop improving',
           thumbnailUri:
@@ -3000,6 +3006,10 @@ describe('AppController (e2e)', () => {
           id: 10,
           ipfsHash: null,
           metadata: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
           name: 'Antonin DVORAK',
           thumbnailUri:
             'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
@@ -3046,6 +3056,10 @@ describe('AppController (e2e)', () => {
           id: 8,
           ipfsHash: null,
           metadata: null,
+          artifactIpfs: null,
+          metadataIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
           name: 'An didn t stop improving',
           thumbnailUri:
             'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
@@ -3068,6 +3082,10 @@ describe('AppController (e2e)', () => {
           editionsSize: 8,
           id: 10,
           ipfsHash: null,
+          artifactIpfs: null,
+          metadataIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
           metadata: null,
           name: 'Antonin DVORAK',
           thumbnailUri:
@@ -3139,11 +3157,11 @@ describe('AppController (e2e)', () => {
               test: {
                 nested: 10,
               },
+            },
             metadataIpfs: 'ipfs://.....',
             artifactIpfs: '1-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '1-thumbnail-ipfs-hash',
-            },
             name: 'Cartoon',
             ownerStatuses: ['pending'],
             price: '0.10',
@@ -3201,6 +3219,10 @@ describe('AppController (e2e)', () => {
           editionsSize: 8,
           id: 4,
           ipfsHash: 'ipfs://.....',
+          metadataIpfs: 'ipfs://.....',
+          artifactIpfs: '4-artifact-ipfs-hash',
+          displayIpfs: null,
+          thumbnailIpfs: '4-thumbnail-ipfs-hash',
           metadata: null,
           name: 'The cat & the city',
           ownerStatuses: ['payment processing'],
@@ -3362,11 +3384,11 @@ describe('AppController (e2e)', () => {
               test: {
                 nested: 10,
               },
+            },
             metadataIpfs: 'ipfs://.....',
             artifactIpfs: '1-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '1-thumbnail-ipfs-hash',
-            },
             name: 'Cartoon',
             ownerStatuses: ['pending'],
             price: '0.10',
@@ -3425,6 +3447,10 @@ describe('AppController (e2e)', () => {
           id: 4,
           ipfsHash: 'ipfs://.....',
           metadata: null,
+          metadataIpfs: 'ipfs://.....',
+          artifactIpfs: '4-artifact-ipfs-hash',
+          displayIpfs: null,
+          thumbnailIpfs: '4-thumbnail-ipfs-hash',
           name: 'The cat & the city',
           ownerStatuses: ['payment processing'],
           price: '4.30',
