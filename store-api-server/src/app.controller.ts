@@ -1,5 +1,4 @@
-import { Controller, Get, Logger } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service.js';
 import { AppConstants } from './app.entity.js';
 

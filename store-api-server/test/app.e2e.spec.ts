@@ -69,11 +69,7 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer()).get('/').expect(404);
   });
 
-  // Note:
-  // - these tests expect responses related to a database that has been filled
-  //   with data in store-api-server/script/populate-testdb.sql
-
-  skipOnPriorFail(`/constants (GET) => success`, async () => {
+  it(`/constants (GET) => success`, async () => {
     const resp = await request(app.getHttpServer()).get('/constants');
     expect(resp.statusCode).toEqual(200);
 
@@ -84,45 +80,9 @@ describe('AppController (e2e)', () => {
     });
   });
 
-  skipOnPriorFail('/users/cart: verify it has a max size', async () => {
-    const add1 = await request(app.getHttpServer()).post('/users/cart/add/1');
-    expect(add1.statusCode).toEqual(201);
-    const cookie = add1.headers['set-cookie'];
-
-    let nfts = [];
-    for (let i = 10; i < CART_MAX_ITEMS + 10; i++) {
-      nfts.push(i);
-    }
-    const addPosts = await Promise.all(
-      nfts.map((nft) =>
-        request(app.getHttpServer())
-          .post(`/users/cart/add/${nft}`)
-          .set('cookie', cookie),
-      ),
-    );
-    for (const post of addPosts) {
-      expect(post.statusCode).toEqual(201);
-    }
-
-    const addTooMany = await request(app.getHttpServer())
-      .post('/users/cart/add/30')
-      .set('cookie', cookie);
-    expect(addTooMany.body).toEqual({
-      message: 'cart is full',
-      statusCode: 400,
-    });
-
-    await Promise.all(
-      nfts.map((nft) =>
-        request(app.getHttpServer())
-          .post(`/users/cart/remove/${nft}`)
-          .set('cookie', cookie),
-      ),
-    );
-    await request(app.getHttpServer())
-      .post('/users/cart/remove/1')
-      .set('cookie', cookie);
-  });
+  // Note:
+  // - these tests expect responses related to a database that has been filled
+  //   with data in store-api-server/script/populate-testdb.sql
 
   skipOnPriorFail(
     '/nfts?orderBy=view is determined by number of POST /nfts/:id per id',
@@ -1221,6 +1181,46 @@ describe('AppController (e2e)', () => {
       expect(idList).toEqual([]);
     },
   );
+
+  skipOnPriorFail('/users/cart: verify it has a max size', async () => {
+    const add1 = await request(app.getHttpServer()).post('/users/cart/add/1');
+    expect(add1.statusCode).toEqual(201);
+    const cookie = add1.headers['set-cookie'];
+
+    let nfts = [];
+    for (let i = 10; i < CART_MAX_ITEMS + 10; i++) {
+      nfts.push(i);
+    }
+    const addPosts = await Promise.all(
+      nfts.map((nft) =>
+        request(app.getHttpServer())
+          .post(`/users/cart/add/${nft}`)
+          .set('cookie', cookie),
+      ),
+    );
+    for (const post of addPosts) {
+      expect(post.statusCode).toEqual(201);
+    }
+
+    const addTooMany = await request(app.getHttpServer())
+      .post('/users/cart/add/30')
+      .set('cookie', cookie);
+    expect(addTooMany.body).toEqual({
+      message: 'cart is full',
+      statusCode: 400,
+    });
+
+    await Promise.all(
+      nfts.map((nft) =>
+        request(app.getHttpServer())
+          .post(`/users/cart/remove/${nft}`)
+          .set('cookie', cookie),
+      ),
+    );
+    await request(app.getHttpServer())
+      .post('/users/cart/remove/1')
+      .set('cookie', cookie);
+  });
 
   skipOnPriorFail(
     '/users/cart (cookie based to login and logout interactions)',
