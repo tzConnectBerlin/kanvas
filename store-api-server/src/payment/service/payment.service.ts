@@ -33,7 +33,11 @@ import {
 } from 'kanvas-api-lib';
 import { signSmartContractData } from '@wert-io/widget-sc-signer';
 import { createRequire } from 'module';
-import { NftEntity } from '../../nft/entity/nft.entity.js';
+import { PaymentProvider } from '../entity/payment.entity.js';
+
+import type { NftEntity } from '../../nft/entity/nft.entity.js';
+import type { PaymentIntent } from '../entity/payment.entity.js';
+
 const require = createRequire(import.meta.url);
 const stripe = require('stripe');
 
@@ -47,13 +51,6 @@ export enum PaymentStatus {
   FAILED = 'failed',
 }
 
-export enum PaymentProvider {
-  TEZPAY = 'tezpay',
-  STRIPE = 'stripe',
-  WERT = 'wert',
-  TEST = 'test_provider',
-}
-
 interface NftOrder {
   id: number;
   userId: number;
@@ -61,17 +58,6 @@ interface NftOrder {
   currency: string;
   currencyUnitAmount: number; // denoted in NftOrder.currency
   nfts: NftEntity[];
-}
-
-export interface PaymentIntent {
-  amount: string;
-  currency: string;
-  clientSecret: string;
-  id: string;
-  receiverAddress?: string;
-  nfts?: NftEntity[];
-  expiresAt?: number;
-  other?: any;
 }
 
 @Injectable()
