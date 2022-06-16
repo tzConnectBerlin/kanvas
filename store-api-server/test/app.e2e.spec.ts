@@ -885,24 +885,42 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         nfts: [],
         categories: [
-          { id: 13, name: 'Honk Kong', description: 'Sub cities category' },
+          {
+            id: 13,
+            name: 'Honk Kong',
+            description: 'Sub cities category',
+            metadata: null,
+          },
           {
             id: 16,
             name: 'Black & White',
             description: 'Sub photography category',
+            metadata: null,
           },
           {
             id: 10,
             name: 'Landscape',
             description: 'Sub photography category',
+            metadata: null,
           },
-          { id: 15, name: 'London', description: 'Sub cities category' },
+          {
+            id: 15,
+            name: 'London',
+            description: 'Sub cities category',
+            metadata: null,
+          },
           {
             id: 9,
             name: 'Abstract',
             description: 'Sub photography category',
+            metadata: null,
           },
-          { id: 4, name: 'Drawing', description: 'Sub fine art category' },
+          {
+            id: 4,
+            name: 'Drawing',
+            description: 'Sub fine art category',
+            metadata: null,
+          },
         ],
       });
     },
@@ -2455,23 +2473,31 @@ describe('AppController (e2e)', () => {
         id: 1,
         name: 'Fine Art',
         description: 'A collection of fine art devided in several categories',
+        metadata: {
+          test: {
+            nested: true,
+          },
+        },
         children: [
           {
             id: 4,
             name: 'Drawing',
             description: 'Sub fine art category',
+            metadata: null,
             children: [],
           },
           {
             id: 5,
             name: 'Painting',
             description: 'Sub fine art category',
+            metadata: null,
             children: [],
           },
           {
             id: 6,
             name: 'Sculpture',
             description: 'Sub fine art category',
+            metadata: null,
             children: [],
           },
         ],
@@ -2480,22 +2506,26 @@ describe('AppController (e2e)', () => {
         id: 2,
         name: 'Visual Art',
         description: 'Not actually visual',
+        metadata: null,
         children: [
           {
             id: 7,
             name: 'Digital',
             description: 'Sub visual art category',
+            metadata: null,
             children: [],
           },
           {
             id: 8,
             name: 'Photography',
             description: 'Sub visual art category',
+            metadata: null,
             children: [
               {
                 id: 9,
                 name: 'Abstract',
                 description: 'Sub photography category',
+                metadata: null,
                 children: [],
               },
               {
@@ -2503,35 +2533,41 @@ describe('AppController (e2e)', () => {
                 name: 'Landscape',
                 description: 'Sub photography category',
                 children: [],
+                metadata: null,
               },
               {
                 id: 11,
                 name: 'Portrait',
                 description: 'Sub photography category',
+                metadata: null,
                 children: [],
               },
               {
                 id: 12,
                 name: 'Cities',
                 description: 'Sub photography category',
+                metadata: null,
                 children: [
                   {
                     id: 13,
                     name: 'Honk Kong',
                     description: 'Sub cities category',
                     children: [],
+                    metadata: null,
                   },
                   {
                     id: 14,
                     name: 'Toronto',
                     description: 'Sub cities category',
                     children: [],
+                    metadata: null,
                   },
                   {
                     id: 15,
                     name: 'London',
                     description: 'Sub cities category',
                     children: [],
+                    metadata: null,
                   },
                 ],
               },
@@ -2539,6 +2575,7 @@ describe('AppController (e2e)', () => {
                 id: 16,
                 name: 'Black & White',
                 description: 'Sub photography category',
+                metadata: null,
                 children: [],
               },
             ],
@@ -2549,6 +2586,7 @@ describe('AppController (e2e)', () => {
         id: 3,
         name: 'Applied Art',
         description: 'Not actually visual',
+        metadata: null,
         children: [],
       },
     ]);
