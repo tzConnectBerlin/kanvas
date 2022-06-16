@@ -399,15 +399,23 @@ SELECT
   nft_id,
   nft_name,
   description,
-  ipfs_hash,
+
+  metadata_ipfs,
+  artifact_ipfs,
+  display_ipfs,
+  thumbnail_ipfs,
+
   artifact_uri,
   display_uri,
   thumbnail_uri,
+
   price,
   categories,
+
   editions_size,
   editions_reserved,
   editions_owned,
+
   nft_created_at,
   onsale_from,
   onsale_until,
@@ -424,26 +432,37 @@ FROM nfts_by_id($1, $2, $3)`,
         const onsaleUntilMilliUnix =
           nftRow['onsale_until']?.getTime() || undefined;
 
+        let metadataIpfs = null;
+        let artifactIpfs = null;
+        let displayIpfs = null;
+        let thumbnailIpfs = null;
+        if (owned > 0) {
+          metadataIpfs = nftRow['metadata_ipfs'];
+          artifactIpfs = nftRow['artifact_ipfs'];
+          displayIpfs = nftRow['display_ipfs'];
+          thumbnailIpfs = nftRow['thumbnail_ipfs'];
+        }
+
         const nft = <NftEntity>{
           id: nftRow['nft_id'],
           name: nftRow['nft_name'],
           description: nftRow['description'],
-          ipfsHash: owned === 0 ? null : nftRow['ipfs_hash'], // Hide the IPFS hash until first purchase (delay irreversable publishing of the NFT In our name for as long as possible)
+
+          ipfsHash: metadataIpfs, // note: deprecated by metadataIpfs
+          metadataIpfs: metadataIpfs,
+          artifactIpfs: artifactIpfs,
+          displayIpfs: displayIpfs,
+          thumbnailIpfs: thumbnailIpfs,
+
           artifactUri: nftRow['artifact_uri'],
           displayUri: nftRow['display_uri'],
           thumbnailUri: nftRow['thumbnail_uri'],
+
           price: this.currencyService.convertToCurrency(
             Number(nftRow['price']),
             currency,
             inBaseUnit,
           ),
-          editionsSize: editions,
-          editionsAvailable: editions - (reserved + owned),
-          createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
-          launchAt: Math.floor(launchAtMilliUnix / 1000),
-          onsaleUntil: onsaleUntilMilliUnix
-            ? Math.floor(onsaleUntilMilliUnix / 1000)
-            : undefined,
           categories: nftRow['categories'].map((categoryRow: any) => {
             return <CategoryEntity>{
               id: Number(categoryRow[0]),
@@ -452,6 +471,14 @@ FROM nfts_by_id($1, $2, $3)`,
             };
           }),
           metadata: nftRow['metadata'],
+          editionsSize: editions,
+          editionsAvailable: editions - (reserved + owned),
+
+          createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
+          launchAt: Math.floor(launchAtMilliUnix / 1000),
+          onsaleUntil: onsaleUntilMilliUnix
+            ? Math.floor(onsaleUntilMilliUnix / 1000)
+            : undefined,
         };
 
         nft.displayUri ??= nft.artifactUri;
