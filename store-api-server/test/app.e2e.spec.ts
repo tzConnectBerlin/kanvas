@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { RATE_LIMIT } from '../src/constants';
+import { RATE_LIMIT, CART_MAX_ITEMS } from '../src/constants';
 import {
   SIGNATURE_PREFIX_CREATE_NFT,
   SIGNATURE_PREFIX_DELIST_NFT,
@@ -67,6 +67,17 @@ describe('AppController (e2e)', () => {
 
   it(`/ (GET) => NOT FOUND (make sure the nestjs's Hello World page is gone)`, () => {
     return request(app.getHttpServer()).get('/').expect(404);
+  });
+
+  it(`/constants (GET) => success`, async () => {
+    const resp = await request(app.getHttpServer()).get('/constants');
+    expect(resp.statusCode).toEqual(200);
+
+    expect(resp.body).toEqual({
+      baseCurrency: 'EUR',
+      cartMaxItems: 10,
+      supportedCurrencies: ['USD', 'GBP', 'EUR', 'XTZ'],
+    });
   });
 
   // Note:
@@ -1170,6 +1181,46 @@ describe('AppController (e2e)', () => {
       expect(idList).toEqual([]);
     },
   );
+
+  skipOnPriorFail('/users/cart: verify it has a max size', async () => {
+    const add1 = await request(app.getHttpServer()).post('/users/cart/add/1');
+    expect(add1.statusCode).toEqual(201);
+    const cookie = add1.headers['set-cookie'];
+
+    let nfts = [];
+    for (let i = 10; i < CART_MAX_ITEMS + 10; i++) {
+      nfts.push(i);
+    }
+    const addPosts = await Promise.all(
+      nfts.map((nft) =>
+        request(app.getHttpServer())
+          .post(`/users/cart/add/${nft}`)
+          .set('cookie', cookie),
+      ),
+    );
+    for (const post of addPosts) {
+      expect(post.statusCode).toEqual(201);
+    }
+
+    const addTooMany = await request(app.getHttpServer())
+      .post('/users/cart/add/30')
+      .set('cookie', cookie);
+    expect(addTooMany.body).toEqual({
+      message: 'cart is full',
+      statusCode: 400,
+    });
+
+    await Promise.all(
+      nfts.map((nft) =>
+        request(app.getHttpServer())
+          .post(`/users/cart/remove/${nft}`)
+          .set('cookie', cookie),
+      ),
+    );
+    await request(app.getHttpServer())
+      .post('/users/cart/remove/1')
+      .set('cookie', cookie);
+  });
 
   skipOnPriorFail(
     '/users/cart (cookie based to login and logout interactions)',
