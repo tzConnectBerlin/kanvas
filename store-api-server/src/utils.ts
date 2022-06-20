@@ -84,3 +84,10 @@ export function nowUtcWithOffset(offsetMs: number): string {
   d.setTime(d.getTime() + offsetMs);
   return d.toISOString();
 }
+
+export function isBottom(v: any): boolean {
+  // note: v here is checked for Javascripts' bottom values (null and undefined)
+  //       because undefined coerces into null. It's safe because nothing
+  //       else coerces into null (other than null itself).
+  return v == null;
+}

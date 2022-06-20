@@ -2942,7 +2942,9 @@ describe('AppController (e2e)', () => {
     expect(paymentIntentRes.status).toEqual(201);
     const intentId = paymentIntentRes.body.id;
     delete paymentIntentRes.body.id;
-    delete paymentIntentRes.body.clientSecret;
+    delete paymentIntentRes.body.paymentDetails.paypointMessage;
+    expect(paymentIntentRes.body.paymentDetails.mutezAmount).toBeGreaterThan(0);
+    delete paymentIntentRes.body.paymentDetails.mutezAmount;
     expect(Number(paymentIntentRes.body.amount)).toBeGreaterThan(0);
     delete paymentIntentRes.body.amount;
     delete paymentIntentRes.body.expiresAt;
@@ -2959,6 +2961,9 @@ describe('AppController (e2e)', () => {
       }
     }
     expect(paymentIntentRes.body).toEqual({
+      paymentDetails: {
+        receiverAddress: 'KT1MZTPQFdEZKLXtdQzpuA4MFt5ZkmKqFqkq',
+      },
       currency: 'XTZ',
       nfts: [
         {

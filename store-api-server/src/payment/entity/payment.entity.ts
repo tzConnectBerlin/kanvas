@@ -1,14 +1,21 @@
 import type { NftEntity } from '../../nft/entity/nft.entity.js';
 
+export interface NftOrder {
+  nfts: NftEntity[];
+  expiresAt: number;
+  // the key of paymentIntents below is PaymentProvider
+  paymentIntents: { [key: string]: PaymentIntent };
+}
+
 export interface PaymentIntent {
+  id: string;
+
   amount: string;
   currency: string;
-  clientSecret: string;
-  id: string;
-  receiverAddress?: string;
+  paymentDetails?: any;
+
   nfts?: NftEntity[];
   expiresAt?: number;
-  other?: any;
 }
 
 export enum PaymentProvider {
