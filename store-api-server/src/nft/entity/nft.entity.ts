@@ -1,11 +1,16 @@
-import { CategoryEntity } from '../../category/entity/category.entity.js';
+import type { CategoryEntity } from '../../category/entity/category.entity.js';
 
 export interface NftEntity {
   id: number;
   createdAt: number;
   name: string;
   description: string;
-  ipfsHash?: string;
+
+  ipfsHash?: string; // deprecated by metadataIpfs field
+  metadataIpfs?: string;
+  artifactIpfs?: string;
+  displayIpfs?: string;
+  thumbnailIpfs?: string;
 
   artifactUri: string;
   displayUri?: string;
@@ -17,6 +22,7 @@ export interface NftEntity {
   editionsAvailable: number;
   launchAt: number;
   ownerStatuses?: string[];
+  metadata?: any;
 }
 
 export interface CreateNft {
@@ -43,6 +49,7 @@ export interface NftEntityPage {
   nfts: NftEntity[];
   currentPage: number;
   numberOfPages: number;
+  totalNftCount: number;
   lowerPriceBound: string;
   upperPriceBound: string;
 }

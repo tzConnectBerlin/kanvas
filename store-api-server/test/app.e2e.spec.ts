@@ -7,20 +7,22 @@ import {
 } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { RATE_LIMIT } from '../src/constants';
+import { RATE_LIMIT, CART_MAX_ITEMS } from '../src/constants';
 import {
   SIGNATURE_PREFIX_CREATE_NFT,
   SIGNATURE_PREFIX_DELIST_NFT,
   SIGNATURE_PREFIX_RELIST_NFT,
 } from 'kanvas-api-lib';
 import {
-  PaymentProvider,
   PaymentService,
   PaymentStatus,
 } from '../src/payment/service/payment.service';
+import { PaymentProvider } from '../src/payment/entity/payment.entity.js';
+import { UserEntity } from '../src/user/entity/user.entity';
 import { UserService } from '../src/user/service/user.service';
 import { assertEnv, sleep } from '../src/utils';
 import sotez from 'sotez';
+import { v4 as uuidv4 } from 'uuid';
 const { cryptoUtils } = sotez;
 
 let anyTestFailed = false;
@@ -66,6 +68,17 @@ describe('AppController (e2e)', () => {
 
   it(`/ (GET) => NOT FOUND (make sure the nestjs's Hello World page is gone)`, () => {
     return request(app.getHttpServer()).get('/').expect(404);
+  });
+
+  it(`/constants (GET) => success`, async () => {
+    const resp = await request(app.getHttpServer()).get('/constants');
+    expect(resp.statusCode).toEqual(200);
+
+    expect(resp.body).toEqual({
+      baseCurrency: 'EUR',
+      cartMaxItems: 10,
+      supportedCurrencies: ['USD', 'GBP', 'EUR', 'XTZ'],
+    });
   });
 
   // Note:
@@ -195,6 +208,15 @@ describe('AppController (e2e)', () => {
       description:
         'Hey guys, here s the WL team ready to write some more code !',
       ipfsHash: null,
+      metadata: {
+        test: {
+          nested: 10,
+        },
+      },
+      metadataIpfs: null,
+      artifactIpfs: null,
+      displayIpfs: null,
+      thumbnailIpfs: null,
       artifactUri:
         'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
       displayUri:
@@ -238,6 +260,7 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         currentPage: 1,
         numberOfPages: 0,
+        totalNftCount: 0,
         nfts: [],
         lowerPriceBound: '0.00',
         upperPriceBound: '0.00',
@@ -256,6 +279,7 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         currentPage: 1,
         numberOfPages: 0,
+        totalNftCount: 0,
         nfts: [],
         lowerPriceBound: '0.00',
         upperPriceBound: '0.00',
@@ -286,6 +310,7 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         currentPage: 1,
         numberOfPages: 1,
+        totalNftCount: 9,
         nfts: [
           {
             id: 1,
@@ -293,6 +318,15 @@ describe('AppController (e2e)', () => {
             description:
               'Hey guys, here s the WL team ready to write some more code !',
             ipfsHash: null,
+            metadata: {
+              test: {
+                nested: 10,
+              },
+            },
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -316,6 +350,11 @@ describe('AppController (e2e)', () => {
             description:
               'Framley Parsonage - Was it not a Lie?,1860. John Everett Millais (d.1896) and Dalziel Brothers',
             ipfsHash: null,
+            metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2202&q=80',
             displayUri:
@@ -338,6 +377,11 @@ describe('AppController (e2e)', () => {
             name: 'Internet',
             description: 'its a mountain',
             ipfsHash: null,
+            metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             displayUri:
@@ -360,6 +404,11 @@ describe('AppController (e2e)', () => {
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
             ipfsHash: null,
+            metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -383,6 +432,11 @@ describe('AppController (e2e)', () => {
             description:
               'Bronze sculpture of Antonin DVORAK who lived from 1841 - 1904',
             ipfsHash: null,
+            metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -406,6 +460,11 @@ describe('AppController (e2e)', () => {
             description:
               'Inventor of the korean language. This is the statue in Seoul South Korea of him.',
             ipfsHash: null,
+            metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1506809211073-d0785aaad75e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2656&q=80',
             displayUri:
@@ -429,6 +488,11 @@ describe('AppController (e2e)', () => {
             description:
               'The humanoid robot TOCABI. I both led the design and took the photo. It is a full-size (real) humanoid robot that can also be used as an avatar for teleoperation.',
             ipfsHash: null,
+            metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1633957897986-70e83293f3ff?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1986&q=80',
             displayUri:
@@ -451,6 +515,11 @@ describe('AppController (e2e)', () => {
             name: 'Lost',
             description: 'You look lost in thought.',
             ipfsHash: null,
+            metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1599790772272-d1425cd3242e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -474,6 +543,11 @@ describe('AppController (e2e)', () => {
             description:
               'In South Korea these sculptures are part of the light festival. Dragon vs. Tiger.',
             ipfsHash: null,
+            metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             displayUri:
@@ -521,6 +595,7 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         currentPage: 1,
         numberOfPages: 0,
+        totalNftCount: 0,
         nfts: [],
         lowerPriceBound: '0.00',
         upperPriceBound: '0.00',
@@ -567,6 +642,11 @@ describe('AppController (e2e)', () => {
           editionsSize: 6,
           id: 3,
           ipfsHash: null,
+          metadata: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
           name: 'Internet',
           price: '10.40',
           thumbnailUri:
@@ -574,6 +654,7 @@ describe('AppController (e2e)', () => {
         },
       ],
       numberOfPages: 1,
+      totalNftCount: 1,
       upperPriceBound: '10.40',
     });
   });
@@ -606,6 +687,15 @@ describe('AppController (e2e)', () => {
           description:
             'Hey guys, here s the WL team ready to write some more code !',
           ipfsHash: null,
+          metadata: {
+            test: {
+              nested: 10,
+            },
+          },
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
           artifactUri:
             'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
           displayUri:
@@ -626,6 +716,7 @@ describe('AppController (e2e)', () => {
       ],
       lowerPriceBound: '0.10',
       upperPriceBound: '0.10',
+      totalNftCount: 1,
     });
   });
 
@@ -659,6 +750,15 @@ describe('AppController (e2e)', () => {
             description:
               'Hey guys, here s the WL team ready to write some more code !',
             ipfsHash: null,
+            metadata: {
+              test: {
+                nested: 10,
+              },
+            },
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -693,6 +793,11 @@ describe('AppController (e2e)', () => {
             editionsSize: 6,
             id: 3,
             ipfsHash: null,
+            metadata: null,
+            metadataIpfs: null,
+            artifactIpfs: null,
+            displayIpfs: null,
+            thumbnailIpfs: null,
             name: 'Internet',
             price: '10.40',
             thumbnailUri:
@@ -700,6 +805,7 @@ describe('AppController (e2e)', () => {
           },
         ],
         numberOfPages: 1,
+        totalNftCount: 2,
         upperPriceBound: '10.40',
       });
     },
@@ -800,6 +906,11 @@ describe('AppController (e2e)', () => {
           description:
             'In South Korea these sculptures are part of the light festival. Dragon vs. Tiger.',
           ipfsHash: null,
+          metadata: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
           artifactUri:
             'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
           displayUri:
@@ -835,24 +946,42 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         nfts: [],
         categories: [
-          { id: 13, name: 'Honk Kong', description: 'Sub cities category' },
+          {
+            id: 13,
+            name: 'Honk Kong',
+            description: 'Sub cities category',
+            metadata: null,
+          },
           {
             id: 16,
             name: 'Black & White',
             description: 'Sub photography category',
+            metadata: null,
           },
           {
             id: 10,
             name: 'Landscape',
             description: 'Sub photography category',
+            metadata: null,
           },
-          { id: 15, name: 'London', description: 'Sub cities category' },
+          {
+            id: 15,
+            name: 'London',
+            description: 'Sub cities category',
+            metadata: null,
+          },
           {
             id: 9,
             name: 'Abstract',
             description: 'Sub photography category',
+            metadata: null,
           },
-          { id: 4, name: 'Drawing', description: 'Sub fine art category' },
+          {
+            id: 4,
+            name: 'Drawing',
+            description: 'Sub fine art category',
+            metadata: null,
+          },
         ],
       });
     },
@@ -950,7 +1079,15 @@ describe('AppController (e2e)', () => {
       delete res.body.user?.createdAt;
 
       expect(res.body).toStrictEqual({
-        nftCount: 0,
+        collection: {
+          currentPage: 1,
+          lowerPriceBound: '0.00',
+          nfts: [],
+          numberOfPages: 0,
+          totalNftCount: 0,
+          upperPriceBound: '0.00',
+        },
+        pendingOwnership: [],
         user: {
           id: 1,
           userAddress: 'addr',
@@ -976,7 +1113,15 @@ describe('AppController (e2e)', () => {
       delete res.body.user?.createdAt;
 
       expect(res.body).toStrictEqual({
-        nftCount: 0,
+        collection: {
+          currentPage: 1,
+          lowerPriceBound: '0.00',
+          nfts: [],
+          numberOfPages: 0,
+          totalNftCount: 0,
+          upperPriceBound: '0.00',
+        },
+        pendingOwnership: [],
         user: {
           id: 1,
           userAddress: 'addr',
@@ -1003,7 +1148,15 @@ describe('AppController (e2e)', () => {
       delete res.body.user?.createdAt;
 
       expect(res.body).toStrictEqual({
-        nftCount: 0,
+        collection: {
+          currentPage: 1,
+          lowerPriceBound: '0.00',
+          nfts: [],
+          numberOfPages: 0,
+          totalNftCount: 0,
+          upperPriceBound: '0.00',
+        },
+        pendingOwnership: [],
         user: {
           id: 2,
           userAddress: 'tz1',
@@ -1077,8 +1230,6 @@ describe('AppController (e2e)', () => {
     async () => {
       await app.close();
 
-      const origExpiration = process.env.CART_EXPIRATION_MILLI_SECS;
-      process.env.CART_EXPIRATION_MILLI_SECS = '0';
       const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [AppModule],
       }).compile();
@@ -1090,6 +1241,7 @@ describe('AppController (e2e)', () => {
       const userService = await moduleFixture.get(UserService);
 
       userService.CART_EXPIRATION_MILLI_SECS = 0;
+      userService.CART_EXPIRATION_AT_MINUTE_END = false;
       const add1 = await request(app.getHttpServer()).post(
         '/users/cart/add/12',
       );
@@ -1106,10 +1258,48 @@ describe('AppController (e2e)', () => {
 
       const idList = list.body.nfts.map((nft: any) => nft.id);
       expect(idList).toEqual([]);
-
-      process.env.CART_EXPIRATION_MILLI_SECS = origExpiration;
     },
   );
+
+  skipOnPriorFail('/users/cart: verify it has a max size', async () => {
+    const add1 = await request(app.getHttpServer()).post('/users/cart/add/1');
+    expect(add1.statusCode).toEqual(201);
+    const cookie = add1.headers['set-cookie'];
+
+    let nfts = [];
+    for (let i = 10; i < CART_MAX_ITEMS + 10; i++) {
+      nfts.push(i);
+    }
+    const addPosts = await Promise.all(
+      nfts.map((nft) =>
+        request(app.getHttpServer())
+          .post(`/users/cart/add/${nft}`)
+          .set('cookie', cookie),
+      ),
+    );
+    for (const post of addPosts) {
+      expect(post.statusCode).toEqual(201);
+    }
+
+    const addTooMany = await request(app.getHttpServer())
+      .post('/users/cart/add/30')
+      .set('cookie', cookie);
+    expect(addTooMany.body).toEqual({
+      message: 'cart is full',
+      statusCode: 400,
+    });
+
+    await Promise.all(
+      nfts.map((nft) =>
+        request(app.getHttpServer())
+          .post(`/users/cart/remove/${nft}`)
+          .set('cookie', cookie),
+      ),
+    );
+    await request(app.getHttpServer())
+      .post('/users/cart/remove/1')
+      .set('cookie', cookie);
+  });
 
   skipOnPriorFail(
     '/users/cart (cookie based to login and logout interactions)',
@@ -1341,6 +1531,7 @@ describe('AppController (e2e)', () => {
     'stripe payment: Payment status should change to succeeded if payment is successfull',
     async () => {
       const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      const usr = <UserEntity>{ userAddress: address, id: id };
 
       expect(await getLockedCount(1)).toEqual(0);
 
@@ -1358,7 +1549,12 @@ describe('AppController (e2e)', () => {
       expect(await getLockedCount(1)).toEqual(1);
 
       // Create one payment intent (we are not calling the stripe api)
-      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
+      const intentRes = await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
+      );
 
       // 1 edition reserved by the order
       expect(await getLockedCount(1)).toEqual(1);
@@ -1414,6 +1610,7 @@ describe('AppController (e2e)', () => {
     'stripe payment: Payment status should change to cancel if payment is canceled, nft should not be transferred',
     async () => {
       const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      const usr = <UserEntity>{ userAddress: address, id: id };
 
       expect(await getLockedCount(2)).toEqual(0);
 
@@ -1431,7 +1628,12 @@ describe('AppController (e2e)', () => {
       expect(await getLockedCount(2)).toEqual(1);
 
       // Create one payment intent (we are not calling the stripe api)
-      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
+      );
 
       // Give webhook handler function success event
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
@@ -1502,7 +1704,8 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'stripe payment: Payment status should change to failed if payment has failed, nft should not be transferred',
     async () => {
-      const { bearer, id } = await loginUser(app, 'addr', 'admin');
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      const usr = <UserEntity>{ userAddress: address, id: id };
 
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/7')
@@ -1516,7 +1719,8 @@ describe('AppController (e2e)', () => {
 
       // Create one payment intent (we are not calling the stripe api)
       const preparedOrder = await paymentService.createPayment(
-        id,
+        usr,
+        uuidv4(),
         PaymentProvider.TEST,
         'EUR',
       );
@@ -1577,9 +1781,10 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail(
-    'stripe payment: Payment status should change to timeout if payment has expired, and in CREATED OR PROCESSING state',
+    'stripe payment: Payment status should change to timeout if payment has expired, and in CREATED OR PROMISED state',
     async () => {
-      const { bearer, id } = await loginUser(app, 'addr', 'admin');
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      const usr = <UserEntity>{ userAddress: address, id: id };
 
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
@@ -1587,16 +1792,15 @@ describe('AppController (e2e)', () => {
       expect(add1.statusCode).toEqual(201);
 
       // Create one payment intent (we are not calling the stripe api)
-      try {
-        await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
-      } catch (err) {
-        Logger.log(err);
-      }
-
-      const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
-        id,
+      await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
       );
-
+      const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
+        usr.id,
+      );
       // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.payment_failed',
@@ -1606,32 +1810,26 @@ describe('AppController (e2e)', () => {
           },
         },
       };
-
       await paymentService.webhookHandler(constructedEvent);
-
       // Check failed payment don't get to timeout
-      const failed = await paymentService.getPaymentForLatestUserOrder(id);
+      const failed = await paymentService.getPaymentForLatestUserOrder(usr.id);
       expect(failed.status).toEqual(PaymentStatus.FAILED);
-
+      // Check canceled payment don't get to timeout
       await paymentService.deleteExpiredPayments();
-
-      const stillFailed = await paymentService.getPaymentForLatestUserOrder(id);
+      const stillFailed = await paymentService.getPaymentForLatestUserOrder(
+        usr.id,
+      );
       expect(stillFailed.status).toEqual(PaymentStatus.FAILED);
 
-      // Check canceled payment don't get to timeout
-
-      // Create one payment intent (we are not calling the stripe api)
       const preparedOrder2 = await paymentService.createPayment(
-        id,
+        usr,
+        uuidv4(),
         PaymentProvider.TEST,
         'EUR',
       );
-
       const payment3Data = await paymentService.getPaymentForLatestUserOrder(
-        id,
+        usr.id,
       );
-
-      // reconstruct success event from stripe
       const constructedEvent3 = {
         type: 'payment_intent.canceled',
         data: {
@@ -1640,36 +1838,69 @@ describe('AppController (e2e)', () => {
           },
         },
       };
-
       await paymentService.webhookHandler(constructedEvent3);
-
-      const canceled = await paymentService.getPaymentForLatestUserOrder(id);
+      const canceled = await paymentService.getPaymentForLatestUserOrder(
+        usr.id,
+      );
       expect(canceled.status).toEqual(PaymentStatus.CANCELED);
-
       await paymentService.deleteExpiredPayments();
-
       const stillCanceled = await paymentService.getPaymentForLatestUserOrder(
-        id,
+        usr.id,
       );
       expect(stillCanceled.status).toEqual(PaymentStatus.CANCELED);
 
-      // Create one payment intent (we are not calling the stripe api)
-      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
-
-      const created = await paymentService.getPaymentForLatestUserOrder(id);
+      await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
+      );
+      const created = await paymentService.getPaymentForLatestUserOrder(usr.id);
       expect(created.status).toEqual(PaymentStatus.CREATED);
-
       await paymentService.deleteExpiredPayments();
-
-      const timedOut = await paymentService.getPaymentForLatestUserOrder(id);
+      const timedOut = await paymentService.getPaymentForLatestUserOrder(
+        usr.id,
+      );
       expect(timedOut.status).toEqual(PaymentStatus.TIMED_OUT);
 
-      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
-
-      const payment4Data = await paymentService.getPaymentForLatestUserOrder(
-        id,
+      await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
       );
+      const promisePaid = await paymentService.getPaymentForLatestUserOrder(
+        usr.id,
+      );
+      const promisePaidPostResp = await request(app.getHttpServer())
+        .post('/payment/promise-paid')
+        .set('authorization', bearer)
+        .send({ payment_id: promisePaid.paymentId });
+      expect(promisePaidPostResp.statusCode).toEqual(201);
+      const promised = await paymentService.getPaymentForLatestUserOrder(
+        usr.id,
+      );
+      expect(promised.status).toEqual(PaymentStatus.PROMISED);
+      await paymentService.deleteExpiredPayments();
+      const promisedTimedOut =
+        await paymentService.getPaymentForLatestUserOrder(usr.id);
+      expect(promisedTimedOut.status).toEqual(PaymentStatus.TIMED_OUT);
 
+      // need to re-add cart item, promise-paid drops the active cart session
+      const readd = await request(app.getHttpServer())
+        .post('/users/cart/add/4')
+        .set('authorization', bearer);
+      expect(readd.statusCode).toEqual(201);
+
+      await await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
+      );
+      const payment4Data = await paymentService.getPaymentForLatestUserOrder(
+        usr.id,
+      );
       // reconstruct success event from stripe
       const constructedEvent5 = {
         type: 'payment_intent.processing',
@@ -1679,25 +1910,31 @@ describe('AppController (e2e)', () => {
           },
         },
       };
-
       await paymentService.webhookHandler(constructedEvent5);
-
-      const processing = await paymentService.getPaymentForLatestUserOrder(id);
-      expect(processing.status).toEqual(PaymentStatus.PROCESSING);
-
-      await paymentService.deleteExpiredPayments();
-
-      const timedOutResponse =
-        await paymentService.getPaymentForLatestUserOrder(id);
-      expect(timedOutResponse.status).toEqual(PaymentStatus.TIMED_OUT);
-
-      // Create one payment intent (we are not calling the stripe api)
-      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
-
-      const payment5Data = await paymentService.getPaymentForLatestUserOrder(
-        id,
+      const processing = await paymentService.getPaymentForLatestUserOrder(
+        usr.id,
       );
+      expect(processing.status).toEqual(PaymentStatus.PROCESSING);
+      await paymentService.deleteExpiredPayments();
+      const processingDidNotTimeout =
+        await paymentService.getPaymentForLatestUserOrder(usr.id);
+      expect(processingDidNotTimeout.status).toEqual(PaymentStatus.PROCESSING);
 
+      // need to re-add cart item, changing state to PROCESSING drops the active cart session
+      const readd2 = await request(app.getHttpServer())
+        .post('/users/cart/add/4')
+        .set('authorization', bearer);
+      expect(readd2.statusCode).toEqual(201);
+
+      await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
+      );
+      const payment5Data = await paymentService.getPaymentForLatestUserOrder(
+        usr.id,
+      );
       // reconstruct success event from stripe
       const constructedEvent2 = {
         type: 'payment_intent.succeeded',
@@ -1707,16 +1944,12 @@ describe('AppController (e2e)', () => {
           },
         },
       };
-
       await paymentService.webhookHandler(constructedEvent2);
-
-      const success = await paymentService.getPaymentForLatestUserOrder(id);
+      const success = await paymentService.getPaymentForLatestUserOrder(usr.id);
       expect(success.status).toEqual(PaymentStatus.SUCCEEDED);
-
       await paymentService.deleteExpiredPayments();
-
       const stillSuccess = await paymentService.getPaymentForLatestUserOrder(
-        id,
+        usr.id,
       );
       expect(stillSuccess.status).toEqual(PaymentStatus.SUCCEEDED);
     },
@@ -1725,14 +1958,20 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'stripe payment: Payment status should not change from FAILED',
     async () => {
-      const { bearer, id } = await loginUser(app, 'addr', 'admin');
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      const usr = <UserEntity>{ userAddress: address, id: id };
 
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
+      );
 
       // Give webhook handler function success event
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
@@ -1781,14 +2020,20 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'stripe payment: Payment status should not change from SUCCEEDED',
     async () => {
-      const { bearer, id } = await loginUser(app, 'addr', 'admin');
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      const usr = <UserEntity>{ userAddress: address, id: id };
 
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
-      await paymentService.createPayment(id, PaymentProvider.TEST, 'EUR');
+      await paymentService.createPayment(
+        usr,
+        uuidv4(),
+        PaymentProvider.TEST,
+        'EUR',
+      );
 
       // Give webhook handler function success event
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
@@ -1861,6 +2106,15 @@ describe('AppController (e2e)', () => {
             description:
               'Hey guys, here s the WL team ready to write some more code !',
             ipfsHash: 'ipfs://.....', // Note: this is now non-null, because it's been purchased at least once
+            metadata: {
+              test: {
+                nested: 10,
+              },
+            },
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '1-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '1-thumbnail-ipfs-hash',
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -1877,13 +2131,17 @@ describe('AppController (e2e)', () => {
                 name: 'Drawing',
               },
             ],
-            ownerStatuses: ['pending'],
           },
           {
             id: 4,
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....', // Note: this is now non-null, because it's been purchased at least once
+            metadata: null,
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -1892,7 +2150,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
             editionsSize: 8,
-            editionsAvailable: 1,
+            editionsAvailable: 0,
             categories: [
               {
                 id: 4,
@@ -1900,11 +2158,11 @@ describe('AppController (e2e)', () => {
                 name: 'Drawing',
               },
             ],
-            ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
         lowerPriceBound: '0.10',
         upperPriceBound: '4.30',
+        totalNftCount: 2,
       });
     },
   );
@@ -1939,6 +2197,15 @@ describe('AppController (e2e)', () => {
             description:
               'Hey guys, here s the WL team ready to write some more code !',
             ipfsHash: 'ipfs://.....',
+            metadata: {
+              test: {
+                nested: 10,
+              },
+            },
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '1-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '1-thumbnail-ipfs-hash',
             artifactUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             displayUri:
@@ -1955,9 +2222,9 @@ describe('AppController (e2e)', () => {
                 name: 'Drawing',
               },
             ],
-            ownerStatuses: ['pending'],
           },
         ],
+        totalNftCount: 2,
         lowerPriceBound: '0.10',
         upperPriceBound: '4.30',
       });
@@ -1993,6 +2260,11 @@ describe('AppController (e2e)', () => {
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
+            metadataIpfs: 'ipfs://.....',
+            metadata: null,
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -2001,7 +2273,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
             editionsSize: 8,
-            editionsAvailable: 1,
+            editionsAvailable: 0,
             categories: [
               {
                 id: 4,
@@ -2009,9 +2281,9 @@ describe('AppController (e2e)', () => {
                 name: 'Drawing',
               },
             ],
-            ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
+        totalNftCount: 2,
         lowerPriceBound: '0.10',
         upperPriceBound: '4.30',
       });
@@ -2051,6 +2323,11 @@ describe('AppController (e2e)', () => {
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
+            metadata: null,
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -2059,7 +2336,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
             editionsSize: 8,
-            editionsAvailable: 1,
+            editionsAvailable: 0,
             categories: [
               {
                 id: 4,
@@ -2067,9 +2344,9 @@ describe('AppController (e2e)', () => {
                 name: 'Drawing',
               },
             ],
-            ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
+        totalNftCount: 2,
         lowerPriceBound: '0.10',
         upperPriceBound: '4.30',
       });
@@ -2109,6 +2386,11 @@ describe('AppController (e2e)', () => {
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
+            metadata: null,
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -2117,7 +2399,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
             editionsSize: 8,
-            editionsAvailable: 1,
+            editionsAvailable: 0,
             categories: [
               {
                 id: 4,
@@ -2125,9 +2407,9 @@ describe('AppController (e2e)', () => {
                 name: 'Drawing',
               },
             ],
-            ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
+        totalNftCount: 2,
         lowerPriceBound: '0.10',
         upperPriceBound: '4.30',
       });
@@ -2161,12 +2443,18 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         currentPage: 2,
         numberOfPages: 2,
+        totalNftCount: 2,
         nfts: [
           {
             id: 4,
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
+            metadata: null,
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -2175,7 +2463,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
             editionsSize: 8,
-            editionsAvailable: 1,
+            editionsAvailable: 0,
             categories: [
               {
                 id: 4,
@@ -2183,7 +2471,6 @@ describe('AppController (e2e)', () => {
                 name: 'Drawing',
               },
             ],
-            ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
         lowerPriceBound: '0.10',
@@ -2218,12 +2505,18 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         currentPage: 1,
         numberOfPages: 2,
+        totalNftCount: 2,
         nfts: [
           {
             id: 4,
             name: 'The cat & the city',
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
+            metadata: null,
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
             artifactUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             displayUri:
@@ -2232,7 +2525,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
             editionsSize: 8,
-            editionsAvailable: 1,
+            editionsAvailable: 0,
             categories: [
               {
                 id: 4,
@@ -2240,7 +2533,6 @@ describe('AppController (e2e)', () => {
                 name: 'Drawing',
               },
             ],
-            ownerStatuses: ['pending', 'pending', 'pending'],
           },
         ],
         lowerPriceBound: '0.10',
@@ -2252,11 +2544,9 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     '/users/nftOwnership (not logged in => UNAUTHORIZED)',
     async () => {
-      const res = await request(app.getHttpServer())
-        .post('/users/nftOwnership')
-        .query({
-          nftIds: '4',
-        });
+      const res = await request(app.getHttpServer()).get(
+        '/users/nftOwnershipsPending',
+      );
       expect(res.statusCode).toEqual(401);
     },
   );
@@ -2265,41 +2555,17 @@ describe('AppController (e2e)', () => {
     const { bearer } = await loginUser(app, 'addr', 'admin');
 
     const res = await request(app.getHttpServer())
-      .post('/users/nftOwnership')
-      .set('authorization', bearer)
-      .query({
-        nftIds: '4,1',
-      });
-    expect(res.statusCode).toEqual(201);
+      .get('/users/nftOwnershipsPending')
+      .set('authorization', bearer);
+    expect(res.statusCode).toEqual(200);
     expect(res.body).toStrictEqual([
       { nftId: '1', ownerStatuses: ['pending'] },
       {
         nftId: '4',
-        ownerStatuses: ['pending', 'pending', 'pending'],
+        ownerStatuses: ['pending', 'pending', 'pending', 'payment processing'],
       },
     ]);
   });
-
-  skipOnPriorFail(
-    '/users/nftOwnership (asking for not owned at all nft, not even pending, is fine)',
-    async () => {
-      const { bearer } = await loginUser(app, 'addr', 'admin');
-
-      const res = await request(app.getHttpServer())
-        .post('/users/nftOwnership')
-        .set('authorization', bearer)
-        .query({
-          nftIds: '6',
-        });
-      expect(res.statusCode).toEqual(201);
-      expect(res.body).toStrictEqual([
-        {
-          nftId: '6',
-          ownerStatuses: [],
-        },
-      ]);
-    },
-  );
 
   skipOnPriorFail('/users/topBuyers', async () => {
     const res = await request(app.getHttpServer()).get('/users/topBuyers');
@@ -2339,23 +2605,31 @@ describe('AppController (e2e)', () => {
         id: 1,
         name: 'Fine Art',
         description: 'A collection of fine art devided in several categories',
+        metadata: {
+          test: {
+            nested: true,
+          },
+        },
         children: [
           {
             id: 4,
             name: 'Drawing',
             description: 'Sub fine art category',
+            metadata: null,
             children: [],
           },
           {
             id: 5,
             name: 'Painting',
             description: 'Sub fine art category',
+            metadata: null,
             children: [],
           },
           {
             id: 6,
             name: 'Sculpture',
             description: 'Sub fine art category',
+            metadata: null,
             children: [],
           },
         ],
@@ -2364,22 +2638,26 @@ describe('AppController (e2e)', () => {
         id: 2,
         name: 'Visual Art',
         description: 'Not actually visual',
+        metadata: null,
         children: [
           {
             id: 7,
             name: 'Digital',
             description: 'Sub visual art category',
+            metadata: null,
             children: [],
           },
           {
             id: 8,
             name: 'Photography',
             description: 'Sub visual art category',
+            metadata: null,
             children: [
               {
                 id: 9,
                 name: 'Abstract',
                 description: 'Sub photography category',
+                metadata: null,
                 children: [],
               },
               {
@@ -2387,35 +2665,41 @@ describe('AppController (e2e)', () => {
                 name: 'Landscape',
                 description: 'Sub photography category',
                 children: [],
+                metadata: null,
               },
               {
                 id: 11,
                 name: 'Portrait',
                 description: 'Sub photography category',
+                metadata: null,
                 children: [],
               },
               {
                 id: 12,
                 name: 'Cities',
                 description: 'Sub photography category',
+                metadata: null,
                 children: [
                   {
                     id: 13,
                     name: 'Honk Kong',
                     description: 'Sub cities category',
                     children: [],
+                    metadata: null,
                   },
                   {
                     id: 14,
                     name: 'Toronto',
                     description: 'Sub cities category',
                     children: [],
+                    metadata: null,
                   },
                   {
                     id: 15,
                     name: 'London',
                     description: 'Sub cities category',
                     children: [],
+                    metadata: null,
                   },
                 ],
               },
@@ -2423,6 +2707,7 @@ describe('AppController (e2e)', () => {
                 id: 16,
                 name: 'Black & White',
                 description: 'Sub photography category',
+                metadata: null,
                 children: [],
               },
             ],
@@ -2433,6 +2718,7 @@ describe('AppController (e2e)', () => {
         id: 3,
         name: 'Applied Art',
         description: 'Not actually visual',
+        metadata: null,
         children: [],
       },
     ]);
@@ -2446,10 +2732,10 @@ describe('AppController (e2e)', () => {
       hexMsg = SIGNATURE_PREFIX_DELIST_NFT + '0' + hexMsg;
     }
 
-    const nftExistsPreCheck = await request(app.getHttpServer()).post(
+    const nftExistsBeforeCheck = await request(app.getHttpServer()).post(
       `/nfts/${nftId}`,
     );
-    expect(nftExistsPreCheck.statusCode).toEqual(201);
+    expect(nftExistsBeforeCheck.statusCode).toEqual(201);
 
     const topBuyersResBefore = await request(app.getHttpServer()).get(
       '/users/topBuyers',
@@ -2492,10 +2778,10 @@ describe('AppController (e2e)', () => {
     await sleep(1000);
 
     // nft no longer exists now
-    const nftExistsPostCheck = await request(app.getHttpServer()).post(
+    const nftExistsAfterCheck = await request(app.getHttpServer()).post(
       `/nfts/${nftId}`,
     );
-    expect(nftExistsPostCheck.statusCode).toEqual(400);
+    expect(nftExistsAfterCheck.statusCode).toEqual(400);
 
     // previous buys are no longer taken into the topBuyers sum
     const topBuyersResAfter = await request(app.getHttpServer()).get(
@@ -2549,10 +2835,10 @@ describe('AppController (e2e)', () => {
     await sleep(1000);
 
     // nft exists again
-    const nftExistsPostCheck = await request(app.getHttpServer()).post(
+    const nftExistsAfterCheck = await request(app.getHttpServer()).post(
       `/nfts/${nftId}`,
     );
-    expect(nftExistsPostCheck.statusCode).toEqual(201);
+    expect(nftExistsAfterCheck.statusCode).toEqual(201);
 
     // previous buys are recovered and taken into the topBuyers sum
     const topBuyersResAfter = await request(app.getHttpServer()).get(
@@ -2636,6 +2922,611 @@ describe('AppController (e2e)', () => {
       });
 
     expect(res.statusCode).toEqual(401);
+  });
+
+  skipOnPriorFail('/users/profile: shows promised payment nfts', async () => {
+    const { bearer } = await loginUser(app, 'addr', 'admin');
+
+    const add8Res = await request(app.getHttpServer())
+      .post('/users/cart/add/8')
+      .set('authorization', bearer);
+    expect(add8Res.status).toEqual(201);
+    const add10Res = await request(app.getHttpServer())
+      .post('/users/cart/add/10')
+      .set('authorization', bearer);
+    expect(add10Res.status).toEqual(201);
+    const paymentIntentRes = await request(app.getHttpServer())
+      .post('/payment/create-payment-intent')
+      .set('authorization', bearer)
+      .send({ currency: 'XTZ', paymentProvider: 'tezpay' });
+    expect(paymentIntentRes.status).toEqual(201);
+    const intentId = paymentIntentRes.body.id;
+    delete paymentIntentRes.body.id;
+    delete paymentIntentRes.body.clientSecret;
+    expect(Number(paymentIntentRes.body.amount)).toBeGreaterThan(0);
+    delete paymentIntentRes.body.amount;
+    delete paymentIntentRes.body.expiresAt;
+    for (const i in paymentIntentRes.body.nfts) {
+      expect(Number(paymentIntentRes.body.nfts[i].price)).toBeGreaterThan(0);
+      expect(paymentIntentRes.body.nfts[i].createdAt).toBeGreaterThan(0);
+      expect(paymentIntentRes.body.nfts[i].launchAt).toBeGreaterThan(0);
+      delete paymentIntentRes.body.nfts[i].price;
+      delete paymentIntentRes.body.nfts[i].createdAt;
+      delete paymentIntentRes.body.nfts[i].launchAt;
+      if (typeof paymentIntentRes.body.nfts[i].onsaleUntil !== 'undefined') {
+        expect(paymentIntentRes.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+        delete paymentIntentRes.body.nfts[i].onsaleUntil;
+      }
+    }
+    expect(paymentIntentRes.body).toEqual({
+      currency: 'XTZ',
+      nfts: [
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 5,
+              name: 'Painting',
+            },
+          ],
+          description: 'Paintings from my twelve year old nephew',
+          displayUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          editionsAvailable: 7,
+          editionsSize: 8,
+          id: 8,
+          ipfsHash: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
+          metadata: null,
+          name: 'An didn t stop improving',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+        },
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 6,
+              name: 'Sculpture',
+            },
+          ],
+          description:
+            'Bronze sculpture of Antonin DVORAK who lived from 1841 - 1904',
+          displayUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+          editionsAvailable: 7,
+          editionsSize: 8,
+          id: 10,
+          ipfsHash: null,
+          metadata: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
+          name: 'Antonin DVORAK',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+        },
+      ],
+      receiverAddress: 'KT1MZTPQFdEZKLXtdQzpuA4MFt5ZkmKqFqkq',
+    });
+
+    const paymentOrderNfts = await request(app.getHttpServer())
+      .get(`/payment/nfts/${intentId}`)
+      .set('authorization', bearer);
+    delete paymentOrderNfts.body.expiresAt;
+    for (const i in paymentOrderNfts.body.nfts) {
+      expect(Number(paymentOrderNfts.body.nfts[i].price)).toBeGreaterThan(0);
+      expect(paymentOrderNfts.body.nfts[i].createdAt).toBeGreaterThan(0);
+      expect(paymentOrderNfts.body.nfts[i].launchAt).toBeGreaterThan(0);
+      delete paymentOrderNfts.body.nfts[i].price;
+      delete paymentOrderNfts.body.nfts[i].createdAt;
+      delete paymentOrderNfts.body.nfts[i].launchAt;
+      if (typeof paymentOrderNfts.body.nfts[i].onsaleUntil !== 'undefined') {
+        expect(paymentOrderNfts.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+        delete paymentOrderNfts.body.nfts[i].onsaleUntil;
+      }
+    }
+    expect(paymentOrderNfts.status).toEqual(200);
+    expect(paymentOrderNfts.body).toEqual({
+      currency: 'EUR',
+      nfts: [
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 5,
+              name: 'Painting',
+            },
+          ],
+          description: 'Paintings from my twelve year old nephew',
+          displayUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          editionsAvailable: 7,
+          editionsSize: 8,
+          id: 8,
+          ipfsHash: null,
+          metadata: null,
+          artifactIpfs: null,
+          metadataIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
+          name: 'An didn t stop improving',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+        },
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 6,
+              name: 'Sculpture',
+            },
+          ],
+          description:
+            'Bronze sculpture of Antonin DVORAK who lived from 1841 - 1904',
+          displayUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+          editionsAvailable: 7,
+          editionsSize: 8,
+          id: 10,
+          ipfsHash: null,
+          artifactIpfs: null,
+          metadataIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
+          metadata: null,
+          name: 'Antonin DVORAK',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+        },
+      ],
+    });
+
+    const resBefore = await request(app.getHttpServer())
+      .get('/users/profile')
+      .set('authorization', bearer);
+    expect(resBefore.statusCode).toEqual(200);
+    expect(resBefore.body.user?.createdAt).toBeGreaterThan(0);
+    delete resBefore.body.user?.createdAt;
+
+    for (const i in resBefore.body.collection.nfts) {
+      expect(resBefore.body.collection.nfts[i].createdAt).toBeGreaterThan(0);
+      expect(resBefore.body.collection.nfts[i].launchAt).toBeGreaterThan(0);
+      delete resBefore.body.collection.nfts[i].createdAt;
+      delete resBefore.body.collection.nfts[i].launchAt;
+      if (
+        typeof resBefore.body.collection.nfts[i].onsaleUntil !== 'undefined'
+      ) {
+        expect(resBefore.body.collection.nfts[i].onsaleUntil).toBeGreaterThan(
+          0,
+        );
+        delete resBefore.body.collection.nfts[i].onsaleUntil;
+      }
+    }
+    for (const i in resBefore.body.pendingOwnership) {
+      expect(resBefore.body.pendingOwnership[i].createdAt).toBeGreaterThan(0);
+      expect(resBefore.body.pendingOwnership[i].launchAt).toBeGreaterThan(0);
+      delete resBefore.body.pendingOwnership[i].createdAt;
+      delete resBefore.body.pendingOwnership[i].launchAt;
+      if (
+        typeof resBefore.body.pendingOwnership[i].onsaleUntil !== 'undefined'
+      ) {
+        expect(resBefore.body.pendingOwnership[i].onsaleUntil).toBeGreaterThan(
+          0,
+        );
+        delete resBefore.body.pendingOwnership[i].onsaleUntil;
+      }
+    }
+
+    expect(resBefore.body).toStrictEqual({
+      collection: {
+        currentPage: 1,
+        lowerPriceBound: '0.10',
+        nfts: [
+          {
+            artifactUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 4,
+                name: 'Drawing',
+              },
+            ],
+            description:
+              'Hey guys, here s the WL team ready to write some more code !',
+            displayUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            editionsAvailable: 3,
+            editionsSize: 4,
+            id: 1,
+            ipfsHash: 'ipfs://.....',
+            metadata: {
+              test: {
+                nested: 10,
+              },
+            },
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '1-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '1-thumbnail-ipfs-hash',
+            name: 'Cartoon',
+            ownerStatuses: ['pending'],
+            price: '0.10',
+            thumbnailUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          },
+          {
+            artifactUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 4,
+                name: 'Drawing',
+              },
+            ],
+            description: 'What s better then a cat in a city ?',
+            displayUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            editionsAvailable: 0,
+            editionsSize: 8,
+            id: 4,
+            ipfsHash: 'ipfs://.....',
+            metadata: null,
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
+            name: 'The cat & the city',
+            ownerStatuses: ['pending', 'pending', 'pending'],
+            price: '4.30',
+            thumbnailUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+          },
+        ],
+        numberOfPages: 1,
+        totalNftCount: 2,
+        upperPriceBound: '4.30',
+      },
+      pendingOwnership: [
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 4,
+              name: 'Drawing',
+            },
+          ],
+          description: 'What s better then a cat in a city ?',
+          displayUri:
+            'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+          editionsAvailable: 0,
+          editionsSize: 8,
+          id: 4,
+          ipfsHash: 'ipfs://.....',
+          metadataIpfs: 'ipfs://.....',
+          artifactIpfs: '4-artifact-ipfs-hash',
+          displayIpfs: null,
+          thumbnailIpfs: '4-thumbnail-ipfs-hash',
+          metadata: null,
+          name: 'The cat & the city',
+          ownerStatuses: ['payment processing'],
+          price: '4.30',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+        },
+      ], // nothing new yet (just what was already in processing state from a previous test
+      user: {
+        id: 1,
+        userAddress: 'addr',
+        profilePicture: null,
+      },
+    });
+
+    const cartBefore = await request(app.getHttpServer())
+      .post('/users/cart/list')
+      .set('authorization', bearer);
+    delete cartBefore.body.expiresAt;
+    for (const i in cartBefore.body.nfts) {
+      expect(cartBefore.body.nfts[i].createdAt).toBeGreaterThan(0);
+      expect(cartBefore.body.nfts[i].launchAt).toBeGreaterThan(0);
+      delete cartBefore.body.nfts[i].createdAt;
+      delete cartBefore.body.nfts[i].launchAt;
+      if (typeof cartBefore.body.nfts[i].onsaleUntil !== 'undefined') {
+        expect(cartBefore.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+        delete cartBefore.body.nfts[i].onsaleUntil;
+      }
+    }
+    expect(cartBefore.body).toEqual({
+      nfts: [
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 5,
+              name: 'Painting',
+            },
+          ],
+          description: 'Paintings from my twelve year old nephew',
+          displayUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          editionsAvailable: 7,
+          editionsSize: 8,
+          id: 8,
+          ipfsHash: null,
+          metadata: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
+          name: 'An didn t stop improving',
+          price: '23.20',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+        },
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 6,
+              name: 'Sculpture',
+            },
+          ],
+          description:
+            'Bronze sculpture of Antonin DVORAK who lived from 1841 - 1904',
+          displayUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+          editionsAvailable: 7,
+          editionsSize: 8,
+          id: 10,
+          ipfsHash: null,
+          metadata: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
+          name: 'Antonin DVORAK',
+          price: '9.20',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+        },
+      ],
+    });
+
+    const promisePaidRes = await request(app.getHttpServer())
+      .post('/payment/promise-paid')
+      .send({ payment_id: intentId })
+      .set('authorization', bearer);
+    expect(promisePaidRes.status).toEqual(201);
+
+    const cartAfter = await request(app.getHttpServer())
+      .post('/users/cart/list')
+      .set('authorization', bearer);
+    delete cartAfter.body.expiresAt;
+    expect(cartAfter.body).toEqual({
+      nfts: [],
+    });
+
+    const resAfter = await request(app.getHttpServer())
+      .get('/users/profile')
+      .set('authorization', bearer);
+    expect(resAfter.statusCode).toEqual(200);
+    expect(resAfter.body.user?.createdAt).toBeGreaterThan(0);
+    delete resAfter.body.user?.createdAt;
+    for (const i in resAfter.body.collection.nfts) {
+      expect(resAfter.body.collection.nfts[i].createdAt).toBeGreaterThan(0);
+      expect(resAfter.body.collection.nfts[i].launchAt).toBeGreaterThan(0);
+      delete resAfter.body.collection.nfts[i].createdAt;
+      delete resAfter.body.collection.nfts[i].launchAt;
+      if (typeof resAfter.body.collection.nfts[i].onsaleUntil !== 'undefined') {
+        expect(resAfter.body.collection.nfts[i].onsaleUntil).toBeGreaterThan(0);
+        delete resAfter.body.collection.nfts[i].onsaleUntil;
+      }
+    }
+    for (const i in resAfter.body.pendingOwnership) {
+      expect(resAfter.body.pendingOwnership[i].createdAt).toBeGreaterThan(0);
+      expect(resAfter.body.pendingOwnership[i].launchAt).toBeGreaterThan(0);
+      delete resAfter.body.pendingOwnership[i].createdAt;
+      delete resAfter.body.pendingOwnership[i].launchAt;
+      if (
+        typeof resAfter.body.pendingOwnership[i].onsaleUntil !== 'undefined'
+      ) {
+        expect(resAfter.body.pendingOwnership[i].onsaleUntil).toBeGreaterThan(
+          0,
+        );
+        delete resAfter.body.pendingOwnership[i].onsaleUntil;
+      }
+    }
+
+    expect(resAfter.body).toStrictEqual({
+      collection: {
+        currentPage: 1,
+        lowerPriceBound: '0.10',
+        nfts: [
+          {
+            artifactUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 4,
+                name: 'Drawing',
+              },
+            ],
+            description:
+              'Hey guys, here s the WL team ready to write some more code !',
+            displayUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+            editionsAvailable: 3,
+            editionsSize: 4,
+            id: 1,
+            ipfsHash: 'ipfs://.....',
+            metadata: {
+              test: {
+                nested: 10,
+              },
+            },
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '1-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '1-thumbnail-ipfs-hash',
+            name: 'Cartoon',
+            ownerStatuses: ['pending'],
+            price: '0.10',
+            thumbnailUri:
+              'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          },
+          {
+            artifactUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 4,
+                name: 'Drawing',
+              },
+            ],
+            description: 'What s better then a cat in a city ?',
+            displayUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+            editionsAvailable: 0,
+            editionsSize: 8,
+            id: 4,
+            ipfsHash: 'ipfs://.....',
+            metadata: null,
+            metadataIpfs: 'ipfs://.....',
+            artifactIpfs: '4-artifact-ipfs-hash',
+            displayIpfs: null,
+            thumbnailIpfs: '4-thumbnail-ipfs-hash',
+            name: 'The cat & the city',
+            ownerStatuses: ['pending', 'pending', 'pending'],
+            price: '4.30',
+            thumbnailUri:
+              'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+          },
+        ],
+        numberOfPages: 1,
+        totalNftCount: 2,
+        upperPriceBound: '4.30',
+      },
+      pendingOwnership: [
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 4,
+              name: 'Drawing',
+            },
+          ],
+          description: 'What s better then a cat in a city ?',
+          displayUri:
+            'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+          editionsAvailable: 0,
+          editionsSize: 8,
+          id: 4,
+          ipfsHash: 'ipfs://.....',
+          metadata: null,
+          metadataIpfs: 'ipfs://.....',
+          artifactIpfs: '4-artifact-ipfs-hash',
+          displayIpfs: null,
+          thumbnailIpfs: '4-thumbnail-ipfs-hash',
+          name: 'The cat & the city',
+          ownerStatuses: ['payment processing'],
+          price: '4.30',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
+        },
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 5,
+              name: 'Painting',
+            },
+          ],
+          description: 'Paintings from my twelve year old nephew',
+          displayUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+          editionsAvailable: 7,
+          editionsSize: 8,
+          id: 8,
+          ipfsHash: null,
+          metadata: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
+          name: 'An didn t stop improving',
+          ownerStatuses: ['payment processing'],
+          price: '23.20',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
+        },
+        {
+          artifactUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+          categories: [
+            {
+              description: 'Sub fine art category',
+              id: 6,
+              name: 'Sculpture',
+            },
+          ],
+          description:
+            'Bronze sculpture of Antonin DVORAK who lived from 1841 - 1904',
+          displayUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+          editionsAvailable: 7,
+          editionsSize: 8,
+          id: 10,
+          ipfsHash: null,
+          metadata: null,
+          metadataIpfs: null,
+          artifactIpfs: null,
+          displayIpfs: null,
+          thumbnailIpfs: null,
+          name: 'Antonin DVORAK',
+          ownerStatuses: ['payment processing'],
+          price: '9.20',
+          thumbnailUri:
+            'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
+        },
+      ],
+      user: {
+        id: 1,
+        userAddress: 'addr',
+        profilePicture: null,
+      },
+    });
+
+    // and finally, only logged in user sees their own pending nfts
+    const resAfterOtherUser = await request(app.getHttpServer())
+      .get('/users/profile')
+      .query({ userAddress: 'addr' });
+    expect(resAfterOtherUser.body.pendingOwnership).toEqual([]);
   });
 });
 

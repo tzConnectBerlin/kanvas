@@ -10,8 +10,16 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 var bodyParser = require('body-parser');
 
 async function bootstrap() {
+  let cors: any = false;
+  if (process.env.LOCAL_CORS === 'true') {
+    cors = {
+      credentials: true,
+      origin: true,
+    };
+  }
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    cors: process.env.LOCAL_CORS === 'true',
+    cors: cors,
     logger: ['log', 'warn', 'error'],
   });
   app.use(

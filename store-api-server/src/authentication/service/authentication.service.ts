@@ -5,18 +5,15 @@ import { ITokenPayload } from '../../interfaces/token.interface.js';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Result } from 'ts-results';
 import ts_results from 'ts-results';
+import { SIGNED_LOGIN_ENABLED } from '../../constants.js';
 const { Ok } = ts_results;
 
 import { createRequire } from 'module';
+
+import type { IAuthentication } from './authentication.js';
+
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcrypt');
-
-interface IAuthentication {
-  id: number;
-  userAddress: string;
-  token: string;
-  maxAge: string;
-}
 
 @Injectable()
 export class AuthenticationService {
@@ -38,20 +35,22 @@ export class AuthenticationService {
     }
     const user = userRes.val;
 
-    if (
-      user.signedPayload !== undefined &&
-      userData.signedPayload !== undefined
-    ) {
-      await this.verifyPassword(userData.signedPayload, user.signedPayload);
-
-      return this.getCookieWithJwtToken(
-        {
-          id: user.id,
-          userAddress: user.userAddress,
-        },
-        user,
-      );
+    if (SIGNED_LOGIN_ENABLED) {
+      if (
+        user.signedPayload !== undefined &&
+        userData.signedPayload !== undefined
+      ) {
+        await this.verifyPassword(userData.signedPayload, user.signedPayload);
+      }
     }
+
+    return this.getCookieWithJwtToken(
+      {
+        id: user.id,
+        userAddress: user.userAddress,
+      },
+      user,
+    );
   }
 
   public async getLoggedUser(
@@ -83,14 +82,12 @@ export class AuthenticationService {
   }
 
   public async register(user: UserEntity): Promise<any> {
-    const hashedsignedKanvasPayload: string = await bcrypt.hash(
-      user.signedPayload,
-      10,
-    );
-    const createdUser = await this.userService.create({
-      ...user,
-      signedPayload: hashedsignedKanvasPayload,
-    });
+    let newUser = { ...user };
+    if (SIGNED_LOGIN_ENABLED) {
+      newUser.signedPayload = await bcrypt.hash(user.signedPayload, 10);
+    }
+
+    const createdUser = await this.userService.create(newUser);
 
     createdUser.signedPayload = undefined;
 

@@ -16,6 +16,7 @@ interface CategoryQueryResponse {
   id: number;
   category: string;
   description: string;
+  metadata?: any;
   parent: number | undefined;
 }
 
@@ -36,6 +37,7 @@ FROM (
     id,
     category,
     description,
+    metadata,
     GREATEST(
       word_similarity($1, category),
       word_similarity($1, description)
@@ -55,7 +57,7 @@ LIMIT $3
   async getMostPopular(): Promise<CategoryEntity[]> {
     const qryRes = await this.conn.query(
       `
-SELECT cat.id, cat.category AS name, cat.description
+SELECT cat.id, cat.category AS name, cat.description, cat.metadata
 FROM (
   SELECT cat.id as cat_id, SUM(nft.view_count) AS view_count
   FROM nft_category AS cat
@@ -80,7 +82,7 @@ ORDER BY view_count, cat.id
     try {
       const categoriesQryRes = await this.conn.query(
         `
-SELECT id, category, description, parent
+SELECT id, category, description, metadata, parent
 FROM nft_category
 ORDER BY COALESCE(parent, 0) DESC, id`,
         [],
@@ -110,6 +112,7 @@ ORDER BY COALESCE(parent, 0) DESC, id`,
         id: row.id,
         name: row.category,
         description: row.description,
+        metadata: row.metadata,
         children: [],
       };
       if (m.has(row.id)) {

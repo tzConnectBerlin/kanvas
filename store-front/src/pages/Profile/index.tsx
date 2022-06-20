@@ -99,7 +99,8 @@ const Profile: FC<ProfileProps> = () => {
 
     const [checkPendingNftsResponse, checkPendingNfts] = useAxios(
         {
-            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/nftOwnership`,
+            url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/nftOwnershipsPending`,
+            method: 'GET',
             withCredentials: true,
             params: {
                 nftIds: []
@@ -111,9 +112,9 @@ const Profile: FC<ProfileProps> = () => {
     const fetchPendingNfts = (pendingNfts: any) => {
         if (userNftsResponse.data?.nfts.length > 0) {
             checkPendingNfts({
-                url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/nftOwnership`,
+                url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/nftOwnershipsPending`,
+                method: 'GET',
                 withCredentials: true,
-                method: 'POST',
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem(
                         'Kanvas - Bearer',
@@ -290,7 +291,7 @@ const Profile: FC<ProfileProps> = () => {
                             userDomainLoading={userDomainLoading}
                             loading={userResponse.loading}
                             editProfile={editProfile}
-                            nftsCount={userResponse.data?.nftCount}
+                            nftsCount={userResponse.data?.collection.totalNftCount}
                         />
 
                         <FlexSpacer minHeight={2} />

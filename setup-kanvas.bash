@@ -28,6 +28,8 @@ $1
     if [ "$#" -eq "1" ]; then
         echo "this is a manual step. press any key when ready to continue or ^C to quit"
         read -s -n 1
+    elif [ "${DRY_RUN:-false}" == "true" ]; then
+        echo "(dry run): ${@:2}"
     else
         ${@:2}
     fi
@@ -64,8 +66,12 @@ function cp_bak {
     # special case: if $1 -eq '' then this behaves as a "touch_bak"
 
     [ -f "$2" ] && {
-        bakCount=`ls -w 1 | grep --extended-regexp "^$2\.bak[0-9]+$" | wc -l`
-        mv "$2" "$2.bak$bakCount"
+        bakFilePath="$2.bak"
+        bakPath=`dirname "$bakFilePath"`
+        bakFileName=`basename "$bakFilePath"`
+        [ "${bakFileName::1}" != '.' ] && bakFileName=".$bakFileName"
+        bakCount=`ls -w 1 -a "$bakPath" | grep --extended-regexp "^$bakFileName[0-9]+$" | wc -l`
+        mv -v "$2" "$bakPath/$bakFileName$bakCount"
     }
 
     if [ "$1" == '' ]; then
@@ -170,19 +176,27 @@ function setup_peppermint {
     cp_bak '' config/peppermint.json
     cat <<EOF > config/peppermint.json
 {
-        "batchSize": 110,
-        "confirmations": 2,
-        "nftContract": "`take_env CONTRACT_ADDRESS global.env | sed 's/\"//g'`",
-        "privateKey": "`take_env ADMIN_PRIVATE_KEY global.env | sed 's/\"//g'`",
-        "rpcUrl": "`take_env NODE_URL global.env`",
-        "pollingDelay": 1000,
-        "dbConnection": {
-                "user": "store_pguser",
-                "password": "store_pgpass",
-                "host": "store-db",
-                "port": 5432,
-                "database": "dev_database"
+    "batchSize": 110,
+    "confirmations": 2,
+    "timeout": 300,
+    "privateKey": "`take_env ADMIN_PRIVATE_KEY global.env | sed 's/\"//g'`",
+    "rpcUrl": "https://ithaca-archive.tzconnect.berlin",
+    "pollingDelay": 1000,
+    "dbConnection": {
+            "user": "store_pguser",
+            "password": "store_pgpass",
+            "host": "store-db",
+            "port": 5432,
+            "database": "dev_database"
+    },
+    "handlers": {
+        "nft": {
+            "handler": "MultiassetHandler",
+            "args": {
+                "contract_address": "`take_env CONTRACT_ADDRESS global.env | sed 's/\"//g'`"
+            }
         }
+    }
 }
 EOF
 }

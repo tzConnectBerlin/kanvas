@@ -6,13 +6,14 @@ import { CurrencyModule } from 'kanvas-api-lib';
 import { CategoryModule } from './category/category.module.js';
 import { NftModule } from './nft/nft.module.js';
 import { UserModule } from './user/user.module.js';
-import { AuthProviderModule } from './auth-provider/auth-provider.module.js';
 import { AuthenticationModule } from './authentication/authentication.module.js';
 import { DbModule } from './db.module.js';
 import { PaymentModule } from './payment/payment.module.js';
 import { LoggerMiddleware, StatsLogger } from './middleware/logger.js';
 import { CookieSessionMiddleware } from './middleware/cookie_session.js';
 import { ProxiedThrottlerGuard } from './decoraters/proxied_throttler.js';
+import { AppController } from './app.controller.js';
+import { AppService } from './app.service.js';
 import {
   RATE_LIMIT_TTL,
   RATE_LIMIT,
@@ -27,7 +28,6 @@ import {
     CategoryModule,
     NftModule,
     UserModule,
-    AuthProviderModule,
     PaymentModule,
     DbModule,
     CurrencyModule,
@@ -41,9 +41,11 @@ import {
       isGlobal: true,
     }),
   ],
+  controllers: [AppController],
   providers: [
     StatsLogger,
     { provide: APP_GUARD, useClass: ProxiedThrottlerGuard },
+    AppService,
   ],
 })
 export class AppModule {
