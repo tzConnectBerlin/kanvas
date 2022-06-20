@@ -58,13 +58,16 @@ WHERE id = $1
       return qryRes.rows[0]['metadata_ipfs'];
     }
 
-    const [artifactIpfs, displayIpfs, thumbnailIpfs] = [
+    const [artifactIpfs, displayIpfs, thumbnailIpfs, originalIpfs] = [
       await this.#pinUri(nft.artifactUri),
       await (nft.displayUri !== nft.artifactUri
         ? this.#pinUri(nft.displayUri!)
         : undefined),
       await (nft.thumbnailUri !== nft.displayUri
         ? this.#pinUri(nft.thumbnailUri!)
+        : undefined),
+      await (typeof nft.metadata?.original !== 'undefined'
+        ? this.#pinUri(nft.metadata.original!)
         : undefined),
     ];
 
@@ -74,6 +77,7 @@ WHERE id = $1
       displayIpfs ?? artifactIpfs,
       thumbnailIpfs ?? displayIpfs ?? artifactIpfs,
       qryRes.rows[0]['signature'],
+      originalIpfs,
     );
     const metadataIpfs = await this.#pinJson(metadata);
 
@@ -115,10 +119,11 @@ WHERE id = $1
     displayIpfsUri: string,
     thumbnailIpfsUri: string,
     signature: string,
+    originalIpfsUri?: string,
   ): any {
     const createdAt = new Date(nft.createdAt * 1000).toISOString();
 
-    return {
+    let res: any = {
       decimals: 0,
 
       name: nft.name,
@@ -138,6 +143,10 @@ WHERE id = $1
       isBooleanAmount: nft.editionsSize === 1,
       signature: signature,
     };
+    if (typeof originalIpfsUri !== 'undefined') {
+      res.originalUri = originalIpfsUri;
+    }
+    return res;
   }
 
   async #pinUri(uri: string): Promise<string> {
