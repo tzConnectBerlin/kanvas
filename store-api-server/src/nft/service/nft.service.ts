@@ -82,6 +82,7 @@ SELECT $1, UNNEST($2::INTEGER[])
       const nftEntity: NftEntity = await this.byId(
         newNft.id,
         BASE_CURRENCY,
+        undefined,
         false,
         dbTx,
       );
@@ -223,6 +224,7 @@ LIMIT $3
 
     const nfts = await this.findByIds(
       nftIds.rows.map((row: any) => row.id),
+      undefined,
       'nft_id',
       'asc',
       currency,
@@ -334,6 +336,7 @@ FROM price_bounds($1, $2, $3, $4, $5)`,
       res.numberOfPages = Math.ceil(res.totalNftCount / filters.pageSize);
       res.nfts = await this.findByIds(
         nftIds.rows.map((row: any) => row.nft_id),
+        filters.userAddress,
         orderBy,
         filters.orderDirection,
         currency,
@@ -351,11 +354,13 @@ FROM price_bounds($1, $2, $3, $4, $5)`,
   async byId(
     id: number,
     currency: string,
+    includeRecvForAddress?: string,
     incrViewCount: boolean = true,
     dbConn: any = this.conn,
   ): Promise<NftEntity> {
     const nfts = await this.findByIds(
       [id],
+      includeRecvForAddress,
       'nft_id',
       'asc',
       currency,
@@ -387,6 +392,7 @@ WHERE id = $1
 
   async findByIds(
     nftIds: number[],
+    forRecvAddr: string | undefined,
     orderBy: string = 'nft_id',
     orderDirection: string = 'asc',
     currency: string = BASE_CURRENCY,
@@ -398,8 +404,18 @@ WHERE id = $1
         `
 SELECT
   nft_id,
+  nft_created_at,
   nft_name,
   description,
+
+  editions_size,
+  price,
+  categories,
+
+  onsale_from,
+  onsale_until,
+
+  metadata,
 
   metadata_ipfs,
   artifact_ipfs,
@@ -410,19 +426,13 @@ SELECT
   display_uri,
   thumbnail_uri,
 
-  price,
-  categories,
-
-  editions_size,
   editions_reserved,
   editions_owned,
 
-  nft_created_at,
-  onsale_from,
-  onsale_until,
-  metadata
-FROM nfts_by_id($1, $2, $3)`,
-        [nftIds, orderBy, orderDirection],
+  mint_op_hash,
+  owned_recv_op_hashes
+FROM nfts_by_id($1, $2, $3, $4)`,
+        [nftIds, orderBy, orderDirection, forRecvAddr],
       );
       return nftsQryRes.rows.map((nftRow: any) => {
         const editions = Number(nftRow['editions_size']);
@@ -480,6 +490,9 @@ FROM nfts_by_id($1, $2, $3)`,
           onsaleUntil: onsaleUntilMilliUnix
             ? Math.floor(onsaleUntilMilliUnix / 1000)
             : undefined,
+
+          mintOpHash: nftRow['mint_op_hash'],
+          ownedRecvOpHashes: nftRow['owned_recv_op_hashes'],
         };
 
         nft.displayUri ??= nft.artifactUri;

@@ -5,6 +5,11 @@ export interface NftEntity {
   createdAt: number;
   name: string;
   description: string;
+  price: string;
+  categories: CategoryEntity[];
+  launchAt: number;
+  editionsSize: number;
+  metadata?: any;
 
   ipfsHash?: string; // deprecated by metadataIpfs field
   metadataIpfs?: string;
@@ -16,13 +21,13 @@ export interface NftEntity {
   displayUri?: string;
   thumbnailUri?: string;
 
-  price: string;
-  categories: CategoryEntity[];
-  editionsSize: number;
   editionsAvailable: number;
-  launchAt: number;
   ownerStatuses?: string[];
-  metadata?: any;
+
+  // TODO: merge into ownerStatuses
+  ownedRecvOpHashes?: string[];
+
+  mintOpHash?: string;
 }
 
 export interface CreateNft {

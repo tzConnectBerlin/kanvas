@@ -156,6 +156,7 @@ WHERE address = $1
       .map((nftId: string) => Number(nftId));
     let paymentPromisedNfts = await this.nftService.findByIds(
       paymentPromisedNftIds,
+      undefined,
       'nft_id',
       'asc',
       currency,
@@ -353,6 +354,7 @@ WHERE session_id = $1
     return {
       nfts: await this.nftService.findByIds(
         nftIds,
+        undefined,
         'nft_id',
         'asc',
         currency,
