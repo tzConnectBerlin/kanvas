@@ -36,7 +36,11 @@ import { createRequire } from 'module';
 import { PaymentProvider } from '../entity/payment.entity.js';
 
 import type { NftEntity } from '../../nft/entity/nft.entity.js';
-import type { PaymentIntent } from '../entity/payment.entity.js';
+import type {
+  TezpayDetails,
+  StripeDetails,
+  WertDetails,
+} from '../entity/payment.entity.js';
 
 const require = createRequire(import.meta.url);
 const stripe = require('stripe');
@@ -57,6 +61,14 @@ export interface NftOrder {
   userAddress: string;
   nfts: NftEntity[];
   expiresAt: number;
+}
+
+export interface PaymentIntentInternal {
+  id: string;
+
+  amount: string;
+  currency: string;
+  paymentDetails?: StripeDetails | WertDetails | TezpayDetails;
 }
 
 @Injectable()
@@ -145,7 +157,7 @@ WHERE id = $1
     provider: PaymentProvider,
     currency: string,
     recreateOrder: boolean = false,
-  ): Promise<PaymentIntent> {
+  ): Promise<PaymentIntentInternal> {
     await this.userService.ensureUserCartSession(usr.id, cookieSession);
 
     return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
@@ -300,7 +312,7 @@ WHERE nft_order.id = $1
     userAddress: string,
     currency: string,
     currencyUnitAmount: number,
-  ): Promise<PaymentIntent> {
+  ): Promise<PaymentIntentInternal> {
     switch (provider) {
       case PaymentProvider.TEZPAY:
         if (currency !== 'XTZ') {
@@ -334,7 +346,7 @@ WHERE nft_order.id = $1
     userAddress: string,
     fiatCurrency: string,
     mutezAmount: number,
-  ): Promise<PaymentIntent> {
+  ): Promise<PaymentIntentInternal> {
     if (
       typeof WERT_PRIV_KEY === 'undefined' ||
       typeof TEZPAY_PAYPOINT_ADDRESS === 'undefined'
@@ -352,12 +364,11 @@ WHERE nft_order.id = $1
     }
 
     const tezpayIntent = await this.#createTezPaymentIntent(mutezAmount);
+    const tezpayDetails = <TezpayDetails>tezpayIntent.paymentDetails;
 
     const decimals = SUPPORTED_CURRENCIES['XTZ'];
     const tezAmount = Number(
-      (
-        tezpayIntent.paymentDetails.mutezAmount * Math.pow(10, -decimals)
-      ).toFixed(decimals),
+      (tezpayDetails.mutezAmount * Math.pow(10, -decimals)).toFixed(decimals),
     );
     const signedData = signSmartContractData(
       {
@@ -365,13 +376,11 @@ WHERE nft_order.id = $1
         commodity: 'XTZ',
         commodity_amount: tezAmount,
         pk_id: 'key1',
-        sc_id: new Buffer(tezpayIntent.paymentDetails.paypointMessage).toString(
-          'hex',
-        ),
+        sc_id: new Buffer(tezpayDetails.paypointMessage).toString('hex'),
         sc_address: TEZPAY_PAYPOINT_ADDRESS,
         sc_input_data: new Buffer(`{
             "entrypoint": "pay",
-            "value": {"string":"${tezpayIntent.paymentDetails.paypointMessage}"}
+            "value": {"string":"${tezpayDetails.paypointMessage}"}
           }`).toString('hex'),
       },
       WERT_PRIV_KEY,
@@ -396,7 +405,7 @@ WHERE nft_order.id = $1
   async #createStripePaymentIntent(
     currency: string,
     currencyUnitAmount: number,
-  ): Promise<PaymentIntent> {
+  ): Promise<PaymentIntentInternal> {
     if (typeof this.stripe === 'undefined') {
       throw new HttpException(
         'stripe payment provider not supported by this API instance',
@@ -431,7 +440,9 @@ WHERE nft_order.id = $1
     };
   }
 
-  async #createTezPaymentIntent(mutezAmount: number): Promise<PaymentIntent> {
+  async #createTezPaymentIntent(
+    mutezAmount: number,
+  ): Promise<PaymentIntentInternal> {
     const id = uuidv4();
     const tezpayIntent = await this.tezpay.init_payment({
       external_id: id,

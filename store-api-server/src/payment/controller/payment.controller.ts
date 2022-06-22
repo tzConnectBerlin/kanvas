@@ -105,9 +105,13 @@ export class PaymentController {
         currency,
       );
       const order = await this.paymentService.getPaymentOrder(paymentIntent.id);
-      paymentIntent.nfts = order.nfts;
-      paymentIntent.expiresAt = order.expiresAt;
-      return paymentIntent;
+
+      let resp = {
+        ...paymentIntent,
+        nfts: order.nfts,
+        expiresAt: order.expiresAt,
+      };
+      return resp;
     } catch (err: any) {
       if (err instanceof HttpException) {
         throw err;

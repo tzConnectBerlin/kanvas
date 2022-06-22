@@ -7,15 +7,27 @@ export interface NftOrder {
   paymentIntents: { [key: string]: PaymentIntent };
 }
 
+export interface StripeDetails {
+  clientSecret: string;
+}
+export interface WertDetails {
+  wertData: any;
+}
+export interface TezpayDetails {
+  receiverAddress: string;
+  paypointMessage: string;
+  mutezAmount: number;
+}
+
 export interface PaymentIntent {
   id: string;
 
   amount: string;
   currency: string;
-  paymentDetails?: any;
+  paymentDetails?: StripeDetails | WertDetails | TezpayDetails;
 
-  nfts?: NftEntity[];
-  expiresAt?: number;
+  nfts: NftEntity[];
+  expiresAt: number;
 }
 
 export enum PaymentProvider {
