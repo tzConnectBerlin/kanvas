@@ -86,37 +86,37 @@ describe('AppController (e2e)', () => {
   //   with data in store-api-server/script/populate-testdb.sql
 
   skipOnPriorFail(
-    '/nfts?orderBy=view is determined by number of POST /nfts/:id per id',
+    '/nfts?orderBy=view is determined by number of GET /nfts/:id per id',
     async () => {
-      const posts = await Promise.all([
-        request(app.getHttpServer()).post('/nfts/1'),
-        request(app.getHttpServer()).post('/nfts/23'),
-        request(app.getHttpServer()).post('/nfts/23'),
-        request(app.getHttpServer()).post('/nfts/23'),
-        request(app.getHttpServer()).post('/nfts/3'),
-        request(app.getHttpServer()).post('/nfts/3'),
+      const gets = await Promise.all([
+        request(app.getHttpServer()).get('/nfts/1'),
+        request(app.getHttpServer()).get('/nfts/23'),
+        request(app.getHttpServer()).get('/nfts/23'),
+        request(app.getHttpServer()).get('/nfts/23'),
+        request(app.getHttpServer()).get('/nfts/3'),
+        request(app.getHttpServer()).get('/nfts/3'),
 
-        request(app.getHttpServer()).post('/nfts/1'),
-        request(app.getHttpServer()).post('/nfts/23'),
-        request(app.getHttpServer()).post('/nfts/23'),
-        request(app.getHttpServer()).post('/nfts/23'),
-        request(app.getHttpServer()).post('/nfts/3'),
-        request(app.getHttpServer()).post('/nfts/3'),
+        request(app.getHttpServer()).get('/nfts/1'),
+        request(app.getHttpServer()).get('/nfts/23'),
+        request(app.getHttpServer()).get('/nfts/23'),
+        request(app.getHttpServer()).get('/nfts/23'),
+        request(app.getHttpServer()).get('/nfts/3'),
+        request(app.getHttpServer()).get('/nfts/3'),
 
-        request(app.getHttpServer()).post('/nfts/7'),
-        request(app.getHttpServer()).post('/nfts/18'),
-        request(app.getHttpServer()).post('/nfts/19'),
-        request(app.getHttpServer()).post('/nfts/22'),
-        request(app.getHttpServer()).post('/nfts/27'),
-        request(app.getHttpServer()).post('/nfts/28'),
+        request(app.getHttpServer()).get('/nfts/7'),
+        request(app.getHttpServer()).get('/nfts/18'),
+        request(app.getHttpServer()).get('/nfts/19'),
+        request(app.getHttpServer()).get('/nfts/22'),
+        request(app.getHttpServer()).get('/nfts/27'),
+        request(app.getHttpServer()).get('/nfts/28'),
       ]);
 
-      for (const post of posts) {
-        expect(post.statusCode).toEqual(201);
+      for (const get of gets) {
+        expect(get.statusCode).toEqual(200);
       }
 
       // have to sleep here for a bit, because we (on purpose) don't await
-      // on the nft increment view count query in POST /nfts/:id calls
+      // on the nft increment view count query in get /nfts/:id calls
       await sleep(2000);
 
       const res = await request(app.getHttpServer())
@@ -141,9 +141,9 @@ describe('AppController (e2e)', () => {
       ]);
 
       await Promise.all([
-        request(app.getHttpServer()).post('/nfts/2'),
-        request(app.getHttpServer()).post('/nfts/2'),
-        request(app.getHttpServer()).post('/nfts/2'),
+        request(app.getHttpServer()).get('/nfts/2'),
+        request(app.getHttpServer()).get('/nfts/2'),
+        request(app.getHttpServer()).get('/nfts/2'),
       ]);
       await sleep(100);
 
@@ -182,13 +182,13 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail('/nfts/:id (non existing id => BAD REQUEST)', async () => {
-    const res = await request(app.getHttpServer()).post('/nfts/0');
+    const res = await request(app.getHttpServer()).get('/nfts/0');
     expect(res.statusCode).toEqual(400);
   });
 
   skipOnPriorFail('/nfts/:id (existing id => OK)', async () => {
-    const res = await request(app.getHttpServer()).post('/nfts/1');
-    expect(res.statusCode).toEqual(201);
+    const res = await request(app.getHttpServer()).get('/nfts/1');
+    expect(res.statusCode).toEqual(200);
 
     // cannot test this accurately because currently the testdb is populated
     // with now() timestamps
@@ -936,7 +936,7 @@ describe('AppController (e2e)', () => {
   });
 
   skipOnPriorFail(
-    '/nfts/search (empty searchString gives most popular categories, based on POST /nfts/:id hits)',
+    '/nfts/search (empty searchString gives most popular categories, based on GET /nfts/:id hits)',
     async () => {
       const res = await request(app.getHttpServer())
         .get('/nfts/search')
@@ -1180,9 +1180,9 @@ describe('AppController (e2e)', () => {
       expect(add2.statusCode).toEqual(201);
 
       const list = await request(app.getHttpServer())
-        .post('/users/cart/list')
+        .get('/users/cart/list')
         .set('cookie', cookie);
-      expect(list.statusCode).toEqual(201);
+      expect(list.statusCode).toEqual(200);
 
       const idList = list.body.nfts.map((nft: any) => nft.id);
       expect(idList).toEqual([4, 12]);
@@ -1211,9 +1211,9 @@ describe('AppController (e2e)', () => {
       expect(add2Part2.statusCode).toEqual(400);
 
       const list = await request(app.getHttpServer())
-        .post('/users/cart/list')
+        .get('/users/cart/list')
         .set('cookie', cookie);
-      expect(list.statusCode).toEqual(201);
+      expect(list.statusCode).toEqual(200);
 
       // trigger deletion manually, because waiting for the CRON can take 60 seconds - too long for a test
       // note: this is just here to verify that _nothing_ gets deleted, because
@@ -1252,9 +1252,9 @@ describe('AppController (e2e)', () => {
 
       const cookie = add1.headers['set-cookie'];
       const list = await request(app.getHttpServer())
-        .post('/users/cart/list')
+        .get('/users/cart/list')
         .set('cookie', cookie);
-      expect(list.statusCode).toEqual(201);
+      expect(list.statusCode).toEqual(200);
 
       const idList = list.body.nfts.map((nft: any) => nft.id);
       expect(idList).toEqual([]);
@@ -1315,9 +1315,9 @@ describe('AppController (e2e)', () => {
       expect(add2.statusCode).toEqual(201);
 
       let list = await request(app.getHttpServer())
-        .post('/users/cart/list')
+        .get('/users/cart/list')
         .set('cookie', cookie);
-      expect(list.statusCode).toEqual(201);
+      expect(list.statusCode).toEqual(200);
 
       let idList = list.body.nfts.map((nft: any) => nft.id);
       expect(idList).toEqual([4, 12]);
@@ -1325,10 +1325,10 @@ describe('AppController (e2e)', () => {
       // now login. this should takeover the cart session of the cookie
       const { bearer } = await loginUser(app, 'addr', 'admin');
       const listLoggedIn = await request(app.getHttpServer())
-        .post('/users/cart/list')
+        .get('/users/cart/list')
         .set('cookie', cookie)
         .set('authorization', bearer);
-      expect(listLoggedIn.statusCode).toEqual(201);
+      expect(listLoggedIn.statusCode).toEqual(200);
 
       const idListLoggedIn = list.body.nfts.map((nft: any) => nft.id);
       expect(idListLoggedIn).toEqual(idList);
@@ -1340,10 +1340,10 @@ describe('AppController (e2e)', () => {
       expect(remove.statusCode).toEqual(204);
 
       list = await request(app.getHttpServer())
-        .post('/users/cart/list')
+        .get('/users/cart/list')
         .set('cookie', cookie)
         .set('authorization', bearer);
-      expect(list.statusCode).toEqual(201);
+      expect(list.statusCode).toEqual(200);
 
       idList = list.body.nfts.map((nft: any) => nft.id);
       expect(idList).toEqual([12]);
@@ -1361,9 +1361,9 @@ describe('AppController (e2e)', () => {
       expect(newCookie).not.toEqual(cookie);
 
       list = await request(app.getHttpServer())
-        .post('/users/cart/list')
+        .get('/users/cart/list')
         .set('cookie', newCookie);
-      expect(list.statusCode).toEqual(201);
+      expect(list.statusCode).toEqual(200);
 
       idList = list.body.nfts.map((nft: any) => nft.id);
       expect(idList).toEqual([]);
@@ -1371,10 +1371,10 @@ describe('AppController (e2e)', () => {
       // now logging back in, gives back the session we had
       const newBearer = await loginUser(app, 'addr', 'admin');
       list = await request(app.getHttpServer())
-        .post('/users/cart/list')
+        .get('/users/cart/list')
         .set('cookie', newCookie)
         .set('authorization', newBearer.bearer);
-      expect(list.statusCode).toEqual(201);
+      expect(list.statusCode).toEqual(200);
 
       idList = list.body.nfts.map((nft: any) => nft.id);
       expect(idList).toEqual([12]);
@@ -1421,10 +1421,10 @@ describe('AppController (e2e)', () => {
       // because the newCookie cart is empty
       const newBearer = await loginUser(app, 'addr', 'admin');
       const list = await request(app.getHttpServer())
-        .post('/users/cart/list')
+        .get('/users/cart/list')
         .set('cookie', cookie)
         .set('authorization', newBearer.bearer);
-      expect(list.statusCode).toEqual(201);
+      expect(list.statusCode).toEqual(200);
 
       const idList = list.body.nfts.map((nft: any) => nft.id);
       expect(idList).toEqual([4]);
@@ -1466,10 +1466,10 @@ describe('AppController (e2e)', () => {
       // now logging back in, user session is replaced with newCookie session
       const newBearer = await loginUser(app, 'addr', 'admin');
       const list = await request(app.getHttpServer())
-        .post('/users/cart/list')
+        .get('/users/cart/list')
         .set('cookie', cookie)
         .set('authorization', newBearer.bearer);
-      expect(list.statusCode).toEqual(201);
+      expect(list.statusCode).toEqual(200);
 
       const idList = list.body.nfts.map((nft: any) => nft.id);
       expect(idList).toEqual([10]);
@@ -1513,7 +1513,7 @@ describe('AppController (e2e)', () => {
       const server = app.getHttpServer();
       const respPromises = [];
       for (let i = 0; i < RATE_LIMIT + 1; i++) {
-        respPromises.push(request(server).post('/nfts/0'));
+        respPromises.push(request(server).get('/nfts/0'));
       }
       const resp = await Promise.all(respPromises);
       expect(
@@ -1523,7 +1523,7 @@ describe('AppController (e2e)', () => {
   );
 
   const getLockedCount = async (nftId: number) => {
-    const resp = await request(app.getHttpServer()).post(`/nfts/${nftId}`);
+    const resp = await request(app.getHttpServer()).get(`/nfts/${nftId}`);
     return resp.body.editionsSize - resp.body.editionsAvailable;
   };
 
@@ -2732,10 +2732,10 @@ describe('AppController (e2e)', () => {
       hexMsg = SIGNATURE_PREFIX_DELIST_NFT + '0' + hexMsg;
     }
 
-    const nftExistsBeforeCheck = await request(app.getHttpServer()).post(
+    const nftExistsBeforeCheck = await request(app.getHttpServer()).get(
       `/nfts/${nftId}`,
     );
-    expect(nftExistsBeforeCheck.statusCode).toEqual(201);
+    expect(nftExistsBeforeCheck.statusCode).toEqual(200);
 
     const topBuyersResBefore = await request(app.getHttpServer()).get(
       '/users/topBuyers',
@@ -2778,7 +2778,7 @@ describe('AppController (e2e)', () => {
     await sleep(1000);
 
     // nft no longer exists now
-    const nftExistsAfterCheck = await request(app.getHttpServer()).post(
+    const nftExistsAfterCheck = await request(app.getHttpServer()).get(
       `/nfts/${nftId}`,
     );
     expect(nftExistsAfterCheck.statusCode).toEqual(400);
@@ -2835,10 +2835,10 @@ describe('AppController (e2e)', () => {
     await sleep(1000);
 
     // nft exists again
-    const nftExistsAfterCheck = await request(app.getHttpServer()).post(
+    const nftExistsAfterCheck = await request(app.getHttpServer()).get(
       `/nfts/${nftId}`,
     );
-    expect(nftExistsAfterCheck.statusCode).toEqual(201);
+    expect(nftExistsAfterCheck.statusCode).toEqual(200);
 
     // previous buys are recovered and taken into the topBuyers sum
     const topBuyersResAfter = await request(app.getHttpServer()).get(
@@ -3167,7 +3167,7 @@ describe('AppController (e2e)', () => {
     });
 
     const cartBefore = await request(app.getHttpServer())
-      .post('/users/cart/list')
+      .get('/users/cart/list')
       .set('authorization', bearer);
     delete cartBefore.body.expiresAt;
     for (const i in cartBefore.body.nfts) {
@@ -3247,7 +3247,7 @@ describe('AppController (e2e)', () => {
     expect(promisePaidRes.status).toEqual(201);
 
     const cartAfter = await request(app.getHttpServer())
-      .post('/users/cart/list')
+      .get('/users/cart/list')
       .set('authorization', bearer);
     delete cartAfter.body.expiresAt;
     expect(cartAfter.body).toEqual({

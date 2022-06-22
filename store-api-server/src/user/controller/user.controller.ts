@@ -225,8 +225,9 @@ export class UserController {
     throw new HttpException('', HttpStatus.NO_CONTENT);
   }
 
-  @Post('cart/list')
+  @Get('cart/list')
   @UseGuards(JwtFailableAuthGuard)
+  @Header('cache-control', 'no-store,must-revalidate')
   async cartList(
     @Session() cookieSession: any,
     @CurrentUser() user: UserEntity | undefined,

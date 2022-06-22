@@ -87,7 +87,7 @@ All files                      |   76.43 |       57 |   83.33 |   75.49 |
 
  src/nft/controller            |    92.3 |       60 |     100 |   92.15 |                                                                                                                     
 
-  nft.controller.ts            |    92.3 |       60 |     100 |   92.15 | 64,82,145,188                                                                                                       
+  nft.controller.ts            |    92.3 |       60 |     100 |   92.15 | 65,83,147,190               
 
  src/nft/service               |   68.04 |    46.83 |   68.29 |   67.19 |                                                                                                                     
 
