@@ -80,8 +80,18 @@ export class PaymentController {
     @Body('paymentProvider')
     paymentProvider: PaymentProvider = PaymentProvider.STRIPE,
     @Body('currency') currency: string = BASE_CURRENCY,
+    @Body('recreateNftOrder') recreateNftOrder: boolean = false,
   ): Promise<PaymentIntent> {
     validateRequestedCurrency(currency);
+    if (
+      paymentProvider === PaymentProvider.TEST ||
+      !Object.values(PaymentProvider).includes(paymentProvider)
+    ) {
+      throw new HttpException(
+        `requested payment provider not available`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     if (currency === 'XTZ') {
       // temporary for backwards compatibility, until frontend has been updated
@@ -94,14 +104,16 @@ export class PaymentController {
         cookieSession.uuid,
         paymentProvider,
         currency,
+        recreateNftOrder,
       );
-      const orderDetails = await this.paymentService.getPaymentNfts(
-        user.id,
-        paymentIntent.id,
-      );
-      paymentIntent.nfts = orderDetails.nfts;
-      paymentIntent.expiresAt = orderDetails.expiresAt;
-      return paymentIntent;
+      const order = await this.paymentService.getPaymentOrder(paymentIntent.id);
+
+      let resp = {
+        ...paymentIntent,
+        nfts: order.nfts,
+        expiresAt: order.expiresAt,
+      };
+      return resp;
     } catch (err: any) {
       if (err instanceof HttpException) {
         throw err;
@@ -120,27 +132,18 @@ export class PaymentController {
     @CurrentUser() user: UserEntity,
     @Body('payment_id') paymentId: string,
   ) {
-    await this.paymentService.promisePaid(user.id, paymentId);
-  }
+    try {
+      await this.paymentService.promisePaid(user.id, paymentId);
+    } catch (err: any) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
 
-  @Get('/nfts/:payment_id')
-  @UseGuards(JwtAuthGuard)
-  async getPaymentNfts(
-    @CurrentUser() user: UserEntity,
-    @Param('payment_id') paymentId: string,
-  ): Promise<{ expiresAt: number; currency: string; nfts: NftEntity[] }> {
-    return await this.paymentService.getPaymentNfts(user.id, paymentId);
-  }
-
-  @Get('/status/:payment_id')
-  @UseGuards(JwtAuthGuard)
-  @Header('cache-control', 'no-store,must-revalidate')
-  async getPaymentStatus(
-    @CurrentUser() user: UserEntity,
-    @Param('payment_id') paymentId: string,
-  ): Promise<{ status: PaymentStatus }> {
-    return {
-      status: await this.paymentService.getPaymentStatus(user.id, paymentId),
-    };
+      Logger.error(err);
+      throw new HttpException(
+        `logged in user (id=${user.id}) does not have an unfinished payment with payment_id=${paymentId} that hasn't been promised payment yet`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }
