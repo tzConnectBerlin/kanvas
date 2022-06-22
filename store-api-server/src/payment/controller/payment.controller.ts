@@ -82,7 +82,6 @@ export class PaymentController {
     @Body('currency') currency: string = BASE_CURRENCY,
   ): Promise<PaymentIntent> {
     validateRequestedCurrency(currency);
-    console.log(Object.values(PaymentProvider));
     if (
       paymentProvider === PaymentProvider.TEST ||
       !Object.values(PaymentProvider).includes(paymentProvider)
