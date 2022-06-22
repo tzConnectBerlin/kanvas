@@ -80,6 +80,7 @@ export class PaymentController {
     @Body('paymentProvider')
     paymentProvider: PaymentProvider = PaymentProvider.STRIPE,
     @Body('currency') currency: string = BASE_CURRENCY,
+    @Body('recreateNftOrder') recreateNftOrder: boolean = false,
   ): Promise<PaymentIntent> {
     validateRequestedCurrency(currency);
     if (
@@ -103,6 +104,7 @@ export class PaymentController {
         cookieSession.uuid,
         paymentProvider,
         currency,
+        recreateNftOrder,
       );
       const order = await this.paymentService.getPaymentOrder(paymentIntent.id);
 
