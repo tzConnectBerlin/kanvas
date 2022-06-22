@@ -1,6 +1,7 @@
 import {
   HttpException,
   HttpStatus,
+  Header,
   Res,
   Controller,
   Body,
@@ -133,7 +134,8 @@ export class NftController {
     );
   }
 
-  @Post('/:id')
+  @Get('/:id')
+  @Header('cache-control', 'no-store,must-revalidate')
   async byId(
     @Param('id') id: number,
     @Query('currency') currency: string = BASE_CURRENCY,
