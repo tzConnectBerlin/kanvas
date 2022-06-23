@@ -206,7 +206,7 @@ UNION ALL
 SELECT
   mtm.nft_id,
   $4 AS owner_status,
-  count(1) AS num_editions
+  count(distinct mtm.nft_order_id) AS num_editions
 FROM nft_order
 JOIN kanvas_user AS usr
   ON usr.id = nft_order.user_id
