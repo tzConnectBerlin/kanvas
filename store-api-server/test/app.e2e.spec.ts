@@ -2925,7 +2925,7 @@ describe('AppController (e2e)', () => {
   });
 
   skipOnPriorFail('/users/profile: shows promised payment nfts', async () => {
-    const { bearer } = await loginUser(app, 'addr', 'admin');
+    const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
 
     const add8Res = await request(app.getHttpServer())
       .post('/users/cart/add/8')
@@ -2940,6 +2940,13 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer)
       .send({ currency: 'XTZ', paymentProvider: 'tezpay' });
     expect(paymentIntentRes.status).toEqual(201);
+    const usr = <UserEntity>{ userAddress: address, id: id };
+    const intentRes = await paymentService.createPayment(
+      usr,
+      uuidv4(),
+      PaymentProvider.TEST,
+      'EUR',
+    );
     const intentId = paymentIntentRes.body.id;
     delete paymentIntentRes.body.id;
     delete paymentIntentRes.body.paymentDetails.paypointMessage;
