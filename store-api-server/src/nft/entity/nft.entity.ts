@@ -1,5 +1,10 @@
 import type { CategoryEntity } from '../../category/entity/category.entity.js';
 
+export interface OwnershipInfo {
+  status: 'owned' | 'pending' | 'payment processing';
+  receivalOperationHash?: string;
+}
+
 export interface NftEntity {
   id: number;
   createdAt: number;
@@ -9,6 +14,7 @@ export interface NftEntity {
   categories: CategoryEntity[];
   launchAt: number;
   editionsSize: number;
+  editionsAvailable: number;
   metadata?: any;
 
   ipfsHash?: string; // deprecated by metadataIpfs field
@@ -21,13 +27,9 @@ export interface NftEntity {
   displayUri?: string;
   thumbnailUri?: string;
 
-  editionsAvailable: number;
-  ownerStatuses?: string[];
-
-  // TODO: merge into ownerStatuses
-  ownedRecvOpHashes?: string[];
-
-  mintOpHash?: string;
+  mintOperationHash?: string;
+  ownerStatuses?: string[]; // deprecated by ownershipInfo
+  ownershipInfo?: OwnershipInfo[];
 }
 
 export interface CreateNft {

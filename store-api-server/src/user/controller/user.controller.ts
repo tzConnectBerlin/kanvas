@@ -147,7 +147,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Header('cache-control', 'no-store,must-revalidate')
   async nftOwnershipStatus(@CurrentUser() user: UserEntity) {
-    const statuses = await this.userService.getNftOwnershipStatuses(
+    const statuses = await this.userService.getNftPendingOwnershipInfo(
       user.userAddress,
       user.id,
     );
@@ -233,6 +233,7 @@ export class UserController {
     @CurrentUser() user: UserEntity | undefined,
     @Query('currency') currency: string = BASE_CURRENCY,
   ) {
+    console.log(user?.id);
     validateRequestedCurrency(currency);
 
     const cartSession = await this.userService.getCartSession(

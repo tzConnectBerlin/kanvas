@@ -5,7 +5,12 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import { CreateNft, NftEntity, NftEntityPage } from '../entity/nft.entity.js';
+import {
+  CreateNft,
+  NftEntity,
+  NftEntityPage,
+  OwnershipInfo,
+} from '../entity/nft.entity.js';
 import { CategoryEntity } from '../../category/entity/category.entity.js';
 import { CategoryService } from '../../category/service/category.service.js';
 import { FilterParams } from '../params.js';
@@ -491,8 +496,14 @@ FROM nfts_by_id($1, $2, $3, $4)`,
             ? Math.floor(onsaleUntilMilliUnix / 1000)
             : undefined,
 
-          mintOpHash: nftRow['mint_op_hash'],
-          ownedRecvOpHashes: nftRow['owned_recv_op_hashes'],
+          mintOperationHash: nftRow['mint_op_hash'],
+          ownershipInfo: nftRow['owned_recv_op_hashes']?.map(
+            (opHash: string) =>
+              <OwnershipInfo>{
+                status: 'owned',
+                receivalOperationHash: opHash,
+              },
+          ),
         };
 
         nft.displayUri ??= nft.artifactUri;

@@ -224,6 +224,7 @@ WHERE id = $1
 
     const orderAt = new Date();
     const expireAt = nowUtcWithOffset(ORDER_EXPIRATION_MILLI_SECS);
+    console.log(userId);
     const orderQryRes = await dbTx.query(
       `
 INSERT INTO nft_order (
