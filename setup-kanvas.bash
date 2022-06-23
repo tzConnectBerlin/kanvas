@@ -164,7 +164,7 @@ contracts:
 - name: "onchain_kanvas"
   address: "`take_env CONTRACT_ADDRESS global.env | sed 's/\"//g'`"
 - name: "paypoint"
-  address: "KT1MZTPQFdEZKLXtdQzpuA4MFt5ZkmKqFqkq"
+  address: "KT1LTTm6EJW387FR4WRv31akjdNLaAUNgCyb"
 EOF
     cat <<EOF > config/.env-kanvas
 NODE_URL=`take_env NODE_URL global.env`

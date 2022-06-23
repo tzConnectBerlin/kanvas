@@ -559,7 +559,12 @@ WHERE payment_id = $2
       !this.FINAL_STATES.includes(prevStatus)
     ) {
       const orderId = await this.getPaymentOrderId(paymentId);
-      await this.#orderCheckout(orderId);
+      this.#orderCheckout(orderId);
+
+      // cancel other payment intents (if any)
+      withTransaction(this.conn, async (dbTx: DbTransaction) => {
+        this.cancelNftOrder(dbTx, orderId);
+      });
     }
   }
 
