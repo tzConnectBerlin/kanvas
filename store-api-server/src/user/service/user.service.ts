@@ -159,7 +159,6 @@ WHERE address = $1
       nft.ownerStatuses = nft.ownershipInfo.map((x: OwnershipInfo) => x.status);
     }
 
-    console.log(`${JSON.stringify(statuses)}`);
     const paymentPromisedNftIds = Object.keys(statuses)
       .filter((nftId: any) => {
         return statuses[nftId].some(
@@ -167,7 +166,6 @@ WHERE address = $1
         );
       })
       .map((nftId: string) => Number(nftId));
-    console.log(paymentPromisedNftIds);
     let paymentPromisedNfts = await this.nftService.findByIds(
       paymentPromisedNftIds,
       undefined,
@@ -179,6 +177,9 @@ WHERE address = $1
       nft.ownershipInfo = statuses[nft.id].filter(
         (x: OwnershipInfo) => x.status === OwnershipStatus.PAYMENT_PROCESSING,
       );
+
+      // Backwards compatibility
+      nft.ownerStatuses = nft.ownershipInfo.map((x: OwnershipInfo) => x.status);
     }
 
     return new Ok({
@@ -235,7 +236,6 @@ ORDER BY 1
         OwnershipStatus.PAYMENT_PROCESSING,
       ],
     );
-    console.log(qryRes);
 
     const ownerStatuses: any = {};
     for (const row of qryRes.rows) {

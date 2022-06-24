@@ -22,6 +22,7 @@ import { Response } from 'express';
 import { wrapCache } from '../../utils.js';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserEntity } from '../entity/user.entity.js';
+import { OwnershipInfo } from '../../nft/entity/nft.entity.js';
 import { UserService } from '../service/user.service.js';
 import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { validateRequestedCurrency } from '../../paramUtils.js';
@@ -156,7 +157,9 @@ export class UserController {
     for (const nftId of Object.keys(statuses)) {
       res.push({
         nftId: nftId,
-        ownerStatuses: statuses[Number(nftId)],
+        ownerStatuses: statuses[Number(nftId)].map(
+          (x: OwnershipInfo) => x.status,
+        ),
       });
     }
     return res;
@@ -233,7 +236,6 @@ export class UserController {
     @CurrentUser() user: UserEntity | undefined,
     @Query('currency') currency: string = BASE_CURRENCY,
   ) {
-    console.log(user?.id);
     validateRequestedCurrency(currency);
 
     const cartSession = await this.userService.getCartSession(
