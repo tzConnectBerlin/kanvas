@@ -294,6 +294,7 @@ WHERE nft_order.id = $1
       expiresAt: qryRes.rows[0]['expires_at'],
       nfts: await this.nftService.findByIds(
         qryRes.rows.map((row: any) => row['nft_id']),
+        undefined,
         'nft_id',
         'asc',
         currency,
