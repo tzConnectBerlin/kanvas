@@ -137,6 +137,9 @@ function setup_store_api {
     replace_env BEHIND_PROXY "`take_env BEHIND_PROXY_STORE global.env`" store-api-server/.env
 
     replace_env PROFILE_PICTURES_ENABLED "`take_env PROFILE_PICTURES_ENABLED global.env`" store-api-server/.env
+
+    replace_env KANVAS_ADDRESS "`take_env CONTRACT_ADDRESS global.env`" global.env
+    replace_env TEZOS_NETWORK  "`take_env NETWORK global.env`" global.env
 }
 
 function setup_store_front {

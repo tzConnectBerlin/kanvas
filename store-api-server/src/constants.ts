@@ -12,6 +12,8 @@ export const SEARCH_MAX_NFTS = 3;
 export const SEARCH_MAX_CATEGORIES = 6;
 export const SEARCH_SIMILARITY_LIMIT = 0.4;
 
+export const TEZOS_NETWORK = assertEnv('TEZOS_NETWORK');
+export const KANVAS_CONTRACT = assertEnv('KANVAS_CONTRACT');
 export const MINTER_ADDRESS = assertEnv('MINTER_TZ_ADDRESS');
 export const ADMIN_PUBLIC_KEY = assertEnv('ADMIN_PUBLIC_KEY'); // this should be the revealed public key associated to the MINTER_ADDRESS (MINTER_ADDRESS is the public key hash)
 
