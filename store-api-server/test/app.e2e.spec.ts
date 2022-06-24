@@ -78,6 +78,8 @@ describe('AppController (e2e)', () => {
       baseCurrency: 'EUR',
       cartMaxItems: 10,
       supportedCurrencies: ['USD', 'GBP', 'EUR', 'XTZ'],
+      tezosNetwork: 'testnet',
+      kanvasContract: 'KT1..',
     });
   });
 

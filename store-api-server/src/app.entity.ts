@@ -3,4 +3,7 @@ export interface AppConstants {
 
   supportedCurrencies: string[];
   baseCurrency: string;
+
+  tezosNetwork: string;
+  kanvasContract: string;
 }
