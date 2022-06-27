@@ -45,6 +45,7 @@ export class LoggerMiddleware implements NestMiddleware {
     const userAgent = request.get('user-agent') || '';
     const cookieSession = request.session?.uuid.slice(0, 5) || '';
     const realIp = BEHIND_PROXY ? request.get('X-Forwarded-For') || ip : ip;
+    const timeStart = new Date();
 
     const fields = [
       method,
@@ -57,12 +58,15 @@ export class LoggerMiddleware implements NestMiddleware {
     this.logger.log(`>> ${fields.join(' ')}`);
 
     response.on('finish', () => {
+      const timeEnd: Date = new Date();
+      const duration = `${timeEnd.getTime() - timeStart.getTime()}ms`;
       const { statusCode } = response;
       const contentLength = response.get('content-length');
 
       fields.push('=>');
       fields.push(`${statusCode}`);
       fields.push(contentLength);
+      fields.push(duration);
 
       switch (response.get('cached')) {
         case 'yes':
