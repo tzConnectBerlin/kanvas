@@ -32,6 +32,7 @@ describe('NftController', () => {
         CurrencyService,
         IpfsService,
       ],
+      exports: [NftServiceMock],
     }).compile();
 
     controller = module.get<NftController>(NftController);

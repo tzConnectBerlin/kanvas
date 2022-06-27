@@ -5,12 +5,16 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import { CategoryEntity } from '../entity/category.entity.js';
+import { CategoryEntity, CategoriesInfo } from '../entity/category.entity.js';
 import {
   PG_CONNECTION,
   SEARCH_SIMILARITY_LIMIT,
   SEARCH_MAX_CATEGORIES,
 } from '../../constants.js';
+import { BASE_CURRENCY } from 'kanvas-api-lib';
+import { NftService } from '../../nft/service/nft.service.js';
+import { NftEntityPage } from '../../nft/entity/nft.entity.js';
+import { FilterParams } from '../../nft/params.js';
 
 interface CategoryQueryResponse {
   id: number;
@@ -22,7 +26,10 @@ interface CategoryQueryResponse {
 
 @Injectable()
 export class CategoryService {
-  constructor(@Inject(PG_CONNECTION) private conn: any) {}
+  constructor(
+    @Inject(PG_CONNECTION) private conn: any,
+    public readonly nftService: NftService,
+  ) {}
 
   async search(str: string): Promise<CategoryEntity[]> {
     if (str === '') {
@@ -78,7 +85,67 @@ ORDER BY view_count, cat.id
     return qryRes.rows;
   }
 
-  async findAll(): Promise<CategoryEntity[]> {
+  async categoriesInfo(): Promise<CategoriesInfo> {
+    const categories: CategoryEntity[] = await this.categories();
+
+    const categoriesWithContent = this.leafCategoryIds(categories);
+    const promises: {
+      [key: number]: {
+        totalNftCount: Promise<number>;
+        unavailableNftCount: Promise<number>;
+      };
+    } = {};
+    for (const catId of categoriesWithContent) {
+      promises[catId] = {
+        totalNftCount: this.nftService
+          .findNftsWithFilter(
+            <FilterParams>{
+              categories: [catId],
+              pageSize: 1,
+              page: 1,
+
+              orderBy: 'id',
+              orderDirection: 'asc',
+            },
+            BASE_CURRENCY,
+          )
+          .then((x: NftEntityPage) => {
+            return x.totalNftCount;
+          }),
+        unavailableNftCount: this.nftService
+          .findNftsWithFilter(
+            <FilterParams>{
+              categories: [catId],
+              availability: ['soldOut'],
+              pageSize: 1,
+              page: 1,
+
+              orderBy: 'id',
+              orderDirection: 'asc',
+            },
+            BASE_CURRENCY,
+          )
+          .then((x: NftEntityPage) => {
+            return x.totalNftCount;
+          }),
+      };
+    }
+
+    const resp = <CategoriesInfo>{
+      categories: categories,
+      info: {},
+    };
+    for (const catId of categoriesWithContent) {
+      resp.info[catId] = {
+        totalNftCount: await promises[catId].totalNftCount,
+        unavailableNftCount: await promises[catId].unavailableNftCount,
+      };
+    }
+
+    return resp;
+  }
+
+  async categories(): Promise<CategoryEntity[]> {
     try {
       const categoriesQryRes = await this.conn.query(
         `
@@ -128,5 +195,21 @@ ORDER BY COALESCE(parent, 0) DESC, id`,
       }
     }
     return m.get(0);
+  }
+
+  leafCategoryIds(categories: CategoryEntity[]): number[] {
+    if (categories.length === 0) {
+      return [];
+    }
+    let res: number[] = [];
+    for (const cat of categories) {
+      if ((cat.children?.length || 0) === 0) {
+        res.push(cat.id);
+        continue;
+      }
+
+      res = [...res, ...this.leafCategoryIds(cat.children || [])];
+    }
+    return res;
   }
 }
