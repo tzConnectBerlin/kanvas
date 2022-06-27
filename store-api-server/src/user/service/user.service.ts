@@ -12,7 +12,7 @@ import {
   UserTotalPaid,
   NftOwnershipStatus,
 } from '../entity/user.entity.js';
-import { NftEntity } from '../../nft/entity/nft.entity.js';
+import { NftEntity, OwnershipInfo } from '../../nft/entity/nft.entity.js';
 import { NftService } from '../../nft/service/nft.service.js';
 import { PaginationParams } from '../../nft/params.js';
 import {
@@ -36,7 +36,11 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const generate = require('meaningful-string');
 
-const STATUS_PAYMENT_PROCESSING = 'payment processing';
+enum OwnershipStatus {
+  PAYMENT_PROCESSING = 'payment processing',
+  PENDING_ONCHAIN = 'pending',
+  OWNED = 'owned',
+}
 
 interface CartMeta {
   id: number;
@@ -141,29 +145,41 @@ WHERE address = $1
         },
         currency,
       ),
-      this.getNftOwnershipStatuses(address, loggedInUserId),
+      this.getNftPendingOwnershipInfo(address, loggedInUserId),
     ]);
     for (const nft of owned.nfts) {
-      nft.ownerStatuses = statuses[nft.id].filter(
-        (status: string) => status !== STATUS_PAYMENT_PROCESSING,
-      );
+      nft.ownershipInfo = [
+        ...(nft.ownershipInfo || []),
+        ...statuses[nft.id].filter(
+          (x: OwnershipInfo) => x.status === OwnershipStatus.PENDING_ONCHAIN,
+        ),
+      ];
+
+      // Backwards compatibility
+      nft.ownerStatuses = nft.ownershipInfo.map((x: OwnershipInfo) => x.status);
     }
 
     const paymentPromisedNftIds = Object.keys(statuses)
       .filter((nftId: any) => {
-        return statuses[nftId].includes(STATUS_PAYMENT_PROCESSING);
+        return statuses[nftId].some(
+          (x: OwnershipInfo) => x.status === OwnershipStatus.PAYMENT_PROCESSING,
+        );
       })
       .map((nftId: string) => Number(nftId));
     let paymentPromisedNfts = await this.nftService.findByIds(
       paymentPromisedNftIds,
+      undefined,
       'nft_id',
       'asc',
       currency,
     );
     for (const nft of paymentPromisedNfts) {
-      nft.ownerStatuses = statuses[nft.id].filter(
-        (status: string) => status === STATUS_PAYMENT_PROCESSING,
+      nft.ownershipInfo = statuses[nft.id].filter(
+        (x: OwnershipInfo) => x.status === OwnershipStatus.PAYMENT_PROCESSING,
       );
+
+      // Backwards compatibility
+      nft.ownerStatuses = nft.ownershipInfo.map((x: OwnershipInfo) => x.status);
     }
 
     return new Ok({
@@ -173,24 +189,15 @@ WHERE address = $1
     });
   }
 
-  async getNftOwnershipStatuses(
+  async getNftPendingOwnershipInfo(
     address: string,
     loggedInUserId?: number,
-  ): Promise<{ [key: number]: string[] }> {
+  ): Promise<{ [key: number]: OwnershipInfo[] }> {
     const qryRes = await this.conn.query(
       `
 SELECT
-  idx_assets_nat AS nft_id,
-  'owned' AS owner_status,
-  assets_nat AS num_editions
-FROM onchain_kanvas."storage.ledger_live" AS ledger_now
-WHERE ledger_now.idx_assets_address = $2
-
-UNION ALL
-
-SELECT
   nft_id,
-  'pending' AS owner_status,
+  $4 AS owner_status,
   purchased_editions_pending_transfer(nft_id, $2, $1) as num_editions
 FROM (
   SELECT DISTINCT
@@ -205,7 +212,7 @@ UNION ALL
 
 SELECT
   mtm.nft_id,
-  $4 AS owner_status,
+  $5 AS owner_status,
   count(distinct mtm.nft_order_id) AS num_editions
 FROM nft_order
 JOIN kanvas_user AS usr
@@ -221,14 +228,22 @@ GROUP BY 1, 2
 
 ORDER BY 1
 `,
-      [MINTER_ADDRESS, address, loggedInUserId, STATUS_PAYMENT_PROCESSING],
+      [
+        MINTER_ADDRESS,
+        address,
+        loggedInUserId,
+        OwnershipStatus.PENDING_ONCHAIN,
+        OwnershipStatus.PAYMENT_PROCESSING,
+      ],
     );
 
     const ownerStatuses: any = {};
     for (const row of qryRes.rows) {
       ownerStatuses[row.nft_id] = [
         ...(ownerStatuses[row.nft_id] || []),
-        ...Array(Number(row.num_editions)).fill(row.owner_status),
+        ...Array(Number(row.num_editions)).fill(<OwnershipInfo>{
+          status: row.owner_status,
+        }),
       ];
     }
     return ownerStatuses;
@@ -353,6 +368,7 @@ WHERE session_id = $1
     return {
       nfts: await this.nftService.findByIds(
         nftIds,
+        undefined,
         'nft_id',
         'asc',
         currency,
