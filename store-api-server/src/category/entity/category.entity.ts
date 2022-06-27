@@ -6,7 +6,7 @@ export interface CategoryEntity {
   children?: CategoryEntity[];
 }
 
-export interface CategoriesInfo {
+export interface CategoriesExtendedInfo {
   categories: CategoryEntity[];
 
   info: {

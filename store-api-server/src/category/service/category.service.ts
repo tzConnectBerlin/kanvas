@@ -5,7 +5,10 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import { CategoryEntity, CategoriesInfo } from '../entity/category.entity.js';
+import {
+  CategoryEntity,
+  CategoriesExtendedInfo,
+} from '../entity/category.entity.js';
 import {
   PG_CONNECTION,
   SEARCH_SIMILARITY_LIMIT,
@@ -85,7 +88,7 @@ ORDER BY view_count, cat.id
     return qryRes.rows;
   }
 
-  async categoriesInfo(): Promise<CategoriesInfo> {
+  async categoriesExtendedInfo(): Promise<CategoriesExtendedInfo> {
     const categories: CategoryEntity[] = await this.categories();
 
     const categoriesWithContent = this.leafCategoryIds(categories);
@@ -131,7 +134,7 @@ ORDER BY view_count, cat.id
       };
     }
 
-    const resp = <CategoriesInfo>{
+    const resp = <CategoriesExtendedInfo>{
       categories: categories,
       info: {},
     };
