@@ -12,7 +12,6 @@ import {
   OwnershipInfo,
 } from '../entity/nft.entity.js';
 import { CategoryEntity } from '../../category/entity/category.entity.js';
-import { CategoryService } from '../../category/service/category.service.js';
 import { FilterParams } from '../params.js';
 import {
   PG_CONNECTION,
@@ -30,7 +29,6 @@ import { DbTransaction, withTransaction } from '../../db.module.js';
 export class NftService {
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
-    private readonly categoryService: CategoryService,
     private ipfsService: IpfsService,
     private currencyService: CurrencyService,
   ) {}
