@@ -12,9 +12,21 @@ export class CategoryController {
   ) {}
 
   @Get()
-  async findAll(@Res() resp: Response) {
-    return await wrapCache(this.cache, resp, 'categories.findAll', () => {
-      return this.categoryService.findAll();
+  async getCategories(@Res() resp: Response) {
+    return await wrapCache(this.cache, resp, 'categories.categories', () => {
+      return this.categoryService.categories();
     });
+  }
+
+  @Get('/extendedInfo')
+  async getCategoriesExtendedInfo(@Res() resp: Response) {
+    return await wrapCache(
+      this.cache,
+      resp,
+      'categories.categoriesExtendedInfo',
+      () => {
+        return this.categoryService.categoriesExtendedInfo();
+      },
+    );
   }
 }

@@ -5,3 +5,14 @@ export interface CategoryEntity {
   metadata?: any;
   children?: CategoryEntity[];
 }
+
+export interface CategoriesExtendedInfo {
+  categories: CategoryEntity[];
+
+  info: {
+    [key: number]: {
+      totalNftCount: number;
+      unavailableNftCount: number;
+    };
+  };
+}

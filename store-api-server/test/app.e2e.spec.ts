@@ -2749,6 +2749,188 @@ describe('AppController (e2e)', () => {
     ]);
   });
 
+  skipOnPriorFail('/categories/extendedInfo', async () => {
+    const res = await request(app.getHttpServer()).get(
+      '/categories/extendedInfo',
+    );
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toStrictEqual({
+      categories: [
+        {
+          id: 1,
+          name: 'Fine Art',
+          description: 'A collection of fine art devided in several categories',
+          metadata: {
+            test: {
+              nested: true,
+            },
+          },
+          children: [
+            {
+              id: 4,
+              name: 'Drawing',
+              description: 'Sub fine art category',
+              metadata: null,
+              children: [],
+            },
+            {
+              id: 5,
+              name: 'Painting',
+              description: 'Sub fine art category',
+              metadata: null,
+              children: [],
+            },
+            {
+              id: 6,
+              name: 'Sculpture',
+              description: 'Sub fine art category',
+              metadata: null,
+              children: [],
+            },
+          ],
+        },
+        {
+          id: 2,
+          name: 'Visual Art',
+          description: 'Not actually visual',
+          metadata: null,
+          children: [
+            {
+              id: 7,
+              name: 'Digital',
+              description: 'Sub visual art category',
+              metadata: null,
+              children: [],
+            },
+            {
+              id: 8,
+              name: 'Photography',
+              description: 'Sub visual art category',
+              metadata: null,
+              children: [
+                {
+                  id: 9,
+                  name: 'Abstract',
+                  description: 'Sub photography category',
+                  metadata: null,
+                  children: [],
+                },
+                {
+                  id: 10,
+                  name: 'Landscape',
+                  description: 'Sub photography category',
+                  children: [],
+                  metadata: null,
+                },
+                {
+                  id: 11,
+                  name: 'Portrait',
+                  description: 'Sub photography category',
+                  metadata: null,
+                  children: [],
+                },
+                {
+                  id: 12,
+                  name: 'Cities',
+                  description: 'Sub photography category',
+                  metadata: null,
+                  children: [
+                    {
+                      id: 13,
+                      name: 'Honk Kong',
+                      description: 'Sub cities category',
+                      children: [],
+                      metadata: null,
+                    },
+                    {
+                      id: 14,
+                      name: 'Toronto',
+                      description: 'Sub cities category',
+                      children: [],
+                      metadata: null,
+                    },
+                    {
+                      id: 15,
+                      name: 'London',
+                      description: 'Sub cities category',
+                      children: [],
+                      metadata: null,
+                    },
+                  ],
+                },
+                {
+                  id: 16,
+                  name: 'Black & White',
+                  description: 'Sub photography category',
+                  metadata: null,
+                  children: [],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 3,
+          name: 'Applied Art',
+          description: 'Not actually visual',
+          metadata: null,
+          children: [],
+        },
+      ],
+      info: {
+        '10': {
+          totalNftCount: 4,
+          unavailableNftCount: 0,
+        },
+        '11': {
+          totalNftCount: 3,
+          unavailableNftCount: 0,
+        },
+        '13': {
+          totalNftCount: 2,
+          unavailableNftCount: 0,
+        },
+        '14': {
+          totalNftCount: 1,
+          unavailableNftCount: 0,
+        },
+        '15': {
+          totalNftCount: 1,
+          unavailableNftCount: 0,
+        },
+        '16': {
+          totalNftCount: 2,
+          unavailableNftCount: 0,
+        },
+        '3': {
+          totalNftCount: 2,
+          unavailableNftCount: 0,
+        },
+        '4': {
+          totalNftCount: 4,
+          unavailableNftCount: 1,
+        },
+        '5': {
+          totalNftCount: 5,
+          unavailableNftCount: 0,
+        },
+        '6': {
+          totalNftCount: 5,
+          unavailableNftCount: 0,
+        },
+        '7': {
+          totalNftCount: 4,
+          unavailableNftCount: 0,
+        },
+        '9': {
+          totalNftCount: 6,
+          unavailableNftCount: 0,
+        },
+      },
+    });
+  });
+
   skipOnPriorFail('/nft/delist: success case', async () => {
     const nftId = 1;
     let hexMsg = nftId.toString(16);
