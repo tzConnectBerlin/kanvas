@@ -257,6 +257,9 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
             process.env.REACT_APP_API_SERVER_BASE_URL +
             '/payment/create-payment-intent',
         method: 'POST',
+        data: {
+            recreateNftOrder: true,
+        },
         withCredentials: true,
         headers: {
             Authorization: `Bearer ${localStorage.getItem(
