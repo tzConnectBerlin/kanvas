@@ -90,7 +90,7 @@ const Router = () => {
         if (!embedKukai) {
             setEmbedKukai(
                 new KukaiEmbed({
-                    net: Networks[KUKAI_NETWORK],
+                    net: "https://ithacanet.kukai.app",
                     icon: false,
                 }),
             );
