@@ -309,7 +309,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
             };
             setStripeOptions({
                 appearance: appearance,
-                clientSecret: paymentIntentSecret.data.clientSecret
+                clientSecret: paymentIntentSecret.data.paymentDetails.clientSecret
             })
         }
         if (paymentIntentSecret.response?.status === 401) {
