@@ -33,6 +33,10 @@ SET expires_at = payment.expires_at
 FROM payment
 WHERE payment.nft_order_id = nft_order.id;
 
+UPDATE nft_order
+SET expires_at = 'epoch'
+WHERE expires_at IS NULL;
+
 ALTER TABLE nft_order ALTER COLUMN expires_at SET NOT NULL;
 
 
