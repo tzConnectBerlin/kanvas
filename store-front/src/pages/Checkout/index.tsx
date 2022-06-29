@@ -257,6 +257,9 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
             process.env.REACT_APP_API_SERVER_BASE_URL +
             '/payment/create-payment-intent',
         method: 'POST',
+        data: {
+            recreateNftOrder: true,
+        },
         withCredentials: true,
         headers: {
             Authorization: `Bearer ${localStorage.getItem(
@@ -309,7 +312,7 @@ export const Checkout: FC<CheckoutProps> = ({ ...props }) => {
             };
             setStripeOptions({
                 appearance: appearance,
-                clientSecret: paymentIntentSecret.data.clientSecret
+                clientSecret: paymentIntentSecret.data.paymentDetails.clientSecret
             })
         }
         if (paymentIntentSecret.response?.status === 401) {
