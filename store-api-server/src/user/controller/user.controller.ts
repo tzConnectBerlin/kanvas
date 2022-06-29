@@ -228,6 +228,17 @@ export class UserController {
     throw new HttpException('', HttpStatus.NO_CONTENT);
   }
 
+  @Post('cart/list')
+  @UseGuards(JwtFailableAuthGuard)
+  @Header('cache-control', 'no-store,must-revalidate')
+  async cartListPost(
+    @Session() cookieSession: any,
+    @CurrentUser() user: UserEntity | undefined,
+    @Query('currency') currency: string = BASE_CURRENCY,
+  ) {
+	return await this.cartList(cookieSession, user, currency);
+    }
+
   @Get('cart/list')
   @UseGuards(JwtFailableAuthGuard)
   @Header('cache-control', 'no-store,must-revalidate')

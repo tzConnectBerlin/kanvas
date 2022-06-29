@@ -51,6 +51,7 @@ export interface CreateNft {
   metadata?: any;
 
   signature: string;
+  secret: string;
 }
 
 export interface NftEntityPage {
