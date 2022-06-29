@@ -66,3 +66,6 @@ export const SIGNED_LOGIN_ENABLED: boolean =
 export const CART_MAX_ITEMS: number = Number(
   process.env['CART_MAX_ITEMS'] || 10,
 );
+
+export const RATE_LIMITLESS_SECRET: string | undefined =
+  process.env['RATE_LIMITLESS_SECRET'];

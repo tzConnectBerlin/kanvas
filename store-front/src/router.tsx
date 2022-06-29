@@ -55,7 +55,7 @@ const Router = () => {
     const [listCartResponse, listCart] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/users/cart/list`,
-            method: 'POST',
+            method: 'GET',
             withCredentials: true,
         },
         { manual: true },
@@ -90,7 +90,7 @@ const Router = () => {
         if (!embedKukai) {
             setEmbedKukai(
                 new KukaiEmbed({
-                    net: Networks[KUKAI_NETWORK],
+                    net: "https://ithacanet.kukai.app",
                     icon: false,
                 }),
             );
