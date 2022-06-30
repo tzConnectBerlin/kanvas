@@ -83,17 +83,36 @@ function cp_bak {
 
 function run_mintery {
     git clone https://github.com/tzConnectBerlin/mintery.git "$tmpdir/mintery" || exit 1
-    "$tmpdir"/mintery/script/setup || exit 1
+    export NODE_URL="`take_env NODE_URL global.env`"
 
-    replace_env MINTER_TZ_ADDRESS "`take_env ORIGINATOR_ADDRESS \"$mintery/.env\"`" global.env || exit 1
-    replace_env ADMIN_PUB_KEY "`take_env ORIGINATOR_PUB_KEY \"$mintery/.env\"`" global.env || exit 1
-    replace_env ADMIN_PRIVATE_KEY "`take_env ORIGINATOR_PRIV_KEY \"$mintery/.env\"`" global.env || exit 1
-    replace_env CONTRACT_ADDRESS "`take_env CONTRACT_ADDRESS \"$mintery/.env\"`" global.env
+    if [[ "`take_env NETWORK global.env`" == "mainnet" ]]; then
+        replace_env ORIGINATOR_ADDRESS "`take_env MINTER_TZ_ADDRESS global.env`" "$tmpdir/mintery/env" || exit 1
+        replace_env ORIGINATOR_PUB_KEY "`take_env ADMIN_PUB_KEY global.env`" "$tmpdir/mintery/env" || exit 1
+        replace_env ORIGINATOR_PRIV_KEY "`take_env ADMIN_PRIVATE_KEY global.env`" "$tmpdir/mintery/env" || exit 1
+    else
+        # testnet deployment. create a tez loaded address w/ faucet
+        "$tmpdir"/mintery/script/initialize-address || exit 1
+
+        replace_env MINTER_TZ_ADDRESS "`take_env ORIGINATOR_ADDRESS \"$mintery/env\"`" global.env || exit 1
+        replace_env ADMIN_PUB_KEY "`take_env ORIGINATOR_PUB_KEY \"$mintery/env\"`" global.env || exit 1
+        replace_env ADMIN_PRIVATE_KEY "`take_env ORIGINATOR_PRIV_KEY \"$mintery/env\"`" global.env || exit 1
+    fi
+
+    replace_env CONTRACT fa2 "$tmpdir/mintery/env" || exit 1
+    replace_env BURN_CAP 0.87725 "$tmpdir/mintery/env" || exit 1
+    "$tmpdir"/mintery/script/deploy-contract || exit 1
+    replace_env CONTRACT_ADDRESS "`take_env CONTRACT_ADDRESS \"$mintery/env\"`" global.env || exit 1
+
+    replace_env CONTRACT paypoint "$tmpdir/mintery/env" || exit 1
+    replace_env BURN_CAP 0.10325 "$tmpdir/mintery/env" || exit 1
+    "$tmpdir"/mintery/script/deploy-contract || exit 1
+    replace_env PAYPOINT_ADDRESS "`take_env CONTRACT_ADDRESS \"$mintery/env\"`" global.env
 }
 
 function create_random_secrets {
     replace_env JWT_SECRET_ADMIN "`tr -dc A-Za-z0-9 </dev/urandom | head -c 60 ; echo ''`" global.env || exit 1
     replace_env JWT_SECRET_STORE "`tr -dc A-Za-z0-9 </dev/urandom | head -c 60 ; echo ''`" global.env
+    replace_env RATE_LIMITLESS_SECRET "`tr -dc A-Za-z0-9 </dev/urandom | head -c 60 ; echo ''`" global.env
 }
 
 function setup_admin_api {
@@ -134,12 +153,19 @@ function setup_store_api {
     replace_env MINTER_TZ_ADDRESS  "`take_env MINTER_TZ_ADDRESS global.env`" store-api-server/.env || exit 1
     replace_env ADMIN_PUBLIC_KEY  "`take_env ADMIN_PUB_KEY global.env`" store-api-server/.env || exit 1
 
-    replace_env BEHIND_PROXY "`take_env BEHIND_PROXY_STORE global.env`" store-api-server/.env
+    replace_env BEHIND_PROXY "`take_env BEHIND_PROXY_STORE global.env`" store-api-server/.env || exit 1
 
-    replace_env PROFILE_PICTURES_ENABLED "`take_env PROFILE_PICTURES_ENABLED global.env`" store-api-server/.env
+    replace_env PROFILE_PICTURES_ENABLED "`take_env PROFILE_PICTURES_ENABLED global.env`" store-api-server/.env || exit 1
 
-    replace_env KANVAS_ADDRESS "`take_env CONTRACT_ADDRESS global.env`" global.env
-    replace_env TEZOS_NETWORK  "`take_env NETWORK global.env`" global.env
+    replace_env KANVAS_CONTRACT "`take_env CONTRACT_ADDRESS global.env`" store-api-server/.env || exit 1
+    replace_env TEZOS_NETWORK "`take_env NETWORK global.env`" store-api-server/.env || exit 1
+
+    replace_env CACHE_TTL "`take_env CACHE_TTL global.env`" store-api-server/.env || exit 1
+    replace_env CART_MAX_ITEMS "`take_env CART_MAX_ITEMS global.env`" store-api-server/.env || exit 1
+
+    replace_env RATE_LIMITLESS_SECRET "`take_env RATE_LIMITLESS_SECRET global.env`" store-api-server/.env || exit 1
+
+    replace_env TEZPAY_PAYPOINT_ADDRESS "`take_env PAYPOINT_ADDRESS global.env`" store-api-server/.env
 }
 
 function setup_store_front {
@@ -167,7 +193,7 @@ contracts:
 - name: "onchain_kanvas"
   address: "`take_env CONTRACT_ADDRESS global.env | sed 's/\"//g'`"
 - name: "paypoint"
-  address: "KT1LTTm6EJW387FR4WRv31akjdNLaAUNgCyb"
+  address: "`take_env PAYPOINT_ADDRESS global.env | sed 's/\"//g'`"
 EOF
     cat <<EOF > config/.env-kanvas
 NODE_URL=`take_env NODE_URL global.env`
@@ -183,7 +209,7 @@ function setup_peppermint {
     "confirmations": 2,
     "timeout": 300,
     "privateKey": "`take_env ADMIN_PRIVATE_KEY global.env | sed 's/\"//g'`",
-    "rpcUrl": "https://ithaca-archive.tzconnect.berlin",
+    "rpcUrl": "`take_env NODE_URL global.env | sed 's/\"//g'`",
     "pollingDelay": 1000,
     "dbConnection": {
             "user": "store_pguser",
@@ -352,13 +378,13 @@ step \
     'Set AWS_S3_ACCESS_KEY and AWS_S3_KEY_SECRET in global.env, these are related to your AWS account. Please find the correct values on their website (https://us-east-1.console.aws.amazon.com/iam/home#/security_credentials).' || exit 1
 
 step \
-    'Stripe (https://dashboard.stripe.com/test/dashboard):
+    'If Stripe enabled,  (https://dashboard.stripe.com/test/dashboard):
 
 - find "Publishable key", copy this into STRIPE_PUB_KEY in global.env
 - find "Secret key", copy this into STRIPE_SECRET in global.env'
 
 step \
-    "Stripe (https://dashboard.stripe.com/test/webhooks):
+    "If Stripe enabled, (https://dashboard.stripe.com/test/webhooks):
 
 add a new endpoint for a new webhook:
 1. set the endpoint url to: `take_env STORE_API_URL global.env`/payment/stripe-webhook
@@ -367,12 +393,21 @@ add a new endpoint for a new webhook:
 4. Under the new webhook page, reveal the 'Signing secret', copy this value into STRIPE_WEBHOOK_SECRET in global.env"
 
 step \
+    'If Wert enabled, set WERT_PRIV_KEY'
+
+step \
     'Pinata (https://app.pinata.cloud/keys):
-    1. add a new key with at least the following permissions (listed under "Pinning"):
+1. add a new key with at least the following permissions (listed under "Pinning"):
     - pinFileToIPFS
     - pinJSONToIPFS
 2. save the API secret in global.env under PINATA_API_SECRET
 3. save the API key in global.env under PINATA_API_KEY'
+
+step \
+    'Set TEZOS_NETWORK and NODE_URL. If deploying on mainnet (TEZOS_NETWORK=mainnet), also set:
+- MINTER_TZ_ADDRESS
+- ADMIN_PUB_KEY
+- ADMIN_PRIVATE_KEY'
 
 step \
     'Creating a testnet wallet loaded with tez, and deploying the FA2 contract...' \
