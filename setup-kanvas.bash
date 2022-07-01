@@ -165,6 +165,8 @@ function setup_store_api {
 
     replace_env RATE_LIMITLESS_SECRET "`take_env RATE_LIMITLESS_SECRET global.env`" store-api-server/.env || exit 1
 
+    replace_env WERT_PRIV_KEY "`take_env WERT_PRIV_KEY global.env`" store-api-server/.env || exit 1
+
     replace_env TEZPAY_PAYPOINT_ADDRESS "`take_env PAYPOINT_ADDRESS global.env`" store-api-server/.env
 }
 
