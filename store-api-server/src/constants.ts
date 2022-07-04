@@ -69,3 +69,5 @@ export const CART_MAX_ITEMS: number = Number(
 
 export const RATE_LIMITLESS_SECRET: string | undefined =
   process.env['RATE_LIMITLESS_SECRET'];
+
+export const NFT_CREATE_SECRET: string = assertEnv('NFT_CREATE_SECRET');

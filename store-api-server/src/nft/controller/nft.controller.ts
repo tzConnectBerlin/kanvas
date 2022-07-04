@@ -27,7 +27,7 @@ import {
   validatePaginationParams,
 } from '../params.js';
 import { wrapCache } from '../../utils.js';
-import { ADMIN_PUBLIC_KEY } from '../../constants.js';
+import { ADMIN_PUBLIC_KEY, NFT_CREATE_SECRET } from '../../constants.js';
 import {
   BASE_CURRENCY,
   SIGNATURE_PREFIX_CREATE_NFT,
@@ -190,7 +190,7 @@ export class NftController {
 
     try {
       if (
-    	signature !== 'BW7WRXXuyKgLFRbVqawGzeTjJP6FohHWbQfd8qJNmN2MdMyLmlRaBqqQrXxv'
+    	signature !== NFT_CREATE_SECRET
 
         // !(await cryptoUtils.verify(
         //   hexPrefix + nftIdHex,
