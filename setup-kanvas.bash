@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR
 
 start_from=${1:-0}
 end_at=${2:-0}
