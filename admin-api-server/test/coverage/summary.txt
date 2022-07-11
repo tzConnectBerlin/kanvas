@@ -8,7 +8,6 @@ File                      | % Stmts | % Branch | % Funcs | % Lines | Uncovered L
 All files                 |   87.15 |    65.38 |    89.1 |   85.95 |
 
  src                      |   80.66 |    67.56 |   85.71 |   79.57 |
->>>>>>> Stashed changes
 
   app.module.ts           |     100 |      100 |     100 |     100 |
 
@@ -19,7 +18,6 @@ All files                 |   87.15 |    65.38 |    89.1 |   85.95 |
   db_mock.module.ts       |     100 |      100 |     100 |     100 |
 
   main.ts                 |       0 |        0 |       0 |       0 | 1-40
-
   utils.ts                |   90.74 |       85 |   85.71 |   90.38 | 7,12-13,29,112
 
  src/analytics            |      85 |      100 |      25 |   83.33 |

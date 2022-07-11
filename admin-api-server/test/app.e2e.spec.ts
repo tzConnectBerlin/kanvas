@@ -264,7 +264,7 @@ describe('AppController (e2e)', () => {
       expect(res.statusCode).toEqual(200);
 
       expect(res.body.createdAt).toBeGreaterThan(0);
-      expect(res.body.updatedAt).toEqual(res.body.createdAt);
+      expect(res.body.updatedAt).toBeGreaterThanOrEqual(res.body.createdAt);
       delete res.body.createdAt;
       delete res.body.updatedAt;
 
@@ -2226,7 +2226,11 @@ describe('AppController (e2e)', () => {
       nft: {
         id: 35,
         nft_name: 'some name',
-        ipfs_hash: null,
+        artifact_ipfs: null,
+        display_ipfs: null,
+        thumbnail_ipfs: null,
+        metadata: null,
+        metadata_ipfs: null,
         artifact_uri: 'someuri',
         price: '105',
         editions_size: 4,
@@ -2259,7 +2263,7 @@ describe('AppController (e2e)', () => {
 
     const nftRes = await axios({
       url: process.env['STORE_API'] + `/nfts/${nftId}`,
-      method: 'POST',
+      method: 'GET',
       validateStatus: () => true,
     });
     expect(nftRes.status).toEqual(400);
@@ -2283,10 +2287,10 @@ describe('AppController (e2e)', () => {
 
     const nftRes = await axios({
       url: process.env['STORE_API'] + `/nfts/${nftId}`,
-      method: 'POST',
+      method: 'GET',
       validateStatus: () => true,
     });
-    expect(nftRes.status).toEqual(201);
+    expect(nftRes.status).toEqual(200);
   });
 
   skipOnPriorFail(
@@ -2533,9 +2537,9 @@ async function emulateNftSale(userId: number, nftIds: number[], at: Date) {
   const qryRes = await storeRepl.query(
     `
 INSERT INTO nft_order (
-  user_id, order_at
+  user_id, order_at, expires_at
 )
-VALUES ($1, $2)
+VALUES ($1, $2, now())
 RETURNING id
     `,
     [userId, at.toUTCString()],
@@ -2556,9 +2560,9 @@ SELECT $1, UNNEST($2::INTEGER[])
   await storeRepl.query(
     `
 INSERT INTO payment (
-  payment_id, status, nft_order_id, provider, expires_at
+  payment_id, status, nft_order_id, provider, currency, amount
 )
-VALUES ('bla', 'succeeded', $1, 'test_provider', now())
+VALUES ('bla', 'succeeded', $1, 'test_provider', 'EUR', 4.45)
     `,
     [orderId],
   );

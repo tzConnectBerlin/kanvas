@@ -1,7 +1,13 @@
 attributes:
   name: string
   description: string
-  image: content_uri
+  image:
+    type: content_uri
+    restrictions:
+      mimetypes:
+      - image/png
+      - image/jpg
+      maxSize: 12.5MB
   thumbnail: content_uri
   create_ready: boolean
   price: number

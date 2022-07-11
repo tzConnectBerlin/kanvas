@@ -20,7 +20,12 @@ import {
   SIGNATURE_PREFIX_RELIST_NFT,
 } from 'kanvas-api-lib';
 import { DbPool } from 'src/db.module';
-import { STMResultStatus, StateTransitionMachine, Actor } from 'kanvas-stm-lib';
+import {
+  STMResultStatus,
+  StateTransitionMachine,
+  Actor,
+  ContentRestrictions,
+} from 'kanvas-stm-lib';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { NftEntity, NftUpdate } from '../entities/nft.entity';
 import { NftFilterParams } from '../params';
@@ -32,7 +37,6 @@ import { Lock } from 'async-await-mutex-lock';
 import { cryptoUtils } from 'sotez';
 import axios from 'axios';
 import { watch, FSWatcher } from 'fs';
-// const fs = require('fs');
 
 @Injectable()
 export class NftService {
@@ -79,6 +83,12 @@ export class NftService {
 
   getAttributes(): any {
     return this.stm.getAttributes();
+  }
+
+  getContentRestrictions(contentAttr: string): ContentRestrictions | undefined {
+    console.log(typeof this);
+    console.log(typeof this.stm);
+    return this.stm.getContentRestrictions(contentAttr);
   }
 
   getSortableFields(): string[] {
