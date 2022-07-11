@@ -8,7 +8,13 @@ attributes:
       - image/png
       - image/jpg
       maxSize: 12.5MB
-  thumbnail: content_uri
+  thumbnail:
+    type: content_uri
+    restrictions:
+      mimetypes:
+      - image/png
+      - image/jpg
+      maxSize: 10MB
   create_ready: boolean
   price: number
   editions_size: number

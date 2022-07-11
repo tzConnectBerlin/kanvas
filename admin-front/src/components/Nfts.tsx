@@ -9,8 +9,8 @@ import {
   SimpleForm,
   TextInput,
   Create,
-  ImageInput,
-  ImageField,
+  FileInput,
+  FileField,
   NumberInput,
   NumberField,
   useGetOne,
@@ -145,9 +145,9 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
   if (props.type === 'content_uri') {
 
     return (
-      <ImageInput label={props.label} source={`files[${props.label}]`} accept="image/*">
-        <ImageField src={`attributes.${props.label}`} source="src" title="title" />
-      </ImageInput>
+      <FileInput label={props.label} source={`files[${props.label}]`} >
+        <FileField src={`attributes.${props.label}`} source="src" title="title" />
+      </FileInput>
     );
   }
   else return null
