@@ -64,7 +64,7 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
           newNft.description,
           onsaleFrom?.toUTCString(),
           onsaleUntil?.toUTCString(),
-          newNft.price,
+          this.currencyService.convertFromCurrency(newNft.price, BASE_CURRENCY),
           newNft.editionsSize,
           newNft.metadata,
         ],

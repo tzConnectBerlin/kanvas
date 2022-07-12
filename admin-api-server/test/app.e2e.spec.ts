@@ -2186,7 +2186,7 @@ describe('AppController (e2e)', () => {
       .patch(`/nft/${nftId}`)
       .set('authorization', bearer)
       .send({
-        price: JSON.stringify(105),
+        price: JSON.stringify(105.1),
         categories: JSON.stringify(
           allowedCategories.body.data.map((cat: any) => cat.id).slice(0, 3),
         ),
@@ -2232,7 +2232,7 @@ describe('AppController (e2e)', () => {
         metadata: null,
         metadata_ipfs: null,
         artifact_uri: 'someuri',
-        price: '105',
+        price: '10510', // in cents in the db
         editions_size: 4,
         view_count: 0,
         description: 'some long description',

@@ -55,7 +55,7 @@ export class CurrencyService {
     fromCurrency: string,
     maxAge: Duration = Duration.fromObject({ minutes: DEFAULT_MAX_RATE_AGE_MINUTES }),
   ): number {
-    return amount / this.#getRate(fromCurrency, maxAge);
+    return Number((amount / this.#getRate(fromCurrency, maxAge)).toFixed(0));
   }
 
   #getRate(
