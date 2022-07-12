@@ -3,11 +3,6 @@ attributes:
   description: string
   image:
     type: content_uri
-    restrictions:
-      mimetypes:
-      - image/png
-      - image/jpg
-      maxSize: 12.5MB
   thumbnail:
     type: content_uri
     restrictions:

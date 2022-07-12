@@ -44,8 +44,11 @@ function contentFilter(req: any, file: any, callback: any) {
     typeof mimetypes !== 'undefined' &&
     !mimetypes.some((mimeAllowed: string) => file.mimetype === mimeAllowed)
   ) {
-    req.fileValidationError = `Invalid file type (${file.mimetype})`;
-    return callback(null, false);
+    const err = `Invalid file type (${
+      file.mimetype
+    }), allowed types: ${JSON.stringify(mimetypes)}`;
+    req.fileValidationError = err;
+    return callback(new HttpException(err, HttpStatus.BAD_REQUEST), false);
   }
 
   return callback(null, true);

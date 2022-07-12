@@ -86,8 +86,6 @@ export class NftService {
   }
 
   getContentRestrictions(contentAttr: string): ContentRestrictions | undefined {
-    console.log(typeof this);
-    console.log(typeof this.stm);
     return this.stm.getContentRestrictions(contentAttr);
   }
 
