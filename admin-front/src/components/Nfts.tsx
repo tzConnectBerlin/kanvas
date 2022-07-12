@@ -264,16 +264,35 @@ const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
     </Stack>
   };
 
-  if (props.type === 'content_uri' && props.attributesName !== 'image') {
+  if (props.type === 'content_uri' && props.attributesName !== 'artifact') {
     return <Stack direction="column">
       <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
         {props.label}
 
       </Typography>
-      <img src={props.record[props.attributesName]} style={{ maxWidth: '100px', maxHeight: '100px' }} />
+      {
+        renderContent('100px', '100px', props.record[props.attributesName])
+      }
     </Stack>
   }
   else return null
+}
+
+function renderContent(maxWidth: string, maxHeight: string, uri?: string) {
+  if (typeof uri === 'undefined') {
+    return;
+  }
+  if (uri.endsWith(".mp4")) {
+    return (
+      <video  width={maxWidth} height={maxHeight} controls>
+        <source src={uri} type="video/mp4"  />
+      </video>
+    )
+  }
+  // assuming this is an image then (for backwards compatibility)
+  return (
+    <img src={uri} style={{ margin: 'auto', maxWidth: '80%', maxHeight: '80%' }} />
+  )
 }
 
 const NftAside = ({ ...props }) => {
@@ -343,7 +362,9 @@ const NftAside = ({ ...props }) => {
         <Stack direction="row" sx={{ position: 'relative', alignItems: 'flex-end', margin: '2em', height: '100%', flexGrow: 1 }} spacing={3}>
 
           <Box sx={{ minHeight: '100px', display: 'flex', flexDirection: "column", flexGrow: 1, justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
-            <img src={props.record?.attributes.image} style={{ margin: 'auto', maxWidth: '80%', maxHeight: '80%' }} />
+          {
+            renderContent('80%', '80%', props.record?.attributes.artifact)
+          }
           </Box>
 
           <Stack direction="column" sx={{ flexStart: 'end', width: '60%' }}>

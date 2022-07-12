@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
-import { FILE_MAX_BYTES, MAX_FILE_UPLOADS_PER_CALL } from 'src/constants';
+import { MAX_FILE_UPLOADS_PER_CALL } from 'src/constants';
 import { NftEntity, NftUpdate } from '../entities/nft.entity';
 import { NftService } from '../service/nft.service';
 import { CurrentUser } from 'src/decoraters/user.decorator';

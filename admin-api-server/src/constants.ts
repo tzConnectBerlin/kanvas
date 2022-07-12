@@ -9,10 +9,6 @@ export const PG_CONNECTION_STORE = 'PG_CONNECTION_STORE';
 export const PG_UNIQUE_VIOLATION_ERRCODE = '23505';
 export const AUTH_SALT_ROUNDS = 10;
 
-export const FILE_MAX_BYTES: number | undefined = maybe(
-  Number,
-  process.env['NFT_ARTIFACT_MAX_BYTES'],
-);
 export const FILE_PREFIX = 'NFT_FILE_';
 export const MAX_FILE_UPLOADS_PER_CALL = 5;
 

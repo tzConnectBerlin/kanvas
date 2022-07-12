@@ -1,8 +1,7 @@
 attributes:
   name: string
   description: string
-  image:
-    type: content_uri
+  artifact: content_uri
   thumbnail:
     type: content_uri
     restrictions:
@@ -29,10 +28,10 @@ states:
       when:
       - nft.name.length > 0
       - nft.description.length > 0
-      - nft.image.length > 0
+      - nft.artifact.length > 0
       - nft.thumbnail.length > 0
     mutables:
-    - attributes: [name, image, thumbnail, description]
+    - attributes: [name, artifact, thumbnail, description]
       by_roles: [creator]
 
   setup_nft:

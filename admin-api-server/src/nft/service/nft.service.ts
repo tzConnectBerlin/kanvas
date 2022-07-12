@@ -37,6 +37,7 @@ import { Lock } from 'async-await-mutex-lock';
 import { cryptoUtils } from 'sotez';
 import axios from 'axios';
 import { watch, FSWatcher } from 'fs';
+const mime = require('mime');
 
 @Injectable()
 export class NftService {
@@ -352,7 +353,8 @@ WHERE id = $1
       );
     }
 
-    const fileName = `${FILE_PREFIX}_${nftId}_${attribute}`;
+    const extension = mime.getExtension(file.mimetype);
+    const fileName = `${FILE_PREFIX}_${nftId}_${attribute}.${extension}`;
     // we'll simply store the uri as a pointer to the image in our own db
     const contentUri = await this.s3Service.uploadFile(file, fileName);
 
