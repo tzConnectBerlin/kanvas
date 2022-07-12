@@ -2201,7 +2201,7 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer)
       .send({
         publish_vote: JSON.stringify('yes'),
-        image: JSON.stringify('someuri'),
+        artifact: JSON.stringify('someuri'),
         thumbnail: JSON.stringify('somethumbnailuri'),
         description: JSON.stringify('some long description'),
       });
@@ -2345,7 +2345,7 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer)
         .send({
           publish_vote: JSON.stringify('yes'),
-          image: JSON.stringify('someuri'),
+          artifact: JSON.stringify('someuri'),
           thumbnail: JSON.stringify('somethumbnailuri'),
           description: JSON.stringify('some long description'),
         });
@@ -2406,7 +2406,7 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer)
       .send({
         publish_vote: JSON.stringify('yes'),
-        image: JSON.stringify('someuri'),
+        artifact: JSON.stringify('someuri'),
         thumbnail: JSON.stringify('somethumbnailuri'),
         description: JSON.stringify('some long description'),
       });
@@ -2495,7 +2495,7 @@ describe('AppController (e2e)', () => {
       create_ready: 'boolean',
       delist_vote: 'votes',
       description: 'string',
-      image: 'string',
+      artifact: 'string',
       thumbnail: 'string',
       price: 'number',
       editions_size: 'number',

@@ -2,6 +2,12 @@ attributes:
   name: string
   description: string
   artifact: content_uri
+  display:
+    type: content_uri
+    restrictions:
+      mimetypes:
+      - image/png
+      - image/jpg
   thumbnail:
     type: content_uri
     restrictions:
@@ -29,9 +35,8 @@ states:
       - nft.name.length > 0
       - nft.description.length > 0
       - nft.artifact.length > 0
-      - nft.thumbnail.length > 0
     mutables:
-    - attributes: [name, artifact, thumbnail, description]
+    - attributes: [name, artifact, display, thumbnail, description]
       by_roles: [creator]
 
   setup_nft:

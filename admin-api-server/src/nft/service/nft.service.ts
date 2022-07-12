@@ -484,7 +484,8 @@ WHERE TARGET.value != EXCLUDED.value
       name: attr.name,
       description: attr.description,
 
-      artifactUri: attr.image,
+      artifactUri: attr.artifact,
+      displayUri: attr.display,
       thumbnailUri: attr.thumbnail,
 
       price: attr.price,

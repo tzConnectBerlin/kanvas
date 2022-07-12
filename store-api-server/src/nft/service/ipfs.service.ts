@@ -151,6 +151,7 @@ WHERE id = $1
 
     return axios
       .post('https://api.pinata.cloud/pinning/pinFileToIPFS', form, {
+        maxBodyLength: 1000000000, //this is needed to prevent axios from erroring with large files
         headers: {
           pinata_api_key: this.PINATA_API_KEY || '',
           pinata_secret_api_key: this.PINATA_API_SECRET || '',
