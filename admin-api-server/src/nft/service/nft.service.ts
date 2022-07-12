@@ -55,7 +55,14 @@ export class NftService {
     private readonly roleService: RoleService,
   ) {
     const stmConfigFile = STM_CONFIG_FILE;
-    this.stm = new StateTransitionMachine(stmConfigFile);
+    try {
+      this.stm = new StateTransitionMachine(stmConfigFile);
+    } catch (err: any) {
+      Logger.error(
+        `State transition machine config load failed, shutting down. err: ${err}`,
+      );
+      process.exit(1);
+    }
     this.nftLock = new Lock<number>();
 
     this.stmFileWatcher = watch(
