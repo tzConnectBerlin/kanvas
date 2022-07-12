@@ -17,6 +17,7 @@ async function bootstrap() {
       origin: true,
     };
   }
+  console.log(`cors: ${JSON.stringify(cors)}`);
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: cors,

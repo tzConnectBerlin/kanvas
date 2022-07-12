@@ -20,7 +20,12 @@ import {
   SIGNATURE_PREFIX_RELIST_NFT,
 } from 'kanvas-api-lib';
 import { DbPool } from 'src/db.module';
-import { STMResultStatus, StateTransitionMachine, Actor } from 'kanvas-stm-lib';
+import {
+  STMResultStatus,
+  StateTransitionMachine,
+  Actor,
+  ContentRestrictions,
+} from 'kanvas-stm-lib';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { NftEntity, NftUpdate } from '../entities/nft.entity';
 import { NftFilterParams } from '../params';
@@ -32,7 +37,7 @@ import { Lock } from 'async-await-mutex-lock';
 import { cryptoUtils } from 'sotez';
 import axios from 'axios';
 import { watch, FSWatcher } from 'fs';
-// const fs = require('fs');
+const mime = require('mime');
 
 @Injectable()
 export class NftService {
@@ -50,7 +55,14 @@ export class NftService {
     private readonly roleService: RoleService,
   ) {
     const stmConfigFile = STM_CONFIG_FILE;
-    this.stm = new StateTransitionMachine(stmConfigFile);
+    try {
+      this.stm = new StateTransitionMachine(stmConfigFile);
+    } catch (err: any) {
+      Logger.error(
+        `State transition machine config load failed, shutting down. err: ${err}`,
+      );
+      process.exit(1);
+    }
     this.nftLock = new Lock<number>();
 
     this.stmFileWatcher = watch(
@@ -79,6 +91,10 @@ export class NftService {
 
   getAttributes(): any {
     return this.stm.getAttributes();
+  }
+
+  getContentRestrictions(contentAttr: string): ContentRestrictions | undefined {
+    return this.stm.getContentRestrictions(contentAttr);
   }
 
   getSortableFields(): string[] {
@@ -344,7 +360,8 @@ WHERE id = $1
       );
     }
 
-    const fileName = `${FILE_PREFIX}_${nftId}_${attribute}`;
+    const extension = mime.getExtension(file.mimetype);
+    const fileName = `${FILE_PREFIX}_${nftId}_${attribute}.${extension}`;
     // we'll simply store the uri as a pointer to the image in our own db
     const contentUri = await this.s3Service.uploadFile(file, fileName);
 
@@ -467,7 +484,8 @@ WHERE TARGET.value != EXCLUDED.value
       name: attr.name,
       description: attr.description,
 
-      artifactUri: attr.image,
+      artifactUri: attr.artifact,
+      displayUri: attr.display,
       thumbnailUri: attr.thumbnail,
 
       price: attr.price,

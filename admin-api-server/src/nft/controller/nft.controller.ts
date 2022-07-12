@@ -9,14 +9,12 @@ import {
   UseGuards,
   UploadedFiles,
   UseInterceptors,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
-import {
-  FILE_MAX_BYTES,
-  MAX_FILE_UPLOADS_PER_CALL,
-  ALLOWED_FILE_MIMETYPES,
-} from 'src/constants';
+import { MAX_FILE_UPLOADS_PER_CALL } from 'src/constants';
 import { NftEntity, NftUpdate } from '../entities/nft.entity';
 import { NftService } from '../service/nft.service';
 import { CurrentUser } from 'src/decoraters/user.decorator';
@@ -27,15 +25,30 @@ import {
   queryParamsToPaginationParams,
   validatePaginationParams,
 } from 'src/utils';
+import { ContentRestrictions } from 'kanvas-stm-lib';
+const filesizeHuman = require('filesize').partial({ standard: 'jedec' });
 
-function pngFileFilter(req: any, file: any, callback: any) {
+let getContentRestrictions: (string) => ContentRestrictions;
+function contentFilter(req: any, file: any, callback: any) {
+  if (typeof getContentRestrictions === 'undefined') {
+    return callback(null, true);
+  }
+
+  const restrictions = getContentRestrictions(file.originalname);
+  if (typeof restrictions === 'undefined') {
+    return callback(null, true);
+  }
+
+  const mimetypes = restrictions.mimetypes;
   if (
-    !ALLOWED_FILE_MIMETYPES.some(
-      (mimeAllowed: string) => file.mimetype === mimeAllowed,
-    )
+    typeof mimetypes !== 'undefined' &&
+    !mimetypes.some((mimeAllowed: string) => file.mimetype === mimeAllowed)
   ) {
-    req.fileValidationError = 'Invalid file type';
-    return callback(new Error(`Invalid file type: ${file.mimetype}`), false);
+    const err = `Invalid file type (${
+      file.mimetype
+    }), allowed types: ${JSON.stringify(mimetypes)}`;
+    req.fileValidationError = err;
+    return callback(new HttpException(err, HttpStatus.BAD_REQUEST), false);
   }
 
   return callback(null, true);
@@ -43,7 +56,11 @@ function pngFileFilter(req: any, file: any, callback: any) {
 
 @Controller('nft')
 export class NftController {
-  constructor(private readonly nftService: NftService) {}
+  constructor(private readonly nftService: NftService) {
+    getContentRestrictions = (attrName: string) => {
+      return this.nftService.getContentRestrictions(attrName);
+    };
+  }
 
   @Get('/attributes')
   @UseGuards(JwtAuthGuard)
@@ -75,10 +92,7 @@ export class NftController {
 
   @UseInterceptors(
     FilesInterceptor('files[]', MAX_FILE_UPLOADS_PER_CALL, {
-      fileFilter: pngFileFilter,
-      limits: {
-        fileSize: FILE_MAX_BYTES,
-      },
+      fileFilter: contentFilter,
     }),
   )
   @UseGuards(JwtAuthGuard)
@@ -120,6 +134,21 @@ export class NftController {
 
     if (typeof filesArray !== 'undefined') {
       for (const file of filesArray) {
+        const attrName = file.originalname;
+
+        const restrictions = this.nftService.getContentRestrictions(attrName);
+        if (
+          typeof restrictions?.maxBytes !== 'undefined' &&
+          file.size > restrictions.maxBytes
+        ) {
+          throw new HttpException(
+            `${attrName} too big (file size=${filesizeHuman(
+              file.size,
+            )}), max allowed size is ${filesizeHuman(restrictions.maxBytes)}`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
         res.push(<NftUpdate>{
           attribute: file.originalname,
           file: file,
