@@ -12,7 +12,7 @@ async function bootstrap() {
   const port = process.env['KANVAS_API_PORT'] || 3000;
 
   let cors: any = false;
-  if (process.env.LOCAL_CORS === 'true') {
+  if (!BEHIND_PROXY) {
     cors = {
       credentials: true,
       origin: true,

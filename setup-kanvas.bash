@@ -2,6 +2,19 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 
+function assert_dependency {
+    dep=$1
+    command -v "$dep" >/dev/null 2>&1 || {
+        echo >&2 "$dep is a required dependency, it is currently not installed"
+        exit 1
+    }
+}
+assert_dependency jq
+assert_dependency envsubst
+assert_dependency git
+assert_dependency docker
+
+
 start_from=${1:-0}
 end_at=${2:-0}
 
@@ -126,58 +139,73 @@ function create_random_secrets {
 }
 
 function setup_admin_api {
-    cp_bak '' admin-api-server/.env || exit 1
+    set -e
+    cp_bak '' admin-api-server/.env
 
-    replace_env JWT_EXPIRATION_TIME "`take_env JWT_EXPIRATION_TIME global.env`" admin-api-server/.env || exit 1
-    replace_env JWT_SECRET "`take_env JWT_SECRET_ADMIN global.env`" admin-api-server/.env || exit 1
+    replace_env JWT_EXPIRATION_TIME "`take_env JWT_EXPIRATION_TIME global.env`" admin-api-server/.env
+    replace_env JWT_SECRET "`take_env JWT_SECRET_ADMIN global.env`" admin-api-server/.env
 
-    replace_env AWS_S3_BUCKET "`take_env AWS_S3_BUCKET_ADMIN global.env`" admin-api-server/.env || exit 1
-    replace_env AWS_S3_ACCESS_KEY "`take_env AWS_S3_ACCESS_KEY global.env`" admin-api-server/.env || exit 1
-    replace_env AWS_S3_KEY_SECRET "`take_env AWS_S3_KEY_SECRET global.env`" admin-api-server/.env || exit 1
+    replace_env AWS_S3_BUCKET "`take_env AWS_S3_BUCKET_ADMIN global.env`" admin-api-server/.env
+    replace_env AWS_S3_ACCESS_KEY "`take_env AWS_S3_ACCESS_KEY global.env`" admin-api-server/.env
+    replace_env AWS_S3_KEY_SECRET "`take_env AWS_S3_KEY_SECRET global.env`" admin-api-server/.env
 
-    replace_env STORE_API "`take_env STORE_API_URL global.env`" admin-api-server/.env || exit 1
+    replace_env STORE_API "`take_env STORE_API_URL global.env`" admin-api-server/.env
     replace_env ADMIN_PRIVATE_KEY "`take_env ADMIN_PRIVATE_KEY global.env`" admin-api-server/.env
 
     replace_env BEHIND_PROXY "`take_env BEHIND_PROXY_ADMIN global.env`" admin-api-server/.env
+
+    replace_env PGHOST "`take_env ADMIN_PGHOST global.env`" store-api-server/.env
+    replace_env PGPORT "`take_env ADMIN_PGPORT global.env`" store-api-server/.env
+    replace_env PGUSER "`take_env ADMIN_PGUSER global.env`" store-api-server/.env
+    replace_env PGPASSWORD "`take_env ADMIN_PGPASSWORD global.env`" store-api-server/.env
+    replace_env PGDATABASE "`take_env ADMIN_PGDATABASE global.env`" store-api-server/.env
+    replace_env STORE_REPLICATION_TARGET_PGDATABASE "`take_env STORE_REPLICATION_TARGET_PGDATABASE global.env`" store-api-server/.env
 }
 
 function setup_store_api {
-    cp_bak '' store-api-server/.env || exit 1
+    set -e
+    cp_bak '' store-api-server/.env
 
-    replace_env JWT_EXPIRATION_TIME "`take_env JWT_EXPIRATION_TIME global.env`" store-api-server/.env || exit 1
-    replace_env JWT_SECRET "`take_env JWT_SECRET_STORE global.env`" store-api-server/.env || exit 1
+    replace_env JWT_EXPIRATION_TIME "`take_env JWT_EXPIRATION_TIME global.env`" store-api-server/.env
+    replace_env JWT_SECRET "`take_env JWT_SECRET_STORE global.env`" store-api-server/.env
 
-    replace_env AWS_S3_BUCKET "`take_env AWS_S3_BUCKET_STORE global.env`" store-api-server/.env || exit 1
-    replace_env AWS_S3_ACCESS_KEY "`take_env AWS_S3_ACCESS_KEY global.env`" store-api-server/.env || exit 1
-    replace_env AWS_S3_KEY_SECRET "`take_env AWS_S3_KEY_SECRET global.env`" store-api-server/.env || exit 1
+    replace_env AWS_S3_BUCKET "`take_env AWS_S3_BUCKET_STORE global.env`" store-api-server/.env
+    replace_env AWS_S3_ACCESS_KEY "`take_env AWS_S3_ACCESS_KEY global.env`" store-api-server/.env
+    replace_env AWS_S3_KEY_SECRET "`take_env AWS_S3_KEY_SECRET global.env`" store-api-server/.env
 
-    replace_env STRIPE_SECRET "`take_env STRIPE_SECRET global.env`" store-api-server/.env || exit 1
-    replace_env STRIPE_WEBHOOK_SECRET "`take_env STRIPE_WEBHOOK_SECRET global.env`" store-api-server/.env || exit 1
+    replace_env STRIPE_SECRET "`take_env STRIPE_SECRET global.env`" store-api-server/.env
+    replace_env STRIPE_WEBHOOK_SECRET "`take_env STRIPE_WEBHOOK_SECRET global.env`" store-api-server/.env
 
-    replace_env PINATA_API_KEY  "`take_env PINATA_API_KEY global.env`" store-api-server/.env || exit 1
-    replace_env PINATA_API_SECRET  "`take_env PINATA_API_SECRET global.env`" store-api-server/.env || exit 1
+    replace_env PINATA_API_KEY  "`take_env PINATA_API_KEY global.env`" store-api-server/.env
+    replace_env PINATA_API_SECRET  "`take_env PINATA_API_SECRET global.env`" store-api-server/.env
 
-    replace_env CART_EXPIRATION_MILLI_SECS  "`take_env CART_EXPIRATION_MILLI_SECS global.env`" store-api-server/.env || exit 1
-    replace_env ORDER_EXPIRATION_MILLI_SECS  "`take_env ORDER_EXPIRATION_MILLI_SECS global.env`" store-api-server/.env || exit 1
+    replace_env CART_EXPIRATION_MILLI_SECS  "`take_env CART_EXPIRATION_MILLI_SECS global.env`" store-api-server/.env
+    replace_env ORDER_EXPIRATION_MILLI_SECS  "`take_env ORDER_EXPIRATION_MILLI_SECS global.env`" store-api-server/.env
 
-    replace_env MINTER_TZ_ADDRESS  "`take_env MINTER_TZ_ADDRESS global.env`" store-api-server/.env || exit 1
-    replace_env ADMIN_PUBLIC_KEY  "`take_env ADMIN_PUB_KEY global.env`" store-api-server/.env || exit 1
+    replace_env MINTER_TZ_ADDRESS  "`take_env MINTER_TZ_ADDRESS global.env`" store-api-server/.env
+    replace_env ADMIN_PUBLIC_KEY  "`take_env ADMIN_PUB_KEY global.env`" store-api-server/.env
 
-    replace_env BEHIND_PROXY "`take_env BEHIND_PROXY_STORE global.env`" store-api-server/.env || exit 1
+    replace_env BEHIND_PROXY "`take_env BEHIND_PROXY_STORE global.env`" store-api-server/.env
 
-    replace_env PROFILE_PICTURES_ENABLED "`take_env PROFILE_PICTURES_ENABLED global.env`" store-api-server/.env || exit 1
+    replace_env PROFILE_PICTURES_ENABLED "`take_env PROFILE_PICTURES_ENABLED global.env`" store-api-server/.env
 
-    replace_env KANVAS_CONTRACT "`take_env CONTRACT_ADDRESS global.env`" store-api-server/.env || exit 1
-    replace_env TEZOS_NETWORK "`take_env NETWORK global.env`" store-api-server/.env || exit 1
+    replace_env KANVAS_CONTRACT "`take_env CONTRACT_ADDRESS global.env`" store-api-server/.env
+    replace_env TEZOS_NETWORK "`take_env NETWORK global.env`" store-api-server/.env
 
-    replace_env CACHE_TTL "`take_env CACHE_TTL global.env`" store-api-server/.env || exit 1
-    replace_env CART_MAX_ITEMS "`take_env CART_MAX_ITEMS global.env`" store-api-server/.env || exit 1
+    replace_env CACHE_TTL "`take_env CACHE_TTL global.env`" store-api-server/.env
+    replace_env CART_MAX_ITEMS "`take_env CART_MAX_ITEMS global.env`" store-api-server/.env
 
-    replace_env RATE_LIMITLESS_SECRET "`take_env RATE_LIMITLESS_SECRET global.env`" store-api-server/.env || exit 1
+    replace_env RATE_LIMITLESS_SECRET "`take_env RATE_LIMITLESS_SECRET global.env`" store-api-server/.env
 
-    replace_env WERT_PRIV_KEY "`take_env WERT_PRIV_KEY global.env`" store-api-server/.env || exit 1
+    replace_env WERT_PRIV_KEY "`take_env WERT_PRIV_KEY global.env`" store-api-server/.env
 
     replace_env TEZPAY_PAYPOINT_ADDRESS "`take_env PAYPOINT_ADDRESS global.env`" store-api-server/.env
+
+    replace_env PGHOST "`take_env STORE_PGHOST global.env`" store-api-server/.env
+    replace_env PGPORT "`take_env STORE_PGPORT global.env`" store-api-server/.env
+    replace_env PGUSER "`take_env STORE_PGUSER global.env`" store-api-server/.env
+    replace_env PGPASSWORD "`take_env STORE_PGPASSWORD global.env`" store-api-server/.env
+    replace_env PGDATABASE "`take_env STORE_PGDATABASE global.env`" store-api-server/.env
 }
 
 function setup_store_front {
@@ -353,7 +381,7 @@ EOF
 
 step \
     'Creating a fresh global.env file (note: if one already existed it will be backed up under a .bak extension)' \
-    cp_bak global.env.example global.env || exit 1
+    cp_bak global.env.skeleton global.env || exit 1
 
 step \
     'Setting up nested git repositories' \
@@ -461,17 +489,19 @@ step \
     'Building docker images' \
     docker-compose build || exit 1
 
-step \
-    'If running with nginx, continue. otherwise quit here.'
+if [[ "`take_env BEHIND_PROXY_STORE global.env`" == 'yes' || "`take_env BEHIND_PROXY_ADMIN global.env`" == 'yes' ]]; then
+    step \
+        'If running with nginx, continue. otherwise quit here.'
 
-step \
-    'Setting up the nginx config (this will append to the existing nginx config file)
+    step \
+        'Setting up the nginx config (this will append to the existing nginx config file)
 
-Note: Certbot will prompt for your information to setup SSL' \
-    setup_nginx || exit 1
+    Note: Certbot will prompt for your information to setup SSL' \
+        setup_nginx || exit 1
+fi
 
 step \
     'ALL DONE
 
-execute "./run-deployment.bash" to start kanvas' \
+execute "docker-compose up" for development or "./run-deployment.bash" for deploying kanvas' \
     :

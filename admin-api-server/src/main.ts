@@ -11,13 +11,12 @@ var bodyParser = require('body-parser');
 
 async function bootstrap() {
   let cors: any = false;
-  if (process.env.LOCAL_CORS === 'true') {
+  if (!BEHIND_PROXY) {
     cors = {
       credentials: true,
       origin: true,
     };
   }
-  console.log(`cors: ${JSON.stringify(cors)}`);
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: cors,

@@ -191,13 +191,19 @@ WHERE id = $1
   }
 
   #serviceEnabled(): boolean {
-    if (typeof this.PINATA_API_KEY === 'undefined') {
+    if (
+      typeof this.PINATA_API_KEY === 'undefined' ||
+      this.PINATA_API_KEY === ''
+    ) {
       Logger.warn(
         `failed to upload NFT to IPFS, IpfsService not enabled: PINATA_API_KEY env var not set`,
       );
       return false;
     }
-    if (typeof this.PINATA_API_SECRET === 'undefined') {
+    if (
+      typeof this.PINATA_API_SECRET === 'undefined' ||
+      this.PINATA_API_KEY === ''
+    ) {
       Logger.warn(
         `failed to upload NFT to IPFS, IpfsService not enabled: PINATA_API_SECRET env var not set`,
       );

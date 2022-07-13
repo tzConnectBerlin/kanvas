@@ -2,6 +2,17 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 
+source_db="$STORE_PGHOST:$STORE_PGPORT"
+target_db="$PGHOST:$PGPORT"
+if [[ "$source_db" == "$target_db" ]]; then
+    if [[ "$STORE_PGDATABASE" != "$STORE_REPLICATION_TARGET_PGDATABASE" ]] ; then
+        echo "error: store and admin database are the same postgres instance. in this setup, store PGDATABASE must equal the admin's store replication target PGDATABASE (aka, STORE_PGDATABASE should equal STORE_REPLICATION_TARGET_PGDATABASE; $STORE_PGDATABASE != $STORE_REPLICATION_TARGET_PGDATABASE" >&2
+        exit 1
+    fi
+    echo "no need to set up store db replication, store db and admin db are the same"
+    exit 0
+fi
+
 echo waiting for subscription target database to be up..
 (
     export PGUSER=$STORE_PGUSER

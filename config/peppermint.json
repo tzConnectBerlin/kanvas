@@ -1,0 +1,23 @@
+{
+    "batchSize": 110,
+    "confirmations": 2,
+    "timeout": 300,
+    "privateKey": "edsk4HFdYfXKZiXrpGh7NakNDy4Z8iFYrtNkKso2K2qmT3rkwA9S4Z",
+    "rpcUrl": "https://ithaca-archive.tzconnect.berlin",
+    "pollingDelay": 1000,
+    "dbConnection": {
+            "user": "store_pguser",
+            "password": "store_pgpass",
+            "host": "store-db",
+            "port": 5432,
+            "database": "dev_database"
+    },
+    "handlers": {
+        "nft": {
+            "handler": "MultiassetHandler",
+            "args": {
+                "contract_address": "KT1Ky9AgcqYnRubMi8ZfXnuuCVHFbPMqmpbL"
+            }
+        }
+    }
+}

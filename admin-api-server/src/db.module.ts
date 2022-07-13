@@ -54,7 +54,7 @@ const dbStoreReplProvider = {
       port: Number(assertEnv('PGPORT')),
       user: assertEnv('PGUSER'),
       password: assertEnv('PGPASSWORD'),
-      database: 'store_replication',
+      database: assertEnv('STORE_REPLICATION_TARGET_PGDATABASE'),
     });
     return w.storeDbPool;
   },

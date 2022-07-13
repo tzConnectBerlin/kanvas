@@ -79,7 +79,7 @@ describe('AppController (e2e)', () => {
       cartMaxItems: 10,
       supportedCurrencies: ['USD', 'GBP', 'EUR', 'XTZ'],
       tezosNetwork: 'testnet',
-      kanvasContract: 'KT1..',
+      kanvasContract: 'KT1..fa2',
     });
   });
 
@@ -3174,10 +3174,12 @@ describe('AppController (e2e)', () => {
         delete paymentIntentRes.body.nfts[i].onsaleUntil;
       }
     }
+
+    expect(typeof paymentIntentRes.body.paymentDetails.receiverAddress).toEqual(
+      'string',
+    );
+    delete paymentIntentRes.body.paymentDetails;
     expect(paymentIntentRes.body).toEqual({
-      paymentDetails: {
-        receiverAddress: 'KT1MZTPQFdEZKLXtdQzpuA4MFt5ZkmKqFqkq',
-      },
       currency: 'XTZ',
       nfts: [
         {

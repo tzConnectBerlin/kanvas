@@ -1,16 +1,29 @@
 # Kanvas is a distributed system with multiple databases, servers, and web browser clients
-# For development, we can spin everything up via docker-compose
+# For development and easy deployments that where optimal performance is not required,
+# we can spin everything up via docker-compose
 
 
 services:
+  db:
+    image: postgres:13
+    ports:
+      - 54322:5432
+    environment:
+      POSTGRES_USER: usr
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: store_db
+    command:
+      - postgres
+    restart: on-failure
+
   store-db:
     image: postgres:13
     ports:
       - 54320:5432
     environment:
-      POSTGRES_USER: store_pguser
-      POSTGRES_PASSWORD: store_pgpass
-      POSTGRES_DB: dev_database
+      POSTGRES_USER: usr
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: store_db
     command:
       - postgres
       - -c
@@ -27,12 +40,13 @@ services:
       - 3005:3000
     links:
       - store-db
+      - db
     environment:
-      PGHOST: store-db
+      PGHOST: db # store-db
       PGPORT: 5432
-      PGUSER: store_pguser
-      PGPASSWORD: store_pgpass
-      PGDATABASE: dev_database
+      PGUSER: usr
+      PGPASSWORD: pass
+      PGDATABASE: store_db
       KANVAS_API_PORT: 3000
     env_file:
       - store-api-server/.env
@@ -41,7 +55,7 @@ services:
         set -e
         ./script/wait-db
         INIT_QUEPASA=false ./script/migrate up
-        if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
+        if [[ "`psql -c \"select count(1) from nft_category\" -tA`" == "0" ]]; then
           if [ "${DEPLOYMENT:-no}" == "yes" ]; then
             psql < script/populate-stagingdb.sql
           else
@@ -74,13 +88,16 @@ services:
     image: ghcr.io/tzconnectberlin/que-pasa:1.2.5
     volumes:
       - ./config:/config
+    links:
+    - store-db
+    - db
     environment:
-      PGHOST: store-db
+      PGHOST: db # store-db
       PGPORT: 5432
-      PGUSER: store_pguser
-      PGPASSWORD: store_pgpass
-      PGDATABASE: dev_database
-      DATABASE_URL: "postgres://store_pguser:store_pgpass@store-db:5432/dev_database"
+      PGUSER: usr
+      PGPASSWORD: pass
+      PGDATABASE: store_db
+      DATABASE_URL: "postgres://usr:pass@db:5432/store_db"
       CONTRACT_SETTINGS: /config/kanvas.yaml
     env_file:
       - config/.env-kanvas
@@ -111,7 +128,7 @@ services:
         node app.mjs
       '
     environment:
-      DATABASE_URL: "postgres://store_pguser:store_pgpass@store-db:5432/dev_database"
+      DATABASE_URL: "postgres://usr:pass@db:5432/store_db"
     restart: on-failure
 
   admin-db:
@@ -119,9 +136,9 @@ services:
     ports:
       - 54321:5432
     environment:
-      POSTGRES_USER: admin_pguser
-      POSTGRES_PASSWORD: admin_pgpass
-      POSTGRES_DB: dev_database
+      POSTGRES_USER: usr
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: admin_db
     restart: on-failure
 
   admin-api:
@@ -134,8 +151,8 @@ services:
         ./script/wait-db
         INIT_QUEPASA=false ./script/migrate
         if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
-          yarn seed
           ./script/setup-replication-sub
+          yarn seed
         fi
         if [ "${ADMIN_API_ENABLED:-yes}" == "yes" ]; then
           yarn run start:prod
@@ -147,24 +164,26 @@ services:
       - admin-db
       - store-db
       - store-api
+      - db
     env_file:
       - admin-api-server/.env
     environment:
-      POSTGRES_USER: admin_pguser
-      POSTGRES_PASSWORD: admin_pgpass
-      POSTGRES_DB: dev_database
+      POSTGRES_USER: usr
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: admin_db
 
-      PGHOST: admin-db
+      PGHOST: db # admin-db
       PGPORT: 5432
-      PGUSER: admin_pguser
-      PGPASSWORD: admin_pgpass
-      PGDATABASE: dev_database
+      PGUSER: usr
+      PGPASSWORD: pass
+      PGDATABASE: admin_db
+      STORE_REPLICATION_TARGET_PGDATABASE: store_db
 
-      STORE_PGHOST: store-db
+      STORE_PGHOST: db # store-db
       STORE_PGPORT: 5432
-      STORE_PGUSER: store_pguser
-      STORE_PGPASSWORD: store_pgpass
-      STORE_PGDATABASE: dev_database
+      STORE_PGUSER: usr
+      STORE_PGPASSWORD: pass
+      STORE_PGDATABASE: store_db
 
       ADMIN_API_PORT: 3001
       STORE_API: http://store-api:3000
@@ -186,26 +205,26 @@ services:
       '
     restart: on-failure
 
-  admin-quepasa:
-    image: ghcr.io/tzconnectberlin/que-pasa:1.2.5
-    entrypoint: |-
-      bash -c '
-        set -e
-        while ! psql -d "$$DATABASE_URL" -c "select 1" ; do
-          sleep 1
-        done
-        /que-pasa/que-pasa --bcd-enable
-      '
-    env_file:
-      - config/.env-kanvas
-    volumes:
-      - ./config:/config
-    environment:
-      PGHOST: admin-db
-      PGPORT: 5432
-      PGUSER: admin_pguser
-      PGPASSWORD: admin_pgpass
-      PGDATABASE: store_replication
-      DATABASE_URL: "postgres://admin_pguser:admin_pgpass@admin-db:5432/store_replication"
-      CONTRACT_SETTINGS: /config/kanvas.yaml
-    restart: on-failure
+      # admin-quepasa:
+      #   image: ghcr.io/tzconnectberlin/que-pasa:1.2.5
+      #   entrypoint: |-
+      #     bash -c '
+      #       set -e
+      #       while ! psql -d "$$DATABASE_URL" -c "select 1" ; do
+      #         sleep 1
+      #       done
+      #       /que-pasa/que-pasa --bcd-enable
+      #     '
+      #   env_file:
+      #     - config/.env-kanvas
+      #   volumes:
+      #     - ./config:/config
+      #   environment:
+      #     PGHOST: localhost  # admin-db
+      #     PGPORT: 5432
+      #     PGUSER: usr
+      #     PGPASSWORD: pass
+      #     PGDATABASE: store_replication
+      #     DATABASE_URL: "postgres://usr:pass@admin-db:5432/store_replication"
+      #     CONTRACT_SETTINGS: /config/kanvas.yaml
+      #   restart: on-failure
