@@ -119,24 +119,16 @@ interface InbutSelectorProps {
 
 const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
 
-  const validateNumber = [(x: any) => {console.log(`GOT ${x} (type=${typeof x}) => ${number('not a number?')(x, undefined)}`); return number('not a number?')(x, undefined)}, minValue(0)];
+  const validateNumber = [number('expecting a number'), minValue(0)];
   const validateDate = (value: any) => {
     if (value < new Date().getTime()) return 'Date must be in the future'
     return undefined
   };
 
-  const tryParseNumber = (str: string): number | string => {
-    const x = Number(str);
-    if (isNaN(x)) {
-      return str;
-    }
-    return x;
-  }
-
   const classes = useStyle()
 
   if (props.type === 'string') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} />;
-  if (props.type === 'number') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} validate={validateNumber} parse={tryParseNumber} />;
+  if (props.type === 'number') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} validate={validateNumber}  />;
   if (props.type === 'boolean') return <BooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
   if (props.type === 'date') return <DateTimeInput source={`attributes.${props.attributesName}`} label={props.label} value={props.record * 1000} validate={validateDate} />;
   if (props.type === 'number[]') {
