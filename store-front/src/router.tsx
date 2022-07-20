@@ -4,6 +4,8 @@ import StorePage from './pages/StorePage';
 import HomePage from './pages/HomePage';
 import Faq from './pages/Faq';
 import Privacy from './pages/Privacy';
+import Privacy2 from './pages/Policies/Privacy';
+// import Content from '!@mdx-js/loader!./pages/Policies/content.mdx'
 import CreateNFT from './pages/CreateNFT';
 import EditProfile from './pages/EditProfile';
 import ProductPage from './pages/Product';
@@ -163,6 +165,7 @@ const Router = () => {
                         />
                         <Route path="/faq" component={Faq} />{' '}
                         <Route path="/privacy" component={Privacy} />
+                      <Route path="/policies/privacy" component={Privacy2} />
                         <Route
                             path="/create-nft"
                             render={(props) => <CreateNFT {...props} />}
