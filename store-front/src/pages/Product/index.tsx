@@ -233,10 +233,10 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
         }
     }, [launchTime]);
 
-    const renderNftArtifact = (uri: string) => {
-      if (uri.endsWith(".mp4")) {
+    const renderNft = (nftData: any) => {
+      if (nftData.artifactUri.endsWith(".mp4")) {
         return (
-          <video width="400" height="400" controls>
+          <video width="100%" poster={nftData.displayUri} loop controls autoPlay>
             <source src={nftResponse.data?.artifactUri} type="video/mp4" />
           </video>
         );
@@ -245,7 +245,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
         <Box>
           <StyledCardMedia
               component="img"
-              image={nftResponse.data?.displayUri}
+              image={nftData.artifactUri}
               alt="random"
           />
           <StyledWrapperIcon
@@ -328,7 +328,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             }}
                         >
                           {
-                            typeof nftResponse.data === 'undefined' ? (<br/>) : renderNftArtifact(nftResponse.data?.artifactUri)
+                            typeof nftResponse.data === 'undefined' ? (<br/>) : renderNft(nftResponse.data)
                           }
                         </Box>
                     )}
