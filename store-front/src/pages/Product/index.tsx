@@ -233,10 +233,42 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
         }
     }, [launchTime]);
 
+    const renderNftArtifact = (uri: string) => {
+      if (uri.endsWith(".mp4")) {
+        return (
+          <video width="400" height="400" controls>
+            <source src={nftResponse.data?.artifactUri} type="video/mp4" />
+          </video>
+        );
+      }
+      return (
+        <Box>
+          <StyledCardMedia
+              component="img"
+              image={nftResponse.data?.displayUri}
+              alt="random"
+          />
+          <StyledWrapperIcon
+              onClick={
+                  !fullScreenView
+                      ? () => {
+                          setFullScreenView(true);
+                          document.body.style.overflow =
+                              'hidden';
+                      }
+                      : () => { }
+              }
+          >
+            <StyledFullscreenIcon />
+          </StyledWrapperIcon>
+        </Box>
+      );
+    }
+
     return (
         <StytledPageWrapper>
             <WrapperFullScreen open={fullScreenView}>
-                <StyledImage
+              <StyledImage
                     src={nftResponse.data?.displayUri}
                     alt="random"
                     onClick={
@@ -248,7 +280,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             : () => { }
                     }
                     open={fullScreenView}
-                />
+                  />
                 <FullScreenView open={fullScreenView}></FullScreenView>
             </WrapperFullScreen>
             <StyledStack
@@ -295,24 +327,9 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 alignItems: 'flex-end',
                             }}
                         >
-                            <StyledCardMedia
-                                component="img"
-                                image={nftResponse.data?.displayUri}
-                                alt="random"
-                            />
-                            <StyledWrapperIcon
-                                onClick={
-                                    !fullScreenView
-                                        ? () => {
-                                            setFullScreenView(true);
-                                            document.body.style.overflow =
-                                                'hidden';
-                                        }
-                                        : () => { }
-                                }
-                            >
-                                <StyledFullscreenIcon />
-                            </StyledWrapperIcon>
+                          {
+                            typeof nftResponse.data === 'undefined' ? (<br/>) : renderNftArtifact(nftResponse.data?.artifactUri)
+                          }
                         </Box>
                     )}
 
