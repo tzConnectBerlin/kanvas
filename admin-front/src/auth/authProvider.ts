@@ -22,7 +22,19 @@ const authProvider = {
     }
     return Promise.resolve();
   },
-
+  getIdentity: async () => {
+    try {
+      const user = getDecodedToken()
+      return ({
+        id: user.sub,
+        userName: user.userName,
+        roles: user.scope,
+        email: user.email,
+      })
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  },
   checkAuth: async () =>
     (await getToken()) ? Promise.resolve() : Promise.reject(),
 
