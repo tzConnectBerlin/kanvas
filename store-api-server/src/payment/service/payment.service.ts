@@ -492,7 +492,7 @@ WHERE nft_order.id = $1
                         email: "example.cohen@simplex.com", // TODO Umit ?
                         phone: "+972509123456", // TODO Umit ?
                         signup_login: {
-                            timestamp: new Date().toDateString(),
+                            timestamp: new Date().toISOString(),
                             ip: "176.12.200.206" // TODO Umit?
                         }
                     },
@@ -531,7 +531,7 @@ WHERE nft_order.id = $1
             );
         }
 
-        if (paymentResponse.data?.is_kyc_update_required) {
+        if (!paymentResponse.data?.is_kyc_update_required) {
             throw new HttpException(
                 `there is problem simplex api payment req please contact your backend services (payment req succeeded response unsupported)`,
                 HttpStatus.BAD_REQUEST
