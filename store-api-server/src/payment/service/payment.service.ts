@@ -18,7 +18,7 @@ import {
     SIMPLEX_API_URL,
     SIMPLEX_PUBLIC_KEY,
     SIMPLEX_WALLET_ID,
-    SIMPLEX_ALLOWED_FIAT,
+    SIMPLEX_ALLOWED_FIAT
 } from "../../constants.js";
 import { UserService } from "../../user/service/user.service.js";
 import { NftService } from "../../nft/service/nft.service.js";
@@ -447,7 +447,7 @@ WHERE nft_order.id = $1
             var quoteResponse = await axios.post(
                 SIMPLEX_API_URL + "/wallet/merchant/v2/quote",
                 {
-                    end_user_id: usr.id,
+                    end_user_id: "" + usr.id,
                     digital_currency: "USD-DEPOSIT",
                     fiat_currency: "USD",
                     requested_currency: "USD",
@@ -487,7 +487,7 @@ WHERE nft_order.id = $1
                     account_details: {
                         app_provider_id: SIMPLEX_WALLET_ID,
                         app_version_id: "1.0.0",
-                        app_end_user_id: usr.id,
+                        app_end_user_id: "" + usr.id,
                         app_install_date: "2022-05-05T15:23:12Z",
                         email: "example.cohen@simplex.com", // TODO Umit ?
                         phone: "+972509123456", // TODO Umit ?
@@ -548,7 +548,8 @@ WHERE nft_order.id = $1
             paymentDetails: {
                 simplexData: {
                     paymentId: paymentId,
-                    orderId: orderId
+                    orderId: orderId,
+                    publicApiKey: SIMPLEX_PUBLIC_KEY
                 }
             }
         };
