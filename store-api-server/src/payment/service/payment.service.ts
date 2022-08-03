@@ -441,6 +441,10 @@ WHERE nft_order.id = $1
           HttpStatus.BAD_REQUEST
       );
     }
+    const decimals = SUPPORTED_CURRENCIES[fiatCurrency];
+    const amount = (Number(currencyUnitAmount) * Math.pow(10, -decimals)).toFixed(
+        decimals
+    )
     let quoteId;
     try {
       var quoteResponse = await axios.post(
@@ -450,7 +454,7 @@ WHERE nft_order.id = $1
             digital_currency: "USD-DEPOSIT",
             fiat_currency: "USD",
             requested_currency: "USD",
-            requested_amount: 50,
+            requested_amount: Number(amount),
             wallet_id: SIMPLEX_WALLET_ID,
             client_ip: "1.2.3.4",
             payment_methods: ["credit_card"]
@@ -537,12 +541,9 @@ WHERE nft_order.id = $1
       );
     }
 
-    const decimals = SUPPORTED_CURRENCIES[fiatCurrency];
     return {
       id: paymentId,
-      amount: (Number(currencyUnitAmount) * Math.pow(10, -decimals)).toFixed(
-          decimals
-      ),
+      amount: amount,
       currency: fiatCurrency,
       paymentDetails: {
         simplexData: {
