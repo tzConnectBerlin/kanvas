@@ -447,7 +447,7 @@ WHERE nft_order.id = $1
     )
     let quoteId;
     try {
-      var quoteResponse = await axios.post(
+      let quoteResponse = await axios.post(
           SIMPLEX_API_URL + "/wallet/merchant/v2/quote",
           {
             end_user_id: "" + usr.id,
@@ -467,17 +467,27 @@ WHERE nft_order.id = $1
       );
       quoteId = quoteResponse.data?.quote_id;
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        console.log((error.response?.data).error);
+        let errorMessage;
+        if (error instanceof Error) {
+            if (axios.isAxiosError(error) && error.response) {
+                errorMessage = error.response?.data?.error || error.response?.data;
+                let errors = error.response?.data?.errors;
+                if (errors && typeof errors == "object") {
+                    errorMessage = error.response?.data?.error + "---DETAILS:---" + JSON.stringify(errors);
+                }
+                console.log('get quote ERROR' + errorMessage);
+                throw new HttpException(
+                    `there is problem simplex api get quote please contact your backend services detail: (${errorMessage})`,
+                    HttpStatus.BAD_REQUEST
+                );
+            }
+        } else {
+            console.log("Unexpected error simplex api get quote");
+        }
         throw new HttpException(
-            `there is problem simplex api get quote please contact your backend services detail: (${(error.response?.data).error})`,
+            `there is problem simplex api get quote please contact your backend services`,
             HttpStatus.BAD_REQUEST
         );
-      }
-      throw new HttpException(
-          `there is problem simplex api get quote please contact your backend services`,
-          HttpStatus.BAD_REQUEST
-      );
     }
 
     const paymentId = uuidv4();
@@ -521,22 +531,32 @@ WHERE nft_order.id = $1
       );
 
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        console.log((error.response?.data).error);
+        let errorMessage;
+        if (error instanceof Error) {
+            if (axios.isAxiosError(error) && error.response) {
+                errorMessage = error.response?.data?.error || error.response?.data;
+                let errors = error.response?.data?.errors;
+                if (errors && typeof errors == "object") {
+                    errorMessage = error.response?.data?.error + "---DETAILS:---" + JSON.stringify(errors);
+                }
+                console.log('payment req ERROR' + errorMessage);
+                throw new HttpException(
+                    `there is problem simplex api payment req please contact your backend services detail: (${errorMessage})`,
+                    HttpStatus.BAD_REQUEST
+                );
+            }
+        } else {
+            console.log("Unexpected error simplex api payment req");
+        }
         throw new HttpException(
-            `there is problem simplex api payment req please contact your backend services detail: (${(error.response?.data).error})`,
+            `there is problem simplex api payment req please contact your backend services`,
             HttpStatus.BAD_REQUEST
         );
-      }
-      throw new HttpException(
-          `there is problem simplex api payment req please contact your backend services`,
-          HttpStatus.BAD_REQUEST
-      );
     }
 
     if (!paymentResponse.data?.is_kyc_update_required) {
       throw new HttpException(
-          `there is problem simplex api payment req please contact your backend services (payment req succeeded response unsupported)`,
+          `there is problem simplex api payment req please contact your backend services (payment req succeeded but response unsupported)`,
           HttpStatus.BAD_REQUEST
       );
     }
