@@ -456,7 +456,7 @@ WHERE nft_order.id = $1
             requested_currency: "USD",
             requested_amount: Number(amount),
             wallet_id: SIMPLEX_WALLET_ID,
-            client_ip: "1.2.3.4",
+            client_ip: "1.2.3.4", // TODO ?
             payment_methods: ["credit_card"]
           },
           {
@@ -501,12 +501,12 @@ WHERE nft_order.id = $1
               app_provider_id: SIMPLEX_WALLET_ID,
               app_version_id: "1.0.0",
               app_end_user_id: "" + usr.id,
-              app_install_date: "2022-05-05T15:23:12Z",
-              email: "example.cohen@simplex.com", // TODO Umit ?
-              phone: "+972509123456", // TODO Umit ?
+              app_install_date: usr.createdAt ? new Date(usr.createdAt * 1000).toISOString() : new Date().toISOString(),
+              email: "example.cohen@simplex.com", // TODO NO WAY ?
+              phone: "+972509123456", // TODO NO WAY ?
               signup_login: {
                 timestamp: new Date().toISOString(),
-                ip: "176.12.200.206" // TODO Umit?
+                ip: "176.12.200.206" // TODO ?
               }
             },
             transaction_details: {
@@ -516,10 +516,10 @@ WHERE nft_order.id = $1
                 order_id: orderId,
                 destination_wallet: {
                   currency: "USD-DEPOSIT",
-                  address: "1", // TODO Umit?
+                  address: usr.userAddress,
                   tag: ""
                 },
-                original_http_ref_url: "https://www.partner.com/" // TODO Umit?
+                original_http_ref_url: "https://www.partner.com/" // TODO ?
               }
             }
           },
