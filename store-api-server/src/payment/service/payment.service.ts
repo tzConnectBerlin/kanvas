@@ -164,6 +164,7 @@ WHERE id = $1
     provider: PaymentProvider,
     currency: string,
     recreateOrder: boolean = false,
+    clientIp: string,
   ): Promise<PaymentIntentInternal> {
     await this.userService.ensureUserCartSession(usr.id, cookieSession);
 
@@ -186,7 +187,8 @@ WHERE id = $1
         usr.userAddress,
         currency,
         currencyUnitAmount,
-        usr
+        usr,
+        clientIp,
       );
       await this.#registerPayment(
         dbTx,
@@ -322,6 +324,7 @@ WHERE nft_order.id = $1
     currency: string,
     currencyUnitAmount: number,
     usr: UserEntity,
+    clientIp: string,
   ): Promise<PaymentIntentInternal> {
     switch (provider) {
       case PaymentProvider.TEZPAY:
@@ -347,7 +350,8 @@ WHERE nft_order.id = $1
         return await this.#createSimplexPaymentIntent(
             currency,
             currencyUnitAmount,
-            usr
+            usr,
+            clientIp,
         );
       case PaymentProvider.TEST:
         return {
@@ -421,7 +425,8 @@ WHERE nft_order.id = $1
   async #createSimplexPaymentIntent(
       fiatCurrency: string,
       currencyUnitAmount: number,
-      usr: UserEntity
+      usr: UserEntity,
+      clientIp: string
   ): Promise<PaymentIntentInternal> {
     if (
         typeof SIMPLEX_API_URL === "undefined" ||
@@ -949,7 +954,4 @@ ORDER BY payment.id DESC
       status: qryRes.rows[0]['status'],
     };
   }
-
-
-
 }

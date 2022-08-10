@@ -77,6 +77,7 @@ export class PaymentController {
   async createPaymentIntent(
     @Session() cookieSession: any,
     @CurrentUser() user: UserEntity,
+    @Req() request: any,
     @Body('paymentProvider')
     paymentProvider: PaymentProvider = PaymentProvider.STRIPE,
     @Body('currency') currency: string = BASE_CURRENCY,
@@ -97,6 +98,8 @@ export class PaymentController {
       // temporary for backwards compatibility, until frontend has been updated
       paymentProvider = PaymentProvider.TEZPAY;
     }
+    const { ip } = request;
+    const clientIp = request.get('X-Forwarded-For') || ip;
 
     try {
       let paymentIntent = await this.paymentService.createPayment(
@@ -105,6 +108,7 @@ export class PaymentController {
         paymentProvider,
         currency,
         recreateNftOrder,
+        clientIp,
       );
       const order = await this.paymentService.getPaymentOrder(paymentIntent.id);
 
