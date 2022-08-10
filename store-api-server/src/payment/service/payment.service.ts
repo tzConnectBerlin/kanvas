@@ -345,7 +345,6 @@ WHERE nft_order.id = $1
         );
       case PaymentProvider.SIMPLEX:
         return await this.#createSimplexPaymentIntent(
-            userAddress,
             currency,
             currencyUnitAmount,
             usr
@@ -420,7 +419,6 @@ WHERE nft_order.id = $1
   }
 
   async #createSimplexPaymentIntent(
-      userAddress: string,
       fiatCurrency: string,
       currencyUnitAmount: number,
       usr: UserEntity
@@ -437,7 +435,7 @@ WHERE nft_order.id = $1
     }
     if (!SIMPLEX_ALLOWED_FIAT.includes(fiatCurrency)) {
       throw new HttpException(
-          `requested fiat (${fiatCurrency}) is not supported by Wert`,
+          `requested fiat (${fiatCurrency}) is not supported by Simplex`,
           HttpStatus.BAD_REQUEST
       );
     }
@@ -445,120 +443,117 @@ WHERE nft_order.id = $1
     const amount = (Number(currencyUnitAmount) * Math.pow(10, -decimals)).toFixed(
         decimals
     )
-    let quoteId;
-    try {
-      let quoteResponse = await axios.post(
-          SIMPLEX_API_URL + "/wallet/merchant/v2/quote",
-          {
-            end_user_id: "" + usr.id,
-            digital_currency: "USD-DEPOSIT",
-            fiat_currency: "USD",
-            requested_currency: "USD",
-            requested_amount: Number(amount),
-            wallet_id: SIMPLEX_WALLET_ID,
-            client_ip: "1.2.3.4", // TODO ?
-            payment_methods: ["credit_card"]
-          },
-          {
-            headers: {
-              "Authorization": `ApiKey ${SIMPLEX_API_KEY}`
+    async function getQuoteId() {
+      try {
+        let quoteResponse = await axios.post(
+            SIMPLEX_API_URL + "/wallet/merchant/v2/quote",
+            {
+              end_user_id: "" + usr.id,
+              digital_currency: "USD-DEPOSIT",
+              fiat_currency: "USD",
+              requested_currency: "USD",
+              requested_amount: Number(amount),
+              wallet_id: SIMPLEX_WALLET_ID,
+              client_ip: "1.2.3.4", // TODO ?
+              payment_methods: ["credit_card"]
+            },
+            {
+              headers: {
+                "Authorization": `ApiKey ${SIMPLEX_API_KEY}`
+              }
             }
-          }
-      );
-      quoteId = quoteResponse.data?.quote_id;
-    } catch (error) {
+        );
+        return quoteResponse.data?.quote_id;
+      } catch (error) {
         let errorMessage;
         if (error instanceof Error) {
-            if (axios.isAxiosError(error) && error.response) {
-                errorMessage = error.response?.data?.error || error.response?.data;
-                let errors = error.response?.data?.errors;
-                if (errors && typeof errors == "object") {
-                    errorMessage = error.response?.data?.error + "---DETAILS:---" + JSON.stringify(errors);
-                }
-                console.log('get quote ERROR' + errorMessage);
-                throw new HttpException(
-                    `there is problem simplex api get quote please contact your backend services detail: (${errorMessage})`,
-                    HttpStatus.BAD_REQUEST
-                );
+          if (axios.isAxiosError(error) && error.response) {
+            errorMessage = error.response?.data?.error || error.response?.data;
+            let errors = error.response?.data?.errors;
+            if (errors && typeof errors == "object") {
+              errorMessage = error.response?.data?.error + "---DETAILS:---" + JSON.stringify(errors);
             }
+            Logger.warn("get quote ERROR" + errorMessage);
+            throw new Error(`there is problem simplex api get quote please contact your backend services`);
+          }
+          else{
+              Logger.warn("Unexpected error simplex api get quote instance of error", error.message);
+          }
         } else {
-            console.log("Unexpected error simplex api get quote");
+          Logger.warn("Unexpected error simplex api get quote");
         }
-        throw new HttpException(
-            `there is problem simplex api get quote please contact your backend services`,
-            HttpStatus.BAD_REQUEST
-        );
+          throw new Error(`there is problem simplex api get quote please contact your backend services`);
+      }
     }
+    let quoteId = await getQuoteId();
 
     const paymentId = uuidv4();
     const orderId = uuidv4();
 
-    try {
-      var paymentResponse = await axios.post(
-          SIMPLEX_API_URL + "/wallet/merchant/v2/payments/partner/data",
-          {
-            account_details: {
-              app_provider_id: SIMPLEX_WALLET_ID,
-              app_version_id: "1.0.0",
-              app_end_user_id: "" + usr.id,
-              app_install_date: usr.createdAt ? new Date(usr.createdAt * 1000).toISOString() : new Date().toISOString(),
-              email: "example.cohen@simplex.com", // TODO NO WAY ?
-              phone: "+972509123456", // TODO NO WAY ?
-              signup_login: {
-                timestamp: new Date().toISOString(),
-                ip: "176.12.200.206" // TODO ?
+    async function paymentRequest() {
+      try {
+        var paymentResponse = await axios.post(
+            SIMPLEX_API_URL + "/wallet/merchant/v2/payments/partner/data",
+            {
+              account_details: {
+                app_provider_id: SIMPLEX_WALLET_ID,
+                app_version_id: "1.0.0",
+                app_end_user_id: "" + usr.id,
+                app_install_date: usr.createdAt ? new Date(usr.createdAt * 1000).toISOString() : new Date().toISOString(),
+                email: "example.cohen@simplex.com", // TODO NO WAY ?
+                phone: "+972509123456", // TODO NO WAY ?
+                signup_login: {
+                  timestamp: new Date().toISOString(),
+                  ip: "176.12.200.206" // TODO ?
+                }
+              },
+              transaction_details: {
+                payment_details: {
+                  quote_id: quoteId,
+                  payment_id: paymentId,
+                  order_id: orderId,
+                  destination_wallet: {
+                    currency: "USD-DEPOSIT",
+                    address: usr.userAddress,
+                    tag: ""
+                  },
+                  original_http_ref_url: "https://www.partner.com/" // TODO ?
+                }
               }
             },
-            transaction_details: {
-              payment_details: {
-                quote_id: quoteId,
-                payment_id: paymentId,
-                order_id: orderId,
-                destination_wallet: {
-                  currency: "USD-DEPOSIT",
-                  address: usr.userAddress,
-                  tag: ""
-                },
-                original_http_ref_url: "https://www.partner.com/" // TODO ?
+            {
+              headers: {
+                "Authorization": `ApiKey ${SIMPLEX_API_KEY}`
               }
             }
-          },
-          {
-            headers: {
-              "Authorization": `ApiKey ${SIMPLEX_API_KEY}`
-            }
-          }
-      );
+        );
 
-    } catch (error) {
+      } catch (error) {
         let errorMessage;
         if (error instanceof Error) {
-            if (axios.isAxiosError(error) && error.response) {
-                errorMessage = error.response?.data?.error || error.response?.data;
-                let errors = error.response?.data?.errors;
-                if (errors && typeof errors == "object") {
-                    errorMessage = error.response?.data?.error + "---DETAILS:---" + JSON.stringify(errors);
-                }
-                console.log('payment req ERROR' + errorMessage);
-                throw new HttpException(
-                    `there is problem simplex api payment req please contact your backend services detail: (${errorMessage})`,
-                    HttpStatus.BAD_REQUEST
-                );
+          if (axios.isAxiosError(error) && error.response) {
+            errorMessage = error.response?.data?.error || error.response?.data;
+            let errors = error.response?.data?.errors;
+            if (errors && typeof errors == "object") {
+              errorMessage = error.response?.data?.error + "---DETAILS:---" + JSON.stringify(errors);
             }
+            Logger.warn("payment req ERROR" + errorMessage);
+              throw new Error(`there is problem simplex api payment req please contact your backend services`);
+          }else{
+              Logger.warn("Unexpected error simplex api get quote instance of error", error.message);
+          }
         } else {
-            console.log("Unexpected error simplex api payment req");
+          Logger.warn("Unexpected error simplex api payment req");
         }
-        throw new HttpException(
-            `there is problem simplex api payment req please contact your backend services`,
-            HttpStatus.BAD_REQUEST
-        );
+          throw new Error(`there is problem simplex api payment req please contact your backend services`);
+      }
+      return paymentResponse;
     }
 
+    let paymentResponse = await paymentRequest();
+
     if (!paymentResponse.data?.is_kyc_update_required) {
-      throw new HttpException(
-          `there is problem simplex api payment req please contact your backend services (payment req succeeded but response unsupported)`,
-          HttpStatus.BAD_REQUEST
-      );
+        throw new Error(`there is problem simplex api payment req please contact your backend services (payment req succeeded but response unsupported)`);
     }
 
     return {
@@ -954,4 +949,7 @@ ORDER BY payment.id DESC
       status: qryRes.rows[0]['status'],
     };
   }
+
+
+
 }
