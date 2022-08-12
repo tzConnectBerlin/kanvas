@@ -13,6 +13,7 @@ import {
   BEHIND_PROXY,
   RATE_LIMITLESS_SECRET,
 } from '../constants.js';
+import { getRealIp } from "../utils.js";
 
 @Injectable()
 export class StatsLogger {
@@ -48,7 +49,7 @@ export class LoggerMiddleware implements NestMiddleware {
     const { ip, method, originalUrl } = request;
     const userAgent = request.get('user-agent') || '';
     const cookieSession = request.session?.uuid.slice(0, 5) || '';
-    const realIp = BEHIND_PROXY ? request.get('X-Forwarded-For') || ip : ip;
+    const realIp = getRealIp(request);
     const timeStart = new Date();
 
     const fields = [

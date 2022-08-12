@@ -448,7 +448,7 @@ WHERE nft_order.id = $1
     const amount = (Number(currencyUnitAmount) * Math.pow(10, -decimals)).toFixed(
         decimals
     )
-    async function getQuoteId() {
+    async function getSimplexQuoteId() {
       try {
         let quoteResponse = await axios.post(
             SIMPLEX_API_URL + "/wallet/merchant/v2/quote",
@@ -490,12 +490,12 @@ WHERE nft_order.id = $1
           throw new Error(`there is problem simplex api get quote please contact your backend services`);
       }
     }
-    let quoteId = await getQuoteId();
+    let quoteId = await getSimplexQuoteId();
 
     const paymentId = uuidv4();
     const orderId = uuidv4();
 
-    async function paymentRequest() {
+    async function simplexPaymentRequest() {
       try {
         var paymentResponse = await axios.post(
             SIMPLEX_API_URL + "/wallet/merchant/v2/payments/partner/data",
@@ -505,11 +505,11 @@ WHERE nft_order.id = $1
                 app_version_id: "1.0.0",
                 app_end_user_id: "" + usr.id,
                 app_install_date: usr.createdAt ? new Date(usr.createdAt * 1000).toISOString() : new Date().toISOString(),
-                email: "example.cohen@simplex.com", // TODO NO WAY ?
-                phone: "+972509123456", // TODO NO WAY ?
+                email: "", // TODO NO WAY ?
+                phone: "", // TODO NO WAY ?
                 signup_login: {
                   timestamp: new Date().toISOString(),
-                  ip: "176.12.200.206" // TODO ?
+                  ip: clientIp
                 }
               },
               transaction_details: {
@@ -522,7 +522,7 @@ WHERE nft_order.id = $1
                     address: usr.userAddress,
                     tag: ""
                   },
-                  original_http_ref_url: "https://www.partner.com/" // TODO ?
+                  original_http_ref_url: "" // TODO NO WAY ?
                 }
               }
             },
@@ -555,7 +555,7 @@ WHERE nft_order.id = $1
       return paymentResponse;
     }
 
-    let paymentResponse = await paymentRequest();
+    let paymentResponse = await simplexPaymentRequest();
 
     if (!paymentResponse.data?.is_kyc_update_required) {
         throw new Error(`there is problem simplex api payment req please contact your backend services (payment req succeeded but response unsupported)`);

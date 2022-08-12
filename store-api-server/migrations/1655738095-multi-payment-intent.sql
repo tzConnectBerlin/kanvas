@@ -85,6 +85,4 @@ ALTER TABLE nft_order DROP COLUMN expires_at;
 DROP INDEX payment_nft_order_id_idx;
 ALTER TABLE payment ADD CONSTRAINT payment_nft_order_id_uniq UNIQUE (nft_order_id);
 
-ALTER TYPE payment_provider ADD VALUE IF NOT EXISTS 'simplex';
-
 COMMIT;

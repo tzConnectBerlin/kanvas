@@ -4,6 +4,9 @@ import { HttpException } from '@nestjs/common';
 import { Response } from 'express';
 import { Cache } from 'cache-manager';
 import { Lock } from 'async-await-mutex-lock';
+import {
+  BEHIND_PROXY
+} from './constants.js';
 
 export async function wrapCache<T>(
   cache: Cache,
@@ -90,4 +93,9 @@ export function isBottom(v: any): boolean {
   //       because undefined coerces into null. It's safe because nothing
   //       else coerces into null (other than null itself).
   return v == null;
+}
+
+export function getRealIp(request: any): string {
+  const { ip } = request;
+  return BEHIND_PROXY ? request.get('X-Forwarded-For') || ip : ip;
 }
