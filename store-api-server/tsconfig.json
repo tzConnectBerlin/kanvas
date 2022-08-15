@@ -10,6 +10,7 @@
     "esModuleInterop": true,
     "target": "es2017",
     "sourceMap": true,
+    "rootDir": ".",
     "outDir": "./dist",
     "incremental": true,
     "strict": true,
@@ -18,6 +19,6 @@
       "node", "jest"
     ], "lib": [
       "es2020"
-    ],
+    ]
   }
 }
