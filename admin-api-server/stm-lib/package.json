@@ -6,6 +6,7 @@
   "license": "MIT",
   "private": true,
   "main": "dist/main.js",
+  "type": "module",
   "scripts": {
     "build": "rimraf dist && tsc",
     "start": "NODE_ENV=production node ."

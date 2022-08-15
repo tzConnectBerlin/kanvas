@@ -1,6 +1,6 @@
-import * as log from 'log';
-import { Nft } from './types';
-import * as ext from './extensions';
+import log from 'log';
+import { Nft } from './types.js';
+import * as ext from './extensions.js';
 
 export function evalExpr<T>(nftState: Nft, s: string, defaultOnErr: T): T {
   log.debug(`evaluation '${s}'`);
