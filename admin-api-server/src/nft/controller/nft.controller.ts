@@ -26,6 +26,9 @@ import {
   validatePaginationParams,
 } from '../../utils.js';
 import { ContentRestrictions } from 'kanvas-stm-lib';
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 const filesizeHuman = require('filesize').partial({ standard: 'jedec' });
 
 let getContentRestrictions: (

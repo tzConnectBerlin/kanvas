@@ -1,5 +1,7 @@
 import { Module, Logger, Inject } from '@nestjs/common';
-import { Client, types } from 'pg';
+import { Client } from 'pg';
+import pg from 'pg';
+const { types } = pg;
 import Pool from 'pg-pool';
 
 import { assertEnv } from './utils.js';

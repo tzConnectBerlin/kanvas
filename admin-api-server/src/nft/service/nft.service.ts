@@ -34,7 +34,8 @@ import { S3Service } from './s3.service.js';
 import { CategoryService } from '../../category/service/category.service.js';
 import { CategoryEntity } from '../../category/entity/category.entity.js';
 import { Lock } from 'async-await-mutex-lock';
-import { cryptoUtils } from 'sotez';
+import sotez from 'sotez';
+const { cryptoUtils } = sotez;
 import axios from 'axios';
 import { watch, FSWatcher } from 'fs';
 
