@@ -85,7 +85,7 @@ set -m
 ) &
 store_api_pid=$!
 set +m
-trap "docker kill $db_docker; kill -- -$store_api_pid" EXIT
+trap "kill -- -$store_api_pid; docker kill $db_docker" EXIT
 
 yarn run seed || exit 1
 
