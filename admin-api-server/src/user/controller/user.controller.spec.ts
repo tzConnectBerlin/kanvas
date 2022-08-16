@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from '../service/user.service';
-import { DbMockModule } from 'src/db_mock.module';
+import { DbMockModule } from '../../db_mock.module';
 
 describe('UserController', () => {
   let controller: UserController;

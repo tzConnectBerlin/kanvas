@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { S3 } from 'aws-sdk';
+import aws from 'aws-sdk';
+const { S3 } = aws;
 
 const AWS_S3_BUCKET = process.env.AWS_S3_BUCKET;
 

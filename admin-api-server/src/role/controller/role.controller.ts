@@ -1,7 +1,7 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
-import { Roles } from '../entities/role.entity';
-import { RoleService } from '../service/role.service';
+import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard.js';
+import { Roles } from '../entities/role.entity.js';
+import { RoleService } from '../service/role.service.js';
 
 @Controller('role')
 export class RoleController {

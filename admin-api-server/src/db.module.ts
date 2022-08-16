@@ -1,8 +1,11 @@
 import { Module, Logger, Inject } from '@nestjs/common';
-import { assertEnv } from './utils';
-import { PG_CONNECTION, PG_CONNECTION_STORE_REPLICATION } from './constants';
-import { Client, types } from 'pg';
-import * as Pool from 'pg-pool';
+import { Client } from 'pg';
+import pg from 'pg';
+const { types } = pg;
+import Pool from 'pg-pool';
+
+import { assertEnv } from './utils.js';
+import { PG_CONNECTION, PG_CONNECTION_STORE_REPLICATION } from './constants.js';
 
 export type DbPool = Pool<Client>;
 
@@ -68,19 +71,24 @@ export class DbModule {
   constructor(@Inject('PG_POOL_WRAP') private w: Wrap) {}
 
   async onModuleDestroy() {
-    if (typeof this.w.dbPool === 'undefined') {
-      Logger.warn(
-        `pool already uninitialized! stacktrace: ${new Error().stack}`,
-      );
-      return;
-    }
     Logger.log('closing db connection..');
 
-    await this.w.dbPool.end();
-    this.w.dbPool = undefined;
-    await this.w.storeDbPool.end();
-    this.w.storeDbPool = undefined;
-
+    if (typeof this.w.dbPool === 'undefined') {
+      Logger.warn(
+        `dbPool already uninitialized! stacktrace: ${new Error().stack}`,
+      );
+    } else {
+      await this.w.dbPool.end();
+      this.w.dbPool = undefined;
+    }
+    if (typeof this.w.storeDbPool === 'undefined') {
+      Logger.warn(
+        `storeDbPool already uninitialized! stacktrace: ${new Error().stack}`,
+      );
+    } else {
+      await this.w.storeDbPool.end();
+      this.w.storeDbPool = undefined;
+    }
     Logger.log('db connection closed');
   }
 }

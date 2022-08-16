@@ -4,7 +4,7 @@ import {
   parseStringArray,
   parseNumberParam,
   PaginationParams,
-} from 'src/utils';
+} from '../utils.js';
 
 export class UserFilters {
   @IsArray()

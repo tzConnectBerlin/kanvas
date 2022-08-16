@@ -2,6 +2,11 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
+(
+    cd stm-lib
+    yarn build
+)
+
 set -a
 . .env.test
 set +a
@@ -50,17 +55,19 @@ echo "starting the store api in the background"
 # enabling job control with set -m here, this will enforce a new process group
 # for the following background spawned store api, which in turn will allow
 # proper kill of all child processes by kill on process group id.
-mv $SCRIPT_DIR/../../store-api-server/.env $SCRIPT_DIR/../../store-api-server/.env_disabled_during_tests
 set -m
 (
     cd $SCRIPT_DIR/../../store-api-server
+    yarn build || exit 1
+
     set -a
     . .env.test
-    store_env_exec yarn run start >/dev/null 2>&1
+
+    DOTENV_CONFIG_PATH=.env.test store_env_exec yarn run start:prod >/dev/null 2>&1
 ) &
 store_api_pid=$!
 set +m
-trap "docker kill $db_docker; kill -- -$store_api_pid; mv $SCRIPT_DIR/../../store-api-server/.env_disabled_during_tests $SCRIPT_DIR/../../store-api-server/.env" EXIT
+trap "docker kill $db_docker; kill -- -$store_api_pid" EXIT
 
 yarn run seed || exit 1
 
@@ -72,7 +79,7 @@ done
 echo "running tests.."
 
 mkdir -p test/coverage
-jest "$@" --coverage | tee test/coverage/summary.txt || exit 1
+LOG_LEVEL=warning node --experimental-vm-modules node_modules/.bin/jest "$@" --coverage | tee test/coverage/summary.txt || exit 1
 sed -n '/^-----/,$p' test/coverage/summary.txt > test/coverage/summary_.txt
 head -n 4 test/coverage/summary_.txt | awk -F '|' '{print $2 $3 $4 $5}'
 sed 's/^/\n/' test/coverage/summary_.txt > test/coverage/summary.txt
