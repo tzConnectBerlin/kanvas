@@ -137,6 +137,67 @@ export class PaymentService {
     );
   }
 
+  async isPaidSimplex(paymentId: string): Promise<string> {
+    let paymentStatus: PaymentStatus;
+
+    async function getSimplexEvents() {
+      try {
+        let eventsResponse = await axios.get(
+            SIMPLEX_API_URL + "/wallet/merchant/v2/events",
+            {
+              headers: {
+                "Authorization": `ApiKey ${SIMPLEX_API_KEY}`
+              }
+            }
+        );
+        return eventsResponse.data;
+      } catch (error) {
+        let errorMessage;
+        if (error instanceof Error) {
+          if (axios.isAxiosError(error) && error.response) {
+            errorMessage = error.response?.data?.error || error.response?.data;
+            let errors = error.response?.data?.errors;
+            if (errors && typeof errors == "object") {
+              errorMessage = error.response?.data?.error + "---DETAILS:---" + JSON.stringify(errors);
+            }
+            Logger.warn("getSimplexEvents ERROR" + errorMessage);
+            throw new Error(`there is problem simplex api getSimplexEvents please contact your backend services`);
+          }
+          else{
+            Logger.warn("Unexpected error simplex api getSimplexEvents instance of error", error.message);
+          }
+        } else {
+          Logger.warn("Unexpected error simplex api getSimplexEvents");
+        }
+        throw new Error(`there is problem simplex api getSimplexEvents please contact your backend services`);
+      }
+    }
+    let eventsResponse = await getSimplexEvents();
+
+    let event = eventsResponse?.events?.find((item: { payment: { id: string; }; }) => { return item?.payment?.id == paymentId })
+    if(!event){
+      Logger.warn("isPaidSimplex there is no event for paymentId: " + paymentId);
+    }
+    switch (event?.name) {
+      case 'payment_simplexcc_approved':
+        paymentStatus = PaymentStatus.SUCCEEDED;
+        break;
+      case 'payment_simplexcc_declined':
+        paymentStatus = PaymentStatus.FAILED;
+        break;
+      default:
+        Logger.error(`Unhandled payment status ${event?.name}`);
+        throw Err('Unknown simplex events');
+    }
+
+    await this.#updatePaymentStatus(
+        paymentId,
+        paymentStatus,
+    );
+
+    return paymentStatus;
+  }
+
   async promisePaid(userId: number, paymentId: string) {
     const order = await this.getPaymentOrder(paymentId);
     if (order.userId !== userId) {

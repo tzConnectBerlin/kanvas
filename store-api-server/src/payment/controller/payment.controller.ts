@@ -150,4 +150,20 @@ export class PaymentController {
       );
     }
   }
+
+  @Get('/is-paid-simplex/:paymentId')
+  @UseGuards(JwtAuthGuard)
+  async IsPaidSimplex(
+      @Req() request: any,
+      @Param('paymentId') paymentId: string,
+  ) {
+
+    try {
+      let paymentStatus = await this.paymentService.isPaidSimplex(paymentId);
+
+      return { paymentStatus };
+    } catch (error) {
+      throw new HttpException('', HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+  }
 }
