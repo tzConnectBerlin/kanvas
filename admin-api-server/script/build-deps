@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR/..
+
+set -u
+
+sig_err_file=`mktemp`
+rm $sig_err_file
+echo "building stm-lib.."
+(
+    trap "echo 'stm-lib build failed' >> $sig_err_file" ERR
+
+    cd stm-lib
+    yarn build
+) &
+echo "building api-lib.."
+(
+    trap "echo 'api-lib build failed' >> $sig_err_file" ERR
+
+    cd ../lib/api-lib
+    yarn build
+) &
+wait
+[ -f $sig_err_file ] && {
+    cat $sig_err_file
+    rm $sig_err_file
+    exit 1
+}
+
+links=`ls -l node_modules | grep ^l`
+echo "$links" | grep --silent 'kanvas-stm-lib ->' || {
+    echo "linking stm-lib.."
+    (
+        cd stm-lib
+        yarn link 2>/dev/null
+    )
+    yarn link kanvas-stm-lib
+}
+echo "$links" | grep --silent 'kanvas-api-lib ->' || {
+    echo "linking api-lib.."
+    (
+        cd ../lib/api-lib
+        yarn link 2>/dev/null
+    )
+    yarn link kanvas-api-lib
+}
