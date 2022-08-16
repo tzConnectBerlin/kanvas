@@ -3,7 +3,7 @@ import {
   PG_CONNECTION,
   PG_CONNECTION_STORE_REPLICATION,
   PG_CONNECTION_STORE,
-} from './constants';
+} from './constants.js';
 
 class dbConnMock {}
 

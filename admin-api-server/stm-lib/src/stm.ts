@@ -1,9 +1,13 @@
-import * as fs from 'fs';
-import { parse } from 'yaml';
-import { evalExpr, execExpr } from './expr';
-import { Nft, Actor } from './types';
-import * as log from 'log';
-import { isBottom, maybe } from './utils';
+import fs from 'fs';
+import yaml from 'yaml';
+const { parse } = yaml;
+import { evalExpr, execExpr } from './expr.js';
+import { Nft, Actor } from './types.js';
+import log from 'log';
+import { isBottom, maybe } from './utils.js';
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 const filesizeParser = require('filesize-parser');
 
 interface State {
@@ -47,7 +51,7 @@ export class StateTransitionMachine {
     const file = fs.readFileSync(filepath, 'utf8');
     const parsed = parse(file);
 
-    console.log('parsing file..');
+    log.info('parsing file..');
     for (const attrName in parsed.attributes) {
       const attr = parsed.attributes[attrName];
 
@@ -78,7 +82,7 @@ export class StateTransitionMachine {
         mutables: st.mutables,
       };
     }
-    console.log(
+    log.info(
       `file parsed: ${JSON.stringify(this.attrTypes)}, ${JSON.stringify(
         this.contentRestrictions,
       )}`,

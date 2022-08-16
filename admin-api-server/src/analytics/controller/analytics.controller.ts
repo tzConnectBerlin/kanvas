@@ -11,19 +11,19 @@ import {
   MetricParams,
   Resolution,
   Activity,
-} from '../entity/analytics.entity';
-import { ParseJSONArrayPipe } from 'src/pipes/ParseJSONArrayPipe';
-import { AnalyticsService } from '../service/analytics.service';
-import { enumFromStringValue } from 'src/utils';
-import { RolesDecorator } from 'src/role/role.decorator';
-import { Roles } from 'src/role/entities/role.entity';
-import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
-import { RolesGuard } from 'src/role/role.guard';
-import { ActivityFilterParams, ActivityFilters } from '../params';
+} from '../entity/analytics.entity.js';
+import { ParseJSONArrayPipe } from '../../pipes/ParseJSONArrayPipe.js';
+import { AnalyticsService } from '../service/analytics.service.js';
+import { enumFromStringValue } from '../../utils.js';
+import { RolesDecorator } from '../../role/role.decorator.js';
+import { Roles } from '../../role/entities/role.entity.js';
+import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard.js';
+import { RolesGuard } from '../../role/role.guard.js';
+import { ActivityFilterParams, ActivityFilters } from '../params.js';
 import {
   queryParamsToPaginationParams,
   validatePaginationParams,
-} from 'src/utils';
+} from '../../utils.js';
 
 @Controller('analytics')
 export class AnalyticsController {

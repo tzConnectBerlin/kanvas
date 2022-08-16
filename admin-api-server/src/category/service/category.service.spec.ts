@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CategoryService } from './category.service';
-import { DbMockModule } from 'src/db_mock.module';
+import { CategoryService } from './category.service.js';
+import { DbMockModule } from '../../db_mock.module';
 
 describe('CategoryService', () => {
   let service: CategoryService;

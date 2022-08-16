@@ -1,7 +1,9 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import cookieSession = require('cookie-session');
 import { v4 as uuidv4 } from 'uuid';
-import { assertEnv } from '../utils';
+import { assertEnv } from '../utils.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const cookieSession = require('cookie-session');
 
 @Injectable()
 export class CookieSessionMiddleware implements NestMiddleware {
