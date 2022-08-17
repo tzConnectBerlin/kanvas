@@ -814,7 +814,7 @@ WHERE provider IN ('tezpay', 'wert')
 SELECT
   payment_id
 FROM payment
-WHERE provider IN ('simplex')
+WHERE provider = 'simplex'
   AND status IN ('created', 'promised')
     `
     );
