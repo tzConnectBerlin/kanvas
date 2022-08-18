@@ -918,6 +918,7 @@ WHERE provider = 'simplex'
       await this.#updatePaymentStatus(paymentId, paymentStatus);
       Logger.log(`simplex payment ended. payment_id=${paymentId} paymentStatus:${paymentStatus}`);
 
+      events.push(event);
       for (const event1 of events) {
         let deleteResponse = await deleteSimplexEvents(event1.event_id);
         if (deleteResponse?.status == "OK") {
