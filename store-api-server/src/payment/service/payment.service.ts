@@ -809,6 +809,7 @@ WHERE provider IN ('tezpay', 'wert')
 
   @Cron(CronExpression.EVERY_MINUTE)
   async checkPendingSimplex() {
+    Logger.log("getSimplexEvents START");
     const pendingPaymentIds = await this.conn.query(
         `
 SELECT
@@ -922,6 +923,7 @@ WHERE provider = 'simplex'
         Logger.warn(`simplex payment DELETE event failed. eventId=${event.event_id} paymentId=${paymentId}`);
       }
     }
+    Logger.log("getSimplexEvents FINISH successfully");
   }
 
   async cancelNftOrder(
@@ -978,6 +980,7 @@ RETURNING payment_id
 
     try {
       switch (provider) {
+        // we could not add SIMPLEX. Because Simplex Team does not support cancel payment.
         case PaymentProvider.STRIPE:
           await this.stripe.paymentIntents.cancel(paymentId);
           break;
