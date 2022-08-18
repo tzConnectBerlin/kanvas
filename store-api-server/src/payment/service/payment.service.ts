@@ -902,9 +902,11 @@ WHERE provider = 'simplex'
     for (const row of pendingPaymentIds.rows) {
       const paymentId = row["payment_id"];
 
-      let event = eventsResponse?.events?.find((item: { payment: { id: string; }; }) => {
+      let events = eventsResponse?.events?.filter((item: { payment: { id: string; }; }) => {
         return item?.payment?.id == paymentId;
       });
+
+      let event = events.pop();
 
       if (!event) {
         Logger.warn("isPaidSimplex there is no event for paymentId: " + paymentId);
@@ -916,11 +918,13 @@ WHERE provider = 'simplex'
       await this.#updatePaymentStatus(paymentId, paymentStatus);
       Logger.log(`simplex payment ended. payment_id=${paymentId} paymentStatus:${paymentStatus}`);
 
-      let deleteResponse = await deleteSimplexEvents(event.event_id);
-      if (deleteResponse?.status == "OK") {
-        Logger.log(`simplex payment DELETE event succeeded. eventId=${event.event_id} paymentId=${paymentId}`);
-      } else {
-        Logger.warn(`simplex payment DELETE event failed. eventId=${event.event_id} paymentId=${paymentId}`);
+      for (const event1 of events) {
+        let deleteResponse = await deleteSimplexEvents(event1.event_id);
+        if (deleteResponse?.status == "OK") {
+          Logger.log(`simplex payment DELETE event succeeded. eventId=${event1.event_id} paymentId=${paymentId}`);
+        } else {
+          Logger.warn(`simplex payment DELETE event failed. eventId=${event1.event_id} paymentId=${paymentId}`);
+        }
       }
     }
     Logger.log("getSimplexEvents FINISH successfully");
