@@ -6,18 +6,26 @@ import {
   Logger,
 } from '@nestjs/common';
 
-import { PG_CONNECTION } from '../../constants';
-import { DbPool } from '../../db.module';
-import { hashPassword } from '../../utils';
-import { UserEntity } from '../entities/user.entity';
-import { UserFilterParams } from '../params';
-import { Roles } from 'src/role/entities/role.entity';
+import { PG_CONNECTION } from '../../constants.js';
+import { DbPool } from '../../db.module.js';
+import { hashPassword } from '../../utils.js';
+import { UserEntity } from '../entities/user.entity.js';
+import { UserFilterParams } from '../params.js';
+import { Roles } from '../../role/entities/role.entity.js';
 
 @Injectable()
 export class UserService {
   constructor(@Inject(PG_CONNECTION) private db: DbPool) {}
 
-  async create({ password, roles, ...rest }: UserEntity): Promise<UserEntity> {
+  async create({
+    password,
+    roles,
+    id, // taking id here because we don't want it inside rest, it should be undefined
+    ...rest
+  }: UserEntity): Promise<UserEntity> {
+    if (typeof password === 'undefined') {
+      throw new HttpException(`no password defined`, HttpStatus.BAD_REQUEST);
+    }
     if (!this.#allRolesValid(roles)) {
       throw new HttpException(
         `(partially) invalid roles`,
@@ -165,7 +173,7 @@ GROUP BY ku.id
     return result.rows[0];
   }
 
-  async update(id: number, { roles, ...rest }) {
+  async update(id: number, { roles, ...rest }: UserEntity) {
     if (!this.#allRolesValid(roles)) {
       throw new HttpException(
         `(partially) invalid roles`,

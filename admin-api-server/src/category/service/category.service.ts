@@ -5,8 +5,8 @@ import {
   Injectable,
   Inject,
 } from '@nestjs/common';
-import { CategoryEntity } from '../entity/category.entity';
-import { PG_CONNECTION_STORE_REPLICATION } from '../../constants';
+import { CategoryEntity } from '../entity/category.entity.js';
+import { PG_CONNECTION_STORE_REPLICATION } from '../../constants.js';
 
 @Injectable()
 export class CategoryService {

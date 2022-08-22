@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from 'src/app.module';
-import { Roles } from 'src/role/entities/role.entity';
-import { assertEnv } from 'src/utils';
-import * as Pool from 'pg-pool';
+import request from 'supertest';
+import { AppModule } from '../src/app.module';
+import { Roles } from '../src/role/entities/role.entity';
+import { assertEnv } from '../src/utils';
+import Pool from 'pg-pool';
 import axios from 'axios';
 
 let anyTestFailed = false;

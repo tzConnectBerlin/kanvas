@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsService } from '../service/analytics.service';
-import { DbMockModule } from 'src/db_mock.module';
+import { DbMockModule } from '../../db_mock.module';
 import { mockedRatesProvider, CurrencyService } from 'kanvas-api-lib';
 
 describe('AnalyticsController', () => {
