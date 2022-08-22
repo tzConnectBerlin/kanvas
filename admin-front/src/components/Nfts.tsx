@@ -1,4 +1,4 @@
-import { Box, Paper, Stack, Typography } from '@mui/material';
+import { Box, Breadcrumbs, Paper, Stack, Typography } from '@mui/material';
 import { format } from 'date-fns';
 import {
   Record,
@@ -36,6 +36,8 @@ import ToolbarActions from './ToolbarActions';
 import { makeStyles } from '@material-ui/core/styles';
 import React from 'react';
 import axios from 'axios';
+import styled from "@emotion/styled";
+import { NavigateNext } from "@mui/icons-material";
 
 const useStyle = makeStyles({
   boxWrapper: {
@@ -59,6 +61,10 @@ const useStyle = makeStyles({
   }
 })
 
+const StyledTypography = styled(Typography)({
+  fontSize: '0.8rem',
+});
+
 export const NftList = ({ ...props }) => {
 
   const renderState = (state: 'creation' | 'setup_nft' | 'proposed' | 'prototype' | 'finish') => {
@@ -80,8 +86,27 @@ export const NftList = ({ ...props }) => {
 
   return (
     <>
-      <Stack direction="row">
-        {`States are: 'Ready for creative' ->  'Ready for commercials' -> 'Settings completed' -> 'Ready to publish' -> 'Published'`}
+      <Stack direction="row" alignItems="baseline">
+        <Typography style={{ fontSize: '0.8rem', marginRight: '0.4rem' }}>
+          States are:
+        </Typography>
+        <Breadcrumbs separator={<NavigateNext color="secondary" />}>
+          <StyledTypography variant="body1" color="text.secondary">
+            Ready for creative
+          </StyledTypography>
+          <StyledTypography variant="body1" color="text.secondary">
+            Ready for commercials
+          </StyledTypography>
+          <StyledTypography variant="body1" color="text.secondary">
+            Settings completed
+          </StyledTypography>
+          <StyledTypography variant="body1" color="text.secondary">
+            Ready to publish
+          </StyledTypography>
+          <StyledTypography variant="body1" color="text.secondary">
+            Published
+          </StyledTypography>
+        </Breadcrumbs>
       </Stack>
       <List {...props}
         actions={<ToolbarActions />}
