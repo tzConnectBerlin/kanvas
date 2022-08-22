@@ -32,15 +32,15 @@ echo "$links" | grep --silent 'kanvas-stm-lib ->' || {
     echo "linking stm-lib.."
     (
         cd stm-lib
-        yarn link 2>/dev/null
+        yarn link ${YARN_LINK_ARGS:-''} 2>/dev/null
     )
-    yarn link kanvas-stm-lib
+    yarn link ${YARN_LINK_ARGS:-''} kanvas-stm-lib
 }
 echo "$links" | grep --silent 'kanvas-api-lib ->' || {
     echo "linking api-lib.."
     (
         cd ../lib/api-lib
-        yarn link 2>/dev/null
+        yarn link ${YARN_LINK_ARGS:-''} 2>/dev/null
     )
-    yarn link kanvas-api-lib
+    yarn link ${YARN_LINK_ARGS:-''} kanvas-api-lib
 }
