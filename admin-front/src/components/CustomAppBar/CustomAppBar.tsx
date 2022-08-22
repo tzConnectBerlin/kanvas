@@ -37,7 +37,7 @@ const CustomUserMenu = (props: any) => {
 export const CustomAppBar = (props: any) => {
   const classes = useStyles();
   return (
-    <AppBar {...props} color="black" className={classes.bar}>
+    <AppBar {...props} color="black" className={classes.bar} userMenu={<CustomUserMenu/>}>
       <Link to="/" className={classes.link}>
         <img src='/Logo.svg' className={classes.logo} />
       </Link>

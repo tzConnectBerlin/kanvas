@@ -8,6 +8,7 @@ interface LoginParams {
 }
 
 interface Decoded {
+  email: string;
   iat: number;
   userName: string;
   sub: number;
