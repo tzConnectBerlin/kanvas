@@ -14,6 +14,8 @@ import BurstMode from '@mui/icons-material/BurstMode';
 import { ActivityList } from './components/Activities';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
 import { Label } from '@mui/icons-material';
+import { Route } from "react-router-dom";
+import Profile from "./components/Profile";
 
 //for data from the nest admin api
 
@@ -31,6 +33,9 @@ function App() {
       dataProvider={dataProvider(process.env.REACT_APP_API_SERVER_BASE_URL ?? 'http://localhost:3001')}
       disableTelemetry
       authProvider={authProvider}
+      customRoutes={[
+        <Route exact key={"my-profile"} path="/my-profile" component={Profile} />,
+      ]}
       theme={theme}
     >
       <Resource
