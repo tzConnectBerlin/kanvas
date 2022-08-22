@@ -48,6 +48,7 @@ export class AuthenticationService {
       {
         id: user.id,
         userAddress: user.userAddress,
+        createdAt: user.createdAt
       },
       user,
     );

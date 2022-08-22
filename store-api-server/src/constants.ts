@@ -57,6 +57,12 @@ export const WERT_PRIV_KEY: string | undefined = process.env['WERT_PRIV_KEY'];
 export const WERT_PUB_KEY: string | undefined = process.env['WERT_PUB_KEY'];
 export const WERT_ALLOWED_FIAT: string[] = ['USD']; // it seems that as for now at least wert only supports payments in USD
 
+export const SIMPLEX_API_KEY: string | undefined = process.env['SIMPLEX_API_KEY'];
+export const SIMPLEX_API_URL: string | undefined = process.env['SIMPLEX_API_URL'];
+export const SIMPLEX_PUBLIC_KEY: string | undefined = process.env['SIMPLEX_PUBLIC_KEY'];
+export const SIMPLEX_WALLET_ID: string | undefined = process.env['SIMPLEX_WALLET_ID'];
+export const SIMPLEX_ALLOWED_FIAT: string[] = ['USD']; // it seems that as for now at least simplex only supports payments in USD
+
 export const TEZPAY_PAYPOINT_ADDRESS: string | undefined =
   process.env['TEZPAY_PAYPOINT_ADDRESS'];
 

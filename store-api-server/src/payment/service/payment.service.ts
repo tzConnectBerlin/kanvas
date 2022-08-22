@@ -14,6 +14,11 @@ import {
   WERT_PUB_KEY,
   WERT_ALLOWED_FIAT,
   TEZPAY_PAYPOINT_ADDRESS,
+  SIMPLEX_API_KEY,
+  SIMPLEX_API_URL,
+  SIMPLEX_PUBLIC_KEY,
+  SIMPLEX_WALLET_ID,
+  SIMPLEX_ALLOWED_FIAT
 } from '../../constants.js';
 import { UserService } from '../../user/service/user.service.js';
 import { NftService } from '../../nft/service/nft.service.js';
@@ -25,6 +30,7 @@ import { assertEnv, nowUtcWithOffset, isBottom } from '../../utils.js';
 import { DbTransaction, withTransaction, DbPool } from '../../db.module.js';
 import Tezpay from 'tezpay-server';
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 import { UserEntity } from '../../user/entity/user.entity.js';
 import {
   CurrencyService,
@@ -40,6 +46,7 @@ import type {
   TezpayDetails,
   StripeDetails,
   WertDetails,
+  SimplexDetails
 } from '../entity/payment.entity.js';
 
 const require = createRequire(import.meta.url);
@@ -68,7 +75,7 @@ export interface PaymentIntentInternal {
 
   amount: string;
   currency: string;
-  paymentDetails?: StripeDetails | WertDetails | TezpayDetails;
+  paymentDetails?: StripeDetails | WertDetails | TezpayDetails | SimplexDetails;
 }
 
 @Injectable()
@@ -157,6 +164,7 @@ WHERE id = $1
     provider: PaymentProvider,
     currency: string,
     recreateOrder: boolean = false,
+    clientIp: string,
   ): Promise<PaymentIntentInternal> {
     await this.userService.ensureUserCartSession(usr.id, cookieSession);
 
@@ -179,6 +187,8 @@ WHERE id = $1
         usr.userAddress,
         currency,
         currencyUnitAmount,
+        usr,
+        clientIp,
       );
       await this.#registerPayment(
         dbTx,
@@ -313,6 +323,8 @@ WHERE nft_order.id = $1
     userAddress: string,
     currency: string,
     currencyUnitAmount: number,
+    usr: UserEntity,
+    clientIp: string,
   ): Promise<PaymentIntentInternal> {
     switch (provider) {
       case PaymentProvider.TEZPAY:
@@ -333,6 +345,13 @@ WHERE nft_order.id = $1
           userAddress,
           currency,
           currencyUnitAmount,
+        );
+      case PaymentProvider.SIMPLEX:
+        return await this.#createSimplexPaymentIntent(
+            currency,
+            currencyUnitAmount,
+            usr,
+            clientIp,
         );
       case PaymentProvider.TEST:
         return {
@@ -400,6 +419,159 @@ WHERE nft_order.id = $1
           currency: fiatCurrency,
         },
       },
+    };
+  }
+
+  async #createSimplexPaymentIntent(
+      fiatCurrency: string,
+      currencyUnitAmount: number,
+      usr: UserEntity,
+      clientIp: string
+  ): Promise<PaymentIntentInternal> {
+    if (
+        typeof SIMPLEX_API_URL === "undefined" ||
+        typeof SIMPLEX_API_KEY === "undefined" ||
+        typeof SIMPLEX_WALLET_ID === "undefined"
+    ) {
+      throw new HttpException(
+          "Simplex payment provider not supported by this API instance",
+          HttpStatus.NOT_IMPLEMENTED
+      );
+    }
+    if (!SIMPLEX_ALLOWED_FIAT.includes(fiatCurrency)) {
+      throw new HttpException(
+          `requested fiat (${fiatCurrency}) is not supported by Simplex`,
+          HttpStatus.BAD_REQUEST
+      );
+    }
+    const decimals = SUPPORTED_CURRENCIES[fiatCurrency];
+    const amount = (Number(currencyUnitAmount) * Math.pow(10, -decimals)).toFixed(
+        decimals
+    )
+    async function getSimplexQuoteId() {
+      try {
+        let quoteResponse = await axios.post(
+            SIMPLEX_API_URL + "/wallet/merchant/v2/quote",
+            {
+              end_user_id: "" + usr.id,
+              digital_currency: "USD-DEPOSIT",
+              fiat_currency: "USD",
+              requested_currency: "USD",
+              requested_amount: Number(amount),
+              wallet_id: SIMPLEX_WALLET_ID,
+              client_ip: "1.2.3.4", // TODO ?
+              payment_methods: ["credit_card"]
+            },
+            {
+              headers: {
+                "Authorization": `ApiKey ${SIMPLEX_API_KEY}`
+              }
+            }
+        );
+        return quoteResponse.data?.quote_id;
+      } catch (error) {
+        let errorMessage;
+        if (error instanceof Error) {
+          if (axios.isAxiosError(error) && error.response) {
+            errorMessage = error.response?.data?.error || error.response?.data;
+            let errors = error.response?.data?.errors;
+            if (errors && typeof errors == "object") {
+              errorMessage = error.response?.data?.error + "---DETAILS:---" + JSON.stringify(errors);
+            }
+            Logger.warn("get quote ERROR" + errorMessage);
+            throw new Error(`there is problem simplex api get quote please contact your backend services`);
+          }
+          else{
+              Logger.warn("Unexpected error simplex api get quote instance of error", error.message);
+          }
+        } else {
+          Logger.warn("Unexpected error simplex api get quote");
+        }
+          throw new Error(`there is problem simplex api get quote please contact your backend services`);
+      }
+    }
+    let quoteId = await getSimplexQuoteId();
+
+    const paymentId = uuidv4();
+    const orderId = uuidv4();
+
+    async function simplexPaymentRequest() {
+      try {
+        var paymentResponse = await axios.post(
+            SIMPLEX_API_URL + "/wallet/merchant/v2/payments/partner/data",
+            {
+              account_details: {
+                app_provider_id: SIMPLEX_WALLET_ID,
+                app_version_id: "1.0.0",
+                app_end_user_id: "" + usr.id,
+                app_install_date: usr.createdAt ? new Date(usr.createdAt * 1000).toISOString() : new Date().toISOString(),
+                email: "", // TODO NO WAY ?
+                phone: "", // TODO NO WAY ?
+                signup_login: {
+                  timestamp: new Date().toISOString(),
+                  ip: clientIp
+                }
+              },
+              transaction_details: {
+                payment_details: {
+                  quote_id: quoteId,
+                  payment_id: paymentId,
+                  order_id: orderId,
+                  destination_wallet: {
+                    currency: "USD-DEPOSIT",
+                    address: usr.userAddress,
+                    tag: ""
+                  },
+                  original_http_ref_url: "" // TODO NO WAY ?
+                }
+              }
+            },
+            {
+              headers: {
+                "Authorization": `ApiKey ${SIMPLEX_API_KEY}`
+              }
+            }
+        );
+
+      } catch (error) {
+        let errorMessage;
+        if (error instanceof Error) {
+          if (axios.isAxiosError(error) && error.response) {
+            errorMessage = error.response?.data?.error || error.response?.data;
+            let errors = error.response?.data?.errors;
+            if (errors && typeof errors == "object") {
+              errorMessage = error.response?.data?.error + "---DETAILS:---" + JSON.stringify(errors);
+            }
+            Logger.warn("payment req ERROR" + errorMessage);
+              throw new Error(`there is problem simplex api payment req please contact your backend services`);
+          }else{
+              Logger.warn("Unexpected error simplex api get quote instance of error", error.message);
+          }
+        } else {
+          Logger.warn("Unexpected error simplex api payment req");
+        }
+          throw new Error(`there is problem simplex api payment req please contact your backend services`);
+      }
+      return paymentResponse;
+    }
+
+    let paymentResponse = await simplexPaymentRequest();
+
+    if (!paymentResponse.data?.is_kyc_update_required) {
+        throw new Error(`there is problem simplex api payment req please contact your backend services (payment req succeeded but response unsupported)`);
+    }
+
+    return {
+      id: paymentId,
+      amount: amount,
+      currency: fiatCurrency,
+      paymentDetails: {
+        simplexData: {
+          paymentId: paymentId,
+          orderId: orderId,
+          publicApiKey: SIMPLEX_PUBLIC_KEY
+        }
+      }
     };
   }
 
@@ -635,6 +807,130 @@ WHERE provider IN ('tezpay', 'wert')
     }
   }
 
+  @Cron(CronExpression.EVERY_MINUTE)
+  async checkPendingSimplex() {
+    Logger.log("getSimplexEvents START");
+    const pendingPaymentIds = await this.conn.query(
+        `
+SELECT
+  payment_id
+FROM payment
+WHERE provider = 'simplex'
+  AND status IN ('created', 'promised')
+    `
+    );
+
+    async function getSimplexEvents() {
+      try {
+        let eventsResponse = await axios.get(
+            SIMPLEX_API_URL + "/wallet/merchant/v2/events",
+            {
+              headers: {
+                "Authorization": `ApiKey ${SIMPLEX_API_KEY}`
+              }
+            }
+        );
+        return eventsResponse.data;
+      } catch (error) {
+        let errorMessage;
+        if (error instanceof Error) {
+          if (axios.isAxiosError(error) && error.response) {
+            errorMessage = error.response?.data?.error || error.response?.data;
+            let errors = error.response?.data?.errors;
+            if (errors && typeof errors == "object") {
+              errorMessage = error.response?.data?.error + "---DETAILS:---" + JSON.stringify(errors);
+            }
+            Logger.warn("getSimplexEvents ERROR" + errorMessage);
+            throw new Error(`there is problem simplex api getSimplexEvents please contact your backend services`);
+          } else {
+            Logger.warn("Unexpected error simplex api getSimplexEvents instance of error", error.message);
+          }
+        } else {
+          Logger.warn("Unexpected error simplex api getSimplexEvents");
+        }
+        throw new Error(`there is problem simplex api getSimplexEvents please contact your backend services`);
+      }
+    }
+
+    async function deleteSimplexEvents(eventId: string) {
+      try {
+        let eventsResponse = await axios.delete(
+            SIMPLEX_API_URL + "/wallet/merchant/v2/events/" + eventId,
+            {
+              headers: {
+                "Authorization": `ApiKey ${SIMPLEX_API_KEY}`
+              }
+            }
+        );
+        return eventsResponse.data;
+      } catch (error) {
+        let errorMessage;
+        if (error instanceof Error) {
+          if (axios.isAxiosError(error) && error.response) {
+            errorMessage = error.response?.data?.error || error.response?.data;
+            let errors = error.response?.data?.errors;
+            if (errors && typeof errors == "object") {
+              errorMessage = error.response?.data?.error + "---DETAILS:---" + JSON.stringify(errors);
+            }
+            Logger.warn("getSimplexEvents ERROR" + errorMessage);
+          } else {
+            Logger.warn("Unexpected error simplex api deleteSimplexEvents instance of error", error.message);
+          }
+        } else {
+          Logger.warn("Unexpected error simplex api deleteSimplexEvents");
+        }
+      }
+    }
+
+    function getSimplexPaymentStatus(event: { name: any; }) {
+      let paymentStatus: PaymentStatus;
+      switch (event?.name) {
+        case "payment_simplexcc_approved":
+          paymentStatus = PaymentStatus.SUCCEEDED;
+          break;
+        case "payment_simplexcc_declined":
+          paymentStatus = PaymentStatus.FAILED;
+          break;
+        default:
+          Logger.error(`Unhandled payment status ${event?.name}`);
+          throw Err("Unknown simplex events");
+      }
+      return paymentStatus;
+    }
+
+    let eventsResponse = await getSimplexEvents();
+    for (const row of pendingPaymentIds.rows) {
+      const paymentId = row["payment_id"];
+
+      let events = eventsResponse?.events?.filter((item: { payment: { id: string; }; }) => {
+        return item?.payment?.id == paymentId;
+      });
+
+      let event = events.pop();
+
+      if (!event) {
+        Logger.warn("isPaidSimplex there is no event for paymentId: " + paymentId);
+        throw Err("there is no simplex event");
+      }
+
+      const paymentStatus = getSimplexPaymentStatus(event);
+
+      await this.#updatePaymentStatus(paymentId, paymentStatus);
+      Logger.log(`simplex payment ended. payment_id=${paymentId} paymentStatus:${paymentStatus}`);
+
+      events.push(event);
+      for (const event1 of events) {
+        let deleteResponse = await deleteSimplexEvents(event1.event_id);
+        if (deleteResponse?.status == "OK") {
+          Logger.log(`simplex payment DELETE event succeeded. eventId=${event1.event_id} paymentId=${paymentId}`);
+        } else {
+          Logger.warn(`simplex payment DELETE event failed. eventId=${event1.event_id} paymentId=${paymentId}`);
+        }
+      }
+    }
+    Logger.log("getSimplexEvents FINISH successfully");
+  }
+
   async cancelNftOrder(
     dbTx: DbTransaction,
     orderId: number,
@@ -689,6 +985,7 @@ RETURNING payment_id
 
     try {
       switch (provider) {
+        // we could not add SIMPLEX. Because Simplex Team does not support cancel payment.
         case PaymentProvider.STRIPE:
           await this.stripe.paymentIntents.cancel(paymentId);
           break;

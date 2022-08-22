@@ -13,6 +13,10 @@ export interface StripeDetails {
 export interface WertDetails {
   wertData: any;
 }
+
+export interface SimplexDetails {
+  simplexData: any;
+}
 export interface TezpayDetails {
   receiverAddress: string;
   paypointMessage: string;
@@ -24,7 +28,7 @@ export interface PaymentIntent {
 
   amount: string;
   currency: string;
-  paymentDetails?: StripeDetails | WertDetails | TezpayDetails;
+  paymentDetails?: StripeDetails | WertDetails | TezpayDetails | SimplexDetails;
 
   nfts: NftEntity[];
   expiresAt: number;
@@ -34,6 +38,7 @@ export enum PaymentProvider {
   TEZPAY = 'tezpay',
   STRIPE = 'stripe',
   WERT = 'wert',
+  SIMPLEX = 'simplex',
   TEST = 'test_provider',
 }
 
