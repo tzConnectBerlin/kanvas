@@ -7,6 +7,7 @@ import {
   TextField,
   Edit,
   SimpleForm,
+  SimpleList,
   TextInput,
   Create,
   FileInput,
@@ -26,7 +27,8 @@ import {
   useRedirect,
   ReferenceField,
   DateTimeInput,
-  FunctionField
+  FunctionField,
+  Responsive
 } from 'react-admin';
 // import { DateTimeInput } from 'react-admin-date-inputs';
 import { CustomDeleteButton } from './Buttons/CustomDeleteButton';
@@ -86,24 +88,38 @@ export const NftList = ({ ...props }) => {
         bulkActionButtons={<CustomDeleteButton {...props} />}
         sort={{ field: "id", order: "DESC" }}
       >
-        <Datagrid rowClick="edit">
-          <TextField source="id" />
-          <TextField source="attributes.name" label="Name" />
-          <FunctionField label="Current state" render={(record: any) => renderState(record.state)} />
-          <NumberField source="attributes.price" label='Price' />
-          <NumberField source="attributes.editions_size" label='Token amount' />
-          <FunctionField label="Creation time" render={(record: any) => `${format(
-            record.createdAt * 1000 ? new Date(record.createdAt * 1000) : new Date(),
-            'dd/MM/yyyy - HH : mm : ss',
-          )}`} />
-          <FunctionField label="Last updated" render={(record: any) => `${format(
-            record.updatedAt * 1000 ? new Date(record.updatedAt * 1000) : new Date(),
-            'dd/MM/yyyy - HH : mm : ss',
-          )}`} />
-          <ReferenceField label="Created by" source="createdBy" reference="user">
-            <ChipField source="userName" />
-          </ReferenceField>
-        </Datagrid>
+        <Responsive
+          medium={
+            <Datagrid rowClick="edit">
+              <TextField source="id" />
+              <TextField source="attributes.name" label="Name" />
+              <FunctionField label="Current state" render={(record: any) => renderState(record.state)} />
+              <NumberField source="attributes.price" label='Price' />
+              <NumberField source="attributes.editions_size" label='Token amount' />
+              <FunctionField label="Creation time" render={(record: any) => `${format(
+                record.createdAt * 1000 ? new Date(record.createdAt * 1000) : new Date(),
+                'dd/MM/yyyy - HH : mm : ss',
+              )}`} />
+              <FunctionField label="Last updated" render={(record: any) => `${format(
+                record.updatedAt * 1000 ? new Date(record.updatedAt * 1000) : new Date(),
+                'dd/MM/yyyy - HH : mm : ss',
+              )}`} />
+              <ReferenceField label="Created by" source="createdBy" reference="user">
+                <ChipField source="userName" />
+              </ReferenceField>
+            </Datagrid>
+          }
+          small={
+            <SimpleList
+              primaryText={(record: any) => record.attributes.name}
+              secondaryText={(record: any) => renderState(record.state)}
+              tertiaryText={(record: any) => `${format(
+                record.createdAt * 1000 ? new Date(record.createdAt * 1000) : new Date(),
+                'dd/MM/yyyy - HH : mm : ss',
+              )}`}
+            />
+          }
+          />
       </List>
     </>
   )
