@@ -495,7 +495,7 @@ WHERE TARGET.value != EXCLUDED.value
 
       price: attr.price,
       categories: attr.categories,
-      editionsSize: attr.editions_size,
+      editionsSize: attr.edition_size,
       onsaleFrom: attr.onsale_from,
       onsaleUntil: attr.onsale_until,
 

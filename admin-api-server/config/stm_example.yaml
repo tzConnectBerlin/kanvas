@@ -17,7 +17,7 @@ attributes:
       maxSize: 10MB
   create_ready: boolean
   price: number
-  editions_size: number
+  edition_size: number
   categories: number[]
   onsale_from: date
   onsale_until: date
@@ -44,12 +44,12 @@ states:
     - next_state: proposed
       when:
       - nft.proposed
-      - nft.editions_size > 0
+      - nft.edition_size > 0
       - nft.price > 0
       - nft.price < 1000000
       - nft.categories.length > 0
     mutables:
-    - attributes: [price, editions_size, proposed, categories, onsale_from, onsale_until]
+    - attributes: [price, edition_size, proposed, categories, onsale_from, onsale_until]
       by_roles: [editor, creator, admin]
 
   proposed:
