@@ -476,7 +476,7 @@ export const NftEdit = (props: any) => {
                   <InputSelector
                     attributesName={key}
                     label={key[0].toUpperCase() + key.replace('_', ' ').slice(1)}
-                    type={concernedNft.data!.allowedActions[key] as 'string' | 'boolean' | 'number' | 'content_uri' | 'number[]' | 'votes' | 'date'}
+                    type={concernedNft.data!.allowedActions[key] as 'string' | 'boolean' | 'number' | 'content_uri' | 'number[]' | 'votes' | 'date' | 'text' }
                   />
                 </Box>
               )
