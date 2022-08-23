@@ -1,4 +1,4 @@
-import { Box, Breadcrumbs, Paper, Stack, Typography } from '@mui/material';
+import { Box, Paper, Stack, Typography } from '@mui/material';
 import { format } from 'date-fns';
 import {
   Record,
@@ -7,11 +7,10 @@ import {
   TextField,
   Edit,
   SimpleForm,
-  SimpleList,
   TextInput,
   Create,
-  FileInput,
-  FileField,
+  ImageInput,
+  ImageField,
   NumberInput,
   NumberField,
   useGetOne,
@@ -27,8 +26,7 @@ import {
   useRedirect,
   ReferenceField,
   DateTimeInput,
-  FunctionField,
-  Responsive
+  FunctionField
 } from 'react-admin';
 // import { DateTimeInput } from 'react-admin-date-inputs';
 import { CustomDeleteButton } from './Buttons/CustomDeleteButton';
@@ -36,8 +34,6 @@ import ToolbarActions from './ToolbarActions';
 import { makeStyles } from '@material-ui/core/styles';
 import React from 'react';
 import axios from 'axios';
-import styled from "@emotion/styled";
-import { NavigateNext } from "@mui/icons-material";
 
 const useStyle = makeStyles({
   boxWrapper: {
@@ -61,10 +57,6 @@ const useStyle = makeStyles({
   }
 })
 
-const StyledTypography = styled(Typography)({
-  fontSize: '0.8rem',
-});
-
 export const NftList = ({ ...props }) => {
 
   const renderState = (state: 'creation' | 'setup_nft' | 'proposed' | 'prototype' | 'finish') => {
@@ -86,65 +78,32 @@ export const NftList = ({ ...props }) => {
 
   return (
     <>
-      <Stack direction="row" alignItems="baseline">
-        <Typography style={{ fontSize: '0.8rem', marginRight: '0.4rem' }}>
-          States are:
-        </Typography>
-        <Breadcrumbs separator={<NavigateNext color="secondary" />}>
-          <StyledTypography variant="body1" color="text.secondary">
-            Ready for creative
-          </StyledTypography>
-          <StyledTypography variant="body1" color="text.secondary">
-            Ready for commercials
-          </StyledTypography>
-          <StyledTypography variant="body1" color="text.secondary">
-            Settings completed
-          </StyledTypography>
-          <StyledTypography variant="body1" color="text.secondary">
-            Ready to publish
-          </StyledTypography>
-          <StyledTypography variant="body1" color="text.secondary">
-            Published
-          </StyledTypography>
-        </Breadcrumbs>
+      <Stack direction="row">
+        {`States are: 'Ready for creative' ->  'Ready for commercials' -> 'Settings completed' -> 'Ready to publish' -> 'Published'`}
       </Stack>
       <List {...props}
         actions={<ToolbarActions />}
         bulkActionButtons={<CustomDeleteButton {...props} />}
         sort={{ field: "id", order: "DESC" }}
       >
-        <Responsive
-          medium={
-            <Datagrid rowClick="edit">
-              <TextField source="id" />
-              <TextField source="attributes.name" label="Name" />
-              <FunctionField label="Current state" render={(record: any) => renderState(record.state)} />
-              <NumberField source="attributes.price" label='Price' />
-              <NumberField source="attributes.editions_size" label='Token amount' />
-              <FunctionField label="Creation time" render={(record: any) => `${format(
-                record.createdAt * 1000 ? new Date(record.createdAt * 1000) : new Date(),
-                'dd/MM/yyyy - HH : mm : ss',
-              )}`} />
-              <FunctionField label="Last updated" render={(record: any) => `${format(
-                record.updatedAt * 1000 ? new Date(record.updatedAt * 1000) : new Date(),
-                'dd/MM/yyyy - HH : mm : ss',
-              )}`} />
-              <ReferenceField label="Created by" source="createdBy" reference="user">
-                <ChipField source="userName" />
-              </ReferenceField>
-            </Datagrid>
-          }
-          small={
-            <SimpleList
-              primaryText={(record: any) => record.attributes.name}
-              secondaryText={(record: any) => renderState(record.state)}
-              tertiaryText={(record: any) => `${format(
-                record.createdAt * 1000 ? new Date(record.createdAt * 1000) : new Date(),
-                'dd/MM/yyyy - HH : mm : ss',
-              )}`}
-            />
-          }
-          />
+        <Datagrid rowClick="edit">
+          <TextField source="id" />
+          <TextField source="attributes.name" label="Name" />
+          <FunctionField label="Current state" render={(record: any) => renderState(record.state)} />
+          <NumberField source="attributes.price" label='Price' />
+          <NumberField source="attributes.editions_size" label='Token amount' />
+          <FunctionField label="Creation time" render={(record: any) => `${format(
+            record.createdAt * 1000 ? new Date(record.createdAt * 1000) : new Date(),
+            'dd/MM/yyyy - HH : mm : ss',
+          )}`} />
+          <FunctionField label="Last updated" render={(record: any) => `${format(
+            record.updatedAt * 1000 ? new Date(record.updatedAt * 1000) : new Date(),
+            'dd/MM/yyyy - HH : mm : ss',
+          )}`} />
+          <ReferenceField label="Created by" source="createdBy" reference="user">
+            <ChipField source="userName" />
+          </ReferenceField>
+        </Datagrid>
       </List>
     </>
   )
@@ -160,7 +119,7 @@ interface InbutSelectorProps {
 
 const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
 
-  const validateNumber = [number('expecting a number'), minValue(0)];
+  const validateNumber = [number(), minValue(0)];
   const validateDate = (value: any) => {
     if (value < new Date().getTime()) return 'Date must be in the future'
     return undefined
@@ -169,7 +128,8 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
   const classes = useStyle()
 
   if (props.type === 'string') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} />;
-  if (props.type === 'number') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} validate={validateNumber}  />;
+  if (props.type === 'text') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} multiline fullWidth />;
+  if (props.type === 'number') return <NumberInput source={`attributes.${props.attributesName}`} label={props.label} validate={validateNumber} />;
   if (props.type === 'boolean') return <BooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
   if (props.type === 'date') return <DateTimeInput source={`attributes.${props.attributesName}`} label={props.label} value={props.record * 1000} validate={validateDate} />;
   if (props.type === 'number[]') {
@@ -186,9 +146,9 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
   if (props.type === 'content_uri') {
 
     return (
-      <FileInput label={props.label} source={`files[${props.label}]`} >
-        <FileField src={`attributes.${props.label}`} source="src" title="title" />
-      </FileInput>
+      <ImageInput label={props.label} source={`files[${props.label}]`} accept="image/*">
+        <ImageField src={`attributes.${props.label}`} source="src" title="title" />
+      </ImageInput>
     );
   }
   else return null
@@ -224,7 +184,7 @@ const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
 
   if (!props.record || !props.type) return null;
 
-  if (props.type === 'string' || props.type === 'number') {
+  if (props.type === 'string' || props.type === 'number' || props.type === 'text') {
     return <Stack direction="column">
       <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
         {props.label}
@@ -247,7 +207,7 @@ const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
   }
   if (props.type === 'number[]') {
     return (
-      < Stack direction="row" >
+      <Stack direction="row">
         <Stack direction="column">
           <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
             {props.label}
@@ -305,35 +265,16 @@ const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
     </Stack>
   };
 
-  if (props.type === 'content_uri' && props.attributesName !== 'artifact') {
+  if (props.type === 'content_uri' && props.attributesName !== 'image.png') {
     return <Stack direction="column">
       <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
         {props.label}
 
       </Typography>
-      {
-        renderContent('100px', '100px', props.record[props.attributesName])
-      }
+      <img src={props.record[props.attributesName]} style={{ maxWidth: '100px', maxHeight: '100px' }} />
     </Stack>
   }
   else return null
-}
-
-function renderContent(maxWidth: string, maxHeight: string, uri?: string) {
-  if (typeof uri === 'undefined') {
-    return;
-  }
-  if (uri.endsWith(".mp4")) {
-    return (
-      <video  width={maxWidth} height={maxHeight} controls>
-        <source src={uri} type="video/mp4"  />
-      </video>
-    )
-  }
-  // assuming this is an image then (for backwards compatibility)
-  return (
-    <img src={uri} style={{ margin: 'auto', maxWidth: '80%', maxHeight: '80%' }} />
-  )
 }
 
 const NftAside = ({ ...props }) => {
@@ -403,9 +344,7 @@ const NftAside = ({ ...props }) => {
         <Stack direction="row" sx={{ position: 'relative', alignItems: 'flex-end', margin: '2em', height: '100%', flexGrow: 1 }} spacing={3}>
 
           <Box sx={{ minHeight: '100px', display: 'flex', flexDirection: "column", flexGrow: 1, justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
-          {
-            renderContent('80%', '80%', props.record?.attributes.artifact)
-          }
+            <img src={props.record?.attributes["image.png"]} style={{ margin: 'auto', maxWidth: '80%', maxHeight: '80%' }} />
           </Box>
 
           <Stack direction="column" sx={{ flexStart: 'end', width: '60%' }}>
@@ -415,7 +354,7 @@ const NftAside = ({ ...props }) => {
                 return <FieldSelector
                   attributesName={key}
                   label={key[0].toUpperCase() + key.replace('_', ' ').slice(1)}
-                  type={attributesTypes[key] as 'string' | 'boolean' | 'number' | 'content_uri' | 'number[]' | 'votes' | 'date'}
+                  type={attributesTypes[key] as 'string' | 'boolean' | 'number' | 'content_uri' | 'number[]' | 'votes' | 'date' | 'text' }
                   record={props.record.attributes}
                   numberValueArray={key === 'categories' ? categories.map((category: Record) => category?.name) : []}
                 />
