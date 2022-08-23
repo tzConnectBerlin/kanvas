@@ -7,6 +7,7 @@ set -u
 echo "building api-lib.."
 (
     cd ../lib/api-lib
+    yarn install
     yarn build
 )
 
