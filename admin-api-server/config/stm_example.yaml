@@ -1,6 +1,6 @@
 attributes:
   name: string
-  description: text
+  description: string
   artifact: content_uri
   display:
     type: content_uri
