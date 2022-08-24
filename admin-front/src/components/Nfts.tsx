@@ -169,6 +169,7 @@ const InputSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
   const classes = useStyle()
 
   if (props.type === 'string') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} />;
+  if (props.type === 'text') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} fullWidth multiline />;
   if (props.type === 'number') return <TextInput source={`attributes.${props.attributesName}`} label={props.label} validate={validateNumber}  />;
   if (props.type === 'boolean') return <BooleanInput source={`attributes.${props.attributesName}`} label={props.label} />;
   if (props.type === 'date') return <DateTimeInput source={`attributes.${props.attributesName}`} label={props.label} value={props.record * 1000} validate={validateDate} />;
@@ -224,7 +225,7 @@ const FieldSelector: React.FC<InbutSelectorProps> = ({ ...props }) => {
 
   if (!props.record || !props.type) return null;
 
-  if (props.type === 'string' || props.type === 'number') {
+  if (props.type === 'string' || props.type === 'number' || props.type === 'text') {
     return <Stack direction="column">
       <Typography variant="subtitle2" style={{ fontFamily: 'Poppins SemiBold', color: '#c4C4C4' }}>
         {props.label}
@@ -415,7 +416,7 @@ const NftAside = ({ ...props }) => {
                 return <FieldSelector
                   attributesName={key}
                   label={key[0].toUpperCase() + key.replace('_', ' ').slice(1)}
-                  type={attributesTypes[key] as 'string' | 'boolean' | 'number' | 'content_uri' | 'number[]' | 'votes' | 'date'}
+                  type={attributesTypes[key] as 'string' | 'boolean' | 'number' | 'content_uri' | 'number[]' | 'votes' | 'date' | 'text'}
                   record={props.record.attributes}
                   numberValueArray={key === 'categories' ? categories.map((category: Record) => category?.name) : []}
                 />
@@ -475,7 +476,7 @@ export const NftEdit = (props: any) => {
                   <InputSelector
                     attributesName={key}
                     label={key[0].toUpperCase() + key.replace('_', ' ').slice(1)}
-                    type={concernedNft.data!.allowedActions[key] as 'string' | 'boolean' | 'number' | 'content_uri' | 'number[]' | 'votes' | 'date'}
+                    type={concernedNft.data!.allowedActions[key] as 'string' | 'boolean' | 'number' | 'content_uri' | 'number[]' | 'votes' | 'date' | 'text' }
                   />
                 </Box>
               )
