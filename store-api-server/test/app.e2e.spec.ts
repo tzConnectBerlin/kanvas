@@ -23,6 +23,7 @@ import { UserService } from '../src/user/service/user.service';
 import { assertEnv, sleep } from '../src/utils';
 import sotez from 'sotez';
 import { v4 as uuidv4 } from 'uuid';
+import Pool from 'pg-pool';
 const { cryptoUtils } = sotez;
 
 let anyTestFailed = false;
@@ -1571,6 +1572,7 @@ describe('AppController (e2e)', () => {
         uuidv4(),
         PaymentProvider.TEST,
         'EUR',
+        'localhost',
       );
 
       // 1 edition reserved by the order
@@ -1650,6 +1652,7 @@ describe('AppController (e2e)', () => {
         uuidv4(),
         PaymentProvider.TEST,
         'EUR',
+        'localhost',
       );
 
       // Give webhook handler function success event
@@ -1740,6 +1743,7 @@ describe('AppController (e2e)', () => {
         uuidv4(),
         PaymentProvider.TEST,
         'EUR',
+        'localhost',
       );
 
       // Give webhook handler function success event
@@ -1814,6 +1818,7 @@ describe('AppController (e2e)', () => {
         uuidv4(),
         PaymentProvider.TEST,
         'EUR',
+        'localhost',
       );
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
         usr.id,
@@ -1843,6 +1848,7 @@ describe('AppController (e2e)', () => {
         uuidv4(),
         PaymentProvider.TEST,
         'EUR',
+        'localhost',
       );
       const payment3Data = await paymentService.getPaymentForLatestUserOrder(
         usr.id,
@@ -1871,6 +1877,7 @@ describe('AppController (e2e)', () => {
         uuidv4(),
         PaymentProvider.TEST,
         'EUR',
+        'localhost',
       );
       const created = await paymentService.getPaymentForLatestUserOrder(usr.id);
       expect(created.status).toEqual(PaymentStatus.CREATED);
@@ -1885,6 +1892,7 @@ describe('AppController (e2e)', () => {
         uuidv4(),
         PaymentProvider.TEST,
         'EUR',
+        'localhost',
       );
       const promisePaid = await paymentService.getPaymentForLatestUserOrder(
         usr.id,
@@ -1914,6 +1922,7 @@ describe('AppController (e2e)', () => {
         uuidv4(),
         PaymentProvider.TEST,
         'EUR',
+        'localhost',
       );
       const payment4Data = await paymentService.getPaymentForLatestUserOrder(
         usr.id,
@@ -1948,6 +1957,7 @@ describe('AppController (e2e)', () => {
         uuidv4(),
         PaymentProvider.TEST,
         'EUR',
+        'localhost',
       );
       const payment5Data = await paymentService.getPaymentForLatestUserOrder(
         usr.id,
@@ -1973,6 +1983,78 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail(
+    'double create-payment-intent for same provider in quick succession => only 1 ends in non-cancelled state',
+    async () => {
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      const usr = <UserEntity>{ userAddress: address, id: id };
+
+      const add1 = await request(app.getHttpServer())
+        .post('/users/cart/add/4')
+        .set('authorization', bearer);
+      expect(add1.statusCode).toEqual(201);
+
+      const paymentIntents = await Promise.all([
+        (async () => {
+          try {
+            return await paymentService.createPayment(
+              usr,
+              uuidv4(),
+              PaymentProvider.TEST,
+              'EUR',
+              'localhost',
+            );
+          } catch (err: any) {
+            return null;
+          }
+        })(),
+        (async () => {
+          try {
+            return await paymentService.createPayment(
+              usr,
+              uuidv4(),
+              PaymentProvider.TEST,
+              'EUR',
+              'localhost',
+            );
+          } catch (err: any) {
+            return null;
+          }
+        })(),
+      ]);
+
+      const intent1 = paymentIntents[0];
+      const intent2 = paymentIntents[1];
+
+      if (intent1 != null && intent2 != null) {
+        // the race condition wasn't triggered; in this case it's
+        // a matter of the first created intent to have been cancelled and
+        // the last created intent to be in CREATED state.
+
+        const status1 = await getPaymentStatus(intent1.id);
+        const status2 = await getPaymentStatus(intent2.id);
+
+        expect(
+          (status1 === PaymentStatus.CREATED &&
+            status2 === PaymentStatus.CANCELED) ||
+            (status1 === PaymentStatus.CANCELED &&
+              status2 === PaymentStatus.CREATED),
+        ).toBe(true);
+      } else {
+        // the race condition was triggered; in this case, it's a matter of
+        // 1 of them having failed to have been created at all
+        expect(
+          (intent1 != null && intent2 == null) ||
+            (intent1 == null && intent2 != null),
+        ).toBe(true);
+      }
+
+      await request(app.getHttpServer())
+        .post('/users/cart/remove/4')
+        .set('authorization', bearer);
+    },
+  );
+
+  skipOnPriorFail(
     'stripe payment: Payment status should not change from FAILED',
     async () => {
       const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
@@ -1988,6 +2070,7 @@ describe('AppController (e2e)', () => {
         uuidv4(),
         PaymentProvider.TEST,
         'EUR',
+        'localhost',
       );
 
       // Give webhook handler function success event
@@ -2050,6 +2133,7 @@ describe('AppController (e2e)', () => {
         uuidv4(),
         PaymentProvider.TEST,
         'EUR',
+        'localhost',
       );
 
       // Give webhook handler function success event
@@ -3153,6 +3237,7 @@ describe('AppController (e2e)', () => {
       uuidv4(),
       PaymentProvider.TEST,
       'EUR',
+      'localhost',
     );
     const intentId = paymentIntentRes.body.id;
     delete paymentIntentRes.body.id;
@@ -3699,6 +3784,33 @@ describe('AppController (e2e)', () => {
     expect(resAfterOtherUser.body.pendingOwnership).toEqual([]);
   });
 });
+
+async function getPaymentStatus(paymentId: string): Promise<PaymentStatus> {
+  console.log(`paymentId: ${paymentId}`);
+  const db = newDbConn();
+  const qryRes = await db.query(
+    `
+SELECT status
+FROM payment
+WHERE payment_id = $1
+    `,
+    [paymentId],
+  );
+  await db.end();
+
+  console.log(qryRes);
+  return qryRes.rows[0].status;
+}
+
+function newDbConn() {
+  return new Pool({
+    host: assertEnv('PGHOST'),
+    port: Number(assertEnv('PGPORT')),
+    user: assertEnv('PGUSER'),
+    password: assertEnv('PGPASSWORD'),
+    database: assertEnv('PGDATABASE'),
+  });
+}
 
 async function loginUser(
   app: INestApplication,

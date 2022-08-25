@@ -27,7 +27,7 @@ import { NftEntity } from '../../nft/entity/nft.entity.js';
 import { PaymentProvider } from '../../payment/entity/payment.entity.js';
 
 import type { PaymentIntent } from '../../payment/entity/payment.entity.js';
-import { getRealIp } from "../../utils.js";
+import { getRealIp } from '../../utils.js';
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -107,8 +107,8 @@ export class PaymentController {
         cookieSession.uuid,
         paymentProvider,
         currency,
-        recreateNftOrder,
         clientIp,
+        recreateNftOrder,
       );
       const order = await this.paymentService.getPaymentOrder(paymentIntent.id);
 
