@@ -5,7 +5,7 @@ attributes:
   artifact: string
   thumbnail: string
   price: number
-  editions_size: number
+  edition_size: number
   onsale_from: date
   categories: number[]
   proposed: boolean
@@ -30,12 +30,12 @@ states:
     - next_state: proposed
       when:
       - nft.proposed
-      - nft.editions_size > 0
+      - nft.edition_size > 0
       - nft.price > 0
       - nft.categories.length > 0
       - nft.onsale_from >= Date.now()
     mutables:
-    - attributes: [price, editions_size, proposed, categories, onsale_from]
+    - attributes: [price, edition_size, proposed, categories, onsale_from]
       by_roles: [editor, creator, admin]
 
   proposed:

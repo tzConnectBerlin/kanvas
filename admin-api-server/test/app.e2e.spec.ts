@@ -384,7 +384,7 @@ describe('AppController (e2e)', () => {
         .send({
           price: JSON.stringify(105),
           categories: JSON.stringify([2, 5, 10]),
-          editions_size: JSON.stringify(4),
+          edition_size: JSON.stringify(4),
           proposed: JSON.stringify(true),
           onsale_from: JSON.stringify(Date.now() + 30 * 60 * 1000),
         });
@@ -522,7 +522,7 @@ describe('AppController (e2e)', () => {
         attributes: { name: 'modified name', create_ready: true },
         allowedActions: {
           categories: 'number[]',
-          editions_size: 'number',
+          edition_size: 'number',
           price: 'number',
           onsale_from: 'date',
           proposed: 'boolean',
@@ -530,7 +530,7 @@ describe('AppController (e2e)', () => {
         stateInfo: {
           proposed: [
             'nft.proposed',
-            'nft.editions_size > 0',
+            'nft.edition_size > 0',
             'nft.price > 0',
             'nft.categories.length > 0',
             'nft.onsale_from >= Date.now()',
@@ -589,7 +589,7 @@ describe('AppController (e2e)', () => {
             attributes: {
               categories: [2, 5, 10],
               create_ready: true,
-              editions_size: 4,
+              edition_size: 4,
               name: 'some name',
               price: 105,
               proposed: true,
@@ -745,7 +745,7 @@ describe('AppController (e2e)', () => {
             attributes: {
               categories: [2, 5, 10],
               create_ready: true,
-              editions_size: 4,
+              edition_size: 4,
               name: 'some name',
               price: 105,
               proposed: true,
@@ -826,7 +826,7 @@ describe('AppController (e2e)', () => {
             attributes: {
               categories: [2, 5, 10],
               create_ready: true,
-              editions_size: 4,
+              edition_size: 4,
               name: 'some name',
               price: 105,
               proposed: true,
@@ -886,7 +886,7 @@ describe('AppController (e2e)', () => {
             attributes: {
               categories: [2, 5, 10],
               create_ready: true,
-              editions_size: 4,
+              edition_size: 4,
               name: 'some name',
               price: 105,
               proposed: true,
@@ -2190,7 +2190,7 @@ describe('AppController (e2e)', () => {
         categories: JSON.stringify(
           allowedCategories.body.data.map((cat: any) => cat.id).slice(0, 3),
         ),
-        editions_size: JSON.stringify(4),
+        edition_size: JSON.stringify(4),
         onsale_from: JSON.stringify(Date.now() + 30 * 60 * 1000),
         proposed: JSON.stringify(true),
       });
@@ -2334,7 +2334,7 @@ describe('AppController (e2e)', () => {
               0,
             ], // 0 here is definitely wrong
           ),
-          editions_size: JSON.stringify(4),
+          edition_size: JSON.stringify(4),
           onsale_from: JSON.stringify(Date.now() + 30 * 60 * 1000),
           proposed: JSON.stringify(true),
         });
@@ -2395,7 +2395,7 @@ describe('AppController (e2e)', () => {
         categories: JSON.stringify([
           ...allowedCategories.body.data.map((cat: any) => cat.id).slice(0, 3),
         ]),
-        editions_size: JSON.stringify(4),
+        edition_size: JSON.stringify(4),
         onsale_from: JSON.stringify(Date.now() + 30 * 60 * 1000),
         proposed: JSON.stringify(true),
       });
@@ -2498,7 +2498,7 @@ describe('AppController (e2e)', () => {
       artifact: 'string',
       thumbnail: 'string',
       price: 'number',
-      editions_size: 'number',
+      edition_size: 'number',
       onsale_from: 'date',
       categories: 'number[]',
       proposed: 'boolean',
