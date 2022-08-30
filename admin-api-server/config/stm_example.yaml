@@ -8,12 +8,14 @@ attributes:
       mimetypes:
       - image/png
       - image/jpg
+      - image/jpeg
   thumbnail:
     type: content_uri
     restrictions:
       mimetypes:
       - image/png
       - image/jpg
+      - image/jpeg
       maxSize: 10MB
   create_ready: boolean
   price: number
