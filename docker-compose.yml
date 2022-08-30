@@ -55,7 +55,9 @@ services:
     restart: on-failure
 
   store-front:
-    build: ./store-front
+    build:
+      context: .
+      dockerfile: ./store-front/Dockerfile
     ports:
       - 3000:3000
     environment:
@@ -171,7 +173,9 @@ services:
     restart: on-failure
 
   admin-front:
-    build: ./admin-front
+    build:
+      context: .
+      dockerfile: ./admin-front/Dockerfile
     ports:
       - 5000:4000
     environment:
