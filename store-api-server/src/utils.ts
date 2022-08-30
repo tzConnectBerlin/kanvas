@@ -4,9 +4,7 @@ import { HttpException } from '@nestjs/common';
 import { Response } from 'express';
 import { Cache } from 'cache-manager';
 import { Lock } from 'async-await-mutex-lock';
-import {
-  BEHIND_PROXY
-} from './constants.js';
+import { BEHIND_PROXY } from './constants.js';
 
 export async function wrapCache<T>(
   cache: Cache,
@@ -40,9 +38,7 @@ export function assertEnv(v: string): string {
   if (typeof res === 'string') {
     return res;
   } else {
-    throw new AssertionError(
-      `Environment variable ${v} has to be set before starting this program`,
-    );
+    throw `Environment variable ${v} has to be set before starting this program`;
   }
 }
 
