@@ -1,0 +1,9 @@
+**/*.log*
+
+**/.*.bak*
+
+**/node_modules
+**/dist
+**/test/coverage
+
+**/.git

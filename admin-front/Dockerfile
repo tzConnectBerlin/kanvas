@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV NODE_OPTIONS --openssl-legacy-provider
 ENV TZ=UTC
 
-ADD . /build
+ADD admin-front /build
 
 WORKDIR /build
 
