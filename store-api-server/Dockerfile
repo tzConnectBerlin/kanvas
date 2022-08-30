@@ -6,7 +6,7 @@ ENV TZ=UTC
 
 # need psql
 RUN apt update && apt upgrade -y
-RUN apt install -y postgresql tree
+RUN apt install -y postgresql
 
 ADD store-api-server/ /build
 ADD lib/ /lib/
