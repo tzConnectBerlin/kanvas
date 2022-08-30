@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { AppBar } from 'react-admin';
+import { AppBar, MenuItemLink, useGetIdentity, UserMenu } from 'react-admin';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { Link } from 'react-router-dom';
+import { Settings } from "@mui/icons-material";
 
 const useStyles = makeStyles({
   bar: {
@@ -24,10 +25,19 @@ const useStyles = makeStyles({
   }
 });
 
+const CustomUserMenu = (props: any) => {
+  const { identity } = useGetIdentity();
+  return (
+    <UserMenu {...props} label={identity?.email}>
+      <MenuItemLink to="/my-profile" primaryText="My profile" leftIcon={<Settings/>} />
+    </UserMenu>
+  );
+}
+
 export const CustomAppBar = (props: any) => {
   const classes = useStyles();
   return (
-    <AppBar {...props} color="black" className={classes.bar}>
+    <AppBar {...props} color="black" className={classes.bar} userMenu={<CustomUserMenu/>}>
       <Link to="/" className={classes.link}>
         <img src='/Logo.svg' className={classes.logo} />
       </Link>

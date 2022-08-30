@@ -156,7 +156,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
     const [nftResponse, getNft] = useAxios(
         {
             url: process.env.REACT_APP_API_SERVER_BASE_URL + `/nfts/${id}`,
-            method: 'POST',
+            method: 'GET',
         },
         { manual: true },
     );
@@ -233,10 +233,42 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
         }
     }, [launchTime]);
 
+    const renderNft = (nftData: any) => {
+      if (nftData.artifactUri.endsWith(".mp4")) {
+        return (
+          <video width="100%" poster={nftData.displayUri} loop controls autoPlay>
+            <source src={nftResponse.data?.artifactUri} type="video/mp4" />
+          </video>
+        );
+      }
+      return (
+        <Box>
+          <StyledCardMedia
+              component="img"
+              image={nftData.artifactUri}
+              alt="random"
+          />
+          <StyledWrapperIcon
+              onClick={
+                  !fullScreenView
+                      ? () => {
+                          setFullScreenView(true);
+                          document.body.style.overflow =
+                              'hidden';
+                      }
+                      : () => { }
+              }
+          >
+            <StyledFullscreenIcon />
+          </StyledWrapperIcon>
+        </Box>
+      );
+    }
+
     return (
         <StytledPageWrapper>
             <WrapperFullScreen open={fullScreenView}>
-                <StyledImage
+              <StyledImage
                     src={nftResponse.data?.displayUri}
                     alt="random"
                     onClick={
@@ -248,7 +280,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                             : () => { }
                     }
                     open={fullScreenView}
-                />
+                  />
                 <FullScreenView open={fullScreenView}></FullScreenView>
             </WrapperFullScreen>
             <StyledStack
@@ -295,24 +327,9 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 alignItems: 'flex-end',
                             }}
                         >
-                            <StyledCardMedia
-                                component="img"
-                                image={nftResponse.data?.displayUri}
-                                alt="random"
-                            />
-                            <StyledWrapperIcon
-                                onClick={
-                                    !fullScreenView
-                                        ? () => {
-                                            setFullScreenView(true);
-                                            document.body.style.overflow =
-                                                'hidden';
-                                        }
-                                        : () => { }
-                                }
-                            >
-                                <StyledFullscreenIcon />
-                            </StyledWrapperIcon>
+                          {
+                            typeof nftResponse.data === 'undefined' ? (<br/>) : renderNft(nftResponse.data)
+                          }
                         </Box>
                     )}
 
@@ -445,35 +462,6 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 </>
                             )}
                         </Typography>
-                        <Typography
-                            size="body1"
-                            weight="SemiBold"
-                            sx={{ pt: 4 }}
-                            color="#757575"
-                        >
-                            {nftResponse.loading || comfortLoader
-                                ? undefined
-                                : t('product.description.ipfs')}
-                        </Typography>
-
-                        <Typography
-                            size="h5"
-                            weight="Light"
-                            sx={{ pt: 2, mb: 1 }}
-                        >
-                            {nftResponse.loading ||
-                                comfortLoader ? undefined : (
-                                <Typography
-                                    size="body1"
-                                    weight="Medium"
-                                    type="link"
-                                >
-                                    <StyledA href={`https://cloudflare-ipfs.com/ipfs/${nftResponse.data?.ipfsHash?.slice('ipfs://'.length)}`} target='_blank'>
-                                        {nftResponse.data?.ipfsHash}
-                                    </StyledA>
-                                </Typography>
-                            )}
-                        </Typography>
                         <Stack direction="row" spacing={10}>
                             <Stack direction="column">
                                 <Typography
@@ -518,7 +506,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
                                 >
                                     {nftResponse.loading ||
                                         comfortLoader ? undefined : (
-                                        <>{nftResponse.data?.price} ꜩ</>
+                                        <>{nftResponse.data?.price} €</>
                                     )}
                                 </Typography>
                             </Stack>

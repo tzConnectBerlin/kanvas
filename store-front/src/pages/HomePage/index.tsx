@@ -121,31 +121,6 @@ const HomePage: FC<HomePageProps> = () => {
 
                     <FlexSpacer minHeight={isMobile ? 5 : 7} />
 
-                    {/* Top Sellers Grid */}
-                    <Stack
-                        direction="row"
-                        sx={{ alignItems: 'end', marginBottom: '1.5rem' }}
-                    >
-                        <Typography
-                            size="h2"
-                            weight="SemiBold"
-                            sx={{ pt: 2, mb: 1 }}
-                        >
-                            {t('home.topSellers.headline')}
-                        </Typography>
-                    </Stack>
-
-                    <UsersGrid
-                        users={
-                            topBuyersResponse.data
-                                ? topBuyersResponse.data.topBuyers
-                                : []
-                        }
-                        loading={topBuyersResponse.loading}
-                        emptyMessage={'No top Buyers yet'}
-                    />
-
-                    <FlexSpacer minHeight={4} />
 
                     {/* Gallery Grid */}
 

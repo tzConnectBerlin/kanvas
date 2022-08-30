@@ -18,6 +18,11 @@
     "@types/semver" "^7.3.9"
     ts-type "^2.1.4"
 
+"@types/filesize-parser@^1.5.1":
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/@types/filesize-parser/-/filesize-parser-1.5.1.tgz#d1218f48ad160d7b089a555f3984439254196bd7"
+  integrity sha512-kU4V/I/EUARPF3hxTRrZ1ad2P0/9sby1JoRbNcpvMIPqhkVlBqcNc+HutiLl6cS7iCId54Xd6X+BEp5vUgSY6Q==
+
 "@types/node@^16.11.12":
   version "16.11.19"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.19.tgz#1afa165146997b8286b6eabcb1c2d50729055169"
@@ -163,6 +168,11 @@ ext@^1.1.2:
   integrity sha512-sdBImtzkq2HpkdRLtlLWDa6w4DX22ijZLKx8BMPUuKe1c5lbN6xwQDQCxSfxBQnHZ13ls/FH0MQZx/q/gr6FQg==
   dependencies:
     type "^2.5.0"
+
+filesize-parser@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/filesize-parser/-/filesize-parser-1.5.0.tgz#97ad66d5b0d7154b2e8b1b4e83f526aed33c62f3"
+  integrity sha512-UTDpJB22VvozK7t31slU9WCAPSdcUWuwD7P7S6LBXswdgzUz+YhoziLOohknFcx0Kq5LWCAj4MEKY9q3zGq47Q==
 
 find-cache-dir@^3.3.1:
   version "3.3.2"

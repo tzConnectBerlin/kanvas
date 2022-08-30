@@ -1,11 +1,23 @@
 attributes:
   name: string
-  description: string
-  image.png: content_uri
-  thumbnail.png: content_uri
+  description: text
+  artifact: content_uri
+  display:
+    type: content_uri
+    restrictions:
+      mimetypes:
+      - image/png
+      - image/jpg
+  thumbnail:
+    type: content_uri
+    restrictions:
+      mimetypes:
+      - image/png
+      - image/jpg
+      maxSize: 10MB
   create_ready: boolean
   price: number
-  editions_size: number
+  edition_size: number
   categories: number[]
   onsale_from: date
   onsale_until: date
@@ -22,10 +34,9 @@ states:
       when:
       - nft.name.length > 0
       - nft.description.length > 0
-      - nft['image.png'].length > 0
-      - nft['thumbnail.png'].length > 0
+      - nft.artifact.length > 0
     mutables:
-    - attributes: [name, image.png, thumbnail.png, description]
+    - attributes: [name, artifact, display, thumbnail, description]
       by_roles: [creator]
 
   setup_nft:
@@ -33,12 +44,12 @@ states:
     - next_state: proposed
       when:
       - nft.proposed
-      - nft.editions_size > 0
+      - nft.edition_size > 0
       - nft.price > 0
       - nft.price < 1000000
       - nft.categories.length > 0
     mutables:
-    - attributes: [price, editions_size, proposed, categories, onsale_from, onsale_until]
+    - attributes: [price, edition_size, proposed, categories, onsale_from, onsale_until]
       by_roles: [editor, creator, admin]
 
   proposed:

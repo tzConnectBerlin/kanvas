@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { NftService } from './service/nft.service';
-import { NftController } from './controller/nft.controller';
-import { DbModule } from 'src/db.module';
-import { S3Service } from './service/s3.service';
-import { CategoryModule } from 'src/category/category.module';
-import { RoleModule } from 'src/role/role.module';
+import { NftService } from './service/nft.service.js';
+import { NftController } from './controller/nft.controller.js';
+import { DbModule } from '../db.module.js';
+import { S3Service } from './service/s3.service.js';
+import { CategoryModule } from '../category/category.module.js';
+import { RoleModule } from '../role/role.module.js';
 
 @Module({
   imports: [DbModule, CategoryModule, RoleModule],

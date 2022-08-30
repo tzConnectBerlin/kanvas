@@ -5,7 +5,6 @@ cd $SCRIPT_DIR/..
 set -a
 . .env.test
 set +a
-
 export $(grep --regexp='^ADMIN_PRIVATE_KEY' ../admin-api-server/.env.test | xargs)
 
 db_docker=`DBSETUP_LOG=quiet DOCKER_ARGS='-d' ./script/local-db 2>/dev/null`
@@ -17,12 +16,30 @@ if [[ "$?" != "0" ]]; then
 fi
 trap "docker kill $db_docker" EXIT
 
-echo "waiting for testdb setup.. (docker: $db_docker)"
-./script/wait-db
+sig_err_file=`mktemp`
+rm $sig_err_file
+(
+    trap "echo 'yarn linked deps build failed' >> $sig_err_file" ERR
 
-while [ "`HOST=$PGHOST PORT=$PGPORT LOGIN=$PGUSER PASSWORD=$PGPASSWORD ./script/shmig -t postgresql -d $PGDATABASE pending`" != "" ]; do
-    sleep 1
-done
+    echo "ensuring up to date build w/ yarn linked deps (api-lib, etc)..."
+    ./script/build-deps || exit 1
+) &
+(
+    trap "echo 'db setup failed' >> $sig_err_file" ERR
+
+    echo "waiting for testdb setup.. (docker: $db_docker)"
+    ./script/wait-db
+
+    while [ "`HOST=$PGHOST PORT=$PGPORT LOGIN=$PGUSER PASSWORD=$PGPASSWORD ./script/shmig -t postgresql -d $PGDATABASE pending`" != "" ]; do
+        sleep 1
+    done
+) &
+wait
+[ -f $sig_err_file ] && {
+    cat $sig_err_file
+    rm $sig_err_file
+    exit 1
+}
 
 echo "running tests.."
 

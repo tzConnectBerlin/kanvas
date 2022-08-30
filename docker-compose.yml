@@ -71,7 +71,7 @@ services:
     restart: on-failure
 
   store-quepasa:
-    image: ghcr.io/tzconnectberlin/que-pasa:1.2.3
+    image: ghcr.io/tzconnectberlin/que-pasa:1.2.5
     volumes:
       - ./config:/config
     environment:
@@ -95,7 +95,7 @@ services:
     restart: on-failure
 
   peppermint:
-    image: ghcr.io/tzconnectberlin/peppermint:1.1
+    image: ghcr.io/tzconnectberlin/peppermint:1.2
     volumes:
       - ./config:/config
     links:
@@ -187,7 +187,7 @@ services:
     restart: on-failure
 
   admin-quepasa:
-    image: ghcr.io/tzconnectberlin/que-pasa:1.2.3
+    image: ghcr.io/tzconnectberlin/que-pasa:1.2.5
     entrypoint: |-
       bash -c '
         set -e

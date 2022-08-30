@@ -2,10 +2,10 @@ attributes:
   name: string
   create_ready: boolean
   description: string
-  image.png: string
-  thumbnail.png: string
+  artifact: string
+  thumbnail: string
   price: number
-  editions_size: number
+  edition_size: number
   onsale_from: date
   categories: number[]
   proposed: boolean
@@ -30,12 +30,12 @@ states:
     - next_state: proposed
       when:
       - nft.proposed
-      - nft.editions_size > 0
+      - nft.edition_size > 0
       - nft.price > 0
       - nft.categories.length > 0
       - nft.onsale_from >= Date.now()
     mutables:
-    - attributes: [price, editions_size, proposed, categories, onsale_from]
+    - attributes: [price, edition_size, proposed, categories, onsale_from]
       by_roles: [editor, creator, admin]
 
   proposed:
@@ -43,8 +43,8 @@ states:
     - next_state: finish
       when:
       - nft.publish_vote.yes.length >= 2
-      - nft['image.png'].length > 0
-      - nft['thumbnail.png'].length > 0
+      - nft.artifact.length > 0
+      - nft.thumbnail.length > 0
       - nft.description.length > 0
     - next_state: setup_nft
       when:
@@ -55,7 +55,7 @@ states:
           nft.publish_vote = null;
         }
     mutables:
-    - attributes: [publish_vote, image.png, thumbnail.png, description]
+    - attributes: [publish_vote, artifact, thumbnail, description]
       by_roles: [moderator, admin]
 
   finish:

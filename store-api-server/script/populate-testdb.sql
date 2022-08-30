@@ -1,13 +1,15 @@
+begin;
+
 insert into kanvas_user (
-  user_name, address, signed_payload
+  address, signed_payload
 )
 values
-  ('admin', 'addr', '$2b$10$f/hk.7Hnsqltgzm0JqDJZudecFpUtKP9gPGTrm7BiPaqLGlfJcjXS'), -- pwd: admin
-  ('test user', 'tz1', '$2b$10$CKbxQQPEN0uNfazzv89hZ.DXju23yey1XMKzRCca70Z8djcggUpQi'); -- pwd: test
+  ('addr', '$2b$10$f/hk.7Hnsqltgzm0JqDJZudecFpUtKP9gPGTrm7BiPaqLGlfJcjXS'), -- pwd: admin
+  ('tz1', '$2b$10$CKbxQQPEN0uNfazzv89hZ.DXju23yey1XMKzRCca70Z8djcggUpQi'); -- pwd: test
 
 
 insert into nft (
-  signature, editions_size, price, nft_name, ipfs_hash, artifact_uri, description
+  signature, editions_size, price, nft_name, metadata_ipfs, artifact_uri, description
 )
 values
   ('nosig', 4, 1, 'Cartoon', 'ipfs://.....', 'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60', 'Hey guys, here s the WL team ready to write some more code !'),
@@ -55,6 +57,10 @@ where id = 3;
 update nft
 set onsale_until = now() AT TIME ZONE 'UTC' + interval '1 hour'
 where id = 1;
+
+update nft
+set artifact_ipfs = concat(id::text, '-artifact-ipfs-hash'),
+    thumbnail_ipfs = concat(id::text, '-thumbnail-ipfs-hash');
 
 -- lazy way of upping these very low prices now that we're taking into account decimals in the API
 update nft set price = price * 10;
@@ -129,5 +135,7 @@ values
   (3, 33),
   (3, 34);
 
+update nft set metadata = '{"test": {"nested": 10}}' where id = 1;
+update nft_category set metadata = '{"test": {"nested": true}}' where id = 1;
 
-
+commit;

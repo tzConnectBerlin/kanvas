@@ -1,22 +1,35 @@
-import { CategoryEntity } from '../../category/entity/category.entity.js';
+import type { CategoryEntity } from '../../category/entity/category.entity.js';
+
+export interface OwnershipInfo {
+  status: 'owned' | 'pending' | 'payment processing';
+  receivalOperationHash?: string;
+}
 
 export interface NftEntity {
   id: number;
   createdAt: number;
   name: string;
   description: string;
-  ipfsHash?: string;
+  price: string;
+  categories: CategoryEntity[];
+  launchAt: number;
+  editionsSize: number;
+  editionsAvailable: number;
+  metadata?: any;
+
+  ipfsHash?: string; // deprecated by metadataIpfs field
+  metadataIpfs?: string;
+  artifactIpfs?: string;
+  displayIpfs?: string;
+  thumbnailIpfs?: string;
 
   artifactUri: string;
   displayUri?: string;
   thumbnailUri?: string;
 
-  price: string;
-  categories: CategoryEntity[];
-  editionsSize: number;
-  editionsAvailable: number;
-  launchAt: number;
-  ownerStatuses?: string[];
+  mintOperationHash?: string;
+  ownerStatuses?: string[]; // deprecated by ownershipInfo
+  ownershipInfo?: OwnershipInfo[];
 }
 
 export interface CreateNft {
@@ -35,6 +48,8 @@ export interface CreateNft {
   onsaleFrom?: number;
   onsaleUntil?: number;
 
+  metadata?: any;
+
   signature: string;
 }
 
@@ -43,6 +58,7 @@ export interface NftEntityPage {
   nfts: NftEntity[];
   currentPage: number;
   numberOfPages: number;
+  totalNftCount: number;
   lowerPriceBound: string;
   upperPriceBound: string;
 }

@@ -2,6 +2,7 @@ import {
   Session,
   HttpException,
   Inject,
+  Header,
   HttpStatus,
   Body,
   Param,
@@ -21,6 +22,7 @@ import { Response } from 'express';
 import { wrapCache } from '../../utils.js';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserEntity } from '../entity/user.entity.js';
+import { OwnershipInfo } from '../../nft/entity/nft.entity.js';
 import { UserService } from '../service/user.service.js';
 import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { validateRequestedCurrency } from '../../paramUtils.js';
@@ -32,12 +34,13 @@ import {
   PG_UNIQUE_VIOLATION_ERRCODE,
   PG_FOREIGN_KEY_VIOLATION_ERRCODE,
   PROFILE_PICTURE_MAX_BYTES,
+  PROFILE_PICTURES_ENABLED,
 } from '../../constants.js';
+import {
+  PaginationParams,
+  validatePaginationParams,
+} from '../../nft/params.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
-
-interface EditProfile {
-  userName?: string;
-}
 
 @Controller('users')
 export class UserController {
@@ -49,10 +52,12 @@ export class UserController {
   @Get('/profile')
   @UseGuards(JwtFailableAuthGuard)
   async getProfile(
+    @Query() paginationParams: PaginationParams,
     @CurrentUser() user?: UserEntity,
     @Query('userAddress') userAddress?: string,
     @Query('currency') currency: string = BASE_CURRENCY,
   ) {
+    validatePaginationParams(paginationParams);
     validateRequestedCurrency(currency);
     const address =
       userAddress ||
@@ -64,8 +69,13 @@ export class UserController {
       );
     }
 
-    const profile_res = await this.userService.getProfile(address, currency);
-    if (!profile_res.ok) {
+    const profileRes = await this.userService.getProfile(
+      address,
+      paginationParams,
+      currency,
+      user?.id,
+    );
+    if (!profileRes.ok) {
       if (typeof userAddress === 'undefined') {
         throw new HttpException(
           'Failed to find user associated to JWT',
@@ -77,7 +87,7 @@ export class UserController {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return profile_res.val;
+    return profileRes.val;
   }
 
   @Post('/profile/edit')
@@ -89,45 +99,31 @@ export class UserController {
   )
   async editProfile(
     @CurrentUser() currentUser: UserEntity,
-    @Body() editFields: EditProfile,
     @UploadedFile() picture?: any,
   ) {
-    if (
-      typeof editFields.userName === 'undefined' &&
-      typeof picture === 'undefined'
-    ) {
+    if (!PROFILE_PICTURES_ENABLED) {
       throw new HttpException(
-        'neither username nor profile picture change requested',
+        'editing profile pictures is not enabled',
+        HttpStatus.NOT_IMPLEMENTED,
+      );
+    }
+
+    if (typeof picture === 'undefined') {
+      throw new HttpException(
+        'no profile picture attached',
         HttpStatus.BAD_REQUEST,
       );
     }
 
     try {
-      await this.userService.edit(currentUser.id, editFields.userName, picture);
+      await this.userService.edit(currentUser.id, picture);
     } catch (err: any) {
-      if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
-        throw new HttpException(
-          'This username is already taken',
-          HttpStatus.FORBIDDEN,
-        );
-      }
-
       Logger.warn(err);
       throw new HttpException(
         'Failed to edit profile',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-  }
-
-  @Get('/profile/edit/check')
-  @UseGuards(JwtAuthGuard)
-  async checkAllowedEdit(@Query('userName') userName: string) {
-    const available = await this.userService.isNameAvailable(userName);
-    return {
-      userName: userName,
-      available: available,
-    };
   }
 
   @Get('topBuyers')
@@ -148,25 +144,25 @@ export class UserController {
     );
   }
 
-  @Post('nftOwnership')
+  @Get('nftOwnershipsPending')
   @UseGuards(JwtAuthGuard)
-  async nftOwnershipStatus(
-    @CurrentUser() user: UserEntity,
-    @Query('nftIds') nftIdsQuery: string,
-  ) {
-    let nftIds: number[];
-    try {
-      nftIds = nftIdsQuery.split(',').map((v: string) => Number(v));
-      if (nftIds.some((id: number) => Number.isNaN(id))) {
-        throw `one or more requested nftIds is NaN`;
-      }
-    } catch (err: any) {
-      throw new HttpException(
-        'Bad nftIds query parameter, expected comma separated nft id numbers',
-        HttpStatus.BAD_REQUEST,
-      );
+  @Header('cache-control', 'no-store,must-revalidate')
+  async nftOwnershipStatus(@CurrentUser() user: UserEntity) {
+    const statuses = await this.userService.getNftPendingOwnershipInfo(
+      user.userAddress,
+      user.id,
+    );
+
+    let res: any = [];
+    for (const nftId of Object.keys(statuses)) {
+      res.push({
+        nftId: nftId,
+        ownerStatuses: statuses[Number(nftId)].map(
+          (x: OwnershipInfo) => x.status,
+        ),
+      });
     }
-    return await this.userService.getNftOwnershipStatuses(user, nftIds);
+    return res;
   }
 
   @Post('cart/add/:nftId')
@@ -232,8 +228,9 @@ export class UserController {
     throw new HttpException('', HttpStatus.NO_CONTENT);
   }
 
-  @Post('cart/list')
+  @Get('cart/list')
   @UseGuards(JwtFailableAuthGuard)
+  @Header('cache-control', 'no-store,must-revalidate')
   async cartList(
     @Session() cookieSession: any,
     @CurrentUser() user: UserEntity | undefined,

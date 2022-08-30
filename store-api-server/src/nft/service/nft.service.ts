@@ -9,9 +9,9 @@ import {
   CreateNft,
   NftEntity,
   NftEntityPage,
-} from '../../nft/entity/nft.entity.js';
+  OwnershipInfo,
+} from '../entity/nft.entity.js';
 import { CategoryEntity } from '../../category/entity/category.entity.js';
-import { CategoryService } from '../../category/service/category.service.js';
 import { FilterParams } from '../params.js';
 import {
   PG_CONNECTION,
@@ -29,7 +29,6 @@ import { DbTransaction, withTransaction } from '../../db.module.js';
 export class NftService {
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
-    private readonly categoryService: CategoryService,
     private ipfsService: IpfsService,
     private currencyService: CurrencyService,
   ) {}
@@ -50,9 +49,9 @@ export class NftService {
       await dbTx.query(
         `
 INSERT INTO nft (
-  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, onsale_from, onsale_until, price, editions_size
+  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, onsale_from, onsale_until, price, editions_size, metadata
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       `,
 
         [
@@ -65,8 +64,9 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
           newNft.description,
           onsaleFrom?.toUTCString(),
           onsaleUntil?.toUTCString(),
-          newNft.price,
+          this.currencyService.convertFromCurrency(newNft.price, BASE_CURRENCY),
           newNft.editionsSize,
+          newNft.metadata,
         ],
       );
 
@@ -85,6 +85,7 @@ SELECT $1, UNNEST($2::INTEGER[])
       const nftEntity: NftEntity = await this.byId(
         newNft.id,
         BASE_CURRENCY,
+        undefined,
         false,
         dbTx,
       );
@@ -226,6 +227,7 @@ LIMIT $3
 
     const nfts = await this.findByIds(
       nftIds.rows.map((row: any) => row.id),
+      undefined,
       'nft_id',
       'asc',
       currency,
@@ -317,6 +319,7 @@ FROM price_bounds($1, $2, $3, $4, $5)`,
       const res = <NftEntityPage>{
         currentPage: filters.page,
         numberOfPages: 0,
+        totalNftCount: 0,
         firstRequestAt: filters.firstRequestAt,
         nfts: [],
         lowerPriceBound: this.currencyService.convertToCurrency(
@@ -332,18 +335,15 @@ FROM price_bounds($1, $2, $3, $4, $5)`,
         return res;
       }
 
-      res.numberOfPages = Math.ceil(
-        nftIds.rows[0].total_nft_count / filters.pageSize,
-      );
+      res.totalNftCount = Number(nftIds.rows[0].total_nft_count);
+      res.numberOfPages = Math.ceil(res.totalNftCount / filters.pageSize);
       res.nfts = await this.findByIds(
         nftIds.rows.map((row: any) => row.nft_id),
+        filters.userAddress,
         orderBy,
         filters.orderDirection,
         currency,
       );
-      if (typeof filters.userAddress !== 'undefined') {
-        await this.#addNftOwnerStatus(filters.userAddress, res.nfts);
-      }
       return res;
     } catch (err) {
       Logger.error('Error on nft filtered query, err: ' + err);
@@ -357,11 +357,13 @@ FROM price_bounds($1, $2, $3, $4, $5)`,
   async byId(
     id: number,
     currency: string,
+    includeRecvForAddress?: string,
     incrViewCount: boolean = true,
     dbConn: any = this.conn,
   ): Promise<NftEntity> {
     const nfts = await this.findByIds(
       [id],
+      includeRecvForAddress,
       'nft_id',
       'asc',
       currency,
@@ -391,51 +393,9 @@ WHERE id = $1
     );
   }
 
-  async getNftOwnerStatus(address: string, nftIds: number[]) {
-    const qryRes = await this.conn.query(
-      `
-SELECT
-  idx_assets_nat AS nft_id,
-  'owned' AS owner_status,
-  assets_nat AS num_editions
-FROM onchain_kanvas."storage.ledger_live" AS ledger_now
-WHERE ledger_now.idx_assets_address = $2
-  AND ledger_now.idx_assets_nat = ANY($3)
-
-UNION ALL
-
-SELECT
-  nft_id,
-  'pending' AS owner_status,
-  purchased_editions_pending_transfer(nft_id, $2, $1) as num_editions
-FROM UNNEST($3::integer[]) as nft_id
-
-ORDER BY 1
-`,
-      [MINTER_ADDRESS, address, nftIds],
-    );
-    const ownerStatuses: any = {};
-    for (const row of qryRes.rows) {
-      ownerStatuses[row.nft_id] = [
-        ...(ownerStatuses[row.nft_id] || []),
-        ...Array(Number(row.num_editions)).fill(row.owner_status),
-      ];
-    }
-    return ownerStatuses;
-  }
-
-  async #addNftOwnerStatus(address: string, nfts: NftEntity[]) {
-    const ownerStatuses = await this.getNftOwnerStatus(
-      address,
-      nfts.map((nft: NftEntity) => nft.id),
-    );
-    for (const nft of nfts) {
-      nft.ownerStatuses = ownerStatuses[nft.id];
-    }
-  }
-
   async findByIds(
     nftIds: number[],
+    forRecvAddr: string | undefined,
     orderBy: string = 'nft_id',
     orderDirection: string = 'asc',
     currency: string = BASE_CURRENCY,
@@ -447,22 +407,35 @@ ORDER BY 1
         `
 SELECT
   nft_id,
+  nft_created_at,
   nft_name,
   description,
-  ipfs_hash,
+
+  editions_size,
+  price,
+  categories,
+
+  onsale_from,
+  onsale_until,
+
+  metadata,
+
+  metadata_ipfs,
+  artifact_ipfs,
+  display_ipfs,
+  thumbnail_ipfs,
+
   artifact_uri,
   display_uri,
   thumbnail_uri,
-  price,
-  categories,
-  editions_size,
+
   editions_reserved,
   editions_owned,
-  nft_created_at,
-  onsale_from,
-  onsale_until
-FROM nfts_by_id($1, $2, $3)`,
-        [nftIds, orderBy, orderDirection],
+
+  mint_op_hash,
+  owned_recv_op_hashes
+FROM nfts_by_id($1, $2, $3, $4)`,
+        [nftIds, orderBy, orderDirection, forRecvAddr],
       );
       return nftsQryRes.rows.map((nftRow: any) => {
         const editions = Number(nftRow['editions_size']);
@@ -473,26 +446,37 @@ FROM nfts_by_id($1, $2, $3)`,
         const onsaleUntilMilliUnix =
           nftRow['onsale_until']?.getTime() || undefined;
 
+        let metadataIpfs = null;
+        let artifactIpfs = null;
+        let displayIpfs = null;
+        let thumbnailIpfs = null;
+        if (owned > 0) {
+          metadataIpfs = nftRow['metadata_ipfs'];
+          artifactIpfs = nftRow['artifact_ipfs'];
+          displayIpfs = nftRow['display_ipfs'];
+          thumbnailIpfs = nftRow['thumbnail_ipfs'];
+        }
+
         const nft = <NftEntity>{
           id: nftRow['nft_id'],
           name: nftRow['nft_name'],
           description: nftRow['description'],
-          ipfsHash: owned === 0 ? null : nftRow['ipfs_hash'], // Hide the IPFS hash until first purchase (delay irreversable publishing of the NFT In our name for as long as possible)
+
+          ipfsHash: metadataIpfs, // note: deprecated by metadataIpfs
+          metadataIpfs: metadataIpfs,
+          artifactIpfs: artifactIpfs,
+          displayIpfs: displayIpfs,
+          thumbnailIpfs: thumbnailIpfs,
+
           artifactUri: nftRow['artifact_uri'],
           displayUri: nftRow['display_uri'],
           thumbnailUri: nftRow['thumbnail_uri'],
+
           price: this.currencyService.convertToCurrency(
             Number(nftRow['price']),
             currency,
             inBaseUnit,
           ),
-          editionsSize: editions,
-          editionsAvailable: editions - (reserved + owned),
-          createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
-          launchAt: Math.floor(launchAtMilliUnix / 1000),
-          onsaleUntil: onsaleUntilMilliUnix
-            ? Math.floor(onsaleUntilMilliUnix / 1000)
-            : undefined,
           categories: nftRow['categories'].map((categoryRow: any) => {
             return <CategoryEntity>{
               id: Number(categoryRow[0]),
@@ -500,6 +484,24 @@ FROM nfts_by_id($1, $2, $3)`,
               description: categoryRow[2],
             };
           }),
+          metadata: nftRow['metadata'],
+          editionsSize: editions,
+          editionsAvailable: editions - (reserved + owned),
+
+          createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
+          launchAt: Math.floor(launchAtMilliUnix / 1000),
+          onsaleUntil: onsaleUntilMilliUnix
+            ? Math.floor(onsaleUntilMilliUnix / 1000)
+            : undefined,
+
+          mintOperationHash: nftRow['mint_op_hash'],
+          ownershipInfo: nftRow['owned_recv_op_hashes']?.map(
+            (opHash: string) =>
+              <OwnershipInfo>{
+                status: 'owned',
+                receivalOperationHash: opHash,
+              },
+          ),
         };
 
         nft.displayUri ??= nft.artifactUri;

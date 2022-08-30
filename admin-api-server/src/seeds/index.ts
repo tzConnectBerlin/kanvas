@@ -1,4 +1,4 @@
-import { seedUser } from './user.seed';
+import { seedUser } from './user.seed.js';
 
 const runSeeds = async () => {
   await seedUser();

@@ -2,7 +2,6 @@ import { ReduxState, Record, Identifier } from 'react-admin';
 
 export interface UserType {
   id: number;
-  address: string;
   username: string;
   disabled?: boolean;
   password?: string;

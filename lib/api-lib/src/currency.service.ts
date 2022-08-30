@@ -2,7 +2,7 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import axios from 'axios';
 import { DateTime, Duration } from 'luxon';
-import { BASE_CURRENCY, SUPPORTED_CURRENCIES, LOG_CURRENCY_RATES_UPDATES } from './constants';
+import { DEFAULT_MAX_RATE_AGE_MINUTES, BASE_CURRENCY, SUPPORTED_CURRENCIES, LOG_CURRENCY_RATES_UPDATES } from './constants';
 
 export const coinbaseRatesProvider = {
   provide: 'RATES GETTER',
@@ -26,6 +26,9 @@ export class CurrencyService {
     this.getNewRatesFunc = getNewRatesFunc;
 
     this.rates = {};
+    for (const currency of this.currencies) {
+      this.rates[currency] = 1;
+    }
     this.lastUpdatedAt = DateTime.fromSeconds(0, { zone: 'UTC' });
 
     this.updateRates();
@@ -35,7 +38,7 @@ export class CurrencyService {
     baseUnitAmount: number,
     toCurrency: string,
     inBaseUnit: boolean = false,
-    maxAge: Duration = Duration.fromObject({ minutes: 30 }),
+    maxAge: Duration = Duration.fromObject({ minutes: DEFAULT_MAX_RATE_AGE_MINUTES }),
   ): string {
     if (inBaseUnit && toCurrency === BASE_CURRENCY) {
       return baseUnitAmount.toFixed(0);
@@ -50,9 +53,9 @@ export class CurrencyService {
   convertFromCurrency(
     amount: number,
     fromCurrency: string,
-    maxAge: Duration = Duration.fromObject({ minutes: 30 }),
+    maxAge: Duration = Duration.fromObject({ minutes: DEFAULT_MAX_RATE_AGE_MINUTES }),
   ): number {
-    return amount / this.#getRate(fromCurrency, maxAge);
+    return Number((amount / this.#getRate(fromCurrency, maxAge)).toFixed(0));
   }
 
   #getRate(
@@ -69,7 +72,7 @@ export class CurrencyService {
     }
 
     const ratesAge = DateTime.utc().diff(this.lastUpdatedAt);
-    if (ratesAge > maxAge) {
+    if (maxAge > Duration.fromObject({minutes: 0}) && ratesAge > maxAge) {
       throw `currency rates' last update is too long ago, cannot safely convert currencies (rates update age is ${ratesAge})`;
     }
 

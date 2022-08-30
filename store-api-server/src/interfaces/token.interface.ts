@@ -1,5 +1,5 @@
 export interface ITokenPayload {
   id: number;
-  userName: string;
   userAddress: string;
+  createdAt: number; // in UTC UNIX
 }

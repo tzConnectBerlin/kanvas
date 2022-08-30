@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NftController } from './nft.controller';
 import { NftService } from '../service/nft.service';
 import { S3Service } from '../service/s3.service';
-import { DbMockModule } from 'src/db_mock.module';
-import { RoleService } from 'src/role/service/role.service';
-import { CategoryService } from 'src/category/service/category.service';
+import { DbMockModule } from '../../db_mock.module';
+import { RoleService } from '../../role/service/role.service';
+import { CategoryService } from '../../category/service/category.service';
 
 describe('NftController', () => {
   let controller: NftController;

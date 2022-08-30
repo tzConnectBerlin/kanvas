@@ -9,22 +9,13 @@ RUN apt update && apt upgrade -y
 RUN apt install -y postgresql
 
 ADD store-api-server/ /build
-ADD lib/ /build/lib/
+ADD lib/ /lib/
 
 RUN mkdir /build/yarn_links
 
-WORKDIR /build/lib/api-lib/
-RUN yarn install
-RUN yarn build
-RUN yarn link --link-folder /build/yarn_links
-
-WORKDIR /build/lib/tezpay/server
-RUN yarn link --link-folder /build/yarn_links
-
 WORKDIR /build
+ENV YARN_LINK_ARGS='--link-folder /build/yarn_links'
 RUN yarn install
-RUN yarn link --link-folder /build/yarn_links kanvas-api-lib
-RUN yarn link --link-folder /build/yarn_links tezpay-server
 RUN yarn build
 
 ENTRYPOINT yarn start

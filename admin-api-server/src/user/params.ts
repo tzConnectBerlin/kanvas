@@ -4,7 +4,7 @@ import {
   parseStringArray,
   parseNumberParam,
   PaginationParams,
-} from 'src/utils';
+} from '../utils.js';
 
 export class UserFilters {
   @IsArray()
@@ -18,11 +18,6 @@ export class UserFilters {
   @Transform(({ value }) => parseStringArray(value))
   @IsOptional()
   userName?: string[];
-
-  @IsArray()
-  @Transform(({ value }) => parseStringArray(value))
-  @IsOptional()
-  address?: string[];
 
   @IsArray()
   @Transform(({ value }) =>

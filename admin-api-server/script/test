@@ -31,36 +31,61 @@ db_docker=`DOCKER_ARGS='-d' DBSETUP_LOG=quiet INIT_QUEPASA=false ./script/local-
 assert_docker_ok $PGPORT
 trap "docker kill $db_docker" EXIT
 
-echo "waiting for testdb setup (admin).. (docker: $db_docker)"
-./script/wait-db
-
-echo "waiting for testdb setup (store).."
-store_env_exec ../store-api-server/script/wait-db
-
-echo "setting up the store db"
+sig_err_file=`mktemp`
+rm $sig_err_file
 (
-    cd $SCRIPT_DIR/../../store-api-server;
-    yarn build || exit 1
+    trap "echo 'yarn linked deps build failed' >> $sig_err_file" ERR
 
-    store_env_exec script/migrate >/dev/null 2>&1 || exit 1
-    store_env_exec psql < script/populate-testdb.sql || exit 1
-) || exit 1
+    echo "ensuring up to date build w/ yarn linked deps (api-lib, etc)..."
+    ./script/build-deps || exit 1
+) &
+(
+    trap "echo 'store build failed' >> $sig_err_file" ERR
+
+    cd $SCRIPT_DIR/../../store-api-server;
+    ./script/build-deps >/dev/null 2>&1 || exit 1
+    yarn build || exit 1
+) &
+(
+    trap "echo 'db setup failed..' >> $sig_err_file" ERR
+
+    echo "waiting for testdb setup (admin).. (docker: $db_docker)"
+    ./script/wait-db
+
+    echo "setting up the store db"
+    (
+        cd "$SCRIPT_DIR/../../store-api-server"
+
+        set -a
+        . .env.test
+        set +a
+
+        echo "waiting for testdb setup (store).."
+        store_env_exec script/wait-db
+        store_env_exec script/migrate >/dev/null 2>&1 || exit 1
+        store_env_exec psql < script/populate-testdb.sql || exit 1
+    ) || exit 1
+) &
+wait
+[ -f $sig_err_file ] && {
+    cat $sig_err_file
+    rm $sig_err_file
+    exit 1
+}
 
 echo "starting the store api in the background"
 # enabling job control with set -m here, this will enforce a new process group
 # for the following background spawned store api, which in turn will allow
 # proper kill of all child processes by kill on process group id.
-mv $SCRIPT_DIR/../../store-api-server/.env $SCRIPT_DIR/../../store-api-server/.env_disabled_during_tests
 set -m
 (
-    cd $SCRIPT_DIR/../../store-api-server
-    set -a
-    . .env.test
-    store_env_exec yarn run start >/dev/null 2>&1
+    cd "$SCRIPT_DIR/../../store-api-server"
+
+    DOTENV_CONFIG_PATH=.env.test store_env_exec yarn run start:prod >/dev/null 2>&1
 ) &
 store_api_pid=$!
 set +m
-trap "docker kill $db_docker; kill -- -$store_api_pid; mv $SCRIPT_DIR/../../store-api-server/.env_disabled_during_tests $SCRIPT_DIR/../../store-api-server/.env" EXIT
+trap "kill -- -$store_api_pid; docker kill $db_docker" EXIT
 
 yarn run seed || exit 1
 
@@ -72,7 +97,7 @@ done
 echo "running tests.."
 
 mkdir -p test/coverage
-jest "$@" --coverage | tee test/coverage/summary.txt || exit 1
+LOG_LEVEL=warning node --experimental-vm-modules node_modules/.bin/jest "$@" --coverage | tee test/coverage/summary.txt || exit 1
 sed -n '/^-----/,$p' test/coverage/summary.txt > test/coverage/summary_.txt
 head -n 4 test/coverage/summary_.txt | awk -F '|' '{print $2 $3 $4 $5}'
 sed 's/^/\n/' test/coverage/summary_.txt > test/coverage/summary.txt

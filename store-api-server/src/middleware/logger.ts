@@ -8,7 +8,12 @@ import {
 } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Cache } from 'cache-manager';
-import { CACHE_SIZE, BEHIND_PROXY } from '../constants.js';
+import {
+  CACHE_SIZE,
+  BEHIND_PROXY,
+  RATE_LIMITLESS_SECRET,
+} from '../constants.js';
+import { getRealIp } from "../utils.js";
 
 @Injectable()
 export class StatsLogger {
@@ -44,7 +49,8 @@ export class LoggerMiddleware implements NestMiddleware {
     const { ip, method, originalUrl } = request;
     const userAgent = request.get('user-agent') || '';
     const cookieSession = request.session?.uuid.slice(0, 5) || '';
-    const realIp = BEHIND_PROXY ? request.get('X-Forwarded-For') || ip : ip;
+    const realIp = getRealIp(request);
+    const timeStart = new Date();
 
     const fields = [
       method,
@@ -54,15 +60,25 @@ export class LoggerMiddleware implements NestMiddleware {
       `sess:${cookieSession}`,
     ];
 
+    if (
+      typeof RATE_LIMITLESS_SECRET === 'string' &&
+      request.headers['rate-limitless'] === RATE_LIMITLESS_SECRET
+    ) {
+      fields.push('rate-limitless');
+    }
+
     this.logger.log(`>> ${fields.join(' ')}`);
 
     response.on('finish', () => {
+      const timeEnd: Date = new Date();
+      const duration = `${timeEnd.getTime() - timeStart.getTime()}ms`;
       const { statusCode } = response;
       const contentLength = response.get('content-length');
 
       fields.push('=>');
       fields.push(`${statusCode}`);
       fields.push(contentLength);
+      fields.push(duration);
 
       switch (response.get('cached')) {
         case 'yes':

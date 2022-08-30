@@ -2,6 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CategoryService } from './category.service';
 import { DbMock } from '../../mock/db.module';
 import { CacheMock } from '../../mock/cache.module';
+import { NftModule } from '../../nft/nft.module';
+import { mockedRatesProvider, CurrencyService } from 'kanvas-api-lib';
+import { IpfsService } from '../../nft/service/ipfs.service';
+import { NftService } from '../../nft/service/nft.service';
 
 describe('CategoryService', () => {
   let service: CategoryService;
@@ -9,7 +13,13 @@ describe('CategoryService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DbMock, CacheMock],
-      providers: [CategoryService],
+      providers: [
+        CategoryService,
+        NftService,
+        mockedRatesProvider,
+        CurrencyService,
+        IpfsService,
+      ],
     }).compile();
 
     service = module.get<CategoryService>(CategoryService);
@@ -32,12 +42,14 @@ describe('CategoryService', () => {
           id: 1,
           category: 'dust',
           description: '...',
+          metadata: null,
           parent: undefined,
         },
         {
           id: 2,
           category: 'light',
           description: 'bright',
+          metadata: null,
           parent: undefined,
         },
       ],
@@ -46,12 +58,14 @@ describe('CategoryService', () => {
           id: 1,
           name: 'dust',
           description: '...',
+          metadata: null,
           children: [],
         },
         {
           id: 2,
           name: 'light',
           description: 'bright',
+          metadata: null,
           children: [],
         },
       ],
@@ -63,12 +77,14 @@ describe('CategoryService', () => {
           id: 2,
           category: 'light',
           description: 'bright',
+          metadata: null,
           parent: 1,
         },
         {
           id: 1,
           category: 'dust',
           description: '...',
+          metadata: null,
           parent: undefined,
         },
       ],
@@ -77,11 +93,13 @@ describe('CategoryService', () => {
           id: 1,
           name: 'dust',
           description: '...',
+          metadata: null,
           children: [
             {
               id: 2,
               name: 'light',
               description: 'bright',
+              metadata: null,
               children: [],
             },
           ],
@@ -95,18 +113,21 @@ describe('CategoryService', () => {
           id: 3,
           category: 'material',
           description: 'matter',
+          metadata: null,
           parent: 2,
         },
         {
           id: 2,
           category: 'light',
           description: 'bright',
+          metadata: null,
           parent: 1,
         },
         {
           id: 1,
           category: 'dust',
           description: '...',
+          metadata: null,
           parent: undefined,
         },
       ],
@@ -115,16 +136,19 @@ describe('CategoryService', () => {
           id: 1,
           name: 'dust',
           description: '...',
+          metadata: null,
           children: [
             {
               id: 2,
               name: 'light',
               description: 'bright',
+              metadata: null,
               children: [
                 {
                   id: 3,
                   name: 'material',
                   description: 'matter',
+                  metadata: null,
                   children: [],
                 },
               ],
@@ -140,30 +164,35 @@ describe('CategoryService', () => {
           id: 3,
           category: 'material',
           description: 'matter',
+          metadata: null,
           parent: 2,
         },
         {
           id: 5,
           category: 'anti material',
           description: 'nonmatter',
+          metadata: null,
           parent: 2,
         },
         {
           id: 2,
           category: 'light',
           description: 'bright',
+          metadata: null,
           parent: 1,
         },
         {
           id: 4,
           category: 'anti light',
           description: 'dark',
+          metadata: null,
           parent: 1,
         },
         {
           id: 1,
           category: 'dust',
           description: '...',
+          metadata: null,
           parent: undefined,
         },
       ],
@@ -172,22 +201,26 @@ describe('CategoryService', () => {
           id: 1,
           name: 'dust',
           description: '...',
+          metadata: null,
           children: [
             {
               id: 2,
               name: 'light',
               description: 'bright',
+              metadata: null,
               children: [
                 {
                   id: 3,
                   name: 'material',
                   description: 'matter',
+                  metadata: null,
                   children: [],
                 },
                 {
                   id: 5,
                   name: 'anti material',
                   description: 'nonmatter',
+                  metadata: null,
                   children: [],
                 },
               ],
@@ -196,6 +229,7 @@ describe('CategoryService', () => {
               id: 4,
               name: 'anti light',
               description: 'dark',
+              metadata: null,
               children: [],
             },
           ],

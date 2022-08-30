@@ -3,15 +3,23 @@ dotenv.config();
 
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { AppModule } from './app.module';
-import { BEHIND_PROXY } from './constants';
+import { AppModule } from './app.module.js';
+import { BEHIND_PROXY } from './constants.js';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
-var bodyParser = require('body-parser');
+import bodyParser from 'body-parser';
 
 async function bootstrap() {
+  let cors: any = false;
+  if (process.env.LOCAL_CORS === 'true') {
+    cors = {
+      credentials: true,
+      origin: true,
+    };
+  }
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    cors: process.env.LOCAL_CORS === 'true',
+    cors: cors,
     logger: ['log', 'warn', 'error'],
   });
   app.use(

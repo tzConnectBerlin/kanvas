@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcrypt';
-import { AUTH_SALT_ROUNDS } from './constants';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { AUTH_SALT_ROUNDS } from './constants.js';
 
 class AssertionError extends Error {
   constructor(message: string) {

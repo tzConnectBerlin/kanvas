@@ -115,6 +115,14 @@ describe('CurrencyService with a "working" rates provider', () => {
       inp: 534.0,
       exp: 53400,
     },
+    {
+      inp: 5.344, // too many decimal digits gets rounded (down example)
+      exp: 534,
+    },
+    {
+      inp: 5.345, // too many decimal digits gets rounded (up example)
+      exp: 535,
+    },
   ];
 
   for (const tc of testcases3) {

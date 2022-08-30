@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from 'src/app.module';
-import { Roles } from 'src/role/entities/role.entity';
-import { assertEnv } from 'src/utils';
-import * as Pool from 'pg-pool';
+import request from 'supertest';
+import { AppModule } from '../src/app.module';
+import { Roles } from '../src/role/entities/role.entity';
+import { assertEnv } from '../src/utils';
+import Pool from 'pg-pool';
 import axios from 'axios';
 
 let anyTestFailed = false;
@@ -87,7 +87,6 @@ describe('AppController (e2e)', () => {
       .send({
         email: 'regular_joe@bigbrother.co',
         userName: 'Regular Joe',
-        address: 'tz1bla',
         password: 'somepass',
         roles: [Roles.editor, Roles.moderator],
       });
@@ -97,7 +96,6 @@ describe('AppController (e2e)', () => {
       roles: [Roles.editor, Roles.moderator],
       email: 'regular_joe@bigbrother.co',
       userName: 'Regular Joe',
-      address: 'tz1bla',
     });
   });
 
@@ -113,7 +111,6 @@ describe('AppController (e2e)', () => {
       .send({
         email: 'ben@bigbrother.co',
         userName: 'Ben',
-        address: 'tz1ben',
         password: 'somepass',
         roles: [],
       });
@@ -267,7 +264,7 @@ describe('AppController (e2e)', () => {
       expect(res.statusCode).toEqual(200);
 
       expect(res.body.createdAt).toBeGreaterThan(0);
-      expect(res.body.updatedAt).toEqual(res.body.createdAt);
+      expect(res.body.updatedAt).toBeGreaterThanOrEqual(res.body.createdAt);
       delete res.body.createdAt;
       delete res.body.updatedAt;
 
@@ -387,7 +384,7 @@ describe('AppController (e2e)', () => {
         .send({
           price: JSON.stringify(105),
           categories: JSON.stringify([2, 5, 10]),
-          editions_size: JSON.stringify(4),
+          edition_size: JSON.stringify(4),
           proposed: JSON.stringify(true),
           onsale_from: JSON.stringify(Date.now() + 30 * 60 * 1000),
         });
@@ -525,7 +522,7 @@ describe('AppController (e2e)', () => {
         attributes: { name: 'modified name', create_ready: true },
         allowedActions: {
           categories: 'number[]',
-          editions_size: 'number',
+          edition_size: 'number',
           price: 'number',
           onsale_from: 'date',
           proposed: 'boolean',
@@ -533,7 +530,7 @@ describe('AppController (e2e)', () => {
         stateInfo: {
           proposed: [
             'nft.proposed',
-            'nft.editions_size > 0',
+            'nft.edition_size > 0',
             'nft.price > 0',
             'nft.categories.length > 0',
             'nft.onsale_from >= Date.now()',
@@ -592,7 +589,7 @@ describe('AppController (e2e)', () => {
             attributes: {
               categories: [2, 5, 10],
               create_ready: true,
-              editions_size: 4,
+              edition_size: 4,
               name: 'some name',
               price: 105,
               proposed: true,
@@ -748,7 +745,7 @@ describe('AppController (e2e)', () => {
             attributes: {
               categories: [2, 5, 10],
               create_ready: true,
-              editions_size: 4,
+              edition_size: 4,
               name: 'some name',
               price: 105,
               proposed: true,
@@ -829,7 +826,7 @@ describe('AppController (e2e)', () => {
             attributes: {
               categories: [2, 5, 10],
               create_ready: true,
-              editions_size: 4,
+              edition_size: 4,
               name: 'some name',
               price: 105,
               proposed: true,
@@ -889,7 +886,7 @@ describe('AppController (e2e)', () => {
             attributes: {
               categories: [2, 5, 10],
               create_ready: true,
-              editions_size: 4,
+              edition_size: 4,
               name: 'some name',
               price: 105,
               proposed: true,
@@ -1163,7 +1160,6 @@ describe('AppController (e2e)', () => {
       .send({
         email: 'hank@bigbrother.co',
         userName: 'Hank',
-        address: 'tz1hank',
         password: 'somepass',
         roles: [2, 0], // 0 is invalid here
       });
@@ -1182,7 +1178,6 @@ describe('AppController (e2e)', () => {
       .send({
         email: 'jane@bigbrother.co',
         userName: 'Jane',
-        address: 'tz1blb',
         password: 'pass',
         roles: [3],
       });
@@ -1206,21 +1201,18 @@ describe('AppController (e2e)', () => {
           id: 1,
           email: 'admin@tzconnect.com',
           userName: 'admin',
-          address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
           roles: [Roles.admin],
         },
         {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
-          address: 'tz1bla',
           roles: [Roles.editor, Roles.moderator],
         },
         {
           id: 3,
           email: 'ben@bigbrother.co',
           userName: 'Ben',
-          address: 'tz1ben',
           roles: [],
         },
       ],
@@ -1245,21 +1237,18 @@ describe('AppController (e2e)', () => {
           id: 3,
           email: 'ben@bigbrother.co',
           userName: 'Ben',
-          address: 'tz1ben',
           roles: [],
         },
         {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
-          address: 'tz1bla',
           roles: [Roles.editor, Roles.moderator],
         },
         {
           id: 1,
           email: 'admin@tzconnect.com',
           userName: 'admin',
-          address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
           roles: [Roles.admin],
         },
       ],
@@ -1287,14 +1276,12 @@ describe('AppController (e2e)', () => {
           id: 3,
           email: 'ben@bigbrother.co',
           userName: 'Ben',
-          address: 'tz1ben',
           roles: [],
         },
         {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
-          address: 'tz1bla',
           roles: [Roles.editor, Roles.moderator],
         },
       ],
@@ -1322,7 +1309,6 @@ describe('AppController (e2e)', () => {
           id: 1,
           email: 'admin@tzconnect.com',
           userName: 'admin',
-          address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
           roles: [Roles.admin],
         },
       ],
@@ -1379,7 +1365,7 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail(
-    'users list is sortable by id,email,userName,address,roles',
+    'users list is sortable by id,email,userName,roles',
     async () => {
       const { bearer } = await loginUser(
         app,
@@ -1398,21 +1384,18 @@ describe('AppController (e2e)', () => {
             id: 1,
             email: 'admin@tzconnect.com',
             userName: 'admin',
-            address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
             roles: [Roles.admin],
           },
           {
             id: 2,
             email: 'regular_joe@bigbrother.co',
             userName: 'Regular Joe',
-            address: 'tz1bla',
             roles: [Roles.editor, Roles.moderator],
           },
           {
             id: 3,
             email: 'ben@bigbrother.co',
             userName: 'Ben',
-            address: 'tz1ben',
             roles: [],
           },
         ],
@@ -1430,21 +1413,18 @@ describe('AppController (e2e)', () => {
             id: 1,
             email: 'admin@tzconnect.com',
             userName: 'admin',
-            address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
             roles: [Roles.admin],
           },
           {
             id: 3,
             email: 'ben@bigbrother.co',
             userName: 'Ben',
-            address: 'tz1ben',
             roles: [],
           },
           {
             id: 2,
             email: 'regular_joe@bigbrother.co',
             userName: 'Regular Joe',
-            address: 'tz1bla',
             roles: [Roles.editor, Roles.moderator],
           },
         ],
@@ -1462,54 +1442,19 @@ describe('AppController (e2e)', () => {
             id: 1,
             email: 'admin@tzconnect.com',
             userName: 'admin',
-            address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
             roles: [Roles.admin],
           },
           {
             id: 3,
             email: 'ben@bigbrother.co',
             userName: 'Ben',
-            address: 'tz1ben',
             roles: [],
           },
           {
             id: 2,
             email: 'regular_joe@bigbrother.co',
             userName: 'Regular Joe',
-            address: 'tz1bla',
             roles: [Roles.editor, Roles.moderator],
-          },
-        ],
-      });
-
-      res = await request(app.getHttpServer())
-        .get('/user')
-        .set('authorization', bearer)
-        .query({ sort: JSON.stringify(['address']) });
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toEqual({
-        count: 3,
-        data: [
-          {
-            id: 3,
-            email: 'ben@bigbrother.co',
-            userName: 'Ben',
-            address: 'tz1ben',
-            roles: [],
-          },
-          {
-            id: 2,
-            email: 'regular_joe@bigbrother.co',
-            userName: 'Regular Joe',
-            address: 'tz1bla',
-            roles: [Roles.editor, Roles.moderator],
-          },
-          {
-            id: 1,
-            email: 'admin@tzconnect.com',
-            userName: 'admin',
-            address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
-            roles: [Roles.admin],
           },
         ],
       });
@@ -1526,21 +1471,18 @@ describe('AppController (e2e)', () => {
             id: 3,
             email: 'ben@bigbrother.co',
             userName: 'Ben',
-            address: 'tz1ben',
             roles: [],
           },
           {
             id: 1,
             email: 'admin@tzconnect.com',
             userName: 'admin',
-            address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
             roles: [Roles.admin],
           },
           {
             id: 2,
             email: 'regular_joe@bigbrother.co',
             userName: 'Regular Joe',
-            address: 'tz1bla',
             roles: [Roles.editor, Roles.moderator],
           },
         ],
@@ -1587,43 +1529,9 @@ describe('AppController (e2e)', () => {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
-          address: 'tz1bla',
           roles: [Roles.editor, Roles.moderator],
         },
         {
-          address: 'tz1ben',
-          email: 'ben@bigbrother.co',
-          id: 3,
-          roles: [],
-          userName: 'Ben',
-        },
-      ],
-    });
-  });
-
-  skipOnPriorFail('/user has filter on address', async () => {
-    const { bearer } = await loginUser(
-      app,
-      'regular_joe@bigbrother.co',
-      'somepass',
-    );
-    const res = await request(app.getHttpServer())
-      .get('/user')
-      .query({ address: 'tz1bla,tz1ben,some address that doesnt exist' })
-      .set('authorization', bearer);
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toEqual({
-      count: 2,
-      data: [
-        {
-          id: 2,
-          email: 'regular_joe@bigbrother.co',
-          userName: 'Regular Joe',
-          address: 'tz1bla',
-          roles: [Roles.editor, Roles.moderator],
-        },
-        {
-          address: 'tz1ben',
           email: 'ben@bigbrother.co',
           id: 3,
           roles: [],
@@ -1651,11 +1559,9 @@ describe('AppController (e2e)', () => {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
-          address: 'tz1bla',
           roles: [Roles.editor, Roles.moderator],
         },
         {
-          address: 'tz1ben',
           email: 'ben@bigbrother.co',
           id: 3,
           roles: [],
@@ -1683,7 +1589,6 @@ describe('AppController (e2e)', () => {
           id: 2,
           email: 'regular_joe@bigbrother.co',
           userName: 'Regular Joe',
-          address: 'tz1bla',
           roles: [Roles.editor, Roles.moderator],
         },
       ],
@@ -1986,7 +1891,6 @@ describe('AppController (e2e)', () => {
       id: 2,
       email: 'regular_joe@bigbrother.co',
       userName: 'Regular Joe',
-      address: 'tz1bla',
       roles: [Roles.editor, Roles.moderator],
     });
 
@@ -2003,7 +1907,6 @@ describe('AppController (e2e)', () => {
       id: 2,
       email: 'regular_joe@bigbrother.co',
       userName: 'Regular Joe',
-      address: 'tz1bla',
       roles: [],
     });
 
@@ -2021,7 +1924,6 @@ describe('AppController (e2e)', () => {
       id: 2,
       email: 'regular_joe@bigbrother.co',
       userName: 'Regular Joe',
-      address: 'tz1bla',
       roles: [Roles.editor, Roles.moderator],
     });
   });
@@ -2284,11 +2186,11 @@ describe('AppController (e2e)', () => {
       .patch(`/nft/${nftId}`)
       .set('authorization', bearer)
       .send({
-        price: JSON.stringify(105),
+        price: JSON.stringify(105.1),
         categories: JSON.stringify(
           allowedCategories.body.data.map((cat: any) => cat.id).slice(0, 3),
         ),
-        editions_size: JSON.stringify(4),
+        edition_size: JSON.stringify(4),
         onsale_from: JSON.stringify(Date.now() + 30 * 60 * 1000),
         proposed: JSON.stringify(true),
       });
@@ -2299,8 +2201,8 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer)
       .send({
         publish_vote: JSON.stringify('yes'),
-        'image.png': JSON.stringify('someuri'),
-        'thumbnail.png': JSON.stringify('somethumbnailuri'),
+        artifact: JSON.stringify('someuri'),
+        thumbnail: JSON.stringify('somethumbnailuri'),
         description: JSON.stringify('some long description'),
       });
     expect(res.statusCode).toEqual(200);
@@ -2324,9 +2226,13 @@ describe('AppController (e2e)', () => {
       nft: {
         id: 35,
         nft_name: 'some name',
-        ipfs_hash: null,
+        artifact_ipfs: null,
+        display_ipfs: null,
+        thumbnail_ipfs: null,
+        metadata: null,
+        metadata_ipfs: null,
         artifact_uri: 'someuri',
-        price: '105',
+        price: '10510', // in cents in the db
         editions_size: 4,
         view_count: 0,
         description: 'some long description',
@@ -2357,7 +2263,7 @@ describe('AppController (e2e)', () => {
 
     const nftRes = await axios({
       url: process.env['STORE_API'] + `/nfts/${nftId}`,
-      method: 'POST',
+      method: 'GET',
       validateStatus: () => true,
     });
     expect(nftRes.status).toEqual(400);
@@ -2381,10 +2287,10 @@ describe('AppController (e2e)', () => {
 
     const nftRes = await axios({
       url: process.env['STORE_API'] + `/nfts/${nftId}`,
-      method: 'POST',
+      method: 'GET',
       validateStatus: () => true,
     });
-    expect(nftRes.status).toEqual(201);
+    expect(nftRes.status).toEqual(200);
   });
 
   skipOnPriorFail(
@@ -2428,7 +2334,7 @@ describe('AppController (e2e)', () => {
               0,
             ], // 0 here is definitely wrong
           ),
-          editions_size: JSON.stringify(4),
+          edition_size: JSON.stringify(4),
           onsale_from: JSON.stringify(Date.now() + 30 * 60 * 1000),
           proposed: JSON.stringify(true),
         });
@@ -2439,8 +2345,8 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer)
         .send({
           publish_vote: JSON.stringify('yes'),
-          'image.png': JSON.stringify('someuri'),
-          'thumbnail.png': JSON.stringify('somethumbnailuri'),
+          artifact: JSON.stringify('someuri'),
+          thumbnail: JSON.stringify('somethumbnailuri'),
           description: JSON.stringify('some long description'),
         });
       expect(res.statusCode).toEqual(200); // need 2 votes
@@ -2489,7 +2395,7 @@ describe('AppController (e2e)', () => {
         categories: JSON.stringify([
           ...allowedCategories.body.data.map((cat: any) => cat.id).slice(0, 3),
         ]),
-        editions_size: JSON.stringify(4),
+        edition_size: JSON.stringify(4),
         onsale_from: JSON.stringify(Date.now() + 30 * 60 * 1000),
         proposed: JSON.stringify(true),
       });
@@ -2500,8 +2406,8 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer)
       .send({
         publish_vote: JSON.stringify('yes'),
-        'image.png': JSON.stringify('someuri'),
-        'thumbnail.png': JSON.stringify('somethumbnailuri'),
+        artifact: JSON.stringify('someuri'),
+        thumbnail: JSON.stringify('somethumbnailuri'),
         description: JSON.stringify('some long description'),
       });
     expect(res.statusCode).toEqual(200); // need 2 votes
@@ -2589,10 +2495,10 @@ describe('AppController (e2e)', () => {
       create_ready: 'boolean',
       delist_vote: 'votes',
       description: 'string',
-      'image.png': 'string',
-      'thumbnail.png': 'string',
+      artifact: 'string',
+      thumbnail: 'string',
       price: 'number',
-      editions_size: 'number',
+      edition_size: 'number',
       onsale_from: 'date',
       categories: 'number[]',
       proposed: 'boolean',
@@ -2631,9 +2537,9 @@ async function emulateNftSale(userId: number, nftIds: number[], at: Date) {
   const qryRes = await storeRepl.query(
     `
 INSERT INTO nft_order (
-  user_id, order_at
+  user_id, order_at, expires_at
 )
-VALUES ($1, $2)
+VALUES ($1, $2, now())
 RETURNING id
     `,
     [userId, at.toUTCString()],
@@ -2654,9 +2560,9 @@ SELECT $1, UNNEST($2::INTEGER[])
   await storeRepl.query(
     `
 INSERT INTO payment (
-  payment_id, status, nft_order_id, provider, expires_at
+  payment_id, status, nft_order_id, provider, currency, amount
 )
-VALUES ('bla', 'succeeded', $1, 'test_provider', now())
+VALUES ('bla', 'succeeded', $1, 'test_provider', 'EUR', 4.45)
     `,
     [orderId],
   );

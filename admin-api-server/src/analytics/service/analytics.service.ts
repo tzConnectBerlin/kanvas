@@ -4,9 +4,9 @@ import {
   MetricEntity,
   MetricParams,
   Activity,
-} from '../entity/analytics.entity';
-import { PG_CONNECTION_STORE_REPLICATION } from '../../constants';
-import { ActivityFilterParams } from '../params';
+} from '../entity/analytics.entity.js';
+import { PG_CONNECTION_STORE_REPLICATION } from '../../constants.js';
+import { ActivityFilterParams } from '../params.js';
 import { BASE_CURRENCY, CurrencyService } from 'kanvas-api-lib';
 
 @Injectable()

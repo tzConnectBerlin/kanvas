@@ -5,16 +5,18 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "type": "module",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "postinstall": "./script/build-deps",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/src/main",
+    "start:prod": "node dist/src/main.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "seed": "NODE_PATH=. ts-node ./src/seeds/index.ts",
+    "seed": "node ./dist/src/seeds/index.js",
     "test": "./script/test"
   },
   "dependencies": {
@@ -27,7 +29,10 @@
     "@nestjs/schedule": "1.0.2",
     "@nestjs/throttler": "^2.0.0",
     "@types/bcrypt": "^5.0.0",
+    "@types/cron": "^1.7.3",
     "@types/passport-local": "^1.0.34",
+    "@types/uuid": "^8.3.4",
+    "@types/validator": "^13.7.2",
     "async-await-mutex-lock": "^1.0.7",
     "aws-sdk": "^2.1046.0",
     "bcrypt": "^5.0.1",
@@ -37,8 +42,10 @@
     "class-validator": "^0.13.1",
     "cookie-session": "^1.4.0",
     "dotenv": "^10.0.0",
+    "filesize": "^9.0.11",
     "joi": "^17.5.0",
     "libsodium-wrappers": "^0.7.9",
+    "mime": "^3.0.0",
     "nestjs-joi": "^1.5.1",
     "passport": "^0.5.0",
     "passport-jwt": "^4.0.0",
@@ -58,7 +65,7 @@
     "@nestjs/schematics": "^8.0.0",
     "@nestjs/testing": "^8.0.0",
     "@types/express": "^4.17.13",
-    "@types/jest": "27.0.2",
+    "@types/jest": "28.1.2",
     "@types/passport-jwt": "^3.0.6",
     "@types/pg": "^8.6.1",
     "@types/pg-pool": "^2.0.3",
@@ -69,49 +76,50 @@
     "eslint": "^8.0.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
-    "jest": "^27.2.5",
+    "jest": "^28.1.2",
     "prettier": "^2.3.2",
     "source-map-support": "^0.5.20",
     "supertest": "^6.1.3",
-    "ts-jest": "^27.0.3",
+    "ts-jest": "^28.0.5",
     "ts-loader": "^9.2.3",
     "ts-node": "^10.0.0",
     "tsconfig-paths": "^3.10.1",
     "typescript": "^4.3.5"
   },
   "jest": {
+    "preset": "ts-jest/presets/default-esm",
     "moduleDirectories": [
       "node_modules",
       "<rootDir>"
     ],
+    "extensionsToTreatAsEsm": [".ts"],
+    "globals": {
+      "ts-jest": {
+        "useESM": true
+      }
+    },
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
     "moduleFileExtensions": [
       "js",
       "json",
       "ts"
     ],
-    "testPathIgnorePatterns": [
-      "<rootDir>/node_modules/",
-      "<rootDir>/lib/"
-    ],
-    "modulePathIgnorePatterns": [
-      "<rootDir>/lib/"
-    ],
-    "transformIgnorePatterns": [
-      "<rootDir>/node_modules/",
-      "<rootDir>/lib/"
-    ],
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "transformIgnorePatterns": [
+        "<rootDir>/node_modules/",
+        "<rootDir>/stm-lib/",
+        "/kanvas/lib/api-lib/"
+    ],
     "collectCoverageFrom": [
       "src/**/{!(nft_mock.service),}.ts"
     ],
-    "coveragePathIgnorePatterns": [
-      "<rootDir>/node_modules/",
-      "<rootDir>/src/seeds"
-    ],
     "coverageDirectory": "test/coverage",
+    "coverageProvider": "v8",
     "testEnvironment": "node"
   }
 }

@@ -2,7 +2,7 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
-QUEPASA_VERSION=1.2.0
+QUEPASA_VERSION=1.2.5
 
 [ -z $PGHOST ] && export PGHOST=localhost
 [ -z $PGPORT ] && export PGPORT=5433

@@ -105,16 +105,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                 >
                     {nft!.name}
                 </Typography>
-                <Typography
-                    size="body2"
-                    weight="Light"
-                    display="initial !important"
-                    noWrap
-                    color="#C4C4C4"
-                    sx={{ cursor: 'pointer', maxWidth: '70%' }}
-                >
-                    {nft!.ipfsHash}
-                </Typography>
+                
                 <Typography
                     onClick={() =>
                         props.removeNftLoading ? {} : props.removeNft(nft!.id)
@@ -151,7 +142,7 @@ export const ShoppingCartItem: FC<ShoppingCartItemProps> = ({
                     overflow: 'clip',
                 }}
             >
-                {`${nft!.price} ꜩ`}
+                {`${nft!.price} €`}
             </Typography>
         </Stack>
     );

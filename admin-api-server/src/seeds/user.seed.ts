@@ -1,8 +1,8 @@
-import { UserService } from 'src/user/service/user.service';
-import { RoleService } from 'src/role/service/role.service';
-import { Roles } from 'src/role/entities/role.entity';
-import { assertEnv } from 'src/utils';
-import * as Pool from 'pg-pool';
+import Pool from 'pg-pool';
+import { UserService } from '../user/service/user.service.js';
+import { RoleService } from '../role/service/role.service.js';
+import { Roles } from '../role/entities/role.entity.js';
+import { assertEnv } from '../utils.js';
 
 export const seedUser = async () => {
   const dbPool = new Pool({
@@ -20,7 +20,6 @@ export const seedUser = async () => {
   await userService.create({
     password: 'supersafepassword',
     roles: [Roles.admin],
-    address: 'tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU',
     email: 'admin@tzconnect.com',
     userName: 'admin',
     id: 1,

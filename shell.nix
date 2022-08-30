@@ -1,13 +1,11 @@
-with (import <nixpkgs> {});
-mkShell {
-  buildInputs = [
-    ripgrep
-    postgresql
-    jq
-    httpie
-  ];
+{ pkgs ? import <nixpkgs> {} }:
+with pkgs;
 
-  shellHook = ''
-    PATH=$PATH:~/.yarn/bin
-  '';
+let
+
+in mkShell {
+  buildInputs = [
+    yarn
+    nodejs-18_x
+  ];
 }

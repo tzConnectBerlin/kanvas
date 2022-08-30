@@ -1,4 +1,5 @@
-import { assertEnv } from './utils';
+import { assertEnv } from './utils.js';
+import { maybe } from 'kanvas-api-lib';
 
 export const PG_CONNECTION = 'PG_CONNECTION';
 export const PG_CONNECTION_STORE_REPLICATION =

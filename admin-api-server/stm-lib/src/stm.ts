@@ -1,8 +1,14 @@
-import * as fs from 'fs';
-import { parse } from 'yaml';
-import { evalExpr, execExpr } from './expr';
-import { Nft, Actor } from './types';
-import * as log from 'log';
+import fs from 'fs';
+import yaml from 'yaml';
+const { parse } = yaml;
+import { evalExpr, execExpr } from './expr.js';
+import { Nft, Actor } from './types.js';
+import log from 'log';
+import { isBottom, maybe } from './utils.js';
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const filesizeParser = require('filesize-parser');
 
 interface State {
   transitions: [
@@ -30,16 +36,43 @@ export interface STMResult {
   message?: string;
 }
 
+export interface ContentRestrictions {
+  mimetypes?: string[];
+  maxBytes?: number;
+  maxSize?: string; // human readable (w/ KB, MB, etc)
+}
+
 export class StateTransitionMachine {
-  attrTypes: any = {};
-  states: any = {};
+  attrTypes: { [key: string]: string } = {};
+  contentRestrictions: { [key: string]: ContentRestrictions } = {};
+  states: { [key: string]: State } = {};
 
   constructor(filepath: string) {
     const file = fs.readFileSync(filepath, 'utf8');
     const parsed = parse(file);
 
-    for (const attr in parsed.attributes) {
-      this.attrTypes[attr] = parsed.attributes[attr];
+    log.info('parsing file..');
+    for (const attrName in parsed.attributes) {
+      const attr = parsed.attributes[attrName];
+
+      if (typeof attr === 'string') {
+        this.attrTypes[attrName] = attr;
+        continue;
+      }
+
+      const ty = attr['type'];
+      if (typeof ty === 'undefined') {
+        throw `attribute '${attrName}' has no type definition`;
+      }
+      this.attrTypes[attrName] = ty;
+      if (ty === 'content_uri' && typeof attr['restrictions'] !== 'undefined') {
+        this.contentRestrictions[attrName] = attr['restrictions'];
+
+        this.contentRestrictions[attrName].maxBytes = maybe(
+          (maxSize: string) => filesizeParser(maxSize, { base: 10 }),
+          this.contentRestrictions[attrName].maxSize,
+        );
+      }
     }
 
     for (const stateName in parsed.states) {
@@ -49,14 +82,23 @@ export class StateTransitionMachine {
         mutables: st.mutables,
       };
     }
+    log.info(
+      `file parsed: ${JSON.stringify(this.attrTypes)}, ${JSON.stringify(
+        this.contentRestrictions,
+      )}`,
+    );
   }
 
-  getAttributes(): any {
+  getAttributes(): { [key: string]: string } {
     return this.attrTypes;
   }
 
   getAttributeType(attr: string): string {
     return this.attrTypes[attr];
+  }
+
+  getContentRestrictions(contentAttr: string): ContentRestrictions | undefined {
+    return this.contentRestrictions[contentAttr];
   }
 
   getAllowedActions(actor: Actor, nft: Nft): any {
@@ -215,11 +257,4 @@ export class StateTransitionMachine {
 
     return unmetTransitionConditions;
   }
-}
-
-function isBottom(v: any): boolean {
-  // note: v here is checked for Javascripts' bottom values (null and undefined)
-  //       because undefined coerces into null. And its safe because nothing
-  //       else coerces into null (other than null itself).
-  return v == null;
 }

@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR/..
+
+echo "building api-lib.."
+(
+    cd ../lib/api-lib
+    yarn install
+    yarn build
+)
+
+links=`ls -l node_modules | grep ^l`
+echo "$links" | grep --silent 'kanvas-api-lib ->' || {
+    echo "linking api-lib.."
+    (
+        cd ../lib/api-lib
+        yarn link $YARN_LINK_ARGS 2>/dev/null
+    )
+    yarn link $YARN_LINK_ARGS kanvas-api-lib
+}
+echo "$links" | grep --silent 'tezpay-server ->' || {
+    echo "linking tezpay-server.."
+    (
+        cd ../lib/tezpay/server
+        yarn link $YARN_LINK_ARGS 2>/dev/null
+    )
+    yarn link $YARN_LINK_ARGS tezpay-server
+}

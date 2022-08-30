@@ -12,8 +12,10 @@ export const SEARCH_MAX_NFTS = 3;
 export const SEARCH_MAX_CATEGORIES = 6;
 export const SEARCH_SIMILARITY_LIMIT = 0.4;
 
+export const TEZOS_NETWORK = assertEnv('TEZOS_NETWORK');
+export const KANVAS_CONTRACT = assertEnv('KANVAS_CONTRACT');
 export const MINTER_ADDRESS = assertEnv('MINTER_TZ_ADDRESS');
-export const ADMIN_PUBLIC_KEY = assertEnv('ADMIN_PUBLIC_KEY'); // this probably should be the revealed public key associated to the MINTER_ADDRESS (MINTER_ADDRESS is the public key hash)
+export const ADMIN_PUBLIC_KEY = assertEnv('ADMIN_PUBLIC_KEY'); // this should be the revealed public key associated to the MINTER_ADDRESS (MINTER_ADDRESS is the public key hash)
 
 export const STORE_PUBLISHERS = ['Tezos'];
 
@@ -36,3 +38,40 @@ export const BEHIND_PROXY: boolean =
 export const ENDING_SOON_DURATION = '2 hours';
 
 export const PAYPOINT_SCHEMA = 'paypoint';
+
+export const PROFILE_PICTURES_ENABLED: boolean =
+  (process.env['PROFILE_PICTURES_ENABLED'] || 'no') === 'yes';
+
+export const CART_EXPIRATION_MILLI_SECS = Number(
+  process.env['CART_EXPIRATION_MILLI_SECS'] || 60 * 60 * 1000,
+);
+export const PAYMENT_PROMISE_DEADLINE_MILLI_SECS = Number(
+  process.env['PAYMENT_PROMISE_DEADLINE_MILLI_SECS'] || 600 * 1000,
+);
+
+export const ORDER_EXPIRATION_MILLI_SECS = Number(
+  process.env['ORDER_EXPIRATION_MILLI_SECS'] || 3600 * 1000,
+);
+
+export const WERT_PRIV_KEY: string | undefined = process.env['WERT_PRIV_KEY'];
+export const WERT_PUB_KEY: string | undefined = process.env['WERT_PUB_KEY'];
+export const WERT_ALLOWED_FIAT: string[] = ['USD']; // it seems that as for now at least wert only supports payments in USD
+
+export const SIMPLEX_API_KEY: string | undefined = process.env['SIMPLEX_API_KEY'];
+export const SIMPLEX_API_URL: string | undefined = process.env['SIMPLEX_API_URL'];
+export const SIMPLEX_PUBLIC_KEY: string | undefined = process.env['SIMPLEX_PUBLIC_KEY'];
+export const SIMPLEX_WALLET_ID: string | undefined = process.env['SIMPLEX_WALLET_ID'];
+export const SIMPLEX_ALLOWED_FIAT: string[] = ['USD']; // it seems that as for now at least simplex only supports payments in USD
+
+export const TEZPAY_PAYPOINT_ADDRESS: string | undefined =
+  process.env['TEZPAY_PAYPOINT_ADDRESS'];
+
+export const SIGNED_LOGIN_ENABLED: boolean =
+  (process.env['SIGNED_LOGIN_ENABLED'] || 'no') === 'yes';
+
+export const CART_MAX_ITEMS: number = Number(
+  process.env['CART_MAX_ITEMS'] || 10,
+);
+
+export const RATE_LIMITLESS_SECRET: string | undefined =
+  process.env['RATE_LIMITLESS_SECRET'];

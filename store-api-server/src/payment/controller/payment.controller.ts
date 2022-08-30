@@ -1,4 +1,5 @@
 import {
+  Session,
   Controller,
   HttpException,
   Post,
@@ -16,14 +17,17 @@ import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { JwtAuthGuard } from '../../authentication/guards/jwt-auth.guard.js';
 import {
   PaymentService,
-  PaymentIntent,
   PaymentStatus,
-  PaymentProvider,
 } from '../../payment/service/payment.service.js';
 import { UserEntity } from '../../user/entity/user.entity.js';
 import { UserService } from '../../user/service/user.service.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
 import { validateRequestedCurrency } from '../../paramUtils.js';
+import { NftEntity } from '../../nft/entity/nft.entity.js';
+import { PaymentProvider } from '../../payment/entity/payment.entity.js';
+
+import type { PaymentIntent } from '../../payment/entity/payment.entity.js';
+import { getRealIp } from '../../utils.js';
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -72,27 +76,52 @@ export class PaymentController {
   @Post('/create-payment-intent')
   @UseGuards(JwtAuthGuard)
   async createPaymentIntent(
+    @Session() cookieSession: any,
     @CurrentUser() user: UserEntity,
+    @Req() request: any,
+    @Body('paymentProvider')
+    paymentProvider: PaymentProvider = PaymentProvider.STRIPE,
     @Body('currency') currency: string = BASE_CURRENCY,
+    @Body('recreateNftOrder') recreateNftOrder: boolean = false,
   ): Promise<PaymentIntent> {
-    Logger.log(`createPaymentIntent: ${JSON.stringify(currency)}`);
-
     validateRequestedCurrency(currency);
-
-    let paymentProvider: PaymentProvider;
-    if (currency === 'XTZ') {
-      paymentProvider = PaymentProvider.TEZPAY;
-    } else {
-      paymentProvider = PaymentProvider.STRIPE;
+    if (
+      paymentProvider === PaymentProvider.TEST ||
+      !Object.values(PaymentProvider).includes(paymentProvider)
+    ) {
+      throw new HttpException(
+        `requested payment provider not available`,
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
+    if (currency === 'XTZ') {
+      // temporary for backwards compatibility, until frontend has been updated
+      paymentProvider = PaymentProvider.TEZPAY;
+    }
+    const clientIp = getRealIp(request);
+
     try {
-      return await this.paymentService.createPayment(
-        user.id,
+      let paymentIntent = await this.paymentService.createPayment(
+        user,
+        cookieSession.uuid,
         paymentProvider,
         currency,
+        clientIp,
+        recreateNftOrder,
       );
+      const order = await this.paymentService.getPaymentOrder(paymentIntent.id);
+
+      let resp = {
+        ...paymentIntent,
+        nfts: order.nfts,
+        expiresAt: order.expiresAt,
+      };
+      return resp;
     } catch (err: any) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
       Logger.error(err);
       throw new HttpException(
         'Unable to place the order',
@@ -101,15 +130,24 @@ export class PaymentController {
     }
   }
 
-  @Get('/status/:payment_id')
+  @Post('/promise-paid')
   @UseGuards(JwtAuthGuard)
-  @Header('cache-control', 'no-store,must-revalidate')
-  async getPaymentStatus(
+  async promisePaymentPaid(
     @CurrentUser() user: UserEntity,
-    @Param('payment_id') paymentId: string,
-  ): Promise<{ status: PaymentStatus }> {
-    return {
-      status: await this.paymentService.getPaymentStatus(user.id, paymentId),
-    };
+    @Body('payment_id') paymentId: string,
+  ) {
+    try {
+      await this.paymentService.promisePaid(user.id, paymentId);
+    } catch (err: any) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+
+      Logger.error(err);
+      throw new HttpException(
+        `logged in user (id=${user.id}) does not have an unfinished payment with payment_id=${paymentId} that hasn't been promised payment yet`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }
