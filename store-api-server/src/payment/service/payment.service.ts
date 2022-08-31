@@ -24,6 +24,7 @@ import { UserService } from '../../user/service/user.service.js';
 import { NftService } from '../../nft/service/nft.service.js';
 import { MintService } from '../../nft/service/mint.service.js';
 import ts_results from 'ts-results';
+
 const { Err } = ts_results;
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { assertEnv, nowUtcWithOffset, isBottom } from '../../utils.js';
@@ -453,6 +454,7 @@ WHERE nft_order.id = $1
     const amount = (
       Number(currencyUnitAmount) * Math.pow(10, -decimals)
     ).toFixed(decimals);
+
     async function getSimplexQuoteId() {
       try {
         let quoteResponse = await axios.post(
@@ -504,6 +506,7 @@ WHERE nft_order.id = $1
         );
       }
     }
+
     let quoteId = await getSimplexQuoteId();
 
     const paymentId = uuidv4();
@@ -972,19 +975,39 @@ WHERE provider = 'simplex'
 
       events.push(event);
       for (const event1 of events) {
+        await this.createSimplexEventToDB(event1, paymentId);
         let deleteResponse = await deleteSimplexEvents(event1.event_id);
+
         if (deleteResponse?.status == 'OK') {
-          Logger.log(
-            `simplex payment DELETE event succeeded. eventId=${event1.event_id} paymentId=${paymentId}`,
-          );
+          Logger.log(`simplex payment DELETE event succeeded. eventId=${event1.event_id} paymentId=${paymentId}`);
         } else {
-          Logger.warn(
-            `simplex payment DELETE event failed. eventId=${event1.event_id} paymentId=${paymentId}`,
-          );
+          Logger.warn(`simplex payment DELETE event failed. eventId=${event1.event_id} paymentId=${paymentId}`);
         }
       }
     }
     Logger.log('getSimplexEvents FINISH successfully');
+  }
+
+  private async createSimplexEventToDB(event1: any, paymentId: any) {
+    try {
+      const simplexEventCreatedResponse = await this.conn.query(
+        `
+INSERT INTO simplex_payment_event (
+  event_id, payment_id ,simplex_event_status, simplex_payment_status, 
+  partner_id, partner_end_user_id, crypto_currency, fiat_total_amount, 
+  fiat_total_amount_currency, crypto_total_amount, crypto_total_amount_currency, 
+  payment_created_at, payment_updated_at, event_timestamp
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14 )`,
+        [event1.event_id, event1.payment.id, event1.name, event1.payment.status, event1.payment.partner_id,
+          event1.payment.partner_end_user_id, event1.payment.crypto_currency, event1.payment.fiat_total_amount?.amount,
+          event1.payment.fiat_total_amount?.currency, event1.payment.currency_total_amount?.amount, event1.payment.currency_total_amount?.currency,
+          event1.payment.created_at, event1.payment.updated_at, event1.timestamp],
+      );
+      Logger.log(simplexEventCreatedResponse.toLocaleString());
+    } catch (err) {
+      Logger.warn(`simplex payment event creating FAILED. eventId=${event1.event_id} paymentId=${paymentId} ErrorDetails:${err}`);
+    }
   }
 
   async cancelNftOrder(
