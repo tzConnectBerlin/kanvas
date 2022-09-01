@@ -23,6 +23,7 @@ rm $sig_err_file
 
     echo "ensuring up to date build w/ yarn linked deps (api-lib, etc)..."
     ./script/build-deps || exit 1
+    echo build-deps done
 ) &
 (
     trap "echo 'db setup failed' >> $sig_err_file" ERR
@@ -31,6 +32,7 @@ rm $sig_err_file
     ./script/wait-db
 
     while [ "`HOST=$PGHOST PORT=$PGPORT LOGIN=$PGUSER PASSWORD=$PGPASSWORD ./script/shmig -t postgresql -d $PGDATABASE pending`" != "" ]; do
+        echo 'testdb setup migrations not done..'
         sleep 1
     done
 ) &

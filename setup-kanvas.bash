@@ -122,7 +122,7 @@ function run_mintery {
 function create_random_secrets {
     replace_env JWT_SECRET_ADMIN "`tr -dc A-Za-z0-9 </dev/urandom | head -c 60 ; echo ''`" global.env || exit 1
     replace_env JWT_SECRET_STORE "`tr -dc A-Za-z0-9 </dev/urandom | head -c 60 ; echo ''`" global.env
-    replace_env RATE_LIMITLESS_SECRET "`tr -dc A-Za-z0-9 </dev/urandom | head -c 60 ; echo ''`" global.env
+    replace_env API_KEY_SECRET "`tr -dc A-Za-z0-9 </dev/urandom | head -c 40 ; echo ''`" global.env
 }
 
 function setup_admin_api {
@@ -173,7 +173,7 @@ function setup_store_api {
     replace_env CACHE_TTL "`take_env CACHE_TTL global.env`" store-api-server/.env || exit 1
     replace_env CART_MAX_ITEMS "`take_env CART_MAX_ITEMS global.env`" store-api-server/.env || exit 1
 
-    replace_env RATE_LIMITLESS_SECRET "`take_env RATE_LIMITLESS_SECRET global.env`" store-api-server/.env || exit 1
+    replace_env API_KEY_SECRET "`take_env API_KEY_SECRET global.env`" store-api-server/.env || exit 1
 
     replace_env WERT_PRIV_KEY "`take_env WERT_PRIV_KEY global.env`" store-api-server/.env || exit 1
 
