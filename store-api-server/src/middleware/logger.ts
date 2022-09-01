@@ -8,12 +8,8 @@ import {
 } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Cache } from 'cache-manager';
-import {
-  CACHE_SIZE,
-  BEHIND_PROXY,
-  RATE_LIMITLESS_SECRET,
-} from '../constants.js';
-import { getRealIp } from "../utils.js";
+import { CACHE_SIZE, BEHIND_PROXY, API_KEY_SECRET } from '../constants.js';
+import { getRealIp } from '../utils.js';
 
 @Injectable()
 export class StatsLogger {
@@ -61,10 +57,10 @@ export class LoggerMiddleware implements NestMiddleware {
     ];
 
     if (
-      typeof RATE_LIMITLESS_SECRET === 'string' &&
-      request.headers['rate-limitless'] === RATE_LIMITLESS_SECRET
+      typeof API_KEY_SECRET === 'string' &&
+      request.headers['api-key'] === API_KEY_SECRET
     ) {
-      fields.push('rate-limitless');
+      fields.push('api-key');
     }
 
     this.logger.log(`>> ${fields.join(' ')}`);
