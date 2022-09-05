@@ -990,21 +990,14 @@ WHERE provider = 'simplex'
 
   private async createSimplexEventToDB(event1: any, paymentId: any) {
     try {
-      const simplexEventCreatedResponse = await this.conn.query(
+      await this.conn.query(
         `
 INSERT INTO simplex_payment_event (
-  event_id, payment_id ,simplex_event_status, simplex_payment_status, 
-  partner_id, partner_end_user_id, crypto_currency, fiat_total_amount, 
-  fiat_total_amount_currency, crypto_total_amount, crypto_total_amount_currency, 
-  payment_created_at, payment_updated_at, event_timestamp
+  payment_id, data
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14 )`,
-        [event1.event_id, event1.payment.id, event1.name, event1.payment.status, event1.payment.partner_id,
-          event1.payment.partner_end_user_id, event1.payment.crypto_currency, event1.payment.fiat_total_amount?.amount,
-          event1.payment.fiat_total_amount?.currency, event1.payment.currency_total_amount?.amount, event1.payment.currency_total_amount?.currency,
-          event1.payment.created_at, event1.payment.updated_at, event1.timestamp],
+VALUES ($1, $2,)`,
+        [paymentId, event1],
       );
-      Logger.log(simplexEventCreatedResponse.toLocaleString());
     } catch (err) {
       Logger.warn(`simplex payment event creating FAILED. eventId=${event1.event_id} paymentId=${paymentId} ErrorDetails:${err}`);
     }
