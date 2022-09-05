@@ -850,6 +850,7 @@ WHERE provider = 'simplex'
     `,
     );
     if (pendingPaymentIds.rowCount === 0) {
+      Logger.log('checkPendingSimplex FINISH there is no simplex pending payments');
       return;
     }
 
