@@ -4,8 +4,6 @@
 
 BEGIN;
 
-DROP TABLE IF EXISTS simplex_payment_event;
-
 CREATE TABLE simplex_payment_event (
 	id serial PRIMARY KEY,
 	payment_id TEXT NOT NULL,
