@@ -839,7 +839,7 @@ WHERE provider IN ('tezpay', 'wert')
 
   @Cron(CronExpression.EVERY_MINUTE)
   async checkPendingSimplex() {
-    Logger.log('getSimplexEvents START');
+    Logger.log('checkPendingSimplex START');
     const pendingPaymentIds = await this.conn.query(
       `
 SELECT
@@ -918,7 +918,7 @@ WHERE provider = 'simplex'
                 '---DETAILS:---' +
                 JSON.stringify(errors);
             }
-            Logger.warn('getSimplexEvents ERROR' + errorMessage);
+            Logger.warn('deleteSimplexEvents ERROR' + errorMessage);
           } else {
             Logger.warn(
               'Unexpected error simplex api deleteSimplexEvents instance of error',
@@ -978,14 +978,12 @@ WHERE provider = 'simplex'
         await this.createSimplexEventToDB(event1, paymentId);
         let deleteResponse = await deleteSimplexEvents(event1.event_id);
 
-        if (deleteResponse?.status == 'OK') {
-          Logger.log(`simplex payment DELETE event succeeded. eventId=${event1.event_id} paymentId=${paymentId}`);
-        } else {
-          Logger.warn(`simplex payment DELETE event failed. eventId=${event1.event_id} paymentId=${paymentId}`);
+        if (deleteResponse?.status != 'OK') {
+          Logger.warn(`deleting of simplex payment event failed from simplex api. eventId=${event1.event_id} paymentId=${paymentId}`);
         }
       }
     }
-    Logger.log('getSimplexEvents FINISH successfully');
+    Logger.log('checkPendingSimplex FINISH successfully');
   }
 
   private async createSimplexEventToDB(event1: any, paymentId: any) {
@@ -999,7 +997,7 @@ VALUES ($1, $2,)`,
         [paymentId, event1],
       );
     } catch (err) {
-      Logger.warn(`simplex payment event creating FAILED. eventId=${event1.event_id} paymentId=${paymentId} ErrorDetails:${err}`);
+      Logger.warn(`saving of simplex payment event failed. eventId=${event1.event_id} paymentId=${paymentId} ErrorDetails:${err}`);
     }
   }
 
