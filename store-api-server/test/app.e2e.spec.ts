@@ -3246,6 +3246,7 @@ describe('AppController (e2e)', () => {
     delete paymentIntentRes.body.paymentDetails.mutezAmount;
     expect(Number(paymentIntentRes.body.amount)).toBeGreaterThan(0);
     delete paymentIntentRes.body.amount;
+    expect(typeof paymentIntentRes.body.expiresAt).toBe('number');
     delete paymentIntentRes.body.expiresAt;
     for (const i in paymentIntentRes.body.nfts) {
       expect(Number(paymentIntentRes.body.nfts[i].price)).toBeGreaterThan(0);
@@ -3480,6 +3481,7 @@ describe('AppController (e2e)', () => {
     const cartBefore = await request(app.getHttpServer())
       .get('/users/cart/list')
       .set('authorization', bearer);
+    expect(typeof cartBefore.body.expiresAt).toBe('number');
     delete cartBefore.body.expiresAt;
     for (const i in cartBefore.body.nfts) {
       expect(cartBefore.body.nfts[i].createdAt).toBeGreaterThan(0);

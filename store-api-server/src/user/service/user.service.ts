@@ -508,7 +508,7 @@ RETURNING id, expires_at`,
       );
       return {
         id: qryRes.rows[0]['id'],
-        expiresAt: qryRes.rows[0]['expires_at'],
+        expiresAt: qryRes.rows[0]['expires_at'].getTime(),
       };
     } catch (err: any) {
       if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
@@ -553,7 +553,7 @@ ORDER BY expires_at DESC
     }
     return <CartMeta>{
       id: qryRes.rows[0]['id'],
-      expiresAt: qryRes.rows[0]['expires_at'],
+      expiresAt: qryRes.rows[0]['expires_at'].getTime(),
       orderId: qryRes.rows[0]['order_id'],
     };
   }

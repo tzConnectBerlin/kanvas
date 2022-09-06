@@ -306,7 +306,7 @@ WHERE nft_order.id = $1
       id: orderId,
       userId: qryRes.rows[0]['user_id'],
       userAddress: qryRes.rows[0]['user_address'],
-      expiresAt: qryRes.rows[0]['expires_at'],
+      expiresAt: qryRes.rows[0]['expires_at'].getTime(),
       nfts: await this.nftService.findByIds(
         qryRes.rows.map((row: any) => row['nft_id']),
         undefined,
