@@ -13,9 +13,11 @@ export interface NftEntity {
   price: string;
   categories: CategoryEntity[];
   launchAt: number;
+  metadata?: any;
+
   editionsSize: number;
   editionsAvailable: number;
-  metadata?: any;
+  editionsSold: number;
 
   ipfsHash?: string; // deprecated by metadataIpfs field
   metadataIpfs?: string;

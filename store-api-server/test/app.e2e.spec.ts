@@ -230,6 +230,7 @@ describe('AppController (e2e)', () => {
       price: '0.10',
       editionsSize: 4,
       editionsAvailable: 4,
+      editionsSold: 0,
       categories: [
         { id: 4, name: 'Drawing', description: 'Sub fine art category' },
       ],
@@ -341,6 +342,7 @@ describe('AppController (e2e)', () => {
             price: '0.10',
             editionsSize: 4,
             editionsAvailable: 4,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -370,6 +372,7 @@ describe('AppController (e2e)', () => {
             price: '7.80',
             editionsSize: 2,
             editionsAvailable: 2,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -398,6 +401,7 @@ describe('AppController (e2e)', () => {
             price: '10.40',
             editionsSize: 6,
             editionsAvailable: 6,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -426,6 +430,7 @@ describe('AppController (e2e)', () => {
             price: '4.30',
             editionsSize: 8,
             editionsAvailable: 8,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -455,6 +460,7 @@ describe('AppController (e2e)', () => {
             price: '9.20',
             editionsSize: 8,
             editionsAvailable: 8,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -484,6 +490,7 @@ describe('AppController (e2e)', () => {
             price: '4.10',
             editionsSize: 8,
             editionsAvailable: 8,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -513,6 +520,7 @@ describe('AppController (e2e)', () => {
             price: '3.60',
             editionsSize: 8,
             editionsAvailable: 8,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -541,6 +549,7 @@ describe('AppController (e2e)', () => {
             price: '64.20',
             editionsSize: 8,
             editionsAvailable: 8,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -570,6 +579,7 @@ describe('AppController (e2e)', () => {
             price: '343.20',
             editionsSize: 8,
             editionsAvailable: 8,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -653,6 +663,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
           editionsAvailable: 6,
           editionsSize: 6,
+          editionsSold: 0,
           id: 3,
           ipfsHash: null,
           metadata: null,
@@ -720,6 +731,7 @@ describe('AppController (e2e)', () => {
           price: '0.10',
           editionsSize: 4,
           editionsAvailable: 4,
+          editionsSold: 0,
           categories: [
             {
               description: 'Sub fine art category',
@@ -784,6 +796,7 @@ describe('AppController (e2e)', () => {
             price: '0.10',
             editionsSize: 4,
             editionsAvailable: 4,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -807,6 +820,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             editionsAvailable: 6,
             editionsSize: 6,
+            editionsSold: 0,
             id: 3,
             ipfsHash: null,
             metadata: null,
@@ -938,6 +952,7 @@ describe('AppController (e2e)', () => {
           price: '343.20',
           editionsSize: 8,
           editionsAvailable: 8,
+          editionsSold: 0,
           categories: [
             {
               description: 'Sub fine art category',
@@ -2226,6 +2241,7 @@ describe('AppController (e2e)', () => {
             price: '0.10',
             editionsSize: 4,
             editionsAvailable: 3,
+            editionsSold: 1,
             categories: [
               {
                 id: 4,
@@ -2254,6 +2270,7 @@ describe('AppController (e2e)', () => {
             price: '4.30',
             editionsSize: 8,
             editionsAvailable: 0,
+            editionsSold: 3,
             categories: [
               {
                 id: 4,
@@ -2319,6 +2336,7 @@ describe('AppController (e2e)', () => {
             price: '0.10',
             editionsSize: 4,
             editionsAvailable: 3,
+            editionsSold: 1,
             categories: [
               {
                 id: 4,
@@ -2379,6 +2397,7 @@ describe('AppController (e2e)', () => {
             price: '4.30',
             editionsSize: 8,
             editionsAvailable: 0,
+            editionsSold: 3,
             categories: [
               {
                 id: 4,
@@ -2443,6 +2462,7 @@ describe('AppController (e2e)', () => {
             price: '4.30',
             editionsSize: 8,
             editionsAvailable: 0,
+            editionsSold: 3,
             categories: [
               {
                 id: 4,
@@ -2507,6 +2527,7 @@ describe('AppController (e2e)', () => {
             price: '4.30',
             editionsSize: 8,
             editionsAvailable: 0,
+            editionsSold: 3,
             categories: [
               {
                 id: 4,
@@ -2572,6 +2593,7 @@ describe('AppController (e2e)', () => {
             price: '4.30',
             editionsSize: 8,
             editionsAvailable: 0,
+            editionsSold: 3,
             categories: [
               {
                 id: 4,
@@ -2635,6 +2657,7 @@ describe('AppController (e2e)', () => {
             price: '4.30',
             editionsSize: 8,
             editionsAvailable: 0,
+            editionsSold: 3,
             categories: [
               {
                 id: 4,
@@ -3281,6 +3304,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
           editionsAvailable: 7,
           editionsSize: 8,
+          editionsSold: 0,
           id: 8,
           ipfsHash: null,
           metadataIpfs: null,
@@ -3309,6 +3333,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
           editionsAvailable: 7,
           editionsSize: 8,
+          editionsSold: 0,
           id: 10,
           ipfsHash: null,
           metadata: null,
@@ -3381,6 +3406,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             editionsAvailable: 3,
             editionsSize: 4,
+            editionsSold: 1,
             id: 1,
             ipfsHash: 'ipfs://.....',
             metadata: {
@@ -3415,6 +3441,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             editionsAvailable: 0,
             editionsSize: 8,
+            editionsSold: 3,
             id: 4,
             ipfsHash: 'ipfs://.....',
             metadata: null,
@@ -3455,6 +3482,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
           editionsAvailable: 0,
           editionsSize: 8,
+          editionsSold: 3,
           id: 4,
           ipfsHash: 'ipfs://.....',
           metadataIpfs: 'ipfs://.....',
@@ -3510,6 +3538,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
           editionsAvailable: 7,
           editionsSize: 8,
+          editionsSold: 0,
           id: 8,
           ipfsHash: null,
           metadata: null,
@@ -3539,6 +3568,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
           editionsAvailable: 7,
           editionsSize: 8,
+          editionsSold: 0,
           id: 10,
           ipfsHash: null,
           metadata: null,
@@ -3621,6 +3651,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             editionsAvailable: 3,
             editionsSize: 4,
+            editionsSold: 1,
             id: 1,
             ipfsHash: 'ipfs://.....',
             metadata: {
@@ -3655,6 +3686,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             editionsAvailable: 0,
             editionsSize: 8,
+            editionsSold: 3,
             id: 4,
             ipfsHash: 'ipfs://.....',
             metadata: null,
@@ -3695,6 +3727,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
           editionsAvailable: 0,
           editionsSize: 8,
+          editionsSold: 3,
           id: 4,
           ipfsHash: 'ipfs://.....',
           metadata: null,
@@ -3725,6 +3758,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
           editionsAvailable: 7,
           editionsSize: 8,
+          editionsSold: 0,
           id: 8,
           ipfsHash: null,
           metadata: null,
@@ -3756,6 +3790,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
           editionsAvailable: 7,
           editionsSize: 8,
+          editionsSold: 0,
           id: 10,
           ipfsHash: null,
           metadata: null,

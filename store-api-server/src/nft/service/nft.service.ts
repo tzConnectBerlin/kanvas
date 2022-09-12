@@ -487,6 +487,7 @@ FROM nfts_by_id($1, $2, $3, $4)`,
           metadata: nftRow['metadata'],
           editionsSize: editions,
           editionsAvailable: editions - (reserved + owned),
+          editionsSold: owned,
 
           createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
           launchAt: Math.floor(launchAtMilliUnix / 1000),
