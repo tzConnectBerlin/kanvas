@@ -624,10 +624,6 @@ WHERE nft_order.id = $1
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount: currencyUnitAmount,
       currency: currency,
-      automatic_payment_methods: {
-        enabled: false,
-      },
-      customer: usr.id,
       payment_method_types: STRIPE_PAYMENT_METHODS,
     });
 
