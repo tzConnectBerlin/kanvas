@@ -9,7 +9,7 @@ import {
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Cache } from 'cache-manager';
 import { CACHE_SIZE, BEHIND_PROXY, API_KEY_SECRET } from '../constants.js';
-import { getRealIp } from '../utils.js';
+import { getClientIp } from '../utils.js';
 
 @Injectable()
 export class StatsLogger {
@@ -45,14 +45,14 @@ export class LoggerMiddleware implements NestMiddleware {
     const { ip, method, originalUrl } = request;
     const userAgent = request.get('user-agent') || '';
     const cookieSession = request.session?.uuid.slice(0, 5) || '';
-    const realIp = getRealIp(request);
+    const clientIp = getClientIp(request);
     const timeStart = new Date();
 
     const fields = [
       method,
       originalUrl,
       userAgent,
-      realIp,
+      clientIp,
       `sess:${cookieSession}`,
     ];
 
@@ -63,7 +63,23 @@ export class LoggerMiddleware implements NestMiddleware {
       fields.push('api-key');
     }
 
-    this.logger.log(`>> ${fields.join(' ')}`);
+    let resultDelimiterPushed = false;
+    const pushResultDelimiter = () => {
+      if (!resultDelimiterPushed) {
+        fields.push('=>');
+      }
+      resultDelimiterPushed = true;
+    };
+
+    response.on('error', (err) => {
+      pushResultDelimiter();
+      fields.push(`-err: ${err}-`);
+    });
+
+    response.on('close', () => {
+      pushResultDelimiter();
+      fields.push('-client aborted-');
+    });
 
     response.on('finish', () => {
       const timeEnd: Date = new Date();
@@ -71,7 +87,7 @@ export class LoggerMiddleware implements NestMiddleware {
       const { statusCode } = response;
       const contentLength = response.get('content-length');
 
-      fields.push('=>');
+      pushResultDelimiter();
       fields.push(`${statusCode}`);
       fields.push(contentLength);
       fields.push(duration);
@@ -85,7 +101,7 @@ export class LoggerMiddleware implements NestMiddleware {
           break;
       }
 
-      this.logger.log(`  << ${fields.join(' ')}`);
+      this.logger.log(fields.join(' '));
     });
 
     next();
