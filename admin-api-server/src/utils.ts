@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { AUTH_SALT_ROUNDS } from './constants.js';
+import { AUTH_SALT_ROUNDS, BEHIND_PROXY } from './constants.js';
 
 class AssertionError extends Error {
   constructor(message: string) {
@@ -118,4 +118,9 @@ export function sleep(ms: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+}
+
+export function getClientIp(request: any): string {
+  const { ip } = request;
+  return BEHIND_PROXY ? request.get('X-Forwarded-For') || ip : ip;
 }

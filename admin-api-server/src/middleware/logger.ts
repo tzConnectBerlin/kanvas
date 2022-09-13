@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { BEHIND_PROXY } from '../constants.js';
+import { getClientIp } from '../utils.js';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
@@ -10,19 +11,49 @@ export class LoggerMiddleware implements NestMiddleware {
     const { ip, method, originalUrl } = request;
     const userAgent = request.get('user-agent') || '';
     const cookieSession = (request as any).session?.uuid.slice(0, 5) || '';
-    const realIp = BEHIND_PROXY ? request.get('X-Forwarded-For') || ip : ip;
+    const clientIp = getClientIp(request);
+    const timeStart = new Date();
 
-    this.logger.log(
-      `>> ${method} ${originalUrl} - ${userAgent} ${realIp} sess:${cookieSession}`,
-    );
+    const fields = [
+      method,
+      originalUrl,
+      userAgent,
+      clientIp,
+      `sess:${cookieSession}`,
+      '=>',
+    ];
+
+    let closure = false;
+
+    response.on('error', (err) => {
+      closure = true;
+
+      fields.push(`-err: ${err}-`);
+    });
 
     response.on('finish', () => {
+      closure = true;
+
+      const timeEnd: Date = new Date();
+      const duration = `${timeEnd.getTime() - timeStart.getTime()}ms`;
       const { statusCode } = response;
       const contentLength = response.get('content-length');
 
-      this.logger.log(
-        `  << ${method} ${originalUrl} ${statusCode} ${contentLength} - ${userAgent} ${realIp} sess:${cookieSession}`,
-      );
+      fields.push(`${statusCode}`);
+      fields.push(contentLength);
+      fields.push(duration);
+    });
+
+    response.on('close', () => {
+      if (!closure) {
+        const timeEnd: Date = new Date();
+        const duration = `${timeEnd.getTime() - timeStart.getTime()}ms`;
+
+        fields.push('client-aborted');
+        fields.push(duration);
+      }
+
+      this.logger.log(fields.join(' '));
     });
 
     next();
