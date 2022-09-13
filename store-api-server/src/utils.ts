@@ -91,7 +91,7 @@ export function isBottom(v: any): boolean {
   return v == null;
 }
 
-export function getRealIp(request: any): string {
+export function getClientIp(request: any): string {
   const { ip } = request;
   return BEHIND_PROXY ? request.get('X-Forwarded-For') || ip : ip;
 }

@@ -27,7 +27,7 @@ import { NftEntity } from '../../nft/entity/nft.entity.js';
 import { PaymentProvider } from '../../payment/entity/payment.entity.js';
 
 import type { PaymentIntent } from '../../payment/entity/payment.entity.js';
-import { getRealIp } from '../../utils.js';
+import { getClientIp } from '../../utils.js';
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -99,7 +99,7 @@ export class PaymentController {
       // temporary for backwards compatibility, until frontend has been updated
       paymentProvider = PaymentProvider.TEZPAY;
     }
-    const clientIp = getRealIp(request);
+    const clientIp = getClientIp(request);
 
     try {
       let paymentIntent = await this.paymentService.createPayment(
