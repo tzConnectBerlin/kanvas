@@ -55,39 +55,30 @@ export class LoggerMiddleware implements NestMiddleware {
       clientIp,
       `sess:${cookieSession}`,
     ];
-
     if (
       typeof API_KEY_SECRET === 'string' &&
       request.headers['api-key'] === API_KEY_SECRET
     ) {
       fields.push('api-key');
     }
+    fields.push('=>');
 
-    let resultDelimiterPushed = false;
-    const pushResultDelimiter = () => {
-      if (!resultDelimiterPushed) {
-        fields.push('=>');
-      }
-      resultDelimiterPushed = true;
-    };
+    let closure = false;
 
     response.on('error', (err) => {
-      pushResultDelimiter();
+      closure = true;
+
       fields.push(`-err: ${err}-`);
     });
 
-    response.on('close', () => {
-      pushResultDelimiter();
-      fields.push('-client aborted-');
-    });
-
     response.on('finish', () => {
+      closure = true;
+
       const timeEnd: Date = new Date();
       const duration = `${timeEnd.getTime() - timeStart.getTime()}ms`;
       const { statusCode } = response;
       const contentLength = response.get('content-length');
 
-      pushResultDelimiter();
       fields.push(`${statusCode}`);
       fields.push(contentLength);
       fields.push(duration);
@@ -99,6 +90,16 @@ export class LoggerMiddleware implements NestMiddleware {
         case 'no':
           fields.push('uncached');
           break;
+      }
+    });
+
+    response.on('close', () => {
+      if (!closure) {
+        const timeEnd: Date = new Date();
+        const duration = `${timeEnd.getTime() - timeStart.getTime()}ms`;
+
+        fields.push('client-aborted');
+        fields.push(duration);
       }
 
       this.logger.log(fields.join(' '));
