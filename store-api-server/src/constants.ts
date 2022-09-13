@@ -80,3 +80,6 @@ export const CART_MAX_ITEMS: number = Number(
 // Share this secret with trusted API clients. Clients that provide this
 // secret in their API calls are not rate limited.
 export const API_KEY_SECRET: string | undefined = process.env['API_KEY_SECRET'];
+
+export const STRIPE_SECRET: string | undefined = process.env['STRIPE_SECRET'];
+export const STRIPE_PAYMENT_METHODS: string[] = ['card', 'sepa_debit'];

@@ -19,6 +19,8 @@ import {
   SIMPLEX_PUBLIC_KEY,
   SIMPLEX_WALLET_ID,
   SIMPLEX_ALLOWED_FIAT,
+  STRIPE_PAYMENT_METHODS,
+  STRIPE_SECRET,
 } from '../../constants.js';
 import { UserService } from '../../user/service/user.service.js';
 import { NftService } from '../../nft/service/nft.service.js';
@@ -80,9 +82,7 @@ export interface PaymentIntentInternal {
 
 @Injectable()
 export class PaymentService {
-  stripe = process.env.STRIPE_SECRET
-    ? stripe(process.env.STRIPE_SECRET)
-    : undefined;
+  stripe = STRIPE_SECRET ? stripe(STRIPE_SECRET) : undefined;
 
   FINAL_STATES = [
     PaymentStatus.FAILED,
@@ -342,6 +342,7 @@ WHERE nft_order.id = $1
         return await this.#createTezPaymentIntent(currencyUnitAmount);
       case PaymentProvider.STRIPE:
         return await this.#createStripePaymentIntent(
+          usr,
           currency,
           currencyUnitAmount,
         );
@@ -603,6 +604,7 @@ WHERE nft_order.id = $1
   }
 
   async #createStripePaymentIntent(
+    usr: UserEntity,
     currency: string,
     currencyUnitAmount: number,
   ): Promise<PaymentIntentInternal> {
@@ -622,9 +624,7 @@ WHERE nft_order.id = $1
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount: currencyUnitAmount,
       currency: currency,
-      automatic_payment_methods: {
-        enabled: false,
-      },
+      payment_method_types: STRIPE_PAYMENT_METHODS,
     });
 
     const decimals = SUPPORTED_CURRENCIES[currency];
