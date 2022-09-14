@@ -1,7 +1,7 @@
 import { Logger, Injectable, Inject } from '@nestjs/common';
 import { PG_CONNECTION, MINTER_ADDRESS } from '../../constants.js';
 import { NftEntity } from '../entity/nft.entity.js';
-import { IpfsService } from './ipfs.service.js';
+import { NftIpfsService } from './ipfs.service.js';
 import { Lock } from 'async-await-mutex-lock';
 
 interface Command {
@@ -23,7 +23,7 @@ export class MintService {
 
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
-    private ipfsService: IpfsService,
+    private ipfsService: NftIpfsService,
   ) {
     this.nftLock = new Lock<number>();
   }

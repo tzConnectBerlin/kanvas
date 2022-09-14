@@ -5,7 +5,6 @@ import { NftController } from './nft.controller';
 import { DbMock } from '../../mock/db.module';
 import { CacheMock } from '../../mock/cache.module';
 import { NftService } from '../service/nft.service';
-import { IpfsService } from '../../nft/service/ipfs.service';
 import { NftServiceMock } from '../service/nft_mock.service';
 import { CategoryService } from '../../category/service/category.service';
 import { PaginationParams } from '../params';
@@ -30,7 +29,6 @@ describe('NftController', () => {
         CategoryService,
         mockedRatesProvider,
         CurrencyService,
-        IpfsService,
       ],
       exports: [NftServiceMock],
     }).compile();
