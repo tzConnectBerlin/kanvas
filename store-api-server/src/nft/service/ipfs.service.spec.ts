@@ -20,33 +20,51 @@ describe('NftService', () => {
     expect(service).toBeDefined();
   });
 
-  /*
-  it('', () => {
-    const testcases: { nft: NftEntity; exp: any }[] = [
-      {
-        nft: {
-          id: 1,
-          createdAt: 0,
-          name: 'test',
-          description: 'descr',
-          price: '15.30',
-          categories: [],
-          launchAt: 0,
+  const testcases: { name: string; nft: NftEntity; exp: any }[] = [
+    {
+      name: 'undefined display and thumbnail => we default pointing their ipfs to artifact asset',
+      nft: {
+        artifactUri: 'artifact.jpeg',
+        createdAt: 0,
+        name: 'test',
+        description: 'descr',
+        editionsSize: 1,
+        categories: [],
 
-          editionsSize: 1,
-          editionsAvailable: 1,
-          editionsSold: 0,
-
-          artifactUri: 'artifact.jpeg',
-        },
-        exp: {},
+        id: 1,
+        price: '15.30',
+        launchAt: 0,
+        editionsAvailable: 0,
+        editionsSold: 0,
       },
-    ];
-    for (const tc of testcases) {
-      const got = service.nftMetadataJson(tc.nft, '');
-      console.log(got);
+      exp: {
+        artifactUri: 'ipfs-mock://artifact.jpeg',
+        displayUri: 'ipfs-mock://artifact.jpeg',
+        thumbnailUri: 'ipfs-mock://artifact.jpeg',
+        contributors: [],
+        creators: [],
+        date: '1970-01-01T00:00:00.000Z',
+        decimals: 0,
+        description: 'descr',
+        formats: [
+          {
+            uri: 'ipfs-mock://artifact.jpeg',
+            mimeType: 'image/jpeg',
+          },
+        ],
+        isBooleanAmount: true,
+        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        name: 'test',
+        publishers: ['Tezos'],
+        signature: 'not signed',
+        tags: [],
+      },
+    },
+  ];
+  for (const tc of testcases) {
+    it(tc.name, async () => {
+      const got = await service.nftMetadataJson(tc.nft, 'not signed');
       expect(got).toEqual(tc.exp);
-    }
-  });
-  */
+    });
+  }
 });

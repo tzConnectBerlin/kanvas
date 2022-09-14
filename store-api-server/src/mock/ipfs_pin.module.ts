@@ -3,11 +3,11 @@ import { IPFS_PIN_PROVIDER } from '../constants.js';
 
 class IpfsPinServiceMock {
   async pinUri(uri: string): Promise<string> {
-    return `ipfs://${uri}`;
+    return `ipfs-mock://${uri}`;
   }
 
   async pinJson(jsonData: string): Promise<string> {
-    return `ipfs://${JSON.parse(jsonData).name}`;
+    return `ipfs-mock://${JSON.parse(jsonData).name}`;
   }
 }
 

@@ -85,21 +85,22 @@ WHERE id = $1
 
     let [artifactIpfs, displayIpfs, thumbnailIpfs] = [
       await this.uploader.pinUri(nft.artifactUri),
-      await (nft.displayUri !== nft.artifactUri
+      await (!isBottom(nft.displayUri) && nft.displayUri !== nft.artifactUri
         ? this.uploader.pinUri(nft.displayUri!)
         : undefined),
-      await (nft.thumbnailUri !== nft.displayUri
+      await (!isBottom(nft.thumbnailUri) && nft.thumbnailUri !== nft.displayUri
         ? this.uploader.pinUri(nft.thumbnailUri!)
         : undefined),
     ];
-    displayIpfs = displayIpfs ?? artifactIpfs;
-    thumbnailIpfs = thumbnailIpfs ?? displayIpfs ?? artifactIpfs;
 
     const formats: { uri: string; mimeType: string }[] = [
       [artifactIpfs, nft.artifactUri],
       [displayIpfs, nft.displayUri],
       [thumbnailIpfs, nft.thumbnailUri],
     ].flatMap(([ipfsUri, origAssetUri]) => {
+      if (typeof ipfsUri === 'undefined') {
+        return [];
+      }
       const format = this.#specifyIpfsUriFormat(
         ipfsUri as string, // unfortunately the type checker isn't smart enough
         nft.artifactUri,
@@ -110,6 +111,8 @@ WHERE id = $1
       return [format];
     });
 
+    displayIpfs = displayIpfs ?? artifactIpfs;
+    thumbnailIpfs = thumbnailIpfs ?? displayIpfs;
     return {
       decimals: 0,
 
