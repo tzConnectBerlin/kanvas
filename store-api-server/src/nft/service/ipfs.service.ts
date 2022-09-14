@@ -11,6 +11,11 @@ import axiosRetry from 'axios-retry';
 import { createReadStream, createWriteStream } from 'fs';
 import FormData from 'form-data';
 import * as tmp from 'tmp';
+import { isBottom } from '../../utils.js';
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const mime = require('mime');
 
 axiosRetry(axios, {
   retries: 3,
@@ -58,21 +63,8 @@ WHERE id = $1
       return qryRes.rows[0]['metadata_ipfs'];
     }
 
-    const [artifactIpfs, displayIpfs, thumbnailIpfs] = [
-      await this.#pinUri(nft.artifactUri),
-      await (nft.displayUri !== nft.artifactUri
-        ? this.#pinUri(nft.displayUri!)
-        : undefined),
-      await (nft.thumbnailUri !== nft.displayUri
-        ? this.#pinUri(nft.thumbnailUri!)
-        : undefined),
-    ];
-
-    const metadata = this.#nftMetadataJson(
+    const metadata = await this.#nftMetadataJson(
       nft,
-      artifactIpfs,
-      displayIpfs ?? artifactIpfs,
-      thumbnailIpfs ?? displayIpfs ?? artifactIpfs,
       qryRes.rows[0]['signature'],
     );
     const metadataIpfs = await this.#pinJson(metadata);
@@ -80,9 +72,9 @@ WHERE id = $1
     await this.#updateNftIpfsHashes(
       nft.id,
       metadataIpfs,
-      artifactIpfs,
-      displayIpfs,
-      thumbnailIpfs,
+      metadata.artifactUri,
+      metadata.displayUri,
+      metadata.thumbnailUri,
       dbTx,
     );
     return metadataIpfs;
@@ -109,14 +101,32 @@ WHERE id = $1
     );
   }
 
-  #nftMetadataJson(
-    nft: NftEntity,
-    artifactIpfsUri: string,
-    displayIpfsUri: string,
-    thumbnailIpfsUri: string,
-    signature: string,
-  ): any {
+  async #nftMetadataJson(nft: NftEntity, signature: string): Promise<any> {
     const createdAt = new Date(nft.createdAt * 1000).toISOString();
+
+    let [artifactIpfs, displayIpfs, thumbnailIpfs] = [
+      await this.#pinUri(nft.artifactUri),
+      await (nft.displayUri !== nft.artifactUri
+        ? this.#pinUri(nft.displayUri!)
+        : undefined),
+      await (nft.thumbnailUri !== nft.displayUri
+        ? this.#pinUri(nft.thumbnailUri!)
+        : undefined),
+    ];
+    displayIpfs = displayIpfs ?? artifactIpfs;
+    thumbnailIpfs = thumbnailIpfs ?? displayIpfs ?? artifactIpfs;
+
+    const formats: { uri: string; mimeType: string }[] = [
+      [artifactIpfs, nft.artifactUri],
+      [displayIpfs, nft.displayUri],
+      [thumbnailIpfs, nft.thumbnailUri],
+    ].flatMap(([ipfsUri, origAssetUri]) => {
+      const format = this.#specifyIpfsUriFormat(artifactIpfs, nft.artifactUri);
+      if (typeof format === 'undefined') {
+        return [];
+      }
+      return [format];
+    });
 
     return {
       decimals: 0,
@@ -126,9 +136,10 @@ WHERE id = $1
       date: createdAt,
       tags: nft.categories.map((cat) => cat.name),
 
-      artifactUri: artifactIpfsUri,
-      displayUri: displayIpfsUri,
-      thumbnailUri: thumbnailIpfsUri,
+      artifactUri: artifactIpfs,
+      displayUri: displayIpfs,
+      thumbnailUri: thumbnailIpfs,
+      formats,
 
       minter: MINTER_ADDRESS,
       creators: [], // TODO
@@ -188,6 +199,23 @@ WHERE id = $1
         );
         throw error;
       });
+  }
+
+  #specifyIpfsUriFormat(
+    ipfsUri: string,
+    origAssetUri: string,
+  ): { uri: string; mimeType: string } | undefined {
+    const mimeType = mime.getType(origAssetUri);
+    if (isBottom(mimeType)) {
+      Logger.warn(
+        `failed to determine content type from asset uri, ipfsUri=${ipfsUri}, origAssetUri=${origAssetUri}`,
+      );
+      return undefined;
+    }
+    return {
+      uri: ipfsUri,
+      mimeType,
+    };
   }
 
   #serviceEnabled(): boolean {
