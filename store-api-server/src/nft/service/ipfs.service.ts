@@ -98,13 +98,13 @@ WHERE id = $1
       [displayIpfs, nft.displayUri],
       [thumbnailIpfs, nft.thumbnailUri],
     ].flatMap(([ipfsUri, origAssetUri]) => {
-      if (typeof ipfsUri === 'undefined') {
+      if (
+        typeof ipfsUri === 'undefined' ||
+        typeof origAssetUri === 'undefined'
+      ) {
         return [];
       }
-      const format = this.#specifyIpfsUriFormat(
-        ipfsUri as string, // unfortunately the type checker isn't smart enough
-        nft.artifactUri,
-      );
+      const format = this.#specifyIpfsUriFormat(ipfsUri, origAssetUri);
       if (typeof format === 'undefined') {
         return [];
       }
