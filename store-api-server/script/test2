@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+
+set -e
+
+set -a
+. .env.test
+set +a
+export NODE_URL=http://localhost:$FLEXTESA_RPC_PORT
+
+tz=`
+docker run \
+    --name ${DOCKER_NAME:-local-tezos} \
+    --detach \
+    --rm \
+    -p $FLEXTESA_RPC_PORT:20000 \
+    -e block_time=3 \
+    oxheadalpha/flextesa:20220127 \
+    hangzbox start`
+TRAP="docker kill $tz"; trap "$TRAP" EXIT
+
+pg=`DBSETUP_LOG=quiet DOCKER_ARGS='-d' ./script/local-db 2>/dev/null`
+TRAP="$TRAP; docker kill $pg"; trap "$TRAP" EXIT
+
+tzInfo=`docker exec local-tezos hangzbox info 2>&1`
+aliceInfo=`echo "$tzInfo" | grep '* ' | head -n 3 | awk '{print $2}'`
+
+export ADMIN_PUBLIC_KEY=`echo "$aliceInfo" | sed '1q;d'`
+export MINTER_TZ_ADDRESS=`echo "$aliceInfo" | sed '2q;d'`
+export ADMIN_PRIVATE_KEY=`echo "$aliceInfo" | sed '3q;d' | awk -F':' '{print $2}'`
+
+echo -n "setting up a private tezos network"
+while ! http --quiet :$FLEXTESA_RPC_PORT/chains/main/blocks/head 2>/dev/null; do
+    echo -n '.'
+    sleep 1
+done
+echo
+
+function tz-cli() {
+    docker exec local-tezos tezos-client --endpoint http://localhost:20000 "$@"
+}
+
+tz-cli config reset || exit 1
+tz-cli bootstrapped || exit 1
+tz-cli config update || exit 1
+
+echo -n "waiting for true bootstrap"
+while ! tz-cli man | grep --quiet originate; do
+    echo -n "."
+    sleep 1
+done
+echo
+
+tmpdir=`basename $(mktemp -d -u)`
+mkdir "$tmpdir"
+TRAP="$TRAP; rm -rf $tmpdir"; trap "$TRAP" EXIT
+mintery="$tmpdir/mintery"
+git clone https://github.com/tzConnectBerlin/mintery.git "$tmpdir/mintery" >/dev/null 2>&1
+{
+    cd "$tmpdir/mintery"
+    git checkout allow-custom-dockerargs >/dev/null
+
+    echo "
+ORIGINATOR_ADDRESS=$MINTER_TZ_ADDRESS
+ORIGINATOR_PUB_KEY=$ADMIN_PUBLIC_KEY
+ORIGINATOR_PRIV_KEY=$ADMIN_PRIVATE_KEY
+" > env
+
+    echo 'deploying the paypoint contract onto the private tezos network..'
+    CONTRACT=paypoint PAYPOINT_RECEIVER_ADDRESS=$MINTER_TZ_ADDRESS BURN_CAP=0.104 DOCKER_ARGS='--network=host' ./script/deploy-contract >/dev/null 2>&1
+    export TEZPAY_PAYPOINT_ADDRESS=`cat env | grep CONTRACT_ADDRESS | awk -F'=' '{print $2}' | sed 's/"//g'`
+
+    echo 'deploying the FA2 contract onto the private tezos network..'
+    CONTRACT=fa2 BURN_CAP=0.87725 DOCKER_ARGS='--network=host' ./script/deploy-contract >/dev/null 2>&1
+    export KANVAS_CONTRACT=`cat env | grep CONTRACT_ADDRESS | awk -F'=' '{print $2}' | sed 's/"//g'`
+}
+echo "$TEZPAY_PAYPOINT_ADDRESS,$KANVAS_CONTRACT"
+
+qp=`
+docker run \
+    -e DATABASE_URL=postgres://$PGUSER:$PGPASSWORD@localhost:$PGPORT/$PGDATABASE \
+    -e NODE_URL=$NODE_URL \
+    --network=host \
+    --detach \
+    ghcr.io/tzconnectberlin/que-pasa:1.2.6 \
+    --contracts onchain_kanvas=$KANVAS_CONTRACT \
+    --contracts paypoint=$TEZPAY_PAYPOINT_ADDRESS \
+    --allowed-unbootstrapped-offset 0s`
+TRAP="$TRAP; docker kill $qp"; trap "$TRAP" EXIT
+
+sleep 5
