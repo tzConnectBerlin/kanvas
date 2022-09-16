@@ -97,6 +97,9 @@ SELECT $1, UNNEST($2::INTEGER[])
           await this.ipfsService.uploadNft(nftEntity, dbTx);
           return;
         } catch (err: any) {
+          throw `failed to upload new nft to IPFS (attempt ${
+            i + 1
+          }/${MAX_ATTEMPTS}), err: ${err}`;
           Logger.warn(
             `failed to upload new nft to IPFS (attempt ${
               i + 1

@@ -3,6 +3,9 @@ import { assertEnv } from './utils.js';
 export const PG_CONNECTION = 'PG_CONNECTION';
 export const IPFS_PIN_PROVIDER = 'IPFS_PIN_PROVIDER';
 
+export const MOCK_IPFS_PINNING: boolean =
+  (process.env['MOCK_IPFS_PINNING'] || 'no') === 'yes';
+
 // source: https://www.postgresql.org/docs/current/errcodes-appendix.html
 export const PG_FOREIGN_KEY_VIOLATION_ERRCODE = '23503';
 export const PG_UNIQUE_VIOLATION_ERRCODE = '23505';

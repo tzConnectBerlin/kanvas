@@ -18,7 +18,7 @@ const mime = require('mime');
 export class NftIpfsService {
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
-    @Inject(IPFS_PIN_PROVIDER) private uploader: PinataService,
+    @Inject(IPFS_PIN_PROVIDER) private uploader: any,
   ) {}
 
   async uploadNft(

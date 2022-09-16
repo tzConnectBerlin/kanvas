@@ -6,8 +6,13 @@ class IpfsPinServiceMock {
     return `ipfs-mock://${uri}`;
   }
 
-  async pinJson(jsonData: string): Promise<string> {
-    return `ipfs-mock://${JSON.parse(jsonData).name}`;
+  async pinJson(jsonData: any): Promise<string> {
+    // This mock module assumes pinJson is only called for pinning NFT metadata
+    return `ipfs-mock://${jsonData.name}`;
+  }
+
+  enabled(): boolean {
+    return true;
   }
 }
 
