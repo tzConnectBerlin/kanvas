@@ -9,6 +9,11 @@ set -a
 set +a
 export NODE_URL=http://localhost:$FLEXTESA_RPC_PORT
 
+function cleanup_docker_container {
+    echo "stopping $2 docker container, id: ${1:0:12}"
+    docker kill $1 >/dev/null || return 0
+}
+
 
 tz=`
 docker run \
@@ -19,10 +24,10 @@ docker run \
     -e block_time=3 \
     oxheadalpha/flextesa:20220127 \
     hangzbox start`
-TRAP="docker kill $tz"; trap "$TRAP" EXIT
+TRAP="cleanup_docker_container $tz local-tezos"; trap "$TRAP" EXIT
 
 pg=`DBSETUP_LOG=quiet DOCKER_ARGS='-d' ./script/local-db 2>/dev/null`
-TRAP="$TRAP; docker kill $pg"; trap "$TRAP" EXIT
+TRAP="$TRAP; cleanup_docker_container $pg testdb"; trap "$TRAP" EXIT
 
 
 sig_err_file=`mktemp`
@@ -55,7 +60,7 @@ export MINTER_TZ_ADDRESS=`echo "$aliceInfo" | sed '2q;d'`
 export ADMIN_PRIVATE_KEY=`echo "$aliceInfo" | sed '3q;d' | awk -F':' '{print $2}'`
 
 bobInfo=`echo "$tzInfo" | grep '* ' | tail -n 3 | awk '{print $2}'`
-export BOB_TZ_ADDRESS=`echo "$bobInfo" | sed '2q;d'`
+export TESTING_BOB_TZ=`echo "$bobInfo" | sed '2q;d'`
 
 echo -n "setting up a private tezos network"
 while ! http --quiet :$FLEXTESA_RPC_PORT/chains/main/blocks/head 2>/dev/null; do
@@ -115,7 +120,7 @@ docker run \
     --contracts onchain_kanvas=$KANVAS_CONTRACT \
     --contracts paypoint=$TEZPAY_PAYPOINT_ADDRESS \
     --allowed-unbootstrapped-offset 0s`
-TRAP="docker kill $qp; $TRAP"; trap "$TRAP" EXIT
+TRAP="cleanup_docker_container $qp que-pasa; $TRAP"; trap "$TRAP" EXIT
 
 mkdir "$tmpdir"/config
 cat <<EOF > $tmpdir/config/peppermint.json
@@ -150,7 +155,7 @@ docker run \
     --mount type=bind,source="$PWD/$tmpdir"/config/peppermint.json,target=/build/config.json \
     ghcr.io/tzconnectberlin/peppermint:1.2
 `
-TRAP="docker kill $pm; $TRAP"; trap "$TRAP" EXIT
+TRAP="cleanup_docker_container $pm peppermint; $TRAP"; trap "$TRAP" EXIT
 
 wait
 [ -f $sig_err_file ] && {

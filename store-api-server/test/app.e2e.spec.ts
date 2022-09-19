@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { RATE_LIMIT, CART_MAX_ITEMS } from '../src/constants';
+import { RATE_LIMIT, CART_MAX_ITEMS, KANVAS_CONTRACT } from '../src/constants';
 import {
   SIGNATURE_PREFIX_CREATE_NFT,
   SIGNATURE_PREFIX_DELIST_NFT,
@@ -24,6 +24,7 @@ import { assertEnv, sleep } from '../src/utils';
 import sotez from 'sotez';
 import { v4 as uuidv4 } from 'uuid';
 import Pool from 'pg-pool';
+import { runOnchainEnabledTests } from './onchain_enabled';
 const { cryptoUtils } = sotez;
 
 let anyTestFailed = false;
@@ -42,8 +43,6 @@ const skipOnPriorFail = (name: string, action: any) => {
     }
   });
 };
-
-const TZ_ADDR: string = process.env['BOB_TZ_ADDRESS'] ?? 'addr';
 
 describe('AppController (e2e)', () => {
   let app: any;
@@ -67,7 +66,7 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
-  skipOnPriorFail('should be defined', () => expect(app).toBeDefined());
+  it('should be defined', () => expect(app).toBeDefined());
 
   it(`/ (GET) => NOT FOUND (make sure the nestjs's Hello World page is gone)`, () => {
     return request(app.getHttpServer()).get('/').expect(404);
@@ -82,9 +81,11 @@ describe('AppController (e2e)', () => {
       cartMaxItems: 10,
       supportedCurrencies: ['USD', 'GBP', 'EUR', 'XTZ'],
       tezosNetwork: 'testnet',
-      kanvasContract: process.env['KANVAS_CONTRACT'],
+      kanvasContract: KANVAS_CONTRACT,
     });
   });
+
+  runOnchainEnabledTests(() => app);
 
   // Note:
   // - these tests expect responses related to a database that has been filled
@@ -261,7 +262,7 @@ describe('AppController (e2e)', () => {
     async () => {
       const res = await request(app.getHttpServer())
         .get('/nfts')
-        .query({ userAddress: TZ_ADDR });
+        .query({ userAddress: 'addr' });
       expect(res.statusCode).toEqual(200);
 
       expect(res.body).toStrictEqual({
@@ -602,7 +603,7 @@ describe('AppController (e2e)', () => {
     async () => {
       const res = await request(app.getHttpServer())
         .get('/nfts')
-        .query({ categories: '4,6', userAddress: TZ_ADDR });
+        .query({ categories: '4,6', userAddress: 'addr' });
       expect(res.statusCode).toEqual(200);
 
       for (const i in res.body.nfts) {
@@ -1060,15 +1061,10 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     '/auth/login trying to log in for existing account addr with bad pass => BAD REQUEST',
     async () => {
-      const res = await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({ userAddress: TZ_ADDR, signedPayload: 'admin' });
-      expect(res.statusCode).toEqual(201);
-
       const login = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
-          userAddress: TZ_ADDR,
+          userAddress: 'addr',
           signedPayload: 'bad password',
         });
       expect(login.statusCode).toEqual(401);
@@ -1110,7 +1106,7 @@ describe('AppController (e2e)', () => {
     async () => {
       const res = await request(app.getHttpServer())
         .get('/users/profile')
-        .query({ userAddress: TZ_ADDR });
+        .query({ userAddress: 'addr' });
       expect(res.statusCode).toEqual(200);
 
       // cannot test this accurately because currently the testdb is populated
@@ -1129,8 +1125,8 @@ describe('AppController (e2e)', () => {
         },
         pendingOwnership: [],
         user: {
-          id: 5,
-          userAddress: TZ_ADDR,
+          id: 1,
+          userAddress: 'addr',
           profilePicture: null,
         },
       });
@@ -1140,7 +1136,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     '/users/profile: no userAddress provided and logged in => OK, return profile of logged in user',
     async () => {
-      const { bearer } = await loginUser(app, TZ_ADDR, 'admin');
+      const { bearer } = await loginUser(app, 'addr', 'admin');
 
       const res = await request(app.getHttpServer())
         .get('/users/profile')
@@ -1163,8 +1159,8 @@ describe('AppController (e2e)', () => {
         },
         pendingOwnership: [],
         user: {
-          id: 5,
-          userAddress: TZ_ADDR,
+          id: 1,
+          userAddress: 'addr',
           profilePicture: null,
         },
       });
@@ -1174,7 +1170,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     '/users/profile: userAddress provided and logged in => OK, return profile of provided userAddress',
     async () => {
-      const { bearer } = await loginUser(app, TZ_ADDR, 'admin');
+      const { bearer } = await loginUser(app, 'addr', 'admin');
 
       const res = await request(app.getHttpServer())
         .get('/users/profile')
@@ -1363,7 +1359,7 @@ describe('AppController (e2e)', () => {
       expect(idList).toEqual([4, 12]);
 
       // now login. this should takeover the cart session of the cookie
-      const { bearer } = await loginUser(app, TZ_ADDR, 'admin');
+      const { bearer } = await loginUser(app, 'addr', 'admin');
       const listLoggedIn = await request(app.getHttpServer())
         .get('/users/cart/list')
         .set('cookie', cookie)
@@ -1409,7 +1405,7 @@ describe('AppController (e2e)', () => {
       expect(idList).toEqual([]);
 
       // now logging back in, gives back the session we had
-      const newBearer = await loginUser(app, TZ_ADDR, 'admin');
+      const newBearer = await loginUser(app, 'addr', 'admin');
       list = await request(app.getHttpServer())
         .get('/users/cart/list')
         .set('cookie', newCookie)
@@ -1430,7 +1426,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     '/users/cart (empty cookie based into login does *not* take over user session)',
     async () => {
-      const { bearer } = await loginUser(app, TZ_ADDR, 'admin');
+      const { bearer } = await loginUser(app, 'addr', 'admin');
 
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
@@ -1459,7 +1455,7 @@ describe('AppController (e2e)', () => {
 
       // now logging back in, gives back the session we had,
       // because the newCookie cart is empty
-      const newBearer = await loginUser(app, TZ_ADDR, 'admin');
+      const newBearer = await loginUser(app, 'addr', 'admin');
       const list = await request(app.getHttpServer())
         .get('/users/cart/list')
         .set('cookie', cookie)
@@ -1480,7 +1476,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     '/users/cart (non-empty cookie based into login does take over user session)',
     async () => {
-      const { bearer } = await loginUser(app, TZ_ADDR, 'admin');
+      const { bearer } = await loginUser(app, 'addr', 'admin');
 
       const add1 = await request(app.getHttpServer())
         .post('/users/cart/add/4')
@@ -1504,7 +1500,7 @@ describe('AppController (e2e)', () => {
       expect(add2.statusCode).toEqual(201);
 
       // now logging back in, user session is replaced with newCookie session
-      const newBearer = await loginUser(app, TZ_ADDR, 'admin');
+      const newBearer = await loginUser(app, 'addr', 'admin');
       const list = await request(app.getHttpServer())
         .get('/users/cart/list')
         .set('cookie', cookie)
@@ -1570,7 +1566,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'stripe payment: Payment status should change to succeeded if payment is successfull',
     async () => {
-      const { bearer, id, address } = await loginUser(app, TZ_ADDR, 'admin');
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
       const usr = <UserEntity>{ userAddress: address, id: id };
 
       expect(await getLockedCount(1)).toEqual(0);
@@ -1631,7 +1627,7 @@ describe('AppController (e2e)', () => {
 
       // Check NFT ownership transfer
       const userNfts = await request(app.getHttpServer()).get(`/nfts`).query({
-        userAddress: TZ_ADDR,
+        userAddress: 'addr',
         orderDirection: 'asc',
         orderBy: 'id',
         page: 1,
@@ -1650,7 +1646,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'stripe payment: Payment status should change to cancel if payment is canceled, nft should not be transferred',
     async () => {
-      const { bearer, id, address } = await loginUser(app, TZ_ADDR, 'admin');
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
       const usr = <UserEntity>{ userAddress: address, id: id };
 
       expect(await getLockedCount(2)).toEqual(0);
@@ -1716,7 +1712,7 @@ describe('AppController (e2e)', () => {
         // Check that NFT has not been transfered
         .get(`/nfts`)
         .query({
-          userAddress: TZ_ADDR,
+          userAddress: 'addr',
           orderDirection: 'asc',
           orderBy: 'id',
           page: 1,
@@ -1746,7 +1742,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'stripe payment: Payment status should change to failed if payment has failed, nft should not be transferred',
     async () => {
-      const { bearer, id, address } = await loginUser(app, TZ_ADDR, 'admin');
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
       const usr = <UserEntity>{ userAddress: address, id: id };
 
       const add1 = await request(app.getHttpServer())
@@ -1799,7 +1795,7 @@ describe('AppController (e2e)', () => {
         // Check that NFT has not been transfered
         .get(`/nfts`)
         .query({
-          userAddress: TZ_ADDR,
+          userAddress: 'addr',
           orderDirection: 'asc',
           orderBy: 'id',
           page: 1,
@@ -1826,7 +1822,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'stripe payment: Payment status should change to timeout if payment has expired, and in CREATED OR PROMISED state',
     async () => {
-      const { bearer, id, address } = await loginUser(app, TZ_ADDR, 'admin');
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
       const usr = <UserEntity>{ userAddress: address, id: id };
 
       const add1 = await request(app.getHttpServer())
@@ -2007,7 +2003,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'double create-payment-intent for same provider in quick succession => only 1 ends in non-cancelled state',
     async () => {
-      const { bearer, id, address } = await loginUser(app, TZ_ADDR, 'admin');
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
       const usr = <UserEntity>{ userAddress: address, id: id };
 
       const add1 = await request(app.getHttpServer())
@@ -2079,7 +2075,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'stripe payment: Payment status should not change from FAILED',
     async () => {
-      const { bearer, id, address } = await loginUser(app, TZ_ADDR, 'admin');
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
       const usr = <UserEntity>{ userAddress: address, id: id };
 
       const add1 = await request(app.getHttpServer())
@@ -2142,7 +2138,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'stripe payment: Payment status should not change from SUCCEEDED',
     async () => {
-      const { bearer, id, address } = await loginUser(app, TZ_ADDR, 'admin');
+      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
       const usr = <UserEntity>{ userAddress: address, id: id };
 
       const add1 = await request(app.getHttpServer())
@@ -2204,7 +2200,7 @@ describe('AppController (e2e)', () => {
     async () => {
       const res = await request(app.getHttpServer())
         .get('/nfts')
-        .query({ userAddress: TZ_ADDR });
+        .query({ userAddress: 'addr' });
       expect(res.statusCode).toEqual(200);
 
       for (const i in res.body.nfts) {
@@ -2299,7 +2295,7 @@ describe('AppController (e2e)', () => {
     async () => {
       const res = await request(app.getHttpServer())
         .get('/nfts')
-        .query({ userAddress: TZ_ADDR, pageSize: '1' });
+        .query({ userAddress: 'addr', pageSize: '1' });
       expect(res.statusCode).toEqual(200);
 
       for (const i in res.body.nfts) {
@@ -2365,7 +2361,7 @@ describe('AppController (e2e)', () => {
     async () => {
       const res = await request(app.getHttpServer())
         .get('/nfts')
-        .query({ userAddress: TZ_ADDR, pageSize: '1', page: '2' });
+        .query({ userAddress: 'addr', pageSize: '1', page: '2' });
       expect(res.statusCode).toEqual(200);
 
       for (const i in res.body.nfts) {
@@ -2425,7 +2421,7 @@ describe('AppController (e2e)', () => {
     '/nfts with address filter (OK when >0 nfts owned, with pagination, page 2, with sort by name ascending)',
     async () => {
       const res = await request(app.getHttpServer()).get('/nfts').query({
-        userAddress: TZ_ADDR,
+        userAddress: 'addr',
         pageSize: '1',
         page: '2',
         orderBy: 'name',
@@ -2490,7 +2486,7 @@ describe('AppController (e2e)', () => {
     '/nfts with address filter (OK when >0 nfts owned, with pagination, page 1, with sort by name descending)',
     async () => {
       const res = await request(app.getHttpServer()).get('/nfts').query({
-        userAddress: TZ_ADDR,
+        userAddress: 'addr',
         pageSize: '1',
         page: '1',
         orderBy: 'name',
@@ -2555,7 +2551,7 @@ describe('AppController (e2e)', () => {
     '/nfts with address filter (OK when >0 nfts owned, with pagination, page 2, with sort by price ascending)',
     async () => {
       const res = await request(app.getHttpServer()).get('/nfts').query({
-        userAddress: TZ_ADDR,
+        userAddress: 'addr',
         pageSize: '1',
         page: '2',
         orderBy: 'price',
@@ -2620,7 +2616,7 @@ describe('AppController (e2e)', () => {
     '/nfts with address filter (OK when >0 nfts owned, with pagination, page 1, with sort by price descending)',
     async () => {
       const res = await request(app.getHttpServer()).get('/nfts').query({
-        userAddress: TZ_ADDR,
+        userAddress: 'addr',
         pageSize: '1',
         page: '1',
         orderBy: 'price',
@@ -2691,7 +2687,7 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail('/users/nftOwnership', async () => {
-    const { bearer } = await loginUser(app, TZ_ADDR, 'admin');
+    const { bearer } = await loginUser(app, 'addr', 'admin');
 
     const res = await request(app.getHttpServer())
       .get('/users/nftOwnershipsPending')
@@ -2713,8 +2709,8 @@ describe('AppController (e2e)', () => {
     expect(res.body).toStrictEqual({
       topBuyers: [
         {
-          userId: 5,
-          userAddress: TZ_ADDR,
+          userId: 1,
+          userAddress: 'addr',
           userPicture: null,
           totalPaid: '13.00',
         },
@@ -2725,7 +2721,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     '/users/profile/edit: not changing the profile picture => BAD REQUEST',
     async () => {
-      const { bearer } = await loginUser(app, TZ_ADDR, 'admin');
+      const { bearer } = await loginUser(app, 'addr', 'admin');
 
       const res = await request(app.getHttpServer())
         .post('/users/profile/edit')
@@ -3065,8 +3061,8 @@ describe('AppController (e2e)', () => {
     expect(topBuyersResBefore.body).toStrictEqual({
       topBuyers: [
         {
-          userId: 5,
-          userAddress: TZ_ADDR,
+          userId: 1,
+          userAddress: 'addr',
           userPicture: null,
           totalPaid: '13.00',
         },
@@ -3076,7 +3072,7 @@ describe('AppController (e2e)', () => {
     const ownedNftsBefore = await request(app.getHttpServer())
       .get('/nfts')
       .query({
-        userAddress: TZ_ADDR,
+        userAddress: 'addr',
         page: '1',
         orderBy: 'id',
       });
@@ -3112,8 +3108,8 @@ describe('AppController (e2e)', () => {
     expect(topBuyersResAfter.body).toStrictEqual({
       topBuyers: [
         {
-          userId: 5,
-          userAddress: TZ_ADDR,
+          userId: 1,
+          userAddress: 'addr',
           userPicture: null,
           totalPaid: '12.90',
         },
@@ -3124,7 +3120,7 @@ describe('AppController (e2e)', () => {
     const ownedNftsAfter = await request(app.getHttpServer())
       .get('/nfts')
       .query({
-        userAddress: TZ_ADDR,
+        userAddress: 'addr',
         page: '1',
         orderBy: 'id',
       });
@@ -3169,8 +3165,8 @@ describe('AppController (e2e)', () => {
     expect(topBuyersResAfter.body).toStrictEqual({
       topBuyers: [
         {
-          userId: 5,
-          userAddress: TZ_ADDR,
+          userId: 1,
+          userAddress: 'addr',
           userPicture: null,
           totalPaid: '13.00',
         },
@@ -3181,7 +3177,7 @@ describe('AppController (e2e)', () => {
     const ownedNftsAfter = await request(app.getHttpServer())
       .get('/nfts')
       .query({
-        userAddress: TZ_ADDR,
+        userAddress: 'addr',
         page: '1',
         orderBy: 'id',
       });
@@ -3246,7 +3242,7 @@ describe('AppController (e2e)', () => {
   });
 
   skipOnPriorFail('/users/profile: shows promised payment nfts', async () => {
-    const { bearer, id, address } = await loginUser(app, TZ_ADDR, 'admin');
+    const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
 
     const add8Res = await request(app.getHttpServer())
       .post('/users/cart/add/8')
@@ -3376,21 +3372,6 @@ describe('AppController (e2e)', () => {
         );
         delete resBefore.body.collection.nfts[i].onsaleUntil;
       }
-
-      for (const j in resBefore.body.collection.nfts[i].ownershipInfo) {
-        if (
-          resBefore.body.collection.nfts[i].ownershipInfo[j].status === 'owned'
-        ) {
-          if (
-            typeof resBefore.body.collections.nfts[i].mintOperationHash !==
-            'undefined'
-          ) {
-            delete resBefore.body.collections.nfts[i].mintOperationHash;
-          }
-          delete resBefore.body.collection.nfts[i].ownershipInfo[j]
-            .receivalOperationHash;
-        }
-      }
     }
     for (const i in resBefore.body.pendingOwnership) {
       expect(resBefore.body.pendingOwnership[i].createdAt).toBeGreaterThan(0);
@@ -3473,9 +3454,9 @@ describe('AppController (e2e)', () => {
             displayIpfs: null,
             thumbnailIpfs: '4-thumbnail-ipfs-hash',
             name: 'The cat & the city',
-            ownerStatuses: ['owned', 'pending', 'pending'],
+            ownerStatuses: ['pending', 'pending', 'pending'],
             ownershipInfo: [
-              { status: 'owned' },
+              { status: 'pending' },
               { status: 'pending' },
               { status: 'pending' },
             ],
@@ -3522,8 +3503,8 @@ describe('AppController (e2e)', () => {
         },
       ], // nothing new yet (just what was already in processing state from a previous test
       user: {
-        id: 5,
-        userAddress: TZ_ADDR,
+        id: 1,
+        userAddress: 'addr',
         profilePicture: null,
       },
     });
@@ -3830,8 +3811,8 @@ describe('AppController (e2e)', () => {
         },
       ],
       user: {
-        id: 5,
-        userAddress: TZ_ADDR,
+        id: 1,
+        userAddress: 'addr',
         profilePicture: null,
       },
     });
@@ -3839,7 +3820,7 @@ describe('AppController (e2e)', () => {
     // and finally, only logged in user sees their own pending nfts
     const resAfterOtherUser = await request(app.getHttpServer())
       .get('/users/profile')
-      .query({ userAddress: TZ_ADDR });
+      .query({ userAddress: 'addr' });
     expect(resAfterOtherUser.body.pendingOwnership).toEqual([]);
   });
 });
