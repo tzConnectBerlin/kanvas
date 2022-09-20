@@ -52,11 +52,11 @@ values
 update nft
 set onsale_from = now() AT TIME ZONE 'UTC' + interval '1 hour',
     description = 'its a mountain'
-where id = 3;
+where id = (select min(id) from nft) + 2;
 
 update nft
 set onsale_until = now() AT TIME ZONE 'UTC' + interval '1 hour'
-where id = 1;
+where id = (select min(id) from nft);
 
 update nft
 set artifact_ipfs = concat(id::text, '-artifact-ipfs-hash'),
@@ -95,47 +95,47 @@ insert into mtm_nft_category (
   nft_category_id, nft_id
 )
 values
-  (4, 1),
-  (4, 2),
-  (4, 3),
-  (4, 4),
-  (5, 5),
-  (5, 6),
-  (5, 7),
-  (5, 8),
-  (5, 9),
-  (6, 10),
-  (6, 11),
-  (6, 12),
-  (6, 13),
-  (6, 14),
-  (7, 15),
-  (7, 16),
-  (7, 17),
-  (7, 18),
-  (9, 19),
-  (9, 20),
-  (9, 21),
-  (9, 22),
-  (9, 23),
-  (9, 24),
-  (10, 25),
-  (10, 26),
-  (10, 27),
-  (10, 28),
-  (11, 29),
-  (11, 30),
-  (11, 31),
-  (13, 28),
-  (13, 32),
-  (14, 27),
-  (15, 23),
-  (16, 20),
-  (16, 22),
-  (3, 33),
-  (3, 34);
+  (4, (select min(id) from nft) + 0),
+  (4, (select min(id) from nft) + 1),
+  (4, (select min(id) from nft) + 2),
+  (4, (select min(id) from nft) + 3),
+  (5, (select min(id) from nft) + 4),
+  (5, (select min(id) from nft) + 5),
+  (5, (select min(id) from nft) + 6),
+  (5, (select min(id) from nft) + 7),
+  (5, (select min(id) from nft) + 8),
+  (6, (select min(id) from nft) + 9),
+  (6, (select min(id) from nft) + 10),
+  (6, (select min(id) from nft) + 11),
+  (6, (select min(id) from nft) + 12),
+  (6, (select min(id) from nft) + 13),
+  (7, (select min(id) from nft) + 14),
+  (7, (select min(id) from nft) + 15),
+  (7, (select min(id) from nft) + 16),
+  (7, (select min(id) from nft) + 17),
+  (9, (select min(id) from nft) + 18),
+  (9, (select min(id) from nft) + 19),
+  (9, (select min(id) from nft) + 20),
+  (9, (select min(id) from nft) + 21),
+  (9, (select min(id) from nft) + 22),
+  (9, (select min(id) from nft) + 23),
+  (10, (select min(id) from nft) + 24),
+  (10, (select min(id) from nft) + 25),
+  (10, (select min(id) from nft) + 26),
+  (10, (select min(id) from nft) + 27),
+  (11, (select min(id) from nft) + 28),
+  (11, (select min(id) from nft) + 29),
+  (11, (select min(id) from nft) + 30),
+  (13, (select min(id) from nft) + 27),
+  (13, (select min(id) from nft) + 31),
+  (14, (select min(id) from nft) + 26),
+  (15, (select min(id) from nft) + 22),
+  (16, (select min(id) from nft) + 19),
+  (16, (select min(id) from nft) + 21),
+  (3, (select min(id) from nft) + 32),
+  (3, (select min(id) from nft) + 33);
 
-update nft set metadata = '{"test": {"nested": 10}}' where id = 1;
+update nft set metadata = '{"test": {"nested": 10}}' where id = (select min(id) from nft);
 update nft_category set metadata = '{"test": {"nested": true}}' where id = 1;
 
 commit;

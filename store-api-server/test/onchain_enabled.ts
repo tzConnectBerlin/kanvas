@@ -1,45 +1,32 @@
 import request from 'supertest';
 import Pool from 'pg-pool';
-import { cryptoUtils } from 'sotez';
+import sotez from 'sotez';
+const { cryptoUtils } = sotez;
 import { readFileSync } from 'fs';
 
 import { assertEnv, sleep } from '../src/utils';
 
-const bob_tz = process.env['TESTING_BOB_TZ'];
-
 export async function runOnchainEnabledTests(appReference: () => any) {
   let app: any;
+  let nftIds: number[];
 
   describe('clean e2e test cases (db is reset between each test)', () => {
     beforeEach(async () => {
       app = appReference();
-      await resetDb();
-
-      const res = await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({ userAddress: bob_tz, signedPayload: 'verysecret' });
-      expect(res.statusCode).toEqual(201);
+      nftIds = await resetDb();
     });
     afterAll(async () => {
       app = appReference();
-      await resetDb();
+      await resetDb(true);
     });
 
     it('test', async () => {
-      const wallet1 = await genTzAddr();
-      console.log(wallet1);
-      const login = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          userAddress: 'addr',
-          signedPayload: 'bad password',
-        });
-      expect(login.statusCode).toEqual(401);
+      const wallet1 = await newWallet(app);
     });
   });
 }
 
-async function resetDb() {
+async function resetDb(resetForLegacyTest = false): Promise<number[]> {
   const db = newDbConn();
 
   const tables = [
@@ -70,6 +57,15 @@ WHERE S.relkind = 'S'
     AND D.refobjsubid = C.attnum
     AND T.relname = PGT.tablename
     AND PGT.schemaname = 'public'
+    ${
+      !resetForLegacyTest
+        ? // need to increment nft ids, hence exclusion of nft table below.
+          // because: if we don't increment nft ids, next tests will depend on
+          // previous tests' onchain side effects due to minted nfts having the
+          // same token id as the nft id
+          "AND PGT.tablename != 'nft'"
+        : ''
+    }
 ORDER BY S.relname;
     `,
   );
@@ -81,23 +77,58 @@ ORDER BY S.relname;
     readFileSync('script/populate-testdb.sql', { encoding: 'utf8' }),
   );
 
+  const nftIds = (await db.query(`SELECT id FROM nft`)).rows.map(
+    (row: any) => row['id'],
+  );
+
   await db.end();
+
+  return nftIds;
 }
 
-async function genTzAddr() {
+interface Wallet {
+  sk: string;
+  pk: string;
+  pkh: string;
+  esk: string;
+  mnemonic: string;
+  login: KanvasLogin;
+}
+
+interface KanvasLogin {
+  id: number;
+  bearer: string;
+}
+
+async function newWallet(app: any): Promise<Wallet> {
   const mnemonic = cryptoUtils.generateMnemonic();
   const keys = await cryptoUtils.generateKeys(mnemonic, 'bip39_seed_password');
-  // {
-  //   sk: string;
-  //   pk: string;
-  //   pkh: string;
-  // }
 
   const encryptedSecretKey = cryptoUtils.encryptSecretKey(keys.sk, 'password');
+
+  const registrationResp = await request(app.getHttpServer())
+    .post('/auth/register')
+    .send({
+      userAddress: keys.pkh,
+      signedPayload: 'pass',
+    });
+  expect(registrationResp.statusCode).toEqual(201);
+
+  const loginResp = await request(app.getHttpServer())
+    .post('/auth/login')
+    .send({
+      userAddress: keys.pkh,
+      signedPayload: 'pass',
+    });
+  expect(loginResp.statusCode).toEqual(201);
 
   return {
     ...keys,
     esk: encryptedSecretKey,
+    login: {
+      bearer: `Bearer ${loginResp.body.token}`,
+      id: loginResp.body.id,
+    },
   };
 }
 
