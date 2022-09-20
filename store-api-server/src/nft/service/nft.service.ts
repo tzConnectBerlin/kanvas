@@ -21,7 +21,7 @@ import {
   ENDING_SOON_DURATION,
 } from '../../constants.js';
 import { CurrencyService, BASE_CURRENCY } from 'kanvas-api-lib';
-import { sleep } from '../../utils.js';
+import { sleep, maybe } from '../../utils.js';
 import { IpfsService } from './ipfs.service.js';
 import { DbTransaction, withTransaction } from '../../db.module.js';
 
@@ -442,9 +442,12 @@ FROM nfts_by_id($1, $2, $3, $4)`,
         const reserved = Number(nftRow['editions_reserved']);
         const owned = Number(nftRow['editions_owned']);
 
-        const launchAtMilliUnix = nftRow['onsale_from']?.getTime() || 0;
-        const onsaleUntilMilliUnix =
-          nftRow['onsale_until']?.getTime() || undefined;
+        const onsaleFrom = maybe(nftRow['onsale_from'], (t) =>
+          Math.floor(t.getTime() / 1000),
+        );
+        const onsaleUntil = maybe(nftRow['onsale_until'], (t) =>
+          Math.floor(t.getTime() / 1000),
+        );
 
         let metadataIpfs = null;
         let artifactIpfs = null;
@@ -490,10 +493,9 @@ FROM nfts_by_id($1, $2, $3, $4)`,
           editionsSold: owned,
 
           createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
-          launchAt: Math.floor(launchAtMilliUnix / 1000),
-          onsaleUntil: onsaleUntilMilliUnix
-            ? Math.floor(onsaleUntilMilliUnix / 1000)
-            : undefined,
+          launchAt: onsaleFrom,
+          onsaleFrom,
+          onsaleUntil,
 
           mintOperationHash: nftRow['mint_op_hash'],
           ownershipInfo: nftRow['owned_recv_op_hashes']?.map(
