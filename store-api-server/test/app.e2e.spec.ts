@@ -197,8 +197,12 @@ describe('AppController (e2e)', () => {
     // with now() timestamps
     expect(res.body.createdAt).toBeGreaterThan(0);
     delete res.body.createdAt;
-    expect(res.body.launchAt).toBeGreaterThan(0);
-    delete res.body.launchAt;
+    if (typeof res.body.onsaleFrom !== 'undefined') {
+      expect(res.body.launchAt).toEqual(res.body.onsaleFrom);
+      expect(res.body.onsaleFrom).toBeGreaterThan(0);
+      delete res.body.launchAt;
+      delete res.body.onsaleFrom;
+    }
 
     if (typeof res.body.onsaleUntil !== 'undefined') {
       expect(res.body.onsaleUntil).toBeGreaterThan(0);
@@ -302,9 +306,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -605,9 +616,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -634,9 +652,14 @@ describe('AppController (e2e)', () => {
 
     for (const i in res.body.nfts) {
       expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
       delete res.body.nfts[i].createdAt;
-      delete res.body.nfts[i].launchAt;
+
+      if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+        expect(res.body.nfts[i].launchAt).toEqual(res.body.nfts[i].onsaleFrom);
+        expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+        delete res.body.nfts[i].launchAt;
+        delete res.body.nfts[i].onsaleFrom;
+      }
 
       if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
         expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -692,9 +715,14 @@ describe('AppController (e2e)', () => {
 
     for (const i in res.body.nfts) {
       expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
       delete res.body.nfts[i].createdAt;
-      delete res.body.nfts[i].launchAt;
+
+      if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+        expect(res.body.nfts[i].launchAt).toEqual(res.body.nfts[i].onsaleFrom);
+        expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+        delete res.body.nfts[i].launchAt;
+        delete res.body.nfts[i].onsaleFrom;
+      }
 
       if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
         expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -757,9 +785,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -919,9 +954,14 @@ describe('AppController (e2e)', () => {
 
     for (const i in res.body.nfts) {
       expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
       delete res.body.nfts[i].createdAt;
-      delete res.body.nfts[i].launchAt;
+
+      if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+        expect(res.body.nfts[i].launchAt).toEqual(res.body.nfts[i].onsaleFrom);
+        expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+        delete res.body.nfts[i].launchAt;
+        delete res.body.nfts[i].onsaleFrom;
+      }
 
       if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
         expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -2202,9 +2242,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -2297,9 +2344,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -2363,9 +2417,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -2428,9 +2489,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -2493,9 +2561,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -2558,9 +2633,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -2623,9 +2705,17 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
+
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
           delete res.body.nfts[i].onsaleUntil;
@@ -3208,7 +3298,6 @@ describe('AppController (e2e)', () => {
         categories: [10],
         editionsSize: 4,
 
-        launchAt: 0,
         signature: signed.sig,
       });
 
@@ -3231,7 +3320,6 @@ describe('AppController (e2e)', () => {
         categories: [10],
         editionsSize: 4,
 
-        launchAt: 0,
         signature: 'some invalid signature',
       });
 
@@ -3273,11 +3361,19 @@ describe('AppController (e2e)', () => {
     delete paymentIntentRes.body.expiresAt;
     for (const i in paymentIntentRes.body.nfts) {
       expect(Number(paymentIntentRes.body.nfts[i].price)).toBeGreaterThan(0);
-      expect(paymentIntentRes.body.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(paymentIntentRes.body.nfts[i].launchAt).toBeGreaterThan(0);
       delete paymentIntentRes.body.nfts[i].price;
+      expect(paymentIntentRes.body.nfts[i].createdAt).toBeGreaterThan(0);
       delete paymentIntentRes.body.nfts[i].createdAt;
-      delete paymentIntentRes.body.nfts[i].launchAt;
+
+      if (typeof paymentIntentRes.body.nfts[i].onsaleFrom !== 'undefined') {
+        expect(paymentIntentRes.body.nfts[i].launchAt).toEqual(
+          paymentIntentRes.body.nfts[i].onsaleFrom,
+        );
+        expect(paymentIntentRes.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+        delete paymentIntentRes.body.nfts[i].launchAt;
+        delete paymentIntentRes.body.nfts[i].onsaleFrom;
+      }
+
       if (typeof paymentIntentRes.body.nfts[i].onsaleUntil !== 'undefined') {
         expect(paymentIntentRes.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
         delete paymentIntentRes.body.nfts[i].onsaleUntil;
@@ -3358,9 +3454,16 @@ describe('AppController (e2e)', () => {
 
     for (const i in resBefore.body.collection.nfts) {
       expect(resBefore.body.collection.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(resBefore.body.collection.nfts[i].launchAt).toBeGreaterThan(0);
       delete resBefore.body.collection.nfts[i].createdAt;
-      delete resBefore.body.collection.nfts[i].launchAt;
+      if (typeof resBefore.body.collection.nfts[i].onsaleFrom !== 'undefined') {
+        expect(resBefore.body.collection.nfts[i].launchAt).toEqual(
+          resBefore.body.collection.nfts[i].onsaleFrom,
+        );
+        expect(resBefore.body.collection.nfts[i].onsaleFrom).toBeGreaterThan(0);
+        delete resBefore.body.collection.nfts[i].launchAt;
+        delete resBefore.body.collection.nfts[i].onsaleFrom;
+      }
+
       if (
         typeof resBefore.body.collection.nfts[i].onsaleUntil !== 'undefined'
       ) {
@@ -3372,9 +3475,21 @@ describe('AppController (e2e)', () => {
     }
     for (const i in resBefore.body.pendingOwnership) {
       expect(resBefore.body.pendingOwnership[i].createdAt).toBeGreaterThan(0);
-      expect(resBefore.body.pendingOwnership[i].launchAt).toBeGreaterThan(0);
       delete resBefore.body.pendingOwnership[i].createdAt;
-      delete resBefore.body.pendingOwnership[i].launchAt;
+
+      if (
+        typeof resBefore.body.pendingOwnership[i].onsaleFrom !== 'undefined'
+      ) {
+        expect(resBefore.body.pendingOwnership[i].launchAt).toEqual(
+          resBefore.body.pendingOwnership[i].onsaleFrom,
+        );
+        expect(resBefore.body.pendingOwnership[i].onsaleFrom).toBeGreaterThan(
+          0,
+        );
+        delete resBefore.body.pendingOwnership[i].launchAt;
+        delete resBefore.body.pendingOwnership[i].onsaleFrom;
+      }
+
       if (
         typeof resBefore.body.pendingOwnership[i].onsaleUntil !== 'undefined'
       ) {
@@ -3513,9 +3628,17 @@ describe('AppController (e2e)', () => {
     delete cartBefore.body.expiresAt;
     for (const i in cartBefore.body.nfts) {
       expect(cartBefore.body.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(cartBefore.body.nfts[i].launchAt).toBeGreaterThan(0);
+
       delete cartBefore.body.nfts[i].createdAt;
-      delete cartBefore.body.nfts[i].launchAt;
+
+      if (typeof cartBefore.body.nfts[i].onsaleFrom !== 'undefined') {
+        expect(cartBefore.body.nfts[i].launchAt).toEqual(
+          cartBefore.body.nfts[i].onsaleFrom,
+        );
+        expect(cartBefore.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+        delete cartBefore.body.nfts[i].launchAt;
+        delete cartBefore.body.nfts[i].onsaleFrom;
+      }
       if (typeof cartBefore.body.nfts[i].onsaleUntil !== 'undefined') {
         expect(cartBefore.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
         delete cartBefore.body.nfts[i].onsaleUntil;
@@ -3607,9 +3730,16 @@ describe('AppController (e2e)', () => {
     delete resAfter.body.user?.createdAt;
     for (const i in resAfter.body.collection.nfts) {
       expect(resAfter.body.collection.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(resAfter.body.collection.nfts[i].launchAt).toBeGreaterThan(0);
       delete resAfter.body.collection.nfts[i].createdAt;
-      delete resAfter.body.collection.nfts[i].launchAt;
+
+      if (typeof resAfter.body.collection.nfts[i].onsaleFrom !== 'undefined') {
+        expect(resAfter.body.collection.nfts[i].launchAt).toEqual(
+          resAfter.body.collection.nfts[i].onsaleFrom,
+        );
+        expect(resAfter.body.collection.nfts[i].onsaleFrom).toBeGreaterThan(0);
+        delete resAfter.body.collection.nfts[i].launchAt;
+        delete resAfter.body.collection.nfts[i].onsaleFrom;
+      }
       if (typeof resAfter.body.collection.nfts[i].onsaleUntil !== 'undefined') {
         expect(resAfter.body.collection.nfts[i].onsaleUntil).toBeGreaterThan(0);
         delete resAfter.body.collection.nfts[i].onsaleUntil;
@@ -3617,9 +3747,20 @@ describe('AppController (e2e)', () => {
     }
     for (const i in resAfter.body.pendingOwnership) {
       expect(resAfter.body.pendingOwnership[i].createdAt).toBeGreaterThan(0);
-      expect(resAfter.body.pendingOwnership[i].launchAt).toBeGreaterThan(0);
       delete resAfter.body.pendingOwnership[i].createdAt;
-      delete resAfter.body.pendingOwnership[i].launchAt;
+
+      if (
+        typeof resAfter.body.pendingOwnership[i].onsaleFrom !== 'undefined'
+      ) {
+        expect(resAfter.body.pendingOwnership[i].launchAt).toEqual(
+          resAfter.body.pendingOwnership[i].onsaleFrom,
+        );
+        expect(resAfter.body.pendingOwnership[i].onsaleFrom).toBeGreaterThan(
+          0,
+        );
+        delete resAfter.body.pendingOwnership[i].launchAt;
+        delete resAfter.body.pendingOwnership[i].onsaleFrom;
+      }
       if (
         typeof resAfter.body.pendingOwnership[i].onsaleUntil !== 'undefined'
       ) {

@@ -12,7 +12,7 @@ export interface NftEntity {
   description: string;
   price: string;
   categories: CategoryEntity[];
-  launchAt: number;
+  launchAt?: number; // deprecated by onsaleFrom
   metadata?: any;
 
   editionsSize: number;
@@ -32,6 +32,9 @@ export interface NftEntity {
   mintOperationHash?: string;
   ownerStatuses?: string[]; // deprecated by ownershipInfo
   ownershipInfo?: OwnershipInfo[];
+
+  onsaleFrom?: number;
+  onsaleUntil?: number;
 }
 
 export interface CreateNft {

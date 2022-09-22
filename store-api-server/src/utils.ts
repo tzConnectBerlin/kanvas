@@ -91,6 +91,16 @@ export function isBottom(v: any): boolean {
   return v == null;
 }
 
+export function maybe<ValTy, ResTy>(
+  x: ValTy | null | undefined,
+  f: (x: ValTy) => ResTy,
+): ResTy | undefined {
+  if (isBottom(x)) {
+    return undefined;
+  }
+  return f(x!);
+}
+
 export function getClientIp(request: any): string {
   const { ip } = request;
   return BEHIND_PROXY ? request.get('X-Forwarded-For') || ip : ip;
