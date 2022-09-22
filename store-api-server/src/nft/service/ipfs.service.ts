@@ -97,19 +97,27 @@ WHERE id = $1
       [artifactIpfs, nft.artifactUri],
       [displayIpfs, nft.displayUri],
       [thumbnailIpfs, nft.thumbnailUri],
-    ].flatMap(([ipfsUri, origAssetUri]) => {
-      if (
-        typeof ipfsUri === 'undefined' ||
-        typeof origAssetUri === 'undefined'
-      ) {
-        return [];
-      }
-      const format = this.#specifyIpfsUriFormat(ipfsUri, origAssetUri);
-      if (typeof format === 'undefined') {
-        return [];
-      }
-      return [format];
-    });
+    ]
+      .reduce(
+        (xs: string[][], [ipfsUri, origAssetUri]: (string | undefined)[]) => {
+          if (
+            typeof ipfsUri === 'undefined' ||
+            typeof origAssetUri === 'undefined' ||
+            typeof xs.find((x) => x[0] === ipfsUri) !== 'undefined'
+          ) {
+            return xs;
+          }
+          return [...xs, [ipfsUri, origAssetUri]];
+        },
+        [],
+      )
+      .flatMap(([ipfsUri, origAssetUri]) => {
+        const format = this.#specifyIpfsUriFormat(ipfsUri, origAssetUri);
+        if (typeof format === 'undefined') {
+          return [];
+        }
+        return [format];
+      });
 
     displayIpfs = displayIpfs ?? artifactIpfs;
     thumbnailIpfs = thumbnailIpfs ?? displayIpfs;
