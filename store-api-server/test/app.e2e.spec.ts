@@ -85,7 +85,7 @@ describe('AppController (e2e)', () => {
     });
   });
 
-  runOnchainEnabledTests(() => app);
+  runOnchainEnabledTests(() => [app, paymentService]);
 
   // Note:
   // - these tests expect responses related to a database that has been filled

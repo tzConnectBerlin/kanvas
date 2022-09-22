@@ -3,27 +3,118 @@ import Pool from 'pg-pool';
 import sotez from 'sotez';
 const { cryptoUtils } = sotez;
 import { readFileSync } from 'fs';
+import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 
+import {
+  PaymentService,
+  PaymentStatus,
+} from '../src/payment/service/payment.service';
+import { PaymentProvider } from '../src/payment/entity/payment.entity.js';
+import { UserEntity } from '../src/user/entity/user.entity';
 import { assertEnv, sleep } from '../src/utils';
 
 export async function runOnchainEnabledTests(appReference: () => any) {
   let app: any;
+  let paymentService: PaymentService;
   let nftIds: number[];
 
   describe('clean e2e test cases (db is reset between each test)', () => {
     beforeEach(async () => {
-      app = appReference();
+      [app, paymentService] = appReference();
       nftIds = await resetDb();
     });
     afterAll(async () => {
-      app = appReference();
       await resetDb(true);
     });
 
     it('test', async () => {
       const wallet1 = await newWallet(app);
+      await cartAdd(app, nftIds[0], wallet1);
+      await checkout(paymentService, wallet1);
+
+      await waitNextBlock();
+
+      const profile = await getProfile(app, wallet1);
+      logFullObject(profile);
     });
   });
+}
+
+async function waitNextBlock() {
+  const db = newDbConn();
+  const blockNow = async () => {
+    return (
+      await db.query(
+        'SELECT level FROM que_pasa.levels ORDER BY level DESC LIMIT 1',
+      )
+    ).rows[0]['level'];
+  };
+
+  const pollingIntervalMs = 10;
+
+  const blockStart = await blockNow();
+  while (blockStart + 1 >= (await blockNow())) {
+    console.log(`${blockStart},${await blockNow()}`);
+    await sleep(pollingIntervalMs);
+  }
+  console.log(`${blockStart},${await blockNow()}`);
+
+  await db.end();
+}
+
+async function getProfile(app: any, wallet: Wallet, asLogin = true) {
+  let res;
+  if (asLogin) {
+    res = await request(app.getHttpServer())
+      .get('/users/profile')
+      .set('authorization', wallet.login.bearer);
+  } else {
+    res = await request(app.getHttpServer())
+      .get('/users/profile')
+      .query({ userAddress: wallet.pkh });
+  }
+  expect(res.status).toEqual(200);
+  return res.body;
+}
+
+async function cartAdd(app: any, nftId: number, wallet: Wallet) {
+  const resp = await request(app.getHttpServer())
+    .post(`/users/cart/add/${nftId}`)
+    .set('authorization', wallet.login.bearer);
+  expect(resp.statusCode).toEqual(201);
+}
+
+export async function checkout(paymentService: PaymentService, wallet: Wallet) {
+  const usr = <UserEntity>{
+    userAddress: wallet.pkh,
+    id: wallet.login.id,
+  };
+
+  // Create one payment intent (we are not calling the stripe api)
+  const intentRes = await paymentService.createPayment(
+    usr,
+    uuidv4(),
+    PaymentProvider.TEST,
+    'EUR',
+    'localhost',
+  );
+
+  // Give webhook handler function success event
+  const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
+    wallet.login.id,
+  );
+
+  // reconstruct success event from stripe
+  const constructedEvent = {
+    type: 'payment_intent.succeeded',
+    data: {
+      object: {
+        id: paymentId,
+      },
+    },
+  };
+  await paymentService.webhookHandler(constructedEvent);
 }
 
 async function resetDb(resetForLegacyTest = false): Promise<number[]> {
@@ -77,12 +168,11 @@ ORDER BY S.relname;
     readFileSync('script/populate-testdb.sql', { encoding: 'utf8' }),
   );
 
-  const nftIds = (await db.query(`SELECT id FROM nft`)).rows.map(
+  const nftIds = (await db.query(`SELECT id FROM nft ORDER BY id`)).rows.map(
     (row: any) => row['id'],
   );
 
   await db.end();
-
   return nftIds;
 }
 
@@ -140,4 +230,8 @@ function newDbConn() {
     password: assertEnv('PGPASSWORD'),
     database: assertEnv('PGDATABASE'),
   });
+}
+
+function logFullObject(obj: any) {
+  console.log(JSON.stringify(obj, undefined, 2));
 }

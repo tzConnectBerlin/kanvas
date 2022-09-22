@@ -21,7 +21,7 @@ docker run \
     --detach \
     --rm \
     -p $FLEXTESA_RPC_PORT:20000 \
-    -e block_time=3 \
+    -e block_time=1 \
     oxheadalpha/flextesa:20220127 \
     hangzbox start`
 TRAP="cleanup_docker_container $tz local-tezos"; trap "$TRAP" EXIT
