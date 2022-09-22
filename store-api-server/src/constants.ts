@@ -83,7 +83,8 @@ export const CART_MAX_ITEMS: number = Number(
 export const API_KEY_SECRET: string | undefined = process.env['API_KEY_SECRET'];
 
 export const STRIPE_SECRET: string | undefined = process.env['STRIPE_SECRET'];
-export const STRIPE_PAYMENT_METHODS: string[] = ['card', 'sepa_debit'];
+
+export const STRIPE_PAYMENT_METHODS: string[] = ['card'];
 
 export const PINATA_API_KEY: string | undefined = process.env['PINATA_API_KEY'];
 export const PINATA_API_SECRET: string | undefined =
