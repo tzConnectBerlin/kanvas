@@ -5,7 +5,8 @@ import { DbMock } from '../../mock/db.module';
 import { CacheMock } from '../../mock/cache.module';
 import { NftModule } from '../../nft/nft.module';
 import { mockedRatesProvider, CurrencyService } from 'kanvas-api-lib';
-import { IpfsService } from '../../nft/service/ipfs.service';
+import { NftIpfsService } from '../../nft/service/ipfs.service';
+import { IpfsPinMock } from '../../mock/ipfs_pin.module';
 import { NftService } from '../../nft/service/nft.service';
 
 describe('CategoryController', () => {
@@ -13,14 +14,14 @@ describe('CategoryController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DbMock, CacheMock],
+      imports: [DbMock, CacheMock, IpfsPinMock],
       controllers: [CategoryController],
       providers: [
         CategoryService,
         NftService,
         mockedRatesProvider,
         CurrencyService,
-        IpfsService,
+        NftIpfsService,
       ],
     }).compile();
 

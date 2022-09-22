@@ -22,14 +22,14 @@ import {
 } from '../../constants.js';
 import { CurrencyService, BASE_CURRENCY } from 'kanvas-api-lib';
 import { sleep, maybe } from '../../utils.js';
-import { IpfsService } from './ipfs.service.js';
+import { NftIpfsService } from './ipfs.service.js';
 import { DbTransaction, withTransaction } from '../../db.module.js';
 
 @Injectable()
 export class NftService {
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
-    private ipfsService: IpfsService,
+    private ipfsService: NftIpfsService,
     private currencyService: CurrencyService,
   ) {}
 

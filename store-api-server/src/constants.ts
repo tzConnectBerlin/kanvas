@@ -1,6 +1,7 @@
 import { assertEnv } from './utils.js';
 
 export const PG_CONNECTION = 'PG_CONNECTION';
+export const IPFS_PIN_PROVIDER = 'IPFS_PIN_PROVIDER';
 
 // source: https://www.postgresql.org/docs/current/errcodes-appendix.html
 export const PG_FOREIGN_KEY_VIOLATION_ERRCODE = '23503';
@@ -83,3 +84,7 @@ export const API_KEY_SECRET: string | undefined = process.env['API_KEY_SECRET'];
 
 export const STRIPE_SECRET: string | undefined = process.env['STRIPE_SECRET'];
 export const STRIPE_PAYMENT_METHODS: string[] = ['card', 'sepa_debit'];
+
+export const PINATA_API_KEY: string | undefined = process.env['PINATA_API_KEY'];
+export const PINATA_API_SECRET: string | undefined =
+  process.env['PINATA_API_SECRET'];

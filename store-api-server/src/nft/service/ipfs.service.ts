@@ -4,45 +4,29 @@ import {
   PG_CONNECTION,
   STORE_PUBLISHERS,
   MINTER_ADDRESS,
+  IPFS_PIN_PROVIDER,
 } from '../../constants.js';
 import { NftEntity } from '../../nft/entity/nft.entity.js';
-import axios from 'axios';
-import axiosRetry from 'axios-retry';
-import { createReadStream, createWriteStream } from 'fs';
-import FormData from 'form-data';
-import * as tmp from 'tmp';
+import { isBottom } from '../../utils.js';
+import { PinataService } from '../../ipfs_pin.module.js';
 
-axiosRetry(axios, {
-  retries: 3,
-});
-
-async function downloadFile(uri: string, targetFile: string) {
-  const writer = createWriteStream(targetFile);
-
-  const response = await axios.get(uri, {
-    responseType: 'stream',
-  });
-  response.data.pipe(writer);
-
-  return new Promise((resolve, reject) => {
-    writer.on('finish', resolve);
-    writer.on('error', reject);
-  });
-}
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const mime = require('mime');
 
 @Injectable()
-export class IpfsService {
-  PINATA_API_KEY = process.env['PINATA_API_KEY'];
-  PINATA_API_SECRET = process.env['PINATA_API_SECRET'];
-
-  constructor(@Inject(PG_CONNECTION) private conn: any) {}
+export class NftIpfsService {
+  constructor(
+    @Inject(PG_CONNECTION) private conn: any,
+    @Inject(IPFS_PIN_PROVIDER) private uploader: PinataService,
+  ) {}
 
   async uploadNft(
     nft: NftEntity,
     dbTx: any = this.conn,
   ): Promise<string | undefined> {
-    if (!this.#serviceEnabled()) {
-      Logger.warn(`IpfsService not enabled`);
+    if (!this.uploader.enabled()) {
+      Logger.warn(`Ipfs service not enabled`);
       return undefined;
     }
 
@@ -58,31 +42,18 @@ WHERE id = $1
       return qryRes.rows[0]['metadata_ipfs'];
     }
 
-    const [artifactIpfs, displayIpfs, thumbnailIpfs] = [
-      await this.#pinUri(nft.artifactUri),
-      await (nft.displayUri !== nft.artifactUri
-        ? this.#pinUri(nft.displayUri!)
-        : undefined),
-      await (nft.thumbnailUri !== nft.displayUri
-        ? this.#pinUri(nft.thumbnailUri!)
-        : undefined),
-    ];
-
-    const metadata = this.#nftMetadataJson(
+    const metadata = await this.nftMetadataJson(
       nft,
-      artifactIpfs,
-      displayIpfs ?? artifactIpfs,
-      thumbnailIpfs ?? displayIpfs ?? artifactIpfs,
       qryRes.rows[0]['signature'],
     );
-    const metadataIpfs = await this.#pinJson(metadata);
+    const metadataIpfs = await this.uploader.pinJson(metadata);
 
     await this.#updateNftIpfsHashes(
       nft.id,
       metadataIpfs,
-      artifactIpfs,
-      displayIpfs,
-      thumbnailIpfs,
+      metadata.artifactUri,
+      metadata.displayUri,
+      metadata.thumbnailUri,
       dbTx,
     );
     return metadataIpfs;
@@ -109,15 +80,39 @@ WHERE id = $1
     );
   }
 
-  #nftMetadataJson(
-    nft: NftEntity,
-    artifactIpfsUri: string,
-    displayIpfsUri: string,
-    thumbnailIpfsUri: string,
-    signature: string,
-  ): any {
+  async nftMetadataJson(nft: NftEntity, signature: string): Promise<any> {
     const createdAt = new Date(nft.createdAt * 1000).toISOString();
 
+    let [artifactIpfs, displayIpfs, thumbnailIpfs] = [
+      await this.uploader.pinUri(nft.artifactUri),
+      await (!isBottom(nft.displayUri) && nft.displayUri !== nft.artifactUri
+        ? this.uploader.pinUri(nft.displayUri!)
+        : undefined),
+      await (!isBottom(nft.thumbnailUri) && nft.thumbnailUri !== nft.displayUri
+        ? this.uploader.pinUri(nft.thumbnailUri!)
+        : undefined),
+    ];
+
+    const formats: { uri: string; mimeType: string }[] = [
+      [artifactIpfs, nft.artifactUri],
+      [displayIpfs, nft.displayUri],
+      [thumbnailIpfs, nft.thumbnailUri],
+    ].flatMap(([ipfsUri, origAssetUri]) => {
+      if (
+        typeof ipfsUri === 'undefined' ||
+        typeof origAssetUri === 'undefined'
+      ) {
+        return [];
+      }
+      const format = this.#specifyIpfsUriFormat(ipfsUri, origAssetUri);
+      if (typeof format === 'undefined') {
+        return [];
+      }
+      return [format];
+    });
+
+    displayIpfs = displayIpfs ?? artifactIpfs;
+    thumbnailIpfs = thumbnailIpfs ?? displayIpfs;
     return {
       decimals: 0,
 
@@ -126,9 +121,10 @@ WHERE id = $1
       date: createdAt,
       tags: nft.categories.map((cat) => cat.name),
 
-      artifactUri: artifactIpfsUri,
-      displayUri: displayIpfsUri,
-      thumbnailUri: thumbnailIpfsUri,
+      artifactUri: artifactIpfs,
+      displayUri: displayIpfs,
+      thumbnailUri: thumbnailIpfs,
+      formats,
 
       minter: MINTER_ADDRESS,
       creators: [], // TODO
@@ -140,69 +136,20 @@ WHERE id = $1
     };
   }
 
-  async #pinUri(uri: string): Promise<string> {
-    const tmpFile = tmp.fileSync();
-    const tmpFileName = tmpFile.name;
-
-    await downloadFile(uri, tmpFileName);
-
-    const form = new FormData();
-    form.append('file', createReadStream(tmpFileName));
-
-    return axios
-      .post('https://api.pinata.cloud/pinning/pinFileToIPFS', form, {
-        maxBodyLength: 1000000000, //this is needed to prevent axios from erroring with large files
-        headers: {
-          pinata_api_key: this.PINATA_API_KEY || '',
-          pinata_secret_api_key: this.PINATA_API_SECRET || '',
-          ...form.getHeaders(),
-        },
-      })
-      .then(function (response: any) {
-        tmpFile.removeCallback();
-        return 'ipfs://' + response.data.IpfsHash;
-      })
-      .catch(function (error: any) {
-        Logger.error(
-          `failed to pin content from uri (downloaded to file: ${tmpFileName})to ipfs, err: ${error}`,
-        );
-        tmpFile.removeCallback();
-        throw error;
-      });
-  }
-
-  async #pinJson(jsonData: string): Promise<string> {
-    return axios
-      .post('https://api.pinata.cloud/pinning/pinJSONToIPFS', jsonData, {
-        headers: {
-          pinata_api_key: this.PINATA_API_KEY || '',
-          pinata_secret_api_key: this.PINATA_API_SECRET || '',
-        },
-      })
-      .then(function (response: any) {
-        return 'ipfs://' + response.data.IpfsHash;
-      })
-      .catch(function (error: any) {
-        Logger.error(
-          `failed to pin JSON to IPFS (JSON=${jsonData}), err: ${error}`,
-        );
-        throw error;
-      });
-  }
-
-  #serviceEnabled(): boolean {
-    if (typeof this.PINATA_API_KEY === 'undefined') {
+  #specifyIpfsUriFormat(
+    ipfsUri: string,
+    origAssetUri: string,
+  ): { uri: string; mimeType: string } | undefined {
+    const mimeType = mime.getType(origAssetUri);
+    if (isBottom(mimeType)) {
       Logger.warn(
-        `failed to upload NFT to IPFS, IpfsService not enabled: PINATA_API_KEY env var not set`,
+        `failed to determine content type from asset uri, ipfsUri=${ipfsUri}, origAssetUri=${origAssetUri}`,
       );
-      return false;
+      return undefined;
     }
-    if (typeof this.PINATA_API_SECRET === 'undefined') {
-      Logger.warn(
-        `failed to upload NFT to IPFS, IpfsService not enabled: PINATA_API_SECRET env var not set`,
-      );
-      return false;
-    }
-    return true;
+    return {
+      uri: ipfsUri,
+      mimeType,
+    };
   }
 }

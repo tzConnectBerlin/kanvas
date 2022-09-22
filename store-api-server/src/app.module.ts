@@ -5,6 +5,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CurrencyModule } from 'kanvas-api-lib';
 import { CategoryModule } from './category/category.module.js';
 import { NftModule } from './nft/nft.module.js';
+import { IpfsPinModule } from './ipfs_pin.module.js';
 import { UserModule } from './user/user.module.js';
 import { AuthenticationModule } from './authentication/authentication.module.js';
 import { DbModule } from './db.module.js';
@@ -30,6 +31,7 @@ import {
     UserModule,
     PaymentModule,
     DbModule,
+    IpfsPinModule,
     CurrencyModule,
     ThrottlerModule.forRoot({
       ttl: RATE_LIMIT_TTL,
