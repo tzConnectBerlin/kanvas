@@ -81,7 +81,7 @@ export const NftGrid: FC<NftGridProps> = ({ ...props }) => {
                                     nft.editionsAvailable,
                                 )}
                                 nftCardMode={props.nftCardMode}
-                                launchAt={nft.launchAt * 1000}
+                                launchAt={nft.launchAt ? nft.launchAt * 1000 : 0}
                                 ownerStatus={
                                     nft.ownerStatuses
                                         ? nft.ownerStatuses[0]
