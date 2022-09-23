@@ -630,9 +630,7 @@ WHERE nft_order.id = $1
     const decimals = SUPPORTED_CURRENCIES[currency];
     return {
       id: paymentIntent.id,
-      amount: (Number(currencyUnitAmount) * Math.pow(10, -decimals)).toFixed(
-        decimals,
-      ),
+      amount: currencyUnitAmount.toFixed(0),
       currency: currency,
       paymentDetails: {
         clientSecret: paymentIntent.client_secret,
