@@ -1601,18 +1601,12 @@ describe('AppController (e2e)', () => {
         id,
       );
 
-      // reconstruct success event from stripe
-      const constructedEvent = {
-        type: 'payment_intent.succeeded',
-        data: {
-          object: {
-            id: paymentId,
-          },
-        },
-      };
-
       // Calling success status
-      await paymentService.webhookHandler(constructedEvent);
+      await paymentService.updatePaymentStatus(
+        paymentId,
+        PaymentStatus.SUCCEEDED,
+        false,
+      );
 
       // 1 edition locked because it is now owned
       expect(await getLockedCount(1)).toEqual(1);
@@ -1980,16 +1974,14 @@ describe('AppController (e2e)', () => {
       const payment5Data = await paymentService.getPaymentForLatestUserOrder(
         usr.id,
       );
-      // reconstruct success event from stripe
-      const constructedEvent2 = {
-        type: 'payment_intent.succeeded',
-        data: {
-          object: {
-            id: payment5Data.paymentId,
-          },
-        },
-      };
-      await paymentService.webhookHandler(constructedEvent2);
+
+      // Calling success status
+      await paymentService.updatePaymentStatus(
+        payment5Data.paymentId,
+        PaymentStatus.SUCCEEDED,
+        false,
+      );
+
       const success = await paymentService.getPaymentForLatestUserOrder(usr.id);
       expect(success.status).toEqual(PaymentStatus.SUCCEEDED);
       await paymentService.deleteExpiredPayments();
@@ -2159,18 +2151,12 @@ describe('AppController (e2e)', () => {
         id,
       );
 
-      // reconstruct success event from stripe
-      const constructedEvent = {
-        type: 'payment_intent.succeeded',
-        data: {
-          object: {
-            id: paymentId,
-          },
-        },
-      };
-
       // Calling success status
-      await paymentService.webhookHandler(constructedEvent);
+      await paymentService.updatePaymentStatus(
+        paymentId,
+        PaymentStatus.SUCCEEDED,
+        false,
+      );
 
       const success = await paymentService.getPaymentForLatestUserOrder(id);
       expect(success.status).toEqual(PaymentStatus.SUCCEEDED);

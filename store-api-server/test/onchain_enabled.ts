@@ -28,7 +28,7 @@ export async function runOnchainEnabledTests(appReference: () => any) {
       await resetDb(true);
     });
 
-    it('test', async () => {
+    it('paid nft becomes owned after 2 blocks', async () => {
       const wallet1 = await newWallet(app);
       await cartAdd(app, nftIds[0], wallet1);
       await checkout(paymentService, wallet1);
@@ -36,7 +36,40 @@ export async function runOnchainEnabledTests(appReference: () => any) {
       await waitNextBlock();
 
       const profile = await getProfile(app, wallet1);
-      logFullObject(profile);
+      expect(profile).toMatchObject({
+        pendingOwnership: [],
+        collection: {
+          nfts: [
+            {
+              id: nftIds[0],
+              ownershipInfo: [{ status: 'owned' }],
+            },
+          ],
+        },
+      });
+    });
+
+    it('user can buy same nft twice, both become owned', async () => {
+      const wallet1 = await newWallet(app);
+      await cartAdd(app, nftIds[0], wallet1);
+      await checkout(paymentService, wallet1);
+      await cartAdd(app, nftIds[0], wallet1);
+      await checkout(paymentService, wallet1);
+
+      await waitNextBlock();
+
+      const profile = await getProfile(app, wallet1);
+      expect(profile).toMatchObject({
+        pendingOwnership: [],
+        collection: {
+          nfts: [
+            {
+              id: nftIds[0],
+              ownershipInfo: [{ status: 'owned' }, { status: 'owned' }],
+            },
+          ],
+        },
+      });
     });
   });
 }
@@ -52,10 +85,10 @@ async function waitNextBlock() {
   };
 
   const pollingIntervalMs = 10;
+  const waitBlocks = 3;
 
   const blockStart = await blockNow();
-  while (blockStart + 1 >= (await blockNow())) {
-    console.log(`${blockStart},${await blockNow()}`);
+  while (blockStart + waitBlocks > (await blockNow())) {
     await sleep(pollingIntervalMs);
   }
   console.log(`${blockStart},${await blockNow()}`);
@@ -63,7 +96,7 @@ async function waitNextBlock() {
   await db.end();
 }
 
-async function getProfile(app: any, wallet: Wallet, asLogin = true) {
+async function getProfile(app: any, wallet: Wallet, asLogin = false) {
   let res;
   if (asLogin) {
     res = await request(app.getHttpServer())
@@ -105,16 +138,11 @@ export async function checkout(paymentService: PaymentService, wallet: Wallet) {
     wallet.login.id,
   );
 
-  // reconstruct success event from stripe
-  const constructedEvent = {
-    type: 'payment_intent.succeeded',
-    data: {
-      object: {
-        id: paymentId,
-      },
-    },
-  };
-  await paymentService.webhookHandler(constructedEvent);
+  await paymentService.updatePaymentStatus(
+    paymentId,
+    PaymentStatus.SUCCEEDED,
+    false,
+  );
 }
 
 async function resetDb(resetForLegacyTest = false): Promise<number[]> {

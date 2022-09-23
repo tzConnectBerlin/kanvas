@@ -126,11 +126,11 @@ mkdir "$tmpdir"/config
 cat <<EOF > $tmpdir/config/peppermint.json
 {
     "batchSize": 110,
-    "confirmations": 2,
+    "confirmations": 1,
     "timeout": 300,
     "privateKey": "$ADMIN_PRIVATE_KEY",
     "rpcUrl": "$NODE_URL",
-    "pollingDelay": 1000,
+    "pollingDelay": 50,
     "dbConnection": {
             "user": "$PGUSER",
             "password": "$PGPASSWORD",
