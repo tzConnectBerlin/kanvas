@@ -146,13 +146,13 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
     const [componentLoading, setComponentLoading] = useState(true);
 
     const [launchTime, setLaunchTime] = useState<number>(
-        new Date(props.launchAt!).getTime() - new Date().getTime(),
+        new Date(props.launchAt || 0).getTime() - new Date().getTime(),
     );
 
     useEffect(() => {
         if (props.launchAt) {
             setLaunchTime(
-                new Date(props.launchAt).getTime() - new Date().getTime(),
+                new Date(props.launchAt ?? 0).getTime() - new Date().getTime(),
             );
         }
     }, [props.launchAt]);
@@ -161,7 +161,7 @@ export const NftCard: React.FC<NftCardProps> = ({ loading, ...props }) => {
         if (props.launchAt) {
             const launchTimeout = setTimeout(() => {
                 setLaunchTime(
-                    new Date(props.launchAt!).getTime() - new Date().getTime(),
+                    new Date(props.launchAt ?? 0).getTime() - new Date().getTime(),
                 );
             }, 1000);
 

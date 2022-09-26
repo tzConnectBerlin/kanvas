@@ -16,7 +16,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "./script/test2 -w 2"
+    "test": "./script/test -w 2"
   },
   "dependencies": {
     "@nestjs/common": "^8.2.6",
