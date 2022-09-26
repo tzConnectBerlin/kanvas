@@ -7,7 +7,12 @@ import {
 } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { RATE_LIMIT, CART_MAX_ITEMS, KANVAS_CONTRACT } from '../src/constants';
+import {
+  RATE_LIMIT,
+  CART_MAX_ITEMS,
+  KANVAS_CONTRACT,
+  TEZPAY_PAYPOINT_ADDRESS,
+} from '../src/constants';
 import {
   SIGNATURE_PREFIX_CREATE_NFT,
   SIGNATURE_PREFIX_DELIST_NFT,
@@ -3274,7 +3279,7 @@ describe('AppController (e2e)', () => {
     }
     expect(paymentIntentRes.body).toEqual({
       paymentDetails: {
-        receiverAddress: 'KT1MZTPQFdEZKLXtdQzpuA4MFt5ZkmKqFqkq',
+        receiverAddress: TEZPAY_PAYPOINT_ADDRESS,
       },
       currency: 'XTZ',
       nfts: [
@@ -3372,6 +3377,10 @@ describe('AppController (e2e)', () => {
         );
         delete resBefore.body.pendingOwnership[i].onsaleUntil;
       }
+    }
+
+    if (typeof resBefore.body.mintOperationHash !== 'undefined') {
+      delete resBefore.body.mintOperationHash;
     }
 
     expect(resBefore.body).toStrictEqual({

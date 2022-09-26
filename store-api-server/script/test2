@@ -8,6 +8,8 @@ set -a
 . .env.test
 set +a
 export NODE_URL=http://localhost:$FLEXTESA_RPC_PORT
+# using the newest version for --polling-interval parameter, to reduce required testing duration
+export QUEPASA_VERSION=1.3.0
 
 function cleanup_docker_container {
     echo "stopping $2 docker container, id: ${1:0:12}"
@@ -22,11 +24,11 @@ docker run \
     --rm \
     -p $FLEXTESA_RPC_PORT:20000 \
     -e block_time=1 \
-    oxheadalpha/flextesa:20220127 \
-    hangzbox start`
+    oxheadalpha/flextesa:20220715 \
+    kathmandubox start`
 TRAP="cleanup_docker_container $tz local-tezos"; trap "$TRAP" EXIT
 
-pg=`DBSETUP_LOG=quiet DOCKER_ARGS='-d' ./script/local-db 2>/dev/null`
+pg=`DBSETUP_LOG=quiet INIT_QUEPASA=false DOCKER_ARGS='-d' ./script/local-db 2>/dev/null`
 TRAP="$TRAP; cleanup_docker_container $pg testdb"; trap "$TRAP" EXIT
 
 
@@ -52,7 +54,7 @@ rm $sig_err_file
 ) &
 
 
-tzInfo=`docker exec local-tezos hangzbox info 2>&1`
+tzInfo=`docker exec local-tezos kathmandubox info 2>&1`
 aliceInfo=`echo "$tzInfo" | grep '* ' | head -n 3 | awk '{print $2}'`
 
 export ADMIN_PUBLIC_KEY=`echo "$aliceInfo" | sed '1q;d'`
@@ -60,7 +62,8 @@ export MINTER_TZ_ADDRESS=`echo "$aliceInfo" | sed '2q;d'`
 export ADMIN_PRIVATE_KEY=`echo "$aliceInfo" | sed '3q;d' | awk -F':' '{print $2}'`
 
 bobInfo=`echo "$tzInfo" | grep '* ' | tail -n 3 | awk '{print $2}'`
-export TESTING_BOB_TZ=`echo "$bobInfo" | sed '2q;d'`
+export BOB_PKH=`echo "$bobInfo" | sed '2q;d'`
+export BOB_SK=`echo "$bobInfo" | tail -n 1 | awk -F':' '{print $2}'`
 
 echo -n "setting up a private tezos network"
 while ! http --quiet :$FLEXTESA_RPC_PORT/chains/main/blocks/head 2>/dev/null; do
@@ -116,10 +119,11 @@ docker run \
     -e NODE_URL=$NODE_URL \
     --network=host \
     --detach \
-    ghcr.io/tzconnectberlin/que-pasa:1.2.6 \
+    ghcr.io/tzconnectberlin/que-pasa:${QUEPASA_VERSION} \
     --contracts onchain_kanvas=$KANVAS_CONTRACT \
     --contracts paypoint=$TEZPAY_PAYPOINT_ADDRESS \
-    --allowed-unbootstrapped-offset 0s`
+    --allowed-unbootstrapped-offset 0s \
+    --polling-interval 10ms`
 TRAP="cleanup_docker_container $qp que-pasa; $TRAP"; trap "$TRAP" EXIT
 
 mkdir "$tmpdir"/config
@@ -130,7 +134,7 @@ cat <<EOF > $tmpdir/config/peppermint.json
     "timeout": 300,
     "privateKey": "$ADMIN_PRIVATE_KEY",
     "rpcUrl": "$NODE_URL",
-    "pollingDelay": 50,
+    "pollingDelay": 10,
     "dbConnection": {
             "user": "$PGUSER",
             "password": "$PGPASSWORD",
@@ -148,6 +152,7 @@ cat <<EOF > $tmpdir/config/peppermint.json
     }
 }
 EOF
+./script/wait-db 'select 1 from peppermint.operations'
 pm=`
 docker run \
     --detach \
@@ -155,7 +160,7 @@ docker run \
     --mount type=bind,source="$PWD/$tmpdir"/config/peppermint.json,target=/build/config.json \
     ghcr.io/tzconnectberlin/peppermint:1.2
 `
-TRAP="cleanup_docker_container $pm peppermint; $TRAP"; trap "$TRAP" EXIT
+TRAP="cleanup_docker_container $pm peppermint 2>/dev/null; $TRAP"; trap "$TRAP" EXIT
 
 wait
 [ -f $sig_err_file ] && {
