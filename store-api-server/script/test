@@ -4,6 +4,10 @@ cd $SCRIPT_DIR/..
 
 set -e
 
+mkdir -p test/.workdir
+TRAP="rm -rf test/.workdir 2>/dev/null || return 0"
+trap "$TRAP" EXIT
+
 set -a
 . .env.test
 set +a
@@ -26,10 +30,12 @@ docker run \
     -e block_time=1 \
     oxheadalpha/flextesa:20220715 \
     kathmandubox start`
-TRAP="cleanup_docker_container $tz local-tezos"; trap "$TRAP" EXIT
+TRAP="$TRAP; cleanup_docker_container $tz local-tezos"
+trap "$TRAP" EXIT
 
 pg=`DBSETUP_LOG=quiet INIT_QUEPASA=false DOCKER_ARGS='-d' ./script/local-db 2>/dev/null`
-TRAP="$TRAP; cleanup_docker_container $pg testdb"; trap "$TRAP" EXIT
+TRAP="$TRAP; cleanup_docker_container $pg testdb"
+trap "$TRAP" EXIT
 
 
 sig_err_file=`mktemp`
@@ -67,10 +73,8 @@ export BOB_SK=`echo "$bobInfo" | tail -n 1 | awk -F':' '{print $2}'`
 
 echo -n "setting up a private tezos network"
 while ! http --quiet :$FLEXTESA_RPC_PORT/chains/main/blocks/head 2>/dev/null; do
-    # echo -n '.'
     sleep 1
 done
-# echo
 
 function tz-cli() {
     docker exec local-tezos tezos-client --endpoint http://localhost:20000 "$@"
@@ -80,21 +84,18 @@ tz-cli config reset
 tz-cli bootstrapped
 tz-cli config update
 
-echo -n "waiting for true bootstrap"
 while ! tz-cli man | grep --quiet originate; do
     echo -n "."
     sleep 1
 done
 echo
 
-tmpdir=`basename $(mktemp -d -u)`
+tmpdir=test/.workdir/`basename $(mktemp -d -u)`
 mkdir "$tmpdir"
-TRAP="$TRAP; rm -rf $tmpdir"; trap "$TRAP" EXIT
 mintery="$tmpdir/mintery"
 git clone https://github.com/tzConnectBerlin/mintery.git "$tmpdir/mintery" >/dev/null 2>&1
 
 cd "$tmpdir/mintery"
-git checkout allow-custom-dockerargs >/dev/null
 
 echo "
 ORIGINATOR_ADDRESS=$MINTER_TZ_ADDRESS
@@ -124,7 +125,8 @@ docker run \
     --contracts paypoint=$TEZPAY_PAYPOINT_ADDRESS \
     --allowed-unbootstrapped-offset 0s \
     --polling-interval 10ms`
-TRAP="cleanup_docker_container $qp que-pasa; $TRAP"; trap "$TRAP" EXIT
+TRAP="cleanup_docker_container $qp que-pasa; $TRAP"
+trap "$TRAP" EXIT
 
 mkdir "$tmpdir"/config
 cat <<EOF > $tmpdir/config/peppermint.json
@@ -160,7 +162,8 @@ docker run \
     --mount type=bind,source="$PWD/$tmpdir"/config/peppermint.json,target=/build/config.json \
     ghcr.io/tzconnectberlin/peppermint:1.2
 `
-TRAP="cleanup_docker_container $pm peppermint 2>/dev/null; $TRAP"; trap "$TRAP" EXIT
+TRAP="cleanup_docker_container $pm peppermint 2>/dev/null; $TRAP"
+trap "$TRAP" EXIT
 
 wait
 [ -f $sig_err_file ] && {

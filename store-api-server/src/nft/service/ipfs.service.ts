@@ -5,6 +5,7 @@ import {
   STORE_PUBLISHERS,
   MINTER_ADDRESS,
   IPFS_PIN_PROVIDER,
+  DEFAULT_ROYALTIES_MINTER_SHARE,
 } from '../../constants.js';
 import { NftEntity } from '../../nft/entity/nft.entity.js';
 import { isBottom } from '../../utils.js';
@@ -13,6 +14,11 @@ import { PinataService } from '../../ipfs_pin.module.js';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const mime = require('mime');
+
+interface Royalties {
+  decimals: number;
+  shares: { [key: string]: number };
+}
 
 @Injectable()
 export class NftIpfsService {
@@ -119,6 +125,8 @@ WHERE id = $1
         return [format];
       });
 
+    const royalties = this.#defaultRoyalties();
+
     displayIpfs = displayIpfs ?? artifactIpfs;
     thumbnailIpfs = thumbnailIpfs ?? displayIpfs;
     return {
@@ -141,7 +149,18 @@ WHERE id = $1
 
       isBooleanAmount: nft.editionsSize === 1,
       signature: signature,
+
+      royalties,
     };
+  }
+
+  #defaultRoyalties(): Royalties {
+    const royalties: Royalties = {
+      decimals: 2,
+      shares: {},
+    };
+    royalties.shares[`${MINTER_ADDRESS}`] = DEFAULT_ROYALTIES_MINTER_SHARE;
+    return royalties;
   }
 
   #specifyIpfsUriFormat(
