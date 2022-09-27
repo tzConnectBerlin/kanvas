@@ -7,7 +7,12 @@ import {
 } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { RATE_LIMIT, CART_MAX_ITEMS } from '../src/constants';
+import {
+  RATE_LIMIT,
+  CART_MAX_ITEMS,
+  KANVAS_CONTRACT,
+  TEZPAY_PAYPOINT_ADDRESS,
+} from '../src/constants';
 import {
   SIGNATURE_PREFIX_CREATE_NFT,
   SIGNATURE_PREFIX_DELIST_NFT,
@@ -24,6 +29,7 @@ import { assertEnv, sleep } from '../src/utils';
 import sotez from 'sotez';
 import { v4 as uuidv4 } from 'uuid';
 import Pool from 'pg-pool';
+import { runOnchainEnabledTests } from './onchain_enabled';
 const { cryptoUtils } = sotez;
 
 let anyTestFailed = false;
@@ -65,7 +71,7 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
-  skipOnPriorFail('should be defined', () => expect(app).toBeDefined());
+  it('should be defined', () => expect(app).toBeDefined());
 
   it(`/ (GET) => NOT FOUND (make sure the nestjs's Hello World page is gone)`, () => {
     return request(app.getHttpServer()).get('/').expect(404);
@@ -80,9 +86,11 @@ describe('AppController (e2e)', () => {
       cartMaxItems: 10,
       supportedCurrencies: ['USD', 'GBP', 'EUR', 'XTZ'],
       tezosNetwork: 'testnet',
-      kanvasContract: 'KT1..',
+      kanvasContract: KANVAS_CONTRACT,
     });
   });
+
+  runOnchainEnabledTests(() => [app, paymentService]);
 
   // Note:
   // - these tests expect responses related to a database that has been filled
@@ -1638,18 +1646,12 @@ describe('AppController (e2e)', () => {
         id,
       );
 
-      // reconstruct success event from stripe
-      const constructedEvent = {
-        type: 'payment_intent.succeeded',
-        data: {
-          object: {
-            id: paymentId,
-          },
-        },
-      };
-
       // Calling success status
-      await paymentService.webhookHandler(constructedEvent);
+      await paymentService.updatePaymentStatus(
+        paymentId,
+        PaymentStatus.SUCCEEDED,
+        false,
+      );
 
       // 1 edition locked because it is now owned
       expect(await getLockedCount(1)).toEqual(1);
@@ -1961,6 +1963,7 @@ describe('AppController (e2e)', () => {
         usr.id,
       );
       expect(promised.status).toEqual(PaymentStatus.PROMISED);
+      await sleep(Number(process.env['PAYMENT_PROMISE_DEADLINE_MILLI_SECS']));
       await paymentService.deleteExpiredPayments();
       const promisedTimedOut =
         await paymentService.getPaymentForLatestUserOrder(usr.id);
@@ -2017,16 +2020,14 @@ describe('AppController (e2e)', () => {
       const payment5Data = await paymentService.getPaymentForLatestUserOrder(
         usr.id,
       );
-      // reconstruct success event from stripe
-      const constructedEvent2 = {
-        type: 'payment_intent.succeeded',
-        data: {
-          object: {
-            id: payment5Data.paymentId,
-          },
-        },
-      };
-      await paymentService.webhookHandler(constructedEvent2);
+
+      // Calling success status
+      await paymentService.updatePaymentStatus(
+        payment5Data.paymentId,
+        PaymentStatus.SUCCEEDED,
+        false,
+      );
+
       const success = await paymentService.getPaymentForLatestUserOrder(usr.id);
       expect(success.status).toEqual(PaymentStatus.SUCCEEDED);
       await paymentService.deleteExpiredPayments();
@@ -2196,18 +2197,12 @@ describe('AppController (e2e)', () => {
         id,
       );
 
-      // reconstruct success event from stripe
-      const constructedEvent = {
-        type: 'payment_intent.succeeded',
-        data: {
-          object: {
-            id: paymentId,
-          },
-        },
-      };
-
       // Calling success status
-      await paymentService.webhookHandler(constructedEvent);
+      await paymentService.updatePaymentStatus(
+        paymentId,
+        PaymentStatus.SUCCEEDED,
+        false,
+      );
 
       const success = await paymentService.getPaymentForLatestUserOrder(id);
       expect(success.status).toEqual(PaymentStatus.SUCCEEDED);
@@ -2243,6 +2238,10 @@ describe('AppController (e2e)', () => {
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
+
+        if (typeof res.body.nfts[i].mintOperationHash != null) {
+          res.body.nfts[i].mintOperationHash = null;
+        }
 
         if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
           expect(res.body.nfts[i].launchAt).toEqual(
@@ -2361,7 +2360,7 @@ describe('AppController (e2e)', () => {
         }
       }
 
-      expect(res.body).toStrictEqual({
+      expect(res.body).toMatchObject({
         currentPage: 1,
         numberOfPages: 2,
         nfts: [
@@ -2377,7 +2376,6 @@ describe('AppController (e2e)', () => {
               },
             },
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '1-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '1-thumbnail-ipfs-hash',
@@ -2434,7 +2432,7 @@ describe('AppController (e2e)', () => {
         }
       }
 
-      expect(res.body).toStrictEqual({
+      expect(res.body).toMatchObject({
         currentPage: 2,
         numberOfPages: 2,
         nfts: [
@@ -2444,7 +2442,6 @@ describe('AppController (e2e)', () => {
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             metadata: null,
             artifactIpfs: '4-artifact-ipfs-hash',
             displayIpfs: null,
@@ -2506,7 +2503,7 @@ describe('AppController (e2e)', () => {
         }
       }
 
-      expect(res.body).toStrictEqual({
+      expect(res.body).toMatchObject({
         currentPage: 2,
         numberOfPages: 2,
         nfts: [
@@ -2517,7 +2514,6 @@ describe('AppController (e2e)', () => {
             ipfsHash: 'ipfs://.....',
             metadata: null,
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '4-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -2578,7 +2574,7 @@ describe('AppController (e2e)', () => {
         }
       }
 
-      expect(res.body).toStrictEqual({
+      expect(res.body).toMatchObject({
         currentPage: 1,
         numberOfPages: 2,
         nfts: [
@@ -2589,7 +2585,6 @@ describe('AppController (e2e)', () => {
             ipfsHash: 'ipfs://.....',
             metadata: null,
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '4-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -2650,7 +2645,7 @@ describe('AppController (e2e)', () => {
         }
       }
 
-      expect(res.body).toStrictEqual({
+      expect(res.body).toMatchObject({
         currentPage: 2,
         numberOfPages: 2,
         totalNftCount: 2,
@@ -2662,7 +2657,6 @@ describe('AppController (e2e)', () => {
             ipfsHash: 'ipfs://.....',
             metadata: null,
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '4-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -2722,7 +2716,7 @@ describe('AppController (e2e)', () => {
         }
       }
 
-      expect(res.body).toStrictEqual({
+      expect(res.body).toMatchObject({
         currentPage: 1,
         numberOfPages: 2,
         totalNftCount: 2,
@@ -2734,7 +2728,6 @@ describe('AppController (e2e)', () => {
             ipfsHash: 'ipfs://.....',
             metadata: null,
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '4-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -2780,7 +2773,7 @@ describe('AppController (e2e)', () => {
       .get('/users/nftOwnershipsPending')
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
-    expect(res.body).toStrictEqual([
+    expect(res.body).toMatchObject([
       { nftId: '1', ownerStatuses: ['pending'] },
       {
         nftId: '4',
@@ -2793,7 +2786,7 @@ describe('AppController (e2e)', () => {
     const res = await request(app.getHttpServer()).get('/users/topBuyers');
     expect(res.statusCode).toEqual(200);
 
-    expect(res.body).toStrictEqual({
+    expect(res.body).toMatchObject({
       topBuyers: [
         {
           userId: 1,
@@ -2822,7 +2815,7 @@ describe('AppController (e2e)', () => {
     const res = await request(app.getHttpServer()).get('/categories');
 
     expect(res.statusCode).toEqual(200);
-    expect(res.body).toStrictEqual([
+    expect(res.body).toMatchObject([
       {
         id: 1,
         name: 'Fine Art',
@@ -2952,7 +2945,7 @@ describe('AppController (e2e)', () => {
     );
 
     expect(res.statusCode).toEqual(200);
-    expect(res.body).toStrictEqual({
+    expect(res.body).toMatchObject({
       categories: [
         {
           id: 1,
@@ -3145,7 +3138,7 @@ describe('AppController (e2e)', () => {
       '/users/topBuyers',
     );
     expect(topBuyersResBefore.statusCode).toEqual(200);
-    expect(topBuyersResBefore.body).toStrictEqual({
+    expect(topBuyersResBefore.body).toMatchObject({
       topBuyers: [
         {
           userId: 1,
@@ -3192,7 +3185,7 @@ describe('AppController (e2e)', () => {
       '/users/topBuyers',
     );
     expect(topBuyersResAfter.statusCode).toEqual(200);
-    expect(topBuyersResAfter.body).toStrictEqual({
+    expect(topBuyersResAfter.body).toMatchObject({
       topBuyers: [
         {
           userId: 1,
@@ -3249,7 +3242,7 @@ describe('AppController (e2e)', () => {
       '/users/topBuyers',
     );
     expect(topBuyersResAfter.statusCode).toEqual(200);
-    expect(topBuyersResAfter.body).toStrictEqual({
+    expect(topBuyersResAfter.body).toMatchObject({
       topBuyers: [
         {
           userId: 1,
@@ -3379,9 +3372,9 @@ describe('AppController (e2e)', () => {
         delete paymentIntentRes.body.nfts[i].onsaleUntil;
       }
     }
-    expect(paymentIntentRes.body).toEqual({
+    expect(paymentIntentRes.body).toMatchObject({
       paymentDetails: {
-        receiverAddress: 'KT1MZTPQFdEZKLXtdQzpuA4MFt5ZkmKqFqkq',
+        receiverAddress: TEZPAY_PAYPOINT_ADDRESS,
       },
       currency: 'XTZ',
       nfts: [
@@ -3404,7 +3397,6 @@ describe('AppController (e2e)', () => {
           id: 8,
           ipfsHash: null,
           metadataIpfs: null,
-          mintOperationHash: null,
           artifactIpfs: null,
           displayIpfs: null,
           thumbnailIpfs: null,
@@ -3434,7 +3426,6 @@ describe('AppController (e2e)', () => {
           ipfsHash: null,
           metadata: null,
           metadataIpfs: null,
-          mintOperationHash: null,
           artifactIpfs: null,
           displayIpfs: null,
           thumbnailIpfs: null,
@@ -3453,6 +3444,10 @@ describe('AppController (e2e)', () => {
     delete resBefore.body.user?.createdAt;
 
     for (const i in resBefore.body.collection.nfts) {
+      if (typeof resBefore.body.collection.nfts[i].mintOperationHash != null) {
+        resBefore.body.collection.nfts[i].mintOperationHash = null;
+      }
+
       expect(resBefore.body.collection.nfts[i].createdAt).toBeGreaterThan(0);
       delete resBefore.body.collection.nfts[i].createdAt;
       if (typeof resBefore.body.collection.nfts[i].onsaleFrom !== 'undefined') {
@@ -3500,7 +3495,7 @@ describe('AppController (e2e)', () => {
       }
     }
 
-    expect(resBefore.body).toStrictEqual({
+    expect(resBefore.body).toMatchObject({
       collection: {
         currentPage: 1,
         lowerPriceBound: '0.10',
@@ -3530,7 +3525,6 @@ describe('AppController (e2e)', () => {
               },
             },
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '1-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '1-thumbnail-ipfs-hash',
@@ -3561,7 +3555,6 @@ describe('AppController (e2e)', () => {
             ipfsHash: 'ipfs://.....',
             metadata: null,
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '4-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -3601,7 +3594,6 @@ describe('AppController (e2e)', () => {
           id: 4,
           ipfsHash: 'ipfs://.....',
           metadataIpfs: 'ipfs://.....',
-          mintOperationHash: null,
           artifactIpfs: '4-artifact-ipfs-hash',
           displayIpfs: null,
           thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -3644,7 +3636,7 @@ describe('AppController (e2e)', () => {
         delete cartBefore.body.nfts[i].onsaleUntil;
       }
     }
-    expect(cartBefore.body).toEqual({
+    expect(cartBefore.body).toMatchObject({
       nfts: [
         {
           artifactUri:
@@ -3666,7 +3658,6 @@ describe('AppController (e2e)', () => {
           ipfsHash: null,
           metadata: null,
           metadataIpfs: null,
-          mintOperationHash: null,
           artifactIpfs: null,
           displayIpfs: null,
           thumbnailIpfs: null,
@@ -3696,7 +3687,6 @@ describe('AppController (e2e)', () => {
           ipfsHash: null,
           metadata: null,
           metadataIpfs: null,
-          mintOperationHash: null,
           artifactIpfs: null,
           displayIpfs: null,
           thumbnailIpfs: null,
@@ -3749,15 +3739,11 @@ describe('AppController (e2e)', () => {
       expect(resAfter.body.pendingOwnership[i].createdAt).toBeGreaterThan(0);
       delete resAfter.body.pendingOwnership[i].createdAt;
 
-      if (
-        typeof resAfter.body.pendingOwnership[i].onsaleFrom !== 'undefined'
-      ) {
+      if (typeof resAfter.body.pendingOwnership[i].onsaleFrom !== 'undefined') {
         expect(resAfter.body.pendingOwnership[i].launchAt).toEqual(
           resAfter.body.pendingOwnership[i].onsaleFrom,
         );
-        expect(resAfter.body.pendingOwnership[i].onsaleFrom).toBeGreaterThan(
-          0,
-        );
+        expect(resAfter.body.pendingOwnership[i].onsaleFrom).toBeGreaterThan(0);
         delete resAfter.body.pendingOwnership[i].launchAt;
         delete resAfter.body.pendingOwnership[i].onsaleFrom;
       }
@@ -3771,7 +3757,7 @@ describe('AppController (e2e)', () => {
       }
     }
 
-    expect(resAfter.body).toStrictEqual({
+    expect(resAfter.body).toMatchObject({
       collection: {
         currentPage: 1,
         lowerPriceBound: '0.10',
@@ -3801,7 +3787,6 @@ describe('AppController (e2e)', () => {
               },
             },
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '1-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '1-thumbnail-ipfs-hash',
@@ -3832,7 +3817,6 @@ describe('AppController (e2e)', () => {
             ipfsHash: 'ipfs://.....',
             metadata: null,
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '4-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -3873,7 +3857,6 @@ describe('AppController (e2e)', () => {
           ipfsHash: 'ipfs://.....',
           metadata: null,
           metadataIpfs: 'ipfs://.....',
-          mintOperationHash: null,
           artifactIpfs: '4-artifact-ipfs-hash',
           displayIpfs: null,
           thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -3904,7 +3887,6 @@ describe('AppController (e2e)', () => {
           ipfsHash: null,
           metadata: null,
           metadataIpfs: null,
-          mintOperationHash: null,
           artifactIpfs: null,
           displayIpfs: null,
           thumbnailIpfs: null,
@@ -3936,7 +3918,6 @@ describe('AppController (e2e)', () => {
           ipfsHash: null,
           metadata: null,
           metadataIpfs: null,
-          mintOperationHash: null,
           artifactIpfs: null,
           displayIpfs: null,
           thumbnailIpfs: null,

@@ -149,8 +149,8 @@ WHERE address = $1
     ]);
     for (const nft of owned.nfts) {
       nft.ownershipInfo = [
-        ...(nft.ownershipInfo || []),
-        ...statuses[nft.id].filter(
+        ...(nft.ownershipInfo ?? []),
+        ...(statuses[nft.id] ?? []).filter(
           (x: OwnershipInfo) => x.status === OwnershipStatus.PENDING_ONCHAIN,
         ),
       ];

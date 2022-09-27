@@ -131,7 +131,7 @@ export class PaymentService {
         throw Err('Unknown stripe webhook event');
     }
 
-    await this.#updatePaymentStatus(
+    await this.updatePaymentStatus(
       constructedEvent.data.object.id,
       paymentStatus,
     );
@@ -143,7 +143,7 @@ export class PaymentService {
       throw `user (id=${userId}) not allowed to promise payment paid for order of other user (id=${order.userId})`;
     }
 
-    await this.#updatePaymentStatus(paymentId, PaymentStatus.PROMISED);
+    await this.updatePaymentStatus(paymentId, PaymentStatus.PROMISED);
     await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       await dbTx.query(
         `
@@ -707,7 +707,11 @@ WHERE nft_order_id = $1
     return qryRes.rowCount > 0;
   }
 
-  async #updatePaymentStatus(paymentId: string, newStatus: PaymentStatus) {
+  async updatePaymentStatus(
+    paymentId: string,
+    newStatus: PaymentStatus,
+    async_finalize = true,
+  ) {
     const prevStatus = await withTransaction(
       this.conn,
       async (dbTx: DbTransaction) => {
@@ -756,13 +760,18 @@ WHERE payment_id = $2
       newStatus === PaymentStatus.SUCCEEDED &&
       !this.FINAL_STATES.includes(prevStatus)
     ) {
-      const orderId = await this.getPaymentOrderId(paymentId);
-      this.#orderCheckout(orderId);
+      const finalize = (async () => {
+        const orderId = await this.getPaymentOrderId(paymentId);
+        await this.#orderCheckout(orderId);
 
-      // cancel other payment intents (if any)
-      withTransaction(this.conn, async (dbTx: DbTransaction) => {
-        this.cancelNftOrder(dbTx, orderId);
-      });
+        // cancel other payment intents (if any)
+        await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+          await this.cancelNftOrder(dbTx, orderId);
+        });
+      })();
+      if (!async_finalize) {
+        await finalize;
+      }
     }
   }
 
@@ -826,7 +835,7 @@ WHERE provider IN ('tezpay', 'wert')
       const paymentStatus = await this.tezpay.get_payment(paymentId);
 
       if (paymentStatus.is_paid_in_full) {
-        await this.#updatePaymentStatus(paymentId, PaymentStatus.SUCCEEDED);
+        await this.updatePaymentStatus(paymentId, PaymentStatus.SUCCEEDED);
         Logger.log(`tezpay succeeded. payment_id=${paymentId}`);
       }
     }
@@ -963,7 +972,7 @@ WHERE provider = 'simplex'
 
       const paymentStatus = getSimplexPaymentStatus(event);
 
-      await this.#updatePaymentStatus(paymentId, paymentStatus);
+      await this.updatePaymentStatus(paymentId, paymentStatus);
       Logger.log(
         `simplex payment ended. payment_id=${paymentId} paymentStatus:${paymentStatus}`,
       );

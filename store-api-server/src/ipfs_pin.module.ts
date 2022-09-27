@@ -18,12 +18,14 @@ axiosRetry(axios, {
 export class PinataService {
   enabled(): boolean {
     if (typeof PINATA_API_KEY === 'undefined') {
+      throw `failed to upload NFT to IPFS, NftIpfsService not enabled: PINATA_API_KEY env var not set`;
       Logger.warn(
         `failed to upload NFT to IPFS, NftIpfsService not enabled: PINATA_API_KEY env var not set`,
       );
       return false;
     }
     if (typeof PINATA_API_SECRET === 'undefined') {
+      throw `failed to upload NFT to IPFS, NftIpfsService not enabled: PINATA_API_SECRET env var not set`;
       Logger.warn(
         `failed to upload NFT to IPFS, NftIpfsService not enabled: PINATA_API_SECRET env var not set`,
       );
@@ -63,7 +65,7 @@ export class PinataService {
       });
   }
 
-  async pinJson(jsonData: string): Promise<string> {
+  async pinJson(jsonData: any): Promise<string> {
     return axios
       .post('https://api.pinata.cloud/pinning/pinJSONToIPFS', jsonData, {
         headers: {

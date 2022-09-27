@@ -3,6 +3,9 @@ import { assertEnv } from './utils.js';
 export const PG_CONNECTION = 'PG_CONNECTION';
 export const IPFS_PIN_PROVIDER = 'IPFS_PIN_PROVIDER';
 
+export const MOCK_IPFS_PINNING: boolean =
+  (process.env['MOCK_IPFS_PINNING'] || 'no') === 'yes';
+
 // source: https://www.postgresql.org/docs/current/errcodes-appendix.html
 export const PG_FOREIGN_KEY_VIOLATION_ERRCODE = '23503';
 export const PG_UNIQUE_VIOLATION_ERRCODE = '23505';
@@ -17,6 +20,8 @@ export const TEZOS_NETWORK = assertEnv('TEZOS_NETWORK');
 export const KANVAS_CONTRACT = assertEnv('KANVAS_CONTRACT');
 export const MINTER_ADDRESS = assertEnv('MINTER_TZ_ADDRESS');
 export const ADMIN_PUBLIC_KEY = assertEnv('ADMIN_PUBLIC_KEY'); // this should be the revealed public key associated to the MINTER_ADDRESS (MINTER_ADDRESS is the public key hash)
+
+export const DEFAULT_ROYALTIES_MINTER_SHARE = 10;
 
 export const STORE_PUBLISHERS = ['Tezos'];
 

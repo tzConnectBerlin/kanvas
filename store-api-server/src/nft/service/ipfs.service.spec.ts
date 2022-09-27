@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DbMock } from '../../mock/db.module';
-import { NftEntity } from '../entity/nft.entity.js';
+import { NftEntity } from '../entity/nft.entity';
 import { NftIpfsService } from '../../nft/service/ipfs.service';
-import { IpfsPinMock } from '../../mock/ipfs_pin.module.js';
+import { IpfsPinMock } from '../../mock/ipfs_pin.module';
+import { MINTER_ADDRESS } from '../../constants';
 
 describe('NftService', () => {
   let service: NftIpfsService;
@@ -64,7 +65,7 @@ describe('NftService', () => {
           },
         ],
         isBooleanAmount: true,
-        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        minter: process.env['MINTER_TZ_ADDRESS'],
         name: 'test',
         publishers: ['Tezos'],
         signature: 'not signed',
@@ -115,7 +116,7 @@ describe('NftService', () => {
           },
         ],
         isBooleanAmount: true,
-        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        minter: process.env['MINTER_TZ_ADDRESS'],
         name: 'A Test',
         publishers: ['Tezos'],
         signature: 'not signed',
@@ -160,7 +161,7 @@ describe('NftService', () => {
           },
         ],
         isBooleanAmount: true,
-        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        minter: process.env['MINTER_TZ_ADDRESS'],
         name: 'test',
         publishers: ['Tezos'],
         signature: 'not signed',
@@ -222,7 +223,7 @@ describe('NftService', () => {
           },
         ],
         isBooleanAmount: true,
-        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        minter: process.env['MINTER_TZ_ADDRESS'],
         name: 'test',
         publishers: ['Tezos'],
         signature: 'not signed',
@@ -271,7 +272,7 @@ describe('NftService', () => {
           },
         ],
         isBooleanAmount: false,
-        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        minter: process.env['MINTER_TZ_ADDRESS'],
         name: 'test',
         publishers: ['Tezos'],
         signature: 'not signed',
@@ -320,7 +321,7 @@ describe('NftService', () => {
           },
         ],
         isBooleanAmount: false,
-        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        minter: process.env['MINTER_TZ_ADDRESS'],
         name: 'test',
         publishers: ['Tezos'],
         signature: 'not signed',
@@ -370,7 +371,7 @@ describe('NftService', () => {
           },
         ],
         isBooleanAmount: true,
-        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        minter: process.env['MINTER_TZ_ADDRESS'],
         name: 'test',
         publishers: ['Tezos'],
         signature: 'not signed',
@@ -409,7 +410,7 @@ describe('NftService', () => {
           },
         ],
         isBooleanAmount: true,
-        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        minter: process.env['MINTER_TZ_ADDRESS'],
         name: 'test',
         publishers: ['Tezos'],
         signature: 'not signed',
@@ -453,7 +454,7 @@ describe('NftService', () => {
           },
         ],
         isBooleanAmount: true,
-        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        minter: process.env['MINTER_TZ_ADDRESS'],
         name: 'test',
         publishers: ['Tezos'],
         signature: 'not signed',
@@ -494,7 +495,7 @@ describe('NftService', () => {
           },
         ],
         isBooleanAmount: true,
-        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        minter: process.env['MINTER_TZ_ADDRESS'],
         name: 'test',
         publishers: ['Tezos'],
         signature: 'not signed',
@@ -539,7 +540,7 @@ describe('NftService', () => {
           },
         ],
         isBooleanAmount: true,
-        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        minter: process.env['MINTER_TZ_ADDRESS'],
         name: 'test',
         publishers: ['Tezos'],
         signature: 'not signed',
@@ -584,7 +585,7 @@ describe('NftService', () => {
           },
         ],
         isBooleanAmount: true,
-        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        minter: process.env['MINTER_TZ_ADDRESS'],
         name: 'test',
         publishers: ['Tezos'],
         signature: 'not signed',
@@ -629,7 +630,7 @@ describe('NftService', () => {
           },
         ],
         isBooleanAmount: true,
-        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        minter: process.env['MINTER_TZ_ADDRESS'],
         name: 'test',
         publishers: ['Tezos'],
         signature: 'not signed',
@@ -674,7 +675,7 @@ describe('NftService', () => {
           },
         ],
         isBooleanAmount: true,
-        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        minter: process.env['MINTER_TZ_ADDRESS'],
         name: 'test',
         publishers: ['Tezos'],
         signature: 'not signed',
@@ -719,7 +720,7 @@ describe('NftService', () => {
           },
         ],
         isBooleanAmount: true,
-        minter: 'tz1Qgrh4svmkGmF7acZQ91xpNh7ZNfaGndyx',
+        minter: process.env['MINTER_TZ_ADDRESS'],
         name: 'test',
         publishers: ['Tezos'],
         signature: 'not signed',
@@ -729,6 +730,12 @@ describe('NftService', () => {
   ];
   for (const tc of testcases) {
     it(tc.name, async () => {
+      tc.exp.royalties = {
+        decimals: 2,
+        shares: {},
+      };
+      tc.exp.royalties.shares[`${MINTER_ADDRESS}`] = 10;
+
       const got = await service.nftMetadataJson(tc.nft, 'not signed');
       expect(got).toEqual(tc.exp);
     });
