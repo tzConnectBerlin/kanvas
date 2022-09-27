@@ -29,3 +29,10 @@ curl "https://raw.githubusercontent.com/tzConnectBerlin/peppermint/${PEPPERMINT_
 curl "https://raw.githubusercontent.com/tzConnectBerlin/tezpay/${TEZPAY_VERSION}/server/database/schema.sql" 2>/dev/null | psql || exit 1
 
 ./script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1
+psql <<EOF
+BEGIN;
+
+`cat db_procedures/*`
+
+COMMIT;
+EOF
