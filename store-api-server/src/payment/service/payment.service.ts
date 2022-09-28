@@ -143,7 +143,13 @@ export class PaymentService {
       throw `user (id=${userId}) not allowed to promise payment paid for order of other user (id=${order.userId})`;
     }
 
-    await this.updatePaymentStatus(paymentId, PaymentStatus.PROMISED);
+    try {
+      await this.updatePaymentStatus(paymentId, PaymentStatus.PROMISED);
+    } catch (err: any) {
+      Logger.warn(`failed to update status to promised, err: ${err}`);
+      return;
+    }
+
     await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       await dbTx.query(
         `
@@ -715,6 +721,8 @@ WHERE nft_order_id = $1
     const prevStatus = await withTransaction(
       this.conn,
       async (dbTx: DbTransaction) => {
+        dbTx.query('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
+
         const qryPrevStatus = await dbTx.query(
           `
 SELECT status

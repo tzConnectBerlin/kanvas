@@ -30,6 +30,7 @@ import sotez from 'sotez';
 import { v4 as uuidv4 } from 'uuid';
 import Pool from 'pg-pool';
 import { runOnchainEnabledTests } from './onchain_enabled';
+import { runIsolatedTests } from './isolated_e2e';
 const { cryptoUtils } = sotez;
 
 let anyTestFailed = false;
@@ -90,6 +91,7 @@ describe('AppController (e2e)', () => {
     });
   });
 
+  runIsolatedTests(() => [app, paymentService]);
   runOnchainEnabledTests(() => [app, paymentService]);
 
   // Note:
@@ -3945,7 +3947,6 @@ describe('AppController (e2e)', () => {
 });
 
 async function getPaymentStatus(paymentId: string): Promise<PaymentStatus> {
-  console.log(`paymentId: ${paymentId}`);
   const db = newDbConn();
   const qryRes = await db.query(
     `
@@ -3957,7 +3958,6 @@ WHERE payment_id = $1
   );
   await db.end();
 
-  console.log(qryRes);
   return qryRes.rows[0].status;
 }
 

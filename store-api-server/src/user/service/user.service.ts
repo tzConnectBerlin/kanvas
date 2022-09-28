@@ -29,7 +29,7 @@ import ts_results from 'ts-results';
 const { Ok, Err } = ts_results;
 import { S3Service } from '../../s3.service.js';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { assertEnv } from '../../utils.js';
+import { assertEnv, isBottom } from '../../utils.js';
 import { DbPool, DbTransaction, withTransaction } from '../../db.module.js';
 
 import { createRequire } from 'module';
@@ -434,20 +434,28 @@ VALUES ($1, $2)`,
 SELECT
   (SELECT reserved + owned FROM nft_editions_locked($1)) AS editions_locked,
   nft.editions_size,
-  nft.onsale_from
+  nft.onsale_from,
+  nft.onsale_until
 FROM nft
 WHERE nft.id = $1`,
         [nftId],
       );
-      if (qryRes.rows[0]['editions_locked'] > qryRes.rows[0]['editions_size']) {
+      const nft = qryRes.rows[0];
+      if (nft['editions_locked'] > nft['editions_size']) {
         throw new HttpException(
           'All editions of this nft have been reserved/bought',
           HttpStatus.BAD_REQUEST,
         );
       }
-      if (qryRes.rows[0]['onsale_from'] > new Date()) {
+      if (nft['onsale_from'] > new Date()) {
         throw new HttpException(
           'This nft is not yet for sale',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      if (!isBottom(nft['onsale_until']) && nft['onsale_until'] < new Date()) {
+        throw new HttpException(
+          'This nft is no longer for sale',
           HttpStatus.BAD_REQUEST,
         );
       }
