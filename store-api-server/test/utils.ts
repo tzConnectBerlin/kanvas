@@ -143,7 +143,19 @@ export async function cartAdd(app: any, nftId: number, wallet: Wallet) {
   expect(resp.statusCode).toEqual(201);
 }
 
-export async function checkout(paymentService: PaymentService, wallet: Wallet) {
+export async function cartList(app: any, wallet: Wallet) {
+  const resp = await request(app.getHttpServer())
+    .get(`/users/cart/list`)
+    .set('authorization', wallet.login.bearer);
+  expect(resp.statusCode).toEqual(200);
+  return resp.body;
+}
+
+export async function checkout(
+  paymentService: PaymentService,
+  wallet: Wallet,
+  finalStatus = PaymentStatus.SUCCEEDED,
+): Promise<{ paymentId: string }> {
   const usr = <UserEntity>{
     userAddress: wallet.pkh,
     id: wallet.login.id,
@@ -163,35 +175,41 @@ export async function checkout(paymentService: PaymentService, wallet: Wallet) {
     wallet.login.id,
   );
 
-  await paymentService.updatePaymentStatus(
-    paymentId,
-    PaymentStatus.SUCCEEDED,
-    false,
-  );
+  await paymentService.updatePaymentStatus(paymentId, finalStatus, false);
+  return { paymentId };
+}
+
+export async function withDbConn<ResTy>(
+  f: (dbConn: Pool<Client>) => Promise<ResTy>,
+): Promise<ResTy> {
+  const db = newDbConn();
+  const res = await f(db);
+  await db.end();
+  return res;
 }
 
 export async function resetDb(resetForLegacyTest = false): Promise<number[]> {
-  const db = newDbConn();
+  return await withDbConn(async (db) => {
+    await db.query('update cart_session set order_id = null');
 
-  const tables = [
-    'mtm_kanvas_user_nft',
-    'mtm_cart_session_nft',
-    'mtm_nft_category',
-    'mtm_nft_order_nft',
-    'payment',
-    'nft_order',
-    'kanvas_user',
-    'cart_session',
-    'nft',
-    'nft_category',
-  ];
+    const tables = [
+      'mtm_kanvas_user_nft',
+      'mtm_cart_session_nft',
+      'mtm_nft_category',
+      'mtm_nft_order_nft',
+      'payment',
+      'nft_order',
+      'kanvas_user',
+      'cart_session',
+      'nft',
+      'nft_category',
+    ];
+    for (const t of tables) {
+      await db.query(`delete from ${t}`);
+    }
 
-  for (const t of tables) {
-    await db.query(`delete from ${t}`);
-  }
-
-  const resetSequencesQryRes = await db.query(
-    `
+    const resetSequencesQryRes = await db.query(
+      `
 SELECT 'alter sequence ' || S.relname || ' restart;' AS sequence
 FROM pg_class AS S, pg_depend AS D, pg_class AS T, pg_attribute AS C, pg_tables AS PGT
 WHERE S.relkind = 'S'
@@ -212,21 +230,21 @@ WHERE S.relkind = 'S'
     }
 ORDER BY S.relname;
     `,
-  );
-  for (const resetSeq of resetSequencesQryRes.rows) {
-    await db.query(resetSeq['sequence']);
-  }
+    );
+    for (const resetSeq of resetSequencesQryRes.rows) {
+      await db.query(resetSeq['sequence']);
+    }
 
-  await db.query(
-    readFileSync('script/populate-testdb.sql', { encoding: 'utf8' }),
-  );
+    await db.query(
+      readFileSync('script/populate-testdb.sql', { encoding: 'utf8' }),
+    );
 
-  const nftIds = (await db.query(`SELECT id FROM nft ORDER BY id`)).rows.map(
-    (row: any) => row['id'],
-  );
+    const nftIds = (await db.query(`SELECT id FROM nft ORDER BY id`)).rows.map(
+      (row: any) => row['id'],
+    );
 
-  await db.end();
-  return nftIds;
+    return nftIds;
+  });
 }
 
 export function newDbConn(): Pool<Client> {
