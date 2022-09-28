@@ -32,6 +32,7 @@ import Pool from 'pg-pool';
 import { runOnchainEnabledTests } from './onchain_enabled';
 import { runIsolatedTests } from './isolated_e2e';
 const { cryptoUtils } = sotez;
+import * as testUtils from './utils';
 
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {
@@ -1882,7 +1883,6 @@ describe('AppController (e2e)', () => {
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
         usr.id,
       );
-      // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.payment_failed',
         data: {
@@ -1892,15 +1892,8 @@ describe('AppController (e2e)', () => {
         },
       };
       await paymentService.webhookHandler(constructedEvent);
-      // Check failed payment don't get to timeout
       const failed = await paymentService.getPaymentForLatestUserOrder(usr.id);
       expect(failed.status).toEqual(PaymentStatus.FAILED);
-      // Check canceled payment don't get to timeout
-      await paymentService.deleteExpiredPayments();
-      const stillFailed = await paymentService.getPaymentForLatestUserOrder(
-        usr.id,
-      );
-      expect(stillFailed.status).toEqual(PaymentStatus.FAILED);
 
       const preparedOrder2 = await paymentService.createPayment(
         usr,
@@ -2023,7 +2016,6 @@ describe('AppController (e2e)', () => {
         usr.id,
       );
 
-      // Calling success status
       await paymentService.updatePaymentStatus(
         payment5Data.paymentId,
         PaymentStatus.SUCCEEDED,
@@ -2113,13 +2105,13 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail(
-    'stripe payment: Payment status should not change from FAILED',
+    'stripe payment: Payment status should be able to change from FAILED',
     async () => {
-      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      const { bearer, id, address } = await loginUser(app, 'tz1', 'test');
       const usr = <UserEntity>{ userAddress: address, id: id };
 
       const add1 = await request(app.getHttpServer())
-        .post('/users/cart/add/4')
+        .post('/users/cart/add/6')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
@@ -2152,26 +2144,16 @@ describe('AppController (e2e)', () => {
       const failed = await paymentService.getPaymentForLatestUserOrder(id);
       expect(failed.status).toEqual(PaymentStatus.FAILED);
 
-      // reconstruct success event from stripe
-      const constructedEvent2 = {
-        type: 'payment_intent.succeeded',
-        data: {
-          object: {
-            id: failed.paymentId,
-          },
-        },
-      };
+      await paymentService.updatePaymentStatus(
+        failed.paymentId,
+        PaymentStatus.SUCCEEDED,
+        false,
+      );
 
-      // Calling success status
-      await paymentService.webhookHandler(constructedEvent2);
-
-      const stillFailed = await paymentService.getPaymentForLatestUserOrder(id);
-      expect(stillFailed.status).toEqual(PaymentStatus.FAILED);
-
-      const cleanupCart = await request(app.getHttpServer())
-        .post('/users/cart/remove/4')
-        .set('authorization', bearer);
-      expect(cleanupCart.statusCode).toEqual(204);
+      const nowSucceeded = await paymentService.getPaymentForLatestUserOrder(
+        id,
+      );
+      expect(nowSucceeded.status).toEqual(PaymentStatus.SUCCEEDED);
     },
   );
 
@@ -2796,6 +2778,12 @@ describe('AppController (e2e)', () => {
           userPicture: null,
           totalPaid: '13.00',
         },
+        {
+          totalPaid: '1.70',
+          userAddress: 'tz1',
+          userId: 2,
+          userPicture: null,
+        },
       ],
     });
   });
@@ -3148,6 +3136,12 @@ describe('AppController (e2e)', () => {
           userPicture: null,
           totalPaid: '13.00',
         },
+        {
+          totalPaid: '1.70',
+          userAddress: 'tz1',
+          userId: 2,
+          userPicture: null,
+        },
       ],
     });
 
@@ -3194,6 +3188,12 @@ describe('AppController (e2e)', () => {
           userAddress: 'addr',
           userPicture: null,
           totalPaid: '12.90',
+        },
+        {
+          totalPaid: '1.70',
+          userAddress: 'tz1',
+          userId: 2,
+          userPicture: null,
         },
       ],
     });
@@ -3251,6 +3251,12 @@ describe('AppController (e2e)', () => {
           userAddress: 'addr',
           userPicture: null,
           totalPaid: '13.00',
+        },
+        {
+          totalPaid: '1.70',
+          userAddress: 'tz1',
+          userId: 2,
+          userPicture: null,
         },
       ],
     });
