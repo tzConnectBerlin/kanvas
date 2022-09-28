@@ -74,5 +74,67 @@ WHERE id = ${nftIds[0]}
         nfts: [],
       });
     });
+
+    for (const tc of [
+      {
+        input: {
+          afterPaymentStatus: PaymentStatus.SUCCEEDED,
+        },
+        exp: {
+          statusCode: 201,
+          paymentStatus: PaymentStatus.SUCCEEDED,
+        },
+      },
+      {
+        input: {
+          afterPaymentStatus: PaymentStatus.PROMISED,
+        },
+        exp: {
+          statusCode: 400,
+          paymentStatus: PaymentStatus.PROMISED,
+        },
+      },
+      {
+        input: {
+          afterPaymentStatus: PaymentStatus.FAILED,
+        },
+        exp: {
+          statusCode: 400,
+          paymentStatus: PaymentStatus.FAILED,
+        },
+      },
+    ]) {
+      it(`An order that is promise-paid _after_ status changed to ${tc.input.afterPaymentStatus} => promise-paid returns ${tc.exp.statusCode} and payment status is ${tc.exp.paymentStatus}`, async () => {
+        const wallet1 = await testUtils.newWallet(app);
+
+        const cartAdd = await request(app.getHttpServer())
+          .post(`/users/cart/add/${nftIds[0]}`)
+          .set('authorization', wallet1.login.bearer);
+        expect(cartAdd.statusCode).toEqual(201);
+
+        const checkoutData = await testUtils.checkout(
+          paymentService,
+          wallet1,
+          tc.input.afterPaymentStatus,
+        );
+
+        const promisePaidResp = await request(app.getHttpServer())
+          .post(`/payment/promise-paid`)
+          .send({ payment_id: checkoutData.paymentId })
+          .set('authorization', wallet1.login.bearer);
+        expect(promisePaidResp.statusCode).toEqual(tc.exp.statusCode);
+
+        await testUtils.withDbConn(async (db) => {
+          const statusQryRes = await db.query(
+            'SELECT status FROM payment WHERE payment_id = $1',
+            [checkoutData.paymentId],
+          );
+
+          expect(statusQryRes.rows[0]['status']).toStrictEqual(
+            tc.exp.paymentStatus,
+          );
+        });
+      });
+    }
   });
 }

@@ -151,7 +151,11 @@ export async function cartList(app: any, wallet: Wallet) {
   return resp.body;
 }
 
-export async function checkout(paymentService: PaymentService, wallet: Wallet) {
+export async function checkout(
+  paymentService: PaymentService,
+  wallet: Wallet,
+  finalStatus = PaymentStatus.SUCCEEDED,
+): Promise<{ paymentId: string }> {
   const usr = <UserEntity>{
     userAddress: wallet.pkh,
     id: wallet.login.id,
@@ -171,11 +175,8 @@ export async function checkout(paymentService: PaymentService, wallet: Wallet) {
     wallet.login.id,
   );
 
-  await paymentService.updatePaymentStatus(
-    paymentId,
-    PaymentStatus.SUCCEEDED,
-    false,
-  );
+  await paymentService.updatePaymentStatus(paymentId, finalStatus, false);
+  return { paymentId };
 }
 
 export async function withDbConn<ResTy>(
@@ -189,6 +190,8 @@ export async function withDbConn<ResTy>(
 
 export async function resetDb(resetForLegacyTest = false): Promise<number[]> {
   return await withDbConn(async (db) => {
+    await db.query('update cart_session set order_id = null');
+
     const tables = [
       'mtm_kanvas_user_nft',
       'mtm_cart_session_nft',
@@ -201,7 +204,6 @@ export async function resetDb(resetForLegacyTest = false): Promise<number[]> {
       'nft',
       'nft_category',
     ];
-
     for (const t of tables) {
       await db.query(`delete from ${t}`);
     }

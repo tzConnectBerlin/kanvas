@@ -146,6 +146,21 @@ export class PaymentService {
     try {
       await this.updatePaymentStatus(paymentId, PaymentStatus.PROMISED);
     } catch (err: any) {
+      const paymentStatusQryResp = await this.conn.query(
+        `
+SELECT status
+FROM payment
+WHERE payment_id = $1
+        `,
+        [paymentId],
+      );
+
+      if (
+        paymentStatusQryResp.rowCount === 0 ||
+        paymentStatusQryResp.rows[0]['status'] !== PaymentStatus.SUCCEEDED
+      ) {
+        throw err;
+      }
       Logger.warn(`failed to update status to promised, err: ${err}`);
       return;
     }
