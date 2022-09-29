@@ -143,7 +143,7 @@ WHERE id = $1
       formats,
 
       minter: MINTER_ADDRESS,
-      creators: [], // TODO
+      creators: [MINTER_ADDRESS],
       contributors: [], // TODO
       publishers: STORE_PUBLISHERS,
 

@@ -772,10 +772,7 @@ WHERE payment_id = $2
         return prevStatus;
       },
     ).catch((err: any) => {
-      Logger.error(
-        `Err on updating payment status in db (paymentId=${paymentId}, newStatus=${newStatus}), err: ${err}`,
-      );
-      throw err;
+      throw `Err on updating payment status in db (paymentId=${paymentId}, newStatus=${newStatus}), err: ${err}`;
     });
 
     Logger.log(`Payment with id=${paymentId}: ${prevStatus}->${newStatus}`);
