@@ -867,7 +867,6 @@ WHERE provider IN ('tezpay', 'wert')
 
   @Cron(CronExpression.EVERY_MINUTE)
   async checkPendingSimplex() {
-    Logger.log('getSimplexEvents START');
     const pendingPaymentIds = await this.conn.query(
       `
 SELECT
@@ -1015,7 +1014,6 @@ WHERE provider = 'simplex'
         }
       }
     }
-    Logger.log('getSimplexEvents FINISH successfully');
   }
 
   async cancelNftOrder(
