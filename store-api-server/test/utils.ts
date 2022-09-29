@@ -183,9 +183,12 @@ export async function withDbConn<ResTy>(
   f: (dbConn: Pool<Client>) => Promise<ResTy>,
 ): Promise<ResTy> {
   const db = newDbConn();
-  const res = await f(db);
-  await db.end();
-  return res;
+  try {
+    const res = await f(db);
+    return res;
+  } finally {
+    db.end();
+  }
 }
 
 export async function resetDb(resetForLegacyTest = false): Promise<number[]> {

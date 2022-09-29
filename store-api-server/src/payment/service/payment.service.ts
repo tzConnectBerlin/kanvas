@@ -85,7 +85,6 @@ export class PaymentService {
   stripe = STRIPE_SECRET ? stripe(STRIPE_SECRET) : undefined;
 
   FINAL_STATES = [
-    PaymentStatus.FAILED,
     PaymentStatus.SUCCEEDED,
     PaymentStatus.CANCELED,
     PaymentStatus.TIMED_OUT,
@@ -157,7 +156,9 @@ WHERE payment_id = $1
 
       if (
         paymentStatusQryResp.rowCount === 0 ||
-        paymentStatusQryResp.rows[0]['status'] !== PaymentStatus.SUCCEEDED
+        ![PaymentStatus.PROCESSING, PaymentStatus.SUCCEEDED].includes(
+          paymentStatusQryResp.rows[0]['status'],
+        )
       ) {
         throw err;
       }
@@ -804,7 +805,7 @@ WHERE payment_id = $2
   ) {
     if (
       newStatus === PaymentStatus.PROMISED &&
-      prevStatus !== PaymentStatus.CREATED
+      [...this.FINAL_STATES, PaymentStatus.PROCESSING].includes(prevStatus)
     ) {
       throw `Cannot update status to promised from ${prevStatus}`;
     }
@@ -822,7 +823,7 @@ FROM nft_order
 JOIN payment
   ON payment.nft_order_id = nft_order.id
 WHERE nft_order.expires_at <= now() AT TIME ZONE 'UTC'
-  AND payment.status IN ('created', 'promised')
+  AND payment.status IN ('created', 'promised', 'failed')
     `,
     );
 
@@ -1029,9 +1030,9 @@ WHERE provider = 'simplex'
 SELECT provider
 FROM payment
 WHERE nft_order_id = $1
-  AND status IN ('created', 'promised', 'timedOut', 'processing')
+  AND NOT status = ANY($2)
       `,
-      [orderId],
+      [orderId, this.FINAL_STATES],
     );
 
     await Promise.all(
@@ -1108,10 +1109,6 @@ WHERE payment_id = $1
     await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       await this.#assignOrderNftsToUser(dbTx, orderId);
 
-      // Don't await results of the transfers. Finish the checkout, any issues
-      // should be solved asynchronously to the checkout process itself.
-      this.mintService.transfer_nfts(order.nfts, order.userAddress);
-
       await this.userService.dropCartByOrderId(orderId, dbTx);
     }).catch((err: any) => {
       Logger.error(
@@ -1119,6 +1116,10 @@ WHERE payment_id = $1
       );
       throw err;
     });
+
+    // This step is done after committing the database related assigning of the NFTs to the user,
+    // if any issues occur with Blockchain related assigning they should be resolved asynchronously
+    await this.mintService.transfer_nfts(order.nfts, order.userAddress);
   }
 
   async #assignOrderNftsToUser(dbTx: any, orderId: number) {

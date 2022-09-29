@@ -87,10 +87,19 @@ WHERE id = ${nftIds[0]}
       },
       {
         input: {
+          afterPaymentStatus: PaymentStatus.PROCESSING,
+        },
+        exp: {
+          statusCode: 201,
+          paymentStatus: PaymentStatus.PROCESSING,
+        },
+      },
+      {
+        input: {
           afterPaymentStatus: PaymentStatus.PROMISED,
         },
         exp: {
-          statusCode: 400,
+          statusCode: 201,
           paymentStatus: PaymentStatus.PROMISED,
         },
       },
@@ -99,8 +108,26 @@ WHERE id = ${nftIds[0]}
           afterPaymentStatus: PaymentStatus.FAILED,
         },
         exp: {
+          statusCode: 201,
+          paymentStatus: PaymentStatus.PROMISED,
+        },
+      },
+      {
+        input: {
+          afterPaymentStatus: PaymentStatus.CANCELED,
+        },
+        exp: {
           statusCode: 400,
-          paymentStatus: PaymentStatus.FAILED,
+          paymentStatus: PaymentStatus.CANCELED,
+        },
+      },
+      {
+        input: {
+          afterPaymentStatus: PaymentStatus.TIMED_OUT,
+        },
+        exp: {
+          statusCode: 400,
+          paymentStatus: PaymentStatus.TIMED_OUT,
         },
       },
     ]) {
