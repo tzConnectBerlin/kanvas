@@ -2226,11 +2226,11 @@ describe('AppController (e2e)', () => {
       nft: {
         id: 35,
         nft_name: 'some name',
-        artifact_ipfs: null,
-        display_ipfs: null,
-        thumbnail_ipfs: null,
+        artifact_ipfs: 'ipfs-mock://someuri',
+        display_ipfs: 'ipfs-mock://someuri',
+        thumbnail_ipfs: 'ipfs-mock://somethumbnailuri',
         metadata: null,
-        metadata_ipfs: null,
+        metadata_ipfs: 'ipfs-mock://some name',
         artifact_uri: 'someuri',
         price: '10510', // in cents in the db
         editions_size: 4,
