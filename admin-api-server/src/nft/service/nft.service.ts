@@ -43,6 +43,8 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const mime = require('mime');
 
+import { getVideoMetadata } from '../../media.js';
+
 @Injectable()
 export class NftService {
   stmFileWatcher: FSWatcher;
@@ -252,6 +254,7 @@ RETURNING id
             nftUpdate.attribute,
             nftUpdate.file,
           );
+          console.log(`nftUpdate: ${JSON.stringify(nftUpdate)}`);
         }
 
         const stmRes = this.stm.tryAttributeApply(
@@ -292,7 +295,7 @@ RETURNING id
       const actor = await this.#getActorForNft(user, nft);
       if (
         !actor.roles.some(
-          (userRole) => userRole === 'creator' || userRole === 'admin',
+          (userRole: string) => userRole === 'creator' || userRole === 'admin',
         )
       ) {
         throw new HttpException(
@@ -365,15 +368,39 @@ WHERE id = $1
       );
     }
 
+    console.log(file);
+
     const extension = mime.getExtension(file.mimetype);
     const fileName = `${FILE_PREFIX}_${nftId}_${attribute}.${extension}`;
-    // we'll simply store the uri as a pointer to the image in our own db
     const contentUri = await this.s3Service.uploadFile(file, fileName);
 
     return <NftUpdate>{
       attribute: attribute,
-      value: JSON.stringify(contentUri),
+      value: JSON.stringify({
+        uri: contentUri,
+        metadata: await this.#contentMetadata(file),
+      }),
     };
+  }
+
+  async #contentMetadata(file: any): Promise<{ [keys: string]: any }> {
+    let res = {
+      mimetype: file.mimetype,
+    };
+    switch (file.mimetype.split('/')[0]) {
+      case 'video':
+        try {
+          const videoMetadata = await getVideoMetadata(file);
+          console.log(`VIDEO METADATA: ${JSON.stringify(videoMetadata)}`);
+          res = { ...res, ...videoMetadata };
+        } catch (err: any) {
+          Logger.warn(`failed to inspect video metadata, err: ${err}`);
+        }
+        break;
+      case 'image':
+        break;
+    }
+    return res;
   }
 
   async #updateNft(setBy: UserEntity, nft: NftEntity) {
@@ -484,14 +511,16 @@ WHERE TARGET.value != EXCLUDED.value
       ADMIN_PRIVATE_KEY,
     );
 
+    console.log(attr.artifact);
+
     await axios.post(STORE_API + '/nfts/create', {
       id: nft.id,
       name: attr.name,
       description: attr.description,
 
-      artifactUri: attr.artifact,
-      displayUri: attr.display,
-      thumbnailUri: attr.thumbnail,
+      artifactUri: attr.artifact.uri,
+      displayUri: attr.display?.uri,
+      thumbnailUri: attr.thumbnail.uri,
 
       price: attr.price,
       categories: attr.categories,
