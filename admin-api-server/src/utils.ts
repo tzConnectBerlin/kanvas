@@ -124,3 +124,10 @@ export function getClientIp(request: any): string {
   const { ip } = request;
   return BEHIND_PROXY ? request.get('X-Forwarded-For') || ip : ip;
 }
+
+export function isBottom(v: any): boolean {
+  // note: v here is checked for Javascripts' bottom values (null and undefined)
+  //       because undefined coerces into null. It's safe because nothing
+  //       else coerces into null (other than null itself).
+  return v == null;
+}
