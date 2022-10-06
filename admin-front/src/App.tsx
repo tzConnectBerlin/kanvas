@@ -1,8 +1,9 @@
 import './App.css';
 import { Admin, Resource } from 'react-admin';
 // import jsonServerProvider from 'ra-data-json-server';
-import { UserList, UserEdit, UserCreate } from './components/Users';
-import { NftList, NftEdit, NftCreate } from './components/Nfts';
+import { UserList, UserEdit, UserCreate } from './components/Users/Users';
+import { NftEdit, NftCreate } from './components/Nfts';
+import { NftList } from './components/Nfts';
 import Dashboard from './components/Dashboard';
 import NotFound from './components/NotFound';
 import authProvider from './auth/authProvider';
@@ -13,9 +14,8 @@ import { theme } from './theme';
 import BurstMode from '@mui/icons-material/BurstMode';
 import { ActivityList } from './components/Activities';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
-import { Label } from '@mui/icons-material';
-import { Route } from "react-router-dom";
-import Profile from "./components/Profile";
+import { Route } from 'react-router-dom';
+import Profile from './components/Profile';
 
 //for data from the nest admin api
 
@@ -30,11 +30,18 @@ function App() {
       layout={CustomLayout}
       catchAll={NotFound}
       dashboard={Dashboard}
-      dataProvider={dataProvider(process.env.REACT_APP_API_SERVER_BASE_URL ?? 'http://localhost:3001')}
+      dataProvider={dataProvider(
+        process.env.REACT_APP_API_SERVER_BASE_URL ?? 'http://localhost:3001',
+      )}
       disableTelemetry
       authProvider={authProvider}
       customRoutes={[
-        <Route exact key={"my-profile"} path="/my-profile" component={Profile} />,
+        <Route
+          exact
+          key={'my-profile'}
+          path="/my-profile"
+          component={Profile}
+        />,
       ]}
       theme={theme}
     >
@@ -56,34 +63,17 @@ function App() {
         list={ActivityList}
         icon={EqualizerIcon}
         options={{
-          label: 'Reporting'
-        }
-        }
+          label: 'Reporting',
+        }}
       />
-      <Resource
-        name="categories"
-      />
-      <Resource
-        name="role"
-      />
-      <Resource
-        name="categories/assignable"
-      />
-      <Resource
-        name="analytics/sales/priceVolume/snapshot"
-      />
-      <Resource
-        name="analytics/sales/NftCount/snapshot"
-      />
-      <Resource
-        name="kanvas.tzconnect.berlin/api/users/topBuyers"
-      />
+      <Resource name="categories" />
+      <Resource name="role" />
+      <Resource name="categories/assignable" />
+      <Resource name="analytics/sales/priceVolume/snapshot" />
+      <Resource name="analytics/sales/NftCount/snapshot" />
+      <Resource name="kanvas.tzconnect.berlin/api/users/topBuyers" />
     </Admin>
   );
 }
 
 export default App;
-function simpleRestProvider(arg0: string) {
-  throw new Error('Function not implemented.');
-}
-
