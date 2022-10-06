@@ -1,160 +1,160 @@
 
---------------------------|---------|----------|---------|---------|-----------------------------------------------------------------------------
+--------------------------|---------|----------|---------|---------|-------------------------------------------------------------------------------------
 
-File                      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                           
+File                      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                                   
 
---------------------------|---------|----------|---------|---------|-----------------------------------------------------------------------------
+--------------------------|---------|----------|---------|---------|-------------------------------------------------------------------------------------
 
-All files                 |   86.16 |    83.87 |   86.06 |   86.16 |                                                                             
+All files                 |   85.36 |    83.45 |   85.24 |   85.36 |                                                                                     
 
- src                      |   83.14 |     75.6 |   83.33 |   83.14 |                                                                             
+ src                      |   82.92 |     75.6 |   83.33 |   82.92 |                                                                                     
 
-  app.module.ts           |     100 |      100 |     100 |     100 |                                                                             
+  app.module.ts           |     100 |      100 |     100 |     100 |                                                                                     
 
-  constants.ts            |     100 |        0 |     100 |     100 | 23-27                                                                       
+  constants.ts            |     100 |        0 |     100 |     100 | 23-27                                                                               
 
-  db.module.ts            |   89.36 |    55.55 |     100 |   89.36 | 35-36,53-54,77-79,85-87                                                     
+  db.module.ts            |   89.36 |    55.55 |     100 |   89.36 | 35-36,53-54,77-79,85-87                                                             
 
-  db_mock.module.ts       |     100 |      100 |     100 |     100 |                                                                             
+  db_mock.module.ts       |     100 |      100 |     100 |     100 |                                                                                     
 
-  main.ts                 |       0 |        0 |       0 |       0 | 1-39                                                                        
+  main.ts                 |       0 |        0 |       0 |       0 | 1-40                                                                                
 
-  utils.ts                |   90.47 |    89.28 |   83.33 |   90.47 | 7-8,12-15,29-32,112-113                                                     
+  utils.ts                |   90.47 |    89.28 |   83.33 |   90.47 | 7-8,12-15,29-32,112-113                                                             
 
- src/analytics            |     100 |      100 |     100 |     100 |                                                                             
+ src/analytics            |     100 |      100 |     100 |     100 |                                                                                     
 
-  analytics.module.ts     |     100 |      100 |     100 |     100 |                                                                             
+  analytics.module.ts     |     100 |      100 |     100 |     100 |                                                                                     
 
-  params.ts               |     100 |      100 |     100 |     100 |                                                                             
+  params.ts               |     100 |      100 |     100 |     100 |                                                                                     
 
- src/analytics/controller |     100 |    94.44 |     100 |     100 |                                                                             
+ src/analytics/controller |     100 |    94.44 |     100 |     100 |                                                                                     
 
-  analytics.controller.ts |     100 |    94.44 |     100 |     100 | 124                                                                         
+  analytics.controller.ts |     100 |    94.44 |     100 |     100 | 124                                                                                 
 
- src/analytics/entity     |     100 |      100 |     100 |     100 |                                                                             
+ src/analytics/entity     |     100 |      100 |     100 |     100 |                                                                                     
 
-  analytics.entity.ts     |     100 |      100 |     100 |     100 |                                                                             
+  analytics.entity.ts     |     100 |      100 |     100 |     100 |                                                                                     
 
- src/analytics/service    |   99.64 |    96.42 |     100 |   99.64 |                                                                             
+ src/analytics/service    |     100 |      100 |     100 |     100 |                                                                                     
 
-  analytics.service.ts    |   99.64 |    96.42 |     100 |   99.64 | 106                                                                         
+  analytics.service.ts    |     100 |      100 |     100 |     100 |                                                                                     
 
- src/auth                 |     100 |      100 |     100 |     100 |                                                                             
+ src/auth                 |     100 |      100 |     100 |     100 |                                                                                     
 
-  auth.module.ts          |     100 |      100 |     100 |     100 |                                                                             
+  auth.module.ts          |     100 |      100 |     100 |     100 |                                                                                     
 
- src/auth/controller      |     100 |      100 |     100 |     100 |                                                                             
+ src/auth/controller      |     100 |      100 |     100 |     100 |                                                                                     
 
-  auth.controller.ts      |     100 |      100 |     100 |     100 |                                                                             
+  auth.controller.ts      |     100 |      100 |     100 |     100 |                                                                                     
 
- src/auth/guard           |     100 |      100 |     100 |     100 |                                                                             
+ src/auth/guard           |     100 |      100 |     100 |     100 |                                                                                     
 
-  jwt-auth.guard.ts       |     100 |      100 |     100 |     100 |                                                                             
+  jwt-auth.guard.ts       |     100 |      100 |     100 |     100 |                                                                                     
 
- src/auth/service         |     100 |      100 |     100 |     100 |                                                                             
+ src/auth/service         |     100 |      100 |     100 |     100 |                                                                                     
 
-  auth.service.ts         |     100 |      100 |     100 |     100 |                                                                             
+  auth.service.ts         |     100 |      100 |     100 |     100 |                                                                                     
 
- src/auth/strategy        |   95.65 |    85.71 |     100 |   95.65 |                                                                             
+ src/auth/strategy        |   95.65 |    85.71 |     100 |   95.65 |                                                                                     
 
-  jwt.strategy.ts         |    91.3 |    66.66 |     100 |    91.3 | 21-22                                                                       
+  jwt.strategy.ts         |    91.3 |    66.66 |     100 |    91.3 | 21-22                                                                               
 
-  local.strategy.ts       |     100 |      100 |     100 |     100 |                                                                             
+  local.strategy.ts       |     100 |      100 |     100 |     100 |                                                                                     
 
- src/category             |     100 |      100 |     100 |     100 |                                                                             
+ src/category             |     100 |      100 |     100 |     100 |                                                                                     
 
-  category.module.ts      |     100 |      100 |     100 |     100 |                                                                             
+  category.module.ts      |     100 |      100 |     100 |     100 |                                                                                     
 
- src/category/controller  |     100 |      100 |     100 |     100 |                                                                             
+ src/category/controller  |     100 |      100 |     100 |     100 |                                                                                     
 
-  category.controller.ts  |     100 |      100 |     100 |     100 |                                                                             
+  category.controller.ts  |     100 |      100 |     100 |     100 |                                                                                     
 
- src/category/entity      |       0 |        0 |       0 |       0 |                                                                             
+ src/category/entity      |       0 |        0 |       0 |       0 |                                                                                     
 
-  category.entity.ts      |       0 |        0 |       0 |       0 | 1-4                                                                         
+  category.entity.ts      |       0 |        0 |       0 |       0 | 1-4                                                                                 
 
- src/category/service     |   85.71 |       75 |     100 |   85.71 |                                                                             
+ src/category/service     |   85.71 |       75 |     100 |   85.71 |                                                                                     
 
-  category.service.ts     |   85.71 |       75 |     100 |   85.71 | 35-40                                                                       
+  category.service.ts     |   85.71 |       75 |     100 |   85.71 | 35-40                                                                               
 
- src/decoraters           |     100 |    66.66 |     100 |     100 |                                                                             
+ src/decoraters           |     100 |    66.66 |     100 |     100 |                                                                                     
 
-  proxied_throttler.ts    |     100 |       50 |     100 |     100 | 7                                                                           
+  proxied_throttler.ts    |     100 |       50 |     100 |     100 | 7                                                                                   
 
-  user.decorator.ts       |     100 |      100 |     100 |     100 |                                                                             
+  user.decorator.ts       |     100 |      100 |     100 |     100 |                                                                                     
 
- src/middleware           |   89.28 |       70 |     100 |   89.28 |                                                                             
+ src/middleware           |   89.28 |       70 |     100 |   89.28 |                                                                                     
 
-  cookie_session.ts       |     100 |      100 |     100 |     100 |                                                                             
+  cookie_session.ts       |     100 |      100 |     100 |     100 |                                                                                     
 
-  logger.ts               |   85.24 |    57.14 |     100 |   85.24 | 29-31,49-54                                                                 
+  logger.ts               |   85.24 |    57.14 |     100 |   85.24 | 29-31,49-54                                                                         
 
- src/nft                  |     100 |       80 |     100 |     100 |                                                                             
+ src/nft                  |     100 |       80 |     100 |     100 |                                                                                     
 
-  nft.module.ts           |     100 |      100 |     100 |     100 |                                                                             
+  nft.module.ts           |     100 |      100 |     100 |     100 |                                                                                     
 
-  params.ts               |     100 |       80 |     100 |     100 | 17                                                                          
+  params.ts               |     100 |       80 |     100 |     100 | 17                                                                                  
 
- src/nft/controller       |   72.77 |     90.9 |      80 |   72.77 |                                                                             
+ src/nft/controller       |   71.42 |     90.9 |      80 |   71.42 |                                                                                     
 
-  nft.controller.ts       |   72.77 |     90.9 |      80 |   72.77 | 37-60,66-68,143-164                                                         
+  nft.controller.ts       |   71.42 |     90.9 |      80 |   71.42 | 37-60,66-68,145-169                                                                 
 
- src/nft/entities         |       0 |        0 |       0 |       0 |                                                                             
+ src/nft/entities         |       0 |        0 |       0 |       0 |                                                                                     
 
-  nft.entity.ts           |       0 |        0 |       0 |       0 | 1-15                                                                        
+  nft.entity.ts           |       0 |        0 |       0 |       0 | 1-15                                                                                
 
- src/nft/service          |   82.28 |     86.3 |    87.5 |   82.28 |                                                                             
+ src/nft/service          |   80.48 |    85.52 |      84 |   80.48 |                                                                                     
 
-  nft.service.ts          |   86.07 |    86.11 |    90.9 |   86.07 | 65-69,75-87,101-102,223-228,249-255,276-279,336-337,344-377,458-459,543-545 
+  nft.service.ts          |   83.99 |    85.33 |   86.95 |   83.99 | 67-71,77-89,103-104,225-230,251-257,278-281,338-339,346-381,384-396,477-478,564-566 
 
-  s3.service.ts           |   34.09 |      100 |      50 |   34.09 | 15-43                                                                       
+  s3.service.ts           |   34.09 |      100 |      50 |   34.09 | 15-43                                                                               
 
- src/pipes                |   76.19 |       60 |     100 |   76.19 |                                                                             
+ src/pipes                |   76.19 |       60 |     100 |   76.19 |                                                                                     
 
-  ParseJSONArrayPipe.ts   |   76.19 |       60 |     100 |   76.19 | 13-14,17-19                                                                 
+  ParseJSONArrayPipe.ts   |   76.19 |       60 |     100 |   76.19 | 13-14,17-19                                                                         
 
- src/role                 |   94.73 |    66.66 |     100 |   94.73 |                                                                             
+ src/role                 |   94.73 |    66.66 |     100 |   94.73 |                                                                                     
 
-  role.decorator.ts       |     100 |      100 |     100 |     100 |                                                                             
+  role.decorator.ts       |     100 |      100 |     100 |     100 |                                                                                     
 
-  role.guard.ts           |   90.47 |       60 |     100 |   90.47 | 15-16                                                                       
+  role.guard.ts           |   90.47 |       60 |     100 |   90.47 | 15-16                                                                               
 
-  role.module.ts          |     100 |      100 |     100 |     100 |                                                                             
+  role.module.ts          |     100 |      100 |     100 |     100 |                                                                                     
 
- src/role/controller      |   86.66 |      100 |       0 |   86.66 |                                                                             
+ src/role/controller      |   86.66 |      100 |       0 |   86.66 |                                                                                     
 
-  role.controller.ts      |   86.66 |      100 |       0 |   86.66 | 13-14                                                                       
+  role.controller.ts      |   86.66 |      100 |       0 |   86.66 | 13-14                                                                               
 
- src/role/entities        |     100 |      100 |     100 |     100 |                                                                             
+ src/role/entities        |     100 |      100 |     100 |     100 |                                                                                     
 
-  role.entity.ts          |     100 |      100 |     100 |     100 |                                                                             
+  role.entity.ts          |     100 |      100 |     100 |     100 |                                                                                     
 
- src/role/service         |   48.97 |      100 |      50 |   48.97 |                                                                             
+ src/role/service         |   48.97 |      100 |      50 |   48.97 |                                                                                     
 
-  role.service.ts         |   48.97 |      100 |      50 |   48.97 | 10-26,41-48                                                                 
+  role.service.ts         |   48.97 |      100 |      50 |   48.97 | 10-26,41-48                                                                         
 
- src/seeds                |       0 |        0 |       0 |       0 |                                                                             
+ src/seeds                |       0 |        0 |       0 |       0 |                                                                                     
 
-  index.ts                |       0 |        0 |       0 |       0 | 1-8                                                                         
+  index.ts                |       0 |        0 |       0 |       0 | 1-8                                                                                 
 
-  user.seed.ts            |       0 |        0 |       0 |       0 | 1-29                                                                        
+  user.seed.ts            |       0 |        0 |       0 |       0 | 1-29                                                                                
 
- src/user                 |     100 |       75 |     100 |     100 |                                                                             
+ src/user                 |     100 |       75 |     100 |     100 |                                                                                     
 
-  params.ts               |     100 |       75 |     100 |     100 | 12,24                                                                       
+  params.ts               |     100 |       75 |     100 |     100 | 12,24                                                                               
 
-  user.module.ts          |     100 |      100 |     100 |     100 |                                                                             
+  user.module.ts          |     100 |      100 |     100 |     100 |                                                                                     
 
- src/user/controller      |     100 |      100 |     100 |     100 |                                                                             
+ src/user/controller      |     100 |      100 |     100 |     100 |                                                                                     
 
-  user.controller.ts      |     100 |      100 |     100 |     100 |                                                                             
+  user.controller.ts      |     100 |      100 |     100 |     100 |                                                                                     
 
- src/user/entities        |       0 |        0 |       0 |       0 |                                                                             
+ src/user/entities        |       0 |        0 |       0 |       0 |                                                                                     
 
-  user.entity.ts          |       0 |        0 |       0 |       0 | 1-8                                                                         
+  user.entity.ts          |       0 |        0 |       0 |       0 | 1-8                                                                                 
 
- src/user/service         |   91.09 |    86.66 |     100 |   91.09 |                                                                             
+ src/user/service         |   91.09 |    86.66 |     100 |   91.09 |                                                                                     
 
-  user.service.ts         |   91.09 |    86.66 |     100 |   91.09 | 27-28,64-75,218-220,237-241                                                 
+  user.service.ts         |   91.09 |    86.66 |     100 |   91.09 | 27-28,64-75,218-220,237-241                                                         
 
---------------------------|---------|----------|---------|---------|-----------------------------------------------------------------------------
+--------------------------|---------|----------|---------|---------|-------------------------------------------------------------------------------------
