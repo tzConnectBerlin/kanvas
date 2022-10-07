@@ -22,7 +22,7 @@ export function getVideoMetadata(file: any): Promise<VideoMetadata> {
 
 export function videoMetadataFromFfprobe(err: any, metadata: FfprobeData) {
   if (!isBottom(err)) {
-    throw err;
+    throw new Error(err);
   }
 
   const videoMetadata: FfprobeStream | undefined = metadata.streams.find(
