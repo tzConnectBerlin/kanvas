@@ -37,7 +37,7 @@ const getCurrencySymbolDataForCurrency = (
     case Currency.EUR:
       return { symbol: CurrencySymbol.EUR, position: 'after' };
     case Currency.XTZ:
-      return { symbol: CurrencySymbol.XTZ, position: 'before' };
+      return { symbol: CurrencySymbol.XTZ, position: 'after' };
     case Currency.USD:
       return { symbol: CurrencySymbol.USD, position: 'before' };
     case Currency.GBP:

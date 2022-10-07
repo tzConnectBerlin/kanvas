@@ -9,11 +9,17 @@ interface Role {
 
 interface GetRolesFromURL {
   notify: (value: string) => void;
+  withId?: boolean;
 }
+
+const getCapitalizedRole = (role: Role) => {
+  return role.role_label.charAt(0).toUpperCase() + role.role_label.slice(1);
+};
 
 const getRolesFromAPI = async ({
   notify,
-}: GetRolesFromURL): Promise<string[]> => {
+  withId,
+}: GetRolesFromURL): Promise<string[] | Record<string, unknown>[]> => {
   try {
     const response = await axios.get(
       process.env.REACT_APP_API_SERVER_BASE_URL + '/role',
@@ -28,10 +34,13 @@ const getRolesFromAPI = async ({
 
     const { data: roles } = response.data;
 
-    const fetchedRoles = roles.map(
-      (role: Role) =>
-        role.role_label.charAt(0).toUpperCase() + role.role_label.slice(1),
-    );
+    const fetchedRoles = withId
+      ? roles.map((role: Role) => ({
+          id: role.id,
+          name: getCapitalizedRole(role),
+        }))
+      : roles.map((role: Role) => getCapitalizedRole(role));
+
     return fetchedRoles;
   } catch (e) {
     notify(`An error occurred while fetching the roles`);
@@ -40,12 +49,14 @@ const getRolesFromAPI = async ({
   return [];
 };
 
-const UseGetRolesFromAPI = () => {
-  const [roles, setRoles] = React.useState<string[]>([]);
+const UseGetRolesFromAPI = ({ withId } = { withId: true }) => {
+  const [roles, setRoles] = React.useState<
+    string[] | Record<string, unknown>[]
+  >([]);
   const notify = useNotify();
 
   useEffect(() => {
-    getRolesFromAPI({ notify }).then((fetchedRoles) => {
+    getRolesFromAPI({ notify, withId }).then((fetchedRoles) => {
       setRoles(fetchedRoles);
     });
   }, []);
