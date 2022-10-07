@@ -131,3 +131,13 @@ export function isBottom(v: any): boolean {
   //       else coerces into null (other than null itself).
   return v == null;
 }
+
+export function maybe<ValTy, ResTy>(
+  x: ValTy | null | undefined,
+  f: (x: ValTy) => ResTy,
+): ResTy | undefined {
+  if (isBottom(x)) {
+    return undefined;
+  }
+  return f(x!);
+}
