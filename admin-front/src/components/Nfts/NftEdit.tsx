@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import { NftAside } from './NftAside';
 import { InputSelector } from './Selector/InputSelector';
 import { useStyle } from './useStyle';
+import { FormFieldInputType } from './Selector/types';
 
 export const NftEdit = (props: any) => {
   const classes = useStyle();
@@ -68,15 +69,9 @@ export const NftEdit = (props: any) => {
                         fieldName.replace('_', ' ').slice(1)
                       }
                       type={
-                        concernedNft.data!.allowedActions[fieldName] as
-                          | 'string'
-                          | 'boolean'
-                          | 'number'
-                          | 'content_uri'
-                          | 'number[]'
-                          | 'votes'
-                          | 'date'
-                          | 'text'
+                        concernedNft.data!.allowedActions[
+                          fieldName
+                        ] as FormFieldInputType
                       }
                     />
                   </Box>
