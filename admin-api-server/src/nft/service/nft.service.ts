@@ -43,7 +43,7 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const mime = require('mime');
 
-import { getVideoMetadata } from '../../media.js';
+import { getVideoMetadata, getImageMetadata } from '../../media.js';
 
 @Injectable()
 export class NftService {
@@ -254,7 +254,6 @@ RETURNING id
             nftUpdate.attribute,
             nftUpdate.file,
           );
-          console.log(`nftUpdate: ${JSON.stringify(nftUpdate)}`);
         }
 
         const stmRes = this.stm.tryAttributeApply(
@@ -368,8 +367,6 @@ WHERE id = $1
       );
     }
 
-    console.log(file);
-
     const extension = mime.getExtension(file.mimetype);
     const fileName = `${FILE_PREFIX}_${nftId}_${attribute}.${extension}`;
     const contentUri = await this.s3Service.uploadFile(file, fileName);
@@ -378,26 +375,39 @@ WHERE id = $1
       attribute: attribute,
       value: JSON.stringify({
         uri: contentUri,
-        metadata: await this.#contentMetadata(file),
+        metadata: await this.#contentMetadata(nftId, file),
       }),
     };
   }
 
-  async #contentMetadata(file: any): Promise<{ [keys: string]: any }> {
+  async #contentMetadata(
+    nftId: number,
+    file: any,
+  ): Promise<{ [keys: string]: any }> {
     let res = {
-      mimetype: file.mimetype,
+      mimeType: file.mimetype,
+      fileSize: file.size,
     };
     switch (file.mimetype.split('/')[0]) {
       case 'video':
         try {
           const videoMetadata = await getVideoMetadata(file);
-          console.log(`VIDEO METADATA: ${JSON.stringify(videoMetadata)}`);
           res = { ...res, ...videoMetadata };
         } catch (err: any) {
-          Logger.warn(`failed to inspect video metadata, err: ${err}`);
+          Logger.warn(
+            `failed to inspect video metadata for nftId=${nftId}, err: ${err}`,
+          );
         }
         break;
       case 'image':
+        try {
+          const imageMetadata = await getImageMetadata(file);
+          res = { ...res, ...imageMetadata };
+        } catch (err: any) {
+          Logger.warn(
+            `failed to inspect image metadata for nftId=${nftId}, err: ${err}`,
+          );
+        }
         break;
     }
     return res;
@@ -510,8 +520,6 @@ WHERE TARGET.value != EXCLUDED.value
       nft.id,
       ADMIN_PRIVATE_KEY,
     );
-
-    console.log(attr.artifact);
 
     await axios.post(STORE_API + '/nfts/create', {
       id: nft.id,

@@ -46,6 +46,7 @@
     "dotenv": "^10.0.0",
     "filesize": "^9.0.11",
     "fluent-ffmpeg": "^2.1.2",
+    "image-size": "^1.0.2",
     "into-stream": "^7.0.0",
     "joi": "^17.5.0",
     "libsodium-wrappers": "^0.7.9",
