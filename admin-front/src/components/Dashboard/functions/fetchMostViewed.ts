@@ -14,8 +14,8 @@ export async function fetchMostViewed(
     );
 
     return response.data.nfts;
-  } catch (error) {
-    notify(`An error occurred while fetching most viewed: ${error}`);
+  } catch (e) {
+    notify(`An error occurred while fetching most viewed`);
   }
   return [];
 }

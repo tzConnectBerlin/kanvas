@@ -15,8 +15,8 @@ export async function fetchTotalRevenue(
     });
     const price = response.data ? response.data.value : undefined;
     return price ?? 0;
-  } catch (error) {
-    notify(`An error happened while fetching total revenue: ${error}`);
+  } catch (e) {
+    notify(`An error happened while fetching total revenue`);
   }
   return 0;
 }

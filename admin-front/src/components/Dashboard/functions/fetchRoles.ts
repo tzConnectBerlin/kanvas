@@ -20,8 +20,8 @@ export async function fetchRoles(
     return response.data.data.map(
       (role: any) => (newRoles[role.role_label] = role.id),
     );
-  } catch (error) {
-    notify(`An error occurred while fetching the roles: ${error}`);
+  } catch (e) {
+    notify(`An error occurred while fetching the roles`);
   }
   return [];
 }

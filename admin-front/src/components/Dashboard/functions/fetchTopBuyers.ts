@@ -18,8 +18,8 @@ export async function fetchTopBuyers(
       },
     );
     return response.data.topBuyers as TopBuyer[];
-  } catch (error) {
-    notify(`An Error occurred while fetching top buyers: ${error}`);
+  } catch (e) {
+    notify(`An Error occurred while fetching top buyers`);
   }
 
   return [];
