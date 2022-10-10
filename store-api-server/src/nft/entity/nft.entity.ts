@@ -5,6 +5,15 @@ export interface OwnershipInfo {
   receivalOperationHash?: string;
 }
 
+export interface NftFormat {
+  attribute: string;
+  value: any;
+}
+
+export interface NftFormats {
+  [key: string]: NftFormat;
+}
+
 export interface NftEntity {
   id: number;
   createdAt: number;
