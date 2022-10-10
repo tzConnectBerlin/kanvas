@@ -12,7 +12,12 @@ import {
   TextInput,
 } from 'react-admin';
 import { useStyle } from '../useStyle';
-import { InputSelectorProps } from './types';
+import { SelectorProps } from './types';
+import { CurrencySymbolData } from 'shared/types/currency';
+
+interface InputSelectorProps extends SelectorProps {
+  baseCurrencySymbol?: CurrencySymbolData['symbol'];
+}
 
 export const InputSelector: FC<InputSelectorProps> = ({ ...props }) => {
   const validateNumber = [number('expecting a number'), minValue(0)];
@@ -23,7 +28,7 @@ export const InputSelector: FC<InputSelectorProps> = ({ ...props }) => {
 
   const classes = useStyle();
 
-  const { type } = props;
+  const { type, label } = props;
 
   if (type === 'string')
     return (
@@ -36,19 +41,21 @@ export const InputSelector: FC<InputSelectorProps> = ({ ...props }) => {
     return (
       <TextInput
         source={`attributes.${props.attributesName}`}
-        label={props.label}
+        label={label}
         fullWidth
         multiline
       />
     );
   if (type === 'number') {
-    const label = props.baseCurrencySymbol
-      ? props.label + ` in ${props.baseCurrencySymbol}`
-      : props.label;
+    const isPriceLabel = label === 'Price' && !!props.baseCurrencySymbol;
+
+    const textInputLabel = isPriceLabel
+      ? label + ` in ${props.baseCurrencySymbol}`
+      : label;
     return (
       <TextInput
         source={`attributes.${props.attributesName}`}
-        label={label}
+        label={textInputLabel}
         validate={validateNumber}
       />
     );
@@ -58,14 +65,14 @@ export const InputSelector: FC<InputSelectorProps> = ({ ...props }) => {
     return (
       <BooleanInput
         source={`attributes.${props.attributesName}`}
-        label={props.label}
+        label={label}
       />
     );
   if (type === 'date')
     return (
       <DateTimeInput
         source={`attributes.${props.attributesName}`}
-        label={props.label}
+        label={label}
         value={props.record * 1000}
         validate={validateDate}
       />
@@ -85,7 +92,7 @@ export const InputSelector: FC<InputSelectorProps> = ({ ...props }) => {
     return (
       <RadioButtonGroupInput
         source={`attributes.${props.attributesName}`}
-        label={props.label}
+        label={label}
         choices={[
           {
             id: 'yes',
@@ -104,12 +111,8 @@ export const InputSelector: FC<InputSelectorProps> = ({ ...props }) => {
   }
   if (props.type === 'content_uri') {
     return (
-      <FileInput label={props.label} source={`files[${props.label}]`}>
-        <FileField
-          src={`attributes.${props.label}`}
-          source="src"
-          title="title"
-        />
+      <FileInput label={label} source={`files[${label}]`}>
+        <FileField src={`attributes.${label}`} source="src" title="title" />
       </FileInput>
     );
   } else return null;
