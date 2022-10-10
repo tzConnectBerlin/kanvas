@@ -3,12 +3,15 @@ import { Record, useNotify } from 'react-admin';
 import axios from 'axios';
 import { Stack, Typography } from '@mui/material';
 import { format } from 'date-fns';
-import { InputSelectorProps } from './types';
+import { SelectorProps } from './types';
 import { renderContent } from '../renderContent';
 
-export const FieldSelector: FC<InputSelectorProps> = ({ ...props }) => {
-  const notify = useNotify();
+interface FieldSelectorProps extends SelectorProps {
+  getPriceWithCurrency?: (price: string) => string;
+}
 
+export const FieldSelector: FC<FieldSelectorProps> = ({ ...props }) => {
+  const notify = useNotify();
   const [voters, setVoters] = useState<Record[]>([]);
   const [votersCalled, setVotersCalled] = useState<boolean>(false);
 
@@ -47,6 +50,15 @@ export const FieldSelector: FC<InputSelectorProps> = ({ ...props }) => {
     props.type === 'number' ||
     props.type === 'text'
   ) {
+    const { getPriceWithCurrency, label } = props;
+
+    const isPriceValue = label === 'Price';
+
+    const value =
+      isPriceValue && getPriceWithCurrency
+        ? `${getPriceWithCurrency(props.record[props.attributesName])}`
+        : props.record[props.attributesName];
+
     return (
       <Stack direction="column">
         <Typography
@@ -64,7 +76,7 @@ export const FieldSelector: FC<InputSelectorProps> = ({ ...props }) => {
             marginTop: '0.5em',
           }}
         >
-          {props.record[props.attributesName]}
+          {value}
         </Typography>
       </Stack>
     );

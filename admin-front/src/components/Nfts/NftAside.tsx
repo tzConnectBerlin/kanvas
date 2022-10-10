@@ -117,13 +117,14 @@ export const NftAside = ({ ...props }) => {
             {formKeys.length > 0 &&
               attributesTypes &&
               formKeys.map((key) => {
+                const label =
+                  key[0].toUpperCase() + key.replace('_', ' ').slice(1);
+
                 return (
                   <FieldSelector
                     key={key}
                     attributesName={key}
-                    label={
-                      key[0].toUpperCase() + key.replace('_', ' ').slice(1)
-                    }
+                    label={label}
                     type={
                       attributesTypes[key] as
                         | 'string'
@@ -140,6 +141,9 @@ export const NftAside = ({ ...props }) => {
                       key === 'categories'
                         ? categories.map((category: Record) => category?.name)
                         : []
+                    }
+                    getPriceWithCurrency={
+                      label === 'Price' ? props.getPriceWithCurrency : undefined
                     }
                   />
                 );

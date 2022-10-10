@@ -73,6 +73,7 @@ const UseGetPriceWithCurrency = () => {
 
   return {
     getPriceWithCurrency,
+    baseCurrency,
   };
 };
 

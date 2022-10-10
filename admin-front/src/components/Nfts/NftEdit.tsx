@@ -13,11 +13,9 @@ import { NftAside } from './NftAside';
 import { InputSelector } from './Selector/InputSelector';
 import { useStyle } from './useStyle';
 import { FormFieldInputType } from './Selector/types';
-import {
-  getBaseCurrencyFromAPI,
+import UseGetPriceWithCurrency, {
   getCurrencySymbolDataForCurrency,
-} from '../../shared/hooks/useGetPriceWithCurrency';
-import { CurrencySymbolData } from '../../shared/types/currency';
+} from 'shared/hooks/useGetPriceWithCurrency';
 
 export const NftEdit = (props: any) => {
   const notify = useNotify();
@@ -25,21 +23,13 @@ export const NftEdit = (props: any) => {
   const concernedNft = useGetOne('nft', props.id);
 
   const [formFields, setFormFields] = useState<string[]>([]);
-  const [baseCurrencySymbol, setBaseCurrencySymbol] =
-    useState<CurrencySymbolData['symbol']>();
+  const { baseCurrency, getPriceWithCurrency } = UseGetPriceWithCurrency();
 
   useEffect(() => {
     if (!concernedNft.data) return;
     if (!concernedNft.data.allowedActions) return;
     setFormFields(Object.keys(concernedNft.data.allowedActions));
   }, [concernedNft]);
-
-  useEffect(() => {
-    getBaseCurrencyFromAPI({ notify }).then((baseCurrency) => {
-      const currSymbol = getCurrencySymbolDataForCurrency(baseCurrency);
-      setBaseCurrencySymbol(currSymbol?.symbol);
-    });
-  }, [notify]);
 
   const refresh = useRefresh();
   const redirect = useRedirect();
@@ -60,7 +50,7 @@ export const NftEdit = (props: any) => {
         {...props}
         onSuccess={onSuccess}
         mutationMode="pessimistic"
-        aside={<NftAside />}
+        aside={<NftAside getPriceWithCurrency={getPriceWithCurrency} />}
       >
         <SimpleForm className={classes.form}>
           <Box className={classes.boxWrapper}>
@@ -91,7 +81,10 @@ export const NftEdit = (props: any) => {
                         label={label}
                         type={type}
                         baseCurrencySymbol={
-                          useBaseCurrencySymbol ? baseCurrencySymbol : undefined
+                          useBaseCurrencySymbol
+                            ? getCurrencySymbolDataForCurrency(baseCurrency)
+                                ?.symbol
+                            : undefined
                         }
                       />
                     </Box>
