@@ -9,6 +9,7 @@ import {
   CreateNft,
   CreateProxiedNft,
   NftEntity,
+  NftFormats,
   NftEntityPage,
   OwnershipInfo,
 } from '../entity/nft.entity.js';
@@ -463,6 +464,7 @@ SELECT
   onsale_from,
   onsale_until,
 
+  formats,
   metadata,
 
   metadata_ipfs,
@@ -534,6 +536,16 @@ FROM nfts_by_id($1, $2, $3, $4)`,
               description: categoryRow[2],
             };
           }),
+          formats: nftRow['formats'].reduce(
+            (formats: NftFormats, format: any) => {
+              formats[format[0]] = {
+                attribute: format[1],
+                value: format[2],
+              };
+              return formats;
+            },
+            {},
+          ),
           metadata: nftRow['metadata'],
           editionsSize: editions,
           editionsAvailable: editions - (reserved + owned),

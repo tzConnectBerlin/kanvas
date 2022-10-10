@@ -14,6 +14,7 @@ CREATE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT, for
     onsale_from TIMESTAMP WITHOUT TIME ZONE,
     onsale_until TIMESTAMP WITHOUT TIME ZONE,
     categories TEXT[][],
+    formats JSONB[],
     metadata JSONB,
 
     artifact_uri TEXT,
@@ -45,6 +46,17 @@ BEGIN
         ON mtm.nft_id = nft.id
       JOIN nft_category AS cat
         ON mtm.nft_category_id = cat.id
+      WHERE nft.id = ANY($1)
+      GROUP BY nft.id
+    ), nft_formats AS (
+      SELECT
+        nft.id AS nft_id,
+        ARRAY_AGG(jsonb_build_array(format.content_name, format.attribute, format.value)) AS formats
+      FROM nft
+      JOIN mtm_nft_format AS mtm_format
+        ON mtm_format.format_id = nft.id
+      JOIN format ON
+        format.id = mtm_format.format_id
       WHERE nft.id = ANY($1)
       GROUP BY nft.id
     ), for_address_transfers AS (
@@ -94,6 +106,7 @@ BEGIN
       onsale_from,
       onsale_until,
       cat.categories,
+      COALESCE(nft_formats.formats, array[]::jsonb[]) AS formats,
       metadata,
 
       artifact_uri,
@@ -114,6 +127,8 @@ BEGIN
     JOIN nft_categories AS cat
       ON cat.nft_id = nft.id
     CROSS JOIN nft_editions_locked(nft.id) AS availability
+    LEFT JOIN nft_formats
+      ON nft_formats.nft_id = nft.id
     LEFT JOIN for_address_owned_metadata AS for_address
       ON for_address.token_id = nft.id
     LEFT JOIN peppermint.operations AS mint

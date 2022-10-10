@@ -251,6 +251,7 @@ describe('AppController (e2e)', () => {
       editionsSize: 4,
       editionsAvailable: 4,
       editionsSold: 0,
+      formats: {},
       categories: [
         { id: 4, name: 'Drawing', description: 'Sub fine art category' },
       ],
@@ -371,6 +372,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 4,
             editionsAvailable: 4,
             editionsSold: 0,
+            formats: {},
             categories: [
               {
                 description: 'Sub fine art category',
@@ -402,6 +404,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 2,
             editionsAvailable: 2,
             editionsSold: 0,
+            formats: {},
             categories: [
               {
                 description: 'Sub fine art category',
@@ -432,6 +435,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 6,
             editionsAvailable: 6,
             editionsSold: 0,
+            formats: {},
             categories: [
               {
                 description: 'Sub fine art category',
@@ -462,6 +466,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 8,
             editionsAvailable: 8,
             editionsSold: 0,
+            formats: {},
             categories: [
               {
                 description: 'Sub fine art category',
@@ -493,6 +498,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 8,
             editionsAvailable: 8,
             editionsSold: 0,
+            formats: {},
             categories: [
               {
                 description: 'Sub fine art category',
@@ -524,6 +530,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 8,
             editionsAvailable: 8,
             editionsSold: 0,
+            formats: {},
             categories: [
               {
                 description: 'Sub fine art category',
@@ -555,6 +562,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 8,
             editionsAvailable: 8,
             editionsSold: 0,
+            formats: {},
             categories: [
               {
                 description: 'Sub fine art category',
@@ -585,6 +593,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 8,
             editionsAvailable: 8,
             editionsSold: 0,
+            formats: {},
             categories: [
               {
                 description: 'Sub fine art category',
@@ -616,6 +625,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 8,
             editionsAvailable: 8,
             editionsSold: 0,
+            formats: {},
             categories: [
               {
                 description: 'Sub fine art category',
@@ -712,6 +722,7 @@ describe('AppController (e2e)', () => {
           editionsAvailable: 6,
           editionsSize: 6,
           editionsSold: 0,
+          formats: {},
           id: 3,
           ipfsHash: null,
           metadata: null,
@@ -787,6 +798,7 @@ describe('AppController (e2e)', () => {
           editionsSize: 4,
           editionsAvailable: 4,
           editionsSold: 0,
+          formats: {},
           categories: [
             {
               description: 'Sub fine art category',
@@ -860,6 +872,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 4,
             editionsAvailable: 4,
             editionsSold: 0,
+            formats: {},
             categories: [
               {
                 description: 'Sub fine art category',
@@ -884,6 +897,7 @@ describe('AppController (e2e)', () => {
             editionsAvailable: 6,
             editionsSize: 6,
             editionsSold: 0,
+            formats: {},
             id: 3,
             ipfsHash: null,
             metadata: null,
@@ -1023,6 +1037,7 @@ describe('AppController (e2e)', () => {
           editionsSize: 8,
           editionsAvailable: 8,
           editionsSold: 0,
+          formats: {},
           categories: [
             {
               description: 'Sub fine art category',
@@ -2292,6 +2307,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 4,
             editionsAvailable: 3,
             editionsSold: 1,
+            formats: {},
             categories: [
               {
                 id: 4,
@@ -2322,6 +2338,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 8,
             editionsAvailable: 0,
             editionsSold: 3,
+            formats: {},
             categories: [
               {
                 id: 4,
@@ -2395,6 +2412,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 4,
             editionsAvailable: 3,
             editionsSold: 1,
+            formats: {},
             categories: [
               {
                 id: 4,
@@ -2463,6 +2481,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 8,
             editionsAvailable: 0,
             editionsSold: 3,
+            formats: {},
             categories: [
               {
                 id: 4,
@@ -2535,6 +2554,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 8,
             editionsAvailable: 0,
             editionsSold: 3,
+            formats: {},
             categories: [
               {
                 id: 4,
@@ -2607,6 +2627,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 8,
             editionsAvailable: 0,
             editionsSold: 3,
+            formats: {},
             categories: [
               {
                 id: 4,
@@ -2680,6 +2701,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 8,
             editionsAvailable: 0,
             editionsSold: 3,
+            formats: {},
             categories: [
               {
                 id: 4,
@@ -2752,6 +2774,7 @@ describe('AppController (e2e)', () => {
             editionsSize: 8,
             editionsAvailable: 0,
             editionsSold: 3,
+            formats: {},
             categories: [
               {
                 id: 4,
@@ -3431,6 +3454,7 @@ describe('AppController (e2e)', () => {
           editionsAvailable: 7,
           editionsSize: 8,
           editionsSold: 0,
+          formats: {},
           id: 8,
           ipfsHash: null,
           metadataIpfs: null,
@@ -3459,6 +3483,7 @@ describe('AppController (e2e)', () => {
           editionsAvailable: 7,
           editionsSize: 8,
           editionsSold: 0,
+          formats: {},
           id: 10,
           ipfsHash: null,
           metadata: null,
@@ -3554,6 +3579,7 @@ describe('AppController (e2e)', () => {
             editionsAvailable: 3,
             editionsSize: 4,
             editionsSold: 1,
+            formats: {},
             id: 1,
             ipfsHash: 'ipfs://.....',
             metadata: {
@@ -3589,6 +3615,7 @@ describe('AppController (e2e)', () => {
             editionsAvailable: 0,
             editionsSize: 8,
             editionsSold: 3,
+            formats: {},
             id: 4,
             ipfsHash: 'ipfs://.....',
             metadata: null,
@@ -3630,6 +3657,7 @@ describe('AppController (e2e)', () => {
           editionsAvailable: 0,
           editionsSize: 8,
           editionsSold: 3,
+          formats: {},
           id: 4,
           ipfsHash: 'ipfs://.....',
           metadataIpfs: 'ipfs://.....',
@@ -3694,6 +3722,7 @@ describe('AppController (e2e)', () => {
           editionsAvailable: 7,
           editionsSize: 8,
           editionsSold: 0,
+          formats: {},
           id: 8,
           ipfsHash: null,
           metadata: null,
@@ -3724,6 +3753,7 @@ describe('AppController (e2e)', () => {
           editionsAvailable: 7,
           editionsSize: 8,
           editionsSold: 0,
+          formats: {},
           id: 10,
           ipfsHash: null,
           metadata: null,
@@ -3821,6 +3851,7 @@ describe('AppController (e2e)', () => {
             editionsAvailable: 3,
             editionsSize: 4,
             editionsSold: 1,
+            formats: {},
             id: 1,
             ipfsHash: 'ipfs://.....',
             metadata: {
@@ -3856,6 +3887,7 @@ describe('AppController (e2e)', () => {
             editionsAvailable: 0,
             editionsSize: 8,
             editionsSold: 3,
+            formats: {},
             id: 4,
             ipfsHash: 'ipfs://.....',
             metadata: null,
@@ -3897,6 +3929,7 @@ describe('AppController (e2e)', () => {
           editionsAvailable: 0,
           editionsSize: 8,
           editionsSold: 3,
+          formats: {},
           id: 4,
           ipfsHash: 'ipfs://.....',
           metadata: null,
@@ -3928,6 +3961,7 @@ describe('AppController (e2e)', () => {
           editionsAvailable: 7,
           editionsSize: 8,
           editionsSold: 0,
+          formats: {},
           id: 8,
           ipfsHash: null,
           metadata: null,
@@ -3960,6 +3994,7 @@ describe('AppController (e2e)', () => {
           editionsAvailable: 7,
           editionsSize: 8,
           editionsSold: 0,
+          formats: {},
           id: 10,
           ipfsHash: null,
           metadata: null,
