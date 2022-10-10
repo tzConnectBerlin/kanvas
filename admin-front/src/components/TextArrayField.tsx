@@ -1,16 +1,17 @@
 import Chip from '@material-ui/core/Chip';
 import { ArrayFieldProps } from 'ra-ui-materialui';
 import * as React from 'react';
+import { useRecordContext } from 'react-admin';
 
 interface TextArrayFieldProps extends ArrayFieldProps {
-  value: { [i: number]: string };
+  value: string[];
 }
 
 export const TextArrayField: React.FC<TextArrayFieldProps> = ({
-  record,
   source,
   value,
 }) => {
+  const record = useRecordContext();
   const array = source ? record?.[source] : [];
 
   if (typeof array === 'undefined' || array === null || array.length === 0) {
