@@ -23,8 +23,8 @@ const getDataFromAPI = async ({ path, notify }: GetDataFromAPI) => {
     const { data } = response.data;
 
     return data;
-  } catch (e) {
-    notify('An error occurred while fetching data from API');
+  } catch (error) {
+    notify(`An error occurred while fetching data from API`);
   }
 };
 

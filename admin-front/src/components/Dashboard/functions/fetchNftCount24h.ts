@@ -16,8 +16,8 @@ export async function fetchNftCount24h(
 
     const count = response.data ? response.data.value : undefined;
     return count ?? 0;
-  } catch (error) {
-    notify(`An error happened while fetching nft count: ${error}`);
+  } catch (e) {
+    notify(`An error happened while fetching nft count`);
   }
   return 0;
 }
