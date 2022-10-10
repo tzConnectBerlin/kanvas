@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import {
   BooleanInput,
   DateTimeInput,
@@ -10,11 +10,28 @@ import {
   RadioButtonGroupInput,
   SelectArrayInput,
   TextInput,
+  useNotify,
 } from 'react-admin';
 import { useStyle } from '../useStyle';
 import { InputSelectorProps } from './types';
+import {
+  getBaseCurrencyFromAPI,
+  getCurrencySymbolDataForCurrency,
+} from 'shared/hooks/useGetPriceWithCurrency';
+import { CurrencySymbolData } from 'shared/types/currency';
 
 export const InputSelector: FC<InputSelectorProps> = ({ ...props }) => {
+  const notify = useNotify();
+  const [currencySymbol, setCurrencySymbol] =
+    useState<CurrencySymbolData['symbol']>();
+
+  useEffect(() => {
+    getBaseCurrencyFromAPI({ notify }).then((baseCurrency) => {
+      const currSymbol = getCurrencySymbolDataForCurrency(baseCurrency);
+      setCurrencySymbol(currSymbol?.symbol);
+    });
+  }, [notify]);
+
   const validateNumber = [number('expecting a number'), minValue(0)];
   const validateDate = (value: any) => {
     if (value < new Date().getTime()) return 'Date must be in the future';
@@ -22,6 +39,8 @@ export const InputSelector: FC<InputSelectorProps> = ({ ...props }) => {
   };
 
   const classes = useStyle();
+
+  const showCurrency = props.type === 'number' && props.label === 'Price';
 
   const { type } = props;
 
@@ -45,7 +64,11 @@ export const InputSelector: FC<InputSelectorProps> = ({ ...props }) => {
     return (
       <TextInput
         source={`attributes.${props.attributesName}`}
-        label={props.label}
+        label={
+          showCurrency && currencySymbol
+            ? props.label + ` in ${currencySymbol}`
+            : props.label
+        }
         validate={validateNumber}
       />
     );
