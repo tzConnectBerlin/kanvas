@@ -12,12 +12,12 @@ interface GetBaseCurrencyFromAPI {
   notify: (value: string) => void;
 }
 
-const getBaseCurrencyFromAPI = async ({
+export const getBaseCurrencyFromAPI = async ({
   notify,
 }: GetBaseCurrencyFromAPI): Promise<SupportedCurrency> => {
   try {
     const response = await axios.get(
-      process.env.REACT_APP_STORE_BASE_URL + 'api/constants',
+      process.env.REACT_APP_STORE_BASE_URL + '/api/constants',
     );
 
     const { baseCurrency } = response.data;
@@ -30,7 +30,7 @@ const getBaseCurrencyFromAPI = async ({
   return '';
 };
 
-const getCurrencySymbolDataForCurrency = (
+export const getCurrencySymbolDataForCurrency = (
   currency: SupportedCurrency,
 ): CurrencySymbolData | undefined => {
   switch (currency) {
@@ -55,7 +55,7 @@ const UseGetPriceWithCurrency = () => {
     getBaseCurrencyFromAPI({ notify }).then((baseCurrency) => {
       setBaseCurrency(baseCurrency);
     });
-  }, []);
+  }, [notify]);
 
   const getPriceWithCurrency = (price: string) => {
     const currencySymbolData = getCurrencySymbolDataForCurrency(baseCurrency);
