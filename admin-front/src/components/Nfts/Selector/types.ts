@@ -1,3 +1,5 @@
+import { CurrencySymbolData } from 'shared/types/currency';
+
 export type FormFieldInputType =
   | 'string'
   | 'boolean'
@@ -15,4 +17,5 @@ export interface InputSelectorProps {
   type: FormFieldInputType;
   record?: any;
   numberValueArray?: string[];
+  baseCurrencySymbol?: CurrencySymbolData['symbol'];
 }
