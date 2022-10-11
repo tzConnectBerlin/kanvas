@@ -204,5 +204,61 @@ WHERE id = ${nftIds[0]}
         }
       });
     }
+
+    it('NFT formats are returned in GET /nfts/:id', async () => {
+      await testUtils.withDbConn(async (db) => {
+        const addFormat = async (
+          contentName: string,
+          attr: string,
+          val: any,
+        ) => {
+          const formatId = (
+            await db.query(
+              `
+INSERT INTO format (content_name, attribute, value)
+VALUES ($1, $2, $3::jsonb)
+RETURNING id`,
+              [contentName, attr, val],
+            )
+          ).rows[0]['id'];
+
+          await db.query(
+            `
+INSERT INTO mtm_nft_format (nft_id, format_id)
+VALUES ($1, $2)
+        `,
+            [nftIds[0], formatId],
+          );
+        };
+        await addFormat('artifact', 'mimeType', '"image/png"');
+        await addFormat('artifact', 'width', '400');
+        await addFormat('artifact', 'height', '500');
+
+        await addFormat('display', 'height', '450');
+      });
+
+      const resp = await request(app.getHttpServer()).get(`/nfts/${nftIds[0]}`);
+      expect(resp.statusCode).toEqual(200);
+      expect(resp.body).toMatchObject({
+        id: nftIds[0],
+
+        formats: {
+          artifact: {
+            mimeType: 'image/png',
+            width: 400,
+            height: 500,
+          },
+          display: {
+            height: 450,
+          },
+        },
+
+        metadata: {
+          test: {
+            nested: 10,
+          },
+        },
+      });
+    });
   });
 }

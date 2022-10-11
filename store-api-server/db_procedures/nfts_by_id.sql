@@ -54,7 +54,7 @@ BEGIN
         ARRAY_AGG(jsonb_build_array(format.content_name, format.attribute, format.value)) AS formats
       FROM nft
       JOIN mtm_nft_format AS mtm_format
-        ON mtm_format.format_id = nft.id
+        ON mtm_format.nft_id = nft.id
       JOIN format ON
         format.id = mtm_format.format_id
       WHERE nft.id = ANY($1)
