@@ -9,7 +9,9 @@ CREATE TABLE format (
 
   content_name TEXT NOT NULL, -- eg: artifact, or display, or thumbnail
   attribute TEXT NOT NULL,
-  value JSONB NOT NULL
+  value JSONB NOT NULL,
+
+  UNIQUE (content_name, attribute, value)
 );
 
 CREATE TABLE mtm_nft_format (

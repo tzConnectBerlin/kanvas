@@ -62,6 +62,7 @@ export interface CreateNft {
   onsaleFrom?: number;
   onsaleUntil?: number;
 
+  formats?: NftFormats;
   metadata?: any;
 
   signature: string;

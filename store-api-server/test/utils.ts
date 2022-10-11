@@ -298,6 +298,7 @@ export async function resetDb(resetForLegacyTest = false): Promise<number[]> {
       'nft_order',
       'kanvas_user',
       'cart_session',
+      'format',
       'proxy_unfold',
       'nft',
       'nft_category',
