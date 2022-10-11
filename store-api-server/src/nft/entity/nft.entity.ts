@@ -5,13 +5,8 @@ export interface OwnershipInfo {
   receivalOperationHash?: string;
 }
 
-export interface NftFormat {
-  attribute: string;
-  value: any;
-}
-
 export interface NftFormats {
-  [key: string]: NftFormat;
+  [key: string]: { [key: string]: any };
 }
 
 export interface NftEntity {

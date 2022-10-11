@@ -538,10 +538,10 @@ FROM nfts_by_id($1, $2, $3, $4)`,
           }),
           formats: nftRow['formats'].reduce(
             (formats: NftFormats, format: any) => {
-              formats[format[0]] = {
-                attribute: format[1],
-                value: format[2],
-              };
+              if (typeof formats[format[0]] === 'undefined') {
+                formats[format[0]] = {};
+              }
+              formats[format[0]][format[1]] = format[2];
               return formats;
             },
             {},
