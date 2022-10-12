@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import moment from 'moment';
 import useGetDataFromAPI from 'shared/hooks/useGetDataFromAPI';
+import { getTimeSeriesFilteredByOccurrence } from '../functions/getTimeSeriesFilteredByOccurrence';
+import { Month, Resolution } from '../types';
 
-interface TimeSeriesRecord {
+export interface TimeSeriesRecord {
   timestamp: number;
   value: number;
 }
@@ -17,30 +19,47 @@ const TimeSeriesPaths = {
   priceVolume: '/analytics/sales/priceVolume/timeseries',
 };
 
-type TimeSeriesType = 'nftCount' | 'priceVolume';
+export type TimeSeriesType = 'nftCount' | 'priceVolume';
 
-const UseGetTimeSeriesData = (
-  timeSeriesType: TimeSeriesType,
-): TimeSeriesData => {
-  const { data: fetchedTimeSeries } = useGetDataFromAPI<TimeSeriesRecord[]>(
-    TimeSeriesPaths[timeSeriesType],
-  );
+interface UseGetTimeSeriesDataProps {
+  timeSeriesType: TimeSeriesType;
+  resolution: Resolution;
+  occurrence?: Month;
+}
+
+const UseGetTimeSeriesData = ({
+  timeSeriesType,
+  resolution,
+  occurrence,
+}: UseGetTimeSeriesDataProps): TimeSeriesData => {
+  const queryStr = resolution ? `?resolution=${resolution}` : undefined;
+  const { data: fetchedTimeSeries } = useGetDataFromAPI<TimeSeriesRecord[]>({
+    path: TimeSeriesPaths[timeSeriesType],
+    queryStr,
+  });
   const [timeStamps, setTimeStamps] = useState<string[]>([]);
   const [timeStampValues, setTimeStampValues] = useState<number[]>([]);
 
   useEffect(() => {
     if (fetchedTimeSeries) {
+      const timeSeriesFilteredByOccurrence = getTimeSeriesFilteredByOccurrence({
+        timeSeries: fetchedTimeSeries,
+        occurrence,
+      });
+
       setTimeStamps(
-        fetchedTimeSeries.map((record: TimeSeriesRecord) => {
+        timeSeriesFilteredByOccurrence.map((record: TimeSeriesRecord) => {
           return moment.unix(record.timestamp).format('MM/DD/YYYY');
         }),
       );
 
       setTimeStampValues(
-        fetchedTimeSeries.map((record: TimeSeriesRecord) => record.value),
+        timeSeriesFilteredByOccurrence.map(
+          (record: TimeSeriesRecord) => record.value,
+        ),
       );
     }
-  }, [fetchedTimeSeries]);
+  }, [fetchedTimeSeries, occurrence]);
 
   return {
     timeStamps,

@@ -5,20 +5,19 @@ import { useEffect, useState } from 'react';
 interface GetDataFromAPI {
   path: string;
   notify: (value: string) => void;
+  queryStr?: string;
 }
 
-const getDataFromAPI = async ({ path, notify }: GetDataFromAPI) => {
+const getDataFromAPI = async ({ path, queryStr, notify }: GetDataFromAPI) => {
+  const baseUrl = process.env.REACT_APP_API_SERVER_BASE_URL;
+  const url = queryStr ? baseUrl + path + queryStr : baseUrl + path;
+
   try {
-    const response = await axios.get(
-      process.env.REACT_APP_API_SERVER_BASE_URL + path,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem(
-            'KanvasAdmin - Bearer',
-          )}`,
-        },
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('KanvasAdmin - Bearer')}`,
       },
-    );
+    });
 
     const { data } = response.data;
 
@@ -32,19 +31,25 @@ interface DataFromAPI<T> {
   data: T;
 }
 
-export default function UseGetDataFromAPI<T>(
-  path: string,
-): DataFromAPI<T | undefined> {
+interface UseGetDataFromAPIProps {
+  path: string;
+  queryStr?: string;
+}
+
+export default function UseGetDataFromAPI<T>({
+  path,
+  queryStr,
+}: UseGetDataFromAPIProps): DataFromAPI<T | undefined> {
   const notify = useNotify();
   const [dataFromAPI, setDataFromAPI] = useState<T | undefined>();
 
   useEffect(() => {
-    getDataFromAPI({ path, notify }).then((data) => {
+    getDataFromAPI({ path, notify, queryStr }).then((data) => {
       if (data) {
         setDataFromAPI(data);
       }
     });
-  }, [path, notify]);
+  }, [path, notify, queryStr]);
 
   return { data: dataFromAPI };
 }

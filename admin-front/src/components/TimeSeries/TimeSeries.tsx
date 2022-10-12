@@ -2,9 +2,8 @@ import { SyntheticEvent, useState } from 'react';
 import { Paper, Tab } from '@mui/material';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import 'chart.js/auto';
-import { SalesPriceVolume } from './SalesPriceVolume';
-import { SalesNftCount } from './SalesNftCount';
 import { theme } from 'theme';
+import BarChartTimeSeries from './BarChartTimeSeries';
 
 const TimeSeries = () => {
   const [value, setValue] = useState('1');
@@ -37,10 +36,10 @@ const TimeSeries = () => {
           <Tab label="Sales NFT count" value="2" style={makeColor('2')} />
         </TabList>
         <TabPanel value="1">
-          <SalesPriceVolume />
+          <BarChartTimeSeries timeSeriesType="priceVolume" />
         </TabPanel>
         <TabPanel value="2">
-          <SalesNftCount />
+          <BarChartTimeSeries timeSeriesType="nftCount" />
         </TabPanel>
       </TabContext>
     </Paper>
