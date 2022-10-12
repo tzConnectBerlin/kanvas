@@ -12,6 +12,7 @@ import {
   TextField,
 } from '@mui/material';
 import { theme } from 'theme';
+import moment from 'moment';
 import { Bar } from 'react-chartjs-2';
 import { styled } from '@mui/material/styles';
 import { makeStyles } from '@material-ui/core/styles';
@@ -49,15 +50,31 @@ const textFieldSx: SxProps = {
 };
 
 const menuItemSx: SxProps = {
+  '&.Mui-selected': {
+    backgroundColor: `${theme.palette.primary.main}80`,
+    '&:hover': {
+      backgroundColor: `${theme.palette.primary.main}80`,
+    },
+  },
   '&:hover': {
     backgroundColor: `${theme.palette.primary.main}26`,
   },
 };
 
+const getYears = () => {
+  const years = [];
+
+  for (let year = 2022; year <= moment().year(); year++) {
+    years.push({ value: year, label: year });
+  }
+
+  return years;
+};
+
 const months = [
   {
     value: 'All',
-    label: 'All',
+    label: 'All months',
   },
   {
     value: 'January',
@@ -116,10 +133,13 @@ interface BarChartTimeSeriesProps {
 const BarChartTimeSeries = ({ timeSeriesType }: BarChartTimeSeriesProps) => {
   const [resolution, setResolution] = useState<Resolution>('day');
   const [month, setMonth] = useState<Month>('All');
+  const [year, setYear] = useState<number>(moment().year());
+
   const { timeStamps, timeStampValues } = useGetTimeSeriesData({
     timeSeriesType,
     resolution,
-    occurrence: month,
+    year,
+    month,
   });
 
   const classes = useStyles();
@@ -130,9 +150,14 @@ const BarChartTimeSeries = ({ timeSeriesType }: BarChartTimeSeriesProps) => {
     setResolution(newResolution);
   };
 
-  const handleOccurrenceChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleMonthChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newMonth = event.target.value as Month;
     setMonth(newMonth);
+  };
+
+  const handleYearChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const newYear = event.target.value as unknown as number;
+    setYear(newYear);
   };
 
   const chartData = {
@@ -170,11 +195,30 @@ const BarChartTimeSeries = ({ timeSeriesType }: BarChartTimeSeriesProps) => {
         <Grid item>
           <TextField
             size="small"
+            id="outlined-select-year"
+            select
+            value={year}
+            onChange={(event) =>
+              handleYearChange(event as ChangeEvent<HTMLInputElement>)
+            }
+            className={classes.root}
+            sx={textFieldSx}
+          >
+            {getYears().map((year) => (
+              <MenuItem sx={menuItemSx} key={year.value} value={year.value}>
+                {year.label}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Grid>
+        <Grid item>
+          <TextField
+            size="small"
             id="outlined-select-month"
             select
             value={month}
             onChange={(event) =>
-              handleOccurrenceChange(event as ChangeEvent<HTMLInputElement>)
+              handleMonthChange(event as ChangeEvent<HTMLInputElement>)
             }
             className={classes.root}
             sx={textFieldSx}

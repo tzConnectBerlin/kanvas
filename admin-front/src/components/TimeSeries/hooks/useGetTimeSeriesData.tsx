@@ -24,27 +24,30 @@ export type TimeSeriesType = 'nftCount' | 'priceVolume';
 interface UseGetTimeSeriesDataProps {
   timeSeriesType: TimeSeriesType;
   resolution: Resolution;
-  occurrence?: Month;
+  year: number;
+  month: Month;
 }
 
 const UseGetTimeSeriesData = ({
   timeSeriesType,
   resolution,
-  occurrence,
+  year,
+  month,
 }: UseGetTimeSeriesDataProps): TimeSeriesData => {
+  const [timeStamps, setTimeStamps] = useState<string[]>([]);
+  const [timeStampValues, setTimeStampValues] = useState<number[]>([]);
+
   const queryStr = resolution ? `?resolution=${resolution}` : undefined;
   const { data: fetchedTimeSeries } = useGetDataFromAPI<TimeSeriesRecord[]>({
     path: TimeSeriesPaths[timeSeriesType],
     queryStr,
   });
-  const [timeStamps, setTimeStamps] = useState<string[]>([]);
-  const [timeStampValues, setTimeStampValues] = useState<number[]>([]);
 
   useEffect(() => {
     if (fetchedTimeSeries) {
       const timeSeriesFilteredByOccurrence = getTimeSeriesFilteredByOccurrence({
         timeSeries: fetchedTimeSeries,
-        occurrence,
+        occurrence: { year, month },
       });
 
       setTimeStamps(
@@ -59,7 +62,7 @@ const UseGetTimeSeriesData = ({
         ),
       );
     }
-  }, [fetchedTimeSeries, occurrence]);
+  }, [fetchedTimeSeries, year, month]);
 
   return {
     timeStamps,
