@@ -821,6 +821,7 @@ JOIN payment
   ON payment.nft_order_id = nft_order.id
 WHERE nft_order.expires_at <= now() AT TIME ZONE 'UTC'
   AND payment.status IN ('created', 'promised', 'failed')
+ORDER BY 1
     `,
     );
 
@@ -848,6 +849,7 @@ SELECT
 FROM payment
 WHERE provider IN ('tezpay', 'wert')
   AND status IN ('created', 'promised')
+ORDER BY 1
     `,
     );
 
