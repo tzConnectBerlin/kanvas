@@ -13,7 +13,7 @@ export interface Occurrence {
 }
 
 const MonthToIdMap = {
-  All: 'All',
+  All: 0,
   January: 1,
   February: 2,
   March: 3,
