@@ -1,76 +1,59 @@
 import moment from 'moment/moment';
-import { Month } from '../types';
 import { TimeSeriesRecord } from '../hooks/useGetTimeSeriesData';
+import { Month } from '../types';
 
 interface GetTimeSeriesFiltered {
   timeSeries: TimeSeriesRecord[];
-  occurrence?: Month;
+  occurrence: Occurrence;
 }
+
+export interface Occurrence {
+  year: number;
+  month: Month;
+}
+
+const MonthToIdMap = {
+  All: 'All',
+  January: 1,
+  February: 2,
+  March: 3,
+  April: 4,
+  May: 5,
+  June: 6,
+  July: 7,
+  August: 8,
+  September: 9,
+  October: 10,
+  November: 11,
+  December: 12,
+};
 
 const getMonthIdFromTimeStamp = (timestamp: number): number => {
   return Number(moment.unix(timestamp).format('MM'));
+};
+
+const getYearFromTimeStamp = (timestamp: number) => {
+  return Number(moment.unix(timestamp).format('YYYY'));
 };
 
 export const getTimeSeriesFilteredByOccurrence = ({
   timeSeries,
   occurrence,
 }: GetTimeSeriesFiltered): TimeSeriesRecord[] => {
-  if (!occurrence) {
-    return timeSeries;
-  }
-
   const newTimeSeries = [...timeSeries];
 
-  switch (occurrence) {
-    case 'January':
-      return newTimeSeries.filter(
-        (record) => getMonthIdFromTimeStamp(record.timestamp) === 1,
-      );
-    case 'February':
-      return newTimeSeries.filter(
-        (record) => getMonthIdFromTimeStamp(record.timestamp) === 2,
-      );
-    case 'March':
-      return newTimeSeries.filter(
-        (record) => getMonthIdFromTimeStamp(record.timestamp) === 3,
-      );
-    case 'April':
-      return newTimeSeries.filter(
-        (record) => getMonthIdFromTimeStamp(record.timestamp) === 4,
-      );
-    case 'May':
-      return newTimeSeries.filter(
-        (record) => getMonthIdFromTimeStamp(record.timestamp) === 5,
-      );
-    case 'June':
-      return newTimeSeries.filter(
-        (record) => getMonthIdFromTimeStamp(record.timestamp) === 6,
-      );
-    case 'July':
-      return newTimeSeries.filter(
-        (record) => getMonthIdFromTimeStamp(record.timestamp) === 7,
-      );
-    case 'August':
-      return newTimeSeries.filter(
-        (record) => getMonthIdFromTimeStamp(record.timestamp) === 8,
-      );
-    case 'September':
-      return newTimeSeries.filter(
-        (record) => getMonthIdFromTimeStamp(record.timestamp) === 9,
-      );
-    case 'October':
-      return newTimeSeries.filter(
-        (record) => getMonthIdFromTimeStamp(record.timestamp) === 10,
-      );
-    case 'November':
-      return newTimeSeries.filter(
-        (record) => getMonthIdFromTimeStamp(record.timestamp) === 11,
-      );
-    case 'December':
-      return newTimeSeries.filter(
-        (record) => getMonthIdFromTimeStamp(record.timestamp) === 12,
-      );
-    default:
-      return timeSeries;
+  let timeSeriesFilteredByYear = newTimeSeries.filter((record) => {
+    return getYearFromTimeStamp(record.timestamp) === occurrence.year;
+  });
+
+  if (occurrence.month === 'All') {
+    return timeSeriesFilteredByYear;
+  } else {
+    const timeSeriesFilteredByYearAndMonth = timeSeriesFilteredByYear.filter(
+      (record) =>
+        getMonthIdFromTimeStamp(record.timestamp) ===
+        MonthToIdMap[occurrence.month],
+    );
+    return timeSeriesFilteredByYearAndMonth;
   }
 };
