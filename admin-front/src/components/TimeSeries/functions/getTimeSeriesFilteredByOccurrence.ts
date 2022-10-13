@@ -1,15 +1,9 @@
 import moment from 'moment/moment';
-import { TimeSeriesRecord } from '../hooks/useGetTimeSeriesData';
-import { Month } from '../types';
+import { Occurrence, TimeSeriesRecord } from '../utility';
 
 interface GetTimeSeriesFiltered {
   timeSeries: TimeSeriesRecord[];
   occurrence: Occurrence;
-}
-
-export interface Occurrence {
-  year: number;
-  month: Month;
 }
 
 const MonthToIdMap = {
@@ -29,11 +23,11 @@ const MonthToIdMap = {
 };
 
 const getMonthIdFromTimeStamp = (timestamp: number): number => {
-  return Number(moment.unix(timestamp).format('MM'));
+  return Number(moment.unix(timestamp).format('M'));
 };
 
-const getYearFromTimeStamp = (timestamp: number) => {
-  return Number(moment.unix(timestamp).format('YYYY'));
+export const getYearFromTimeStamp = (timestamp: number | undefined) => {
+  return Number(moment.unix(timestamp ?? 0).format('YYYY'));
 };
 
 export const getTimeSeriesFilteredByOccurrence = ({
