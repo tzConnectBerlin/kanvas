@@ -5,7 +5,7 @@ import 'chart.js/auto';
 import { theme } from 'theme';
 import BarChartTimeSeries from './BarChartTimeSeries';
 
-const TimeSeries = () => {
+const TimeSeriesLayout = () => {
   const [value, setValue] = useState('1');
 
   const handleTabChange = (event: SyntheticEvent, newValue: string) => {
@@ -46,4 +46,4 @@ const TimeSeries = () => {
   );
 };
 
-export default TimeSeries;
+export default TimeSeriesLayout;

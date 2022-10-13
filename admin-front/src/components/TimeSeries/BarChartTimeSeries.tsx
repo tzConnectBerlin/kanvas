@@ -1,37 +1,28 @@
-import useGetTimeSeriesData, {
-  TimeSeriesType,
-} from './hooks/useGetTimeSeriesData';
-import { Month, Resolution } from './types';
 import { ChangeEvent, MouseEvent, useState } from 'react';
 import {
   Grid,
   MenuItem,
-  SxProps,
-  ToggleButton,
   ToggleButtonGroup,
   TextField,
+  ToggleButton,
 } from '@mui/material';
 import { theme } from 'theme';
 import moment from 'moment';
 import { Bar } from 'react-chartjs-2';
+import {
+  Month,
+  Resolution,
+  ResolutionValues,
+  TimeSeriesType,
+  menuItemSx,
+  textFieldSx,
+  useStyles,
+  getYears,
+  months,
+} from './utility';
+import useGetTimeSeriesData from './hooks/useGetTimeSeriesData';
+import { getYearFromTimeStamp } from './functions';
 import { styled } from '@mui/material/styles';
-import { makeStyles } from '@material-ui/core/styles';
-
-const useStyles = makeStyles(() => ({
-  root: {
-    '& .MuiOutlinedInput-root': {
-      '& fieldset': {
-        borderColor: 'rgba(0, 0, 0, 0.12)',
-      },
-      '&:hover fieldset': {
-        borderColor: 'rgba(0, 0, 0, 0.20)',
-      },
-      '&.Mui-focused fieldset': {
-        border: '1px solid rgba(0, 0, 0, 0.20)',
-      },
-    },
-  },
-}));
 
 const ToggleButtonStyled = styled(ToggleButton)({
   '&.Mui-selected, &.Mui-selected:hover': {
@@ -40,107 +31,24 @@ const ToggleButtonStyled = styled(ToggleButton)({
   },
 });
 
-const textFieldSx: SxProps = {
-  minWidth: 120,
-  '.MuiOutlinedInput-input': {
-    paddingTop: '8px',
-    paddingBottom: '8px',
-    color: 'rgba(0, 0, 0, 0.54)',
-  },
-};
-
-const menuItemSx: SxProps = {
-  '&.Mui-selected': {
-    backgroundColor: `${theme.palette.primary.main}80`,
-    '&:hover': {
-      backgroundColor: `${theme.palette.primary.main}80`,
-    },
-  },
-  '&:hover': {
-    backgroundColor: `${theme.palette.primary.main}26`,
-  },
-};
-
-const getYears = () => {
-  const years = [];
-
-  for (let year = 2022; year <= moment().year(); year++) {
-    years.push({ value: year, label: year });
-  }
-
-  return years;
-};
-
-const months = [
-  {
-    value: 'All',
-    label: 'All months',
-  },
-  {
-    value: 'January',
-    label: 'January',
-  },
-  {
-    value: 'February',
-    label: 'February',
-  },
-  {
-    value: 'March',
-    label: 'March',
-  },
-  {
-    value: 'April',
-    label: 'April',
-  },
-  {
-    value: 'May',
-    label: 'May',
-  },
-  {
-    value: 'June',
-    label: 'June',
-  },
-  {
-    value: 'July',
-    label: 'July',
-  },
-  {
-    value: 'August',
-    label: 'August',
-  },
-  {
-    value: 'September',
-    label: 'September',
-  },
-  {
-    value: 'October',
-    label: 'October',
-  },
-  {
-    value: 'November',
-    label: 'November',
-  },
-  {
-    value: 'December',
-    label: 'December',
-  },
-];
-
 interface BarChartTimeSeriesProps {
   timeSeriesType: TimeSeriesType;
 }
 
 const BarChartTimeSeries = ({ timeSeriesType }: BarChartTimeSeriesProps) => {
-  const [resolution, setResolution] = useState<Resolution>('day');
+  const [resolution, setResolution] = useState<Resolution>(
+    ResolutionValues.DAY,
+  );
   const [month, setMonth] = useState<Month>('All');
   const [year, setYear] = useState<number>(moment().year());
 
-  const { timeStamps, timeStampValues } = useGetTimeSeriesData({
-    timeSeriesType,
-    resolution,
-    year,
-    month,
-  });
+  const { timeStamps, timeStampValues, fetchedTimeSeries } =
+    useGetTimeSeriesData({
+      timeSeriesType,
+      resolution,
+      year,
+      month,
+    });
 
   const classes = useStyles();
 
@@ -204,7 +112,9 @@ const BarChartTimeSeries = ({ timeSeriesType }: BarChartTimeSeriesProps) => {
             className={classes.root}
             sx={textFieldSx}
           >
-            {getYears().map((year) => (
+            {getYears(
+              getYearFromTimeStamp(fetchedTimeSeries?.[0].timestamp),
+            ).map((year) => (
               <MenuItem sx={menuItemSx} key={year.value} value={year.value}>
                 {year.label}
               </MenuItem>

@@ -1,25 +1,25 @@
 import { useEffect, useState } from 'react';
 import moment from 'moment';
 import useGetDataFromAPI from 'shared/hooks/useGetDataFromAPI';
-import { getTimeSeriesFilteredByOccurrence } from '../functions/getTimeSeriesFilteredByOccurrence';
-import { Month, Resolution } from '../types';
-
-export interface TimeSeriesRecord {
-  timestamp: number;
-  value: number;
-}
+import { getTimeSeriesFilteredByOccurrence, getDateFormat } from '../functions';
+import {
+  Month,
+  Resolution,
+  TimeSeries,
+  TimeSeriesRecord,
+  TimeSeriesType,
+} from '../utility';
 
 interface TimeSeriesData {
   timeStamps: string[];
   timeStampValues: number[];
+  fetchedTimeSeries?: TimeSeries;
 }
 
 const TimeSeriesPaths = {
   nftCount: '/analytics/sales/nftCount/timeseries',
   priceVolume: '/analytics/sales/priceVolume/timeseries',
 };
-
-export type TimeSeriesType = 'nftCount' | 'priceVolume';
 
 interface UseGetTimeSeriesDataProps {
   timeSeriesType: TimeSeriesType;
@@ -52,7 +52,8 @@ const UseGetTimeSeriesData = ({
 
       setTimeStamps(
         timeSeriesFilteredByOccurrence.map((record: TimeSeriesRecord) => {
-          return moment.unix(record.timestamp).format('MM/DD/YYYY');
+          const dateFormat = getDateFormat({ resolution, month });
+          return moment.unix(record.timestamp).format(dateFormat);
         }),
       );
 
@@ -67,6 +68,7 @@ const UseGetTimeSeriesData = ({
   return {
     timeStamps,
     timeStampValues,
+    fetchedTimeSeries,
   };
 };
 
