@@ -14,6 +14,8 @@ import {
 import { useStyle } from '../useStyle';
 import { SelectorProps } from './types';
 import { CurrencySymbolData } from 'shared/types/currency';
+import DisplaySelector from './DisplaySelector';
+import ThumbnailSelector from './ThumbnailSelector';
 
 interface InputSelectorProps extends SelectorProps {
   baseCurrencySymbol?: CurrencySymbolData['symbol'];
@@ -110,10 +112,17 @@ export const InputSelector: FC<InputSelectorProps> = ({ ...props }) => {
     );
   }
   if (props.type === 'content_uri') {
-    return (
-      <FileInput label={label} source={`files[${label}]`}>
-        <FileField src={`attributes.${label}`} source="src" title="title" />
-      </FileInput>
-    );
+    switch (label) {
+      case 'Display':
+        return <DisplaySelector {...props} />;
+      case 'Thumbnail':
+        return <ThumbnailSelector {...props} />;
+      default:
+        return (
+          <FileInput label={label} source={`files[${label}]`}>
+            <FileField src={`attributes.${label}`} source="src" title="title" />
+          </FileInput>
+        );
+    }
   } else return null;
 };

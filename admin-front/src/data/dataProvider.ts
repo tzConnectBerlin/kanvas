@@ -1,6 +1,7 @@
 import { stringify } from 'query-string';
 import { fetchUtils, DataProvider } from 'ra-core';
 import { getToken } from '../auth/authUtils';
+import { removeNullObjKeys } from '../utils/utils';
 
 /**
  * Maps react-admin queries to a simple REST API
@@ -265,7 +266,10 @@ const diffPreviousDataToNewData = (previousData: any, data: any) => {
   }
   // File part
   if (data.hasOwnProperty('files')) {
-    diff['files'] = data['files'].length ? data['files'] : [data['files']];
+    const filesExist = !!data['files'].length;
+    const files = removeNullObjKeys(data['files']);
+
+    diff['files'] = filesExist ? files : [files];
   }
 
   return diff;
