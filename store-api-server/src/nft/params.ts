@@ -3,6 +3,7 @@ import {
   IsString,
   IsInt,
   IsNumber,
+  IsBoolean,
   IsOptional,
   IsArray,
 } from 'class-validator';
@@ -61,6 +62,10 @@ export class FilterParams extends PaginationParams {
   @Transform(({ value }) => (value ? parseStringArray(value, ',') : undefined))
   @IsOptional()
   availability?: string[];
+
+  @IsBoolean()
+  @IsOptional()
+  proxiesFolded?: boolean;
 }
 
 export class SearchParam {

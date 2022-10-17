@@ -35,6 +35,8 @@ export interface NftEntity {
 
   onsaleFrom?: number;
   onsaleUntil?: number;
+
+  isProxy: boolean;
 }
 
 export interface CreateNft {
@@ -52,6 +54,24 @@ export interface CreateNft {
 
   onsaleFrom?: number;
   onsaleUntil?: number;
+
+  metadata?: any;
+
+  signature: string;
+}
+
+export interface CreateProxiedNft {
+  id: number;
+  proxyNftId: number;
+
+  name?: string; // if null/undefined: copied from the proxy nft
+  description?: string; // if null/undefined: copied from the proxy nft
+
+  artifactUri: string;
+  displayUri?: string;
+  thumbnailUri?: string;
+
+  categories: number[];
 
   metadata?: any;
 

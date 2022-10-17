@@ -1102,36 +1102,77 @@ WHERE payment_id = $1
 
   async #orderCheckout(orderId: number) {
     const order = await this.#getOrder(orderId);
+    const nfts = await withTransaction(
+      this.conn,
+      async (dbTx: DbTransaction) => {
+        const nfts = await this.#unfoldProxyNfts(dbTx, order.nfts);
 
-    await withTransaction(this.conn, async (dbTx: DbTransaction) => {
-      await this.#assignOrderNftsToUser(dbTx, orderId);
+        await this.#assignNftsToUser(
+          dbTx,
+          order.userId,
+          nfts.map((nft: NftEntity) => nft.id),
+        );
 
-      await this.userService.dropCartByOrderId(orderId, dbTx);
-    }).catch((err: any) => {
+        return nfts;
+      },
+    ).catch((err: any) => {
       Logger.error(
         `failed to checkout order (orderId=${orderId}), err: ${err}`,
       );
       throw err;
     });
+    this.userService.dropCartByOrderId(orderId);
 
     // This step is done after committing the database related assigning of the NFTs to the user,
     // if any issues occur with Blockchain related assigning they should be resolved asynchronously
-    await this.mintService.transfer_nfts(order.nfts, order.userAddress);
+    await this.mintService.transferNfts(nfts, order.userAddress);
   }
 
-  async #assignOrderNftsToUser(dbTx: any, orderId: number) {
-    const nftIds = await dbTx.query(
+  async #unfoldProxyNfts(
+    dbTx: DbTransaction,
+    nfts: NftEntity[],
+  ): Promise<NftEntity[]> {
+    await dbTx.query('LOCK TABLE proxy_unfold IN EXCLUSIVE MODE');
+
+    return await Promise.all(
+      nfts.map(async (nft) => {
+        if (!nft.isProxy) {
+          return nft;
+        }
+
+        const unfoldId = (
+          await dbTx.query(
+            `
+UPDATE proxy_unfold
+SET claimed = true
+WHERE proxy_nft_id = $1
+  AND NOT claimed
+  AND id = (
+    SELECT min(id)
+    FROM proxy_unfold
+    WHERE proxy_nft_id = $1
+      AND NOT claimed
+  )
+RETURNING id AS unfold_id
+        `,
+            [nft.id],
+          )
+        ).rows[0]['unfold_id'];
+
+        return await this.nftService.byId(unfoldId);
+      }),
+    );
+  }
+
+  async #assignNftsToUser(dbTx: any, userId: number, nftIds: number[]) {
+    await dbTx.query(
       `
 INSERT INTO mtm_kanvas_user_nft (
   kanvas_user_id, nft_id
 )
-SELECT nft_order.user_id, mtm.nft_id
-FROM mtm_nft_order_nft AS mtm
-JOIN nft_order
-  ON nft_order.id = $1
-WHERE nft_order_id = $1
+SELECT $1, UNNEST($2::int[])
 `,
-      [orderId],
+      [userId, nftIds],
     );
   }
 

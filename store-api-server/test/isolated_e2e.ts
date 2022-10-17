@@ -163,5 +163,7 @@ WHERE id = ${nftIds[0]}
         });
       });
     }
+
+    it(`proxy nft test`, async () => {});
   });
 }

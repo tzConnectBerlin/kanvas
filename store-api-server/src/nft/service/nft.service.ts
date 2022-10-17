@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import {
   CreateNft,
+  CreateProxiedNft,
   NftEntity,
   NftEntityPage,
   OwnershipInfo,
@@ -120,6 +121,18 @@ SELECT $1, UNNEST($2::INTEGER[])
     });
 
     Logger.log(`Created new NFT ${newNft.id}`);
+  }
+
+  async createProxiedNft(newNft: CreateProxiedNft) {
+    const proxyNft = await this.byId(newNft.proxyNftId);
+
+    return await this.createNft({
+      ...newNft,
+      name: newNft.name ?? proxyNft.name,
+      description: newNft.description ?? proxyNft.description,
+      price: Number(proxyNft.price),
+      editionsSize: 1,
+    });
   }
 
   async delistNft(nftId: number) {
@@ -290,13 +303,14 @@ LIMIT $3
       const nftIds = await this.conn.query(
         `
 SELECT nft_id, total_nft_count
-FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
         [
           filters.userAddress,
           filters.categories,
           filters.priceAtLeast,
           filters.priceAtMost,
           filters.availability,
+          filters.proxiesFolded,
           ENDING_SOON_DURATION,
           orderBy,
           filters.orderDirection,
@@ -359,7 +373,7 @@ FROM price_bounds($1, $2, $3, $4, $5)`,
 
   async byId(
     id: number,
-    currency: string,
+    currency: string = BASE_CURRENCY,
     includeRecvForAddress?: string,
     incrViewCount: boolean = true,
     dbConn: any = this.conn,
@@ -398,7 +412,7 @@ WHERE id = $1
 
   async findByIds(
     nftIds: number[],
-    forRecvAddr: string | undefined,
+    forRecvAddr?: string,
     orderBy: string = 'nft_id',
     orderDirection: string = 'asc',
     currency: string = BASE_CURRENCY,
@@ -413,6 +427,7 @@ SELECT
   nft_created_at,
   nft_name,
   description,
+  is_proxy,
 
   editions_size,
   price,
@@ -467,6 +482,7 @@ FROM nfts_by_id($1, $2, $3, $4)`,
           id: nftRow['nft_id'],
           name: nftRow['nft_name'],
           description: nftRow['description'],
+          isProxy: nftRow['is_proxy'],
 
           ipfsHash: metadataIpfs, // note: deprecated by metadataIpfs
           metadataIpfs: metadataIpfs,

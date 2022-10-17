@@ -243,6 +243,7 @@ describe('AppController (e2e)', () => {
       thumbnailUri:
         'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
       price: '0.10',
+      isProxy: false,
       editionsSize: 4,
       editionsAvailable: 4,
       editionsSold: 0,
@@ -362,6 +363,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             price: '0.10',
+            isProxy: false,
             editionsSize: 4,
             editionsAvailable: 4,
             editionsSold: 0,
@@ -392,6 +394,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2202&q=80',
             price: '7.80',
+            isProxy: false,
             editionsSize: 2,
             editionsAvailable: 2,
             editionsSold: 0,
@@ -421,6 +424,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             price: '10.40',
+            isProxy: false,
             editionsSize: 6,
             editionsAvailable: 6,
             editionsSold: 0,
@@ -450,6 +454,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 8,
             editionsSold: 0,
@@ -480,6 +485,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
             price: '9.20',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 8,
             editionsSold: 0,
@@ -510,6 +516,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1506809211073-d0785aaad75e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2656&q=80',
             price: '4.10',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 8,
             editionsSold: 0,
@@ -540,6 +547,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1633957897986-70e83293f3ff?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1986&q=80',
             price: '3.60',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 8,
             editionsSold: 0,
@@ -569,6 +577,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1599790772272-d1425cd3242e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
             price: '64.20',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 8,
             editionsSold: 0,
@@ -599,6 +608,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             price: '343.20',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 8,
             editionsSold: 0,
@@ -708,6 +718,7 @@ describe('AppController (e2e)', () => {
           thumbnailIpfs: null,
           name: 'Internet',
           price: '10.40',
+          isProxy: false,
           thumbnailUri:
             'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
         },
@@ -768,6 +779,7 @@ describe('AppController (e2e)', () => {
           thumbnailUri:
             'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
           price: '0.10',
+          isProxy: false,
           editionsSize: 4,
           editionsAvailable: 4,
           editionsSold: 0,
@@ -840,6 +852,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             price: '0.10',
+            isProxy: false,
             editionsSize: 4,
             editionsAvailable: 4,
             editionsSold: 0,
@@ -877,6 +890,7 @@ describe('AppController (e2e)', () => {
             thumbnailIpfs: null,
             name: 'Internet',
             price: '10.40',
+            isProxy: false,
             thumbnailUri:
               'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
           },
@@ -1001,6 +1015,7 @@ describe('AppController (e2e)', () => {
           thumbnailUri:
             'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
           price: '343.20',
+          isProxy: false,
           editionsSize: 8,
           editionsAvailable: 8,
           editionsSold: 0,
@@ -2269,6 +2284,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             price: '0.10',
+            isProxy: false,
             editionsSize: 4,
             editionsAvailable: 3,
             editionsSold: 1,
@@ -2298,6 +2314,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 0,
             editionsSold: 3,
@@ -2370,6 +2387,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             price: '0.10',
+            isProxy: false,
             editionsSize: 4,
             editionsAvailable: 3,
             editionsSold: 1,
@@ -2437,6 +2455,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 0,
             editionsSold: 3,
@@ -2508,6 +2527,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 0,
             editionsSold: 3,
@@ -2579,6 +2599,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 0,
             editionsSold: 3,
@@ -2651,6 +2672,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 0,
             editionsSold: 3,
@@ -2722,6 +2744,7 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 0,
             editionsSold: 3,
@@ -3296,6 +3319,7 @@ describe('AppController (e2e)', () => {
         artifactUri: 'some_s3_uri',
 
         price: '0.50',
+        isProxy: false,
         categories: [10],
         editionsSize: 4,
 
@@ -3318,6 +3342,7 @@ describe('AppController (e2e)', () => {
         artifactUri: 'some_s3_uri',
 
         price: '0.50',
+        isProxy: false,
         categories: [10],
         editionsSize: 4,
 
@@ -3540,6 +3565,7 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending'],
             ownershipInfo: [{ status: 'pending' }],
             price: '0.10',
+            isProxy: false,
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
           },
@@ -3574,6 +3600,7 @@ describe('AppController (e2e)', () => {
               { status: 'pending' },
             ],
             price: '4.30',
+            isProxy: false,
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
           },
@@ -3610,6 +3637,7 @@ describe('AppController (e2e)', () => {
           ownerStatuses: ['payment processing'],
           ownershipInfo: [{ status: 'payment processing' }],
           price: '4.30',
+          isProxy: false,
           thumbnailUri:
             'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
         },
@@ -3671,6 +3699,7 @@ describe('AppController (e2e)', () => {
           thumbnailIpfs: null,
           name: 'An didn t stop improving',
           price: '23.20',
+          isProxy: false,
           thumbnailUri:
             'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
         },
@@ -3700,6 +3729,7 @@ describe('AppController (e2e)', () => {
           thumbnailIpfs: null,
           name: 'Antonin DVORAK',
           price: '9.20',
+          isProxy: false,
           thumbnailUri:
             'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
         },
@@ -3802,6 +3832,7 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending'],
             ownershipInfo: [{ status: 'pending' }],
             price: '0.10',
+            isProxy: false,
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
           },
@@ -3836,6 +3867,7 @@ describe('AppController (e2e)', () => {
               { status: 'pending' },
             ],
             price: '4.30',
+            isProxy: false,
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
           },
@@ -3872,6 +3904,7 @@ describe('AppController (e2e)', () => {
           ownerStatuses: ['payment processing'],
           ownershipInfo: [{ status: 'payment processing' }],
           price: '4.30',
+          isProxy: false,
           thumbnailUri:
             'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
         },
@@ -3902,6 +3935,7 @@ describe('AppController (e2e)', () => {
           ownerStatuses: ['payment processing'],
           ownershipInfo: [{ status: 'payment processing' }],
           price: '23.20',
+          isProxy: false,
           thumbnailUri:
             'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
         },
@@ -3933,6 +3967,7 @@ describe('AppController (e2e)', () => {
           ownerStatuses: ['payment processing'],
           ownershipInfo: [{ status: 'payment processing' }],
           price: '9.20',
+          isProxy: false,
           thumbnailUri:
             'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
         },
