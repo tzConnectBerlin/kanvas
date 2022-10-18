@@ -3,6 +3,7 @@ import {
   IsString,
   IsInt,
   IsNumber,
+  IsBooleanString,
   IsBoolean,
   IsOptional,
   IsArray,
@@ -37,7 +38,7 @@ export class PaginationParams {
 export class FilterParams extends PaginationParams {
   @IsArray()
   @Transform(({ value }) =>
-    value
+    typeof value !== 'undefined'
       ? parseStringArray(value, ',').map((v: string) => parseNumberParam(v))
       : undefined,
   )
@@ -59,11 +60,15 @@ export class FilterParams extends PaginationParams {
   priceAtMost?: number;
 
   @IsArray()
-  @Transform(({ value }) => (value ? parseStringArray(value, ',') : undefined))
+  @Transform(({ value }) =>
+    typeof value !== 'undefined' ? parseStringArray(value, ',') : undefined,
+  )
   @IsOptional()
   availability?: string[];
 
-  @IsBoolean()
+  @Transform(({ value }) =>
+    typeof value !== 'undefined' ? parseBoolParam(value) : undefined,
+  )
   @IsOptional()
   proxiesFolded?: boolean;
 }
@@ -86,6 +91,20 @@ function parseNumberParam(v: string): number {
     throw new HttpException(`${v} is not a number`, HttpStatus.BAD_REQUEST);
   }
   return res;
+}
+
+function parseBoolParam(v: string): boolean {
+  switch (v.toString()) {
+    case 'true':
+      return true;
+    case 'false':
+      return false;
+    default:
+      throw new HttpException(
+        `unsupported boolean param value (got ${v}, ${typeof v}), must be one of true or false`,
+        HttpStatus.BAD_REQUEST,
+      );
+  }
 }
 
 export function validatePaginationParams(params: PaginationParams): void {

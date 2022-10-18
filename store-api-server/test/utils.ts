@@ -12,9 +12,11 @@ import {
   PaymentService,
   PaymentStatus,
 } from '../src/payment/service/payment.service';
-import { PaymentProvider } from '../src/payment/entity/payment.entity.js';
+import { PaymentProvider } from '../src/payment/entity/payment.entity';
 import { UserEntity } from '../src/user/entity/user.entity';
+import { CreateNft, CreateProxiedNft } from '../src/nft/entity/nft.entity';
 import { assertEnv, sleep } from '../src/utils';
+import { SIGNATURE_PREFIX_CREATE_NFT } from 'kanvas-api-lib';
 
 export interface KanvasLogin {
   id: number;
@@ -179,6 +181,34 @@ export async function checkout(
   return { paymentId };
 }
 
+export async function createNft(app: any, nft: any) {
+  let hexMsg = nft.id.toString(16);
+  if (hexMsg.length & 1) {
+    // hex is of uneven length, sotez expects an even number of hexadecimal characters
+    hexMsg = SIGNATURE_PREFIX_CREATE_NFT + '0' + hexMsg;
+  }
+
+  const signed = await cryptoUtils.sign(hexMsg, assertEnv('ADMIN_PRIVATE_KEY'));
+
+  await request(app.getHttpServer())
+    .post('/nfts/create')
+    .send({ ...nft, signature: signed.sig });
+}
+
+export async function createProxiedNft(app: any, nft: any) {
+  let hexMsg = nft.id.toString(16);
+  if (hexMsg.length & 1) {
+    // hex is of uneven length, sotez expects an even number of hexadecimal characters
+    hexMsg = SIGNATURE_PREFIX_CREATE_NFT + '0' + hexMsg;
+  }
+
+  const signed = await cryptoUtils.sign(hexMsg, assertEnv('ADMIN_PRIVATE_KEY'));
+
+  await request(app.getHttpServer())
+    .post('/nfts/create-proxied')
+    .send({ ...nft, signature: signed.sig });
+}
+
 export async function withDbConn<ResTy>(
   f: (dbConn: Pool<Client>) => Promise<ResTy>,
 ): Promise<ResTy> {
@@ -204,6 +234,7 @@ export async function resetDb(resetForLegacyTest = false): Promise<number[]> {
       'nft_order',
       'kanvas_user',
       'cart_session',
+      'proxy_unfold',
       'nft',
       'nft_category',
     ];

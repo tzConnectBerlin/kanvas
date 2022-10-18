@@ -41,6 +41,8 @@ export interface NftEntity {
 
 export interface CreateNft {
   id: number;
+  proxyNftId?: number;
+
   name: string;
   description: string;
 

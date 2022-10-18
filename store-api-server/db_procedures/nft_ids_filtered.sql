@@ -67,8 +67,8 @@ BEGIN
               ))
             ))
         AND ($11 IS NULL OR (
-              ($11 AND nft.proxy_nft_id IS NOT NULL) OR
-              ((NOT $11) AND EXISTS (SELECT 1 FROM proxy_unfold WHERE proxy_nft_id = nft.id))
+              ($11 AND nft.proxy_nft_id IS NULL) OR
+              ((NOT $11) AND NOT EXISTS (SELECT 1 FROM proxy_unfold WHERE proxy_nft_id = nft.id))
             ))
       GROUP BY nft.id, nft.created_at
       ORDER BY ' || quote_ident(order_by) || ' ' || order_direction || '

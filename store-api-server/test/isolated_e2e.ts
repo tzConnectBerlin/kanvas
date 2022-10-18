@@ -18,6 +18,12 @@ export async function runIsolatedTests(appReference: () => any) {
   let paymentService: PaymentService;
   let nftIds: number[];
 
+  const newNftId = () => {
+    const id = nftIds[nftIds.length - 1] + 1;
+    nftIds.push(id);
+    return id;
+  };
+
   describe('clean e2e test cases (db is reset between each test)', () => {
     beforeEach(async () => {
       [app, paymentService] = appReference();
@@ -164,6 +170,122 @@ WHERE id = ${nftIds[0]}
       });
     }
 
-    it(`proxy nft test`, async () => {});
+    it(`proxy nft test`, async () => {
+      let proxyCategoryId;
+      let unfoldCategoryId;
+
+      // simpler to run this test with fresh categories
+      await testUtils.withDbConn(async (conn) => {
+        proxyCategoryId = (
+          await conn.query(`
+insert into nft_category (
+  category, description
+)
+values
+  ('Root', 'root category, assigned to the proxy nft')
+RETURNING id
+`)
+        ).rows[0]['id'];
+        unfoldCategoryId = (
+          await conn.query(
+            `
+insert into nft_category (
+  category, description, parent
+)
+values
+  ('Root', 'root category, assigned to the proxy nft', $1)
+RETURNING id
+`,
+            [proxyCategoryId],
+          )
+        ).rows[0]['id'];
+      });
+
+      const proxyNftId = newNftId();
+      await testUtils.createNft(app, {
+        id: proxyNftId,
+        name: 'the proxy nft',
+        description: 'this nft is a proxy',
+        price: 5,
+        artifactUri: 'proxy_img',
+        editionsSize: 0,
+        categories: [proxyCategoryId],
+      });
+      const proxiedNftId1 = newNftId();
+      await testUtils.createProxiedNft(app, {
+        id: proxiedNftId1,
+        proxyNftId,
+        name: 'one of the unfoldings',
+        description: 'this nft is proxied',
+        artifactUri: 'unfolded_img',
+        editionsSize: 0,
+        categories: [unfoldCategoryId],
+      });
+      const proxiedNftId2 = newNftId();
+      await testUtils.createProxiedNft(app, {
+        id: proxiedNftId2,
+        proxyNftId,
+        name: 'another of the unfoldings',
+        description: 'this nft is proxied',
+        artifactUri: 'unfolded_img2',
+        editionsSize: 0,
+        categories: [unfoldCategoryId],
+      });
+
+      // not setting proxiesFolded returns both the proxy as well as the unfolding
+      const proxiesUnspecifiedResp = await request(app.getHttpServer())
+        .get(`/nfts`)
+        .query({ categories: `${proxyCategoryId},${unfoldCategoryId}` });
+      expect(proxiesUnspecifiedResp.body).toMatchObject({
+        totalNftCount: 3,
+        nfts: [
+          {
+            id: proxyNftId,
+            editionsSize: 2, // editionsSize should automatically become number of proxied nfts
+          },
+          {
+            id: proxiedNftId1,
+          },
+          {
+            id: proxiedNftId2,
+          },
+        ],
+      });
+
+      // setting proxiesFolded to true returns only the proxy
+      const proxiesFoldedResp = await request(app.getHttpServer())
+        .get(`/nfts`)
+        .query({
+          proxiesFolded: 'true',
+          categories: `${proxyCategoryId},${unfoldCategoryId}`,
+        });
+      expect(proxiesFoldedResp.body).toMatchObject({
+        totalNftCount: 1,
+        nfts: [
+          {
+            id: proxyNftId,
+          },
+        ],
+      });
+
+      // setting proxiesFolded to false returns only the unfolding
+      const proxiesUnfoldedResp = await request(app.getHttpServer())
+        .get(`/nfts`)
+        .query({
+          proxiesFolded: 'false',
+          categories: `${proxyCategoryId},${unfoldCategoryId}`,
+        });
+      expect(proxiesUnfoldedResp.body).toMatchObject({
+        totalNftCount: 2,
+        nfts: [
+          {
+            id: proxiedNftId1,
+          },
+          {
+            id: proxiedNftId2,
+          },
+        ],
+      });
+    });
   });
 }

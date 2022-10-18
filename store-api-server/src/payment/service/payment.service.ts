@@ -1153,11 +1153,11 @@ WHERE proxy_nft_id = $1
     WHERE proxy_nft_id = $1
       AND NOT claimed
   )
-RETURNING id AS unfold_id
+RETURNING unfold_nft_id
         `,
             [nft.id],
           )
-        ).rows[0]['unfold_id'];
+        ).rows[0]['unfold_nft_id'];
 
         return await this.nftService.byId(unfoldId);
       }),
