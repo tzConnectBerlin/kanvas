@@ -30,6 +30,7 @@ import sotez from 'sotez';
 import { v4 as uuidv4 } from 'uuid';
 import Pool from 'pg-pool';
 import { runOnchainEnabledTests } from './onchain_enabled';
+import { runProxyNftTests } from './proxy_nft_e2e';
 import { runIsolatedTests } from './isolated_e2e';
 const { cryptoUtils } = sotez;
 import * as testUtils from './utils';
@@ -93,6 +94,7 @@ describe('AppController (e2e)', () => {
   });
 
   runIsolatedTests(() => [app, paymentService]);
+  runProxyNftTests(() => [app, paymentService]);
   runOnchainEnabledTests(() => [app, paymentService]);
 
   // Note:

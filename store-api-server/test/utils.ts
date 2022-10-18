@@ -190,9 +190,10 @@ export async function createNft(app: any, nft: any) {
 
   const signed = await cryptoUtils.sign(hexMsg, assertEnv('ADMIN_PRIVATE_KEY'));
 
-  await request(app.getHttpServer())
+  const resp = await request(app.getHttpServer())
     .post('/nfts/create')
     .send({ ...nft, signature: signed.sig });
+  expect(resp.statusCode).toEqual(201);
 }
 
 export async function createProxiedNft(app: any, nft: any) {
@@ -204,9 +205,10 @@ export async function createProxiedNft(app: any, nft: any) {
 
   const signed = await cryptoUtils.sign(hexMsg, assertEnv('ADMIN_PRIVATE_KEY'));
 
-  await request(app.getHttpServer())
+  const resp = await request(app.getHttpServer())
     .post('/nfts/create-proxied')
     .send({ ...nft, signature: signed.sig });
+  expect(resp.statusCode).toEqual(201);
 }
 
 export async function withDbConn<ResTy>(
