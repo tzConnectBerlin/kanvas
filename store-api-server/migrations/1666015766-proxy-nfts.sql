@@ -10,7 +10,7 @@ CREATE INDEX ON nft(proxy_nft_id);
 CREATE TABLE proxy_unfold (
   id SERIAL PRIMARY KEY,
 
-  proxy_nft_id INT NOT NULL REFERENCES nft(id) UNIQUE,
+  proxy_nft_id INT NOT NULL REFERENCES nft(id),
 
   unfold_nft_id INT NOT NULL REFERENCES nft(id),
   claimed BOOLEAN NOT NULL DEFAULT false,

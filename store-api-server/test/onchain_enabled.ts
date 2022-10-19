@@ -16,6 +16,12 @@ export async function runOnchainEnabledTests(appReference: () => any) {
   let paymentService: PaymentService;
   let nftIds: number[];
 
+  const newNftId = () => {
+    const id = nftIds[nftIds.length - 1] + 1;
+    nftIds.push(id);
+    return id;
+  };
+
   const onchainTestTimeoutMs = 15000;
 
   describe('clean e2e test cases (db is reset between each test)', () => {
@@ -166,6 +172,105 @@ export async function runOnchainEnabledTests(appReference: () => any) {
               },
             ],
           },
+        });
+      },
+      onchainTestTimeoutMs,
+    );
+
+    it('paid proxy nft results in delivery of next proxy unfold nft', async () => {
+      const setup = await testUtils.basicProxySetup(app, newNftId);
+
+      const wallet1 = await testUtils.newWallet(app);
+      await testUtils.cartAdd(app, setup.proxyNftId, wallet1);
+      await testUtils.checkout(paymentService, wallet1);
+
+      await testUtils.waitBlocks();
+
+      const profile = await testUtils.getProfile(app, wallet1);
+      expect(profile).toMatchObject({
+        pendingOwnership: [],
+        collection: {
+          nfts: [
+            {
+              id: setup.proxiedNftIds[0],
+              ownershipInfo: [{ status: 'owned' }],
+            },
+          ],
+        },
+      });
+    });
+
+    it(
+      'some tests with paying all editions of a proxy nft',
+      async () => {
+        const setup = await testUtils.basicProxySetup(app, newNftId);
+
+        const wallet1 = await testUtils.newWallet(app);
+
+        const expOwnedNfts: any[] = [];
+
+        const nextProxyPurchase = async (expProxiedNftId: number) => {
+          await testUtils.cartAdd(app, setup.proxyNftId, wallet1);
+          await testUtils.checkout(paymentService, wallet1);
+
+          await testUtils.waitBlocks();
+
+          expOwnedNfts.push({
+            id: expProxiedNftId,
+            ownershipInfo: [{ status: 'owned' }],
+
+            editionsSize: 1,
+            editionsSold: 1,
+            editionsAvailable: 0,
+          });
+
+          const profile = await testUtils.getProfile(app, wallet1);
+          expect(profile).toMatchObject({
+            pendingOwnership: [],
+            collection: {
+              nfts: expOwnedNfts,
+            },
+          });
+        };
+
+        for (const proxiedNftId of setup.proxiedNftIds) {
+          await nextProxyPurchase(proxiedNftId);
+        }
+
+        // all editions should be claimed now, adding to cart should result in 400
+        await testUtils.cartAdd(app, setup.proxyNftId, wallet1, 400);
+
+        // verify all editions available and sold are correct
+        const resp = await request(app.getHttpServer())
+          .get(`/nfts`)
+          .query({
+            categories: `${setup.proxyCategoryId},${setup.proxiedCategoryId}`,
+          });
+        expect(resp.body).toMatchObject({
+          totalNftCount: 3,
+          nfts: [
+            {
+              id: setup.proxyNftId,
+
+              editionsSize: 2,
+              editionsAvailable: 0,
+              editionsSold: 2,
+            },
+            {
+              id: setup.proxiedNftIds[0],
+
+              editionsSize: 1,
+              editionsAvailable: 0,
+              editionsSold: 1,
+            },
+            {
+              id: setup.proxiedNftIds[1],
+
+              editionsSize: 1,
+              editionsAvailable: 0,
+              editionsSold: 1,
+            },
+          ],
         });
       },
       onchainTestTimeoutMs,

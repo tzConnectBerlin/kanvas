@@ -435,7 +435,8 @@ SELECT
   (SELECT reserved + owned FROM nft_editions_locked($1)) AS editions_locked,
   nft.editions_size,
   nft.onsale_from,
-  nft.onsale_until
+  nft.onsale_until,
+  nft.proxy_nft_id
 FROM nft
 WHERE nft.id = $1`,
         [nftId],
@@ -456,6 +457,12 @@ WHERE nft.id = $1`,
       if (!isBottom(nft['onsale_until']) && nft['onsale_until'] < new Date()) {
         throw new HttpException(
           'This nft is no longer for sale',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      if (!isBottom(nft['proxy_nft_id'])) {
+        throw new HttpException(
+          'This nft is not for sale, only obtainable randomly via its proxy nft',
           HttpStatus.BAD_REQUEST,
         );
       }
