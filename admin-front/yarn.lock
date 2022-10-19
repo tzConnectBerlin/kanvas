@@ -2418,6 +2418,13 @@
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.4.tgz#cd667bcfdd025213aafb7ca5915a932590acdcdc"
   integrity sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==
 
+"@types/react-csv@^1.1.3":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@types/react-csv/-/react-csv-1.1.3.tgz#b93a33314d71e8e3c5c41b20d19a2912c6e642c8"
+  integrity sha512-dkEdyRvRpygSnNg4cyzYWSUjukIQ5lAtXJwc7BqyUfzww/Cv2dcAFGYd+sWTFpGiDNZMVPp6vVPLcAPvJID8Kg==
+  dependencies:
+    "@types/react" "*"
+
 "@types/react-dom@^17.0.0":
   version "17.0.11"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-17.0.11.tgz#e1eadc3c5e86bdb5f7684e00274ae228e7bcc466"
@@ -4972,6 +4979,11 @@ expect@^27.4.6:
     jest-get-type "^27.4.0"
     jest-matcher-utils "^27.4.6"
     jest-message-util "^27.4.6"
+
+export-to-csv@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/export-to-csv/-/export-to-csv-0.2.1.tgz#8f997156feebc1cf995096da16341aa0100cce4e"
+  integrity sha512-KTbrd3CAZ0cFceJEZr1e5uiMasabeCpXq1/5uvVxDl53o4jXJHnltasQoj2NkzrxD8hU9kdwjnMhoir/7nNx/A==
 
 express@^4.17.1:
   version "4.17.2"

@@ -35,4 +35,11 @@ export interface Occurrence {
   month: Month;
 }
 
-export type TimeSeriesType = 'nftCount' | 'priceVolume';
+export enum TimeSeriesTypeEnum {
+  NFT_COUNT = 'nftCount',
+  PRICE_VOLUME = 'priceVolume',
+}
+
+export type TimeSeriesType =
+  | TimeSeriesTypeEnum.NFT_COUNT
+  | TimeSeriesTypeEnum.PRICE_VOLUME;

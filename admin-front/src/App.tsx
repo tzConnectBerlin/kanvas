@@ -16,7 +16,7 @@ import { UserList, UserEdit, UserCreate } from './components/Users';
 import { NftList, NftEdit, NftCreate } from './components/Nfts';
 import NotFound from 'components/NotFound';
 import { ActivityList } from 'components/Activities';
-import TimeSeriesLayout from 'components/TimeSeries/TimeSeriesLayout';
+import TimeSeries from 'components/TimeSeries/TimeSeries';
 import Profile from 'components/Profile';
 
 //for data from the nest admin api
@@ -70,7 +70,7 @@ function App() {
       />
       <Resource
         name="analytics/sales"
-        list={TimeSeriesLayout}
+        list={TimeSeries}
         icon={InsightsIcon}
         options={{
           label: 'Analytics',

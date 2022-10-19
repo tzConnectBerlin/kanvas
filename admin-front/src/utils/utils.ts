@@ -16,3 +16,7 @@ export const removeNullObjKeys = (obj: Record<any, any>) => {
 
   return obj;
 };
+
+export function destroyReferenceAndClone(src: Array<any>) {
+  return JSON.parse(JSON.stringify(src));
+}
