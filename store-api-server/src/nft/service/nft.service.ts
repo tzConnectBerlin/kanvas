@@ -319,6 +319,11 @@ LIMIT $3
       untilNft = new Date(filters.firstRequestAt * 1000).toISOString();
     }
 
+    const proxiesFolded: boolean | undefined =
+      (filters.proxyFolding ?? 'both') === 'both'
+        ? undefined
+        : filters.proxyFolding === 'fold';
+
     try {
       const nftIds = await this.conn.query(
         `
@@ -330,7 +335,7 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
           filters.priceAtLeast,
           filters.priceAtMost,
           filters.availability,
-          filters.proxiesFolded,
+          proxiesFolded,
           ENDING_SOON_DURATION,
           orderBy,
           filters.orderDirection,

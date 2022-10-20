@@ -64,7 +64,7 @@ export async function runProxyNftTests(appReference: () => any) {
       const resp = await request(app.getHttpServer())
         .get(`/nfts`)
         .query({
-          proxiesFolded: 'true',
+          proxyFolding: 'fold',
           categories: `${setup.proxyCategoryId},${setup.proxiedCategoryId}`,
         });
       expect(resp.body).toMatchObject({
@@ -83,7 +83,7 @@ export async function runProxyNftTests(appReference: () => any) {
       const resp = await request(app.getHttpServer())
         .get(`/nfts`)
         .query({
-          proxiesFolded: 'false',
+          proxyFolding: 'unfold',
           categories: `${setup.proxyCategoryId},${setup.proxiedCategoryId}`,
         });
       expect(resp.body).toMatchObject({

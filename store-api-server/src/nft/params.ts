@@ -66,11 +66,21 @@ export class FilterParams extends PaginationParams {
   @IsOptional()
   availability?: string[];
 
-  @Transform(({ value }) =>
-    typeof value !== 'undefined' ? parseBoolParam(value) : undefined,
-  )
+  @IsString()
+  @Transform(({ value }) => {
+    if (
+      typeof value !== 'undefined' &&
+      !['fold', 'unfold', 'both'].includes(value)
+    ) {
+      throw new HttpException(
+        `${value} is not a valid value for proxyFolding`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return value;
+  })
   @IsOptional()
-  proxiesFolded?: boolean;
+  proxyFolding?: 'fold' | 'unfold' | 'both' = 'both';
 }
 
 export class SearchParam {
