@@ -105,17 +105,3 @@ export function getClientIp(request: any): string {
   const { ip } = request;
   return BEHIND_PROXY ? request.get('X-Forwarded-For') || ip : ip;
 }
-
-export function chooseByProbability<T>(xs: { p: number; v: T }[]): T {
-  const totalProbability = xs.reduce((acc, x) => acc + x.p, 0); // normalise to allow cases where the total doesn't add to 1
-
-  let cumulativeProbability = 0;
-  const rand = Math.random();
-  const output = xs
-    .map((x) => {
-      cumulativeProbability += (x.p * 1) / totalProbability ?? 1;
-      return { ...x, cumP: cumulativeProbability };
-    })
-    .find((x) => rand < x.cumP);
-  return (output ?? xs[xs.length - 1]).v;
-}
