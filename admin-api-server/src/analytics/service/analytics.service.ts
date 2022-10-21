@@ -8,7 +8,9 @@ import {
 import { PG_CONNECTION_STORE_REPLICATION } from '../../constants.js';
 import { ActivityFilterParams } from '../params.js';
 import { BASE_CURRENCY, CurrencyService } from 'kanvas-api-lib';
-import { date } from 'joi';
+import dayjs, { ManipulateType } from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
+dayjs.extend(utc);
 
 @Injectable()
 export class AnalyticsService {
@@ -47,19 +49,21 @@ export class AnalyticsService {
   ): Promise<MetricEntity[]> {
     const qryRes = await this.#timeseries(params);
 
-    return qryRes.rows.map(
-      (row: any) =>
-        <MetricEntity>{
-          timestamp: Math.floor(row['timestamp'].getTime() / 1000),
-          value: Number(row['nft_count']),
-        },
-    );
+    const nftCountMap: Record<string, number> = {};
+    qryRes.rows.forEach((row: any) => {
+      const key = Math.floor(row['timestamp'].getTime() / 1000).toString();
+      nftCountMap[key] = Number(row['nft_count']);
+    });
+
+    return this.getTimestampData(nftCountMap, params.resolution);
   }
 
-  async getTimeseriesSalesPriceVolume(params: MetricParams): Promise<any> {
+  async getTimeseriesSalesPriceVolume(
+    params: MetricParams,
+  ): Promise<MetricEntity[]> {
     const qryRes = await this.#timeseries(params);
 
-    const priceVolumeMap: any = {};
+    const priceVolumeMap: Record<string, number> = {};
     qryRes.rows.forEach((row: any) => {
       const key = Math.floor(row['timestamp'].getTime() / 1000).toString();
 
@@ -71,34 +75,51 @@ export class AnalyticsService {
       );
     });
 
-    const priceVolKeyArr = Object.keys(priceVolumeMap);
-
-    const date = new Date(Number(priceVolKeyArr.at(0)) * 1000);
-    const endDate = new Date(
-      Number(priceVolKeyArr.at(priceVolKeyArr.length - 1)) * 1000,
-    );
-
-    console.log('year is: ', date.getFullYear());
-    console.log('month is: ', date.getMonth());
-    console.log('day is: ', date.getDate());
-
-    while (date <= endDate) {
-      const key = Math.floor(date.getTime() / 1000);
-      priceVolumeMap[key] ??= 0;
-      date.setDate(date.getDate() + 1);
-    }
-
-    console.log('priceVolumeMap: ', priceVolumeMap);
-
-    return priceVolumeMap;
+    return this.getTimestampData(priceVolumeMap, params.resolution);
   }
 
-  isSameDay(d1: Date, d2: Date) {
-    return (
-      d1.getFullYear() === d2.getFullYear() &&
-      d1.getMonth() === d2.getMonth() &&
-      d1.getDate() === d2.getDate()
-    );
+  getTimestampData(
+    timestampMap: Record<string, number>,
+    resolution: Resolution,
+  ): MetricEntity[] {
+    const timestampKeyArray = Object.keys(timestampMap);
+
+    let currentDate = dayjs.unix(Number(timestampKeyArray.at(0))).toDate();
+    const endDate = dayjs
+      .unix(Number(timestampKeyArray.at(timestampKeyArray.length - 1)))
+      .toDate();
+
+    let manipulate: ManipulateType;
+    switch (resolution) {
+      case Resolution.Hour:
+        manipulate = 'hour';
+        break;
+      case Resolution.Day:
+        manipulate = 'day';
+        break;
+      case Resolution.Week:
+        manipulate = 'week';
+        break;
+      case Resolution.Month:
+        manipulate = 'month';
+        break;
+      default:
+        manipulate = 'day';
+    }
+
+    while (currentDate <= endDate) {
+      const key = Math.floor(currentDate.getTime() / 1000);
+      timestampMap[key] ??= 0;
+      currentDate = dayjs(currentDate).utc().add(1, manipulate).toDate();
+    }
+
+    const timestampArray: MetricEntity[] = [];
+
+    for (const [key, value] of Object.entries(timestampMap)) {
+      timestampArray.push({ timestamp: Number(key), value });
+    }
+
+    return timestampArray;
   }
 
   async getActivities(
