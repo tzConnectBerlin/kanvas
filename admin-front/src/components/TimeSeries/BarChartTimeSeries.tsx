@@ -15,7 +15,7 @@ const BarChartTimeSeries = ({
   timeStampValues,
   currencySymbol,
 }: BarChartTimeSeriesProps) => {
-  const isPriceVolume = timeSeriesType === 'priceVolume' && !!currencySymbol;
+  const isPriceVolume = timeSeriesType === 'priceVolume';
 
   const chartData = {
     labels: timeStamps,
@@ -50,7 +50,11 @@ const BarChartTimeSeries = ({
       y: {
         title: {
           display: true,
-          text: isPriceVolume ? `Price in ${currencySymbol}` : 'Count',
+          text: isPriceVolume
+            ? currencySymbol
+              ? `Price in ${currencySymbol}`
+              : 'Price'
+            : 'Count',
         },
       },
     },
