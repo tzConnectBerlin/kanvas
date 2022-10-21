@@ -10,7 +10,6 @@ import { ActivityFilterParams } from '../params.js';
 import { BASE_CURRENCY, CurrencyService } from 'kanvas-api-lib';
 import dayjs, { ManipulateType } from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
-import { times } from 'ramda';
 dayjs.extend(utc);
 
 @Injectable()
