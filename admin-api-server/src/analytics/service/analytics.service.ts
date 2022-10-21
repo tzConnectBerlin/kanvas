@@ -10,7 +10,6 @@ import { ActivityFilterParams } from '../params.js';
 import { BASE_CURRENCY, CurrencyService } from 'kanvas-api-lib';
 import dayjs, { ManipulateType } from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
-import { times } from 'ramda';
 dayjs.extend(utc);
 
 @Injectable()
@@ -83,13 +82,6 @@ export class AnalyticsService {
     timestampMap: Record<string, number>,
     resolution: Resolution,
   ): MetricEntity[] {
-    const timestampKeyArray = Object.keys(timestampMap);
-
-    let currentDate = dayjs.unix(Number(timestampKeyArray.at(0))).toDate();
-    const endDate = dayjs
-      .unix(Number(timestampKeyArray.at(timestampKeyArray.length - 1)))
-      .toDate();
-
     let manipulate: ManipulateType;
     switch (resolution) {
       case Resolution.Hour:
@@ -107,6 +99,12 @@ export class AnalyticsService {
       default:
         manipulate = Resolution.Day as ManipulateType;
     }
+
+    const timestampKeys = Object.keys(timestampMap);
+    let currentDate = dayjs.unix(Number(timestampKeys.at(0))).toDate();
+    const endDate = dayjs
+      .unix(Number(timestampKeys.at(timestampKeys.length - 1)))
+      .toDate();
 
     while (currentDate <= endDate) {
       const key = Math.floor(currentDate.getTime() / 1000);
