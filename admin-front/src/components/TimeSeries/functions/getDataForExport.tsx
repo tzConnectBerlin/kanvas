@@ -44,17 +44,15 @@ export const getDataForExport = (data: GetDataForExport) => {
 
   let exportArray: Array<Record<string, number>> = [];
 
-  if (longestLength > 0) {
-    for (let i = 0; i < longestLength; i++) {
-      for (let key in seriesArrays) {
-        if (seriesArrays.hasOwnProperty(key)) {
-          const currentArray = seriesArrays[key as keyof SeriesArrays];
-          if (currentArray[i] !== undefined) {
-            exportArray[i] = {
-              ...exportArray[i],
-              ...currentArray[i],
-            };
-          }
+  for (let i = 0; i < longestLength; i++) {
+    for (let key in seriesArrays) {
+      if (seriesArrays.hasOwnProperty(key)) {
+        const currentArray = seriesArrays[key as keyof SeriesArrays];
+        if (currentArray[i] !== undefined) {
+          exportArray[i] = {
+            ...exportArray[i],
+            ...currentArray[i],
+          };
         }
       }
     }
