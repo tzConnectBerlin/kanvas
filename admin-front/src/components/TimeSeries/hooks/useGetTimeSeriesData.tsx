@@ -12,7 +12,6 @@ import {
 interface TimeSeriesData {
   timeStamps: string[];
   timeStampValues: number[];
-  firstYearTimeSeriesRecord?: TimeSeriesRecord;
   fetchedTimeSeries?: TimeSeriesRecord[];
 }
 
@@ -68,7 +67,6 @@ const UseGetTimeSeriesData = ({
   return {
     timeStamps,
     timeStampValues,
-    firstYearTimeSeriesRecord: fetchedTimeSeries?.[0],
     fetchedTimeSeries,
   };
 };

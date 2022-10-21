@@ -6,16 +6,20 @@ import 'chart.js/auto';
 import moment from 'moment/moment';
 import BarChartTimeSeries from './BarChartTimeSeries';
 import { theme } from 'theme';
-import { destroyReferenceAndClone } from 'utils/utils';
+import { clone } from 'utils/utils';
 import {
   Month,
   Resolution,
   ResolutionValues,
+  TimeSeriesRecord,
   TimeSeriesTypeEnum,
 } from './utility';
 import { getDataForExport } from './functions';
 import TimeSeriesFilter from './TimeSeriesFilter';
 import useGetTimeSeriesData from './hooks/useGetTimeSeriesData';
+import UseGetPriceWithCurrency, {
+  getCurrencySymbolDataForCurrency,
+} from '../../shared/hooks/useGetPriceWithCurrency';
 
 const buttonStyles = {
   borderRadius: 100,
@@ -43,6 +47,7 @@ const TimeSeries = () => {
   );
   const [month, setMonth] = useState<Month>('All');
   const [year, setYear] = useState<number>(moment().year());
+  const [firstYearRecord, setFirstYearRecord] = useState<TimeSeriesRecord>();
 
   const {
     timeStamps: priceVolumeTimeStamps,
@@ -58,7 +63,6 @@ const TimeSeries = () => {
   const {
     timeStamps: nftCountTimeStamps,
     timeStampValues: nftCountTimeStampValues,
-    firstYearTimeSeriesRecord,
     fetchedTimeSeries: timeSeriesNftCount,
   } = useGetTimeSeriesData({
     timeSeriesType: TimeSeriesTypeEnum.NFT_COUNT,
@@ -67,15 +71,18 @@ const TimeSeries = () => {
     month,
   });
 
+  const { baseCurrency } = UseGetPriceWithCurrency();
+
   useEffect(() => {
     if (timeSeriesPriceVolume?.length && timeSeriesNftCount?.length) {
+      setFirstYearRecord(timeSeriesPriceVolume[0]);
       const dataForExport = getDataForExport([
         {
-          timeseries: destroyReferenceAndClone(timeSeriesPriceVolume),
+          timeseries: clone(timeSeriesPriceVolume),
           context: TimeSeriesTypeEnum.PRICE_VOLUME,
         },
         {
-          timeseries: destroyReferenceAndClone(timeSeriesNftCount),
+          timeseries: clone(timeSeriesNftCount),
           context: TimeSeriesTypeEnum.NFT_COUNT,
         },
       ]);
@@ -115,15 +122,17 @@ const TimeSeries = () => {
       <Grid container justifyContent={'space-between'} gap={1} item>
         <Grid item>
           <Paper sx={{ padding: '20px' }}>
-            <TimeSeriesFilter
-              resolution={resolution}
-              year={year}
-              month={month}
-              firstYearTimeSeriesRecord={firstYearTimeSeriesRecord}
-              handleResolutionChange={handleResolutionChange}
-              handleMonthChange={handleMonthChange}
-              handleYearChange={handleYearChange}
-            />
+            {firstYearRecord && (
+              <TimeSeriesFilter
+                resolution={resolution}
+                year={year}
+                month={month}
+                firstYearTimeSeriesRecord={firstYearRecord}
+                handleResolutionChange={handleResolutionChange}
+                handleMonthChange={handleMonthChange}
+                handleYearChange={handleYearChange}
+              />
+            )}
           </Paper>
         </Grid>
         <Grid item>
@@ -144,6 +153,9 @@ const TimeSeries = () => {
               timeSeriesType={TimeSeriesTypeEnum.PRICE_VOLUME}
               timeStamps={priceVolumeTimeStamps}
               timeStampValues={priceVolumeTimeStampValues}
+              currencySymbol={
+                getCurrencySymbolDataForCurrency(baseCurrency)?.symbol
+              }
             />
           </Paper>
         </Grid>

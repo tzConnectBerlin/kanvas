@@ -10,7 +10,7 @@ interface GetDataFromAPI {
 
 const getDataFromAPI = async ({ path, queryStr, notify }: GetDataFromAPI) => {
   const baseUrl = process.env.REACT_APP_API_SERVER_BASE_URL;
-  const url = queryStr ? baseUrl + path + queryStr : baseUrl + path;
+  const url = baseUrl + path + (queryStr ?? '');
 
   try {
     const response = await axios.get(url, {

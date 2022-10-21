@@ -6,12 +6,12 @@ interface SeriesArrays {
   nftCount: TimeSeriesRecord[];
 }
 
-interface ExportParamObj {
+interface ExportParam {
   timeseries: TimeSeriesRecord[];
   context: TimeSeriesType;
 }
 
-type GetDataForExport = Array<ExportParamObj>;
+type GetDataForExport = Array<ExportParam>;
 
 export const getDataForExport = (data: GetDataForExport) => {
   const seriesArrays: SeriesArrays = { priceVolume: [], nftCount: [] };
@@ -27,7 +27,7 @@ export const getDataForExport = (data: GetDataForExport) => {
     const contextArray = exportObj.timeseries.map((record: any) => {
       record[exportKeyNames.timestamp] = moment
         .unix(record['timestamp'])
-        .format('DD/MM/YY HH:MM');
+        .format('DD/MM/YY hh:mm a');
       record[exportKeyNames.value] = record['value'];
       delete record['timestamp'];
       delete record['value'];
@@ -38,17 +38,9 @@ export const getDataForExport = (data: GetDataForExport) => {
     seriesArrays[context] = contextArray;
   });
 
-  let longestLength = 0;
-
-  for (let key in seriesArrays) {
-    if (seriesArrays.hasOwnProperty(key)) {
-      const lengthOfCurrentArray =
-        seriesArrays[key as keyof SeriesArrays].length;
-      if (lengthOfCurrentArray > longestLength) {
-        longestLength = lengthOfCurrentArray;
-      }
-    }
-  }
+  const longestLength = Math.max(
+    ...Object.values(seriesArrays).map((sArr) => sArr.length),
+  );
 
   let exportArray: Array<Record<string, number>> = [];
 

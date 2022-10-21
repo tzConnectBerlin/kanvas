@@ -9,20 +9,16 @@ export const getDateFormat = ({
   resolution,
   month,
 }: GetDateFormatParams): string => {
-  let format = 'DD/MM';
   const individualMonthIsSelected = month !== 'All';
 
-  if (resolution === ResolutionValues.HOUR) {
-    format = 'DD/MM HH:MM';
+  switch (resolution) {
+    case ResolutionValues.HOUR:
+      return 'DD/MM hh:mm a';
+    case ResolutionValues.DAY:
+      return individualMonthIsSelected ? 'DD' : 'DD/MM';
+    case ResolutionValues.MONTH:
+      return 'MMMM';
+    default:
+      return 'DD/MM';
   }
-
-  if (resolution === ResolutionValues.DAY && individualMonthIsSelected) {
-    format = 'DD';
-  }
-
-  if (resolution === ResolutionValues.MONTH) {
-    format = 'MMMM';
-  }
-
-  return format;
 };

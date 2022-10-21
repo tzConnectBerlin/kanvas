@@ -6,14 +6,16 @@ interface BarChartTimeSeriesProps {
   timeSeriesType: TimeSeriesType;
   timeStamps: string[];
   timeStampValues: number[];
+  currencySymbol?: string;
 }
 
 const BarChartTimeSeries = ({
   timeSeriesType,
   timeStamps,
   timeStampValues,
+  currencySymbol,
 }: BarChartTimeSeriesProps) => {
-  const isPriceVolume = timeSeriesType === 'priceVolume';
+  const isPriceVolume = timeSeriesType === 'priceVolume' && !!currencySymbol;
 
   const chartData = {
     labels: timeStamps,
@@ -48,7 +50,7 @@ const BarChartTimeSeries = ({
       y: {
         title: {
           display: true,
-          text: isPriceVolume ? 'Price' : 'Count',
+          text: isPriceVolume ? `Price in ${currencySymbol}` : 'Count',
         },
       },
     },

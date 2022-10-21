@@ -14,8 +14,7 @@ import {
 import { useStyle } from '../useStyle';
 import { SelectorProps } from './types';
 import { CurrencySymbolData } from 'shared/types/currency';
-import DisplaySelector from './DisplaySelector';
-import ThumbnailSelector from './ThumbnailSelector';
+import ToggleSelector from './ToggleSelector';
 
 interface InputSelectorProps extends SelectorProps {
   baseCurrencySymbol?: CurrencySymbolData['symbol'];
@@ -114,9 +113,21 @@ export const InputSelector: FC<InputSelectorProps> = ({ ...props }) => {
   if (props.type === 'content_uri') {
     switch (label) {
       case 'Display':
-        return <DisplaySelector {...props} />;
+        return (
+          <ToggleSelector
+            toggleSource={'addDisplayBooleanInput'}
+            toggleLabel={'add display'}
+            {...props}
+          />
+        );
       case 'Thumbnail':
-        return <ThumbnailSelector {...props} />;
+        return (
+          <ToggleSelector
+            toggleSource={'addThumbnailBooleanInput'}
+            toggleLabel={'add thumbnail'}
+            {...props}
+          />
+        );
       default:
         return (
           <FileInput label={label} source={`files[${label}]`}>

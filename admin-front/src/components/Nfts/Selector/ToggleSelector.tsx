@@ -1,19 +1,24 @@
-import { BooleanInput, FileField, FileInput } from 'react-admin';
 import { FC, useState } from 'react';
+import { BooleanInput, FileField, FileInput } from 'react-admin';
 import { SelectorProps } from './types';
 
-const ThumbnailSelector: FC<SelectorProps> = (props) => {
-  const [showThumbnail, setShowThumbnail] = useState(false);
-  const [showSwitch, setShowSwitch] = useState(true);
-  const { label } = props;
+interface ToggleSelectorProps extends SelectorProps {
+  toggleSource: string;
+  toggleLabel: string;
+}
 
-  const toggleShowThumbnail = () => {
-    setShowThumbnail(!showThumbnail);
+const ToggleSelector: FC<ToggleSelectorProps> = (props) => {
+  const [showFileInput, setFileInput] = useState(false);
+  const [showSwitch, setShowSwitch] = useState(true);
+  const { label, toggleSource, toggleLabel } = props;
+
+  const toggleShowFileInput = () => {
+    setFileInput(!showFileInput);
   };
 
   const handleOnRemove = () => {
     setShowSwitch(true);
-    setShowThumbnail(false);
+    setFileInput(false);
   };
 
   const handleOnDrop = () => {
@@ -24,13 +29,13 @@ const ThumbnailSelector: FC<SelectorProps> = (props) => {
     <>
       {showSwitch && (
         <BooleanInput
-          source={`addThumbnailBooleanInput`}
-          label={'add thumbnail'}
-          options={{ checked: showThumbnail }}
-          onChange={() => toggleShowThumbnail()}
+          source={toggleSource}
+          label={toggleLabel}
+          options={{ checked: showFileInput }}
+          onChange={() => toggleShowFileInput()}
         />
       )}
-      {showThumbnail && (
+      {showFileInput && (
         <FileInput
           label={label}
           source={`files[${label}]`}
@@ -46,4 +51,4 @@ const ThumbnailSelector: FC<SelectorProps> = (props) => {
   );
 };
 
-export default ThumbnailSelector;
+export default ToggleSelector;

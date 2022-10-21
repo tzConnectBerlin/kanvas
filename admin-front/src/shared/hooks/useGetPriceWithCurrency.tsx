@@ -60,11 +60,11 @@ const UseGetPriceWithCurrency = () => {
   const getPriceWithCurrency = (price: string) => {
     const currencySymbolData = getCurrencySymbolDataForCurrency(baseCurrency);
 
-    if (currencySymbolData && currencySymbolData.position === 'before') {
+    if (currencySymbolData?.position === 'before') {
       return `${currencySymbolData.symbol}${price}`;
     }
 
-    if (currencySymbolData && currencySymbolData.position === 'after') {
+    if (currencySymbolData?.position === 'after') {
       return `${price}${currencySymbolData.symbol}`;
     }
 

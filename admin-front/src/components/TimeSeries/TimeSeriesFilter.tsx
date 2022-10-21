@@ -1,5 +1,14 @@
 import { ChangeEvent, FC, MouseEvent } from 'react';
 import {
+  Grid,
+  MenuItem,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { theme } from 'theme';
+import {
   getYears,
   menuItemSx,
   Month,
@@ -9,16 +18,7 @@ import {
   TimeSeriesRecord,
   useStyles,
 } from './utility';
-import {
-  Grid,
-  MenuItem,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-} from '@mui/material';
 import { getYearFromTimeStamp } from './functions';
-import { styled } from '@mui/material/styles';
-import { theme } from 'theme';
 
 const ToggleButtonStyled = styled(ToggleButton)({
   '&.Mui-selected, &.Mui-selected:hover': {
@@ -31,7 +31,7 @@ interface TimeSeriesFilterProps {
   resolution: Resolution;
   year: number;
   month: Month;
-  firstYearTimeSeriesRecord?: TimeSeriesRecord;
+  firstYearTimeSeriesRecord: TimeSeriesRecord;
   handleResolutionChange: (event: MouseEvent<HTMLElement>) => void;
   handleMonthChange: (event: ChangeEvent<HTMLInputElement>) => void;
   handleYearChange: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -65,7 +65,7 @@ const TimeSeriesFilter: FC<TimeSeriesFilterProps> = ({
               sx={textFieldSx}
             >
               {getYears(
-                getYearFromTimeStamp(firstYearTimeSeriesRecord?.timestamp),
+                getYearFromTimeStamp(firstYearTimeSeriesRecord.timestamp),
               ).map((year) => (
                 <MenuItem sx={menuItemSx} key={year.value} value={year.value}>
                   {year.label}

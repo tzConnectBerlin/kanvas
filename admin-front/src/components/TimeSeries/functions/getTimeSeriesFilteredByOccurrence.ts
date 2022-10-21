@@ -26,8 +26,8 @@ const getMonthIdFromTimeStamp = (timestamp: number): number => {
   return Number(moment.unix(timestamp).format('M'));
 };
 
-export const getYearFromTimeStamp = (timestamp: number | undefined) => {
-  return Number(moment.unix(timestamp ?? 0).format('YYYY'));
+export const getYearFromTimeStamp = (timestamp: number) => {
+  return Number(moment.unix(timestamp).format('YYYY'));
 };
 
 export const getTimeSeriesFilteredByOccurrence = ({
@@ -36,18 +36,18 @@ export const getTimeSeriesFilteredByOccurrence = ({
 }: GetTimeSeriesFiltered): TimeSeriesRecord[] => {
   const newTimeSeries = [...timeSeries];
 
-  let timeSeriesFilteredByYear = newTimeSeries.filter((record) => {
+  const byYear = newTimeSeries.filter((record) => {
     return getYearFromTimeStamp(record.timestamp) === occurrence.year;
   });
 
   if (occurrence.month === 'All') {
-    return timeSeriesFilteredByYear;
+    return byYear;
   } else {
-    const timeSeriesFilteredByYearAndMonth = timeSeriesFilteredByYear.filter(
+    const byYearAndMonth = byYear.filter(
       (record) =>
         getMonthIdFromTimeStamp(record.timestamp) ===
         MonthToIdMap[occurrence.month],
     );
-    return timeSeriesFilteredByYearAndMonth;
+    return byYearAndMonth;
   }
 };
