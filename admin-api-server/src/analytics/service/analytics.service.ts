@@ -10,6 +10,7 @@ import { ActivityFilterParams } from '../params.js';
 import { BASE_CURRENCY, CurrencyService } from 'kanvas-api-lib';
 import dayjs, { ManipulateType } from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
+import { times } from 'ramda';
 dayjs.extend(utc);
 
 @Injectable()
@@ -113,13 +114,9 @@ export class AnalyticsService {
       currentDate = dayjs(currentDate).utc().add(1, manipulate).toDate();
     }
 
-    const timestampData: MetricEntity[] = [];
-
-    for (const [key, value] of Object.entries(timestampMap)) {
-      timestampData.push({ timestamp: Number(key), value });
-    }
-
-    return timestampData;
+    return Object.entries(timestampMap).map(([key, value]) => {
+      return { timestamp: Number(key), value };
+    });
   }
 
   async getActivities(
