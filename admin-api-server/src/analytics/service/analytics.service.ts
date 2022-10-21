@@ -8,6 +8,7 @@ import {
 import { PG_CONNECTION_STORE_REPLICATION } from '../../constants.js';
 import { ActivityFilterParams } from '../params.js';
 import { BASE_CURRENCY, CurrencyService } from 'kanvas-api-lib';
+import { date } from 'joi';
 
 @Injectable()
 export class AnalyticsService {
@@ -55,22 +56,48 @@ export class AnalyticsService {
     );
   }
 
-  async getTimeseriesSalesPriceVolume(
-    params: MetricParams,
-  ): Promise<MetricEntity[]> {
+  async getTimeseriesSalesPriceVolume(params: MetricParams): Promise<any> {
     const qryRes = await this.#timeseries(params);
 
-    return qryRes.rows.map(
-      (row: any) =>
-        <MetricEntity>{
-          timestamp: Math.floor(row['timestamp'].getTime() / 1000),
-          value: Number(
-            this.currencyService.convertToCurrency(
-              Number(row['price_volume']),
-              BASE_CURRENCY,
-            ),
-          ),
-        },
+    const priceVolumeMap: any = {};
+    qryRes.rows.forEach((row: any) => {
+      const key = Math.floor(row['timestamp'].getTime() / 1000).toString();
+
+      priceVolumeMap[key] = Number(
+        this.currencyService.convertToCurrency(
+          Number(row['price_volume']),
+          BASE_CURRENCY,
+        ),
+      );
+    });
+
+    const priceVolKeyArr = Object.keys(priceVolumeMap);
+
+    const date = new Date(Number(priceVolKeyArr.at(0)) * 1000);
+    const endDate = new Date(
+      Number(priceVolKeyArr.at(priceVolKeyArr.length - 1)) * 1000,
+    );
+
+    console.log('year is: ', date.getFullYear());
+    console.log('month is: ', date.getMonth());
+    console.log('day is: ', date.getDate());
+
+    while (date <= endDate) {
+      const key = Math.floor(date.getTime() / 1000);
+      priceVolumeMap[key] ??= 0;
+      date.setDate(date.getDate() + 1);
+    }
+
+    console.log('priceVolumeMap: ', priceVolumeMap);
+
+    return priceVolumeMap;
+  }
+
+  isSameDay(d1: Date, d2: Date) {
+    return (
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate()
     );
   }
 
