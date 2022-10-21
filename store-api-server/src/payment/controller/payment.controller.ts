@@ -150,4 +150,14 @@ export class PaymentController {
       );
     }
   }
+
+  @Get('/nft-order/:paymentId')
+  @UseGuards(JwtAuthGuard)
+  @Header('cache-control', 'no-store,must-revalidate')
+  async getNftOrder(
+    @CurrentUser() usr: UserEntity,
+    @Param('paymentId') paymentId: string,
+  ) {
+    return await this.paymentService.getPaymentOrderStatus(usr, paymentId);
+  }
 }
