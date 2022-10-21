@@ -113,13 +113,13 @@ export class AnalyticsService {
       currentDate = dayjs(currentDate).utc().add(1, manipulate).toDate();
     }
 
-    const timestampArray: MetricEntity[] = [];
+    const timestampData: MetricEntity[] = [];
 
     for (const [key, value] of Object.entries(timestampMap)) {
-      timestampArray.push({ timestamp: Number(key), value });
+      timestampData.push({ timestamp: Number(key), value });
     }
 
-    return timestampArray;
+    return timestampData;
   }
 
   async getActivities(
