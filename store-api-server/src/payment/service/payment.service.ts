@@ -347,7 +347,7 @@ WHERE nft_order.id = $1
   async getOrderInfo(usr: UserEntity, paymentId: string): Promise<OrderInfo> {
     const orderId = await this.getPaymentOrderId(paymentId);
 
-    const [order, paymentProviderStatuses] = await Promise.all([
+    const [order, paymentStatuses] = await Promise.all([
       this.#getOrder(orderId),
       this.#getOrderPaymentProviderStatuses(orderId),
     ]);
@@ -356,18 +356,11 @@ WHERE nft_order.id = $1
       throw new Error('user does not have any orders with given payment intent identifier');
     }
 
-    let furthestPaymentStatus = stringEnumIndexValue(
-      PaymentStatus,
-      Math.max(
-        ...Object.values(paymentProviderStatuses).map(
-          (status) => stringEnumValueIndex(PaymentStatus, status) ?? 0,
-        ),
-      ),
-    );
+    const paymentStatus = this.furthestPaymentStatus(Object.values(paymentStatuses));
 
     let orderStatus: OrderStatus;
     let delivery: { [key: number]: NftDeliveryInfo } | undefined;
-    switch (furthestPaymentStatus) {
+    switch (paymentStatus) {
       case PaymentStatus.CANCELED:
       case PaymentStatus.TIMED_OUT:
         orderStatus = OrderStatus.CANCELED;
@@ -393,7 +386,7 @@ WHERE nft_order.id = $1
         break;
       default:
         throw new Error(
-          `failed to determin order status (order id=${orderId}): unknown furthest payment status ${furthestPaymentStatus}`,
+          `failed to determin order status (order id=${orderId}): unknown furthest payment status ${paymentStatus}`,
         );
     }
 
@@ -1387,5 +1380,17 @@ ORDER BY payment.id DESC
           `could not determine nft delivery status: unknown peppermint state ${state}`,
         );
     }
+  }
+
+
+  furthestPaymentStatus(statuses: PaymentStatus[]): PaymentStatus | undefined {
+    return stringEnumIndexValue(
+      PaymentStatus,
+      Math.max(
+        ...statuses.map(
+          (status) => stringEnumValueIndex(PaymentStatus, status) ?? 0,
+        ),
+      ),
+    );
   }
 }

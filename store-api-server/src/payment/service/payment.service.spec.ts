@@ -36,4 +36,10 @@ describe('PaymentService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  for (const tc of [{statuses: [], exp: undefined}]) {
+    it(`should collapse ${tc.statuses} into ${tc.exp}`, () => {
+      expect(service.furthestPaymentStatus(tc.statuses)).toEqual(tc.exp);
+    });
+  }
 });

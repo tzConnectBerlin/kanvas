@@ -32,7 +32,7 @@ export async function runOnchainEnabledTests(appReference: () => any) {
       async () => {
         const wallet1 = await testUtils.newWallet(app);
         await testUtils.cartAdd(app, nftIds[0], wallet1);
-        await testUtils.checkout(paymentService, wallet1);
+        const checkout = await testUtils.checkout(paymentService, wallet1);
 
         await testUtils.waitBlocks();
 
@@ -47,6 +47,15 @@ export async function runOnchainEnabledTests(appReference: () => any) {
               },
             ],
           },
+        });
+
+        testUtils.logFullObject(
+          await testUtils.getOrderInfo(app, wallet1, checkout.paymentId),
+        );
+        expect(
+          await testUtils.getOrderInfo(app, wallet1, checkout.paymentId),
+        ).toMatchObject({
+          status: 'succeeded',
         });
       },
       onchainTestTimeoutMs,

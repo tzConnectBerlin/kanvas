@@ -3,17 +3,18 @@ import { readFileSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import request from 'supertest';
 import sotez from 'sotez';
-import { Client, PoolClient } from 'pg';
+import { Client } from 'pg';
 const { cryptoUtils } = sotez;
 import { InMemorySigner } from '@taquito/signer';
 import { TezosToolkit } from '@taquito/taquito';
 
+import { PaymentService } from '../src/payment/service/payment.service';
 import {
-  PaymentService,
-} from '../src/payment/service/payment.service';
-import { PaymentProvider, PaymentStatus  } from '../src/payment/entity/payment.entity';
+  PaymentProvider,
+  PaymentStatus,
+  OrderInfo,
+} from '../src/payment/entity/payment.entity';
 import { UserEntity } from '../src/user/entity/user.entity';
-import { CreateNft, CreateProxiedNft } from '../src/nft/entity/nft.entity';
 import { assertEnv, sleep } from '../src/utils';
 import { SIGNATURE_PREFIX_CREATE_NFT } from 'kanvas-api-lib';
 
@@ -183,6 +184,19 @@ export async function checkout(
 
   await paymentService.updatePaymentStatus(paymentId, finalStatus, false);
   return { paymentId };
+}
+
+export async function getOrderInfo(
+  app: any,
+  wallet: Wallet,
+  paymentId: string,
+  expStatus = 200,
+): Promise<OrderInfo> {
+  const resp = await request(app.getHttpServer())
+    .get(`/payment/order-info/${paymentId}`)
+    .set('authorization', wallet.login.bearer);
+  expect(resp.statusCode).toEqual(expStatus);
+  return resp.body;
 }
 
 export async function createNft(app: any, nft: any) {

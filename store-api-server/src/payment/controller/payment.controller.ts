@@ -148,7 +148,7 @@ export class PaymentController {
     }
   }
 
-  @Get('/nft-order/:paymentId')
+  @Get('/order-info/:paymentId')
   @UseGuards(JwtAuthGuard)
   @Header('cache-control', 'no-store,must-revalidate')
   async getNftOrder(
