@@ -9,7 +9,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
-    "preinstall": "echo PREINSTALL EXISTS; git submodule update --init",
+    "preinstall": "git submodule update --init",
     "postinstall": "yarn run patch-package; ./script/build-deps",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
