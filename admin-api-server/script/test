@@ -47,6 +47,11 @@ rm $sig_err_file
     yarn build || exit 1
 ) &
 (
+    cd "$SCRIPT_DIR/../../store-api-server"
+
+    yarn install
+) &
+(
     trap "echo 'db setup failed..' >> $sig_err_file" ERR
 
     echo "waiting for testdb setup (admin).. (docker: $db_docker)"
