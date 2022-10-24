@@ -6,6 +6,8 @@ import { Roles } from '../src/role/entities/role.entity';
 import { assertEnv } from '../src/utils';
 import Pool from 'pg-pool';
 import axios from 'axios';
+import { AnalyticsService } from '../src/analytics/service/analytics.service';
+import { Resolution } from '../src/analytics/entity/analytics.entity';
 
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {
@@ -2014,11 +2016,12 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer)
         .query({ resolution: 'hour' });
       expect(res.statusCode).toEqual(200);
+      let timestamps = AnalyticsService.prototype.getTimestampData(
+        { '819165600': 23.3, '819201600': 44.7 },
+        Resolution.Hour,
+      );
       expect(res.body).toStrictEqual({
-        data: [
-          { timestamp: 819165600, value: 23.3 },
-          { timestamp: 819201600, value: 44.7 },
-        ],
+        data: timestamps,
       });
 
       res = await request(app.getHttpServer())
@@ -2035,11 +2038,12 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer)
         .query({ resolution: 'hour' });
       expect(res.statusCode).toEqual(200);
+      timestamps = AnalyticsService.prototype.getTimestampData(
+        { '819165600': 3, '819201600': 8 },
+        Resolution.Hour,
+      );
       expect(res.body).toStrictEqual({
-        data: [
-          { timestamp: 819165600, value: 3 },
-          { timestamp: 819201600, value: 8 },
-        ],
+        data: timestamps,
       });
 
       res = await request(app.getHttpServer())
@@ -2511,6 +2515,165 @@ describe('AppController (e2e)', () => {
     const res = await request(app.getHttpServer()).get('/nft/attributes');
     expect(res.statusCode).toEqual(401);
   });
+
+  skipOnPriorFail(
+    'GET /analytics/sales/priceVolume/timeseries will fill missing datapoints depending on the resolution',
+    async () => {
+      await emulateNftSale(
+        2,
+        [2, 27, 11, 10, 4],
+        new Date('January 01, 1996 03:24:00'),
+      );
+
+      await emulateNftSale(1, [4, 7, 10], new Date('March 01, 1996 03:24:00'));
+
+      const { bearer } = await loginUser(
+        app,
+        'admin@tzconnect.com',
+        'supersafepassword',
+      );
+
+      let res = await request(app.getHttpServer())
+        .get('/analytics/sales/priceVolume/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'hour' });
+      const timestampsHour = AnalyticsService.prototype.getTimestampData(
+        {
+          '819165600': 23.3,
+          '819201600': 44.7,
+          '820461600': 26.6,
+          '825645600': 23.3,
+        },
+        Resolution.Hour,
+      );
+      const hourDiff = 825645600 - 819165600;
+      expect(res.statusCode).toEqual(200);
+      expect(hourDiff / 3600 + 1).toEqual(timestampsHour.length);
+      expect(res.body).toStrictEqual({
+        data: timestampsHour,
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/priceVolume/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'day' });
+      const timestampsDay = AnalyticsService.prototype.getTimestampData(
+        { '819158400': 68, '820454400': 26.6, '825638400': 23.3 },
+        Resolution.Day,
+      );
+      const dayDiff = 825638400 - 819158400;
+      expect(res.statusCode).toEqual(200);
+      expect(dayDiff / (24 * 3600) + 1).toEqual(timestampsDay.length);
+      expect(res.body).toStrictEqual({
+        data: timestampsDay,
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/priceVolume/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'week' });
+      const timestampsWeek = AnalyticsService.prototype.getTimestampData(
+        { '818640000': 68, '820454400': 26.6, '825292800': 23.3 },
+        Resolution.Week,
+      );
+      const weekDiff = 825292800 - 818640000;
+      expect(res.statusCode).toEqual(200);
+      expect(weekDiff / (7 * 24 * 3600) + 1).toEqual(timestampsWeek.length);
+      expect(res.body).toStrictEqual({
+        data: timestampsWeek,
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/priceVolume/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'month' });
+      const timestampsMonth = AnalyticsService.prototype.getTimestampData(
+        { '817776000': 68, '820454400': 26.6, '825638400': 23.3 },
+        Resolution.Month,
+      );
+      const monthDiff = 825638400 - 817776000;
+      expect(res.statusCode).toEqual(200);
+      expect(Math.floor(monthDiff / (30 * 24 * 3600) + 1)).toEqual(
+        timestampsMonth.length,
+      );
+      expect(res.body).toStrictEqual({
+        data: timestampsMonth,
+      });
+    },
+  );
+
+  skipOnPriorFail(
+    'GET /analytics/sales/nftCount/timeseries will fill missing datapoints depending on the resolution',
+    async () => {
+      const { bearer } = await loginUser(
+        app,
+        'admin@tzconnect.com',
+        'supersafepassword',
+      );
+
+      let res = await request(app.getHttpServer())
+        .get('/analytics/sales/nftCount/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'hour' });
+      const timestampsHour = AnalyticsService.prototype.getTimestampData(
+        { '819165600': 3, '819201600': 8, '820461600': 5, '825645600': 3 },
+        Resolution.Hour,
+      );
+      const hourDiff = 825645600 - 819165600;
+      expect(res.statusCode).toEqual(200);
+      expect(hourDiff / 3600 + 1).toEqual(timestampsHour.length);
+      expect(res.body).toStrictEqual({
+        data: timestampsHour,
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/nftCount/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'day' });
+      const timestampsDay = AnalyticsService.prototype.getTimestampData(
+        { '819158400': 11, '820454400': 5, '825638400': 3 },
+        Resolution.Day,
+      );
+      const dayDiff = 825638400 - 819158400;
+      expect(res.statusCode).toEqual(200);
+      expect(dayDiff / (24 * 3600) + 1).toEqual(timestampsDay.length);
+      expect(res.body).toStrictEqual({
+        data: timestampsDay,
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/nftCount/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'week' });
+      const timestampsWeek = AnalyticsService.prototype.getTimestampData(
+        { '818640000': 11, '820454400': 5, '825292800': 3 },
+        Resolution.Week,
+      );
+      const weekDiff = 825292800 - 818640000;
+      expect(res.statusCode).toEqual(200);
+      expect(weekDiff / (7 * 24 * 3600) + 1).toEqual(timestampsWeek.length);
+      expect(res.body).toStrictEqual({
+        data: timestampsWeek,
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/nftCount/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'month' });
+      const timestampsMonth = AnalyticsService.prototype.getTimestampData(
+        { '817776000': 11, '820454400': 5, '825638400': 3 },
+        Resolution.Month,
+      );
+      const monthDiff = 825638400 - 817776000;
+      expect(res.statusCode).toEqual(200);
+      expect(Math.floor(monthDiff / (30 * 24 * 3600) + 1)).toEqual(
+        timestampsMonth.length,
+      );
+      expect(res.body).toStrictEqual({
+        data: timestampsMonth,
+      });
+    },
+  );
 });
 
 function newDbConn() {

@@ -24,7 +24,7 @@ if [[ ${INIT_QUEPASA:-'true'} == "true" ]]; then
         -e NODE_URL=$NODE_URL \
         -e DATABASE_URL="$DATABASE_URL" \
         ghcr.io/tzconnectberlin/que-pasa:$QUEPASA_VERSION \
-        --contract-settings /config/kanvas.yaml -l 0 \
+        --contract-settings /config/kanvas.yaml --only-migrate \
         || exit 1 # >/dev/null 2>&1 || exit 1
 fi
 
