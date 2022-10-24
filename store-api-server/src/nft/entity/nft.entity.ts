@@ -37,6 +37,7 @@ export interface NftEntity {
   onsaleUntil?: number;
 
   isProxy: boolean;
+  proxyNftId?: number;
 }
 
 export interface CreateNft {

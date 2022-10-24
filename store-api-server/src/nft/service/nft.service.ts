@@ -453,6 +453,7 @@ SELECT
   nft_name,
   description,
   is_proxy,
+  proxy_nft_id,
 
   editions_size,
   price,
@@ -508,6 +509,7 @@ FROM nfts_by_id($1, $2, $3, $4)`,
           name: nftRow['nft_name'],
           description: nftRow['description'],
           isProxy: nftRow['is_proxy'],
+          proxyNftId: maybe(nftRow['proxy_nft_id'], (x) => x),
 
           ipfsHash: metadataIpfs, // note: deprecated by metadataIpfs
           metadataIpfs: metadataIpfs,

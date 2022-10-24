@@ -45,14 +45,17 @@ export async function runProxyNftTests(appReference: () => any) {
           {
             id: setup.proxyNftId,
             editionsSize: 2, // editionsSize should automatically become number of proxied nfts
+            isProxy: true,
           },
           {
             id: setup.proxiedNftIds[0],
             editionsSize: 1, // editionsSize should automatically be 1 for proxied nfts
+            proxyNftId: setup.proxyNftId,
           },
           {
             id: setup.proxiedNftIds[1],
             editionsSize: 1,
+            proxyNftId: setup.proxyNftId,
           },
         ],
       });
