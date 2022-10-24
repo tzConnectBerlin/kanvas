@@ -2016,12 +2016,20 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer)
         .query({ resolution: 'hour' });
       expect(res.statusCode).toEqual(200);
-      let timestamps = AnalyticsService.prototype.getTimestampData(
-        { '819165600': 23.3, '819201600': 44.7 },
-        Resolution.Hour,
-      );
       expect(res.body).toStrictEqual({
-        data: timestamps,
+        data: [
+          { timestamp: 819165600, value: 23.3 },
+          { timestamp: 819169200, value: 0 },
+          { timestamp: 819172800, value: 0 },
+          { timestamp: 819176400, value: 0 },
+          { timestamp: 819180000, value: 0 },
+          { timestamp: 819183600, value: 0 },
+          { timestamp: 819187200, value: 0 },
+          { timestamp: 819190800, value: 0 },
+          { timestamp: 819194400, value: 0 },
+          { timestamp: 819198000, value: 0 },
+          { timestamp: 819201600, value: 44.7 },
+        ],
       });
 
       res = await request(app.getHttpServer())
@@ -2038,12 +2046,20 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer)
         .query({ resolution: 'hour' });
       expect(res.statusCode).toEqual(200);
-      timestamps = AnalyticsService.prototype.getTimestampData(
-        { '819165600': 3, '819201600': 8 },
-        Resolution.Hour,
-      );
       expect(res.body).toStrictEqual({
-        data: timestamps,
+        data: [
+          { timestamp: 819165600, value: 3 },
+          { timestamp: 819169200, value: 0 },
+          { timestamp: 819172800, value: 0 },
+          { timestamp: 819176400, value: 0 },
+          { timestamp: 819180000, value: 0 },
+          { timestamp: 819183600, value: 0 },
+          { timestamp: 819187200, value: 0 },
+          { timestamp: 819190800, value: 0 },
+          { timestamp: 819194400, value: 0 },
+          { timestamp: 819198000, value: 0 },
+          { timestamp: 819201600, value: 8 },
+        ],
       });
 
       res = await request(app.getHttpServer())
@@ -2537,7 +2553,7 @@ describe('AppController (e2e)', () => {
         .get('/analytics/sales/priceVolume/timeseries')
         .set('authorization', bearer)
         .query({ resolution: 'hour' });
-      const timestampsHour = AnalyticsService.prototype.getTimestampData(
+      const timestampsHour = AnalyticsService.prototype.zeroFillTimeseries(
         {
           '819165600': 23.3,
           '819201600': 44.7,
@@ -2557,7 +2573,7 @@ describe('AppController (e2e)', () => {
         .get('/analytics/sales/priceVolume/timeseries')
         .set('authorization', bearer)
         .query({ resolution: 'day' });
-      const timestampsDay = AnalyticsService.prototype.getTimestampData(
+      const timestampsDay = AnalyticsService.prototype.zeroFillTimeseries(
         { '819158400': 68, '820454400': 26.6, '825638400': 23.3 },
         Resolution.Day,
       );
@@ -2572,7 +2588,7 @@ describe('AppController (e2e)', () => {
         .get('/analytics/sales/priceVolume/timeseries')
         .set('authorization', bearer)
         .query({ resolution: 'week' });
-      const timestampsWeek = AnalyticsService.prototype.getTimestampData(
+      const timestampsWeek = AnalyticsService.prototype.zeroFillTimeseries(
         { '818640000': 68, '820454400': 26.6, '825292800': 23.3 },
         Resolution.Week,
       );
@@ -2587,7 +2603,7 @@ describe('AppController (e2e)', () => {
         .get('/analytics/sales/priceVolume/timeseries')
         .set('authorization', bearer)
         .query({ resolution: 'month' });
-      const timestampsMonth = AnalyticsService.prototype.getTimestampData(
+      const timestampsMonth = AnalyticsService.prototype.zeroFillTimeseries(
         { '817776000': 68, '820454400': 26.6, '825638400': 23.3 },
         Resolution.Month,
       );
@@ -2615,7 +2631,7 @@ describe('AppController (e2e)', () => {
         .get('/analytics/sales/nftCount/timeseries')
         .set('authorization', bearer)
         .query({ resolution: 'hour' });
-      const timestampsHour = AnalyticsService.prototype.getTimestampData(
+      const timestampsHour = AnalyticsService.prototype.zeroFillTimeseries(
         { '819165600': 3, '819201600': 8, '820461600': 5, '825645600': 3 },
         Resolution.Hour,
       );
@@ -2630,7 +2646,7 @@ describe('AppController (e2e)', () => {
         .get('/analytics/sales/nftCount/timeseries')
         .set('authorization', bearer)
         .query({ resolution: 'day' });
-      const timestampsDay = AnalyticsService.prototype.getTimestampData(
+      const timestampsDay = AnalyticsService.prototype.zeroFillTimeseries(
         { '819158400': 11, '820454400': 5, '825638400': 3 },
         Resolution.Day,
       );
@@ -2645,7 +2661,7 @@ describe('AppController (e2e)', () => {
         .get('/analytics/sales/nftCount/timeseries')
         .set('authorization', bearer)
         .query({ resolution: 'week' });
-      const timestampsWeek = AnalyticsService.prototype.getTimestampData(
+      const timestampsWeek = AnalyticsService.prototype.zeroFillTimeseries(
         { '818640000': 11, '820454400': 5, '825292800': 3 },
         Resolution.Week,
       );
@@ -2660,7 +2676,7 @@ describe('AppController (e2e)', () => {
         .get('/analytics/sales/nftCount/timeseries')
         .set('authorization', bearer)
         .query({ resolution: 'month' });
-      const timestampsMonth = AnalyticsService.prototype.getTimestampData(
+      const timestampsMonth = AnalyticsService.prototype.zeroFillTimeseries(
         { '817776000': 11, '820454400': 5, '825638400': 3 },
         Resolution.Month,
       );

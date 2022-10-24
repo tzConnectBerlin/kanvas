@@ -55,7 +55,7 @@ export class AnalyticsService {
       nftCountMap[key] = Number(row['nft_count']);
     });
 
-    return this.getTimestampData(nftCountMap, params.resolution);
+    return this.zeroFillTimeseries(nftCountMap, params.resolution);
   }
 
   async getTimeseriesSalesPriceVolume(
@@ -75,41 +75,26 @@ export class AnalyticsService {
       );
     });
 
-    return this.getTimestampData(priceVolumeMap, params.resolution);
+    return this.zeroFillTimeseries(priceVolumeMap, params.resolution);
   }
 
-  getTimestampData(
+  zeroFillTimeseries(
     timestampMap: Record<string, number>,
     resolution: Resolution,
   ): MetricEntity[] {
-    let manipulate: ManipulateType;
-    switch (resolution) {
-      case Resolution.Hour:
-        manipulate = Resolution.Hour as ManipulateType;
-        break;
-      case Resolution.Day:
-        manipulate = Resolution.Day as ManipulateType;
-        break;
-      case Resolution.Week:
-        manipulate = Resolution.Week as ManipulateType;
-        break;
-      case Resolution.Month:
-        manipulate = Resolution.Month as ManipulateType;
-        break;
-      default:
-        manipulate = Resolution.Day as ManipulateType;
-    }
-
     const timestampKeys = Object.keys(timestampMap);
-    let currentDate = dayjs.unix(Number(timestampKeys.at(0))).toDate();
-    const endDate = dayjs
+    let current = dayjs.unix(Number(timestampKeys.at(0))).toDate();
+    const end = dayjs
       .unix(Number(timestampKeys.at(timestampKeys.length - 1)))
       .toDate();
 
-    while (currentDate <= endDate) {
-      const key = Math.floor(currentDate.getTime() / 1000);
+    while (current <= end) {
+      const key = Math.floor(current.getTime() / 1000);
       timestampMap[key] ??= 0;
-      currentDate = dayjs(currentDate).utc().add(1, manipulate).toDate();
+      current = dayjs(current)
+        .utc()
+        .add(1, resolution as ManipulateType)
+        .toDate();
     }
 
     return Object.entries(timestampMap).map(([key, value]) => {
