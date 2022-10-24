@@ -13,12 +13,17 @@ import { NftAside } from './NftAside';
 import { InputSelector } from './Selector/InputSelector';
 import { useStyle } from './useStyle';
 import { FormFieldInputType } from './Selector/types';
+import UseGetPriceWithCurrency, {
+  getCurrencySymbolDataForCurrency,
+} from 'shared/hooks/useGetPriceWithCurrency';
 
 export const NftEdit = (props: any) => {
+  const notify = useNotify();
   const classes = useStyle();
   const concernedNft = useGetOne('nft', props.id);
 
   const [formFields, setFormFields] = useState<string[]>([]);
+  const { baseCurrency, getPriceWithCurrency } = UseGetPriceWithCurrency();
 
   useEffect(() => {
     if (!concernedNft.data) return;
@@ -26,7 +31,6 @@ export const NftEdit = (props: any) => {
     setFormFields(Object.keys(concernedNft.data.allowedActions));
   }, [concernedNft]);
 
-  const notify = useNotify();
   const refresh = useRefresh();
   const redirect = useRedirect();
 
@@ -46,7 +50,7 @@ export const NftEdit = (props: any) => {
         {...props}
         onSuccess={onSuccess}
         mutationMode="pessimistic"
-        aside={<NftAside />}
+        aside={<NftAside getPriceWithCurrency={getPriceWithCurrency} />}
       >
         <SimpleForm className={classes.form}>
           <Box className={classes.boxWrapper}>
@@ -60,22 +64,32 @@ export const NftEdit = (props: any) => {
                 Update an NFT
               </Typography>
               {showFormFields &&
-                formFields.map((fieldName) => (
-                  <Box key={fieldName}>
-                    <InputSelector
-                      attributesName={fieldName}
-                      label={
-                        fieldName[0].toUpperCase() +
-                        fieldName.replace('_', ' ').slice(1)
-                      }
-                      type={
-                        concernedNft.data!.allowedActions[
-                          fieldName
-                        ] as FormFieldInputType
-                      }
-                    />
-                  </Box>
-                ))}
+                formFields.map((fieldName) => {
+                  const label =
+                    fieldName[0].toUpperCase() +
+                    fieldName.replace('_', ' ').slice(1);
+                  const type = concernedNft.data!.allowedActions[
+                    fieldName
+                  ] as FormFieldInputType;
+
+                  const useBaseCurrencySymbol =
+                    type === 'number' && label === 'Price';
+                  return (
+                    <Box key={fieldName}>
+                      <InputSelector
+                        attributesName={fieldName}
+                        label={label}
+                        type={type}
+                        baseCurrencySymbol={
+                          useBaseCurrencySymbol
+                            ? getCurrencySymbolDataForCurrency(baseCurrency)
+                                ?.symbol
+                            : undefined
+                        }
+                      />
+                    </Box>
+                  );
+                })}
             </Box>
           </Box>
         </SimpleForm>

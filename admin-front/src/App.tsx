@@ -1,20 +1,23 @@
 import './App.css';
 import { Admin, Resource } from 'react-admin';
-// import jsonServerProvider from 'ra-data-json-server';
-import { UserList, UserEdit, UserCreate } from './components/Users/Users';
-import { NftEdit, NftCreate, NftList } from './components/Nfts';
-import Dashboard from './components/Dashboard';
-import NotFound from './components/NotFound';
-import authProvider from './auth/authProvider';
-import dataProvider from './data/dataProvider';
-import CustomLayout from './components/CustomLayout';
-import { theme } from './theme';
-
-import BurstMode from '@mui/icons-material/BurstMode';
-import { ActivityList } from './components/Activities';
-import EqualizerIcon from '@mui/icons-material/Equalizer';
 import { Route } from 'react-router-dom';
-import Profile from './components/Profile';
+// import jsonServerProvider from 'ra-data-json-server';
+import BurstMode from '@mui/icons-material/BurstMode';
+import EqualizerIcon from '@mui/icons-material/Equalizer';
+import InsightsIcon from '@mui/icons-material/Insights';
+import { theme } from 'theme';
+
+import authProvider from 'auth/authProvider';
+import dataProvider from 'data/dataProvider';
+
+import Dashboard from 'components/Dashboard';
+import CustomLayout from 'components/CustomLayout';
+import { UserList, UserEdit, UserCreate } from './components/Users';
+import { NftList, NftEdit, NftCreate } from './components/Nfts';
+import NotFound from 'components/NotFound';
+import { ActivityList } from 'components/Activities';
+import TimeSeries from 'components/TimeSeries/TimeSeries';
+import Profile from 'components/Profile';
 
 //for data from the nest admin api
 
@@ -63,6 +66,14 @@ function App() {
         icon={EqualizerIcon}
         options={{
           label: 'Reporting',
+        }}
+      />
+      <Resource
+        name="analytics/sales"
+        list={TimeSeries}
+        icon={InsightsIcon}
+        options={{
+          label: 'Analytics',
         }}
       />
       <Resource name="categories" />

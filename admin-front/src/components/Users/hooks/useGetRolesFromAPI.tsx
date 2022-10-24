@@ -59,7 +59,7 @@ const UseGetRolesFromAPI = ({ withId } = { withId: true }) => {
     getRolesFromAPI({ notify, withId }).then((fetchedRoles) => {
       setRoles(fetchedRoles);
     });
-  }, []);
+  }, [notify, withId]);
 
   return {
     roles,

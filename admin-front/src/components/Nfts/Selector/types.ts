@@ -9,7 +9,7 @@ export type FormFieldInputType =
   | 'none'
   | 'text';
 
-export interface InputSelectorProps {
+export interface SelectorProps {
   attributesName: string;
   label: string;
   type: FormFieldInputType;

@@ -6,3 +6,17 @@ export const isValidEmail = (email?: string) =>
     )
     ? true
     : false;
+
+export const removeNullObjKeys = (obj: Record<any, any>) => {
+  Object.keys(obj).forEach((key) => {
+    if (obj[key] === null) {
+      delete obj[key];
+    }
+  });
+
+  return obj;
+};
+
+export function clone(src: Array<any>) {
+  return JSON.parse(JSON.stringify(src));
+}
