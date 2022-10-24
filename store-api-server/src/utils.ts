@@ -93,7 +93,7 @@ export function isBottom(v: any): boolean {
 
 export function maybe<ValTy, ResTy>(
   x: ValTy | null | undefined,
-  f: ((x: ValTy) => ResTy),
+  f: (x: ValTy) => ResTy,
 ): ResTy | undefined {
   if (isBottom(x)) {
     return undefined;

@@ -103,20 +103,6 @@ function parseNumberParam(v: string): number {
   return res;
 }
 
-function parseBoolParam(v: string): boolean {
-  switch (v.toString()) {
-    case 'true':
-      return true;
-    case 'false':
-      return false;
-    default:
-      throw new HttpException(
-        `unsupported boolean param value (got ${v}, ${typeof v}), must be one of true or false`,
-        HttpStatus.BAD_REQUEST,
-      );
-  }
-}
-
 export function validatePaginationParams(params: PaginationParams): void {
   if (params.page < 1 || params.pageSize < 1) {
     throw new HttpException('Bad page parameters', HttpStatus.BAD_REQUEST);

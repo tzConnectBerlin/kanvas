@@ -94,7 +94,7 @@ describe('AppController (e2e)', () => {
   });
 
   runIsolatedTests(() => [app, paymentService]);
-  runProxyNftTests(() => [app, paymentService]);
+  runProxyNftTests(() => [app]);
   runOnchainEnabledTests(() => [app, paymentService]);
 
   // Note:

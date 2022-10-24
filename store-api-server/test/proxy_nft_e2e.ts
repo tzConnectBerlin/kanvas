@@ -13,7 +13,6 @@ import * as testUtils from './utils';
 
 export async function runProxyNftTests(appReference: () => any) {
   let app: any;
-  let paymentService: PaymentService;
   let nftIds: number[];
 
   const newNftId = () => {
@@ -24,7 +23,7 @@ export async function runProxyNftTests(appReference: () => any) {
 
   describe('proxy nft tests (with clean e2e test cases, db is reset between each test)', () => {
     beforeEach(async () => {
-      [app, paymentService] = appReference();
+      [app] = appReference();
       nftIds = await testUtils.resetDb();
     });
     afterAll(async () => {
