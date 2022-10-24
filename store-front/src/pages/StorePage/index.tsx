@@ -168,16 +168,17 @@ const StorePage = () => {
 
     const callNFTsEndpoint = (params: IParamsNFTs) => {
         setComfortLoader(true);
+        let categories: string | number[] | undefined = params.categories ?? selectedCategories.join(',');
+        if (categories === [] || categories === '') {
+          categories = undefined;
+        }
         const comfortTrigger = setTimeout(() => {
             getNfts({
                 withCredentials: true,
                 params: {
                     page: params.page ?? 1,
                     pageSize: 12,
-                    categories:
-                        params.categories ??
-                        selectedCategories.join(',') ??
-                        undefined,
+                    categories,
                     orderBy:
                         params.orderBy ?? selectedSort?.orderBy ?? 'createdAt',
                     orderDirection:
