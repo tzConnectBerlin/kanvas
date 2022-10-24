@@ -6,6 +6,8 @@ CREATE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT, for
     nft_created_at TIMESTAMP WITHOUT TIME ZONE,
     nft_name TEXT,
     description TEXT,
+    is_proxy BOOLEAN,
+    proxy_nft_id INTEGER,
 
     price NUMERIC,
     editions_size INTEGER,
@@ -84,6 +86,8 @@ BEGIN
       created_at AS nft_created_at,
       nft_name,
       description,
+      EXISTS(SELECT 1 FROM proxy_unfold WHERE proxy_nft_id = nft.id) AS is_proxy,
+      proxy_nft_id,
 
       price,
       editions_size,

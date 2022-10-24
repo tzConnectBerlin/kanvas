@@ -12,9 +12,11 @@ import {
   PaymentService,
   PaymentStatus,
 } from '../src/payment/service/payment.service';
-import { PaymentProvider } from '../src/payment/entity/payment.entity.js';
+import { PaymentProvider } from '../src/payment/entity/payment.entity';
 import { UserEntity } from '../src/user/entity/user.entity';
+import { CreateNft, CreateProxiedNft } from '../src/nft/entity/nft.entity';
 import { assertEnv, sleep } from '../src/utils';
+import { SIGNATURE_PREFIX_CREATE_NFT } from 'kanvas-api-lib';
 
 export interface KanvasLogin {
   id: number;
@@ -136,11 +138,16 @@ export async function getProfile(app: any, wallet: Wallet, asLogin = false) {
   return res.body;
 }
 
-export async function cartAdd(app: any, nftId: number, wallet: Wallet) {
+export async function cartAdd(
+  app: any,
+  nftId: number,
+  wallet: Wallet,
+  expStatus = 201,
+) {
   const resp = await request(app.getHttpServer())
     .post(`/users/cart/add/${nftId}`)
     .set('authorization', wallet.login.bearer);
-  expect(resp.statusCode).toEqual(201);
+  expect(resp.statusCode).toEqual(expStatus);
 }
 
 export async function cartList(app: any, wallet: Wallet) {
@@ -179,6 +186,42 @@ export async function checkout(
   return { paymentId };
 }
 
+export async function createNft(app: any, nft: any) {
+  let hexMsg = nft.id.toString(16);
+  if (hexMsg.length & 1) {
+    // hex is of uneven length, sotez expects an even number of hexadecimal characters
+    hexMsg = '0' + hexMsg;
+  }
+
+  const signed = await cryptoUtils.sign(
+    SIGNATURE_PREFIX_CREATE_NFT + hexMsg,
+    assertEnv('ADMIN_PRIVATE_KEY'),
+  );
+
+  const resp = await request(app.getHttpServer())
+    .post('/nfts/create')
+    .send({ ...nft, signature: signed.sig });
+  expect(resp.statusCode).toEqual(201);
+}
+
+export async function createProxiedNft(app: any, nft: any) {
+  let hexMsg = nft.id.toString(16);
+  if (hexMsg.length & 1) {
+    // hex is of uneven length, sotez expects an even number of hexadecimal characters
+    hexMsg = '0' + hexMsg;
+  }
+
+  const signed = await cryptoUtils.sign(
+    SIGNATURE_PREFIX_CREATE_NFT + hexMsg,
+    assertEnv('ADMIN_PRIVATE_KEY'),
+  );
+
+  const resp = await request(app.getHttpServer())
+    .post('/nfts/create-proxied')
+    .send({ ...nft, signature: signed.sig });
+  expect(resp.statusCode).toEqual(201);
+}
+
 export async function withDbConn<ResTy>(
   f: (dbConn: Pool<Client>) => Promise<ResTy>,
 ): Promise<ResTy> {
@@ -204,6 +247,7 @@ export async function resetDb(resetForLegacyTest = false): Promise<number[]> {
       'nft_order',
       'kanvas_user',
       'cart_session',
+      'proxy_unfold',
       'nft',
       'nft_category',
     ];
@@ -261,4 +305,82 @@ export function newDbConn(): Pool<Client> {
 }
 export function logFullObject(obj: any) {
   console.log(JSON.stringify(obj, undefined, 2));
+}
+
+export async function basicProxySetup(
+  app: any,
+  newNftId: () => number,
+): Promise<{
+  proxiedNftIds: number[];
+  proxyNftId: number;
+  proxyCategoryId: number;
+  proxiedCategoryId: number;
+}> {
+  let proxyCategoryId: any;
+  let proxiedCategoryId: any;
+
+  // simpler to run this test with fresh categories
+  await withDbConn(async (conn) => {
+    proxyCategoryId = (
+      await conn.query(`
+insert into nft_category (
+  category, description
+)
+values
+  ('Root', 'parent category, assigned to the proxy nft')
+RETURNING id
+`)
+    ).rows[0]['id'];
+    proxiedCategoryId = (
+      await conn.query(
+        `
+insert into nft_category (
+  category, description, parent
+)
+values
+  ('Root', 'leaf category, assigned to the proxied nft', $1)
+RETURNING id
+`,
+        [proxyCategoryId],
+      )
+    ).rows[0]['id'];
+  });
+
+  const proxyNftId = newNftId();
+  await createNft(app, {
+    id: proxyNftId,
+    name: 'the proxy nft',
+    description: 'this nft is a proxy',
+    price: 5,
+    artifactUri: 'proxy_img',
+    editionsSize: 0,
+    categories: [proxyCategoryId],
+  });
+  const proxiedNftId0 = newNftId();
+  await createProxiedNft(app, {
+    id: proxiedNftId0,
+    proxyNftId,
+    name: 'one of the unfoldings',
+    description: 'this nft is proxied',
+    artifactUri: 'unfolded_img',
+    editionsSize: 0,
+    categories: [proxiedCategoryId],
+  });
+  const proxiedNftId1 = newNftId();
+  await createProxiedNft(app, {
+    id: proxiedNftId1,
+    proxyNftId,
+    name: 'another of the unfoldings',
+    description: 'this nft is proxied',
+    artifactUri: 'unfolded_img2',
+    editionsSize: 0,
+    categories: [proxiedCategoryId],
+  });
+
+  return {
+    proxyNftId,
+    proxiedNftIds: [proxiedNftId0, proxiedNftId1],
+    proxyCategoryId,
+    proxiedCategoryId,
+  };
 }

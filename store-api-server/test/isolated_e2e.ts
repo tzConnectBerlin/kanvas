@@ -11,12 +11,16 @@ import { assertEnv, sleep } from '../src/utils';
 
 import * as testUtils from './utils';
 
-// isolated here means that each test does not affect the later tests' expected
-// results
 export async function runIsolatedTests(appReference: () => any) {
   let app: any;
   let paymentService: PaymentService;
   let nftIds: number[];
+
+  const newNftId = () => {
+    const id = nftIds[nftIds.length - 1] + 1;
+    nftIds.push(id);
+    return id;
+  };
 
   describe('clean e2e test cases (db is reset between each test)', () => {
     beforeEach(async () => {

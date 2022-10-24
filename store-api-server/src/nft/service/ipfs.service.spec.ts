@@ -40,6 +40,7 @@ describe('NftService', () => {
         launchAt: 0,
         editionsAvailable: 0,
         editionsSold: 0,
+        isProxy: false,
       },
       exp: {
         artifactUri: 'ipfs-mock://artifact',
@@ -86,6 +87,7 @@ describe('NftService', () => {
 
         id: 1,
         price: '15.30',
+        isProxy: false,
         launchAt: 0,
         editionsAvailable: 0,
         editionsSold: 0,
@@ -135,6 +137,7 @@ describe('NftService', () => {
 
         id: 1,
         price: '15.30',
+        isProxy: false,
         launchAt: 0,
         editionsAvailable: 0,
         editionsSold: 0,
@@ -192,6 +195,7 @@ describe('NftService', () => {
 
         id: 1,
         price: '15.30',
+        isProxy: false,
         launchAt: 0,
         editionsAvailable: 0,
         editionsSold: 0,
@@ -240,6 +244,7 @@ describe('NftService', () => {
 
         id: 1,
         price: '15.30',
+        isProxy: false,
         launchAt: 0,
         editionsAvailable: 0,
         editionsSold: 0,
@@ -288,6 +293,7 @@ describe('NftService', () => {
 
         id: 1,
         price: '15.30',
+        isProxy: false,
         launchAt: 0,
         editionsAvailable: 0,
         editionsSold: 0,
@@ -336,6 +342,7 @@ describe('NftService', () => {
 
         id: 1,
         price: '15.30',
+        isProxy: false,
         launchAt: 0,
         editionsAvailable: 0,
         editionsSold: 0,
@@ -383,6 +390,7 @@ describe('NftService', () => {
 
         id: 1,
         price: '15.30',
+        isProxy: false,
         launchAt: 0,
         editionsAvailable: 0,
         editionsSold: 0,
@@ -422,6 +430,7 @@ describe('NftService', () => {
 
         id: 1,
         price: '15.30',
+        isProxy: false,
         launchAt: 0,
         editionsAvailable: 0,
         editionsSold: 0,
@@ -466,6 +475,7 @@ describe('NftService', () => {
 
         id: 1,
         price: '15.30',
+        isProxy: false,
         launchAt: 0,
         editionsAvailable: 0,
         editionsSold: 0,
@@ -506,6 +516,7 @@ describe('NftService', () => {
 
         id: 1,
         price: '15.30',
+        isProxy: false,
         launchAt: 0,
         editionsAvailable: 0,
         editionsSold: 0,
@@ -550,6 +561,7 @@ describe('NftService', () => {
 
         id: 1,
         price: '15.30',
+        isProxy: false,
         launchAt: 0,
         editionsAvailable: 0,
         editionsSold: 0,
@@ -594,6 +606,7 @@ describe('NftService', () => {
 
         id: 1,
         price: '15.30',
+        isProxy: false,
         launchAt: 0,
         editionsAvailable: 0,
         editionsSold: 0,
@@ -638,6 +651,7 @@ describe('NftService', () => {
 
         id: 1,
         price: '15.30',
+        isProxy: false,
         launchAt: 0,
         editionsAvailable: 0,
         editionsSold: 0,
@@ -682,6 +696,7 @@ describe('NftService', () => {
 
         id: 1,
         price: '15.30',
+        isProxy: false,
         launchAt: 0,
         editionsAvailable: 0,
         editionsSold: 0,

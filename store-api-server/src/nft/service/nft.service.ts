@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import {
   CreateNft,
+  CreateProxiedNft,
   NftEntity,
   NftEntityPage,
   OwnershipInfo,
@@ -49,9 +50,9 @@ export class NftService {
       await dbTx.query(
         `
 INSERT INTO nft (
-  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, onsale_from, onsale_until, price, editions_size, metadata
+  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, onsale_from, onsale_until, price, editions_size, metadata, proxy_nft_id
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       `,
 
         [
@@ -67,6 +68,7 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
           this.currencyService.convertFromCurrency(newNft.price, BASE_CURRENCY),
           newNft.editionsSize,
           newNft.metadata,
+          newNft.proxyNftId,
         ],
       );
 
@@ -111,7 +113,7 @@ SELECT $1, UNNEST($2::INTEGER[])
       throw `failed to upload new nft to IPFS`;
     };
 
-    return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+    await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       await insert(dbTx);
       await uploadToIpfs(dbTx);
     }).catch((err: any) => {
@@ -120,6 +122,37 @@ SELECT $1, UNNEST($2::INTEGER[])
     });
 
     Logger.log(`Created new NFT ${newNft.id}`);
+  }
+
+  async createProxiedNft(newNft: CreateProxiedNft) {
+    const proxyNft = await this.byId(newNft.proxyNftId);
+
+    await this.createNft({
+      ...newNft,
+      name: newNft.name ?? proxyNft.name,
+      description: newNft.description ?? proxyNft.description,
+      price: Number(proxyNft.price),
+      editionsSize: 1,
+    });
+
+    await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+      await dbTx.query(
+        `
+INSERT INTO proxy_unfold (proxy_nft_id, unfold_nft_id)
+VALUES ($1, $2)
+        `,
+        [newNft.proxyNftId, newNft.id],
+      );
+
+      await dbTx.query(
+        `
+UPDATE nft
+SET editions_size = (SELECT count(1) FROM proxy_unfold WHERE proxy_nft_id = $1)
+WHERE id = $1
+      `,
+        [newNft.proxyNftId],
+      );
+    });
   }
 
   async delistNft(nftId: number) {
@@ -286,17 +319,23 @@ LIMIT $3
       untilNft = new Date(filters.firstRequestAt * 1000).toISOString();
     }
 
+    const proxiesFolded: boolean | undefined =
+      (filters.proxyFolding ?? 'both') === 'both'
+        ? undefined
+        : filters.proxyFolding === 'fold';
+
     try {
       const nftIds = await this.conn.query(
         `
 SELECT nft_id, total_nft_count
-FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
         [
           filters.userAddress,
           filters.categories,
           filters.priceAtLeast,
           filters.priceAtMost,
           filters.availability,
+          proxiesFolded,
           ENDING_SOON_DURATION,
           orderBy,
           filters.orderDirection,
@@ -359,7 +398,7 @@ FROM price_bounds($1, $2, $3, $4, $5)`,
 
   async byId(
     id: number,
-    currency: string,
+    currency: string = BASE_CURRENCY,
     includeRecvForAddress?: string,
     incrViewCount: boolean = true,
     dbConn: any = this.conn,
@@ -398,7 +437,7 @@ WHERE id = $1
 
   async findByIds(
     nftIds: number[],
-    forRecvAddr: string | undefined,
+    forRecvAddr?: string,
     orderBy: string = 'nft_id',
     orderDirection: string = 'asc',
     currency: string = BASE_CURRENCY,
@@ -413,6 +452,8 @@ SELECT
   nft_created_at,
   nft_name,
   description,
+  is_proxy,
+  proxy_nft_id,
 
   editions_size,
   price,
@@ -467,6 +508,8 @@ FROM nfts_by_id($1, $2, $3, $4)`,
           id: nftRow['nft_id'],
           name: nftRow['nft_name'],
           description: nftRow['description'],
+          isProxy: nftRow['is_proxy'],
+          proxyNftId: maybe(nftRow['proxy_nft_id'], (x) => x),
 
           ipfsHash: metadataIpfs, // note: deprecated by metadataIpfs
           metadataIpfs: metadataIpfs,

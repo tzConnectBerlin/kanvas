@@ -28,10 +28,10 @@ export class MintService {
     this.nftLock = new Lock<number>();
   }
 
-  async transfer_nfts(nfts: NftEntity[], buyer_address: string) {
+  async transferNfts(nfts: NftEntity[], buyer_address: string) {
     for (const nft of nfts) {
       try {
-        await this.#transfer_nft(nft, buyer_address);
+        await this.#transferNft(nft, buyer_address);
         Logger.log(
           `transfer created for nft (id=${nft.id}) to buyer (address=${buyer_address})`,
         );
@@ -43,7 +43,7 @@ export class MintService {
     }
   }
 
-  async #transfer_nft(nft: NftEntity, buyer_address: string) {
+  async #transferNft(nft: NftEntity, buyer_address: string) {
     await this.nftLock.acquire(nft.id);
     try {
       if (!(await this.#isNftSubmitted(nft))) {
@@ -67,6 +67,10 @@ export class MintService {
   }
 
   async #mint(nft: NftEntity) {
+    if (nft.isProxy) {
+      throw `cannot mint a proxy nft (id=${nft.id})`;
+    }
+
     const metadataIpfs = await this.ipfsService.uploadNft(nft);
     if (typeof metadataIpfs === 'undefined') {
       throw `failed to upload nft to Ipfs`;

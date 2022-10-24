@@ -3,7 +3,8 @@ DROP FUNCTION IF EXISTS nft_ids_filtered;
 CREATE FUNCTION nft_ids_filtered(
     address TEXT, categories INTEGER[],
     price_at_least NUMERIC, price_at_most NUMERIC,
-    availability TEXT[], ending_soon_duration INTERVAL,
+    availability TEXT[], proxies_folded BOOLEAN,
+    ending_soon_duration INTERVAL,
     order_by TEXT, order_direction TEXT,
     "offset" INTEGER, "limit" INTEGER,
     until TIMESTAMP WITHOUT TIME ZONE,
@@ -65,12 +66,16 @@ BEGIN
                   nft.onsale_until BETWEEN (now() AT TIME ZONE ' || quote_literal('UTC') || ') AND (now() AT TIME ZONE ' || quote_literal('UTC') || ' + $7)
               ))
             ))
+        AND ($11 IS NULL OR (
+              ($11 AND nft.proxy_nft_id IS NULL) OR
+              ((NOT $11) AND NOT EXISTS (SELECT 1 FROM proxy_unfold WHERE proxy_nft_id = nft.id))
+            ))
       GROUP BY nft.id, nft.created_at
       ORDER BY ' || quote_ident(order_by) || ' ' || order_direction || '
       OFFSET $8
       LIMIT  $9
     ) q'
-    USING until, address, categories, price_at_least, price_at_most, availability, ending_soon_duration, "offset", "limit", minter_address;
+    USING until, address, categories, price_at_least, price_at_most, availability, ending_soon_duration, "offset", "limit", minter_address, proxies_folded;
 END
 $$
 LANGUAGE plpgsql;

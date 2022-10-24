@@ -19,7 +19,11 @@ import sotez from 'sotez';
 const { cryptoUtils } = sotez;
 import { NftService } from '../service/nft.service.js';
 import { CategoryService } from '../../category/service/category.service.js';
-import { NftEntity, CreateNft } from '../entity/nft.entity.js';
+import {
+  NftEntity,
+  CreateNft,
+  CreateProxiedNft,
+} from '../entity/nft.entity.js';
 import {
   FilterParams,
   PaginationParams,
@@ -53,6 +57,17 @@ export class NftController {
     );
 
     return await this.nftService.createNft(nft);
+  }
+
+  @Post('/create-proxied')
+  async createProxiedNft(@Body() nft: CreateProxiedNft) {
+    await this.#verifySignature(
+      SIGNATURE_PREFIX_CREATE_NFT,
+      nft.id,
+      nft.signature,
+    );
+
+    return await this.nftService.createProxiedNft(nft);
   }
 
   @Post('/delist/:id')

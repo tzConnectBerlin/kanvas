@@ -1,6 +1,7 @@
 DROP FUNCTION IF EXISTS nft_editions_locked;
+DROP FUNCTION IF EXISTS nft_editions_locked_no_proxy;
 
-CREATE FUNCTION nft_editions_locked(INT)
+CREATE FUNCTION nft_editions_locked_no_proxy(INT)
   RETURNS TABLE(reserved BIGINT, owned BIGINT)
 AS $$
   SELECT
@@ -28,4 +29,22 @@ AS $$
       ON  payment.nft_order_id = nft_order.id
       AND payment.status IN ('created', 'promised', 'processing')
   ) order_nfts
+$$ LANGUAGE SQL;
+
+CREATE FUNCTION nft_editions_locked(nft_id INT)
+  RETURNS TABLE(reserved BIGINT, owned BIGINT)
+AS $$
+  WITH nft_ids AS (
+    SELECT
+      nft_id AS id
+    UNION ALL
+    SELECT
+      unfold_nft_id AS id
+    FROM proxy_unfold
+    WHERE proxy_nft_id = nft_id
+  )
+  SELECT
+    sum(reserved) AS reserved,
+    sum(owned) AS owned
+  FROM nft_ids, nft_editions_locked_no_proxy(nft_ids.id)
 $$ LANGUAGE SQL;
