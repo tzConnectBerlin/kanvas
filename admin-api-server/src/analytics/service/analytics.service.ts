@@ -83,18 +83,33 @@ export class AnalyticsService {
     resolution: Resolution,
   ): MetricEntity[] {
     const timestampKeys = Object.keys(timestampMap);
-    let currentTime = dayjs.unix(Number(timestampKeys.at(0))).toDate();
-    const endTime = dayjs
+    let current = dayjs.unix(Number(timestampKeys.at(0))).toDate();
+    const end = dayjs
       .unix(Number(timestampKeys.at(timestampKeys.length - 1)))
       .toDate();
 
-    while (currentTime <= endTime) {
-      const key = Math.floor(currentTime.getTime() / 1000);
+    let manipulate: ManipulateType;
+    switch (resolution) {
+      case Resolution.Hour:
+        manipulate = Resolution.Hour;
+        break;
+      case Resolution.Day:
+        manipulate = Resolution.Day;
+        break;
+      case Resolution.Week:
+        manipulate = Resolution.Week;
+        break;
+      case Resolution.Month:
+        manipulate = Resolution.Month;
+        break;
+      default:
+        manipulate = Resolution.Day;
+    }
+
+    while (current <= end) {
+      const key = Math.floor(current.getTime() / 1000);
       timestampMap[key] ??= 0;
-      currentTime = dayjs(currentTime)
-        .utc()
-        .add(1, resolution as ManipulateType)
-        .toDate();
+      current = dayjs(current).utc().add(1, manipulate).toDate();
     }
 
     return Object.entries(timestampMap).map(([key, value]) => {
