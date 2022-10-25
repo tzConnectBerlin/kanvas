@@ -91,19 +91,19 @@ export class AnalyticsService {
     let manipulate: ManipulateType;
     switch (resolution) {
       case Resolution.Hour:
-        manipulate = Resolution.Hour;
+        manipulate = 'hour';
         break;
       case Resolution.Day:
-        manipulate = Resolution.Day;
+        manipulate = 'day';
         break;
       case Resolution.Week:
-        manipulate = Resolution.Week;
+        manipulate = 'week';
         break;
       case Resolution.Month:
-        manipulate = Resolution.Month;
+        manipulate = 'month';
         break;
       default:
-        manipulate = Resolution.Day;
+        manipulate = 'day';
     }
 
     while (current <= end) {
