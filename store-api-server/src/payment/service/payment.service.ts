@@ -344,13 +344,17 @@ WHERE nft_order.id = $1
     return await this.#getOrder(orderId);
   }
 
-  async getOrderInfo(paymentId: string): Promise<OrderInfo> {
+  async getOrderInfo(usr: UserEntity, paymentId: string): Promise<OrderInfo> {
     const orderId = await this.getPaymentOrderId(paymentId);
 
     const [order, paymentProviderStatuses] = await Promise.all([
       this.#getOrder(orderId),
       this.#getOrderPaymentProviderStatuses(orderId),
     ]);
+
+    if (order.userId !== usr.id) {
+      throw new Error('user does not have any orders with given payment intent identifier');
+    }
 
     let furthestPaymentStatus = stringEnumIndexValue(
       PaymentStatus,
@@ -1276,7 +1280,7 @@ WHERE payment_id = $1
         await dbTx.query(
           `
 INSERT INTO nft_order_delivery (
-  nft_order_id, order_nft_id, transfer_id, transfer_nft_id
+  nft_order_id, order_nft_id, transfer_operation_id, transfer_nft_id
 )
 VALUES ($1, $2, $3, $4)
           `,

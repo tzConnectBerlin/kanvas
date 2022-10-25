@@ -1,13 +1,4 @@
 import request from 'supertest';
-import axios from 'axios';
-
-import {
-  PaymentService,
-  PaymentStatus,
-} from '../src/payment/service/payment.service';
-import { PaymentProvider } from '../src/payment/entity/payment.entity.js';
-import { UserEntity } from '../src/user/entity/user.entity';
-import { assertEnv, sleep } from '../src/utils';
 
 import * as testUtils from './utils';
 

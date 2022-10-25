@@ -17,10 +17,15 @@ CREATE TABLE nft_order_delivery (
   transfer_nft_id INT NOT NULL REFERENCES nft(id)
 );
 
+CREATE TABLE __nft_order_delivery_delisted (LIKE nft_order_delivery);
+
 COMMIT;
 
 -- ==== DOWN ====
 
 BEGIN;
+
+DROP TABLE nft_order_delivery;
+DROP TABLE __nft_order_delivery_delisted;
 
 COMMIT;

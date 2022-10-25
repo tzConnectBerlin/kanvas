@@ -10,9 +10,8 @@ import { TezosToolkit } from '@taquito/taquito';
 
 import {
   PaymentService,
-  PaymentStatus,
 } from '../src/payment/service/payment.service';
-import { PaymentProvider } from '../src/payment/entity/payment.entity';
+import { PaymentProvider, PaymentStatus  } from '../src/payment/entity/payment.entity';
 import { UserEntity } from '../src/user/entity/user.entity';
 import { CreateNft, CreateProxiedNft } from '../src/nft/entity/nft.entity';
 import { assertEnv, sleep } from '../src/utils';
@@ -239,6 +238,7 @@ export async function resetDb(resetForLegacyTest = false): Promise<number[]> {
     await db.query('update cart_session set order_id = null');
 
     const tables = [
+      'nft_order_delivery',
       'mtm_kanvas_user_nft',
       'mtm_cart_session_nft',
       'mtm_nft_category',

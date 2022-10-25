@@ -1,10 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  ConsoleLogger,
-  Logger,
-  INestApplication,
-  ValidationPipe,
-} from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import {
@@ -18,11 +13,11 @@ import {
   SIGNATURE_PREFIX_DELIST_NFT,
   SIGNATURE_PREFIX_RELIST_NFT,
 } from 'kanvas-api-lib';
+import { PaymentService } from '../src/payment/service/payment.service';
 import {
-  PaymentService,
+  PaymentProvider,
   PaymentStatus,
-} from '../src/payment/service/payment.service';
-import { PaymentProvider } from '../src/payment/entity/payment.entity.js';
+} from '../src/payment/entity/payment.entity.js';
 import { UserEntity } from '../src/user/entity/user.entity';
 import { UserService } from '../src/user/service/user.service';
 import { assertEnv, sleep } from '../src/utils';
@@ -33,7 +28,6 @@ import { runOnchainEnabledTests } from './onchain_enabled';
 import { runProxyNftTests } from './proxy_nft_e2e';
 import { runIsolatedTests } from './isolated_e2e';
 const { cryptoUtils } = sotez;
-import * as testUtils from './utils';
 
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {

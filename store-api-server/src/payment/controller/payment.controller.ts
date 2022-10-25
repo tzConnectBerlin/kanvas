@@ -17,13 +17,11 @@ import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { JwtAuthGuard } from '../../authentication/guards/jwt-auth.guard.js';
 import {
   PaymentService,
-  PaymentStatus,
 } from '../../payment/service/payment.service.js';
 import { UserEntity } from '../../user/entity/user.entity.js';
 import { UserService } from '../../user/service/user.service.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
 import { validateRequestedCurrency } from '../../paramUtils.js';
-import { NftEntity } from '../../nft/entity/nft.entity.js';
 import { PaymentProvider } from '../../payment/entity/payment.entity.js';
 
 import type { PaymentIntent } from '../../payment/entity/payment.entity.js';
@@ -35,7 +33,6 @@ const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 export class PaymentController {
   constructor(
     private paymentService: PaymentService,
-    private userService: UserService,
   ) {}
 
   @Post('/stripe-webhook')
@@ -158,6 +155,11 @@ export class PaymentController {
     @CurrentUser() usr: UserEntity,
     @Param('paymentId') paymentId: string,
   ) {
-    return await this.paymentService.getPaymentOrderStatus(usr, paymentId);
+    try {
+      return await this.paymentService.getOrderInfo(usr, paymentId);
+    } catch (err) {
+      Logger.error(err);
+      throw new HttpException('failed to get order info', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
