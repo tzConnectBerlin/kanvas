@@ -353,10 +353,14 @@ WHERE nft_order.id = $1
     ]);
 
     if (order.userId !== usr.id) {
-      throw new Error('user does not have any orders with given payment intent identifier');
+      throw new Error(
+        'user does not have any orders with given payment intent identifier',
+      );
     }
 
-    const paymentStatus = this.furthestPaymentStatus(Object.values(paymentStatuses));
+    const paymentStatus = this.furthestPaymentStatus(
+      Object.values(paymentStatuses),
+    );
 
     let orderStatus: OrderStatus;
     let delivery: { [key: number]: NftDeliveryInfo } | undefined;
@@ -377,8 +381,7 @@ WHERE nft_order.id = $1
         orderStatus = OrderStatus.DELIVERED;
         if (
           Object.values(delivery).some(
-            (nftDelivery) =>
-              nftDelivery.status !== NftDeliveryStatus.TRANSFERED,
+            (nftDelivery) => nftDelivery.status !== NftDeliveryStatus.DELIVERED,
           )
         ) {
           orderStatus = OrderStatus.DELIVERING;
@@ -413,7 +416,7 @@ FROM nft_order_delivery
 LEFT JOIN peppermint.operations AS op
   ON op.id = transfer_operation_id
 WHERE nft_order_id = $1
-  AND order_nft_id = $2
+  AND order_nft_id = ANY($2)
       `,
         [order.id, order.nfts.map((nft) => nft.id)],
       )
@@ -451,11 +454,10 @@ WHERE nft_order_id = $1
       `,
         [orderId],
       )
-    ).rows.reduce(
-      (res: { [key: string]: PaymentStatus }, row: any) =>
-        (res[row['provider']] = row['status']),
-      {},
-    );
+    ).rows.reduce((res: { [key: string]: PaymentStatus }, row: any) => {
+      res[row['provider']] = row['status'];
+      return res;
+    }, {});
   }
 
   async #createPaymentIntent(
@@ -1364,11 +1366,12 @@ ORDER BY payment.id DESC
   #peppermintStateToDeliveryStatus(state: string): NftDeliveryStatus {
     switch (state) {
       case 'pending':
+        return NftDeliveryStatus.INITIATING;
       case 'processing':
       case 'waiting':
-        return NftDeliveryStatus.TRANSFERING;
+        return NftDeliveryStatus.DELIVERING;
       case 'confirmed':
-        return NftDeliveryStatus.TRANSFERED;
+        return NftDeliveryStatus.DELIVERED;
       case 'unknown':
       case 'rejected':
       case 'failed':
@@ -1381,7 +1384,6 @@ ORDER BY payment.id DESC
         );
     }
   }
-
 
   furthestPaymentStatus(statuses: PaymentStatus[]): PaymentStatus | undefined {
     return stringEnumIndexValue(

@@ -168,7 +168,6 @@ export async function checkout(
     id: wallet.login.id,
   };
 
-  // Create one payment intent (we are not calling the stripe api)
   const intentRes = await paymentService.createPayment(
     usr,
     uuidv4(),
@@ -176,14 +175,17 @@ export async function checkout(
     'EUR',
     'localhost',
   );
-
-  // Give webhook handler function success event
-  const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
-    wallet.login.id,
+  // creating one more intent to make it more realistic
+  await paymentService.createPayment(
+    usr,
+    uuidv4(),
+    PaymentProvider.TEZPAY,
+    'XTZ',
+    'localhost',
   );
 
-  await paymentService.updatePaymentStatus(paymentId, finalStatus, false);
-  return { paymentId };
+  await paymentService.updatePaymentStatus(intentRes.id, finalStatus, false);
+  return { paymentId: intentRes.id };
 }
 
 export async function getOrderInfo(

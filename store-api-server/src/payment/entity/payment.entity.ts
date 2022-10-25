@@ -10,8 +10,8 @@ export enum OrderStatus {
 export enum NftDeliveryStatus {
   UNKNOWN = 'unknown',
   INITIATING = 'initiating',
-  TRANSFERING = 'transfering',
-  TRANSFERED = 'transferred',
+  DELIVERING = 'delivering',
+  DELIVERED = 'delivered',
 }
 
 export interface NftDeliveryInfo {

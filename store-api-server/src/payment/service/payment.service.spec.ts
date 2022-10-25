@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaymentService } from './payment.service';
+import { PaymentStatus } from '../entity/payment.entity';
 import { UserService } from '../../user/service/user.service';
 import { S3Service } from '../../s3.service';
 import { NftService } from '../../nft/service/nft.service';
@@ -37,7 +38,46 @@ describe('PaymentService', () => {
     expect(service).toBeDefined();
   });
 
-  for (const tc of [{statuses: [], exp: undefined}]) {
+  for (const tc of [
+    { statuses: [], exp: undefined },
+    { statuses: [PaymentStatus.SUCCEEDED], exp: PaymentStatus.SUCCEEDED },
+    {
+      statuses: [PaymentStatus.FAILED, PaymentStatus.SUCCEEDED],
+      exp: PaymentStatus.SUCCEEDED,
+    },
+    {
+      statuses: [PaymentStatus.CANCELED, PaymentStatus.SUCCEEDED],
+      exp: PaymentStatus.SUCCEEDED,
+    },
+    {
+      statuses: [PaymentStatus.TIMED_OUT, PaymentStatus.SUCCEEDED],
+      exp: PaymentStatus.SUCCEEDED,
+    },
+    {
+      statuses: [PaymentStatus.TIMED_OUT, PaymentStatus.PROMISED],
+      exp: PaymentStatus.PROMISED,
+    },
+    {
+      statuses: [PaymentStatus.PROMISED, PaymentStatus.CANCELED],
+      exp: PaymentStatus.PROMISED,
+    },
+    {
+      statuses: [PaymentStatus.PROMISED, PaymentStatus.CREATED],
+      exp: PaymentStatus.PROMISED,
+    },
+    {
+      statuses: [PaymentStatus.PROCESSING, PaymentStatus.PROMISED],
+      exp: PaymentStatus.PROCESSING,
+    },
+    {
+      statuses: [PaymentStatus.PROCESSING, PaymentStatus.CANCELED],
+      exp: PaymentStatus.PROCESSING,
+    },
+    {
+      statuses: [PaymentStatus.CREATED, PaymentStatus.PROCESSING],
+      exp: PaymentStatus.PROCESSING,
+    },
+  ]) {
     it(`should collapse ${tc.statuses} into ${tc.exp}`, () => {
       expect(service.furthestPaymentStatus(tc.statuses)).toEqual(tc.exp);
     });

@@ -52,10 +52,20 @@ export async function runOnchainEnabledTests(appReference: () => any) {
         testUtils.logFullObject(
           await testUtils.getOrderInfo(app, wallet1, checkout.paymentId),
         );
+        const expNftsDelivery: any = {};
+        expNftsDelivery[nftIds[0]] = {
+          status: 'delivered',
+        };
         expect(
           await testUtils.getOrderInfo(app, wallet1, checkout.paymentId),
         ).toMatchObject({
-          status: 'succeeded',
+          orderedNfts: [
+            {
+              id: nftIds[0],
+            },
+          ],
+          status: 'delivered',
+          delivery: expNftsDelivery,
         });
       },
       onchainTestTimeoutMs,
