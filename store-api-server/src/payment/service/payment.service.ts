@@ -187,13 +187,13 @@ WHERE id = $1
     clientIp: string,
     recreateOrder: boolean = false,
   ): Promise<PaymentIntentInternal> {
-    await this.userService.ensureUserCartSession(usr.id, cookieSession);
-
     return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       // set isolation level to the most strict setting of postgres,
       // this ensures there are no race conditions with a single user executing
       // createPayment in quick succession.
       dbTx.query('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
+
+      await this.userService.ensureUserCartSession(usr.id, cookieSession, dbTx);
 
       const orderId = await this.#createOrder(dbTx, usr.id, recreateOrder);
 
@@ -347,9 +347,9 @@ WHERE nft_order.id = $1
   async getOrderInfo(usr: UserEntity, paymentId: string): Promise<OrderInfo> {
     const orderId = await this.getPaymentOrderId(paymentId);
 
-    const [order, paymentStatuses] = await Promise.all([
+    const [order, intents] = await Promise.all([
       this.#getOrder(orderId),
-      this.#getOrderPaymentProviderStatuses(orderId),
+      this.#getOrderPaymentIntents(orderId),
     ]);
 
     if (order.userId !== usr.id) {
@@ -359,7 +359,7 @@ WHERE nft_order.id = $1
     }
 
     const paymentStatus = this.furthestPaymentStatus(
-      Object.values(paymentStatuses),
+      intents.map((intent) => intent.status),
     );
 
     let orderStatus: OrderStatus;
@@ -395,7 +395,8 @@ WHERE nft_order.id = $1
 
     return <OrderInfo>{
       orderedNfts: order.nfts,
-      status: orderStatus,
+      paymentIntents: intents,
+      orderStatus: orderStatus,
       delivery,
     };
   }
@@ -440,13 +441,16 @@ WHERE nft_order_id = $1
     return res;
   }
 
-  async #getOrderPaymentProviderStatuses(
+  async #getOrderPaymentIntents(
     orderId: number,
-  ): Promise<{ [key: string]: PaymentStatus }> {
+  ): Promise<
+    [{ paymentId: string; provider: PaymentProvider; status: PaymentStatus }]
+  > {
     return (
       await this.conn.query(
         `
 SELECT
+  payment_id,
   provider,
   status
 FROM payment
@@ -454,10 +458,13 @@ WHERE nft_order_id = $1
       `,
         [orderId],
       )
-    ).rows.reduce((res: { [key: string]: PaymentStatus }, row: any) => {
-      res[row['provider']] = row['status'];
-      return res;
-    }, {});
+    ).rows.map((row: any) => {
+      return {
+        paymentId: row['payment_id'],
+        provider: row['provider'],
+        status: row['status'],
+      };
+    });
   }
 
   async #createPaymentIntent(

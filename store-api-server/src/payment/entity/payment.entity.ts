@@ -22,7 +22,14 @@ export interface NftDeliveryInfo {
 
 export interface OrderInfo {
   orderedNfts: NftEntity[];
-  status: OrderStatus;
+
+  orderStatus: OrderStatus;
+  paymentIntents: {
+    paymentId: string;
+    provider: PaymentProvider;
+    status: PaymentStatus;
+  }[];
+
   delivery?: {
     [key: number /* nft id */]: NftDeliveryInfo;
   };

@@ -170,19 +170,30 @@ WHERE id = ${nftIds[0]}
           );
         });
 
-        const orderInfo = await testUtils.getOrderInfo(
+        const orderInfo: any = await testUtils.getOrderInfo(
           app,
           wallet1,
           checkoutData.paymentId,
         );
-        testUtils.logFullObject(orderInfo);
+        const expPaymentIntents: any = {};
+        expPaymentIntents[checkoutData.paymentId] = {
+          status: tc.exp.paymentStatus,
+        };
+        orderInfo.paymentIntents = orderInfo.paymentIntents.reduce(
+          (res: any, intent: any) => {
+            res[intent.paymentId] = intent;
+            return res;
+          },
+          {},
+        );
         expect(orderInfo).toMatchObject({
           orderedNfts: [
             {
               id: nftIds[0],
             },
           ],
-          status: tc.exp.orderStatus,
+          orderStatus: tc.exp.orderStatus,
+          paymentIntents: expPaymentIntents,
         });
         if (
           ![OrderStatus.DELIVERING, OrderStatus.DELIVERED].includes(
