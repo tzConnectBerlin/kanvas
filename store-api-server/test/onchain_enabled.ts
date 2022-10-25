@@ -1,6 +1,7 @@
 import request from 'supertest';
 
 import { PaymentService } from '../src/payment/service/payment.service';
+import { OrderStatus } from '../src/payment/entity/payment.entity.js';
 import { assertEnv } from '../src/utils';
 
 import * as testUtils from './utils';
@@ -49,9 +50,6 @@ export async function runOnchainEnabledTests(appReference: () => any) {
           },
         });
 
-        testUtils.logFullObject(
-          await testUtils.getOrderInfo(app, wallet1, checkout.paymentId),
-        );
         const expNftsDelivery: any = {};
         expNftsDelivery[nftIds[0]] = {
           status: 'delivered',
@@ -195,7 +193,7 @@ export async function runOnchainEnabledTests(appReference: () => any) {
 
       const wallet1 = await testUtils.newWallet(app);
       await testUtils.cartAdd(app, setup.proxyNftId, wallet1);
-      await testUtils.checkout(paymentService, wallet1);
+      const checkout = await testUtils.checkout(paymentService, wallet1);
 
       await testUtils.waitBlocks();
 
@@ -210,6 +208,27 @@ export async function runOnchainEnabledTests(appReference: () => any) {
             },
           ],
         },
+      });
+
+      const expNftsDelivery: any = {};
+      expNftsDelivery[setup.proxyNftId] = {
+        status: 'delivered',
+        proxiedNft: {
+          id: setup.proxiedNftIds[0],
+        },
+      };
+      const orderInfo = await testUtils.getOrderInfo(
+        app,
+        wallet1,
+        checkout.paymentId,
+      );
+      expect(orderInfo).toMatchObject({
+        orderedNfts: [
+          {
+            id: setup.proxyNftId,
+          },
+        ],
+        status: OrderStatus.DELIVERED,
       });
     });
 

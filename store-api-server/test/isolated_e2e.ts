@@ -1,7 +1,10 @@
 import request from 'supertest';
 
 import { PaymentService } from '../src/payment/service/payment.service';
-import { PaymentStatus } from '../src/payment/entity/payment.entity.js';
+import {
+  PaymentStatus,
+  OrderStatus,
+} from '../src/payment/entity/payment.entity.js';
 
 import * as testUtils from './utils';
 
@@ -81,6 +84,7 @@ WHERE id = ${nftIds[0]}
         exp: {
           statusCode: 201,
           paymentStatus: PaymentStatus.SUCCEEDED,
+          orderStatus: OrderStatus.DELIVERING,
         },
       },
       {
@@ -90,6 +94,7 @@ WHERE id = ${nftIds[0]}
         exp: {
           statusCode: 201,
           paymentStatus: PaymentStatus.PROCESSING,
+          orderStatus: OrderStatus.PENDING_PAYMENT,
         },
       },
       {
@@ -99,6 +104,7 @@ WHERE id = ${nftIds[0]}
         exp: {
           statusCode: 201,
           paymentStatus: PaymentStatus.PROMISED,
+          orderStatus: OrderStatus.PENDING_PAYMENT,
         },
       },
       {
@@ -108,6 +114,7 @@ WHERE id = ${nftIds[0]}
         exp: {
           statusCode: 201,
           paymentStatus: PaymentStatus.PROMISED,
+          orderStatus: OrderStatus.PENDING_PAYMENT,
         },
       },
       {
@@ -117,6 +124,7 @@ WHERE id = ${nftIds[0]}
         exp: {
           statusCode: 400,
           paymentStatus: PaymentStatus.CANCELED,
+          orderStatus: OrderStatus.CANCELED,
         },
       },
       {
@@ -126,6 +134,7 @@ WHERE id = ${nftIds[0]}
         exp: {
           statusCode: 400,
           paymentStatus: PaymentStatus.TIMED_OUT,
+          orderStatus: OrderStatus.CANCELED,
         },
       },
     ]) {
@@ -141,6 +150,7 @@ WHERE id = ${nftIds[0]}
           paymentService,
           wallet1,
           tc.input.afterPaymentStatus,
+          false,
         );
 
         const promisePaidResp = await request(app.getHttpServer())
@@ -159,6 +169,28 @@ WHERE id = ${nftIds[0]}
             tc.exp.paymentStatus,
           );
         });
+
+        const orderInfo = await testUtils.getOrderInfo(
+          app,
+          wallet1,
+          checkoutData.paymentId,
+        );
+        testUtils.logFullObject(orderInfo);
+        expect(orderInfo).toMatchObject({
+          orderedNfts: [
+            {
+              id: nftIds[0],
+            },
+          ],
+          status: tc.exp.orderStatus,
+        });
+        if (
+          ![OrderStatus.DELIVERING, OrderStatus.DELIVERED].includes(
+            tc.exp.orderStatus,
+          )
+        ) {
+          expect(typeof orderInfo.delivery).toEqual('undefined');
+        }
       });
     }
   });

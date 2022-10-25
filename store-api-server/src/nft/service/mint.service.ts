@@ -44,7 +44,6 @@ export class MintService {
         Logger.error(
           `failed to transfer nft (id=${nft.id}) to buyer (address=${buyer_address}), err: ${err}`,
         );
-        operationIds[nft.id] = -1; // TODO: check if this makes sense
       }
     }
     return operationIds;

@@ -162,6 +162,7 @@ export async function checkout(
   paymentService: PaymentService,
   wallet: Wallet,
   finalStatus = PaymentStatus.SUCCEEDED,
+  openSecondaryIntent = true,
 ): Promise<{ paymentId: string }> {
   const usr = <UserEntity>{
     userAddress: wallet.pkh,
@@ -175,14 +176,16 @@ export async function checkout(
     'EUR',
     'localhost',
   );
-  // creating one more intent to make it more realistic
-  await paymentService.createPayment(
-    usr,
-    uuidv4(),
-    PaymentProvider.TEZPAY,
-    'XTZ',
-    'localhost',
-  );
+  if (openSecondaryIntent) {
+    // creating one more intent to make it more realistic
+    await paymentService.createPayment(
+      usr,
+      uuidv4(),
+      PaymentProvider.TEZPAY,
+      'XTZ',
+      'localhost',
+    );
+  }
 
   await paymentService.updatePaymentStatus(intentRes.id, finalStatus, false);
   return { paymentId: intentRes.id };
