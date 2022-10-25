@@ -2428,10 +2428,12 @@ describe('AppController (e2e)', () => {
     expect(res.statusCode).toEqual(401);
   });
 
-  skipOnPriorFail(
-    'GET /analytics/sales/*/timeseries will fill missing datapoints for resolution=hour',
-    async () => {
+  describe('GET /analytics/sales/*/timeseries will fill missing datapoints', () => {
+    beforeEach(async () => {
       await clearEmulatedNftSales();
+    });
+
+    skipOnPriorFail('for resolution=hour', async () => {
       await emulateNftSale(
         1,
         [4, 7, 10],
@@ -2497,13 +2499,9 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         data: tsNftCount,
       });
-    },
-  );
+    });
 
-  skipOnPriorFail(
-    'GET /analytics/sales/*/timeseries will fill missing datapoints for resolution=day',
-    async () => {
-      await clearEmulatedNftSales();
+    skipOnPriorFail('for resolution=day', async () => {
       await emulateNftSale(
         1,
         [4, 7, 10],
@@ -2569,13 +2567,9 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         data: tsNftCount,
       });
-    },
-  );
+    });
 
-  skipOnPriorFail(
-    'GET /analytics/sales/*/timeseries will fill missing datapoints for resolution=week',
-    async () => {
-      await clearEmulatedNftSales();
+    skipOnPriorFail('for resolution=week', async () => {
       await emulateNftSale(
         1,
         [4, 7, 10],
@@ -2638,13 +2632,9 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         data: tsNftCount,
       });
-    },
-  );
+    });
 
-  skipOnPriorFail(
-    'GET /analytics/sales/*/timeseries will fill missing datapoints for resolution=month',
-    async () => {
-      await clearEmulatedNftSales();
+    skipOnPriorFail('for resolution=month', async () => {
       await emulateNftSale(
         2,
         [2, 27, 11, 10, 4],
@@ -2706,8 +2696,8 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         data: tsNftCount,
       });
-    },
-  );
+    });
+  });
 });
 
 function newDbConn() {
