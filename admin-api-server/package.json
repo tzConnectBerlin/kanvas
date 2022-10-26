@@ -41,6 +41,7 @@
     "class-transformer": "0.4.0",
     "class-validator": "^0.13.1",
     "cookie-session": "^1.4.0",
+    "dayjs": "^1.11.6",
     "dotenv": "^10.0.0",
     "filesize": "^9.0.11",
     "joi": "^17.5.0",
@@ -92,7 +93,9 @@
       "node_modules",
       "<rootDir>"
     ],
-    "extensionsToTreatAsEsm": [".ts"],
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
     "globals": {
       "ts-jest": {
         "useESM": true
@@ -111,9 +114,9 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "transformIgnorePatterns": [
-        "<rootDir>/node_modules/",
-        "<rootDir>/stm-lib/",
-        "/kanvas/lib/api-lib/"
+      "<rootDir>/node_modules/",
+      "<rootDir>/stm-lib/",
+      "/kanvas/lib/api-lib/"
     ],
     "collectCoverageFrom": [
       "src/**/{!(nft_mock.service),}.ts"

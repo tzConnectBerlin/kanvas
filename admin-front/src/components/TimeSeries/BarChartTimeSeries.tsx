@@ -1,6 +1,7 @@
 import { theme } from 'theme';
 import { Bar } from 'react-chartjs-2';
 import { TimeSeriesType } from './utility';
+import { useEffect, useState } from 'react';
 
 interface BarChartTimeSeriesProps {
   timeSeriesType: TimeSeriesType;
@@ -15,7 +16,16 @@ const BarChartTimeSeries = ({
   timeStampValues,
   currencySymbol,
 }: BarChartTimeSeriesProps) => {
+  const [useCustomThickness, setUseCustomThickness] = useState<boolean>(false);
   const isPriceVolume = timeSeriesType === 'priceVolume';
+
+  useEffect(() => {
+    if (timeStamps.length > 200 && !useCustomThickness) {
+      setUseCustomThickness(true);
+    } else if (timeStamps.length <= 200 && useCustomThickness) {
+      setUseCustomThickness(false);
+    }
+  }, [timeStamps]);
 
   const chartData = {
     labels: timeStamps,
@@ -24,7 +34,7 @@ const BarChartTimeSeries = ({
         label: isPriceVolume ? 'Price Volume' : 'NFT Count',
         backgroundColor: `${theme.palette.primary.main}80`,
         borderColor: `${theme.palette.primary.main}`,
-        borderWidth: 1,
+        borderWidth: 0.5,
         data: timeStampValues,
       },
     ],
@@ -37,6 +47,7 @@ const BarChartTimeSeries = ({
         position: 'top' as const,
       },
     },
+    barThickness: useCustomThickness ? 2 : undefined,
     scales: {
       x: {
         grid: {
