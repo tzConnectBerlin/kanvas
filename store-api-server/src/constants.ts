@@ -1,6 +1,7 @@
 import { assertEnv } from './utils.js';
 
 export const PG_CONNECTION = 'PG_CONNECTION';
+export const TOKEN_GATE = 'TOKEN_GATE';
 export const IPFS_PIN_PROVIDER = 'IPFS_PIN_PROVIDER';
 
 export const MOCK_IPFS_PINNING: boolean =

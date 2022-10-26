@@ -7,6 +7,9 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module.js';
 import { BEHIND_PROXY } from './constants.js';
+import { TokenGate } from 'token-gate';
+import { expressjwt, ExpressJwtRequest } from 'express-jwt';
+import { assertEnv } from './utils.js';
 
 async function bootstrap() {
   const port = process.env['KANVAS_API_PORT'] || 3000;
@@ -28,6 +31,15 @@ async function bootstrap() {
   if (BEHIND_PROXY) {
     app.set('trust proxy', 1);
   }
+
+  app.use(
+    expressjwt({
+      secret: assertEnv('JWT_SECRET'),
+      algorithms: ['HS256'],
+      credentialsRequired: false,
+    }),
+  );
+
   app.enableShutdownHooks();
 
   await app.listen(port);
