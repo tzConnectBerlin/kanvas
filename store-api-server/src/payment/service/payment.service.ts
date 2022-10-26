@@ -188,13 +188,13 @@ WHERE id = $1
     clientIp: string,
     recreateOrder: boolean = false,
   ): Promise<PaymentIntentInternal> {
+    await this.userService.ensureUserCartSession(usr.id, cookieSession);
+
     return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       // set isolation level to the most strict setting of postgres,
       // this ensures there are no race conditions with a single user executing
       // createPayment in quick succession.
       dbTx.query('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
-
-      await this.userService.ensureUserCartSession(usr.id, cookieSession, dbTx);
 
       const orderId = await this.#createOrder(dbTx, usr.id, recreateOrder);
 
@@ -426,7 +426,10 @@ WHERE nft_order_id = $1
       res[row['order_nft_id']] = {
         status: this.#peppermintStateToDeliveryStatus(row['state']),
         transferOpHash: maybe(row['included_in'], (x) => x),
-        proxiedNft: row['transfer_nft_id'] !== row['order_nft_id'] ? await this.nftService.byId(row['transfer_nft_id']) : undefined,
+        proxiedNft:
+          row['transfer_nft_id'] !== row['order_nft_id']
+            ? await this.nftService.byId(row['transfer_nft_id'])
+            : undefined,
       };
     }
     return res;
