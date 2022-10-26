@@ -28,10 +28,15 @@ export class MintService {
     this.nftLock = new Lock<number>();
   }
 
-  async transferNfts(nfts: NftEntity[], buyer_address: string) {
+  async transferNfts(
+    nfts: NftEntity[],
+    buyer_address: string,
+  ): Promise<{ [key: number]: number }> {
+    const operationIds: { [key: number]: number } = {};
     for (const nft of nfts) {
       try {
-        await this.#transferNft(nft, buyer_address);
+        const opId = await this.#transferNft(nft, buyer_address);
+        operationIds[nft.id] = opId;
         Logger.log(
           `transfer created for nft (id=${nft.id}) to buyer (address=${buyer_address})`,
         );
@@ -41,9 +46,10 @@ export class MintService {
         );
       }
     }
+    return operationIds;
   }
 
-  async #transferNft(nft: NftEntity, buyer_address: string) {
+  async #transferNft(nft: NftEntity, buyer_address: string): Promise<number> {
     await this.nftLock.acquire(nft.id);
     try {
       if (!(await this.#isNftSubmitted(nft))) {
@@ -60,7 +66,7 @@ export class MintService {
           amount: 1,
         },
       };
-      await this.#insertCommand(cmd);
+      return await this.#insertCommand(cmd);
     } finally {
       this.nftLock.release(nft.id);
     }
@@ -89,18 +95,21 @@ export class MintService {
     await this.#insertCommand(cmd);
   }
 
-  async #insertCommand(cmd: Command) {
-    await this.conn.query(
-      `
+  async #insertCommand(cmd: Command): Promise<number> {
+    return (
+      await this.conn.query(
+        `
 INSERT INTO peppermint.operations (
   originator, command
 )
 VALUES (
   $1, $2
 )
+RETURNING id AS operation_id
 `,
-      [MINTER_ADDRESS, cmd],
-    );
+        [MINTER_ADDRESS, cmd],
+      )
+    ).rows[0]['operation_id'];
   }
 
   async #isNftSubmitted(nft: NftEntity): Promise<boolean> {

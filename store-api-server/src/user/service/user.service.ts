@@ -305,13 +305,14 @@ LIMIT $1
   async ensureUserCartSession(
     userId: number,
     session: string,
+    dbTx: DbPool | DbTransaction = this.conn,
   ): Promise<string> {
-    await this.touchCart(session);
+    await this.touchCart(session, dbTx);
 
     // set user cart session to cookie session if:
     // - cookie session has a non-empty cart
     // - or, the user has no active cart session
-    const qryRes = await this.conn.query(
+    const qryRes = await dbTx.query(
       `
 UPDATE kanvas_user AS update
 SET cart_session = coalesce((
@@ -333,7 +334,7 @@ RETURNING
     const oldSession = qryRes.rows[0]['old_session'];
     const newSession = qryRes.rows[0]['new_session'];
     if (oldSession !== newSession) {
-      this.conn.query(
+      dbTx.query(
         `
 DELETE FROM cart_session
 WHERE session_id = $1
@@ -503,8 +504,11 @@ WHERE id = $1
     );
   }
 
-  async touchCart(session: string): Promise<CartMeta> {
-    const cartMeta = await this.getCartMeta(session);
+  async touchCart(
+    session: string,
+    dbTx: DbPool | DbTransaction = this.conn,
+  ): Promise<CartMeta> {
+    const cartMeta = await this.getCartMeta(session, dbTx);
     if (typeof cartMeta !== 'undefined') {
       return cartMeta;
     }
@@ -512,7 +516,7 @@ WHERE id = $1
     const expiresAt = this.newCartExpiration();
 
     try {
-      const qryRes = await this.conn.query(
+      const qryRes = await dbTx.query(
         `
 INSERT INTO cart_session (
   session_id, expires_at
@@ -527,7 +531,7 @@ RETURNING id, expires_at`,
       };
     } catch (err: any) {
       if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
-        const cartMeta = await this.getCartMeta(session);
+        const cartMeta = await this.getCartMeta(session, dbTx);
         if (typeof cartMeta !== 'undefined') {
           return cartMeta;
         }

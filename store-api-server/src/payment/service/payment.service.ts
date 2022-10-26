@@ -11,7 +11,6 @@ import {
   PAYMENT_PROMISE_DEADLINE_MILLI_SECS,
   ORDER_EXPIRATION_MILLI_SECS,
   WERT_PRIV_KEY,
-  WERT_PUB_KEY,
   WERT_ALLOWED_FIAT,
   TEZPAY_PAYPOINT_ADDRESS,
   SIMPLEX_API_KEY,
@@ -28,7 +27,13 @@ import { MintService } from '../../nft/service/mint.service.js';
 import ts_results from 'ts-results';
 const { Err } = ts_results;
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { assertEnv, nowUtcWithOffset, isBottom } from '../../utils.js';
+import {
+  nowUtcWithOffset,
+  isBottom,
+  maybe,
+  stringEnumValueIndex,
+  stringEnumIndexValue,
+} from '../../utils.js';
 import { DbTransaction, withTransaction, DbPool } from '../../db.module.js';
 import Tezpay from 'tezpay-server';
 import { v4 as uuidv4 } from 'uuid';
@@ -41,7 +46,14 @@ import {
 } from 'kanvas-api-lib';
 import { signSmartContractData } from '@wert-io/widget-sc-signer';
 import { createRequire } from 'module';
-import { PaymentProvider } from '../entity/payment.entity.js';
+import {
+  PaymentProvider,
+  PaymentStatus,
+  OrderInfo,
+  OrderStatus,
+  NftDeliveryInfo,
+  NftDeliveryStatus,
+} from '../entity/payment.entity.js';
 
 import type { NftEntity } from '../../nft/entity/nft.entity.js';
 import type {
@@ -53,16 +65,6 @@ import type {
 
 const require = createRequire(import.meta.url);
 const stripe = require('stripe');
-
-export enum PaymentStatus {
-  CREATED = 'created',
-  PROMISED = 'promised',
-  PROCESSING = 'processing',
-  CANCELED = 'canceled',
-  TIMED_OUT = 'timedOut',
-  SUCCEEDED = 'succeeded',
-  FAILED = 'failed',
-}
 
 export interface NftOrder {
   id: number;
@@ -145,23 +147,21 @@ export class PaymentService {
     try {
       await this.updatePaymentStatus(paymentId, PaymentStatus.PROMISED);
     } catch (err: any) {
-      const paymentStatusQryResp = await this.conn.query(
-        `
-SELECT status
-FROM payment
-WHERE payment_id = $1
-        `,
-        [paymentId],
-      );
+      let paymentStatus;
 
+      try {
+        paymentStatus = await this.getPaymentStatus(paymentId);
+      } catch (_) {
+        throw err;
+      }
       if (
-        paymentStatusQryResp.rowCount === 0 ||
         ![PaymentStatus.PROCESSING, PaymentStatus.SUCCEEDED].includes(
-          paymentStatusQryResp.rows[0]['status'],
+          paymentStatus,
         )
       ) {
         throw err;
       }
+
       Logger.warn(`failed to update status to promised, err: ${err}`);
       return;
     }
@@ -188,13 +188,13 @@ WHERE id = $1
     clientIp: string,
     recreateOrder: boolean = false,
   ): Promise<PaymentIntentInternal> {
-    await this.userService.ensureUserCartSession(usr.id, cookieSession);
-
     return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       // set isolation level to the most strict setting of postgres,
       // this ensures there are no race conditions with a single user executing
       // createPayment in quick succession.
       dbTx.query('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
+
+      await this.userService.ensureUserCartSession(usr.id, cookieSession, dbTx);
 
       const orderId = await this.#createOrder(dbTx, usr.id, recreateOrder);
 
@@ -343,6 +343,119 @@ WHERE nft_order.id = $1
   async getPaymentOrder(paymentId: string): Promise<NftOrder> {
     const orderId = await this.getPaymentOrderId(paymentId);
     return await this.#getOrder(orderId);
+  }
+
+  async getOrderInfo(usr: UserEntity, paymentId: string): Promise<OrderInfo> {
+    const orderId = await this.getPaymentOrderId(paymentId);
+
+    const [order, intents] = await Promise.all([
+      this.#getOrder(orderId),
+      this.#getOrderPaymentIntents(orderId),
+    ]);
+
+    if (order.userId !== usr.id) {
+      throw new Error(
+        'user does not have any orders with given payment intent identifier',
+      );
+    }
+
+    const paymentStatus = this.furthestPaymentStatus(
+      intents.map((intent) => intent.status),
+    );
+
+    let orderStatus: OrderStatus;
+    let delivery: { [key: number]: NftDeliveryInfo } | undefined;
+    switch (paymentStatus) {
+      case PaymentStatus.CANCELED:
+      case PaymentStatus.TIMED_OUT:
+        orderStatus = OrderStatus.CANCELED;
+        break;
+      case PaymentStatus.FAILED:
+      case PaymentStatus.CREATED:
+      case PaymentStatus.PROMISED:
+      case PaymentStatus.PROCESSING:
+        orderStatus = OrderStatus.PENDING_PAYMENT;
+        break;
+      case PaymentStatus.SUCCEEDED:
+        delivery = await this.#getOrderDeliveryInfo(order);
+
+        orderStatus = OrderStatus.DELIVERED;
+        if (
+          Object.values(delivery).some(
+            (nftDelivery) => nftDelivery.status !== NftDeliveryStatus.DELIVERED,
+          )
+        ) {
+          orderStatus = OrderStatus.DELIVERING;
+        }
+        break;
+      default:
+        throw new Error(
+          `failed to determin order status (order id=${orderId}): unknown furthest payment status ${paymentStatus}`,
+        );
+    }
+
+    return <OrderInfo>{
+      orderedNfts: order.nfts,
+      paymentIntents: intents,
+      orderStatus: orderStatus,
+      delivery,
+    };
+  }
+
+  async #getOrderDeliveryInfo(
+    order: NftOrder,
+  ): Promise<{ [key: number]: NftDeliveryInfo }> {
+    const res: { [key: number]: NftDeliveryInfo } = {};
+    for (const row of (
+      await this.conn.query(
+        `
+SELECT
+  order_nft_id,
+  transfer_nft_id,
+  op.state,
+  op.included_in
+FROM nft_order_delivery
+LEFT JOIN peppermint.operations AS op
+  ON op.id = transfer_operation_id
+WHERE nft_order_id = $1
+  AND order_nft_id = ANY($2)
+      `,
+        [order.id, order.nfts.map((nft) => nft.id)],
+      )
+    ).rows) {
+      res[row['order_nft_id']] = {
+        status: this.#peppermintStateToDeliveryStatus(row['state']),
+        transferOpHash: maybe(row['included_in'], (x) => x),
+        proxiedNft: row['transfer_nft_id'] !== row['order_nft_id'] ? await this.nftService.byId(row['transfer_nft_id']) : undefined,
+      };
+    }
+    return res;
+  }
+
+  async #getOrderPaymentIntents(
+    orderId: number,
+  ): Promise<
+    [{ paymentId: string; provider: PaymentProvider; status: PaymentStatus }]
+  > {
+    return (
+      await this.conn.query(
+        `
+SELECT
+  payment_id,
+  provider,
+  status
+FROM payment
+WHERE nft_order_id = $1
+      `,
+        [orderId],
+      )
+    ).rows.map((row: any) => {
+      return {
+        paymentId: row['payment_id'],
+        provider: row['provider'],
+        status: row['status'],
+      };
+    });
   }
 
   async #createPaymentIntent(
@@ -1100,6 +1213,21 @@ WHERE payment_id = $1
     return qryRes.rows[0]['nft_order_id'];
   }
 
+  async getPaymentStatus(
+    paymentId: string,
+    dbTx: DbTransaction | DbPool = this.conn,
+  ): Promise<PaymentStatus> {
+    const qryRes = await dbTx.query(
+      `
+SELECT status
+FROM payment
+WHERE payment_id = $1
+      `,
+      [paymentId],
+    );
+    return qryRes.rows[0]['status'];
+  }
+
   async #orderCheckout(orderId: number) {
     const order = await this.#getOrder(orderId);
     const nfts = await withTransaction(
@@ -1110,7 +1238,7 @@ WHERE payment_id = $1
         await this.#assignNftsToUser(
           dbTx,
           order.userId,
-          nfts.map((nft: NftEntity) => nft.id),
+          Object.values(nfts).map((nft: NftEntity) => nft.id),
         );
 
         return nfts;
@@ -1125,24 +1253,52 @@ WHERE payment_id = $1
 
     // This step is done after committing the database related assigning of the NFTs to the user,
     // if any issues occur with Blockchain related assigning they should be resolved asynchronously
-    await this.mintService.transferNfts(nfts, order.userAddress);
+    const opIds = await this.mintService.transferNfts(
+      Object.values(nfts),
+      order.userAddress,
+    );
+    await this.#registerTransfers(orderId, nfts, opIds);
+  }
+
+  async #registerTransfers(
+    orderId: number,
+    nfts: { [key: number]: NftEntity },
+    opIds: { [key: number]: number },
+  ) {
+    await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+      for (const orderedNftId of Object.keys(nfts).map(Number)) {
+        const transferNft = nfts[orderedNftId];
+        let transferOpId = opIds[transferNft.id];
+
+        await dbTx.query(
+          `
+INSERT INTO nft_order_delivery (
+  nft_order_id, order_nft_id, transfer_operation_id, transfer_nft_id
+)
+VALUES ($1, $2, $3, $4)
+          `,
+          [orderId, orderedNftId, transferOpId, transferNft.id],
+        );
+      }
+    });
   }
 
   async #unfoldProxyNfts(
     dbTx: DbTransaction,
     nfts: NftEntity[],
-  ): Promise<NftEntity[]> {
+  ): Promise<{ [key: number]: NftEntity }> {
     await dbTx.query('LOCK TABLE proxy_unfold IN EXCLUSIVE MODE');
 
-    return await Promise.all(
-      nfts.map(async (nft) => {
-        if (!nft.isProxy) {
-          return nft;
-        }
+    const res: { [key: number]: NftEntity } = {};
+    for (const nft of nfts) {
+      if (!nft.isProxy) {
+        res[nft.id] = nft;
+        continue;
+      }
 
-        const unfoldId = (
-          await dbTx.query(
-            `
+      const unfoldId = (
+        await dbTx.query(
+          `
 UPDATE proxy_unfold
 SET claimed = true
 WHERE proxy_nft_id = $1
@@ -1155,13 +1311,13 @@ WHERE proxy_nft_id = $1
   )
 RETURNING unfold_nft_id
         `,
-            [nft.id],
-          )
-        ).rows[0]['unfold_nft_id'];
+          [nft.id],
+        )
+      ).rows[0]['unfold_nft_id'];
 
-        return await this.nftService.byId(unfoldId);
-      }),
-    );
+      res[nft.id] = await this.nftService.byId(unfoldId);
+    }
+    return res;
   }
 
   async #assignNftsToUser(dbTx: any, userId: number, nftIds: number[]) {
@@ -1176,7 +1332,7 @@ SELECT $1, UNNEST($2::int[])
     );
   }
 
-  // Test functions
+  // Test function
   async getPaymentForLatestUserOrder(
     userId: number,
   ): Promise<{ paymentId: string; orderId: number; status: PaymentStatus }> {
@@ -1203,5 +1359,38 @@ ORDER BY payment.id DESC
       orderId: qryRes.rows[0]['order_id'],
       status: qryRes.rows[0]['status'],
     };
+  }
+
+  #peppermintStateToDeliveryStatus(state: string): NftDeliveryStatus {
+    switch (state) {
+      case 'pending':
+        return NftDeliveryStatus.INITIATING;
+      case 'processing':
+      case 'waiting':
+        return NftDeliveryStatus.DELIVERING;
+      case 'confirmed':
+        return NftDeliveryStatus.DELIVERED;
+      case 'unknown':
+      case 'rejected':
+      case 'failed':
+      case 'lost':
+      case 'canary':
+        return NftDeliveryStatus.UNKNOWN;
+      default:
+        throw new Error(
+          `could not determine nft delivery status: unknown peppermint state ${state}`,
+        );
+    }
+  }
+
+  furthestPaymentStatus(statuses: PaymentStatus[]): PaymentStatus | undefined {
+    return stringEnumIndexValue(
+      PaymentStatus,
+      Math.max(
+        ...statuses.map(
+          (status) => stringEnumValueIndex(PaymentStatus, status) ?? 0,
+        ),
+      ),
+    );
   }
 }

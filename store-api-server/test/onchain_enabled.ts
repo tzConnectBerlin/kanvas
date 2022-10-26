@@ -1,13 +1,11 @@
 import request from 'supertest';
-import axios from 'axios';
 
+import { PaymentService } from '../src/payment/service/payment.service';
 import {
-  PaymentService,
+  OrderStatus,
   PaymentStatus,
-} from '../src/payment/service/payment.service';
-import { PaymentProvider } from '../src/payment/entity/payment.entity.js';
-import { UserEntity } from '../src/user/entity/user.entity';
-import { assertEnv, sleep } from '../src/utils';
+} from '../src/payment/entity/payment.entity.js';
+import { assertEnv } from '../src/utils';
 
 import * as testUtils from './utils';
 
@@ -38,7 +36,7 @@ export async function runOnchainEnabledTests(appReference: () => any) {
       async () => {
         const wallet1 = await testUtils.newWallet(app);
         await testUtils.cartAdd(app, nftIds[0], wallet1);
-        await testUtils.checkout(paymentService, wallet1);
+        const checkout = await testUtils.checkout(paymentService, wallet1);
 
         await testUtils.waitBlocks();
 
@@ -53,6 +51,39 @@ export async function runOnchainEnabledTests(appReference: () => any) {
               },
             ],
           },
+        });
+
+        const orderInfo = await testUtils.getOrderInfo(
+          app,
+          wallet1,
+          checkout.paymentId,
+        );
+
+        const expPaymentIntents: any = {};
+        expPaymentIntents[checkout.paymentId] = {
+          status: PaymentStatus.SUCCEEDED,
+        };
+        orderInfo.paymentIntents = orderInfo.paymentIntents.reduce(
+          (res: any, intent: any) => {
+            res[intent.paymentId] = intent;
+            return res;
+          },
+          {},
+        );
+
+        const expNftsDelivery: any = {};
+        expNftsDelivery[nftIds[0]] = {
+          status: 'delivered',
+        };
+        expect(orderInfo).toMatchObject({
+          orderedNfts: [
+            {
+              id: nftIds[0],
+            },
+          ],
+          orderStatus: 'delivered',
+          delivery: expNftsDelivery,
+          paymentIntents: expPaymentIntents,
         });
       },
       onchainTestTimeoutMs,
@@ -182,7 +213,7 @@ export async function runOnchainEnabledTests(appReference: () => any) {
 
       const wallet1 = await testUtils.newWallet(app);
       await testUtils.cartAdd(app, setup.proxyNftId, wallet1);
-      await testUtils.checkout(paymentService, wallet1);
+      const checkout = await testUtils.checkout(paymentService, wallet1);
 
       await testUtils.waitBlocks();
 
@@ -197,6 +228,27 @@ export async function runOnchainEnabledTests(appReference: () => any) {
             },
           ],
         },
+      });
+
+      const expNftsDelivery: any = {};
+      expNftsDelivery[setup.proxyNftId] = {
+        status: 'delivered',
+        proxiedNft: {
+          id: setup.proxiedNftIds[0],
+        },
+      };
+      const orderInfo = await testUtils.getOrderInfo(
+        app,
+        wallet1,
+        checkout.paymentId,
+      );
+      expect(orderInfo).toMatchObject({
+        orderedNfts: [
+          {
+            id: setup.proxyNftId,
+          },
+        ],
+        orderStatus: OrderStatus.DELIVERED,
       });
     });
 

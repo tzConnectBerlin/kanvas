@@ -3,18 +3,18 @@ import { readFileSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import request from 'supertest';
 import sotez from 'sotez';
-import { Client, PoolClient } from 'pg';
+import { Client } from 'pg';
 const { cryptoUtils } = sotez;
 import { InMemorySigner } from '@taquito/signer';
 import { TezosToolkit } from '@taquito/taquito';
 
+import { PaymentService } from '../src/payment/service/payment.service';
 import {
-  PaymentService,
+  PaymentProvider,
   PaymentStatus,
-} from '../src/payment/service/payment.service';
-import { PaymentProvider } from '../src/payment/entity/payment.entity';
+  OrderInfo,
+} from '../src/payment/entity/payment.entity';
 import { UserEntity } from '../src/user/entity/user.entity';
-import { CreateNft, CreateProxiedNft } from '../src/nft/entity/nft.entity';
 import { assertEnv, sleep } from '../src/utils';
 import { SIGNATURE_PREFIX_CREATE_NFT } from 'kanvas-api-lib';
 
@@ -162,13 +162,13 @@ export async function checkout(
   paymentService: PaymentService,
   wallet: Wallet,
   finalStatus = PaymentStatus.SUCCEEDED,
+  openSecondaryIntent = true,
 ): Promise<{ paymentId: string }> {
   const usr = <UserEntity>{
     userAddress: wallet.pkh,
     id: wallet.login.id,
   };
 
-  // Create one payment intent (we are not calling the stripe api)
   const intentRes = await paymentService.createPayment(
     usr,
     uuidv4(),
@@ -176,14 +176,32 @@ export async function checkout(
     'EUR',
     'localhost',
   );
+  if (openSecondaryIntent) {
+    // creating one more intent to make it more realistic
+    await paymentService.createPayment(
+      usr,
+      uuidv4(),
+      PaymentProvider.TEZPAY,
+      'XTZ',
+      'localhost',
+    );
+  }
 
-  // Give webhook handler function success event
-  const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
-    wallet.login.id,
-  );
+  await paymentService.updatePaymentStatus(intentRes.id, finalStatus, false);
+  return { paymentId: intentRes.id };
+}
 
-  await paymentService.updatePaymentStatus(paymentId, finalStatus, false);
-  return { paymentId };
+export async function getOrderInfo(
+  app: any,
+  wallet: Wallet,
+  paymentId: string,
+  expStatus = 200,
+): Promise<OrderInfo> {
+  const resp = await request(app.getHttpServer())
+    .get(`/payment/order-info/${paymentId}`)
+    .set('authorization', wallet.login.bearer);
+  expect(resp.statusCode).toEqual(expStatus);
+  return resp.body;
 }
 
 export async function createNft(app: any, nft: any) {
@@ -239,6 +257,7 @@ export async function resetDb(resetForLegacyTest = false): Promise<number[]> {
     await db.query('update cart_session set order_id = null');
 
     const tables = [
+      'nft_order_delivery',
       'mtm_kanvas_user_nft',
       'mtm_cart_session_nft',
       'mtm_nft_category',
