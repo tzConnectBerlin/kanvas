@@ -30,6 +30,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import {
   nowUtcWithOffset,
   isBottom,
+  maybe,
   stringEnumValueIndex,
   stringEnumIndexValue,
 } from '../../utils.js';
@@ -422,20 +423,10 @@ WHERE nft_order_id = $1
         [order.id, order.nfts.map((nft) => nft.id)],
       )
     ).rows) {
-      let proxiedNft: NftEntity | undefined;
-      if (row['transfer_nft_id'] != row['order_nft_id']) {
-        proxiedNft = await this.nftService.byId(row['transfer_nft_id']);
-      }
-
-      let transferOpHash: string | undefined;
-      if (!isBottom(row['included_in'])) {
-        transferOpHash = row['included_in'];
-      }
-
       res[row['order_nft_id']] = {
         status: this.#peppermintStateToDeliveryStatus(row['state']),
-        transferOpHash,
-        proxiedNft,
+        transferOpHash: maybe(row['included_in'], (x) => x),
+        proxiedNft: row['transfer_nft_id'] !== row['order_nft_id'] ? await this.nftService.byId(row['transfer_nft_id']) : undefined,
       };
     }
     return res;
