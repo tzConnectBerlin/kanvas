@@ -1,0 +1,13 @@
+schema: test_token_gate
+
+tokenNames:
+  0: common
+  1: rare
+
+rules:
+  /nfts:
+    one_of:
+    - rare
+  /nfts/:
+    one_of:
+    - gold

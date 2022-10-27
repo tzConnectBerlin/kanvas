@@ -13,7 +13,6 @@ const tokenGateProvider = {
   inject: [PG_CONNECTION],
   useFactory: (dbPool: DbPool) => {
     const gate = new TokenGate({
-      dbSchema: 'token',
       dbPool,
     });
     if (typeof TOKEN_GATE_SPEC_FILE !== 'undefined') {
