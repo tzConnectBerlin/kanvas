@@ -82,6 +82,31 @@ export async function newWallet(
   };
 }
 
+export async function giveAccessToken(receiver: Wallet, tokenId: number) {
+  const Tezos = new TezosToolkit(assertEnv('NODE_URL'));
+
+  Tezos.setProvider({
+    signer: await InMemorySigner.fromSecretKey(assertEnv('ADMIN_PRIVATE_KEY')),
+  });
+
+  const contract = await Tezos.contract.at(assertEnv('TOKEN_GATE_CONTRACT'));
+  const transferOp = contract.methods
+    .transfer([
+      {
+        from_: assertEnv('MINTER_TZ_ADDRESS'),
+        txs: [
+          {
+            to_: receiver.pkh,
+            token_id: tokenId,
+            amount: 1,
+          },
+        ],
+      },
+    ])
+    .send();
+  await (await transferOp).confirmation(1);
+}
+
 export async function transferNft(
   fromWallet: Wallet,
   toWalletPkh: string,

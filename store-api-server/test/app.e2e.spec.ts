@@ -28,6 +28,7 @@ import { runOnchainTests } from './onchain.e2e';
 import { runTokenGateTests } from './token_gate.e2e';
 import { runProxyNftTests } from './proxy_nft.e2e';
 import { runIsolatedTests } from './isolated.e2e';
+import { TokenGate } from 'token-gate';
 const { cryptoUtils } = sotez;
 
 let anyTestFailed = false;
@@ -51,6 +52,7 @@ describe('AppController (e2e)', () => {
   let app: any;
   let paymentService: PaymentService;
   let userService: UserService;
+  let tokenGate: TokenGate;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -59,6 +61,7 @@ describe('AppController (e2e)', () => {
 
     paymentService = await moduleFixture.get(PaymentService);
     userService = await moduleFixture.get(UserService);
+    tokenGate = await moduleFixture.get('TOKEN_GATE');
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
@@ -91,7 +94,7 @@ describe('AppController (e2e)', () => {
   runIsolatedTests(() => [app, paymentService]);
   runProxyNftTests(() => [app]);
   runOnchainTests(() => [app, paymentService]);
-  runTokenGateTests(() => [app]);
+  runTokenGateTests(() => [app, tokenGate]);
 
   // Note:
   // - these tests expect responses related to a database that has been filled
