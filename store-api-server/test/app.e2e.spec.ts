@@ -24,9 +24,10 @@ import { assertEnv, sleep } from '../src/utils';
 import sotez from 'sotez';
 import { v4 as uuidv4 } from 'uuid';
 import Pool from 'pg-pool';
-import { runOnchainEnabledTests } from './onchain_enabled';
-import { runProxyNftTests } from './proxy_nft_e2e';
-import { runIsolatedTests } from './isolated_e2e';
+import { runOnchainTests } from './onchain.e2e';
+import { runTokenGateTests } from './token_gate.e2e';
+import { runProxyNftTests } from './proxy_nft.e2e';
+import { runIsolatedTests } from './isolated.e2e';
 const { cryptoUtils } = sotez;
 
 let anyTestFailed = false;
@@ -89,7 +90,8 @@ describe('AppController (e2e)', () => {
 
   runIsolatedTests(() => [app, paymentService]);
   runProxyNftTests(() => [app]);
-  runOnchainEnabledTests(() => [app, paymentService]);
+  runOnchainTests(() => [app, paymentService]);
+  runTokenGateTests(() => [app]);
 
   // Note:
   // - these tests expect responses related to a database that has been filled

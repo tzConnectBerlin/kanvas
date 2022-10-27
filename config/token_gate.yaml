@@ -1,0 +1,15 @@
+tokenNames:
+  1: common
+  2: rare
+  3: gold
+
+rules:
+  /users/cart/:
+    one_of:
+    - rare
+    - gold
+  /payment/:
+    one_of:
+    - rare
+    - gold
+  /payment/stripe-webhook: no_rules
