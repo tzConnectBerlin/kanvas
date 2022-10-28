@@ -13,6 +13,7 @@ import { createRequire } from 'module';
 import type { IAuthentication } from './authentication.js';
 import { TokenGate } from 'token-gate';
 import { TokenGateEndpointInfo } from '../entity/authentication.entity.js';
+import { maybe } from '../../utils.js';
 
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcrypt');
@@ -59,14 +60,24 @@ export class AuthenticationService {
     endpoint: string,
     address: string | undefined,
   ): Promise<TokenGateEndpointInfo> {
+    let userOwnsTokensPromise = maybe(address, (addr) =>
+      this.tokenGateOwnedTokens(addr),
+    );
+
+    const [userOwnsTokens, userHasAccess] = await Promise.all([
+      userOwnsTokensPromise,
+      this.tokenGate.hasAccess(endpoint, address),
+    ]);
+
     return {
+      userOwnsTokens: userOwnsTokens ?? [],
       allowedTokens: this.tokenGate.getEndpointAllowedTokens(endpoint),
-      userHasAccess: await this.tokenGate.hasAccess(endpoint, address),
+      userHasAccess,
     };
   }
 
-  tokenGateOwnedTokens(address: string): Promise<(number | string)[]> {
-    return this.tokenGate.getOwnedTokens(address);
+  async tokenGateOwnedTokens(address: string): Promise<(number | string)[]> {
+    return await this.tokenGate.getOwnedTokens(address);
   }
 
   async getLoggedUser(address: string): Promise<Result<UserEntity, string>> {

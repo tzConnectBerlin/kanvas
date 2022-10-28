@@ -1,4 +1,5 @@
 export interface TokenGateEndpointInfo {
-  allowedTokens?: (number | string)[],
-  userHasAccess: boolean,
+  allowedTokens?: (number | string)[];
+  userOwnsTokens: (number | string)[];
+  userHasAccess: boolean;
 }
