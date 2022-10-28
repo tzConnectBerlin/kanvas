@@ -26,3 +26,13 @@ echo "$links" | grep --silent 'tezpay-server ->' || {
     )
     yarn link $YARN_LINK_ARGS tezpay-server
 }
+echo "$links" | grep --silent 'token-gate ->' || {
+    echo "linking token-gate.."
+    (
+        cd ../lib/token-gate
+        yarn install || exit 1
+        yarn build || exit 1
+        yarn link $YARN_LINK_ARGS 2>/dev/null
+    )
+    yarn link $YARN_LINK_ARGS token-gate
+}
