@@ -1298,7 +1298,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/jsonwebtoken@^8.5.8":
+"@types/jsonwebtoken@^8.5.9":
   version "8.5.9"
   resolved "https://registry.yarnpkg.com/@types/jsonwebtoken/-/jsonwebtoken-8.5.9.tgz#2c064ecb0b3128d837d2764aa0b117b0ff6e4586"
   integrity sha512-272FMnFGzAVMGtu9tkr29hRL6bZj4Zs1KZNeHLnKqAvp06tAIcarTMwOh8/8bz4FmKRcMxZhZNeUAQsNLoiPhg==
@@ -3095,20 +3095,6 @@ expect@^28.1.1:
     jest-message-util "^28.1.1"
     jest-util "^28.1.1"
 
-express-jwt@^7.7.7:
-  version "7.7.7"
-  resolved "https://registry.yarnpkg.com/express-jwt/-/express-jwt-7.7.7.tgz#b0400a8c759aba0774d84459e1d2eea7e9869d40"
-  integrity sha512-7s04HZ7sAahx7lwKU5AInhVon1kWVitRFxd7cGUKQaLDOQJsAQjB/OEBXaN0GS22RBgX75TjOJXGY7myQmVz5A==
-  dependencies:
-    "@types/jsonwebtoken" "^8.5.8"
-    express-unless "^2.1.3"
-    jsonwebtoken "^8.5.1"
-
-express-unless@^2.1.3:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/express-unless/-/express-unless-2.1.3.tgz#f951c6cca52a24da3de32d42cfd4db57bc0f9a2e"
-  integrity sha512-wj4tLMyCVYuIIKHGt0FhCtIViBcwzWejX0EjNxveAa6dG+0XBCQhMbx+PnkLkFCxLC69qoFrxds4pIyL88inaQ==
-
 express@4.17.2:
   version "4.17.2"
   resolved "https://registry.yarnpkg.com/express/-/express-4.17.2.tgz#c18369f265297319beed4e5558753cc8c1364cb3"
@@ -4589,11 +4575,6 @@ md5@^2.2.1:
     charenc "0.0.2"
     crypt "0.0.2"
     is-buffer "~1.1.6"
-
-meaningful-string@^1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/meaningful-string/-/meaningful-string-1.3.1.tgz#134befb50e0bb2a8957aae0e9fc4819db9b2fac7"
-  integrity sha512-Su5kp8vTyD2BMMjGWzdQCZ+arbw2RVgIcv/FJckWsamwCZRWadaree6nhDI2a69mnAyw8x6lnkQhyTtgW9WJqw==
 
 media-typer@0.3.0:
   version "0.3.0"

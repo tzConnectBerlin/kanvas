@@ -105,7 +105,7 @@ export class AuthenticationController {
     if (typeof user === 'undefined') {
       return [];
     }
-    return this.authService.tokenGateOwnedTokens(user.userAddress);
+    return await this.authService.tokenGateOwnedTokens(user.userAddress);
   }
 
   @Get('token-gate/endpoint')

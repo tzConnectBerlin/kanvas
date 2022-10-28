@@ -136,6 +136,16 @@ export async function runTokenGateTests(appReference: () => any) {
         .set('Authorization', w.login.bearer);
       expect(resp.statusCode).toEqual(403);
     });
+
+    it('test jwt middleware: dont return 500 on malformed bearer token', async () => {
+      expect(
+        (
+          await request(app.getHttpServer())
+            .get('/constants')
+            .set('Authorization', 'Bearer null')
+        ).statusCode,
+      ).toEqual(200);
+    });
   });
 }
 
