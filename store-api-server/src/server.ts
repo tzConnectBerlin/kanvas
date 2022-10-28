@@ -42,8 +42,10 @@ export function setupKanvasServer(server: NestExpressApplication) {
     const jwtSecret = assertEnv('JWT_SECRET');
     server.use((req: any, _: any, next: any) => {
       try {
-        const token = req.get('authorization').replace(/^Bearer\ /, '');
-        req.auth = jwt.verify(token, jwtSecret);
+        const token = req.get('authorization')?.replace(/^Bearer\ /, '');
+        if (typeof token !== 'undefined') {
+          req.auth = jwt.verify(token, jwtSecret);
+        }
       } catch (err: any) {
         Logger.warn(`failed to verify JWT: ${err}`);
       }
