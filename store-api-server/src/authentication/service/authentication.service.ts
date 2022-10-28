@@ -2,15 +2,17 @@ import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from '../../user/entity/user.entity.js';
 import { UserService } from '../../user/service/user.service.js';
 import { ITokenPayload } from '../../interfaces/token.interface.js';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
 import { Result } from 'ts-results';
 import ts_results from 'ts-results';
-import { SIGNED_LOGIN_ENABLED } from '../../constants.js';
+import { SIGNED_LOGIN_ENABLED, TOKEN_GATE } from '../../constants.js';
 const { Ok } = ts_results;
 
 import { createRequire } from 'module';
 
 import type { IAuthentication } from './authentication.js';
+import { TokenGate } from 'token-gate';
+import { TokenGateEndpointInfo } from '../entity/authentication.entity.js';
 
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcrypt');
@@ -20,6 +22,7 @@ export class AuthenticationService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    @Inject(TOKEN_GATE) private tokenGate: TokenGate,
   ) {}
 
   private async validate(
@@ -48,10 +51,24 @@ export class AuthenticationService {
       {
         id: user.id,
         userAddress: user.userAddress,
-        createdAt: user.createdAt
+        createdAt: user.createdAt,
       },
       user,
     );
+  }
+
+  public async tokenGateEndpointInfo(
+    endpoint: string,
+    address: string | undefined,
+  ): Promise<TokenGateEndpointInfo> {
+    return {
+      allowedTokens: this.tokenGate.getSpec()[endpoint]?.allowedTokens,
+      userHasAccess: await this.tokenGate.hasAccess(endpoint, address),
+    };
+  }
+
+  public tokenGateOwnedTokens(address: string): Promise<(number | string)[]> {
+    return this.tokenGate.getOwnedTokens(address);
   }
 
   public async getLoggedUser(

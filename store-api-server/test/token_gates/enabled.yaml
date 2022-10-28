@@ -1,4 +1,8 @@
 schema: test_token_gate
+columns:
+  address: idx_assets_address
+  token: idx_assets_nat
+  amount: assets_nat
 
 tokenNames:
   0: common
@@ -10,4 +14,4 @@ rules:
     - rare
   /nfts/:
     one_of:
-    - gold
+    - common

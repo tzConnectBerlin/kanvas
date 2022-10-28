@@ -5,15 +5,15 @@ File                           | % Stmts | % Branch | % Funcs | % Lines | Uncove
 
 -------------------------------|---------|----------|---------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------
 
-All files                      |   75.14 |    43.47 |   86.07 |   74.28 |                                                                                                                                                       
+All files                      |   75.31 |    44.27 |   86.26 |   74.46 |                                                                                                                                                       
 
- src                           |   64.56 |    42.42 |   60.46 |   63.31 |                                                                                                                                                       
+ src                           |   64.56 |    43.93 |   60.46 |   63.31 |                                                                                                                                                       
 
   app.controller.ts            |     100 |      100 |     100 |     100 |                                                                                                                                                       
 
   app.module.ts                |     100 |       50 |     100 |     100 | 38                                                                                                                                                    
 
-  app.service.ts               |     100 |       50 |     100 |     100 | 27                                                                                                                                                    
+  app.service.ts               |     100 |      100 |     100 |     100 |                                                                                                                                                       
 
   constants.ts                 |     100 |    70.83 |     100 |     100 | 12,36,54-85                                                                                                                                           
 
@@ -35,19 +35,19 @@ All files                      |   75.14 |    43.47 |   86.07 |   74.28 |
 
   authentication.module.ts     |     100 |      100 |     100 |     100 |                                                                                                                                                       
 
- src/authentication/controller |   66.66 |    71.42 |   83.33 |   65.38 |                                                                                                                                                       
+ src/authentication/controller |   72.72 |    78.94 |    87.5 |   71.87 |                                                                                                                                                       
 
-  authentication.controller.ts |   66.66 |    71.42 |   83.33 |   65.38 | 28-37,62,66-68,85-88                                                                                                                                  
+  authentication.controller.ts |   72.72 |    78.94 |    87.5 |   71.87 | 32-41,66,70-72,89-92                                                                                                                                  
 
  src/authentication/guards     |      90 |       25 |     100 |    87.5 |                                                                                                                                                       
 
   jwt-auth.guard.ts            |      90 |       25 |     100 |    87.5 | 19                                                                                                                                                    
 
- src/authentication/service    |   85.36 |    78.57 |    87.5 |      85 |                                                                                                                                                       
+ src/authentication/service    |   86.36 |    77.77 |      90 |   86.04 |                                                                                                                                                       
 
   authentication.d.ts          |       0 |        0 |       0 |       0 |                                                                                                                                                       
 
-  authentication.service.ts    |   85.36 |    78.57 |    87.5 |      85 | 60-65,76,129                                                                                                                                          
+  authentication.service.ts    |   86.36 |    77.77 |      90 |   86.04 | 73-78,89,142                                                                                                                                          
 
  src/authentication/strategy   |     100 |      100 |     100 |     100 |                                                                                                                                                       
 

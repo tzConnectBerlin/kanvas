@@ -7,16 +7,21 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { UserEntity } from '../../user/entity/user.entity.js';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard.js';
+import {
+  JwtAuthGuard,
+  JwtFailableAuthGuard,
+} from '../guards/jwt-auth.guard.js';
 import { AuthenticationService } from '../service/authentication.service.js';
 import {
   PG_UNIQUE_VIOLATION_ERRCODE,
   SIGNED_LOGIN_ENABLED,
 } from '../../constants.js';
+import { TokenGateEndpointInfo } from '../entity/authentication.entity.js';
 
 @Controller('auth')
 export class AuthenticationController {
@@ -90,5 +95,28 @@ export class AuthenticationController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     });
+  }
+
+  @Get('token-gate/tokens')
+  @UseGuards(JwtFailableAuthGuard)
+  async tokenGateOwnedTokens(
+    @CurrentUser() user?: UserEntity,
+  ): Promise<(number | string)[]> {
+    if (typeof user === 'undefined') {
+      return [];
+    }
+    return this.authService.tokenGateOwnedTokens(user.userAddress);
+  }
+
+  @Get('token-gate/endpoint')
+  @UseGuards(JwtFailableAuthGuard)
+  async tokenGateEndpointInfo(
+    @Query('endpoint') endpoint: string,
+    @CurrentUser() user?: UserEntity,
+  ): Promise<TokenGateEndpointInfo> {
+    return await this.authService.tokenGateEndpointInfo(
+      endpoint,
+      user?.userAddress,
+    );
   }
 }
