@@ -29,6 +29,7 @@ import { runTokenGateTests } from './token_gate.e2e';
 import { runProxyNftTests } from './proxy_nft.e2e';
 import { runIsolatedTests } from './isolated.e2e';
 import { TokenGate } from 'token-gate';
+import { setupKanvasServer } from '../src/server.js';
 const { cryptoUtils } = sotez;
 
 let anyTestFailed = false;
@@ -64,8 +65,7 @@ describe('AppController (e2e)', () => {
     tokenGate = await moduleFixture.get('TOKEN_GATE');
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-    app.enableShutdownHooks();
+    setupKanvasServer(app);
     await app.init();
   });
   afterEach(async () => {

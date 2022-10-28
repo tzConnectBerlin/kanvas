@@ -56,7 +56,7 @@ export async function runTokenGateTests(appReference: () => any) {
 
       enableGate();
 
-      expect(await getEndpointInfo(app, '/nfts/')).toEqual({
+      expect(await getEndpointInfo(app, `/nfts/${nftIds[0]}`)).toEqual({
         allowedTokens: ['common'],
         userHasAccess: false,
       });
@@ -73,7 +73,7 @@ export async function runTokenGateTests(appReference: () => any) {
       const w = await testUtils.newWallet(app);
 
       expect(await getUserTokens(app, w)).toEqual([]);
-      expect(await getEndpointInfo(app, '/nfts/', w)).toEqual({
+      expect(await getEndpointInfo(app, `/nfts/${nftIds[0]}`, w)).toEqual({
         allowedTokens: ['common'],
         userHasAccess: false,
       });
@@ -91,7 +91,7 @@ export async function runTokenGateTests(appReference: () => any) {
       await testUtils.giveAccessToken(w, 0);
 
       expect(await getUserTokens(app, w)).toEqual(['common']);
-      expect(await getEndpointInfo(app, '/nfts/', w)).toEqual({
+      expect(await getEndpointInfo(app, `/nfts/${nftIds[0]}`, w)).toEqual({
         allowedTokens: ['common'],
         userHasAccess: true,
       });
@@ -107,6 +107,12 @@ export async function runTokenGateTests(appReference: () => any) {
 
       const w = await testUtils.newWallet(app);
       await testUtils.giveAccessToken(w, 1);
+
+      expect(await getUserTokens(app, w)).toEqual(['rare']);
+      expect(await getEndpointInfo(app, `/nfts/${nftIds[0]}`, w)).toEqual({
+        allowedTokens: ['common'],
+        userHasAccess: false,
+      });
 
       const resp = await request(app.getHttpServer())
         .get(`/nfts/${nftIds[0]}`)

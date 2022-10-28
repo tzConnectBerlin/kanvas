@@ -25,14 +25,12 @@ export class AuthenticationService {
     @Inject(TOKEN_GATE) private tokenGate: TokenGate,
   ) {}
 
-  private async validate(
-    userData: UserEntity,
-  ): Promise<Result<UserEntity, string>> {
+  async #validate(userData: UserEntity): Promise<Result<UserEntity, string>> {
     return await this.userService.findByAddress(userData.userAddress);
   }
 
-  public async login(userData: UserEntity): Promise<any | { status: number }> {
-    const userRes = await this.validate(userData);
+  async login(userData: UserEntity): Promise<any | { status: number }> {
+    const userRes = await this.#validate(userData);
     if (!userRes.ok) {
       throw new HttpException('User not registered', HttpStatus.BAD_REQUEST);
     }
@@ -57,23 +55,21 @@ export class AuthenticationService {
     );
   }
 
-  public async tokenGateEndpointInfo(
+  async tokenGateEndpointInfo(
     endpoint: string,
     address: string | undefined,
   ): Promise<TokenGateEndpointInfo> {
     return {
-      allowedTokens: this.tokenGate.getSpec()[endpoint]?.allowedTokens,
+      allowedTokens: this.tokenGate.getEndpointAllowedTokens(endpoint),
       userHasAccess: await this.tokenGate.hasAccess(endpoint, address),
     };
   }
 
-  public tokenGateOwnedTokens(address: string): Promise<(number | string)[]> {
+  tokenGateOwnedTokens(address: string): Promise<(number | string)[]> {
     return this.tokenGate.getOwnedTokens(address);
   }
 
-  public async getLoggedUser(
-    address: string,
-  ): Promise<Result<UserEntity, string>> {
+  async getLoggedUser(address: string): Promise<Result<UserEntity, string>> {
     const userRes = await this.userService.findByAddress(address);
     if (userRes.ok) {
       delete userRes.val.signedPayload;
@@ -82,7 +78,7 @@ export class AuthenticationService {
     return userRes;
   }
 
-  public async isUserAttachedToCookieSession(
+  async isUserAttachedToCookieSession(
     userId: number,
     cookieSession: string,
   ): Promise<Result<boolean, string>> {
@@ -99,7 +95,7 @@ export class AuthenticationService {
     return Ok(isAttached);
   }
 
-  public async register(user: UserEntity): Promise<any> {
+  async register(user: UserEntity): Promise<any> {
     let newUser = { ...user };
     if (SIGNED_LOGIN_ENABLED) {
       newUser.signedPayload = await bcrypt.hash(user.signedPayload, 10);
@@ -128,7 +124,7 @@ export class AuthenticationService {
     }
   }
 
-  public getCookieWithJwtToken(
+  getCookieWithJwtToken(
     data: ITokenPayload,
     user: UserEntity,
   ): IAuthentication {
