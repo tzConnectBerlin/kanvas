@@ -104,7 +104,7 @@ export async function giveAccessToken(receiver: Wallet, tokenId: number) {
       },
     ])
     .send();
-  await (await transferOp).confirmation(2);
+  await (await transferOp).confirmation(1);
 }
 
 export async function transferNft(

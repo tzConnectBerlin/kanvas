@@ -1,11 +1,5 @@
 import request from 'supertest';
 
-import { PaymentService } from '../src/payment/service/payment.service';
-import {
-  OrderStatus,
-  PaymentStatus,
-} from '../src/payment/entity/payment.entity.js';
-import { assertEnv } from '../src/utils';
 import { TokenGate } from 'token-gate';
 
 import * as testUtils from './utils';
@@ -119,6 +113,24 @@ export async function runTokenGateTests(appReference: () => any) {
         .set('Authorization', w.login.bearer);
       expect(resp.statusCode).toEqual(403);
     });
+
+    it('trailing / endpoint gets token gated on non-trailing / variant', async () => {
+      enableGate();
+
+      const w = await testUtils.newWallet(app);
+      await testUtils.giveAccessToken(w, 0);
+
+      expect(await getUserTokens(app, w)).toEqual(['common']);
+      expect(await getEndpointInfo(app, `/nfts/`, w)).toEqual({
+        allowedTokens: ['rare'],
+        userHasAccess: false,
+      });
+
+      const resp = await request(app.getHttpServer())
+        .get(`/nfts/`)
+        .set('Authorization', w.login.bearer);
+      expect(resp.statusCode).toEqual(403);
+    });
   });
 }
 
@@ -147,7 +159,6 @@ async function getEndpointInfo(
         endpoint,
       })
       .set('Authorization', w.login.bearer);
-    testUtils.logFullObject(resp.body);
     return resp.body;
   }
   const resp = await request(app.getHttpServer())

@@ -122,7 +122,6 @@ async function expectErrWithHttpStatus(
   try {
     await f();
   } catch (err: any) {
-    //console.log(err);
     expect(err instanceof HttpException).toBe(true);
 
     const gotStatusCode = err.getStatus();
