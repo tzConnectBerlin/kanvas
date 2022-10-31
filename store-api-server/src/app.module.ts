@@ -7,6 +7,7 @@ import { CategoryModule } from './category/category.module.js';
 import { NftModule } from './nft/nft.module.js';
 import { IpfsPinModule } from './ipfs_pin.module.js';
 import { IpfsPinMock } from './mock/ipfs_pin.module.js';
+import { TokenGateModule } from './tokenGate.module.js';
 import { UserModule } from './user/user.module.js';
 import { AuthenticationModule } from './authentication/authentication.module.js';
 import { DbModule } from './db.module.js';
@@ -32,6 +33,7 @@ import {
     NftModule,
     UserModule,
     PaymentModule,
+    TokenGateModule,
     DbModule,
     MOCK_IPFS_PINNING ? IpfsPinMock : IpfsPinModule,
     CurrencyModule,
@@ -54,6 +56,8 @@ import {
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(CookieSessionMiddleware, LoggerMiddleware).forRoutes('*');
+    consumer
+      .apply(CookieSessionMiddleware, LoggerMiddleware, TokenGateModule)
+      .forRoutes('*');
   }
 }

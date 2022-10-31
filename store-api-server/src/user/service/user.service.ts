@@ -29,12 +29,8 @@ import ts_results from 'ts-results';
 const { Ok, Err } = ts_results;
 import { S3Service } from '../../s3.service.js';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { assertEnv, isBottom } from '../../utils.js';
+import { isBottom } from '../../utils.js';
 import { DbPool, DbTransaction, withTransaction } from '../../db.module.js';
-
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const generate = require('meaningful-string');
 
 enum OwnershipStatus {
   PAYMENT_PROCESSING = 'payment processing',

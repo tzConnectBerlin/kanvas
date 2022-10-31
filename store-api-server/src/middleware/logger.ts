@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Cache } from 'cache-manager';
-import { CACHE_SIZE, BEHIND_PROXY, API_KEY_SECRET } from '../constants.js';
+import { CACHE_SIZE, API_KEY_SECRET } from '../constants.js';
 import { getClientIp } from '../utils.js';
 
 @Injectable()
@@ -42,7 +42,7 @@ export class LoggerMiddleware implements NestMiddleware {
   constructor() {}
 
   use(request: Request, response: Response, next: NextFunction): void {
-    const { ip, method, originalUrl } = request;
+    const { method, originalUrl } = request;
     const userAgent = request.get('user-agent') || '';
     const cookieSession = request.session?.uuid.slice(0, 5) || '';
     const clientIp = getClientIp(request);

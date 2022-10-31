@@ -107,11 +107,29 @@ echo 'deploying the paypoint contract onto the private tezos network..'
 CONTRACT=paypoint PAYPOINT_RECEIVER_ADDRESS=$MINTER_TZ_ADDRESS BURN_CAP=0.104 DOCKER_ARGS='--network=host' ./script/deploy-contract >/dev/null 2>&1
 export TEZPAY_PAYPOINT_ADDRESS=`cat env | grep CONTRACT_ADDRESS | awk -F'=' '{print $2}' | sed 's/"//g'`
 
-echo 'deploying the FA2 contract onto the private tezos network..'
+echo 'deploying the FA2 contract (for Nfts) onto the private tezos network..'
 CONTRACT=fa2 BURN_CAP=0.87725 DOCKER_ARGS='--network=host' ./script/deploy-contract >/dev/null 2>&1
 export KANVAS_CONTRACT=`cat env | grep CONTRACT_ADDRESS | awk -F'=' '{print $2}' | sed 's/"//g'`
 
-echo "$TEZPAY_PAYPOINT_ADDRESS,$KANVAS_CONTRACT"
+echo 'deploying the FA2 contract (for token gating) onto the private tezos network..'
+CONTRACT=fa2 BURN_CAP=0.87725 DOCKER_ARGS='--network=host' ./script/deploy-contract >/dev/null 2>&1
+export TOKEN_GATE_CONTRACT=`cat env | grep CONTRACT_ADDRESS | awk -F'=' '{print $2}' | sed 's/"//g'`
+
+echo 'setting up the token distribution for the token gate tests..'
+tz-cli call $TOKEN_GATE_CONTRACT from alice \
+    --entrypoint create_token \
+    --arg 'Pair 0 {Elt "" 0xDEADC0DE}' \
+    --burn-cap 0.04 >/dev/null 2>&1
+tz-cli call $TOKEN_GATE_CONTRACT from alice \
+    --entrypoint create_token \
+    --arg 'Pair 1 {Elt "" 0xDEADC0DE}' \
+    --burn-cap 0.04 >/dev/null 2>&1
+tz-cli call $TOKEN_GATE_CONTRACT from alice \
+    --entrypoint mint_tokens \
+    --arg "{Pair \"$MINTER_TZ_ADDRESS\" (Pair 0 1000); Pair \"$MINTER_TZ_ADDRESS\" (Pair 1 1000)}" \
+    --burn-cap 0.04 >/dev/null 2>&1
+
+echo "$TEZPAY_PAYPOINT_ADDRESS,$KANVAS_CONTRACT,$TOKEN_GATE_CONTRACT"
 cd $SCRIPT_DIR/..
 
 qp=`
@@ -123,6 +141,7 @@ docker run \
     ghcr.io/tzconnectberlin/que-pasa:${QUEPASA_VERSION} \
     --contracts onchain_kanvas=$KANVAS_CONTRACT \
     --contracts paypoint=$TEZPAY_PAYPOINT_ADDRESS \
+    --contracts test_token_gate=$TOKEN_GATE_CONTRACT \
     --allowed-unbootstrapped-offset 0s \
     --polling-interval 10ms`
 TRAP="cleanup_docker_container $qp que-pasa; $TRAP"

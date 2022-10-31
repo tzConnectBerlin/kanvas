@@ -2,6 +2,11 @@ import { assertEnv } from './utils.js';
 
 export const PG_CONNECTION = 'PG_CONNECTION';
 export const IPFS_PIN_PROVIDER = 'IPFS_PIN_PROVIDER';
+export const TOKEN_GATE = 'TOKEN_GATE';
+
+// optional token gate, if undefined it is disabled
+export const TOKEN_GATE_SPEC_FILE: string | undefined =
+  process.env['TOKEN_GATE_SPEC_FILE'];
 
 export const MOCK_IPFS_PINNING: boolean =
   (process.env['MOCK_IPFS_PINNING'] || 'no') === 'yes';

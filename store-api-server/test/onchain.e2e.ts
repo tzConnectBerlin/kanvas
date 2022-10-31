@@ -9,7 +9,7 @@ import { assertEnv } from '../src/utils';
 
 import * as testUtils from './utils';
 
-export async function runOnchainEnabledTests(appReference: () => any) {
+export async function runOnchainTests(appReference: () => any) {
   let app: any;
   let paymentService: PaymentService;
   let nftIds: number[];
