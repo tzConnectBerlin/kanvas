@@ -5,10 +5,6 @@ FROM node:18-alpine AS build
 #ENV NODE_OPTIONS --openssl-legacy-provider
 #ENV TZ=UTC
 
-# need psql
-#RUN apt update
-#RUN apt install -y postgresql
-
 RUN apk add bash
 
 ADD store-api-server/ /build
@@ -22,6 +18,7 @@ ENV YARN_LINK_ARGS='--link-folder /build/yarn_links'
 ENV NODE_ENV=production
 RUN yarn install --frozen-lockfile
 RUN yarn build
+
 
 FROM node:18-alpine
 

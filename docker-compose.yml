@@ -104,6 +104,10 @@ services:
       bash -c '
         set -e
         psql -d "$$DATABASE_URL" < database/schema.sql
+
+        if [ "${PEPPERMINT_ENABLED:-yes}" == "no" ]; then
+          exit 0
+        fi
         cp /config/peppermint.json config.json
         node app.mjs
       '
