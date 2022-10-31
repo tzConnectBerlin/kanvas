@@ -14,5 +14,6 @@
     "strict": true,
     "strictPropertyInitialization": false
   },
-  "include": ["src", "declarations.d.ts"]
+  "include": ["src", "declarations.d.ts"],
+  "exclude": ["**/*.spec.ts"]
 }
