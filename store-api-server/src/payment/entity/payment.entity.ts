@@ -7,6 +7,8 @@ export enum OrderStatus {
   DELIVERED = 'delivered',
 }
 
+export type OrderStatusString =  `${OrderStatus}`
+
 export enum NftDeliveryStatus {
   UNKNOWN = 'unknown',
   INITIATING = 'initiating',
@@ -14,8 +16,10 @@ export enum NftDeliveryStatus {
   DELIVERED = 'delivered',
 }
 
+export type OrderStatusStringString =  `${NftDeliveryStatus}`
+
 export interface NftDeliveryInfo {
-  status: NftDeliveryStatus;
+  status: OrderStatusStringString;
   transferOpHash?: string;
   proxiedNft?: NftEntity;
 }
@@ -23,11 +27,11 @@ export interface NftDeliveryInfo {
 export interface OrderInfo {
   orderedNfts: NftEntity[];
 
-  orderStatus: OrderStatus;
+  orderStatus: OrderStatusString;
   paymentIntents: {
     paymentId: string;
     provider: PaymentProvider;
-    status: PaymentStatus;
+    status: PaymentStatusString;
   }[];
 
   delivery?: {
@@ -44,6 +48,8 @@ export enum PaymentStatus {
   PROCESSING = 'processing',
   SUCCEEDED = 'succeeded',
 }
+
+export type PaymentStatusString =  `${PaymentStatus}`
 
 export interface StripeDetails {
   clientSecret: string;
