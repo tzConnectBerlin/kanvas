@@ -6,7 +6,11 @@ import {
   TOKEN_GATE,
   TOKEN_GATE_SPEC_FILE,
 } from './constants.js';
+import { assertEnv } from './utils.js';
 import { DbPool, DbModule } from './db.module.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const jwt = require('jsonwebtoken');
 
 const tokenGateProvider = {
   provide: TOKEN_GATE,
@@ -15,10 +19,23 @@ const tokenGateProvider = {
     const gate = new TokenGate({
       dbPool,
     });
-    if (typeof TOKEN_GATE_SPEC_FILE !== 'undefined') {
-      gate.loadSpecFromFile(TOKEN_GATE_SPEC_FILE);
+    if (typeof TOKEN_GATE_SPEC_FILE === 'undefined') {
+      return gate;
     }
-    return gate;
+    const jwtSecret = assertEnv('JWT_SECRET');
+    return gate
+      .loadSpecFromFile(TOKEN_GATE_SPEC_FILE)
+      .setTzAddrFromReqFunc((req: any): string | undefined => {
+        try {
+          const token = req.get('authorization')?.replace(/^Bearer\ /, '');
+          if (typeof token !== 'undefined') {
+            return jwt.verify(token, jwtSecret).userAddress;
+          }
+        } catch (err: any) {
+          Logger.warn(`failed to verify JWT: ${err}`);
+        }
+        return undefined;
+      });
   },
 };
 

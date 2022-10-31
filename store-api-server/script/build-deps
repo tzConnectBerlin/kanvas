@@ -2,9 +2,17 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
+set -e
+
 echo "building api-lib.."
 (
     cd ../lib/api-lib
+    yarn install
+    yarn build
+)
+echo "building token-gate.."
+(
+    cd ../lib/token-gate
     yarn install
     yarn build
 )
@@ -30,8 +38,6 @@ echo "$links" | grep --silent 'token-gate ->' || {
     echo "linking token-gate.."
     (
         cd ../lib/token-gate
-        yarn install || exit 1
-        yarn build || exit 1
         yarn link $YARN_LINK_ARGS 2>/dev/null
     )
     yarn link $YARN_LINK_ARGS token-gate

@@ -126,7 +126,7 @@ tz-cli call $TOKEN_GATE_CONTRACT from alice \
     --burn-cap 0.04 >/dev/null 2>&1
 tz-cli call $TOKEN_GATE_CONTRACT from alice \
     --entrypoint mint_tokens \
-    --arg "{Pair \"$MINTER_TZ_ADDRESS\" (Pair 0 10); Pair \"$MINTER_TZ_ADDRESS\" (Pair 1 10)}" \
+    --arg "{Pair \"$MINTER_TZ_ADDRESS\" (Pair 0 1000); Pair \"$MINTER_TZ_ADDRESS\" (Pair 1 1000)}" \
     --burn-cap 0.04 >/dev/null 2>&1
 
 echo "$TEZPAY_PAYPOINT_ADDRESS,$KANVAS_CONTRACT,$TOKEN_GATE_CONTRACT"

@@ -10,6 +10,8 @@ export async function runTokenGateTests(appReference: () => any) {
   let gate: TokenGate;
   let nftIds: number[];
 
+  const onchainTestTimeoutMs = 15000;
+
   const enableGate = () => gate.loadSpecFromFile(specDir + '/enabled.yaml');
   const disableGate = () => gate.loadSpecFromFile(specDir + '/disabled.yaml');
 
@@ -80,62 +82,74 @@ export async function runTokenGateTests(appReference: () => any) {
       expect(resp.statusCode).toEqual(403);
     });
 
-    it('logged in user with correct token has access', async () => {
-      enableGate();
+    it(
+      'logged in user with correct token has access',
+      async () => {
+        enableGate();
 
-      const w = await testUtils.newWallet(app);
-      await testUtils.giveAccessToken(w, 0);
+        const w = await testUtils.newWallet(app);
+        await testUtils.giveAccessToken(w, 0);
 
-      expect(await getUserTokens(app, w)).toEqual(['common']);
-      expect(await getEndpointInfo(app, `/nfts/${nftIds[0]}`, w)).toEqual({
-        userOwnsTokens: ['common'],
-        allowedTokens: ['common'],
-        userHasAccess: true,
-      });
+        expect(await getUserTokens(app, w)).toEqual(['common']);
+        expect(await getEndpointInfo(app, `/nfts/${nftIds[0]}`, w)).toEqual({
+          userOwnsTokens: ['common'],
+          allowedTokens: ['common'],
+          userHasAccess: true,
+        });
 
-      const resp = await request(app.getHttpServer())
-        .get(`/nfts/${nftIds[0]}`)
-        .set('Authorization', w.login.bearer);
-      expect(resp.statusCode).toEqual(200);
-    });
+        const resp = await request(app.getHttpServer())
+          .get(`/nfts/${nftIds[0]}`)
+          .set('Authorization', w.login.bearer);
+        expect(resp.statusCode).toEqual(200);
+      },
+      onchainTestTimeoutMs,
+    );
 
-    it('logged in user with a token, but a wrong one, does not get access', async () => {
-      enableGate();
+    it(
+      'logged in user with a token, but a wrong one, does not get access',
+      async () => {
+        enableGate();
 
-      const w = await testUtils.newWallet(app);
-      await testUtils.giveAccessToken(w, 1);
+        const w = await testUtils.newWallet(app);
+        await testUtils.giveAccessToken(w, 1);
 
-      expect(await getUserTokens(app, w)).toEqual(['rare']);
-      expect(await getEndpointInfo(app, `/nfts/${nftIds[0]}`, w)).toEqual({
-        userOwnsTokens: ['rare'],
-        allowedTokens: ['common'],
-        userHasAccess: false,
-      });
+        expect(await getUserTokens(app, w)).toEqual(['rare']);
+        expect(await getEndpointInfo(app, `/nfts/${nftIds[0]}`, w)).toEqual({
+          userOwnsTokens: ['rare'],
+          allowedTokens: ['common'],
+          userHasAccess: false,
+        });
 
-      const resp = await request(app.getHttpServer())
-        .get(`/nfts/${nftIds[0]}`)
-        .set('Authorization', w.login.bearer);
-      expect(resp.statusCode).toEqual(403);
-    });
+        const resp = await request(app.getHttpServer())
+          .get(`/nfts/${nftIds[0]}`)
+          .set('Authorization', w.login.bearer);
+        expect(resp.statusCode).toEqual(403);
+      },
+      onchainTestTimeoutMs,
+    );
 
-    it('trailing / endpoint gets token gated on non-trailing / variant', async () => {
-      enableGate();
+    it(
+      'trailing / endpoint gets token gated on non-trailing / variant',
+      async () => {
+        enableGate();
 
-      const w = await testUtils.newWallet(app);
-      await testUtils.giveAccessToken(w, 0);
+        const w = await testUtils.newWallet(app);
+        await testUtils.giveAccessToken(w, 0);
 
-      expect(await getUserTokens(app, w)).toEqual(['common']);
-      expect(await getEndpointInfo(app, `/nfts/`, w)).toEqual({
-        userOwnsTokens: ['common'],
-        allowedTokens: ['rare'],
-        userHasAccess: false,
-      });
+        expect(await getUserTokens(app, w)).toEqual(['common']);
+        expect(await getEndpointInfo(app, `/nfts/`, w)).toEqual({
+          userOwnsTokens: ['common'],
+          allowedTokens: ['rare'],
+          userHasAccess: false,
+        });
 
-      const resp = await request(app.getHttpServer())
-        .get(`/nfts/`)
-        .set('Authorization', w.login.bearer);
-      expect(resp.statusCode).toEqual(403);
-    });
+        const resp = await request(app.getHttpServer())
+          .get(`/nfts/`)
+          .set('Authorization', w.login.bearer);
+        expect(resp.statusCode).toEqual(403);
+      },
+      onchainTestTimeoutMs,
+    );
 
     it('test jwt middleware: dont return 500 on malformed bearer token', async () => {
       expect(

@@ -121,7 +121,7 @@
     ],
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.ts$": "ts-jest"
     },
     "transformIgnorePatterns": [
       "<rootDir>/node_modules/",
