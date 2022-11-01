@@ -47,7 +47,7 @@
     "async-await-mutex-lock": "^1.0.7",
     "aws-sdk": "^2.1036.0",
     "axios-retry": "^3.2.4",
-    "bcrypt": "^5.0.1",
+    "bcrypt": "^5.1.0",
     "body-parser": "^1.19.1",
     "bs58check": "^2.1.2",
     "cache-manager": "^3.6.0",
