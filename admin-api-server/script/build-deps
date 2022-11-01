@@ -9,7 +9,7 @@ echo "building stm-lib.."
     trap "echo 'stm-lib build failed' >> $sig_err_file" ERR
 
     cd stm-lib
-    yarn install
+    yarn install --frozen-lockfile --link-duplicates
     yarn build
 ) &
 echo "building api-lib.."
@@ -17,7 +17,7 @@ echo "building api-lib.."
     trap "echo 'api-lib build failed' >> $sig_err_file" ERR
 
     cd ../lib/api-lib
-    yarn install
+    yarn install --frozen-lockfile --link-duplicates
     yarn build
 ) &
 wait

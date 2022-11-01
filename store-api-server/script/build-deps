@@ -5,13 +5,13 @@ cd $SCRIPT_DIR/..
 echo "building api-lib.."
 (
     cd ../lib/api-lib
-    yarn install --frozen-lockfile
+    yarn install --frozen-lockfile --link-duplicates
     yarn build
 )
 echo "building token-gate.."
 (
     cd ../lib/token-gate
-    yarn install --frozen-lockfile
+    yarn install --frozen-lockfile --link-duplicates
     yarn build
 )
 
