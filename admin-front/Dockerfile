@@ -1,8 +1,10 @@
 # note: expected build context is the git root directory
-FROM node
-ENV DEBIAN_FRONTEND=noninteractive
+FROM node:18-alpine
+# ENV DEBIAN_FRONTEND=noninteractive
 ENV NODE_OPTIONS --openssl-legacy-provider
-ENV TZ=UTC
+# ENV TZ=UTC
+
+RUN apk add bash
 
 ADD admin-front /build
 
