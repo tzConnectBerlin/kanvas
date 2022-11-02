@@ -4,10 +4,8 @@ import axios from 'axios';
 import { DateTime, Duration } from 'luxon';
 import { DEFAULT_MAX_RATE_AGE_MINUTES, BASE_CURRENCY, SUPPORTED_CURRENCIES, LOG_CURRENCY_RATES_UPDATES } from './constants';
 
-export const coinbaseRatesProvider = {
-  provide: 'RATES GETTER',
-  useValue: getRatesFromCoinbase,
-};
+export type Rates = { [key: string]: number };
+export type GetRatesFunc = (currencies: string[]) => Promise<Rates>;
 
 @Injectable()
 export class CurrencyService {
@@ -17,12 +15,12 @@ export class CurrencyService {
 
   baseCurrencyDecimals = SUPPORTED_CURRENCIES[BASE_CURRENCY];
 
-  rates: { [key: string]: number };
+  rates: Rates;
   lastUpdatedAt: DateTime;
-  getNewRatesFunc: any;
+  getNewRatesFunc: GetRatesFunc;
   logUpdates: boolean = LOG_CURRENCY_RATES_UPDATES;
 
-  constructor(@Inject('RATES GETTER') getNewRatesFunc: any) {
+  constructor(@Inject('RATES GETTER') getNewRatesFunc: GetRatesFunc) {
     this.getNewRatesFunc = getNewRatesFunc;
 
     this.rates = {};
@@ -109,7 +107,7 @@ export class CurrencyService {
   }
 }
 
-async function getRatesFromCoinbase(
+export async function getRatesFromCoinbase(
   currencies: string[],
 ): Promise<{ [key: string]: number }> {
   return await axios

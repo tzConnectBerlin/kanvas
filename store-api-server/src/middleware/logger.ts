@@ -10,6 +10,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { Cache } from 'cache-manager';
 import { CACHE_SIZE, API_KEY_SECRET } from '../constants.js';
 import { getClientIp } from '../utils.js';
+import { appendFileSync } from 'fs';
 
 @Injectable()
 export class StatsLogger {
@@ -80,6 +81,11 @@ export class LoggerMiddleware implements NestMiddleware {
       const contentLength = response.get('content-length');
 
       fields.push(`${statusCode}`);
+      // if (typeof fields === 'string') {
+      //   throw `fields type: ${typeof fields}, ${JSON.stringify(
+      //     fields,
+      //   )}; contentLength type: ${typeof contentLength}, ${contentLength}`;
+      // }
       fields.push(contentLength);
       fields.push(duration);
 
