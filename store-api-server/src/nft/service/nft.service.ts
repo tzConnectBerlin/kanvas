@@ -94,23 +94,22 @@ SELECT $1, UNNEST($2::INTEGER[])
 
       const MAX_ATTEMPTS = 10;
       const BACKOFF_MS = 1000;
+      let lastErr;
       for (let i = 0; i < MAX_ATTEMPTS; i++) {
         try {
           await this.ipfsService.uploadNft(nftEntity, dbTx);
           return;
         } catch (err: any) {
-          throw `failed to upload new nft to IPFS (attempt ${
-            i + 1
-          }/${MAX_ATTEMPTS}), err: ${err}`;
           Logger.warn(
             `failed to upload new nft to IPFS (attempt ${
               i + 1
             }/${MAX_ATTEMPTS}), err: ${err}`,
           );
+          lastErr = err;
         }
         sleep(BACKOFF_MS);
       }
-      throw `failed to upload new nft to IPFS`;
+      throw `failed to upload new nft to IPFS, final attempt's err: ${lastErr}`;
     };
 
     await withTransaction(this.conn, async (dbTx: DbTransaction) => {

@@ -14,6 +14,7 @@ export const MOCK_IPFS_PINNING: boolean =
 // source: https://www.postgresql.org/docs/current/errcodes-appendix.html
 export const PG_FOREIGN_KEY_VIOLATION_ERRCODE = '23503';
 export const PG_UNIQUE_VIOLATION_ERRCODE = '23505';
+export const PG_LOCK_NOT_AVAILABLE = '55P03';
 
 export const PROFILE_PICTURE_MAX_BYTES: number = 1000 * 1000 * 2; // 2MB
 
