@@ -2,23 +2,21 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
-set -e
-
 echo "building api-lib.."
 (
     cd ../lib/api-lib
-    yarn install
+    yarn install --frozen-lockfile --link-duplicates
     yarn build
 )
 echo "building token-gate.."
 (
     cd ../lib/token-gate
-    yarn install
+    yarn install --frozen-lockfile --link-duplicates
     yarn build
 )
 
 links=`ls -l node_modules | grep ^l`
-echo "$links" | grep --silent 'kanvas-api-lib ->' || {
+echo "$links" | grep -q 'kanvas-api-lib ->' || {
     echo "linking api-lib.."
     (
         cd ../lib/api-lib
@@ -26,7 +24,7 @@ echo "$links" | grep --silent 'kanvas-api-lib ->' || {
     )
     yarn link $YARN_LINK_ARGS kanvas-api-lib
 }
-echo "$links" | grep --silent 'tezpay-server ->' || {
+echo "$links" | grep -q 'tezpay-server ->' || {
     echo "linking tezpay-server.."
     (
         cd ../lib/tezpay/server
@@ -34,7 +32,7 @@ echo "$links" | grep --silent 'tezpay-server ->' || {
     )
     yarn link $YARN_LINK_ARGS tezpay-server
 }
-echo "$links" | grep --silent 'token-gate ->' || {
+echo "$links" | grep -q 'token-gate ->' || {
     echo "linking token-gate.."
     (
         cd ../lib/token-gate

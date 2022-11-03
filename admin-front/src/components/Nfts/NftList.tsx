@@ -91,7 +91,7 @@ export const NftList = ({ ...props }) => {
                 }}
               />
               <NumberField
-                source="attributes.editions_size"
+                source="attributes.edition_size"
                 label="Token amount"
               />
               <FunctionField

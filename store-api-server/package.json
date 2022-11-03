@@ -9,7 +9,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
-    "preinstall": "git submodule update --init",
+    "preinstall": "git submodule update --init 2>&1 || return 0",
     "postinstall": "yarn run patch-package; ./script/build-deps",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -20,6 +20,7 @@
     "test": "./script/test -w 2"
   },
   "dependencies": {
+    "@nestjs/cli": "^8.2.0",
     "@nestjs/common": "^8.2.6",
     "@nestjs/core": "^8.2.6",
     "@nestjs/jwt": "^8.0.0",
@@ -30,6 +31,7 @@
     "@types/cache-manager": "^3.4.3",
     "@types/cookie-session": "^2.0.43",
     "@types/cron": "^1.7.3",
+    "@types/express": "^4.17.14",
     "@types/got": "^9.6.12",
     "@types/jest": "^28.1.2",
     "@types/jsonwebtoken": "^8.5.9",
@@ -45,7 +47,7 @@
     "async-await-mutex-lock": "^1.0.7",
     "aws-sdk": "^2.1036.0",
     "axios-retry": "^3.2.4",
-    "bcrypt": "^5.0.1",
+    "bcrypt": "^5.1.0",
     "body-parser": "^1.19.1",
     "bs58check": "^2.1.2",
     "cache-manager": "^3.6.0",
@@ -59,6 +61,7 @@
     "jsonwebtoken": "^8.5.1",
     "libsodium-wrappers": "^0.7.9",
     "luxon": "^2.3.2",
+    "mime": "^3.0.0",
     "multer": "^1.4.4",
     "nestjs-easyconfig": "^2.4.3",
     "passport": "^0.5.0",
@@ -77,13 +80,10 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@nestjs/cli": "^8.2.0",
     "@nestjs/schematics": "^8.0.5",
     "@nestjs/testing": "^8.2.6",
     "@taquito/signer": "^14.0.0",
     "@taquito/taquito": "^14.0.0",
-    "@types/express": "^4.17.11",
-    "@types/node": "^14.14.31",
     "@types/supertest": "^2.0.10",
     "@typescript-eslint/eslint-plugin": "^4.15.2",
     "@typescript-eslint/parser": "^4.15.2",

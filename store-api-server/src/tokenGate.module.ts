@@ -12,18 +12,30 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const jwt = require('jsonwebtoken');
 
+interface Wrap {
+  gate?: TokenGate;
+}
+
+const wrapGate = {
+  provide: 'TOKEN_GATE_WRAP',
+  useValue: <Wrap>{ gate: undefined },
+};
+
 const tokenGateProvider = {
   provide: TOKEN_GATE,
-  inject: [PG_CONNECTION],
-  useFactory: (dbPool: DbPool) => {
-    const gate = new TokenGate({
+  inject: ['TOKEN_GATE_WRAP', PG_CONNECTION],
+  useFactory: (w: Wrap, dbPool: DbPool) => {
+    if (typeof w.gate !== 'undefined') {
+      return w.gate;
+    }
+    w.gate = new TokenGate({
       dbPool,
     });
     if (typeof TOKEN_GATE_SPEC_FILE === 'undefined') {
-      return gate;
+      return w.gate;
     }
     const jwtSecret = assertEnv('JWT_SECRET');
-    return gate
+    w.gate
       .loadSpecFromFile(TOKEN_GATE_SPEC_FILE)
       .setTzAddrFromReqFunc((req: any): string | undefined => {
         try {
@@ -36,20 +48,21 @@ const tokenGateProvider = {
         }
         return undefined;
       });
+
+    Logger.log(
+      `token gate spec: ${JSON.stringify(w.gate.getSpec(), undefined, 2)}`,
+    );
+    return w.gate;
   },
 };
 
 @Module({
   imports: [DbModule],
-  providers: [tokenGateProvider],
+  providers: [wrapGate, tokenGateProvider],
   exports: [tokenGateProvider],
 })
 export class TokenGateModule implements NestMiddleware {
-  constructor(@Inject(TOKEN_GATE) private gate: any) {
-    Logger.log(
-      `token gate spec: ${JSON.stringify(this.gate.getSpec(), undefined, 2)}`,
-    );
-  }
+  constructor(@Inject(TOKEN_GATE) private gate: any) {}
 
   use(req: Request, resp: Response, next: NextFunction): void {
     this.gate.use(req, resp, next);
