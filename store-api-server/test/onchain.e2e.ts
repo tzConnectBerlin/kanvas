@@ -208,49 +208,53 @@ export async function runOnchainTests(appReference: () => any) {
       onchainTestTimeoutMs,
     );
 
-    it('paid proxy nft results in delivery of next proxy unfold nft', async () => {
-      const setup = await testUtils.basicProxySetup(app, newNftId);
+    it(
+      'paid proxy nft results in delivery of next proxy unfold nft',
+      async () => {
+        const setup = await testUtils.basicProxySetup(app, newNftId);
 
-      const wallet1 = await testUtils.newWallet(app);
-      await testUtils.cartAdd(app, setup.proxyNftId, wallet1);
-      const checkout = await testUtils.checkout(paymentService, wallet1);
+        const wallet1 = await testUtils.newWallet(app);
+        await testUtils.cartAdd(app, setup.proxyNftId, wallet1);
+        const checkout = await testUtils.checkout(paymentService, wallet1);
 
-      await testUtils.waitBlocks();
+        await testUtils.waitBlocks();
 
-      const profile = await testUtils.getProfile(app, wallet1);
-      expect(profile).toMatchObject({
-        pendingOwnership: [],
-        collection: {
-          nfts: [
+        const profile = await testUtils.getProfile(app, wallet1);
+        expect(profile).toMatchObject({
+          pendingOwnership: [],
+          collection: {
+            nfts: [
+              {
+                id: setup.proxiedNftIds[0],
+                ownershipInfo: [{ status: 'owned' }],
+              },
+            ],
+          },
+        });
+
+        const expNftsDelivery: any = {};
+        expNftsDelivery[setup.proxyNftId] = {
+          status: 'delivered',
+          proxiedNft: {
+            id: setup.proxiedNftIds[0],
+          },
+        };
+        const orderInfo = await testUtils.getOrderInfo(
+          app,
+          wallet1,
+          checkout.paymentId,
+        );
+        expect(orderInfo).toMatchObject({
+          orderedNfts: [
             {
-              id: setup.proxiedNftIds[0],
-              ownershipInfo: [{ status: 'owned' }],
+              id: setup.proxyNftId,
             },
           ],
-        },
-      });
-
-      const expNftsDelivery: any = {};
-      expNftsDelivery[setup.proxyNftId] = {
-        status: 'delivered',
-        proxiedNft: {
-          id: setup.proxiedNftIds[0],
-        },
-      };
-      const orderInfo = await testUtils.getOrderInfo(
-        app,
-        wallet1,
-        checkout.paymentId,
-      );
-      expect(orderInfo).toMatchObject({
-        orderedNfts: [
-          {
-            id: setup.proxyNftId,
-          },
-        ],
-        orderStatus: OrderStatus.DELIVERED,
-      });
-    });
+          orderStatus: OrderStatus.DELIVERED,
+        });
+      },
+      onchainTestTimeoutMs,
+    );
 
     it(
       'some tests with paying all editions of a proxy nft',

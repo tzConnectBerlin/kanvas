@@ -960,7 +960,7 @@ ORDER BY 1
             provider,
             PaymentStatus.TIMED_OUT,
           );
-          await dbTx.query('SAVEPOINT');
+          await dbTx.query('SAVEPOINT s');
           Logger.warn(`canceled following expired order session: ${orderId}`);
         }
       },
