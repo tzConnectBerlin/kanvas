@@ -16,14 +16,16 @@ interface Wrap {
   gate?: TokenGate;
 }
 
+const TOKEN_GATE_WRAP = 'TOKEN_GATE_WRAP';
+
 const wrapGate = {
-  provide: 'TOKEN_GATE_WRAP',
+  provide: TOKEN_GATE_WRAP,
   useValue: <Wrap>{ gate: undefined },
 };
 
 const tokenGateProvider = {
   provide: TOKEN_GATE,
-  inject: ['TOKEN_GATE_WRAP', PG_CONNECTION],
+  inject: [TOKEN_GATE_WRAP, PG_CONNECTION],
   useFactory: (w: Wrap, dbPool: DbPool) => {
     if (typeof w.gate !== 'undefined') {
       return w.gate;
@@ -59,12 +61,19 @@ const tokenGateProvider = {
 @Module({
   imports: [DbModule],
   providers: [wrapGate, tokenGateProvider],
-  exports: [tokenGateProvider],
+  exports: [wrapGate, tokenGateProvider],
 })
 export class TokenGateModule implements NestMiddleware {
-  constructor(@Inject(TOKEN_GATE) private gate: any) {}
+  constructor(
+    @Inject(TOKEN_GATE_WRAP) private w: Wrap,
+    @Inject(TOKEN_GATE) private gate: TokenGate,
+  ) {}
 
   use(req: Request, resp: Response, next: NextFunction): void {
     this.gate.use(req, resp, next);
+  }
+
+  onModuleDestroy() {
+    this.w.gate = undefined;
   }
 }
