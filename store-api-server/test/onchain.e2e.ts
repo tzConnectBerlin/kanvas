@@ -4,7 +4,8 @@ import { PaymentService } from '../src/payment/service/payment.service';
 import {
   OrderStatus,
   PaymentStatus,
-} from '../src/payment/entity/payment.entity.js';
+} from '../src/payment/entity/payment.entity';
+import { MintService } from '../src/nft/service/mint.service';
 import { assertEnv } from '../src/utils';
 
 import * as testUtils from './utils';
@@ -12,6 +13,7 @@ import * as testUtils from './utils';
 export async function runOnchainTests(appReference: () => any) {
   let app: any;
   let paymentService: PaymentService;
+  let mintService: MintService;
   let nftIds: number[];
 
   const newNftId = () => {
@@ -24,7 +26,7 @@ export async function runOnchainTests(appReference: () => any) {
 
   describe('clean e2e test cases (db is reset between each test)', () => {
     beforeEach(async () => {
-      [app, paymentService] = appReference();
+      [app, paymentService, mintService] = appReference();
       nftIds = await testUtils.resetDb();
     });
     afterAll(async () => {
@@ -327,6 +329,127 @@ export async function runOnchainTests(appReference: () => any) {
               editionsSold: 1,
             },
           ],
+        });
+      },
+      onchainTestTimeoutMs,
+    );
+
+    it(
+      'simultaneously minting same never-minted-before-nft twice results in 1 create and 2 transfer actions (for 2 different users)',
+      async () => {
+        const [w1, w2] = await Promise.all([
+          testUtils.newWallet(app),
+          testUtils.newWallet(app),
+        ]);
+
+        const nft = await testUtils.getNft(app, nftIds[0]);
+
+        await Promise.all([
+          mintService.transferNfts([nft], w1.pkh),
+          mintService.transferNfts([nft], w2.pkh),
+        ]);
+
+        await testUtils.waitBlocks();
+
+        await testUtils.withDbConn(async (db: any) => {
+          expect(
+            (
+              await db.query(
+                `
+SELECT
+  command->>'name' AS cmd,
+  count(1) AS num
+FROM peppermint.operations
+GROUP BY 1
+ORDER BY 1`,
+              )
+            ).rows,
+          ).toStrictEqual([
+            { cmd: 'create_and_mint', num: '1' },
+            { cmd: 'transfer', num: '2' },
+          ]);
+
+          const sortFunc = (a: any, b: any) => (a.owner < b.owner ? -1 : 1);
+          expect(
+            (
+              await db.query(
+                `
+SELECT
+  idx_assets_address AS owner,
+  assets_nat AS amount
+FROM onchain_kanvas."storage.ledger_live"
+WHERE idx_assets_nat = ${nft.id}`,
+              )
+            ).rows.sort(sortFunc),
+          ).toStrictEqual(
+            [
+              { owner: w1.pkh, amount: '1' },
+              { owner: w2.pkh, amount: '1' },
+              {
+                owner: assertEnv('MINTER_TZ_ADDRESS'),
+                amount: `${nft.editionsSize - 2}`,
+              },
+            ].sort(sortFunc),
+          );
+        });
+      },
+      onchainTestTimeoutMs,
+    );
+
+    it(
+      'simultaneously minting same never-minted-before-nft three times results in 1 create and 3 transfer actions (for same user)',
+      async () => {
+        const w = await testUtils.newWallet(app);
+
+        const nft = await testUtils.getNft(app, nftIds[0]);
+
+        await Promise.all([
+          mintService.transferNfts([nft], w.pkh),
+          mintService.transferNfts([nft], w.pkh),
+          mintService.transferNfts([nft], w.pkh),
+        ]);
+
+        await testUtils.waitBlocks();
+
+        await testUtils.withDbConn(async (db: any) => {
+          expect(
+            (
+              await db.query(
+                `
+SELECT
+  command->>'name' AS cmd,
+  count(1) AS num
+FROM peppermint.operations
+GROUP BY 1
+ORDER BY 1`,
+              )
+            ).rows,
+          ).toStrictEqual([
+            { cmd: 'create_and_mint', num: '1' },
+            { cmd: 'transfer', num: '3' },
+          ]);
+
+          const sortFunc = (a: any, b: any) => (a.owner < b.owner ? -1 : 1);
+          expect(
+            (
+              await db.query(
+                `
+SELECT
+  idx_assets_address AS owner,
+  assets_nat AS amount
+FROM onchain_kanvas."storage.ledger_live"
+WHERE idx_assets_nat = ${nft.id}`,
+              )
+            ).rows.sort(sortFunc),
+          ).toStrictEqual(
+            [
+              { owner: w.pkh, amount: '3' },
+              {
+                owner: assertEnv('MINTER_TZ_ADDRESS'),
+                amount: `${nft.editionsSize - 3}`,
+              },
+            ].sort(sortFunc),
+          );
         });
       },
       onchainTestTimeoutMs,

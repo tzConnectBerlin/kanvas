@@ -30,6 +30,7 @@ import { runProxyNftTests } from './proxy_nft.e2e';
 import { runIsolatedTests } from './isolated.e2e';
 import { TokenGate } from 'token-gate';
 import { setupKanvasServer } from '../src/server.js';
+import { MintService } from '../src/nft/service/mint.service';
 const { cryptoUtils } = sotez;
 
 let anyTestFailed = false;
@@ -52,6 +53,7 @@ const skipOnPriorFail = (name: string, action: any) => {
 describe('AppController (e2e)', () => {
   let app: any;
   let paymentService: PaymentService;
+  let mintService: MintService;
   let userService: UserService;
   let tokenGate: TokenGate;
 
@@ -61,6 +63,7 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     paymentService = await moduleFixture.get(PaymentService);
+    mintService = await moduleFixture.get(MintService);
     userService = await moduleFixture.get(UserService);
     tokenGate = await moduleFixture.get('TOKEN_GATE');
 
@@ -93,7 +96,7 @@ describe('AppController (e2e)', () => {
 
   runIsolatedTests(() => [app, paymentService]);
   runProxyNftTests(() => [app]);
-  runOnchainTests(() => [app, paymentService]);
+  runOnchainTests(() => [app, paymentService, mintService]);
   runTokenGateTests(() => [app, tokenGate]);
 
   // Note:

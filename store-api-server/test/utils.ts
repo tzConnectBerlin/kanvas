@@ -163,6 +163,12 @@ export async function getProfile(app: any, wallet: Wallet, asLogin = false) {
   return res.body;
 }
 
+export async function getNft(app: any, nftId: number) {
+  const res = await request(app.getHttpServer()).get(`/nfts/${nftId}`);
+  expect(res.status).toEqual(200);
+  return res.body;
+}
+
 export async function cartAdd(
   app: any,
   nftId: number,
@@ -294,6 +300,7 @@ export async function resetDb(resetForLegacyTest = false): Promise<number[]> {
       'proxy_unfold',
       'nft',
       'nft_category',
+      'peppermint.operations',
     ];
     for (const t of tables) {
       await db.query(`delete from ${t}`);
