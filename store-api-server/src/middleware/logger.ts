@@ -8,12 +8,8 @@ import {
 } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Cache } from 'cache-manager';
-import {
-  CACHE_SIZE,
-  BEHIND_PROXY,
-  RATE_LIMITLESS_SECRET,
-} from '../constants.js';
-import { getRealIp } from "../utils.js";
+import { CACHE_SIZE, API_KEY_SECRET } from '../constants.js';
+import { getClientIp } from '../utils.js';
 
 @Injectable()
 export class StatsLogger {
@@ -46,36 +42,43 @@ export class LoggerMiddleware implements NestMiddleware {
   constructor() {}
 
   use(request: Request, response: Response, next: NextFunction): void {
-    const { ip, method, originalUrl } = request;
+    const { method, originalUrl } = request;
     const userAgent = request.get('user-agent') || '';
     const cookieSession = request.session?.uuid.slice(0, 5) || '';
-    const realIp = getRealIp(request);
+    const clientIp = getClientIp(request);
     const timeStart = new Date();
 
     const fields = [
       method,
       originalUrl,
       userAgent,
-      realIp,
+      clientIp,
       `sess:${cookieSession}`,
     ];
-
     if (
-      typeof RATE_LIMITLESS_SECRET === 'string' &&
-      request.headers['rate-limitless'] === RATE_LIMITLESS_SECRET
+      typeof API_KEY_SECRET === 'string' &&
+      request.headers['api-key'] === API_KEY_SECRET
     ) {
-      fields.push('rate-limitless');
+      fields.push('api-key');
     }
+    fields.push('=>');
 
-    this.logger.log(`>> ${fields.join(' ')}`);
+    let closure = false;
+
+    response.on('error', (err) => {
+      closure = true;
+
+      fields.push(`-err: ${err}-`);
+    });
 
     response.on('finish', () => {
+      closure = true;
+
       const timeEnd: Date = new Date();
       const duration = `${timeEnd.getTime() - timeStart.getTime()}ms`;
       const { statusCode } = response;
       const contentLength = response.get('content-length');
 
-      fields.push('=>');
       fields.push(`${statusCode}`);
       fields.push(contentLength);
       fields.push(duration);
@@ -88,8 +91,18 @@ export class LoggerMiddleware implements NestMiddleware {
           fields.push('uncached');
           break;
       }
+    });
 
-      this.logger.log(`  << ${fields.join(' ')}`);
+    response.on('close', () => {
+      if (!closure) {
+        const timeEnd: Date = new Date();
+        const duration = `${timeEnd.getTime() - timeStart.getTime()}ms`;
+
+        fields.push('client-aborted');
+        fields.push(duration);
+      }
+
+      this.logger.log(fields.join(' '));
     });
 
     next();

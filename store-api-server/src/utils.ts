@@ -1,6 +1,5 @@
 import ts_results from 'ts-results';
 const { Ok, Err } = ts_results;
-import { HttpException } from '@nestjs/common';
 import { Response } from 'express';
 import { Cache } from 'cache-manager';
 import { Lock } from 'async-await-mutex-lock';
@@ -91,7 +90,39 @@ export function isBottom(v: any): boolean {
   return v == null;
 }
 
-export function getRealIp(request: any): string {
+export function maybe<ValTy, ResTy>(
+  x: ValTy | null | undefined,
+  f: (x: ValTy) => ResTy,
+): ResTy | undefined {
+  if (isBottom(x)) {
+    return undefined;
+  }
+  return f(x!);
+}
+
+export function getClientIp(request: any): string {
   const { ip } = request;
   return BEHIND_PROXY ? request.get('X-Forwarded-For') || ip : ip;
+}
+
+export function stringEnumValueIndex<T>(
+  o: { [s: string]: T },
+  v: T,
+): number | undefined {
+  const res = Object.values(o).indexOf(v);
+  if (res < 0) {
+    return undefined;
+  }
+  return res;
+}
+
+export function stringEnumIndexValue<T>(
+  o: { [s: string]: T },
+  i: number,
+): T | undefined {
+  const enumValues = Object.values(o);
+  if (i < 0 || i >= enumValues.length) {
+    return undefined;
+  }
+  return enumValues[i];
 }

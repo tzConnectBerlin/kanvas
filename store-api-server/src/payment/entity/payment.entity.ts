@@ -1,11 +1,55 @@
 import type { NftEntity } from '../../nft/entity/nft.entity.js';
 
-export interface NftOrder {
-  nfts: NftEntity[];
-  expiresAt: number;
-  // the key of paymentIntents below is PaymentProvider
-  paymentIntents: { [key: string]: PaymentIntent };
+export enum OrderStatus {
+  CANCELED = 'canceled',
+  PENDING_PAYMENT = 'pending_payment',
+  DELIVERING = 'delivering',
+  DELIVERED = 'delivered',
 }
+
+export type OrderStatusString =  `${OrderStatus}`
+
+export enum NftDeliveryStatus {
+  UNKNOWN = 'unknown',
+  INITIATING = 'initiating',
+  DELIVERING = 'delivering',
+  DELIVERED = 'delivered',
+}
+
+export type OrderStatusStringString =  `${NftDeliveryStatus}`
+
+export interface NftDeliveryInfo {
+  status: OrderStatusStringString;
+  transferOpHash?: string;
+  proxiedNft?: NftEntity;
+}
+
+export interface OrderInfo {
+  orderedNfts: NftEntity[];
+
+  orderStatus: OrderStatusString;
+  paymentIntents: {
+    paymentId: string;
+    provider: PaymentProvider;
+    status: PaymentStatusString;
+  }[];
+
+  delivery?: {
+    [key: number /* nft id */]: NftDeliveryInfo;
+  };
+}
+
+export enum PaymentStatus {
+  CANCELED = 'canceled',
+  TIMED_OUT = 'timedOut',
+  FAILED = 'failed',
+  CREATED = 'created',
+  PROMISED = 'promised',
+  PROCESSING = 'processing',
+  SUCCEEDED = 'succeeded',
+}
+
+export type PaymentStatusString =  `${PaymentStatus}`
 
 export interface StripeDetails {
   clientSecret: string;

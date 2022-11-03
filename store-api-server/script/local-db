@@ -15,6 +15,9 @@ PEPPERMINT_VERSION=ee538be4d156ffb456107587eb71f14671afb1c7
         exec 2>/dev/null
     fi
 
+    if [[ ${INIT_QUEPASA:-'true'} != "true" ]]; then
+        ./script/wait-db 'select 1 from que_pasa.levels'
+    fi
     ./script/migrate || exit 1
 
     psql < script/populate-testdb.sql

@@ -6,6 +6,7 @@ import { Roles } from '../src/role/entities/role.entity';
 import { assertEnv } from '../src/utils';
 import Pool from 'pg-pool';
 import axios from 'axios';
+import { loginAsAdmin, loginUser } from './utils';
 
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {
@@ -76,11 +77,7 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail('admin can create new users', async () => {
-    const { bearer } = await loginUser(
-      app,
-      'admin@tzconnect.com',
-      'supersafepassword',
-    );
+    const { bearer } = await loginAsAdmin(app);
     const res = await request(app.getHttpServer())
       .post('/user')
       .set('authorization', bearer)
@@ -100,11 +97,7 @@ describe('AppController (e2e)', () => {
   });
 
   skipOnPriorFail('new user with 0 roles assigned is ok', async () => {
-    const { bearer } = await loginUser(
-      app,
-      'admin@tzconnect.com',
-      'supersafepassword',
-    );
+    const { bearer } = await loginAsAdmin(app);
     const res = await request(app.getHttpServer())
       .post('/user')
       .set('authorization', bearer)
@@ -130,11 +123,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'GET /nft OK when logged in (empty res; no NFTs created yet)',
     async () => {
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
       const res = await request(app.getHttpServer())
         .get('/nft')
         .set('authorization', bearer);
@@ -146,11 +135,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'PATCH /nft/:id of non-existing id is BAD REQUEST',
     async () => {
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
       const res = await request(app.getHttpServer())
         .patch('/nft/5')
         .set('authorization', bearer);
@@ -162,11 +147,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'PATCH /nft/:id with null id is OK and creates new NFT entry',
     async () => {
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
       const res = await request(app.getHttpServer())
         .patch('/nft/')
         .set('authorization', bearer);
@@ -193,11 +174,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'PATCH /nft/:id with null id with attribute values',
     async () => {
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
       const res = await request(app.getHttpServer())
         .patch('/nft')
         .set('authorization', bearer)
@@ -285,11 +262,7 @@ describe('AppController (e2e)', () => {
     'patch /nft/:id action only allowed if in allowedActions',
     async () => {
       const joe = await loginUser(app, 'regular_joe@bigbrother.co', 'somepass');
-      const admin = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const admin = await loginAsAdmin(app);
 
       let res = await request(app.getHttpServer())
         .patch('/nft')
@@ -330,11 +303,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'NFT can still be removed when in creation state',
     async () => {
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
       let res = await request(app.getHttpServer())
         .patch('/nft')
         .set('authorization', bearer);
@@ -363,11 +332,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'NFT cannot be removed when in is past setup_nft state',
     async () => {
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
       let res = await request(app.getHttpServer())
         .patch('/nft')
         .set('authorization', bearer)
@@ -420,11 +385,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'NFT can still be removed when in setup_nft state',
     async () => {
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
       let res = await request(app.getHttpServer())
         .patch('/nft')
         .set('authorization', bearer)
@@ -457,11 +418,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'PATCH /nft/:id can overwrite previously set attributes (of course only if still in the same state)',
     async () => {
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
       let res = await request(app.getHttpServer())
         .patch('/nft')
         .set('authorization', bearer)
@@ -543,11 +500,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'GET /nft OK when logged in (with res; some NFTs have now been created)',
     async () => {
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
       const res = await request(app.getHttpServer())
         .get('/nft')
         .set('authorization', bearer);
@@ -616,11 +569,7 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail('GET /nft pagination tests', async () => {
-    const { bearer } = await loginUser(
-      app,
-      'admin@tzconnect.com',
-      'supersafepassword',
-    );
+    const { bearer } = await loginAsAdmin(app);
     let res = await request(app.getHttpServer())
       .get('/nft')
       .set('authorization', bearer)
@@ -1149,11 +1098,7 @@ describe('AppController (e2e)', () => {
   });
 
   skipOnPriorFail(`new user's roles must all be valid`, async () => {
-    const { bearer } = await loginUser(
-      app,
-      'admin@tzconnect.com',
-      'supersafepassword',
-    );
+    const { bearer } = await loginAsAdmin(app);
     const res = await request(app.getHttpServer())
       .post('/user')
       .set('authorization', bearer)
@@ -1713,11 +1658,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'admin can access analytics endpoints (part 1; before any emulated sales)',
     async () => {
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
       let res = await request(app.getHttpServer())
         .get('/analytics/sales/priceVolume/snapshot')
         .set('authorization', bearer);
@@ -1762,11 +1703,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'analytics endpoints, bad resolution param => BAD REQUEST (part 1: all allowed resolutions)',
     async () => {
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
 
       const snapshotAllowedResolutions = [
         'hour',
@@ -1809,11 +1746,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'analytics endpoints, bad resolution param => BAD REQUEST (part 1: not allowed resolutions)',
     async () => {
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
 
       const snapshotNotAllowedResolutions = ['malicisious', 'something else.;'];
       const timeseriesNotAllowedResolutions = [
@@ -1872,11 +1805,7 @@ describe('AppController (e2e)', () => {
   });
 
   skipOnPriorFail('admin can update user roles', async () => {
-    const { bearer } = await loginUser(
-      app,
-      'admin@tzconnect.com',
-      'supersafepassword',
-    );
+    const { bearer } = await loginAsAdmin(app);
 
     let res = await request(app.getHttpServer())
       .get('/user')
@@ -1931,11 +1860,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     `when updating a user's roles, all new roles must be valid`,
     async () => {
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
 
       let res = await request(app.getHttpServer())
         .get('/user')
@@ -1963,11 +1888,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     `GET /user/:id of non existing id => BAD REQUEST`,
     async () => {
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
 
       const res = await request(app.getHttpServer())
         .get('/user/0')
@@ -1979,6 +1900,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'admin can access analytics endpoints (part 2; after emulated sales)',
     async () => {
+      await clearEmulatedNftSales();
       await emulateNftSale(
         1,
         [4, 7, 10],
@@ -1995,11 +1917,7 @@ describe('AppController (e2e)', () => {
         new Date('December 17, 1995 13:34:00'),
       );
 
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
       let res = await request(app.getHttpServer())
         .get('/analytics/sales/priceVolume/snapshot')
         .set('authorization', bearer)
@@ -2017,6 +1935,15 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         data: [
           { timestamp: 819165600, value: 23.3 },
+          { timestamp: 819169200, value: 0 },
+          { timestamp: 819172800, value: 0 },
+          { timestamp: 819176400, value: 0 },
+          { timestamp: 819180000, value: 0 },
+          { timestamp: 819183600, value: 0 },
+          { timestamp: 819187200, value: 0 },
+          { timestamp: 819190800, value: 0 },
+          { timestamp: 819194400, value: 0 },
+          { timestamp: 819198000, value: 0 },
           { timestamp: 819201600, value: 44.7 },
         ],
       });
@@ -2038,6 +1965,15 @@ describe('AppController (e2e)', () => {
       expect(res.body).toStrictEqual({
         data: [
           { timestamp: 819165600, value: 3 },
+          { timestamp: 819169200, value: 0 },
+          { timestamp: 819172800, value: 0 },
+          { timestamp: 819176400, value: 0 },
+          { timestamp: 819180000, value: 0 },
+          { timestamp: 819183600, value: 0 },
+          { timestamp: 819187200, value: 0 },
+          { timestamp: 819190800, value: 0 },
+          { timestamp: 819194400, value: 0 },
+          { timestamp: 819198000, value: 0 },
           { timestamp: 819201600, value: 8 },
         ],
       });
@@ -2157,11 +2093,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail('NFT test publish to store db', async () => {
     await alignAdminNftNextIdWithStoreNfts();
 
-    const { bearer } = await loginUser(
-      app,
-      'admin@tzconnect.com',
-      'supersafepassword',
-    );
+    const { bearer } = await loginAsAdmin(app);
     const moderator = await loginUser(
       app,
       'regular_joe@bigbrother.co',
@@ -2226,11 +2158,11 @@ describe('AppController (e2e)', () => {
       nft: {
         id: 35,
         nft_name: 'some name',
-        artifact_ipfs: null,
-        display_ipfs: null,
-        thumbnail_ipfs: null,
+        artifact_ipfs: 'ipfs-mock://someuri',
+        display_ipfs: 'ipfs-mock://someuri',
+        thumbnail_ipfs: 'ipfs-mock://somethumbnailuri',
         metadata: null,
-        metadata_ipfs: null,
+        metadata_ipfs: 'ipfs-mock://some name',
         artifact_uri: 'someuri',
         price: '10510', // in cents in the db
         editions_size: 4,
@@ -2296,11 +2228,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'NFT test publish to store db (fails if non valid category assigned)',
     async () => {
-      const { bearer } = await loginUser(
-        app,
-        'admin@tzconnect.com',
-        'supersafepassword',
-      );
+      const { bearer } = await loginAsAdmin(app);
       const moderator = await loginUser(
         app,
         'regular_joe@bigbrother.co',
@@ -2362,11 +2290,7 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail('NFT test voting behavior', async () => {
-    const { bearer } = await loginUser(
-      app,
-      'admin@tzconnect.com',
-      'supersafepassword',
-    );
+    const { bearer } = await loginAsAdmin(app);
     const moderator = await loginUser(
       app,
       'regular_joe@bigbrother.co',
@@ -2460,11 +2384,7 @@ describe('AppController (e2e)', () => {
   });
 
   skipOnPriorFail('admin can remove users', async () => {
-    const { bearer } = await loginUser(
-      app,
-      'admin@tzconnect.com',
-      'supersafepassword',
-    );
+    const { bearer } = await loginAsAdmin(app);
 
     let res = await request(app.getHttpServer())
       .get('/user')
@@ -2479,11 +2399,7 @@ describe('AppController (e2e)', () => {
   });
 
   skipOnPriorFail('GET /nft/attributes', async () => {
-    const { bearer } = await loginUser(
-      app,
-      'admin@tzconnect.com',
-      'supersafepassword',
-    );
+    const { bearer } = await loginAsAdmin(app);
 
     const res = await request(app.getHttpServer())
       .get('/nft/attributes')
@@ -2511,6 +2427,277 @@ describe('AppController (e2e)', () => {
     const res = await request(app.getHttpServer()).get('/nft/attributes');
     expect(res.statusCode).toEqual(401);
   });
+
+  describe('GET /analytics/sales/*/timeseries will fill missing datapoints', () => {
+    beforeEach(async () => {
+      await clearEmulatedNftSales();
+    });
+
+    skipOnPriorFail('for resolution=hour', async () => {
+      await emulateNftSale(
+        1,
+        [4, 7, 10],
+        new Date('December 17, 1995 03:24:00'),
+      );
+      await emulateNftSale(
+        2,
+        [2, 27, 11, 10, 4],
+        new Date('December 17, 1995 08:24:00'),
+      );
+
+      await emulateNftSale(
+        1,
+        [1, 3, 30],
+        new Date('December 17, 1995 12:34:00'),
+      );
+
+      const { bearer } = await loginAsAdmin(app);
+      const timeDiff = 819198000 - 819165600;
+
+      let res = await request(app.getHttpServer())
+        .get('/analytics/sales/priceVolume/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'hour' });
+      const tsPriceVol = [
+        { timestamp: 819165600, value: 23.3 },
+        { timestamp: 819169200, value: 0 },
+        { timestamp: 819172800, value: 0 },
+        { timestamp: 819176400, value: 0 },
+        { timestamp: 819180000, value: 0 },
+        { timestamp: 819183600, value: 26.6 },
+        { timestamp: 819187200, value: 0 },
+        { timestamp: 819190800, value: 0 },
+        { timestamp: 819194400, value: 0 },
+        { timestamp: 819198000, value: 18.1 },
+      ];
+
+      expect(res.statusCode).toEqual(200);
+      expect(timeDiff / 3600 + 1).toEqual(tsPriceVol.length);
+      expect(res.body).toStrictEqual({
+        data: tsPriceVol,
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/nftCount/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'hour' });
+      const tsNftCount = [
+        { timestamp: 819165600, value: 3 },
+        { timestamp: 819169200, value: 0 },
+        { timestamp: 819172800, value: 0 },
+        { timestamp: 819176400, value: 0 },
+        { timestamp: 819180000, value: 0 },
+        { timestamp: 819183600, value: 5 },
+        { timestamp: 819187200, value: 0 },
+        { timestamp: 819190800, value: 0 },
+        { timestamp: 819194400, value: 0 },
+        { timestamp: 819198000, value: 3 },
+      ];
+
+      expect(res.statusCode).toEqual(200);
+      expect(timeDiff / 3600 + 1).toEqual(tsNftCount.length);
+      expect(res.body).toStrictEqual({
+        data: tsNftCount,
+      });
+    });
+
+    skipOnPriorFail('for resolution=day', async () => {
+      await emulateNftSale(
+        1,
+        [4, 7, 10],
+        new Date('December 17, 1995 03:24:00'),
+      );
+      await emulateNftSale(
+        2,
+        [2, 27, 11, 10, 4],
+        new Date('December 20, 1995 08:24:00'),
+      );
+
+      await emulateNftSale(
+        1,
+        [1, 3, 30],
+        new Date('December 26, 1995 12:34:00'),
+      );
+
+      const { bearer } = await loginAsAdmin(app);
+      const timeDiff = 819936000 - 819158400;
+
+      let res = await request(app.getHttpServer())
+        .get('/analytics/sales/priceVolume/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'day' });
+      const tsPriceVol = [
+        { timestamp: 819158400, value: 23.3 },
+        { timestamp: 819244800, value: 0 },
+        { timestamp: 819331200, value: 0 },
+        { timestamp: 819417600, value: 26.6 },
+        { timestamp: 819504000, value: 0 },
+        { timestamp: 819590400, value: 0 },
+        { timestamp: 819676800, value: 0 },
+        { timestamp: 819763200, value: 0 },
+        { timestamp: 819849600, value: 0 },
+        { timestamp: 819936000, value: 18.1 },
+      ];
+
+      expect(res.statusCode).toEqual(200);
+      expect(timeDiff / (24 * 3600) + 1).toEqual(tsPriceVol.length);
+      expect(res.body).toStrictEqual({
+        data: tsPriceVol,
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/nftCount/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'day' });
+      const tsNftCount = [
+        { timestamp: 819158400, value: 3 },
+        { timestamp: 819244800, value: 0 },
+        { timestamp: 819331200, value: 0 },
+        { timestamp: 819417600, value: 5 },
+        { timestamp: 819504000, value: 0 },
+        { timestamp: 819590400, value: 0 },
+        { timestamp: 819676800, value: 0 },
+        { timestamp: 819763200, value: 0 },
+        { timestamp: 819849600, value: 0 },
+        { timestamp: 819936000, value: 3 },
+      ];
+
+      expect(res.statusCode).toEqual(200);
+      expect(timeDiff / (24 * 3600) + 1).toEqual(tsNftCount.length);
+      expect(res.body).toStrictEqual({
+        data: tsNftCount,
+      });
+    });
+
+    skipOnPriorFail('for resolution=week', async () => {
+      await emulateNftSale(
+        1,
+        [4, 7, 10],
+        new Date('December 17, 1995 03:24:00'),
+      );
+
+      await emulateNftSale(
+        1,
+        [1, 3, 30],
+        new Date('January 14, 1996 12:41:00'),
+      );
+
+      await emulateNftSale(
+        1,
+        [1, 3, 30],
+        new Date('February 01, 1996 03:24:00'),
+      );
+
+      const { bearer } = await loginAsAdmin(app);
+      const timeDiff = 822873600 - 818640000;
+
+      let res = await request(app.getHttpServer())
+        .get('/analytics/sales/priceVolume/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'week' });
+      const tsPriceVol = [
+        { timestamp: 818640000, value: 23.3 },
+        { timestamp: 819244800, value: 0 },
+        { timestamp: 819849600, value: 0 },
+        { timestamp: 820454400, value: 0 },
+        { timestamp: 821059200, value: 18.1 },
+        { timestamp: 821664000, value: 0 },
+        { timestamp: 822268800, value: 0 },
+        { timestamp: 822873600, value: 18.1 },
+      ];
+
+      expect(res.statusCode).toEqual(200);
+      expect(timeDiff / (7 * 24 * 3600) + 1).toEqual(tsPriceVol.length);
+      expect(res.body).toStrictEqual({
+        data: tsPriceVol,
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/nftCount/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'week' });
+      const tsNftCount = [
+        { timestamp: 818640000, value: 3 },
+        { timestamp: 819244800, value: 0 },
+        { timestamp: 819849600, value: 0 },
+        { timestamp: 820454400, value: 0 },
+        { timestamp: 821059200, value: 3 },
+        { timestamp: 821664000, value: 0 },
+        { timestamp: 822268800, value: 0 },
+        { timestamp: 822873600, value: 3 },
+      ];
+
+      expect(res.statusCode).toEqual(200);
+      expect(timeDiff / (7 * 24 * 3600) + 1).toEqual(tsNftCount.length);
+      expect(res.body).toStrictEqual({
+        data: tsNftCount,
+      });
+    });
+
+    skipOnPriorFail('for resolution=month', async () => {
+      await emulateNftSale(
+        2,
+        [2, 27, 11, 10, 4],
+        new Date('December 17, 1995 03:24:00'),
+      );
+
+      await emulateNftSale(
+        2,
+        [2, 27, 11, 10, 4],
+        new Date('March 05, 1996 04:41:00'),
+      );
+
+      await emulateNftSale(1, [1, 3, 30], new Date('July 26, 1996 12:21:00'));
+
+      const { bearer } = await loginAsAdmin(app);
+      const timeDiff = 836179200 - 817776000;
+
+      let res = await request(app.getHttpServer())
+        .get('/analytics/sales/priceVolume/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'month' });
+      const tsPriceVol = [
+        { timestamp: 817776000, value: 26.6 },
+        { timestamp: 820454400, value: 0 },
+        { timestamp: 823132800, value: 0 },
+        { timestamp: 825638400, value: 26.6 },
+        { timestamp: 828316800, value: 0 },
+        { timestamp: 830908800, value: 0 },
+        { timestamp: 833587200, value: 0 },
+        { timestamp: 836179200, value: 18.1 },
+      ];
+
+      expect(res.statusCode).toEqual(200);
+      expect(Math.floor(timeDiff / (30 * 24 * 3600) + 1)).toEqual(
+        tsPriceVol.length,
+      );
+      expect(res.body).toStrictEqual({
+        data: tsPriceVol,
+      });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/sales/nftCount/timeseries')
+        .set('authorization', bearer)
+        .query({ resolution: 'month' });
+      const tsNftCount = [
+        { timestamp: 817776000, value: 5 },
+        { timestamp: 820454400, value: 0 },
+        { timestamp: 823132800, value: 0 },
+        { timestamp: 825638400, value: 5 },
+        { timestamp: 828316800, value: 0 },
+        { timestamp: 830908800, value: 0 },
+        { timestamp: 833587200, value: 0 },
+        { timestamp: 836179200, value: 3 },
+      ];
+      expect(res.statusCode).toEqual(200);
+      expect(Math.floor(timeDiff / (30 * 24 * 3600) + 1)).toEqual(
+        tsNftCount.length,
+      );
+      expect(res.body).toStrictEqual({
+        data: tsNftCount,
+      });
+    });
+  });
 });
 
 function newDbConn() {
@@ -2530,6 +2717,14 @@ function newStoreReplConn() {
     password: assertEnv('PGPASSWORD'),
     database: 'store_replication',
   });
+}
+
+async function clearEmulatedNftSales() {
+  const storeRepl = newStoreReplConn();
+  await storeRepl.query(`DELETE FROM payment`);
+  await storeRepl.query(`DELETE FROM mtm_nft_order_nft`);
+  await storeRepl.query(`DELETE FROM nft_order`);
+  await storeRepl.end();
 }
 
 async function emulateNftSale(userId: number, nftIds: number[], at: Date) {
@@ -2615,20 +2810,4 @@ SELECT setval('nft_id_seq', $1)
   );
   await storeRepl.end();
   await db.end();
-}
-
-async function loginUser(
-  app: INestApplication,
-  email: string,
-  password: string,
-): Promise<{ bearer: string; email: string }> {
-  const login = await request(app.getHttpServer())
-    .post('/auth/login')
-    .send({ username: email, password: password });
-  expect(login.statusCode).toEqual(201);
-
-  return {
-    bearer: `Bearer ${login.body.accessToken}`,
-    email: email,
-  };
 }

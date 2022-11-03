@@ -1,29 +1,35 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  ConsoleLogger,
-  Logger,
-  INestApplication,
-  ValidationPipe,
-} from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { RATE_LIMIT, CART_MAX_ITEMS } from '../src/constants';
+import {
+  RATE_LIMIT,
+  CART_MAX_ITEMS,
+  KANVAS_CONTRACT,
+  TEZPAY_PAYPOINT_ADDRESS,
+} from '../src/constants';
 import {
   SIGNATURE_PREFIX_CREATE_NFT,
   SIGNATURE_PREFIX_DELIST_NFT,
   SIGNATURE_PREFIX_RELIST_NFT,
 } from 'kanvas-api-lib';
+import { PaymentService } from '../src/payment/service/payment.service';
 import {
-  PaymentService,
+  PaymentProvider,
   PaymentStatus,
-} from '../src/payment/service/payment.service';
-import { PaymentProvider } from '../src/payment/entity/payment.entity.js';
+} from '../src/payment/entity/payment.entity.js';
 import { UserEntity } from '../src/user/entity/user.entity';
 import { UserService } from '../src/user/service/user.service';
 import { assertEnv, sleep } from '../src/utils';
 import sotez from 'sotez';
 import { v4 as uuidv4 } from 'uuid';
 import Pool from 'pg-pool';
+import { runOnchainTests } from './onchain.e2e';
+import { runTokenGateTests } from './token_gate.e2e';
+import { runProxyNftTests } from './proxy_nft.e2e';
+import { runIsolatedTests } from './isolated.e2e';
+import { TokenGate } from 'token-gate';
+import { setupKanvasServer } from '../src/server.js';
 const { cryptoUtils } = sotez;
 
 let anyTestFailed = false;
@@ -47,6 +53,7 @@ describe('AppController (e2e)', () => {
   let app: any;
   let paymentService: PaymentService;
   let userService: UserService;
+  let tokenGate: TokenGate;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -55,17 +62,17 @@ describe('AppController (e2e)', () => {
 
     paymentService = await moduleFixture.get(PaymentService);
     userService = await moduleFixture.get(UserService);
+    tokenGate = await moduleFixture.get('TOKEN_GATE');
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-    app.enableShutdownHooks();
+    setupKanvasServer(app);
     await app.init();
   });
   afterEach(async () => {
     await app.close();
   });
 
-  skipOnPriorFail('should be defined', () => expect(app).toBeDefined());
+  it('should be defined', () => expect(app).toBeDefined());
 
   it(`/ (GET) => NOT FOUND (make sure the nestjs's Hello World page is gone)`, () => {
     return request(app.getHttpServer()).get('/').expect(404);
@@ -80,9 +87,14 @@ describe('AppController (e2e)', () => {
       cartMaxItems: 10,
       supportedCurrencies: ['USD', 'GBP', 'EUR', 'XTZ'],
       tezosNetwork: 'testnet',
-      kanvasContract: 'KT1..',
+      kanvasContract: KANVAS_CONTRACT,
     });
   });
+
+  runIsolatedTests(() => [app, paymentService]);
+  runProxyNftTests(() => [app]);
+  runOnchainTests(() => [app, paymentService]);
+  runTokenGateTests(() => [app, tokenGate]);
 
   // Note:
   // - these tests expect responses related to a database that has been filled
@@ -197,8 +209,12 @@ describe('AppController (e2e)', () => {
     // with now() timestamps
     expect(res.body.createdAt).toBeGreaterThan(0);
     delete res.body.createdAt;
-    expect(res.body.launchAt).toBeGreaterThan(0);
-    delete res.body.launchAt;
+    if (typeof res.body.onsaleFrom !== 'undefined') {
+      expect(res.body.launchAt).toEqual(res.body.onsaleFrom);
+      expect(res.body.onsaleFrom).toBeGreaterThan(0);
+      delete res.body.launchAt;
+      delete res.body.onsaleFrom;
+    }
 
     if (typeof res.body.onsaleUntil !== 'undefined') {
       expect(res.body.onsaleUntil).toBeGreaterThan(0);
@@ -228,8 +244,10 @@ describe('AppController (e2e)', () => {
       thumbnailUri:
         'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
       price: '0.10',
+      isProxy: false,
       editionsSize: 4,
       editionsAvailable: 4,
+      editionsSold: 0,
       categories: [
         { id: 4, name: 'Drawing', description: 'Sub fine art category' },
       ],
@@ -301,9 +319,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -339,8 +364,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             price: '0.10',
+            isProxy: false,
             editionsSize: 4,
             editionsAvailable: 4,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -368,8 +395,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2202&q=80',
             price: '7.80',
+            isProxy: false,
             editionsSize: 2,
             editionsAvailable: 2,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -396,8 +425,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             price: '10.40',
+            isProxy: false,
             editionsSize: 6,
             editionsAvailable: 6,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -424,8 +455,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 8,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -453,8 +486,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
             price: '9.20',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 8,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -482,8 +517,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1506809211073-d0785aaad75e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2656&q=80',
             price: '4.10',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 8,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -511,8 +548,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1633957897986-70e83293f3ff?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1986&q=80',
             price: '3.60',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 8,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -539,8 +578,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1599790772272-d1425cd3242e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60',
             price: '64.20',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 8,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -568,8 +609,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             price: '343.20',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 8,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -595,9 +638,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -624,9 +674,14 @@ describe('AppController (e2e)', () => {
 
     for (const i in res.body.nfts) {
       expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
       delete res.body.nfts[i].createdAt;
-      delete res.body.nfts[i].launchAt;
+
+      if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+        expect(res.body.nfts[i].launchAt).toEqual(res.body.nfts[i].onsaleFrom);
+        expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+        delete res.body.nfts[i].launchAt;
+        delete res.body.nfts[i].onsaleFrom;
+      }
 
       if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
         expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -653,6 +708,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
           editionsAvailable: 6,
           editionsSize: 6,
+          editionsSold: 0,
           id: 3,
           ipfsHash: null,
           metadata: null,
@@ -663,6 +719,7 @@ describe('AppController (e2e)', () => {
           thumbnailIpfs: null,
           name: 'Internet',
           price: '10.40',
+          isProxy: false,
           thumbnailUri:
             'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
         },
@@ -681,9 +738,14 @@ describe('AppController (e2e)', () => {
 
     for (const i in res.body.nfts) {
       expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
       delete res.body.nfts[i].createdAt;
-      delete res.body.nfts[i].launchAt;
+
+      if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+        expect(res.body.nfts[i].launchAt).toEqual(res.body.nfts[i].onsaleFrom);
+        expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+        delete res.body.nfts[i].launchAt;
+        delete res.body.nfts[i].onsaleFrom;
+      }
 
       if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
         expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -718,8 +780,10 @@ describe('AppController (e2e)', () => {
           thumbnailUri:
             'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
           price: '0.10',
+          isProxy: false,
           editionsSize: 4,
           editionsAvailable: 4,
+          editionsSold: 0,
           categories: [
             {
               description: 'Sub fine art category',
@@ -745,9 +809,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -782,8 +853,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             price: '0.10',
+            isProxy: false,
             editionsSize: 4,
             editionsAvailable: 4,
+            editionsSold: 0,
             categories: [
               {
                 description: 'Sub fine art category',
@@ -807,6 +880,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
             editionsAvailable: 6,
             editionsSize: 6,
+            editionsSold: 0,
             id: 3,
             ipfsHash: null,
             metadata: null,
@@ -817,6 +891,7 @@ describe('AppController (e2e)', () => {
             thumbnailIpfs: null,
             name: 'Internet',
             price: '10.40',
+            isProxy: false,
             thumbnailUri:
               'https://images.unsplash.com/photo-1585007600263-71228e40c8d1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
           },
@@ -905,9 +980,14 @@ describe('AppController (e2e)', () => {
 
     for (const i in res.body.nfts) {
       expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
       delete res.body.nfts[i].createdAt;
-      delete res.body.nfts[i].launchAt;
+
+      if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+        expect(res.body.nfts[i].launchAt).toEqual(res.body.nfts[i].onsaleFrom);
+        expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+        delete res.body.nfts[i].launchAt;
+        delete res.body.nfts[i].onsaleFrom;
+      }
 
       if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
         expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -936,8 +1016,10 @@ describe('AppController (e2e)', () => {
           thumbnailUri:
             'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
           price: '343.20',
+          isProxy: false,
           editionsSize: 8,
           editionsAvailable: 8,
+          editionsSold: 0,
           categories: [
             {
               description: 'Sub fine art category',
@@ -1583,18 +1665,12 @@ describe('AppController (e2e)', () => {
         id,
       );
 
-      // reconstruct success event from stripe
-      const constructedEvent = {
-        type: 'payment_intent.succeeded',
-        data: {
-          object: {
-            id: paymentId,
-          },
-        },
-      };
-
       // Calling success status
-      await paymentService.webhookHandler(constructedEvent);
+      await paymentService.updatePaymentStatus(
+        paymentId,
+        PaymentStatus.SUCCEEDED,
+        false,
+      );
 
       // 1 edition locked because it is now owned
       expect(await getLockedCount(1)).toEqual(1);
@@ -1823,7 +1899,6 @@ describe('AppController (e2e)', () => {
       const { paymentId } = await paymentService.getPaymentForLatestUserOrder(
         usr.id,
       );
-      // reconstruct success event from stripe
       const constructedEvent = {
         type: 'payment_intent.payment_failed',
         data: {
@@ -1833,15 +1908,8 @@ describe('AppController (e2e)', () => {
         },
       };
       await paymentService.webhookHandler(constructedEvent);
-      // Check failed payment don't get to timeout
       const failed = await paymentService.getPaymentForLatestUserOrder(usr.id);
       expect(failed.status).toEqual(PaymentStatus.FAILED);
-      // Check canceled payment don't get to timeout
-      await paymentService.deleteExpiredPayments();
-      const stillFailed = await paymentService.getPaymentForLatestUserOrder(
-        usr.id,
-      );
-      expect(stillFailed.status).toEqual(PaymentStatus.FAILED);
 
       const preparedOrder2 = await paymentService.createPayment(
         usr,
@@ -1906,6 +1974,7 @@ describe('AppController (e2e)', () => {
         usr.id,
       );
       expect(promised.status).toEqual(PaymentStatus.PROMISED);
+      await sleep(Number(process.env['PAYMENT_PROMISE_DEADLINE_MILLI_SECS']));
       await paymentService.deleteExpiredPayments();
       const promisedTimedOut =
         await paymentService.getPaymentForLatestUserOrder(usr.id);
@@ -1962,16 +2031,13 @@ describe('AppController (e2e)', () => {
       const payment5Data = await paymentService.getPaymentForLatestUserOrder(
         usr.id,
       );
-      // reconstruct success event from stripe
-      const constructedEvent2 = {
-        type: 'payment_intent.succeeded',
-        data: {
-          object: {
-            id: payment5Data.paymentId,
-          },
-        },
-      };
-      await paymentService.webhookHandler(constructedEvent2);
+
+      await paymentService.updatePaymentStatus(
+        payment5Data.paymentId,
+        PaymentStatus.SUCCEEDED,
+        false,
+      );
+
       const success = await paymentService.getPaymentForLatestUserOrder(usr.id);
       expect(success.status).toEqual(PaymentStatus.SUCCEEDED);
       await paymentService.deleteExpiredPayments();
@@ -2055,13 +2121,13 @@ describe('AppController (e2e)', () => {
   );
 
   skipOnPriorFail(
-    'stripe payment: Payment status should not change from FAILED',
+    'stripe payment: Payment status should be able to change from FAILED',
     async () => {
-      const { bearer, id, address } = await loginUser(app, 'addr', 'admin');
+      const { bearer, id, address } = await loginUser(app, 'tz1', 'test');
       const usr = <UserEntity>{ userAddress: address, id: id };
 
       const add1 = await request(app.getHttpServer())
-        .post('/users/cart/add/4')
+        .post('/users/cart/add/6')
         .set('authorization', bearer);
       expect(add1.statusCode).toEqual(201);
 
@@ -2094,26 +2160,16 @@ describe('AppController (e2e)', () => {
       const failed = await paymentService.getPaymentForLatestUserOrder(id);
       expect(failed.status).toEqual(PaymentStatus.FAILED);
 
-      // reconstruct success event from stripe
-      const constructedEvent2 = {
-        type: 'payment_intent.succeeded',
-        data: {
-          object: {
-            id: failed.paymentId,
-          },
-        },
-      };
+      await paymentService.updatePaymentStatus(
+        failed.paymentId,
+        PaymentStatus.SUCCEEDED,
+        false,
+      );
 
-      // Calling success status
-      await paymentService.webhookHandler(constructedEvent2);
-
-      const stillFailed = await paymentService.getPaymentForLatestUserOrder(id);
-      expect(stillFailed.status).toEqual(PaymentStatus.FAILED);
-
-      const cleanupCart = await request(app.getHttpServer())
-        .post('/users/cart/remove/4')
-        .set('authorization', bearer);
-      expect(cleanupCart.statusCode).toEqual(204);
+      const nowSucceeded = await paymentService.getPaymentForLatestUserOrder(
+        id,
+      );
+      expect(nowSucceeded.status).toEqual(PaymentStatus.SUCCEEDED);
     },
   );
 
@@ -2141,18 +2197,12 @@ describe('AppController (e2e)', () => {
         id,
       );
 
-      // reconstruct success event from stripe
-      const constructedEvent = {
-        type: 'payment_intent.succeeded',
-        data: {
-          object: {
-            id: paymentId,
-          },
-        },
-      };
-
       // Calling success status
-      await paymentService.webhookHandler(constructedEvent);
+      await paymentService.updatePaymentStatus(
+        paymentId,
+        PaymentStatus.SUCCEEDED,
+        false,
+      );
 
       const success = await paymentService.getPaymentForLatestUserOrder(id);
       expect(success.status).toEqual(PaymentStatus.SUCCEEDED);
@@ -2187,9 +2237,20 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].mintOperationHash != null) {
+          res.body.nfts[i].mintOperationHash = null;
+        }
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -2224,8 +2285,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             price: '0.10',
+            isProxy: false,
             editionsSize: 4,
             editionsAvailable: 3,
+            editionsSold: 1,
             categories: [
               {
                 id: 4,
@@ -2252,8 +2315,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 0,
+            editionsSold: 3,
             categories: [
               {
                 id: 4,
@@ -2280,9 +2345,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -2290,7 +2362,7 @@ describe('AppController (e2e)', () => {
         }
       }
 
-      expect(res.body).toStrictEqual({
+      expect(res.body).toMatchObject({
         currentPage: 1,
         numberOfPages: 2,
         nfts: [
@@ -2306,7 +2378,6 @@ describe('AppController (e2e)', () => {
               },
             },
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '1-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '1-thumbnail-ipfs-hash',
@@ -2317,8 +2388,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             price: '0.10',
+            isProxy: false,
             editionsSize: 4,
             editionsAvailable: 3,
+            editionsSold: 1,
             categories: [
               {
                 id: 4,
@@ -2345,9 +2418,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -2355,7 +2435,7 @@ describe('AppController (e2e)', () => {
         }
       }
 
-      expect(res.body).toStrictEqual({
+      expect(res.body).toMatchObject({
         currentPage: 2,
         numberOfPages: 2,
         nfts: [
@@ -2365,7 +2445,6 @@ describe('AppController (e2e)', () => {
             description: 'What s better then a cat in a city ?',
             ipfsHash: 'ipfs://.....',
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             metadata: null,
             artifactIpfs: '4-artifact-ipfs-hash',
             displayIpfs: null,
@@ -2377,8 +2456,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 0,
+            editionsSold: 3,
             categories: [
               {
                 id: 4,
@@ -2409,9 +2490,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -2419,7 +2507,7 @@ describe('AppController (e2e)', () => {
         }
       }
 
-      expect(res.body).toStrictEqual({
+      expect(res.body).toMatchObject({
         currentPage: 2,
         numberOfPages: 2,
         nfts: [
@@ -2430,7 +2518,6 @@ describe('AppController (e2e)', () => {
             ipfsHash: 'ipfs://.....',
             metadata: null,
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '4-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -2441,8 +2528,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 0,
+            editionsSold: 3,
             categories: [
               {
                 id: 4,
@@ -2473,9 +2562,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -2483,7 +2579,7 @@ describe('AppController (e2e)', () => {
         }
       }
 
-      expect(res.body).toStrictEqual({
+      expect(res.body).toMatchObject({
         currentPage: 1,
         numberOfPages: 2,
         nfts: [
@@ -2494,7 +2590,6 @@ describe('AppController (e2e)', () => {
             ipfsHash: 'ipfs://.....',
             metadata: null,
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '4-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -2505,8 +2600,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 0,
+            editionsSold: 3,
             categories: [
               {
                 id: 4,
@@ -2537,9 +2634,16 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
 
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
@@ -2547,7 +2651,7 @@ describe('AppController (e2e)', () => {
         }
       }
 
-      expect(res.body).toStrictEqual({
+      expect(res.body).toMatchObject({
         currentPage: 2,
         numberOfPages: 2,
         totalNftCount: 2,
@@ -2559,7 +2663,6 @@ describe('AppController (e2e)', () => {
             ipfsHash: 'ipfs://.....',
             metadata: null,
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '4-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -2570,8 +2673,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 0,
+            editionsSold: 3,
             categories: [
               {
                 id: 4,
@@ -2601,16 +2706,24 @@ describe('AppController (e2e)', () => {
 
       for (const i in res.body.nfts) {
         expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-        expect(res.body.nfts[i].launchAt).toBeGreaterThan(0);
         delete res.body.nfts[i].createdAt;
-        delete res.body.nfts[i].launchAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
+
         if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
           expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
           delete res.body.nfts[i].onsaleUntil;
         }
       }
 
-      expect(res.body).toStrictEqual({
+      expect(res.body).toMatchObject({
         currentPage: 1,
         numberOfPages: 2,
         totalNftCount: 2,
@@ -2622,7 +2735,6 @@ describe('AppController (e2e)', () => {
             ipfsHash: 'ipfs://.....',
             metadata: null,
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '4-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -2633,8 +2745,10 @@ describe('AppController (e2e)', () => {
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             price: '4.30',
+            isProxy: false,
             editionsSize: 8,
             editionsAvailable: 0,
+            editionsSold: 3,
             categories: [
               {
                 id: 4,
@@ -2667,7 +2781,7 @@ describe('AppController (e2e)', () => {
       .get('/users/nftOwnershipsPending')
       .set('authorization', bearer);
     expect(res.statusCode).toEqual(200);
-    expect(res.body).toStrictEqual([
+    expect(res.body).toMatchObject([
       { nftId: '1', ownerStatuses: ['pending'] },
       {
         nftId: '4',
@@ -2680,13 +2794,19 @@ describe('AppController (e2e)', () => {
     const res = await request(app.getHttpServer()).get('/users/topBuyers');
     expect(res.statusCode).toEqual(200);
 
-    expect(res.body).toStrictEqual({
+    expect(res.body).toMatchObject({
       topBuyers: [
         {
           userId: 1,
           userAddress: 'addr',
           userPicture: null,
           totalPaid: '13.00',
+        },
+        {
+          totalPaid: '1.70',
+          userAddress: 'tz1',
+          userId: 2,
+          userPicture: null,
         },
       ],
     });
@@ -2709,7 +2829,7 @@ describe('AppController (e2e)', () => {
     const res = await request(app.getHttpServer()).get('/categories');
 
     expect(res.statusCode).toEqual(200);
-    expect(res.body).toStrictEqual([
+    expect(res.body).toMatchObject([
       {
         id: 1,
         name: 'Fine Art',
@@ -2839,7 +2959,7 @@ describe('AppController (e2e)', () => {
     );
 
     expect(res.statusCode).toEqual(200);
-    expect(res.body).toStrictEqual({
+    expect(res.body).toMatchObject({
       categories: [
         {
           id: 1,
@@ -3032,13 +3152,19 @@ describe('AppController (e2e)', () => {
       '/users/topBuyers',
     );
     expect(topBuyersResBefore.statusCode).toEqual(200);
-    expect(topBuyersResBefore.body).toStrictEqual({
+    expect(topBuyersResBefore.body).toMatchObject({
       topBuyers: [
         {
           userId: 1,
           userAddress: 'addr',
           userPicture: null,
           totalPaid: '13.00',
+        },
+        {
+          totalPaid: '1.70',
+          userAddress: 'tz1',
+          userId: 2,
+          userPicture: null,
         },
       ],
     });
@@ -3079,13 +3205,19 @@ describe('AppController (e2e)', () => {
       '/users/topBuyers',
     );
     expect(topBuyersResAfter.statusCode).toEqual(200);
-    expect(topBuyersResAfter.body).toStrictEqual({
+    expect(topBuyersResAfter.body).toMatchObject({
       topBuyers: [
         {
           userId: 1,
           userAddress: 'addr',
           userPicture: null,
           totalPaid: '12.90',
+        },
+        {
+          totalPaid: '1.70',
+          userAddress: 'tz1',
+          userId: 2,
+          userPicture: null,
         },
       ],
     });
@@ -3136,13 +3268,19 @@ describe('AppController (e2e)', () => {
       '/users/topBuyers',
     );
     expect(topBuyersResAfter.statusCode).toEqual(200);
-    expect(topBuyersResAfter.body).toStrictEqual({
+    expect(topBuyersResAfter.body).toMatchObject({
       topBuyers: [
         {
           userId: 1,
           userAddress: 'addr',
           userPicture: null,
           totalPaid: '13.00',
+        },
+        {
+          totalPaid: '1.70',
+          userAddress: 'tz1',
+          userId: 2,
+          userPicture: null,
         },
       ],
     });
@@ -3182,10 +3320,10 @@ describe('AppController (e2e)', () => {
         artifactUri: 'some_s3_uri',
 
         price: '0.50',
+        isProxy: false,
         categories: [10],
         editionsSize: 4,
 
-        launchAt: 0,
         signature: signed.sig,
       });
 
@@ -3205,10 +3343,10 @@ describe('AppController (e2e)', () => {
         artifactUri: 'some_s3_uri',
 
         price: '0.50',
+        isProxy: false,
         categories: [10],
         editionsSize: 4,
 
-        launchAt: 0,
         signature: 'some invalid signature',
       });
 
@@ -3246,22 +3384,31 @@ describe('AppController (e2e)', () => {
     delete paymentIntentRes.body.paymentDetails.mutezAmount;
     expect(Number(paymentIntentRes.body.amount)).toBeGreaterThan(0);
     delete paymentIntentRes.body.amount;
+    expect(typeof paymentIntentRes.body.expiresAt).toBe('number');
     delete paymentIntentRes.body.expiresAt;
     for (const i in paymentIntentRes.body.nfts) {
       expect(Number(paymentIntentRes.body.nfts[i].price)).toBeGreaterThan(0);
-      expect(paymentIntentRes.body.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(paymentIntentRes.body.nfts[i].launchAt).toBeGreaterThan(0);
       delete paymentIntentRes.body.nfts[i].price;
+      expect(paymentIntentRes.body.nfts[i].createdAt).toBeGreaterThan(0);
       delete paymentIntentRes.body.nfts[i].createdAt;
-      delete paymentIntentRes.body.nfts[i].launchAt;
+
+      if (typeof paymentIntentRes.body.nfts[i].onsaleFrom !== 'undefined') {
+        expect(paymentIntentRes.body.nfts[i].launchAt).toEqual(
+          paymentIntentRes.body.nfts[i].onsaleFrom,
+        );
+        expect(paymentIntentRes.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+        delete paymentIntentRes.body.nfts[i].launchAt;
+        delete paymentIntentRes.body.nfts[i].onsaleFrom;
+      }
+
       if (typeof paymentIntentRes.body.nfts[i].onsaleUntil !== 'undefined') {
         expect(paymentIntentRes.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
         delete paymentIntentRes.body.nfts[i].onsaleUntil;
       }
     }
-    expect(paymentIntentRes.body).toEqual({
+    expect(paymentIntentRes.body).toMatchObject({
       paymentDetails: {
-        receiverAddress: 'KT1MZTPQFdEZKLXtdQzpuA4MFt5ZkmKqFqkq',
+        receiverAddress: TEZPAY_PAYPOINT_ADDRESS,
       },
       currency: 'XTZ',
       nfts: [
@@ -3280,10 +3427,10 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
           editionsAvailable: 7,
           editionsSize: 8,
+          editionsSold: 0,
           id: 8,
           ipfsHash: null,
           metadataIpfs: null,
-          mintOperationHash: null,
           artifactIpfs: null,
           displayIpfs: null,
           thumbnailIpfs: null,
@@ -3308,11 +3455,11 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
           editionsAvailable: 7,
           editionsSize: 8,
+          editionsSold: 0,
           id: 10,
           ipfsHash: null,
           metadata: null,
           metadataIpfs: null,
-          mintOperationHash: null,
           artifactIpfs: null,
           displayIpfs: null,
           thumbnailIpfs: null,
@@ -3331,10 +3478,21 @@ describe('AppController (e2e)', () => {
     delete resBefore.body.user?.createdAt;
 
     for (const i in resBefore.body.collection.nfts) {
+      if (typeof resBefore.body.collection.nfts[i].mintOperationHash != null) {
+        resBefore.body.collection.nfts[i].mintOperationHash = null;
+      }
+
       expect(resBefore.body.collection.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(resBefore.body.collection.nfts[i].launchAt).toBeGreaterThan(0);
       delete resBefore.body.collection.nfts[i].createdAt;
-      delete resBefore.body.collection.nfts[i].launchAt;
+      if (typeof resBefore.body.collection.nfts[i].onsaleFrom !== 'undefined') {
+        expect(resBefore.body.collection.nfts[i].launchAt).toEqual(
+          resBefore.body.collection.nfts[i].onsaleFrom,
+        );
+        expect(resBefore.body.collection.nfts[i].onsaleFrom).toBeGreaterThan(0);
+        delete resBefore.body.collection.nfts[i].launchAt;
+        delete resBefore.body.collection.nfts[i].onsaleFrom;
+      }
+
       if (
         typeof resBefore.body.collection.nfts[i].onsaleUntil !== 'undefined'
       ) {
@@ -3346,9 +3504,21 @@ describe('AppController (e2e)', () => {
     }
     for (const i in resBefore.body.pendingOwnership) {
       expect(resBefore.body.pendingOwnership[i].createdAt).toBeGreaterThan(0);
-      expect(resBefore.body.pendingOwnership[i].launchAt).toBeGreaterThan(0);
       delete resBefore.body.pendingOwnership[i].createdAt;
-      delete resBefore.body.pendingOwnership[i].launchAt;
+
+      if (
+        typeof resBefore.body.pendingOwnership[i].onsaleFrom !== 'undefined'
+      ) {
+        expect(resBefore.body.pendingOwnership[i].launchAt).toEqual(
+          resBefore.body.pendingOwnership[i].onsaleFrom,
+        );
+        expect(resBefore.body.pendingOwnership[i].onsaleFrom).toBeGreaterThan(
+          0,
+        );
+        delete resBefore.body.pendingOwnership[i].launchAt;
+        delete resBefore.body.pendingOwnership[i].onsaleFrom;
+      }
+
       if (
         typeof resBefore.body.pendingOwnership[i].onsaleUntil !== 'undefined'
       ) {
@@ -3359,7 +3529,7 @@ describe('AppController (e2e)', () => {
       }
     }
 
-    expect(resBefore.body).toStrictEqual({
+    expect(resBefore.body).toMatchObject({
       collection: {
         currentPage: 1,
         lowerPriceBound: '0.10',
@@ -3380,6 +3550,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             editionsAvailable: 3,
             editionsSize: 4,
+            editionsSold: 1,
             id: 1,
             ipfsHash: 'ipfs://.....',
             metadata: {
@@ -3388,7 +3559,6 @@ describe('AppController (e2e)', () => {
               },
             },
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '1-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '1-thumbnail-ipfs-hash',
@@ -3396,6 +3566,7 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending'],
             ownershipInfo: [{ status: 'pending' }],
             price: '0.10',
+            isProxy: false,
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
           },
@@ -3414,11 +3585,11 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             editionsAvailable: 0,
             editionsSize: 8,
+            editionsSold: 3,
             id: 4,
             ipfsHash: 'ipfs://.....',
             metadata: null,
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '4-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -3430,6 +3601,7 @@ describe('AppController (e2e)', () => {
               { status: 'pending' },
             ],
             price: '4.30',
+            isProxy: false,
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
           },
@@ -3454,10 +3626,10 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
           editionsAvailable: 0,
           editionsSize: 8,
+          editionsSold: 3,
           id: 4,
           ipfsHash: 'ipfs://.....',
           metadataIpfs: 'ipfs://.....',
-          mintOperationHash: null,
           artifactIpfs: '4-artifact-ipfs-hash',
           displayIpfs: null,
           thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -3466,6 +3638,7 @@ describe('AppController (e2e)', () => {
           ownerStatuses: ['payment processing'],
           ownershipInfo: [{ status: 'payment processing' }],
           price: '4.30',
+          isProxy: false,
           thumbnailUri:
             'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
         },
@@ -3480,18 +3653,27 @@ describe('AppController (e2e)', () => {
     const cartBefore = await request(app.getHttpServer())
       .get('/users/cart/list')
       .set('authorization', bearer);
+    expect(typeof cartBefore.body.expiresAt).toBe('number');
     delete cartBefore.body.expiresAt;
     for (const i in cartBefore.body.nfts) {
       expect(cartBefore.body.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(cartBefore.body.nfts[i].launchAt).toBeGreaterThan(0);
+
       delete cartBefore.body.nfts[i].createdAt;
-      delete cartBefore.body.nfts[i].launchAt;
+
+      if (typeof cartBefore.body.nfts[i].onsaleFrom !== 'undefined') {
+        expect(cartBefore.body.nfts[i].launchAt).toEqual(
+          cartBefore.body.nfts[i].onsaleFrom,
+        );
+        expect(cartBefore.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+        delete cartBefore.body.nfts[i].launchAt;
+        delete cartBefore.body.nfts[i].onsaleFrom;
+      }
       if (typeof cartBefore.body.nfts[i].onsaleUntil !== 'undefined') {
         expect(cartBefore.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
         delete cartBefore.body.nfts[i].onsaleUntil;
       }
     }
-    expect(cartBefore.body).toEqual({
+    expect(cartBefore.body).toMatchObject({
       nfts: [
         {
           artifactUri:
@@ -3508,16 +3690,17 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
           editionsAvailable: 7,
           editionsSize: 8,
+          editionsSold: 0,
           id: 8,
           ipfsHash: null,
           metadata: null,
           metadataIpfs: null,
-          mintOperationHash: null,
           artifactIpfs: null,
           displayIpfs: null,
           thumbnailIpfs: null,
           name: 'An didn t stop improving',
           price: '23.20',
+          isProxy: false,
           thumbnailUri:
             'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
         },
@@ -3537,16 +3720,17 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
           editionsAvailable: 7,
           editionsSize: 8,
+          editionsSold: 0,
           id: 10,
           ipfsHash: null,
           metadata: null,
           metadataIpfs: null,
-          mintOperationHash: null,
           artifactIpfs: null,
           displayIpfs: null,
           thumbnailIpfs: null,
           name: 'Antonin DVORAK',
           price: '9.20',
+          isProxy: false,
           thumbnailUri:
             'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
         },
@@ -3575,9 +3759,16 @@ describe('AppController (e2e)', () => {
     delete resAfter.body.user?.createdAt;
     for (const i in resAfter.body.collection.nfts) {
       expect(resAfter.body.collection.nfts[i].createdAt).toBeGreaterThan(0);
-      expect(resAfter.body.collection.nfts[i].launchAt).toBeGreaterThan(0);
       delete resAfter.body.collection.nfts[i].createdAt;
-      delete resAfter.body.collection.nfts[i].launchAt;
+
+      if (typeof resAfter.body.collection.nfts[i].onsaleFrom !== 'undefined') {
+        expect(resAfter.body.collection.nfts[i].launchAt).toEqual(
+          resAfter.body.collection.nfts[i].onsaleFrom,
+        );
+        expect(resAfter.body.collection.nfts[i].onsaleFrom).toBeGreaterThan(0);
+        delete resAfter.body.collection.nfts[i].launchAt;
+        delete resAfter.body.collection.nfts[i].onsaleFrom;
+      }
       if (typeof resAfter.body.collection.nfts[i].onsaleUntil !== 'undefined') {
         expect(resAfter.body.collection.nfts[i].onsaleUntil).toBeGreaterThan(0);
         delete resAfter.body.collection.nfts[i].onsaleUntil;
@@ -3585,9 +3776,16 @@ describe('AppController (e2e)', () => {
     }
     for (const i in resAfter.body.pendingOwnership) {
       expect(resAfter.body.pendingOwnership[i].createdAt).toBeGreaterThan(0);
-      expect(resAfter.body.pendingOwnership[i].launchAt).toBeGreaterThan(0);
       delete resAfter.body.pendingOwnership[i].createdAt;
-      delete resAfter.body.pendingOwnership[i].launchAt;
+
+      if (typeof resAfter.body.pendingOwnership[i].onsaleFrom !== 'undefined') {
+        expect(resAfter.body.pendingOwnership[i].launchAt).toEqual(
+          resAfter.body.pendingOwnership[i].onsaleFrom,
+        );
+        expect(resAfter.body.pendingOwnership[i].onsaleFrom).toBeGreaterThan(0);
+        delete resAfter.body.pendingOwnership[i].launchAt;
+        delete resAfter.body.pendingOwnership[i].onsaleFrom;
+      }
       if (
         typeof resAfter.body.pendingOwnership[i].onsaleUntil !== 'undefined'
       ) {
@@ -3598,7 +3796,7 @@ describe('AppController (e2e)', () => {
       }
     }
 
-    expect(resAfter.body).toStrictEqual({
+    expect(resAfter.body).toMatchObject({
       collection: {
         currentPage: 1,
         lowerPriceBound: '0.10',
@@ -3619,6 +3817,7 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
             editionsAvailable: 3,
             editionsSize: 4,
+            editionsSold: 1,
             id: 1,
             ipfsHash: 'ipfs://.....',
             metadata: {
@@ -3627,7 +3826,6 @@ describe('AppController (e2e)', () => {
               },
             },
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '1-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '1-thumbnail-ipfs-hash',
@@ -3635,6 +3833,7 @@ describe('AppController (e2e)', () => {
             ownerStatuses: ['pending'],
             ownershipInfo: [{ status: 'pending' }],
             price: '0.10',
+            isProxy: false,
             thumbnailUri:
               'https://images.unsplash.com/photo-1603344204980-4edb0ea63148?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8ZHJhd2luZ3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
           },
@@ -3653,11 +3852,11 @@ describe('AppController (e2e)', () => {
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
             editionsAvailable: 0,
             editionsSize: 8,
+            editionsSold: 3,
             id: 4,
             ipfsHash: 'ipfs://.....',
             metadata: null,
             metadataIpfs: 'ipfs://.....',
-            mintOperationHash: null,
             artifactIpfs: '4-artifact-ipfs-hash',
             displayIpfs: null,
             thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -3669,6 +3868,7 @@ describe('AppController (e2e)', () => {
               { status: 'pending' },
             ],
             price: '4.30',
+            isProxy: false,
             thumbnailUri:
               'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
           },
@@ -3693,11 +3893,11 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
           editionsAvailable: 0,
           editionsSize: 8,
+          editionsSold: 3,
           id: 4,
           ipfsHash: 'ipfs://.....',
           metadata: null,
           metadataIpfs: 'ipfs://.....',
-          mintOperationHash: null,
           artifactIpfs: '4-artifact-ipfs-hash',
           displayIpfs: null,
           thumbnailIpfs: '4-thumbnail-ipfs-hash',
@@ -3705,6 +3905,7 @@ describe('AppController (e2e)', () => {
           ownerStatuses: ['payment processing'],
           ownershipInfo: [{ status: 'payment processing' }],
           price: '4.30',
+          isProxy: false,
           thumbnailUri:
             'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
         },
@@ -3723,11 +3924,11 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
           editionsAvailable: 7,
           editionsSize: 8,
+          editionsSold: 0,
           id: 8,
           ipfsHash: null,
           metadata: null,
           metadataIpfs: null,
-          mintOperationHash: null,
           artifactIpfs: null,
           displayIpfs: null,
           thumbnailIpfs: null,
@@ -3735,6 +3936,7 @@ describe('AppController (e2e)', () => {
           ownerStatuses: ['payment processing'],
           ownershipInfo: [{ status: 'payment processing' }],
           price: '23.20',
+          isProxy: false,
           thumbnailUri:
             'https://images.unsplash.com/photo-1544967082-d9d25d867d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MjB8fHBhaW50aW5nc3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=900&q=60',
         },
@@ -3754,11 +3956,11 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
           editionsAvailable: 7,
           editionsSize: 8,
+          editionsSold: 0,
           id: 10,
           ipfsHash: null,
           metadata: null,
           metadataIpfs: null,
-          mintOperationHash: null,
           artifactIpfs: null,
           displayIpfs: null,
           thumbnailIpfs: null,
@@ -3766,6 +3968,7 @@ describe('AppController (e2e)', () => {
           ownerStatuses: ['payment processing'],
           ownershipInfo: [{ status: 'payment processing' }],
           price: '9.20',
+          isProxy: false,
           thumbnailUri:
             'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
         },
@@ -3786,7 +3989,6 @@ describe('AppController (e2e)', () => {
 });
 
 async function getPaymentStatus(paymentId: string): Promise<PaymentStatus> {
-  console.log(`paymentId: ${paymentId}`);
   const db = newDbConn();
   const qryRes = await db.query(
     `
@@ -3798,7 +4000,6 @@ WHERE payment_id = $1
   );
   await db.end();
 
-  console.log(qryRes);
   return qryRes.rows[0].status;
 }
 

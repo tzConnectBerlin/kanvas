@@ -6,6 +6,7 @@ import { AuthenticationController } from '../authentication/controller/authentic
 import { JwtStrategy } from './strategy/jwt-auth.strategy.js';
 import { DbModule } from '../db.module.js';
 import { S3Service } from '../s3.service.js';
+import { TokenGateModule } from '../tokenGate.module.js';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { S3Service } from '../s3.service.js';
     }),
     DbModule,
     UserModule,
+    TokenGateModule,
   ],
   controllers: [AuthenticationController],
   providers: [AuthenticationService, JwtStrategy, S3Service],

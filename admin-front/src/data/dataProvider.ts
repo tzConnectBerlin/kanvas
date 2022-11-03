@@ -1,7 +1,7 @@
-import { reject } from 'lodash';
 import { stringify } from 'query-string';
 import { fetchUtils, DataProvider } from 'ra-core';
 import { getToken } from '../auth/authUtils';
+import { removeNullObjKeys } from '../utils/utils';
 
 /**
  * Maps react-admin queries to a simple REST API
@@ -41,7 +41,6 @@ const dataProvider = (
   httpClient = fetchUtils.fetchJson,
   countHeader: string = 'Content-Range',
 ): DataProvider => ({
-
   getList: (resource, params) => {
     const { page, perPage } = params.pagination;
     const { field, order } = params.sort;
@@ -49,18 +48,31 @@ const dataProvider = (
     const rangeStart = (page - 1) * perPage;
     const rangeEnd = perPage;
 
-    let query = {}
+    let query = {};
     if (resource === 'analytics/sales/priceVolume/snapshot') {
       query = {
-        sort: JSON.stringify([field.startsWith('attributes.') ? field.slice('attributes.'.length) : field, order.toLowerCase()]),
+        sort: JSON.stringify([
+          field.startsWith('attributes.')
+            ? field.slice('attributes.'.length)
+            : field,
+          order.toLowerCase(),
+        ]),
         range: JSON.stringify([rangeStart, rangeEnd]),
         [Object.keys(params.filter)[0]]: params.filter.resolution,
       };
     } else {
       query = {
-        sort: JSON.stringify([field.startsWith('attributes.') ? field.slice('attributes.'.length) : field, order.toLowerCase()]),
+        sort: JSON.stringify([
+          field.startsWith('attributes.')
+            ? field.slice('attributes.'.length)
+            : field,
+          order.toLowerCase(),
+        ]),
         range: JSON.stringify([rangeStart, rangeEnd]),
-        filters: Object.keys(params.filter).length === 0 ? undefined : JSON.stringify(params.filter),
+        filters:
+          Object.keys(params.filter).length === 0
+            ? undefined
+            : JSON.stringify(params.filter),
       };
     }
 
@@ -72,25 +84,26 @@ const dataProvider = (
     const options =
       countHeader === 'Content-Range'
         ? {
-          // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
-          headers: new Headers({
-            Authorization: `Bearer ${getToken()}`,
-            Range: `${resource}=${rangeStart}-${rangeEnd}`,
-          }),
-        }
+            // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
+            headers: new Headers({
+              Authorization: `Bearer ${getToken()}`,
+              Range: `${resource}=${rangeStart}-${rangeEnd}`,
+            }),
+          }
         : {};
 
     return httpClient(url, options).then(({ headers, json }) => {
-
       return {
         data: json?.data,
         total: json?.count ?? 1,
-      }
+      };
     });
   },
 
   getOne: (resource, params) =>
-    httpClient(`${apiUrl}/${resource}/${params.id}`, { headers: new Headers({ Authorization: `Bearer ${getToken()}` }) }).then(({ json }) => ({
+    httpClient(`${apiUrl}/${resource}/${params.id}`, {
+      headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
+    }).then(({ json }) => ({
       headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
       data: json,
     })),
@@ -101,11 +114,13 @@ const dataProvider = (
     };
 
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    return httpClient(url, { headers: new Headers({ Authorization: `Bearer ${getToken()}` }) }).then(({ json }) => {
-
-      return ({
-        data: json.data, headers: new Headers({ Authorization: `Bearer ${getToken()}` })
-      });
+    return httpClient(url, {
+      headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
+    }).then(({ json }) => {
+      return {
+        data: json.data,
+        headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
+      };
     });
   },
 
@@ -125,11 +140,11 @@ const dataProvider = (
     const options =
       countHeader === 'Content-Range'
         ? {
-          // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
-          headers: new Headers({
-            Range: `${resource}=${rangeStart}-${rangeEnd}`,
-          }),
-        }
+            // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
+            headers: new Headers({
+              Range: `${resource}=${rangeStart}-${rangeEnd}`,
+            }),
+          }
         : {};
 
     return httpClient(url, options).then(({ headers, json }) => {
@@ -144,9 +159,9 @@ const dataProvider = (
         total:
           countHeader === 'Content-Range'
             ? parseInt(
-              (headers.get('content-range') ?? '').split('/').pop() ?? '',
-              10,
-            )
+                (headers.get('content-range') ?? '').split('/').pop() ?? '',
+                10,
+              )
             : parseInt(headers.get(countHeader.toLowerCase()) ?? ''),
       };
     });
@@ -156,14 +171,17 @@ const dataProvider = (
     let updatedData: any = {};
 
     if (resource === 'nft') {
-      updatedData = diffPreviousDataToNewData(params.previousData, params.data)
+      updatedData = diffPreviousDataToNewData(params.previousData, params.data);
     }
 
     return await httpClient(`${apiUrl}/${resource}/${params.id}`, {
       method: 'PATCH',
-      body: resource === 'nft' ? toFormData(updatedData, resource) : JSON.stringify(params.data),
+      body:
+        resource === 'nft'
+          ? toFormData(updatedData, resource)
+          : JSON.stringify(params.data),
       headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
-    }).then(({ json }) => ({ data: json }))
+    }).then(({ json }) => ({ data: json }));
   },
 
   // simple-rest doesn't handle provide an updateMany route, so we fallback to calling update n times instead
@@ -175,33 +193,35 @@ const dataProvider = (
           body: JSON.stringify(params.data),
         }),
       ),
-    ).then((responses) => ({ data: responses.map(({ json }) => json.id) }))
+    ).then((responses) => ({ data: responses.map(({ json }) => json.id) }));
   },
 
   create: async (resource, params) => {
     if (resource === 'nft') {
-      const updatedData = diffPreviousDataToNewData({}, params.data)
+      const updatedData = diffPreviousDataToNewData({}, params.data);
       return await httpClient(`${apiUrl}/${resource}/`, {
         method: 'PATCH',
         body: toFormData(updatedData, resource),
         headers: new Headers({ Authorization: `Bearer ${getToken()}` }),
       }).then(({ json }) => ({
         data: { ...params.data, id: json.id },
-      }))
-
+      }));
     }
     // fallback to the default implementation
     return await httpClient(`${apiUrl}/${resource}`, {
       method: 'POST',
       body: JSON.stringify(params.data),
-      headers: new Headers({ 'Content-type': 'application/json', Authorization: `Bearer ${getToken()}` }),
+      headers: new Headers({
+        'Content-type': 'application/json',
+        Authorization: `Bearer ${getToken()}`,
+      }),
     }).then(({ json }) => ({
       data: { ...params.data, id: json.id },
-    }))
+    }));
   },
 
   delete: (resource, params) =>
-     httpClient(`${apiUrl}/${resource}/${params.id}`, {
+    httpClient(`${apiUrl}/${resource}/${params.id}`, {
       method: 'DELETE',
       headers: new Headers({
         'Content-Type': 'text/plain',
@@ -230,24 +250,30 @@ const diffPreviousDataToNewData = (previousData: any, data: any) => {
   // Attributes part
   let diff: any = {};
 
-  const newKeys = Object.keys(data.attributes)
+  const newKeys = Object.keys(data.attributes);
 
   for (const key of newKeys) {
     if (!previousData.attributes) {
-      diff[key] = data.attributes[key]
-      continue
+      diff[key] = data.attributes[key];
+      continue;
     }
-    if (JSON.stringify(previousData.attributes[key]) !== JSON.stringify(data.attributes[key])) {
-      diff[key] = data.attributes[key]
+    if (
+      JSON.stringify(previousData.attributes[key]) !==
+      JSON.stringify(data.attributes[key])
+    ) {
+      diff[key] = data.attributes[key];
     }
   }
   // File part
   if (data.hasOwnProperty('files')) {
-    diff['files'] = data['files'].length ? data['files'] : [data['files']]
+    const filesExist = !!data['files'].length;
+    const files = removeNullObjKeys(data['files']);
+
+    diff['files'] = filesExist ? files : [files];
   }
 
-  return diff
-}
+  return diff;
+};
 
 const toFormData = (data: any, resource = '') => {
   const formData = new FormData();
@@ -261,20 +287,24 @@ const toFormData = (data: any, resource = '') => {
           try {
             Object.defineProperty(file, 'name', {
               writable: true,
-              value: key.slice('files'.length).toLowerCase()
+              value: key.slice('files'.length).toLowerCase(),
             });
 
             Object.keys(file).map((key: any, index: number) => {
-              formData.append('files[]', file[Object.keys(file)[index]].rawFile, Object.keys(file)[index].toLowerCase());
-            })
+              formData.append(
+                'files[]',
+                file[Object.keys(file)[index]].rawFile,
+                Object.keys(file)[index].toLowerCase(),
+              );
+            });
           } catch (error: any) {
-            console.log(error)
+            console.log(error);
           }
-        })
+        });
       } else {
         // Checking if it s a date: not the best way but convenient enough in this case
         if (typeof data[key].getMonth === 'function') {
-          data[key] = data[key].getTime()
+          data[key] = data[key].getTime();
         }
         formData.append(key, JSON.stringify(data[key]));
       }
@@ -282,7 +312,6 @@ const toFormData = (data: any, resource = '') => {
   });
 
   return formData;
-
 };
 
 export default dataProvider;

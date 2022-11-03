@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import {
   CreateNft,
+  CreateProxiedNft,
   NftEntity,
   NftEntityPage,
   OwnershipInfo,
@@ -21,15 +22,15 @@ import {
   ENDING_SOON_DURATION,
 } from '../../constants.js';
 import { CurrencyService, BASE_CURRENCY } from 'kanvas-api-lib';
-import { sleep } from '../../utils.js';
-import { IpfsService } from './ipfs.service.js';
+import { sleep, maybe } from '../../utils.js';
+import { NftIpfsService } from './ipfs.service.js';
 import { DbTransaction, withTransaction } from '../../db.module.js';
 
 @Injectable()
 export class NftService {
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
-    private ipfsService: IpfsService,
+    private ipfsService: NftIpfsService,
     private currencyService: CurrencyService,
   ) {}
 
@@ -49,9 +50,9 @@ export class NftService {
       await dbTx.query(
         `
 INSERT INTO nft (
-  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, onsale_from, onsale_until, price, editions_size, metadata
+  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, onsale_from, onsale_until, price, editions_size, metadata, proxy_nft_id
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       `,
 
         [
@@ -67,6 +68,7 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
           this.currencyService.convertFromCurrency(newNft.price, BASE_CURRENCY),
           newNft.editionsSize,
           newNft.metadata,
+          newNft.proxyNftId,
         ],
       );
 
@@ -97,6 +99,9 @@ SELECT $1, UNNEST($2::INTEGER[])
           await this.ipfsService.uploadNft(nftEntity, dbTx);
           return;
         } catch (err: any) {
+          throw `failed to upload new nft to IPFS (attempt ${
+            i + 1
+          }/${MAX_ATTEMPTS}), err: ${err}`;
           Logger.warn(
             `failed to upload new nft to IPFS (attempt ${
               i + 1
@@ -108,7 +113,7 @@ SELECT $1, UNNEST($2::INTEGER[])
       throw `failed to upload new nft to IPFS`;
     };
 
-    return await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+    await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       await insert(dbTx);
       await uploadToIpfs(dbTx);
     }).catch((err: any) => {
@@ -119,6 +124,37 @@ SELECT $1, UNNEST($2::INTEGER[])
     Logger.log(`Created new NFT ${newNft.id}`);
   }
 
+  async createProxiedNft(newNft: CreateProxiedNft) {
+    const proxyNft = await this.byId(newNft.proxyNftId);
+
+    await this.createNft({
+      ...newNft,
+      name: newNft.name ?? proxyNft.name,
+      description: newNft.description ?? proxyNft.description,
+      price: Number(proxyNft.price),
+      editionsSize: 1,
+    });
+
+    await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+      await dbTx.query(
+        `
+INSERT INTO proxy_unfold (proxy_nft_id, unfold_nft_id)
+VALUES ($1, $2)
+        `,
+        [newNft.proxyNftId, newNft.id],
+      );
+
+      await dbTx.query(
+        `
+UPDATE nft
+SET editions_size = (SELECT count(1) FROM proxy_unfold WHERE proxy_nft_id = $1)
+WHERE id = $1
+      `,
+        [newNft.proxyNftId],
+      );
+    });
+  }
+
   async delistNft(nftId: number) {
     await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       const tablesNftIdField: { [key: string]: string } = {
@@ -126,8 +162,10 @@ SELECT $1, UNNEST($2::INTEGER[])
         mtm_kanvas_user_nft: 'nft_id',
         mtm_nft_category: 'nft_id',
         mtm_nft_order_nft: 'nft_id',
+        nft_order_delivery: 'nft_order_id',
       };
       const tables = [
+        'nft_order_delivery',
         'mtm_nft_order_nft',
         'mtm_kanvas_user_nft',
         'mtm_nft_category',
@@ -283,17 +321,23 @@ LIMIT $3
       untilNft = new Date(filters.firstRequestAt * 1000).toISOString();
     }
 
+    const proxiesFolded: boolean | undefined =
+      (filters.proxyFolding ?? 'both') === 'both'
+        ? undefined
+        : filters.proxyFolding === 'fold';
+
     try {
       const nftIds = await this.conn.query(
         `
 SELECT nft_id, total_nft_count
-FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
         [
           filters.userAddress,
           filters.categories,
           filters.priceAtLeast,
           filters.priceAtMost,
           filters.availability,
+          proxiesFolded,
           ENDING_SOON_DURATION,
           orderBy,
           filters.orderDirection,
@@ -356,7 +400,7 @@ FROM price_bounds($1, $2, $3, $4, $5)`,
 
   async byId(
     id: number,
-    currency: string,
+    currency: string = BASE_CURRENCY,
     includeRecvForAddress?: string,
     incrViewCount: boolean = true,
     dbConn: any = this.conn,
@@ -395,7 +439,7 @@ WHERE id = $1
 
   async findByIds(
     nftIds: number[],
-    forRecvAddr: string | undefined,
+    forRecvAddr?: string,
     orderBy: string = 'nft_id',
     orderDirection: string = 'asc',
     currency: string = BASE_CURRENCY,
@@ -410,6 +454,8 @@ SELECT
   nft_created_at,
   nft_name,
   description,
+  is_proxy,
+  proxy_nft_id,
 
   editions_size,
   price,
@@ -442,9 +488,12 @@ FROM nfts_by_id($1, $2, $3, $4)`,
         const reserved = Number(nftRow['editions_reserved']);
         const owned = Number(nftRow['editions_owned']);
 
-        const launchAtMilliUnix = nftRow['onsale_from']?.getTime() || 0;
-        const onsaleUntilMilliUnix =
-          nftRow['onsale_until']?.getTime() || undefined;
+        const onsaleFrom = maybe(nftRow['onsale_from'], (t) =>
+          Math.floor(t.getTime() / 1000),
+        );
+        const onsaleUntil = maybe(nftRow['onsale_until'], (t) =>
+          Math.floor(t.getTime() / 1000),
+        );
 
         let metadataIpfs = null;
         let artifactIpfs = null;
@@ -461,6 +510,8 @@ FROM nfts_by_id($1, $2, $3, $4)`,
           id: nftRow['nft_id'],
           name: nftRow['nft_name'],
           description: nftRow['description'],
+          isProxy: nftRow['is_proxy'],
+          proxyNftId: maybe(nftRow['proxy_nft_id'], (x) => x),
 
           ipfsHash: metadataIpfs, // note: deprecated by metadataIpfs
           metadataIpfs: metadataIpfs,
@@ -487,12 +538,12 @@ FROM nfts_by_id($1, $2, $3, $4)`,
           metadata: nftRow['metadata'],
           editionsSize: editions,
           editionsAvailable: editions - (reserved + owned),
+          editionsSold: owned,
 
           createdAt: Math.floor(nftRow['nft_created_at'].getTime() / 1000),
-          launchAt: Math.floor(launchAtMilliUnix / 1000),
-          onsaleUntil: onsaleUntilMilliUnix
-            ? Math.floor(onsaleUntilMilliUnix / 1000)
-            : undefined,
+          launchAt: onsaleFrom,
+          onsaleFrom,
+          onsaleUntil,
 
           mintOperationHash: nftRow['mint_op_hash'],
           ownershipInfo: nftRow['owned_recv_op_hashes']?.map(

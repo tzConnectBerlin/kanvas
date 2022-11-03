@@ -35,12 +35,13 @@
     "@types/validator": "^13.7.2",
     "async-await-mutex-lock": "^1.0.7",
     "aws-sdk": "^2.1046.0",
-    "bcrypt": "^5.0.1",
+    "bcrypt": "^5.1.0",
     "body-parser": "^1.19.1",
     "bs58check": "^2.1.2",
     "class-transformer": "0.4.0",
     "class-validator": "^0.13.1",
     "cookie-session": "^1.4.0",
+    "dayjs": "^1.11.6",
     "dotenv": "^10.0.0",
     "filesize": "^9.0.11",
     "joi": "^17.5.0",
@@ -92,7 +93,9 @@
       "node_modules",
       "<rootDir>"
     ],
-    "extensionsToTreatAsEsm": [".ts"],
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
     "globals": {
       "ts-jest": {
         "useESM": true
@@ -111,9 +114,9 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "transformIgnorePatterns": [
-        "<rootDir>/node_modules/",
-        "<rootDir>/stm-lib/",
-        "/kanvas/lib/api-lib/"
+      "<rootDir>/node_modules/",
+      "<rootDir>/stm-lib/",
+      "/kanvas/lib/api-lib/"
     ],
     "collectCoverageFrom": [
       "src/**/{!(nft_mock.service),}.ts"

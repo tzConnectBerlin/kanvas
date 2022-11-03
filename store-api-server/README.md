@@ -40,16 +40,6 @@ $ yarn run start:prod
 
 It should now be available at `http://localhost:3000/`.
 
-
-#### Note
-
-Currently as part of the migrations files, Database stored procedures are
-defined too. This means that part of the functionality of queries is defined
-in `migrations/...`.
-
-For example, if you see something like `SELECT ... FROM some_custom_function(..)`
-somewhere in the typescript code, `some_custom_function` is defined in the migrations folder.
-
 ## Test
 
 ```bash

@@ -1,3 +1,6 @@
 [submodule "lib/tezpay"]
 	path = lib/tezpay
 	url = https://github.com/tzConnectBerlin/tezpay.git
+[submodule "lib/token-gate"]
+	path = lib/token-gate
+	url = https://github.com/tzConnectBerlin/token-gate.git

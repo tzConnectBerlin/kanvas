@@ -19,7 +19,11 @@ import sotez from 'sotez';
 const { cryptoUtils } = sotez;
 import { NftService } from '../service/nft.service.js';
 import { CategoryService } from '../../category/service/category.service.js';
-import { NftEntity, CreateNft } from '../entity/nft.entity.js';
+import {
+  NftEntity,
+  CreateNft,
+  CreateProxiedNft,
+} from '../entity/nft.entity.js';
 import {
   FilterParams,
   PaginationParams,
@@ -53,6 +57,17 @@ export class NftController {
     );
 
     return await this.nftService.createNft(nft);
+  }
+
+  @Post('/create-proxied')
+  async createProxiedNft(@Body() nft: CreateProxiedNft) {
+    await this.#verifySignature(
+      SIGNATURE_PREFIX_CREATE_NFT,
+      nft.id,
+      nft.signature,
+    );
+
+    return await this.nftService.createProxiedNft(nft);
   }
 
   @Post('/delist/:id')
@@ -138,6 +153,7 @@ export class NftController {
   @Header('cache-control', 'no-store,must-revalidate')
   async byId(
     @Param('id') id: number,
+    @Query('userAddress') userOnchainOwnedInfo?: string,
     @Query('currency') currency: string = BASE_CURRENCY,
   ): Promise<NftEntity> {
     validateRequestedCurrency(currency);
@@ -149,7 +165,7 @@ export class NftController {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return await this.nftService.byId(id, currency);
+    return await this.nftService.byId(id, currency, userOnchainOwnedInfo);
   }
 
   #validateFilterParams(params: FilterParams): void {

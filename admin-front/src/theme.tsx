@@ -8,6 +8,7 @@ export const theme = createTheme(
       type: 'light',
       primary: {
         main: '#9771ff',
+        light: 'rgb(196, 196, 196)',
       },
       secondary: {
         main: '#fff',
@@ -30,7 +31,6 @@ export const theme = createTheme(
       },
     },
     overrides: {
-
       MuiToolbar: {
         regular: {
           MuiButtonBase: {
@@ -60,8 +60,6 @@ export const theme = createTheme(
           borderLeft: '3px solid #fff', // invisible menu when not active, to avoid scrolling the text when selecting the menu
         },
       },
-
-
 
       MuiButtonBase: {
         root: {
