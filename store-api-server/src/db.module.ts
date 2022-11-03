@@ -117,7 +117,7 @@ export async function withMutexLock<ResTy>({
     const res = await f(dbTx);
 
     await dbTx.query(
-      `UPDATE mutex SET last_lock = now() at time zone 'utc' WHERE name = $1`,
+      `UPDATE mutex SET last_lock = now() AT TIME ZONE 'utc' WHERE name = $1`,
       [mutexName],
     );
     return res;
