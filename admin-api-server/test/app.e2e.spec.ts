@@ -3,7 +3,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { Roles } from '../src/role/entities/role.entity';
-import { assertEnv } from '../src/utils';
+import { assertEnv } from '../src/utils/utils';
 import Pool from 'pg-pool';
 import axios from 'axios';
 import { loginAsAdmin, loginUser } from './utils';

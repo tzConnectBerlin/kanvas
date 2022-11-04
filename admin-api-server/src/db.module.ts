@@ -4,7 +4,7 @@ import pg from 'pg';
 const { types } = pg;
 import Pool from 'pg-pool';
 
-import { assertEnv } from './utils.js';
+import { assertEnv } from './utils/utils.js';
 import { PG_CONNECTION, PG_CONNECTION_STORE_REPLICATION } from './constants.js';
 
 export type DbPool = Pool<Client>;
