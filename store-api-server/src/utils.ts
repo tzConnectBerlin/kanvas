@@ -53,29 +53,6 @@ export function findOne(predicate: any, xs: any[]) {
   }
 }
 
-//
-// testing utils
-//
-
-export function sleep(ms: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
-export async function withKeyLocked<LockKeyTy, ResTy>(
-  lock: Lock<LockKeyTy>,
-  key: LockKeyTy,
-  f: () => Promise<ResTy>,
-): Promise<ResTy> {
-  await lock.acquire(key);
-  try {
-    return await f();
-  } finally {
-    lock.release(key);
-  }
-}
-
 export function nowUtcWithOffset(offsetMs: number): string {
   const d = new Date();
 
@@ -125,4 +102,11 @@ export function stringEnumIndexValue<T>(
     return undefined;
   }
   return enumValues[i];
+}
+
+// testing util
+export function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }

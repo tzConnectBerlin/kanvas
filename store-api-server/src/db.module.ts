@@ -116,10 +116,6 @@ export async function withMutexLock<ResTy>({
     Logger.log(`executing with db mutex ${mutexName}..`);
     const res = await f(dbTx);
 
-    await dbTx.query(
-      `UPDATE mutex SET last_lock = now() AT TIME ZONE 'utc' WHERE name = $1`,
-      [mutexName],
-    );
     return res;
   }).catch((err: any) => {
     if (noWait && err?.code === PG_LOCK_NOT_AVAILABLE) {
