@@ -371,6 +371,8 @@ WHERE id = $1
     const fileName = `${FILE_PREFIX}_${nftId}_${attribute}.${extension}`;
     const contentUri = await this.s3Service.uploadFile(file, fileName);
 
+    console.log('contentUri is: ', contentUri);
+
     return <NftUpdate>{
       attribute: attribute,
       value: JSON.stringify({
