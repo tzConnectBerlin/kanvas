@@ -24,8 +24,8 @@ import { ParseJSONPipe } from '../../pipes/ParseJSONPipe.js';
 import {
   queryParamsToPaginationParams,
   validatePaginationParams,
-} from '../../utils/utils.js';
-import { File, imageFromVideo, resizedImg } from '../../utils/media/media';
+} from '../../utils.js';
+import { File, imageFromVideo, resizedImg } from '../../media.js';
 import { ContentRestrictions } from 'kanvas-stm-lib';
 
 import { createRequire } from 'module';

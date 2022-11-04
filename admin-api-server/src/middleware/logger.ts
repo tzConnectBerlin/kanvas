@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { BEHIND_PROXY } from '../constants.js';
-import { getClientIp } from '../utils/utils.js';
+import { getClientIp } from '../utils.js';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
