@@ -1991,11 +1991,6 @@ astral-regex@^2.0.0:
   resolved "https://registry.yarnpkg.com/astral-regex/-/astral-regex-2.0.0.tgz#483143c567aeed4785759c0865786dc77d7d2e31"
   integrity sha512-Z7tMw1ytTXt5jqMcOP+OQteU1VuNK9Y02uuJtKQ1Sv69jXQKKg5cibLwGJow8yzZP+eAc18EmLGPal0bp36rvQ==
 
-async-await-mutex-lock@^1.0.7:
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/async-await-mutex-lock/-/async-await-mutex-lock-1.0.9.tgz#909801be8ec575215f69399625f815b4306bd230"
-  integrity sha512-QV8MDid/uFYrpOwB+z5W5MnDsyQjxSJqqt6UnDO7m7PnFzoT9j2nYOIp0LnzAw3PycXA9nk++vEqDV+8vj1hkg==
-
 async@3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/async/-/async-3.2.0.tgz#b3a2685c5ebb641d3de02d161002c60fc9f85720"
