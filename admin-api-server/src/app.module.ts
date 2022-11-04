@@ -24,7 +24,7 @@ import { RATE_LIMIT_WINDOW_SECS, RATE_LIMIT } from './constants.js';
     CategoryModule,
     AnalyticsModule,
     RoleModule,
-    CurrencyModule,
+    CurrencyModule.forRoot(),
     ThrottlerModule.forRoot({
       ttl: RATE_LIMIT_WINDOW_SECS,
       limit: RATE_LIMIT,

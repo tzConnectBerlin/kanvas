@@ -2164,6 +2164,7 @@ describe('AppController (e2e)', () => {
         metadata: null,
         metadata_ipfs: 'ipfs-mock://some name',
         artifact_uri: 'someuri',
+        proxy_nft_id: null,
         price: '10510', // in cents in the db
         editions_size: 4,
         view_count: 0,
