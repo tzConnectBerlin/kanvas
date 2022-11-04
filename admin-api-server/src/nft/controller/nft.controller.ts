@@ -24,7 +24,8 @@ import { ParseJSONPipe } from '../../pipes/ParseJSONPipe.js';
 import {
   queryParamsToPaginationParams,
   validatePaginationParams,
-} from '../../utils.js';
+} from '../../utils/utils.js';
+import { File, imageFromVideo, resizedImg } from '../../utils/media/media';
 import { ContentRestrictions } from 'kanvas-stm-lib';
 
 import { createRequire } from 'module';
@@ -216,13 +217,85 @@ export class NftController {
     @Body() nftUpdatesBody: Record<string, unknown>,
     @CurrentUser() user: UserEntity,
     @Param() urlParams: UrlParams,
-    @UploadedFiles() filesArray?: any[],
+    @UploadedFiles() filesArray?: File[],
   ): Promise<NftEntity> {
     let nftId = urlParams.id;
 
     if (typeof nftId === 'undefined') {
       nftId = (await this.nftService.createNft(user)).id;
     }
+
+    if (filesArray?.length) {
+      const artifact = filesArray.find(
+        (file) => file.originalname === 'artifact',
+      );
+      const thumbnailMissing =
+        artifact &&
+        !filesArray.some((file) => file.originalname === 'thumbnail');
+      const displayMissing =
+        artifact && !filesArray.some((file) => file.originalname === 'display');
+
+      const isVideo = (artifact?.mimetype.match(/video/g) || []).length > 0;
+      const isImage = (artifact?.mimetype.match(/image/g) || []).length > 0;
+
+      const artifactBuffer = artifact?.buffer;
+      if (isVideo && artifactBuffer) {
+        if (displayMissing && thumbnailMissing) {
+          // create display from video first, then use the same image and resize it for the thumbnail
+          const generatedDisplay = await imageFromVideo({
+            artifactBuffer,
+            nftId,
+            type: 'display',
+          });
+
+          // use the same image that is already in temp directory and resize it and use as thumbnail
+          if (generatedDisplay) {
+            filesArray.push(generatedDisplay);
+            const { buffer: displayBuffer } = generatedDisplay;
+
+            const type = 'thumbnail';
+            const pathToSave = `/Users/joshuapruefer/Desktop/kanvas/admin-api-server/temp/${nftId}_${type}.png`;
+            const thumbnail = await resizedImg({
+              buffer: displayBuffer,
+              size: 400,
+              pathToSave,
+              type: 'thumbnail',
+            });
+
+            if (thumbnail) {
+              filesArray.push(thumbnail);
+            }
+          }
+        } else if (displayMissing) {
+          const generatedDisplay = await imageFromVideo({
+            artifactBuffer,
+            nftId,
+            type: 'display',
+          });
+          if (generatedDisplay) {
+            filesArray.push(generatedDisplay);
+          }
+        } else if (thumbnailMissing) {
+          const generatedThumbnail = await imageFromVideo({
+            artifactBuffer,
+            nftId,
+            type: 'thumbnail',
+          });
+          if (generatedThumbnail) {
+            filesArray.push(generatedThumbnail);
+          }
+        }
+      } else if (isImage && artifactBuffer) {
+        if (displayMissing && thumbnailMissing) {
+          // create display from image first, then use the same image and resize it for the thumbnail
+        } else if (displayMissing) {
+          // create display from image
+        } else if (thumbnailMissing) {
+          // create thumbnail from image
+        }
+      }
+    }
+
     const nftUpdates = this.#transformFormDataToNftUpdates(
       nftUpdatesBody,
       filesArray,
