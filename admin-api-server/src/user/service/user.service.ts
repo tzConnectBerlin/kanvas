@@ -8,7 +8,7 @@ import {
 
 import { PG_CONNECTION } from '../../constants.js';
 import { DbPool } from '../../db.module.js';
-import { hashPassword } from '../../utils/utils.js';
+import { hashPassword } from '../../utils.js';
 import { UserEntity } from '../entities/user.entity.js';
 import { UserFilterParams } from '../params.js';
 import { Roles } from '../../role/entities/role.entity.js';

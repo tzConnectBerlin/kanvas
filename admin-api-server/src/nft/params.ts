@@ -4,7 +4,7 @@ import {
   parseStringArray,
   parseNumberParam,
   PaginationParams,
-} from '../utils/utils.js';
+} from '../utils.js';
 
 export class NftFilters {
   @IsArray()

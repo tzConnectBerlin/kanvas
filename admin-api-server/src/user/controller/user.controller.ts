@@ -23,7 +23,7 @@ import { UserEntity } from '../entities/user.entity.js';
 import {
   queryParamsToPaginationParams,
   validatePaginationParams,
-} from '../../utils/utils';
+} from '../../utils.js';
 
 @Controller('user')
 export class UserController {
