@@ -6,7 +6,7 @@ import { sleep } from './utils';
 
 describe('DbModule', () => {
   let db: DbPool;
-  let testMutexes = ['m1', 'm2'];
+  let testMutexes = ['m1', 'm2', 'm3'];
 
   beforeAll(async () => {});
 
@@ -169,4 +169,50 @@ describe('DbModule', () => {
       ).rejects.toEqual(err);
     });
   }
+
+  it('db mutex lock, OK if new mutex is "created" concurrently (with wait on lock)', async () => {
+    const got = await Promise.all([
+      withMutexLock({
+        dbPool: db,
+        mutexName: testMutexes[0],
+        f: async () => {
+          sleep(50);
+          return 0;
+        },
+      }),
+      withMutexLock({
+        dbPool: db,
+        mutexName: testMutexes[0],
+        f: async () => {
+          sleep(50);
+          return 0;
+        },
+      }),
+    ]);
+    expect(got).toStrictEqual([0, 0]);
+  });
+
+  it('db mutex lock, OK if new mutex is "created" concurrently (with no wait on lock)', async () => {
+    const got = await Promise.all([
+      withMutexLock({
+        dbPool: db,
+        mutexName: testMutexes[0],
+        onLockedReturn: 1,
+        f: async () => {
+          sleep(50);
+          return 0;
+        },
+      }),
+      withMutexLock({
+        dbPool: db,
+        onLockedReturn: 1,
+        mutexName: testMutexes[0],
+        f: async () => {
+          sleep(50);
+          return 0;
+        },
+      }),
+    ]);
+    expect(got.sort()).toStrictEqual([0, 1]);
+  });
 });
