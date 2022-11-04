@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { assertEnv } from '../utils/utils.js';
+import { assertEnv } from '../utils.js';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const cookieSession = require('cookie-session');

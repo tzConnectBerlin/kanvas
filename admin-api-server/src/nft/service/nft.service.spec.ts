@@ -4,7 +4,7 @@ import { S3Service } from './s3.service';
 import { DbMockModule } from '../../db_mock.module';
 import { RoleService } from '../../role/service/role.service';
 import { CategoryService } from '../../category/service/category.service';
-import { sleep } from '../../utils/utils';
+import { sleep } from '../../utils';
 
 describe('NftService', () => {
   let service: NftService;

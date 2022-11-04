@@ -15,7 +15,7 @@ import {
 import { ParseJSONPipe } from '../../pipes/ParseJSONPipe.js';
 import { ParseJSONObjectPipe } from '../../pipes/ParseJSONObjectPipe.js';
 import { AnalyticsService } from '../service/analytics.service.js';
-import { enumFromStringValue } from '../../utils/utils.js';
+import { enumFromStringValue } from '../../utils.js';
 import { RolesDecorator } from '../../role/role.decorator.js';
 import { Roles } from '../../role/entities/role.entity.js';
 import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard.js';
@@ -24,7 +24,7 @@ import { ActivityFilterParams, ActivityFilters } from '../params.js';
 import {
   queryParamsToPaginationParams,
   validatePaginationParams,
-} from '../../utils/utils.js';
+} from '../../utils.js';
 
 @Controller('analytics')
 export class AnalyticsController {
