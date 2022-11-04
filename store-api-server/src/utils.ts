@@ -2,7 +2,6 @@ import ts_results from 'ts-results';
 const { Ok, Err } = ts_results;
 import { Response } from 'express';
 import { Cache } from 'cache-manager';
-import { Lock } from 'async-await-mutex-lock';
 import { BEHIND_PROXY } from './constants.js';
 
 export async function wrapCache<T>(
