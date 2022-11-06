@@ -2,7 +2,7 @@ import Pool from 'pg-pool';
 import { UserService } from '../user/service/user.service.js';
 import { RoleService } from '../role/service/role.service.js';
 import { Roles } from '../role/entities/role.entity.js';
-import { assertEnv } from '../utils';
+import { assertEnv } from '../utils.js';
 
 export const seedUser = async () => {
   const dbPool = new Pool({

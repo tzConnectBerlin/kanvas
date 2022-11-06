@@ -229,7 +229,7 @@ export class NftController {
     }
 
     if (filesArray?.length) {
-      filesArray = await this.fileService.addMissingFiles(filesArray, nftId); // in case not all files were provided
+      filesArray = await this.fileService.addMissingFiles(filesArray, nftId);
     }
 
     const nftUpdates = this.#transformFormDataToNftUpdates(
