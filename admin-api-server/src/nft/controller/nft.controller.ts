@@ -17,6 +17,7 @@ import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard.js';
 import { MAX_FILE_UPLOADS_PER_CALL } from '../../constants.js';
 import { NftEntity, NftUpdate, UrlParams } from '../entities/nft.entity.js';
 import { NftService } from '../service/nft.service.js';
+import { FileService, File } from '../service/file.service.js';
 import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { UserEntity } from '../../user/entities/user.entity.js';
 import { NftFilterParams, NftFilters } from '../params.js';
@@ -25,7 +26,6 @@ import {
   queryParamsToPaginationParams,
   validatePaginationParams,
 } from '../../utils.js';
-import { File, imageFromVideo, resizedImg } from '../../media.js';
 import { ContentRestrictions } from 'kanvas-stm-lib';
 
 import { createRequire } from 'module';
@@ -62,7 +62,10 @@ function contentFilter(req: any, file: any, callback: any) {
 
 @Controller('nft')
 export class NftController {
-  constructor(private readonly nftService: NftService) {
+  constructor(
+    private readonly nftService: NftService,
+    private readonly fileService: FileService,
+  ) {
     getContentRestrictions = (
       attrName: string,
     ): ContentRestrictions | undefined => {
@@ -226,74 +229,7 @@ export class NftController {
     }
 
     if (filesArray?.length) {
-      const artifact = filesArray.find(
-        (file) => file.originalname === 'artifact',
-      );
-      const thumbnailMissing =
-        artifact &&
-        !filesArray.some((file) => file.originalname === 'thumbnail');
-      const displayMissing =
-        artifact && !filesArray.some((file) => file.originalname === 'display');
-
-      const isVideo = (artifact?.mimetype.match(/video/g) || []).length > 0;
-      const isImage = (artifact?.mimetype.match(/image/g) || []).length > 0;
-
-      const artifactBuffer = artifact?.buffer;
-      if (isVideo && artifactBuffer) {
-        if (displayMissing && thumbnailMissing) {
-          // create display from video first, then use the same image and resize it for the thumbnail
-          const generatedDisplay = await imageFromVideo({
-            artifactBuffer,
-            nftId,
-            type: 'display',
-          });
-
-          // use the same image that is already in temp directory and resize it and use as thumbnail
-          if (generatedDisplay) {
-            filesArray.push(generatedDisplay);
-            const { buffer: displayBuffer } = generatedDisplay;
-
-            const type = 'thumbnail';
-            const pathToSave = `/Users/joshuapruefer/Desktop/kanvas/admin-api-server/temp/${nftId}_${type}.png`;
-            const thumbnail = await resizedImg({
-              buffer: displayBuffer,
-              size: 400,
-              pathToSave,
-              type: 'thumbnail',
-            });
-
-            if (thumbnail) {
-              filesArray.push(thumbnail);
-            }
-          }
-        } else if (displayMissing) {
-          const generatedDisplay = await imageFromVideo({
-            artifactBuffer,
-            nftId,
-            type: 'display',
-          });
-          if (generatedDisplay) {
-            filesArray.push(generatedDisplay);
-          }
-        } else if (thumbnailMissing) {
-          const generatedThumbnail = await imageFromVideo({
-            artifactBuffer,
-            nftId,
-            type: 'thumbnail',
-          });
-          if (generatedThumbnail) {
-            filesArray.push(generatedThumbnail);
-          }
-        }
-      } else if (isImage && artifactBuffer) {
-        if (displayMissing && thumbnailMissing) {
-          // create display from image first, then use the same image and resize it for the thumbnail
-        } else if (displayMissing) {
-          // create display from image
-        } else if (thumbnailMissing) {
-          // create thumbnail from image
-        }
-      }
+      filesArray = await this.fileService.addMissingFiles(filesArray, nftId); // in case not all files were provided
     }
 
     const nftUpdates = this.#transformFormDataToNftUpdates(
