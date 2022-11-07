@@ -6,7 +6,7 @@ import { sleep } from './utils';
 
 describe('DbModule', () => {
   let db: DbPool;
-  let testMutexes = ['m1', 'm2', 'm3'];
+  let testMutexes = ['m1', 'm2'];
 
   beforeAll(async () => {});
 
