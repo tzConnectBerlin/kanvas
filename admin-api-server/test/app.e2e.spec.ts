@@ -2133,7 +2133,10 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer)
       .send({
         publish_vote: JSON.stringify('yes'),
-        artifact: JSON.stringify({ uri: 'someuri' }),
+        artifact: JSON.stringify({
+          uri: 'someuri',
+          metadata: { height: 500, width: 450 },
+        }),
         thumbnail: JSON.stringify({ uri: 'somethumbnailuri' }),
         description: JSON.stringify('some long description'),
       });
@@ -2149,32 +2152,55 @@ describe('AppController (e2e)', () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body.state).toEqual('finish');
 
-    const storeNft = await queryStoreDbNft(nftId);
-    delete storeNft.nft.created_at;
-    delete storeNft.nft.onsale_from;
-    delete storeNft.nft.onsale_until;
+    const storeNft = (
+      await axios({
+        url: process.env['STORE_API'] + `/nfts/${nftId}`,
+        method: 'GET',
+      })
+    ).data;
+
+    delete storeNft.createdAt;
+    delete storeNft.launchAt;
+    delete storeNft.onsaleFrom;
+    delete storeNft.onsaleUntil;
 
     expect(storeNft).toStrictEqual({
+      id: nftId,
+      name: 'some name',
+      description: 'some long description',
+      isProxy: false,
+      ipfsHash: null,
+      metadataIpfs: null,
+      artifactIpfs: null,
+      displayIpfs: null,
+      thumbnailIpfs: null,
+      artifactUri: 'someuri',
+      displayUri: 'someuri',
+      thumbnailUri: 'somethumbnailuri',
+      price: '105.10',
+      categories: [
+        { id: 3, name: 'Applied Art', description: 'Not actually visual' },
+        { id: 4, name: 'Drawing', description: 'Sub fine art category' },
+        { id: 5, name: 'Painting', description: 'Sub fine art category' },
+      ],
+      formats: {
+        artifact: { uri: 'someuri', metadata: { height: 500, width: 450 } },
+      },
+      metadata: null,
+      editionsSize: 4,
+      editionsAvailable: 4,
+      editionsSold: 0,
+      mintOperationHash: null,
+    });
+
+    expect(await queryStoreDbNft(nftId)).toMatchObject({
       nft: {
-        id: 35,
-        nft_name: 'some name',
         artifact_ipfs: 'ipfs-mock://someuri',
         display_ipfs: 'ipfs-mock://someuri',
         thumbnail_ipfs: 'ipfs-mock://somethumbnailuri',
-        metadata: null,
-        metadata_ipfs: 'ipfs-mock://some name',
-        artifact_uri: 'someuri',
-        proxy_nft_id: null,
-        price: '10510', // in cents in the db
-        editions_size: 4,
-        view_count: 0,
-        description: 'some long description',
-        display_uri: null,
-        thumbnail_uri: 'somethumbnailuri',
         signature:
           'sigXLxpqc2gGdUTb2hgqvwq2mjoAGVY3eY9HBQCQxDTiJ257kbaQ3BxrrM6kC7ppW3K2foNMW44xk5C1wcHh8uStmyFhxjRk',
       },
-      categories: [3, 4, 5],
     });
   });
 

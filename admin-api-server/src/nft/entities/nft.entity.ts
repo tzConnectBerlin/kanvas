@@ -10,6 +10,6 @@ export interface NftEntity {
 
 export interface NftUpdate {
   attribute: string;
-  value?: any;
+  value?: string;
   file?: any;
 }

@@ -213,8 +213,10 @@ WHERE id = $1
         mtm_nft_category: 'nft_id',
         mtm_nft_order_nft: 'nft_id',
         nft_order_delivery: 'nft_order_id',
+        mtm_nft_format: 'nft_id',
       };
       const tables = [
+        'mtm_nft_format',
         'nft_order_delivery',
         'mtm_nft_order_nft',
         'mtm_kanvas_user_nft',
