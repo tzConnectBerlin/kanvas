@@ -115,7 +115,7 @@ echo 'deploying the FA2 contract (for token gating) onto the private tezos netwo
 CONTRACT=fa2 BURN_CAP=0.87725 DOCKER_ARGS='--network=host' ./script/deploy-contract >/dev/null 2>&1
 export TOKEN_GATE_CONTRACT=`cat env | grep CONTRACT_ADDRESS | awk -F'=' '{print $2}' | sed 's/"//g'`
 
-echo 'setting up the token distribution for the token gate tests..'
+echo 'setting up faucet for the token gate tests..'
 tz-cli call $TOKEN_GATE_CONTRACT from alice \
     --entrypoint create_token \
     --arg 'Pair 0 {Elt "" 0xDEADC0DE}' \

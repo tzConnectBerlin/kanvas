@@ -2,7 +2,7 @@ import { Logger, Injectable, Inject } from '@nestjs/common';
 import { PG_CONNECTION, MINTER_ADDRESS } from '../../constants.js';
 import { NftEntity } from '../entity/nft.entity.js';
 import { NftIpfsService } from './ipfs.service.js';
-import { Lock } from 'async-await-mutex-lock';
+import { withMutexLock, DbTransaction } from '../../db.module.js';
 
 interface Command {
   handler: string;
@@ -19,14 +19,10 @@ interface Command {
 
 @Injectable()
 export class MintService {
-  nftLock: Lock<number>;
-
   constructor(
     @Inject(PG_CONNECTION) private conn: any,
     private ipfsService: NftIpfsService,
-  ) {
-    this.nftLock = new Lock<number>();
-  }
+  ) {}
 
   async transferNfts(
     nfts: NftEntity[],
@@ -50,29 +46,30 @@ export class MintService {
   }
 
   async #transferNft(nft: NftEntity, buyer_address: string): Promise<number> {
-    await this.nftLock.acquire(nft.id);
-    try {
-      if (!(await this.#isNftSubmitted(nft))) {
-        await this.#mint(nft);
-      }
+    return await withMutexLock({
+      mutexName: `transferNft:${nft.id}`,
+      dbPool: this.conn,
+      f: async (dbTx: DbTransaction) => {
+        if (!(await this.#isNftSubmitted(dbTx, nft))) {
+          await this.#mint(dbTx, nft);
+        }
 
-      const cmd = {
-        handler: 'nft',
-        name: 'transfer',
-        args: {
-          token_id: nft.id,
-          from_address: MINTER_ADDRESS,
-          to_address: buyer_address,
-          amount: 1,
-        },
-      };
-      return await this.#insertCommand(cmd);
-    } finally {
-      this.nftLock.release(nft.id);
-    }
+        const cmd = {
+          handler: 'nft',
+          name: 'transfer',
+          args: {
+            token_id: nft.id,
+            from_address: MINTER_ADDRESS,
+            to_address: buyer_address,
+            amount: 1,
+          },
+        };
+        return await this.#insertCommand(dbTx, cmd);
+      },
+    });
   }
 
-  async #mint(nft: NftEntity) {
+  async #mint(dbTx: DbTransaction, nft: NftEntity) {
     if (nft.isProxy) {
       throw `cannot mint a proxy nft (id=${nft.id})`;
     }
@@ -92,12 +89,12 @@ export class MintService {
       },
     };
 
-    await this.#insertCommand(cmd);
+    await this.#insertCommand(dbTx, cmd);
   }
 
-  async #insertCommand(cmd: Command): Promise<number> {
+  async #insertCommand(dbTx: DbTransaction, cmd: Command): Promise<number> {
     return (
-      await this.conn.query(
+      await dbTx.query(
         `
 INSERT INTO peppermint.operations (
   originator, command
@@ -112,8 +109,8 @@ RETURNING id AS operation_id
     ).rows[0]['operation_id'];
   }
 
-  async #isNftSubmitted(nft: NftEntity): Promise<boolean> {
-    const qryRes = await this.conn.query(
+  async #isNftSubmitted(dbTx: DbTransaction, nft: NftEntity): Promise<boolean> {
+    const qryRes = await dbTx.query(
       `
 SELECT 1
 FROM onchain_kanvas."storage.token_metadata_live"

@@ -4,7 +4,7 @@ import pg from 'pg';
 const { types } = pg;
 import Pool from 'pg-pool';
 import { assertEnv } from './utils.js';
-import { PG_CONNECTION } from './constants.js';
+import { PG_CONNECTION, PG_LOCK_NOT_AVAILABLE } from './constants.js';
 
 export type DbPool = Pool<Client>;
 export type DbTransaction = PoolClient;
@@ -80,4 +80,47 @@ export async function withTransaction<ResTy>(
   } finally {
     dbTx.release();
   }
+}
+
+export async function withMutexLock<ResTy>({
+  mutexName,
+  dbPool,
+  f,
+  onLockedReturn,
+}: {
+  mutexName: string;
+  dbPool: DbPool;
+  f: (dbTx: DbTransaction) => Promise<ResTy>;
+  onLockedReturn?: ResTy;
+}): Promise<ResTy> {
+  const noWait = typeof onLockedReturn !== 'undefined';
+
+  return await withTransaction(dbPool, async (dbTx: DbTransaction) => {
+    const claimQry = await dbTx.query(
+      `SELECT FROM mutex WHERE name = $1 FOR UPDATE ${noWait ? 'NOWAIT' : ''}`,
+      [mutexName],
+    );
+    if (claimQry.rowCount === 0) {
+      const createQry = await dbTx.query(
+        'INSERT INTO mutex (name) VALUES ($1) ON CONFLICT (name) DO NOTHING',
+        [mutexName],
+      );
+      if (noWait && createQry.rowCount === 0) {
+        throw {
+          message: `duplicate mutex creation of ${mutexName}`,
+          code: PG_LOCK_NOT_AVAILABLE,
+        };
+      }
+    }
+
+    Logger.log(`executing with db mutex ${mutexName}..`);
+    const res = await f(dbTx);
+
+    return res;
+  }).catch((err: any) => {
+    if (noWait && err?.code === PG_LOCK_NOT_AVAILABLE) {
+      return onLockedReturn;
+    }
+    throw err;
+  });
 }

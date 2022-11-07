@@ -36,7 +36,7 @@ import {
     TokenGateModule,
     DbModule,
     MOCK_IPFS_PINNING ? IpfsPinMock : IpfsPinModule,
-    CurrencyModule,
+    CurrencyModule.forRoot(),
     ThrottlerModule.forRoot({
       ttl: RATE_LIMIT_TTL,
       limit: RATE_LIMIT,

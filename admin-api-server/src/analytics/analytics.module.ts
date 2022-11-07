@@ -2,10 +2,9 @@ import { Module } from '@nestjs/common';
 import { AnalyticsController } from './controller/analytics.controller.js';
 import { AnalyticsService } from './service/analytics.service.js';
 import { DbModule } from '../db.module.js';
-import { CurrencyModule } from 'kanvas-api-lib';
 
 @Module({
-  imports: [DbModule, CurrencyModule],
+  imports: [DbModule],
   controllers: [AnalyticsController],
   providers: [AnalyticsService],
 })

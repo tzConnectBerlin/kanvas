@@ -2,7 +2,6 @@ import ts_results from 'ts-results';
 const { Ok, Err } = ts_results;
 import { Response } from 'express';
 import { Cache } from 'cache-manager';
-import { Lock } from 'async-await-mutex-lock';
 import { BEHIND_PROXY } from './constants.js';
 
 export async function wrapCache<T>(
@@ -50,29 +49,6 @@ export function findOne(predicate: any, xs: any[]) {
     return new Ok(result[0]);
   } else {
     return new Err('findOne found multiple results');
-  }
-}
-
-//
-// testing utils
-//
-
-export function sleep(ms: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
-export async function withKeyLocked<LockKeyTy, ResTy>(
-  lock: Lock<LockKeyTy>,
-  key: LockKeyTy,
-  f: () => Promise<ResTy>,
-): Promise<ResTy> {
-  await lock.acquire(key);
-  try {
-    return await f();
-  } finally {
-    lock.release(key);
   }
 }
 
@@ -125,4 +101,11 @@ export function stringEnumIndexValue<T>(
     return undefined;
   }
   return enumValues[i];
+}
+
+// testing util
+export function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }

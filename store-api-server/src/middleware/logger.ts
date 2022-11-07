@@ -48,7 +48,7 @@ export class LoggerMiddleware implements NestMiddleware {
     const clientIp = getClientIp(request);
     const timeStart = new Date();
 
-    const fields = [
+    const fields: string[] = [
       method,
       originalUrl,
       userAgent,
@@ -77,7 +77,7 @@ export class LoggerMiddleware implements NestMiddleware {
       const timeEnd: Date = new Date();
       const duration = `${timeEnd.getTime() - timeStart.getTime()}ms`;
       const { statusCode } = response;
-      const contentLength = response.get('content-length');
+      const contentLength = response.get('content-length') ?? '0';
 
       fields.push(`${statusCode}`);
       fields.push(contentLength);
