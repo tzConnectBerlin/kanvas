@@ -4,9 +4,21 @@ cd $SCRIPT_DIR/..
 
 set -e
 
-mkdir -p test/.workdir
-TRAP="rm -rf test/.workdir 2>/dev/null || return 0"
+try_kill_bg() {
+  bg_pids="$(jobs -p)"
+  if [[ "$bg_pids" == "" ]]; then
+    return 0
+  fi
+
+  echo "killing background pids: `echo $bg_pids | paste -sd' '`.."
+  echo "$bg_pids" | xargs -I'{}' pkill -TERM -P '{}' || return 0
+}
+TRAP='try_kill_bg'
 trap "$TRAP" EXIT
+
+TRAP="$TRAP; rm -rf test/.workdir 2>/dev/null || return 0"
+trap "$TRAP" EXIT
+mkdir -p test/.workdir
 
 set -a
 . .env.test
