@@ -19,12 +19,15 @@ CREATE TABLE mtm_nft_format (
   format_id INT REFERENCES format(id)
 );
 
+CREATE TABLE __mtm_nft_format_delisted (LIKE mtm_nft_format);
+
 COMMIT;
 
 -- ==== DOWN ====
 
 BEGIN;
 
+DROP TABLE __mtm_nft_format_delisted;
 DROP TABLE mtm_nft_format;
 DROP TABLE format;
 

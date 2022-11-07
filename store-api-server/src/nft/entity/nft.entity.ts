@@ -29,6 +29,8 @@ export interface NftEntity {
   displayIpfs?: string;
   thumbnailIpfs?: string;
 
+  formats?: NftFormats;
+
   artifactUri: string;
   displayUri?: string;
   thumbnailUri?: string;

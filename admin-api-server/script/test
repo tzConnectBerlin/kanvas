@@ -61,7 +61,7 @@ rm $sig_err_file
     trap "echo 'db setup failed..' >> $sig_err_file" ERR
 
     echo "waiting for testdb setup (admin).. (docker: $db_docker)"
-    ./script/wait-db 'select 2'
+    ./script/wait-db
 
     echo "setting up the store db"
     (
@@ -98,13 +98,12 @@ while ! http --quiet :$STORE_API_PORT 2>/dev/null; do
     sleep 1
 done
 
+
 echo "running tests.."
 
-TRAP="$TRAP; rm test/coverage/summary_.txt"
-trap "$TRAP" EXIT
-
+summary_tmp=`mktemp`
 mkdir -p test/coverage
 LOG_LEVEL=warning node --experimental-vm-modules node_modules/.bin/jest "$@" --coverage | tee test/coverage/summary.txt || exit 1
-sed -n '/^-----/,$p' test/coverage/summary.txt > test/coverage/summary_.txt
-head -n 4 test/coverage/summary_.txt | awk -F '|' '{print $2 $3 $4 $5}'
-sed 's/^/\n/' test/coverage/summary_.txt > test/coverage/summary.txt
+sed -n '/^-----/,$p' test/coverage/summary.txt > "$summary_tmp"
+head -n 4 "$summary_tmp" | awk -F '|' '{print $2 $3 $4 $5}'
+sed 's/^/\n/' "$summary_tmp" > test/coverage/summary.txt
