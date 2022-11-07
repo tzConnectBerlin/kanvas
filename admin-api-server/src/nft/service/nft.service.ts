@@ -45,6 +45,17 @@ const mime = require('mime');
 
 import { getVideoMetadata, getImageMetadata } from '../../media.js';
 
+interface ContentMetadata {
+  mimetype: string;
+  fileSize: number;
+
+  width?: number;
+  height?: number;
+
+  duration?: string;
+  dataRate?: { value: number; unit: string };
+}
+
 @Injectable()
 export class NftService {
   stmFileWatcher: FSWatcher;
@@ -380,12 +391,9 @@ WHERE id = $1
     };
   }
 
-  async #contentMetadata(
-    nftId: number,
-    file: any,
-  ): Promise<{ [keys: string]: any }> {
+  async #contentMetadata(nftId: number, file: any): Promise<ContentMetadata> {
     let res = {
-      mimeType: file.mimetype,
+      mimetype: file.mimetype,
       fileSize: file.size,
     };
     switch (file.mimetype.split('/')[0]) {
@@ -401,7 +409,7 @@ WHERE id = $1
         break;
       case 'image':
         try {
-          const imageMetadata = await getImageMetadata(file);
+          const imageMetadata = getImageMetadata(file);
           res = { ...res, ...imageMetadata };
         } catch (err: any) {
           Logger.warn(
@@ -521,6 +529,17 @@ WHERE TARGET.value != EXCLUDED.value
       ADMIN_PRIVATE_KEY,
     );
 
+    const formats: { [key: string]: ContentMetadata } = {};
+    if (typeof attr.artifact.metadata !== 'undefined') {
+      formats['artifact'] = attr.artifact;
+    }
+    if (typeof attr.display?.metadata !== 'undefined') {
+      formats['display'] = attr.display.metadata;
+    }
+    if (typeof attr.thumbnail?.metadata !== 'undefined') {
+      formats['thumbnail'] = attr.thumbnail.metadata;
+    }
+
     await axios.post(STORE_API + '/nfts/create', {
       id: nft.id,
       name: attr.name,
@@ -528,7 +547,8 @@ WHERE TARGET.value != EXCLUDED.value
 
       artifactUri: attr.artifact.uri,
       displayUri: attr.display?.uri,
-      thumbnailUri: attr.thumbnail.uri,
+      thumbnailUri: attr.thumbnail?.uri,
+      formats,
 
       price: attr.price,
       categories: attr.categories,

@@ -13,7 +13,7 @@ export interface VideoMetadata {
 }
 
 export function getVideoMetadata(file: any): Promise<VideoMetadata> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     ffmpeg(intoStream(file.buffer)).ffprobe((err, metadata) => {
       resolve(videoMetadataFromFfprobe(err, metadata));
     });
@@ -26,14 +26,14 @@ export function videoMetadataFromFfprobe(err: any, metadata: FfprobeData) {
   }
 
   const videoMetadata: FfprobeStream | undefined = metadata.streams.find(
-    (s: any) => s.codec_type === 'video',
+    (s: FfprobeStream) => s.codec_type === 'video',
   );
   if (typeof videoMetadata === 'undefined') {
     throw new Error('no video stream found');
   }
 
   const tryGetField = (field: string): any | undefined => {
-    const res = videoMetadata![field];
+    const res = videoMetadata[field];
     if (typeof res === 'undefined') {
       Logger.warn(`${field} is missing in ffprobe's video metadata`);
     }
