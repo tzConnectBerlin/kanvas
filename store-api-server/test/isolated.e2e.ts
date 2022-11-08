@@ -290,7 +290,6 @@ VALUES ($1, $2)
 
       const resp = await request(app.getHttpServer()).get(`/nfts/${nftId}`);
       expect(resp.statusCode).toEqual(200);
-      testUtils.logFullObject(resp.body);
       expect(resp.body).toMatchObject({
         id: nftId,
 

@@ -43,18 +43,7 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const mime = require('mime');
 
-import { getVideoMetadata, getImageMetadata } from '../../media.js';
-
-interface ContentMetadata {
-  mimetype: string;
-  fileSize: number;
-
-  width?: number;
-  height?: number;
-
-  duration?: string;
-  dataRate?: { value: number; unit: string };
-}
+import { getContentMetadata } from '../../media.js';
 
 @Injectable()
 export class NftService {
@@ -386,39 +375,9 @@ WHERE id = $1
       attribute: attribute,
       value: JSON.stringify({
         uri: contentUri,
-        metadata: await this.#contentMetadata(nftId, file),
+        metadata: await getContentMetadata(nftId, file),
       }),
     };
-  }
-
-  async #contentMetadata(nftId: number, file: any): Promise<ContentMetadata> {
-    let res = {
-      mimetype: file.mimetype,
-      fileSize: file.size,
-    };
-    switch (file.mimetype.split('/')[0]) {
-      case 'video':
-        try {
-          const videoMetadata = await getVideoMetadata(file);
-          res = { ...res, ...videoMetadata };
-        } catch (err: any) {
-          Logger.warn(
-            `failed to inspect video metadata for nftId=${nftId}, err: ${err}`,
-          );
-        }
-        break;
-      case 'image':
-        try {
-          const imageMetadata = getImageMetadata(file);
-          res = { ...res, ...imageMetadata };
-        } catch (err: any) {
-          Logger.warn(
-            `failed to inspect image metadata for nftId=${nftId}, err: ${err}`,
-          );
-        }
-        break;
-    }
-    return res;
   }
 
   async #updateNft(setBy: UserEntity, nft: NftEntity) {

@@ -28,6 +28,17 @@ describe('NftService', () => {
         artifactUri: 'artifact.mp4',
         displayUri: 'display.jpeg',
         thumbnailUri: 'thumbnail.png',
+        formats: {
+          artifact: {
+            mimeType: 'video/mp4',
+          },
+          display: {
+            mimeType: 'image/jpeg',
+          },
+          thumbnail: {
+            mimeType: 'image/png',
+          },
+        },
         createdAt: 0,
         name: 'test',
         description: 'descr',
@@ -78,6 +89,17 @@ describe('NftService', () => {
         artifactUri: 'artifact.mp4',
         displayUri: 'display.jpeg',
         thumbnailUri: 'thumbnail.png',
+        formats: {
+          artifact: {
+            mimeType: 'video/mp4',
+          },
+          display: {
+            mimeType: 'image/jpeg',
+          },
+          thumbnail: {
+            mimeType: 'image/png',
+          },
+        },
         createdAt: 0,
         name: 'A Test',
         description:
@@ -129,6 +151,14 @@ describe('NftService', () => {
         artifactUri: 'artifact.someExtensionThatIsNotRecognized',
         displayUri: 'display.jpeg',
         thumbnailUri: 'thumbnail.png',
+        formats: {
+          display: {
+            mimeType: 'image/jpeg',
+          },
+          thumbnail: {
+            mimeType: 'image/png',
+          },
+        },
         createdAt: 0,
         name: 'test',
         description: 'descr',
@@ -174,6 +204,17 @@ describe('NftService', () => {
         artifactUri: 'artifact.mp4',
         displayUri: 'display.jpeg',
         thumbnailUri: 'thumbnail.jpg',
+        formats: {
+          artifact: {
+            mimeType: 'video/mp4',
+          },
+          display: {
+            mimeType: 'image/jpeg',
+          },
+          thumbnail: {
+            mimeType: 'image/jpeg',
+          },
+        },
         createdAt: 0,
         name: 'test',
         description: 'descr',
@@ -236,6 +277,17 @@ describe('NftService', () => {
         artifactUri: 'artifact.mp4',
         displayUri: 'display.jpeg',
         thumbnailUri: 'thumbnail.jpg',
+        formats: {
+          artifact: {
+            mimeType: 'video/mp4',
+          },
+          display: {
+            mimeType: 'image/jpeg',
+          },
+          thumbnail: {
+            mimeType: 'image/jpeg',
+          },
+        },
         createdAt: 0,
         name: 'test',
         description: 'descr',
@@ -285,6 +337,17 @@ describe('NftService', () => {
         artifactUri: 'artifact.mp4',
         displayUri: 'display.jpeg',
         thumbnailUri: 'thumbnail.jpg',
+        formats: {
+          artifact: {
+            mimeType: 'video/mp4',
+          },
+          display: {
+            mimeType: 'image/jpeg',
+          },
+          thumbnail: {
+            mimeType: 'image/jpeg',
+          },
+        },
         createdAt: 0,
         name: 'test',
         description: 'descr',
@@ -334,6 +397,17 @@ describe('NftService', () => {
         artifactUri: 'artifact.mp4',
         displayUri: 'display.jpeg',
         thumbnailUri: 'thumbnail.jpg',
+        formats: {
+          artifact: {
+            mimeType: 'video/mp4',
+          },
+          display: {
+            mimeType: 'image/jpeg',
+          },
+          thumbnail: {
+            mimeType: 'image/jpeg',
+          },
+        },
         createdAt: 1663236430,
         name: 'test',
         description: 'descr',
@@ -382,6 +456,11 @@ describe('NftService', () => {
       name: 'undefined display and thumbnail => we default pointing their ipfs to the artifact asset',
       nft: {
         artifactUri: 'artifact.jpeg',
+        formats: {
+          artifact: {
+            mimeType: 'image/jpeg',
+          },
+        },
         createdAt: 0,
         name: 'test',
         description: 'descr',
@@ -422,6 +501,14 @@ describe('NftService', () => {
       nft: {
         artifactUri: 'artifact.jpeg',
         displayUri: 'display.jpeg',
+        formats: {
+          artifact: {
+            mimeType: 'image/jpeg',
+          },
+          display: {
+            mimeType: 'image/jpeg',
+          },
+        },
         createdAt: 0,
         name: 'test',
         description: 'descr',
@@ -467,6 +554,17 @@ describe('NftService', () => {
         artifactUri: 'artifact.jpeg',
         displayUri: 'artifact.jpeg',
         thumbnailUri: 'artifact.jpeg',
+        formats: {
+          artifact: {
+            mimeType: 'image/jpeg',
+          },
+          display: {
+            mimeType: 'image/jpeg',
+          },
+          thumbnail: {
+            mimeType: 'image/jpeg',
+          },
+        },
         createdAt: 0,
         name: 'test',
         description: 'descr',
@@ -508,6 +606,17 @@ describe('NftService', () => {
         artifactUri: 'artifact.jpeg',
         displayUri: 'display.jpeg',
         thumbnailUri: 'display.jpeg',
+        formats: {
+          artifact: {
+            mimeType: 'image/jpeg',
+          },
+          display: {
+            mimeType: 'image/jpeg',
+          },
+          thumbnail: {
+            mimeType: 'image/jpeg',
+          },
+        },
         createdAt: 0,
         name: 'test',
         description: 'descr',
@@ -553,6 +662,17 @@ describe('NftService', () => {
         artifactUri: 'artifact.jpeg',
         displayUri: 'display.jpeg',
         thumbnailUri: 'display#test-dup-content#.jpeg',
+        formats: {
+          artifact: {
+            mimeType: 'image/jpeg',
+          },
+          display: {
+            mimeType: 'image/jpeg',
+          },
+          thumbnail: {
+            mimeType: 'image/jpeg',
+          },
+        },
         createdAt: 0,
         name: 'test',
         description: 'descr',
@@ -598,6 +718,17 @@ describe('NftService', () => {
         artifactUri: 'artifact.jpeg',
         displayUri: 'display.jpeg',
         thumbnailUri: 'artifact#test-dup-content#.jpeg',
+        formats: {
+          artifact: {
+            mimeType: 'image/jpeg',
+          },
+          display: {
+            mimeType: 'image/jpeg',
+          },
+          thumbnail: {
+            mimeType: 'image/jpeg',
+          },
+        },
         createdAt: 0,
         name: 'test',
         description: 'descr',
@@ -643,6 +774,17 @@ describe('NftService', () => {
         artifactUri: 'artifact.jpeg',
         displayUri: 'artifact#test-dup-content#.jpeg',
         thumbnailUri: 'thumbnail.jpeg',
+        formats: {
+          artifact: {
+            mimeType: 'image/jpeg',
+          },
+          display: {
+            mimeType: 'image/jpeg',
+          },
+          thumbnail: {
+            mimeType: 'image/jpeg',
+          },
+        },
         createdAt: 0,
         name: 'test',
         description: 'descr',
@@ -688,6 +830,17 @@ describe('NftService', () => {
         artifactUri: 'artifact.jpeg',
         displayUri: 'artifact#test-dup-content#.mp4',
         thumbnailUri: 'thumbnail.jpeg',
+        formats: {
+          artifact: {
+            mimeType: 'image/jpeg',
+          },
+          display: {
+            mimeType: 'video/mp4',
+          },
+          thumbnail: {
+            mimeType: 'image/jpeg',
+          },
+        },
         createdAt: 0,
         name: 'test',
         description: 'descr',
