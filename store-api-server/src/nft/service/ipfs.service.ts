@@ -9,15 +9,14 @@ import {
 } from '../../constants.js';
 import { NftEntity } from '../../nft/entity/nft.entity.js';
 import { isBottom } from '../../utils.js';
-import { PinataService } from '../../ipfs_pin.module.js';
-
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const mime = require('mime');
 
 interface Royalties {
   decimals: number;
   shares: { [key: string]: number };
+}
+interface IpfsFormat {
+  [key: string]: any;
+  uri: string;
 }
 
 @Injectable()
@@ -99,32 +98,6 @@ WHERE id = $1
         : undefined),
     ];
 
-    const formats: { uri: string; mimeType: string }[] = [
-      [artifactIpfs, nft.artifactUri],
-      [displayIpfs, nft.displayUri],
-      [thumbnailIpfs, nft.thumbnailUri],
-    ]
-      .reduce(
-        (xs: string[][], [ipfsUri, origAssetUri]: (string | undefined)[]) => {
-          if (
-            typeof ipfsUri === 'undefined' ||
-            typeof origAssetUri === 'undefined' ||
-            typeof xs.find((x) => x[0] === ipfsUri) !== 'undefined'
-          ) {
-            return xs;
-          }
-          return [...xs, [ipfsUri, origAssetUri]];
-        },
-        [],
-      )
-      .flatMap(([ipfsUri, origAssetUri]) => {
-        const format = this.#specifyIpfsUriFormat(ipfsUri, origAssetUri);
-        if (typeof format === 'undefined') {
-          return [];
-        }
-        return [format];
-      });
-
     const royalties = this.#defaultRoyalties();
 
     displayIpfs = displayIpfs ?? artifactIpfs;
@@ -140,8 +113,34 @@ WHERE id = $1
       artifactUri: artifactIpfs,
       displayUri: displayIpfs,
       thumbnailUri: thumbnailIpfs,
-      formats,
-
+      formats: Object.keys(nft.formats ?? []).reduce(
+        (res: IpfsFormat[], k: string) => {
+          let uri: string | undefined;
+          switch (k) {
+            case 'artifact':
+              uri = artifactIpfs;
+              break;
+            case 'display':
+              uri = displayIpfs;
+              break;
+            case 'thumbnail':
+              uri = thumbnailIpfs;
+              break;
+          }
+          if (
+            typeof uri === 'undefined' ||
+            res.map((format) => format.uri).includes(uri)
+          ) {
+            return res;
+          }
+          res.push({
+            uri,
+            ...nft.formats![k],
+          });
+          return res;
+        },
+        [],
+      ),
       minter: MINTER_ADDRESS,
       creators: [MINTER_ADDRESS],
       contributors: [], // TODO
@@ -161,22 +160,5 @@ WHERE id = $1
     };
     royalties.shares[`${MINTER_ADDRESS}`] = DEFAULT_ROYALTIES_MINTER_SHARE;
     return royalties;
-  }
-
-  #specifyIpfsUriFormat(
-    ipfsUri: string,
-    origAssetUri: string,
-  ): { uri: string; mimeType: string } | undefined {
-    const mimeType = mime.getType(origAssetUri);
-    if (isBottom(mimeType)) {
-      Logger.warn(
-        `failed to determine content type from asset uri, ipfsUri=${ipfsUri}, origAssetUri=${origAssetUri}`,
-      );
-      return undefined;
-    }
-    return {
-      uri: ipfsUri,
-      mimeType,
-    };
   }
 }

@@ -1,8 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { videoMetadataFromFfprobe, getImageMetadata } from './media';
-import { FfprobeData } from 'fluent-ffmpeg';
+import { videoMetadataFromFfprobe } from './media';
 
-describe('Media util tests', () => {
+describe('Media video ffprobe mocked tests', () => {
   for (const tc_ of [
     {
       name: 'basic case',
