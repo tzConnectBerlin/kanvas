@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { fileTypeFromBuffer } from 'file-type';
 import fs from 'fs';
 import { Buffer } from 'node:buffer';
 import ffmpeg from 'fluent-ffmpeg';
@@ -8,6 +7,15 @@ import * as path from 'path';
 import sharp from 'sharp';
 import sizeOf from 'image-size';
 import { v4 as uuidv4 } from 'uuid';
+import mime from 'mime';
+
+mime.define(
+  {
+    'video/mov': ['mov'],
+    'video/quicktime': ['qt'],
+  },
+  true,
+);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,10 +40,11 @@ interface ResizedImgParams {
   buffer: Buffer;
   imageSize: { width: number; height: number };
   type: FileType;
+  extension: string;
 }
 
 interface ImageFromVideoParams {
-  videoBuffer: Buffer;
+  videoFile: File;
   typeOfImage: FileType;
   imageSize: number;
 }
@@ -43,6 +52,7 @@ interface ImageFromVideoParams {
 interface GenerateImageFileParams {
   source: Path | Buffer;
   type: FileType;
+  extension: string;
 }
 
 interface ScreenshotFromVideoParams {
@@ -129,7 +139,7 @@ export class FileService {
     let addedFiles: File[] = [];
     if (displayMissing && thumbnailMissing) {
       const generatedDisplay = await this.#imageFromVideo({
-        videoBuffer: this.artifact.buffer,
+        videoFile: this.artifact,
         typeOfImage: 'display',
         imageSize: 350,
       });
@@ -139,6 +149,7 @@ export class FileService {
           buffer: generatedDisplay.buffer,
           imageSize: { width: 250, height: 250 },
           type: 'thumbnail',
+          extension: 'png',
         });
 
         if (thumbnail) {
@@ -148,7 +159,7 @@ export class FileService {
       }
     } else if (displayMissing) {
       const generatedDisplay = await this.#imageFromVideo({
-        videoBuffer: this.artifact.buffer,
+        videoFile: this.artifact,
         typeOfImage: 'display',
         imageSize: 350,
       });
@@ -180,14 +191,18 @@ export class FileService {
         height = thumbnailDimensions.height;
       }
 
-      thumbnail = await this.#resizedImg({
-        buffer: display.buffer,
-        imageSize: {
-          width,
-          height,
-        },
-        type: 'thumbnail',
-      });
+      const displayExtension = mime.getExtension(display.mimetype);
+      if (displayExtension) {
+        thumbnail = await this.#resizedImg({
+          buffer: display.buffer,
+          imageSize: {
+            width,
+            height,
+          },
+          type: 'thumbnail',
+          extension: displayExtension,
+        });
+      }
 
       if (thumbnail) {
         addedFiles.push(thumbnail);
@@ -222,29 +237,34 @@ export class FileService {
           350,
           350,
         );
-        display = await this.#resizedImg({
-          buffer: this.artifact.buffer,
-          imageSize: {
-            width: displayDimensions.width,
-            height: displayDimensions.height,
-          },
-          type: 'display',
-        });
+        const artifactExtension = mime.getExtension(this.artifact.mimetype);
+        if (artifactExtension) {
+          display = await this.#resizedImg({
+            buffer: this.artifact.buffer,
+            imageSize: {
+              width: displayDimensions.width,
+              height: displayDimensions.height,
+            },
+            type: 'display',
+            extension: artifactExtension,
+          });
 
-        const thumbnailDimensions = this.scaledDimensions(
-          artifactDimensions.width,
-          artifactDimensions.height,
-          250,
-          250,
-        );
-        thumbnail = await this.#resizedImg({
-          buffer: this.artifact.buffer,
-          imageSize: {
-            width: thumbnailDimensions.width,
-            height: thumbnailDimensions.height,
-          },
-          type: 'thumbnail',
-        });
+          const thumbnailDimensions = this.scaledDimensions(
+            artifactDimensions.width,
+            artifactDimensions.height,
+            250,
+            250,
+          );
+          thumbnail = await this.#resizedImg({
+            buffer: this.artifact.buffer,
+            imageSize: {
+              width: thumbnailDimensions.width,
+              height: thumbnailDimensions.height,
+            },
+            type: 'thumbnail',
+            extension: artifactExtension,
+          });
+        }
       }
 
       if (display && thumbnail) {
@@ -264,14 +284,18 @@ export class FileService {
           350,
           350,
         );
-        display = await this.#resizedImg({
-          buffer: this.artifact.buffer,
-          imageSize: {
-            width: displayDimensions.width,
-            height: displayDimensions.height,
-          },
-          type: 'display',
-        });
+        const artifactExtension = mime.getExtension(this.artifact.mimetype);
+        if (artifactExtension) {
+          display = await this.#resizedImg({
+            buffer: this.artifact.buffer,
+            imageSize: {
+              width: displayDimensions.width,
+              height: displayDimensions.height,
+            },
+            type: 'display',
+            extension: artifactExtension,
+          });
+        }
       }
 
       if (display) {
@@ -295,14 +319,18 @@ export class FileService {
           250,
           250,
         );
-        thumbnail = await this.#resizedImg({
-          buffer: display.buffer,
-          imageSize: {
-            width: thumbnailDimensions.width,
-            height: thumbnailDimensions.height,
-          },
-          type: 'thumbnail',
-        });
+        const displayExtension = mime.getExtension(display.mimetype);
+        if (displayExtension) {
+          thumbnail = await this.#resizedImg({
+            buffer: display.buffer,
+            imageSize: {
+              width: thumbnailDimensions.width,
+              height: thumbnailDimensions.height,
+            },
+            type: 'thumbnail',
+            extension: displayExtension,
+          });
+        }
       }
 
       if (thumbnail) {
@@ -313,18 +341,17 @@ export class FileService {
   }
 
   async #imageFromVideo({
-    videoBuffer,
+    videoFile,
     typeOfImage,
     imageSize,
   }: ImageFromVideoParams): Promise<File | undefined> {
-    const fileTypeResult = await fileTypeFromBuffer(videoBuffer);
-
-    if (fileTypeResult) {
+    const videoExtension = mime.getExtension(videoFile.mimetype);
+    if (videoExtension) {
       const imagePath = `${this.MEDIA_TEMP_DIR}${typeOfImage}.png`;
-      const videoPath = `${this.MEDIA_TEMP_DIR}video.${fileTypeResult.ext}`;
+      const videoPath = `${this.MEDIA_TEMP_DIR}video.${videoExtension}`;
 
       // generating screenshots doesn't work with input streams, therefore we write the buffer to a file
-      fs.writeFileSync(videoPath, videoBuffer);
+      fs.writeFileSync(videoPath, videoFile.buffer);
 
       try {
         await this.#screenshotFromVideo({
@@ -340,6 +367,7 @@ export class FileService {
       return this.#generateImageFile({
         source: imagePath,
         type: typeOfImage,
+        extension: 'png',
       });
     }
   }
@@ -348,35 +376,38 @@ export class FileService {
     buffer,
     imageSize,
     type,
+    extension,
   }: ResizedImgParams): Promise<File | undefined> {
     const resizedImgBuffer = await sharp(buffer)
       .resize({ width: imageSize.width, height: imageSize.height })
       .toBuffer();
     if (resizedImgBuffer) {
-      return this.#generateImageFile({ source: resizedImgBuffer, type });
+      return this.#generateImageFile({
+        source: resizedImgBuffer,
+        type,
+        extension,
+      });
     }
   }
 
   async #generateImageFile({
     source,
     type,
+    extension,
   }: GenerateImageFileParams): Promise<File | undefined> {
     const imageBuffer = Buffer.isBuffer(source)
       ? source
       : fs.readFileSync(source as Path);
     const bufferSize = Buffer.byteLength(imageBuffer);
-    const fileType = await fileTypeFromBuffer(imageBuffer);
 
-    if (fileType) {
-      return <File>{
-        fieldname: 'files[]', // for now, we only get files from this fieldname
-        originalname: type,
-        encoding: '7bit', // the client returns us this encoding for images
-        mimetype: fileType.mime,
-        buffer: imageBuffer,
-        size: bufferSize,
-      };
-    }
+    return <File>{
+      fieldname: 'files[]', // for now, we only get files from this fieldname
+      originalname: type,
+      encoding: '7bit', // the client returns us this encoding for images
+      mimetype: `image/${extension}`,
+      buffer: imageBuffer,
+      size: bufferSize,
+    };
   }
 
   async #screenshotFromVideo({
