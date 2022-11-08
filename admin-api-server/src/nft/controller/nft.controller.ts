@@ -17,7 +17,7 @@ import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard.js';
 import { MAX_FILE_UPLOADS_PER_CALL } from '../../constants.js';
 import { NftEntity, NftUpdate, UrlParams } from '../entities/nft.entity.js';
 import { NftService } from '../service/nft.service.js';
-import { FileService, File } from '../service/file.service.js';
+import { FileService, File } from '../service/file/file.service.js';
 import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { UserEntity } from '../../user/entities/user.entity.js';
 import { NftFilterParams, NftFilters } from '../params.js';
@@ -229,7 +229,7 @@ export class NftController {
     }
 
     if (filesArray?.length) {
-      filesArray = await this.fileService.addMissingFiles(filesArray, nftId);
+      filesArray = await this.fileService.addMissingFiles(filesArray);
     }
 
     const nftUpdates = this.#transformFormDataToNftUpdates(

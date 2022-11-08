@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NftController } from './nft.controller';
 import { NftService } from '../service/nft.service';
+import { FileService } from '../service/file/file.service';
 import { S3Service } from '../service/s3.service';
 import { DbMockModule } from '../../db_mock.module';
 import { RoleService } from '../../role/service/role.service';
@@ -14,7 +15,13 @@ describe('NftController', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DbMockModule],
       controllers: [NftController],
-      providers: [NftService, S3Service, RoleService, CategoryService],
+      providers: [
+        NftService,
+        S3Service,
+        RoleService,
+        CategoryService,
+        FileService,
+      ],
     }).compile();
 
     controller = module.get<NftController>(NftController);
