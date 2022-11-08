@@ -106,7 +106,7 @@ BEGIN
       onsale_from,
       onsale_until,
       cat.categories,
-      COALESCE(nft_formats.formats, array[]::jsonb[]) AS formats,
+      nft_formats.formats AS formats,
       metadata,
 
       artifact_uri,

@@ -588,15 +588,14 @@ FROM nfts_by_id($1, $2, $3, $4)`,
               description: categoryRow[2],
             };
           }),
-          formats: nftRow['formats'].reduce(
-            (formats: NftFormats, format: any) => {
+          formats: maybe(nftRow['formats'], (formats) =>
+            formats.reduce((formats: NftFormats, format: any) => {
               if (typeof formats[format[0]] === 'undefined') {
                 formats[format[0]] = {};
               }
               formats[format[0]][format[1]] = format[2];
               return formats;
-            },
-            {},
+            }, {}),
           ),
           metadata: nftRow['metadata'],
           editionsSize: editions,
