@@ -2,16 +2,15 @@ import { Injectable, Logger } from '@nestjs/common';
 import { fileTypeFromBuffer } from 'file-type';
 import fs from 'fs';
 import { Buffer } from 'node:buffer';
-import { createRequire } from 'module';
 import ffmpeg from 'fluent-ffmpeg';
 import { fileURLToPath } from 'url';
 import * as path from 'path';
+import sharp from 'sharp';
+import sizeOf from 'image-size';
+import { v4 as uuidv4 } from 'uuid';
 
-const require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const sharp = require('sharp');
-const sizeOf = require('image-size');
 
 export interface File {
   originalname: string;
@@ -23,23 +22,26 @@ export interface File {
 }
 
 type FileType = 'thumbnail' | 'display';
+type Path = string;
+type Dimension = {
+  width: number;
+  height: number;
+};
 
 interface ResizedImgParams {
   buffer: Buffer;
-  nftId: number;
   imageSize: { width: number; height: number };
   type: FileType;
 }
 
 interface ImageFromVideoParams {
   videoBuffer: Buffer;
-  nftId: number;
   typeOfImage: FileType;
   imageSize: number;
 }
 
 interface GenerateImageFileParams {
-  path: string;
+  source: Path | Buffer;
   type: FileType;
 }
 
@@ -52,22 +54,21 @@ interface ScreenshotFromVideoParams {
 interface HandleVideoParams {
   thumbnailMissing: boolean;
   displayMissing: boolean;
-  nftId: number;
 }
 
 interface HandleImageParams {
   thumbnailMissing: boolean;
   displayMissing: boolean;
-  nftId: number;
 }
 
 @Injectable()
 export class FileService {
-  private MEDIA_TEMP_DIR = __dirname + '/temp/';
+  private MEDIA_TEMP_DIR: string;
   private allFiles: File[] = [];
   private artifact: File;
 
-  async addMissingFiles(filesArray: File[], nftId: number): Promise<File[]> {
+  async addMissingFiles(filesArray: File[]): Promise<File[]> {
+    this.MEDIA_TEMP_DIR = __dirname + `/${uuidv4()}/`;
     this.allFiles = filesArray;
     this.artifact = filesArray.find(
       (file) => file.originalname === 'artifact',
@@ -86,7 +87,6 @@ export class FileService {
       if (isVideo) {
         this.#createTempDir();
         const addedFiles = await this.#handleVideo({
-          nftId,
           thumbnailMissing,
           displayMissing,
         });
@@ -99,7 +99,6 @@ export class FileService {
       } else if (isImage) {
         this.#createTempDir();
         const addedFiles = await this.#handleImage({
-          nftId,
           thumbnailMissing,
           displayMissing,
         });
@@ -124,7 +123,6 @@ export class FileService {
   }
 
   async #handleVideo({
-    nftId,
     displayMissing,
     thumbnailMissing,
   }: HandleVideoParams): Promise<File[]> {
@@ -132,7 +130,6 @@ export class FileService {
     if (displayMissing && thumbnailMissing) {
       const generatedDisplay = await this.#imageFromVideo({
         videoBuffer: this.artifact.buffer,
-        nftId,
         typeOfImage: 'display',
         imageSize: 350,
       });
@@ -141,7 +138,6 @@ export class FileService {
         const thumbnail = await this.#resizedImg({
           buffer: generatedDisplay.buffer,
           imageSize: { width: 250, height: 250 },
-          nftId,
           type: 'thumbnail',
         });
 
@@ -153,7 +149,6 @@ export class FileService {
     } else if (displayMissing) {
       const generatedDisplay = await this.#imageFromVideo({
         videoBuffer: this.artifact.buffer,
-        nftId,
         typeOfImage: 'display',
         imageSize: 350,
       });
@@ -166,9 +161,7 @@ export class FileService {
         (file) => file.originalname === 'display',
       ) as File; // we know there is a display at this point in time
 
-      const displayDimensions: { height: number; width: number } = sizeOf(
-        display.buffer,
-      );
+      const displayDimensions = sizeOf(display.buffer) as Dimension;
 
       let thumbnail: File | undefined;
       let width: number;
@@ -189,7 +182,6 @@ export class FileService {
 
       thumbnail = await this.#resizedImg({
         buffer: display.buffer,
-        nftId,
         imageSize: {
           width,
           height,
@@ -206,15 +198,14 @@ export class FileService {
   }
 
   async #handleImage({
-    nftId,
     displayMissing,
     thumbnailMissing,
   }: HandleImageParams): Promise<File[]> {
     let addedFiles: File[] = [];
     if (displayMissing && thumbnailMissing) {
-      const artifactDimensions: { height: number; width: number } = sizeOf(
+      const artifactDimensions: Dimension = sizeOf(
         this.artifact.buffer,
-      );
+      ) as Dimension;
 
       let display: File | undefined;
       let thumbnail: File | undefined;
@@ -233,7 +224,6 @@ export class FileService {
         );
         display = await this.#resizedImg({
           buffer: this.artifact.buffer,
-          nftId,
           imageSize: {
             width: displayDimensions.width,
             height: displayDimensions.height,
@@ -249,7 +239,6 @@ export class FileService {
         );
         thumbnail = await this.#resizedImg({
           buffer: this.artifact.buffer,
-          nftId,
           imageSize: {
             width: thumbnailDimensions.width,
             height: thumbnailDimensions.height,
@@ -263,9 +252,7 @@ export class FileService {
         addedFiles.push(thumbnail);
       }
     } else if (displayMissing) {
-      const artifactDimensions: { height: number; width: number } = sizeOf(
-        this.artifact.buffer,
-      );
+      const artifactDimensions = sizeOf(this.artifact.buffer) as Dimension;
       let display: File | undefined;
       if (artifactDimensions.width < 350 && artifactDimensions.height < 350) {
         display = Object.assign({}, this.artifact);
@@ -279,7 +266,6 @@ export class FileService {
         );
         display = await this.#resizedImg({
           buffer: this.artifact.buffer,
-          nftId,
           imageSize: {
             width: displayDimensions.width,
             height: displayDimensions.height,
@@ -295,18 +281,14 @@ export class FileService {
       const display = this.allFiles.find(
         (file) => file.originalname === 'display',
       ) as File;
-      const displayDimensions: { height: number; width: number } = sizeOf(
-        display.buffer,
-      );
+      const displayDimensions = sizeOf(display.buffer) as Dimension;
 
       let thumbnail: File | undefined;
       if (displayDimensions.width < 350 && displayDimensions.height < 350) {
         thumbnail = Object.assign({}, display);
         thumbnail.originalname = 'thumbnail';
       } else {
-        const displayDimensions: { height: number; width: number } = sizeOf(
-          display.buffer,
-        );
+        const displayDimensions = sizeOf(display.buffer) as Dimension;
         const thumbnailDimensions = this.scaledDimensions(
           displayDimensions.width,
           displayDimensions.height,
@@ -315,7 +297,6 @@ export class FileService {
         );
         thumbnail = await this.#resizedImg({
           buffer: display.buffer,
-          nftId,
           imageSize: {
             width: thumbnailDimensions.width,
             height: thumbnailDimensions.height,
@@ -333,24 +314,23 @@ export class FileService {
 
   async #imageFromVideo({
     videoBuffer,
-    nftId,
     typeOfImage,
     imageSize,
   }: ImageFromVideoParams): Promise<File | undefined> {
     const fileTypeResult = await fileTypeFromBuffer(videoBuffer);
 
     if (fileTypeResult) {
-      const video = `${nftId}_video.${fileTypeResult.ext}`;
-      const image = `${nftId}_${typeOfImage}.png`;
+      const imagePath = `${this.MEDIA_TEMP_DIR}${typeOfImage}.png`;
+      const videoPath = `${this.MEDIA_TEMP_DIR}video.${fileTypeResult.ext}`;
 
       // generating screenshots doesn't work with input streams, therefore we write the buffer to a file
-      fs.writeFileSync(`${this.MEDIA_TEMP_DIR}${video}`, videoBuffer);
+      fs.writeFileSync(videoPath, videoBuffer);
 
       try {
         await this.#screenshotFromVideo({
           imageSize,
-          videoPath: `${this.MEDIA_TEMP_DIR}${video}`,
-          filename: `${nftId}_${typeOfImage}`,
+          videoPath: videoPath,
+          filename: `${typeOfImage}`,
         });
       } catch (error) {
         Logger.error('taking screenshot from video failed');
@@ -358,7 +338,7 @@ export class FileService {
       }
 
       return this.#generateImageFile({
-        path: `${this.MEDIA_TEMP_DIR}${image}`,
+        source: imagePath,
         type: typeOfImage,
       });
     }
@@ -366,27 +346,24 @@ export class FileService {
 
   async #resizedImg({
     buffer,
-    nftId,
     imageSize,
     type,
   }: ResizedImgParams): Promise<File | undefined> {
-    const destinationPath = `${this.MEDIA_TEMP_DIR}${nftId}_${type}.png`;
-    const res = await sharp(buffer)
+    const resizedImgBuffer = await sharp(buffer)
       .resize({ width: imageSize.width, height: imageSize.height })
-      .toFile(destinationPath);
-    if (res) {
-      return this.#generateImageFile({
-        path: destinationPath,
-        type,
-      });
+      .toBuffer();
+    if (resizedImgBuffer) {
+      return this.#generateImageFile({ source: resizedImgBuffer, type });
     }
   }
 
   async #generateImageFile({
-    path,
+    source,
     type,
   }: GenerateImageFileParams): Promise<File | undefined> {
-    const imageBuffer = fs.readFileSync(path);
+    const imageBuffer = Buffer.isBuffer(source)
+      ? source
+      : fs.readFileSync(source as Path);
     const bufferSize = Buffer.byteLength(imageBuffer);
     const fileType = await fileTypeFromBuffer(imageBuffer);
 
