@@ -105,7 +105,7 @@ describe('Media video ffprobe mocked tests', () => {
       expErr: new Error('no video stream found'),
     },
     {
-      name: 'if there are multiple video streams present, first is taken',
+      name: 'if there are multiple video streams present, first is taken (but data rate is sum)',
       err: null,
       metadata: {
         streams: [
@@ -128,7 +128,7 @@ describe('Media video ffprobe mocked tests', () => {
       },
       exp: {
         dataRate: {
-          value: 149,
+          value: 324,
           unit: 'kbps',
         },
       },

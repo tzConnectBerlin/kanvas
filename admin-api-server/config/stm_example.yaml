@@ -1,16 +1,16 @@
 attributes:
   name: string
   description: text
-  artifact: content_uri
+  artifact: content
   display:
-    type: content_uri
+    type: content
     restrictions:
       mimetypes:
       - image/png
       - image/jpg
       - image/jpeg
   thumbnail:
-    type: content_uri
+    type: content
     restrictions:
       mimetypes:
       - image/png
@@ -36,7 +36,7 @@ states:
       when:
       - nft.name.length > 0
       - nft.description.length > 0
-      - nft.artifact.length > 0
+      - nft.artifact.uri.length > 0
     mutables:
     - attributes: [name, artifact, display, thumbnail, description]
       by_roles: [creator]
