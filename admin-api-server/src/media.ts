@@ -84,6 +84,16 @@ export function videoMetadataFromFfprobe(err: any, metadata: FfprobeData) {
     return res;
   };
 
+  const bitRate = metadata.streams.reduce(
+    (rate: number | undefined, s: FfprobeStream) => {
+      if (s.bit_rate == null || Number(s.bit_rate) === NaN) {
+        return rate;
+      }
+      return (rate ?? 0) + Number(s.bit_rate);
+    },
+    undefined,
+  );
+
   const res: VideoMetadata = <VideoMetadata>{
     duration: maybe(tryGetField('duration'), (seconds: string) =>
       durationString(Number(seconds)),
@@ -91,17 +101,10 @@ export function videoMetadataFromFfprobe(err: any, metadata: FfprobeData) {
     width: tryGetField('width'),
     height: tryGetField('height'),
     dataRate: maybe(
-      tryGetField('bit_rate'),
-      (bitRateStr: string): { value: number; unit: string } | undefined => {
-        const bitRate = Number(bitRateStr);
-        if (bitRate === NaN) {
-          Logger.warn(
-            `bit_rate field is NaN in ffprobe's video metadata (value is ${bitRateStr}`,
-          );
-          return undefined;
-        }
+      bitRate,
+      (rate: number): { value: number; unit: string } | undefined => {
         return {
-          value: Math.floor(bitRate / 1000),
+          value: Math.floor(rate / 1000),
           unit: 'kbps',
         };
       },
@@ -119,7 +122,7 @@ function durationString(totalSeconds: number): string {
   const hours = Math.floor(totalSeconds / 3600);
   totalSeconds %= 3600;
   const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
+  const seconds = Math.ceil(totalSeconds % 60);
 
   const padded = (n: number): string => {
     return String(n).padStart(2, '0');
