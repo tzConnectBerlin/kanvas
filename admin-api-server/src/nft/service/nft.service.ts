@@ -490,7 +490,7 @@ WHERE TARGET.value != EXCLUDED.value
 
     const formats: { [key: string]: ContentMetadata } = {};
     if (typeof attr.artifact.metadata !== 'undefined') {
-      formats['artifact'] = attr.artifact;
+      formats['artifact'] = attr.artifact.metadata;
     }
     if (typeof attr.display?.metadata !== 'undefined') {
       formats['display'] = attr.display.metadata;
