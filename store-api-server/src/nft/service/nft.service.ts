@@ -9,6 +9,7 @@ import {
   CreateNft,
   CreateProxiedNft,
   NftEntity,
+  NftFormats,
   NftEntityPage,
   OwnershipInfo,
 } from '../entity/nft.entity.js';
@@ -22,7 +23,7 @@ import {
   ENDING_SOON_DURATION,
 } from '../../constants.js';
 import { CurrencyService, BASE_CURRENCY } from 'kanvas-api-lib';
-import { sleep, maybe } from '../../utils.js';
+import { sleep, maybe, isBottom } from '../../utils.js';
 import { NftIpfsService } from './ipfs.service.js';
 import { DbTransaction, withTransaction } from '../../db.module.js';
 
@@ -35,7 +36,45 @@ export class NftService {
   ) {}
 
   async createNft(newNft: CreateNft) {
-    const insert = async (dbTx: any) => {
+    const insertFormats = async (
+      dbTx: DbTransaction,
+      formats?: NftFormats,
+    ): Promise<number[]> => {
+      const formatIds: number[] = [];
+
+      if (typeof formats === 'undefined') {
+        return formatIds;
+      }
+
+      for (const contentName of Object.keys(formats)) {
+        for (const attr of Object.keys(formats[contentName])) {
+          await dbTx.query(
+            `
+INSERT INTO format (content_name, attribute, value)
+VALUES ($1, $2, $3)
+ON CONFLICT DO NOTHING
+          `,
+            [contentName, attr, JSON.stringify(formats[contentName][attr])],
+          );
+          formatIds.push(
+            (
+              await dbTx.query(
+                `
+SELECT
+  id
+FROM format
+WHERE content_name = $1
+  AND attribute = $2
+          `,
+                [contentName, attr],
+              )
+            ).rows[0]['id'],
+          );
+        }
+      }
+      return formatIds;
+    };
+    const insert = async (dbTx: DbTransaction) => {
       let onsaleFrom: Date | undefined = undefined;
       if (typeof newNft.onsaleFrom !== 'undefined') {
         onsaleFrom = new Date();
@@ -46,6 +85,8 @@ export class NftService {
         onsaleUntil = new Date();
         onsaleUntil.setTime(newNft.onsaleUntil);
       }
+
+      const formatIds = await insertFormats(dbTx, newNft.formats);
 
       await dbTx.query(
         `
@@ -70,6 +111,16 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
           newNft.metadata,
           newNft.proxyNftId,
         ],
+      );
+
+      await dbTx.query(
+        `
+INSERT INTO mtm_nft_format (
+  nft_id, format_id
+)
+SELECT $1, UNNEST($2::INTEGER[])
+      `,
+        [newNft.id, formatIds],
       );
 
       await dbTx.query(
@@ -162,8 +213,10 @@ WHERE id = $1
         mtm_nft_category: 'nft_id',
         mtm_nft_order_nft: 'nft_id',
         nft_order_delivery: 'nft_order_id',
+        mtm_nft_format: 'nft_id',
       };
       const tables = [
+        'mtm_nft_format',
         'nft_order_delivery',
         'mtm_nft_order_nft',
         'mtm_kanvas_user_nft',
@@ -463,6 +516,7 @@ SELECT
   onsale_from,
   onsale_until,
 
+  formats,
   metadata,
 
   metadata_ipfs,
@@ -534,6 +588,15 @@ FROM nfts_by_id($1, $2, $3, $4)`,
               description: categoryRow[2],
             };
           }),
+          formats: maybe(nftRow['formats'], (formats) =>
+            formats.reduce((formats: NftFormats, format: any) => {
+              if (typeof formats[format[0]] === 'undefined') {
+                formats[format[0]] = {};
+              }
+              formats[format[0]][format[1]] = format[2];
+              return formats;
+            }, {}),
+          ),
           metadata: nftRow['metadata'],
           editionsSize: editions,
           editionsAvailable: editions - (reserved + owned),

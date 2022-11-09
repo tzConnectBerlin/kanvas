@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import request from 'supertest';
 import sotez from 'sotez';
-import { Client } from 'pg';
+import { Client, PoolClient } from 'pg';
 const { cryptoUtils } = sotez;
 import { InMemorySigner } from '@taquito/signer';
 import { TezosToolkit } from '@taquito/taquito';
@@ -289,6 +289,7 @@ export async function resetDb(resetForLegacyTest = false): Promise<number[]> {
 
     const tables = [
       'nft_order_delivery',
+      'mtm_nft_format',
       'mtm_kanvas_user_nft',
       'mtm_cart_session_nft',
       'mtm_nft_category',
@@ -297,6 +298,7 @@ export async function resetDb(resetForLegacyTest = false): Promise<number[]> {
       'nft_order',
       'kanvas_user',
       'cart_session',
+      'format',
       'proxy_unfold',
       'nft',
       'nft_category',

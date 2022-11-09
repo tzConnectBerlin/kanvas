@@ -5,6 +5,10 @@ export interface OwnershipInfo {
   receivalOperationHash?: string;
 }
 
+export interface NftFormats {
+  [key: string]: { [key: string]: any };
+}
+
 export interface NftEntity {
   id: number;
   createdAt: number;
@@ -24,6 +28,8 @@ export interface NftEntity {
   artifactIpfs?: string;
   displayIpfs?: string;
   thumbnailIpfs?: string;
+
+  formats?: NftFormats;
 
   artifactUri: string;
   displayUri?: string;
@@ -58,6 +64,7 @@ export interface CreateNft {
   onsaleFrom?: number;
   onsaleUntil?: number;
 
+  formats?: NftFormats;
   metadata?: any;
 
   signature: string;

@@ -139,28 +139,30 @@ export class NftController {
       });
     }
 
-    if (typeof filesArray !== 'undefined') {
-      for (const file of filesArray) {
-        const attrName = file.originalname;
+    if (typeof filesArray === 'undefined') {
+      return res;
+    }
 
-        const restrictions = this.nftService.getContentRestrictions(attrName);
-        if (
-          typeof restrictions?.maxBytes !== 'undefined' &&
-          file.size > restrictions.maxBytes
-        ) {
-          throw new HttpException(
-            `${attrName} too big (file size=${filesizeHuman(
-              file.size,
-            )}), max allowed size is ${filesizeHuman(restrictions.maxBytes)}`,
-            HttpStatus.BAD_REQUEST,
-          );
-        }
+    for (const file of filesArray) {
+      const attrName = file.originalname;
 
-        res.push(<NftUpdate>{
-          attribute: file.originalname,
-          file: file,
-        });
+      const restrictions = this.nftService.getContentRestrictions(attrName);
+      if (
+        typeof restrictions?.maxBytes !== 'undefined' &&
+        file.size > restrictions.maxBytes
+      ) {
+        throw new HttpException(
+          `${attrName} too big (file size=${filesizeHuman(
+            file.size,
+          )}), max allowed size is ${filesizeHuman(restrictions.maxBytes)}`,
+          HttpStatus.BAD_REQUEST,
+        );
       }
+
+      res.push(<NftUpdate>{
+        attribute: file.originalname,
+        file: file,
+      });
     }
 
     return res;

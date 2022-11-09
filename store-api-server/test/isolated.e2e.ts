@@ -204,5 +204,175 @@ WHERE id = ${nftIds[0]}
         }
       });
     }
+
+    it('NFT formats are returned in GET /nfts/:id', async () => {
+      await testUtils.withDbConn(async (db) => {
+        const addFormat = async (
+          contentName: string,
+          attr: string,
+          val: any,
+        ) => {
+          const formatId = (
+            await db.query(
+              `
+INSERT INTO format (content_name, attribute, value)
+VALUES ($1, $2, $3::jsonb)
+RETURNING id`,
+              [contentName, attr, val],
+            )
+          ).rows[0]['id'];
+
+          await db.query(
+            `
+INSERT INTO mtm_nft_format (nft_id, format_id)
+VALUES ($1, $2)
+        `,
+            [nftIds[0], formatId],
+          );
+        };
+        await addFormat('artifact', 'mimeType', '"image/png"');
+        await addFormat('artifact', 'width', '400');
+        await addFormat('artifact', 'height', '500');
+
+        await addFormat('display', 'height', '450');
+      });
+
+      const resp = await request(app.getHttpServer()).get(`/nfts/${nftIds[0]}`);
+      expect(resp.statusCode).toEqual(200);
+      expect(resp.body).toMatchObject({
+        id: nftIds[0],
+
+        formats: {
+          artifact: {
+            mimeType: 'image/png',
+            width: 400,
+            height: 500,
+          },
+          display: {
+            height: 450,
+          },
+        },
+
+        metadata: {
+          test: {
+            nested: 10,
+          },
+        },
+      });
+    });
+
+    it('NFT create with formats field specified', async () => {
+      const nftId = nftIds[nftIds.length - 1] + 1;
+      await testUtils.createNft(app, {
+        id: nftId,
+
+        name: 'test',
+        description: 'test description',
+
+        artifactUri: 'some_s3_uri',
+
+        price: 0.5,
+        categories: [10],
+        editionsSize: 4,
+
+        formats: {
+          artifact: {
+            mimeType: 'video/mp4',
+            width: 300,
+            height: 550,
+            duration: '00:10:15',
+          },
+          thumbnail: {
+            height: 450,
+          },
+        },
+      });
+
+      const resp = await request(app.getHttpServer()).get(`/nfts/${nftId}`);
+      expect(resp.statusCode).toEqual(200);
+      expect(resp.body).toMatchObject({
+        id: nftId,
+
+        formats: {
+          artifact: {
+            mimeType: 'video/mp4',
+            width: 300,
+            height: 550,
+            duration: '00:10:15',
+          },
+          thumbnail: {
+            height: 450,
+          },
+        },
+      });
+    });
+
+    it('same formats fields specified results in normalized db representation', async () => {
+      const nftId = nftIds[nftIds.length - 1] + 1;
+      await testUtils.createNft(app, {
+        id: nftId,
+
+        name: 'test',
+        description: 'test description',
+
+        artifactUri: 'some_s3_uri',
+
+        price: 0.5,
+        categories: [10],
+        editionsSize: 4,
+
+        formats: {
+          artifact: {
+            mimeType: 'video/mp4',
+            width: 300,
+          },
+          thumbnail: {
+            height: 450,
+          },
+        },
+      });
+      await testUtils.createNft(app, {
+        id: nftId + 1,
+
+        name: 'test',
+        description: 'test description',
+
+        artifactUri: 'some_s3_uri',
+
+        price: 0.5,
+        categories: [10],
+        editionsSize: 4,
+
+        formats: {
+          artifact: {
+            mimeType: 'video/mp4', // same as above, not an additional format table row
+            width: 350, // differs, expecting a new format table row
+          },
+          thumbnail: {
+            height: 450, // same as above, not an additional format table row
+          },
+        },
+      });
+
+      await testUtils.withDbConn(async (db) => {
+        const res = (
+          await db.query(`
+SELECT
+  (SELECT count(1) FROM format) AS format_count,
+  (SELECT count(1) FROM mtm_nft_format) AS mtm_count`)
+        ).rows.map((row: any) => {
+          return {
+            formatCount: Number(row['format_count']),
+            mtmCount: Number(row['mtm_count']),
+          };
+        });
+        expect(res).toStrictEqual([
+          {
+            formatCount: 4,
+            mtmCount: 6,
+          },
+        ]);
+      });
+    });
   });
 }

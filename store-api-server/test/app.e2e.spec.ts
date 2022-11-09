@@ -29,7 +29,7 @@ import { runTokenGateTests } from './token_gate.e2e';
 import { runProxyNftTests } from './proxy_nft.e2e';
 import { runIsolatedTests } from './isolated.e2e';
 import { TokenGate } from 'token-gate';
-import { setupKanvasServer } from '../src/server.js';
+import { setupKanvasServer, kanvasNestOptions } from '../src/server.js';
 import { MintService } from '../src/nft/service/mint.service';
 const { cryptoUtils } = sotez;
 
@@ -67,7 +67,7 @@ describe('AppController (e2e)', () => {
     userService = await moduleFixture.get(UserService);
     tokenGate = await moduleFixture.get('TOKEN_GATE');
 
-    app = moduleFixture.createNestApplication();
+    app = moduleFixture.createNestApplication(kanvasNestOptions());
     setupKanvasServer(app);
     await app.init();
   });
@@ -79,6 +79,11 @@ describe('AppController (e2e)', () => {
 
   it(`/ (GET) => NOT FOUND (make sure the nestjs's Hello World page is gone)`, () => {
     return request(app.getHttpServer()).get('/').expect(404);
+  });
+
+  it(`OPTIONS w/ local_cors set => 204`, async () => {
+    const resp = await request(app.getHttpServer()).options('/constants');
+    expect(resp.statusCode).toEqual(204);
   });
 
   it(`/constants (GET) => success`, async () => {
