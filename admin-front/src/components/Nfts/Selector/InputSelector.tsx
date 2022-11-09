@@ -110,7 +110,7 @@ export const InputSelector: FC<InputSelectorProps> = ({ ...props }) => {
       />
     );
   }
-  if (props.type === 'content_uri') {
+  if (props.type === 'content') {
     switch (label) {
       case 'Display':
         return (

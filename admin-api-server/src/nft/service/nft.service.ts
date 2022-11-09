@@ -43,14 +43,14 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const mime = require('mime');
 
-import { getContentMetadata } from '../../media.js';
+import { getContentMetadata, ContentMetadata } from '../../media.js';
 
 @Injectable()
 export class NftService {
   stmFileWatcher: FSWatcher;
   stm: StateTransitionMachine;
   nftLock: Lock<number>;
-  CONTENT_TYPE = 'content_uri';
+  CONTENT_TYPE = 'content';
   TOP_LEVEL_IDENTIFIERS = ['id', 'state', 'created_at', 'updated_at'];
   DELETABLE_IN_STATES = ['creation', 'setup_nft'];
 

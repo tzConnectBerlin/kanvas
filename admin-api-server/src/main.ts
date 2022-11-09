@@ -35,5 +35,6 @@ async function bootstrap() {
   const port = process.env['ADMIN_API_PORT'] || 3001;
   await app.listen(port);
   console.log('Listening on ', port);
+  console.log(cors);
 }
 bootstrap();

@@ -110,7 +110,11 @@ export const NftAside = ({ ...props }) => {
               height: '100%',
             }}
           >
-            {renderContent('80%', '80%', props.record?.attributes.artifact)}
+            {renderContent(
+              '80%',
+              '80%',
+              props.record?.attributes.artifact?.uri,
+            )}
           </Box>
 
           <Stack direction="column" sx={{ flexStart: 'end', width: '60%' }}>
@@ -130,7 +134,7 @@ export const NftAside = ({ ...props }) => {
                         | 'string'
                         | 'boolean'
                         | 'number'
-                        | 'content_uri'
+                        | 'content'
                         | 'number[]'
                         | 'votes'
                         | 'date'

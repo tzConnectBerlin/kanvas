@@ -46,8 +46,12 @@ export const BEHIND_PROXY: boolean =
   (process.env['BEHIND_PROXY'] ?? 'no') === 'yes';
 // if LOCAL_CORS is true, the API will set CORS related response headers (usually should be kept default as the inverse of BEHIND_PROXY)
 export const LOCAL_CORS: boolean =
-  maybe(process.env.LOCAL_CORS, (cors_env) => cors_env === 'yes') ??
-  !BEHIND_PROXY;
+  maybe(
+    process.env.LOCAL_CORS,
+    (cors_env) =>
+      cors_env === 'yes' ||
+      cors_env === 'true' /* note: true value here is deprecated */,
+  ) ?? !BEHIND_PROXY;
 
 // See section '8.5.4. Interval Input' in https://www.postgresql.org/docs/9.1/datatype-datetime.html
 // for exactly what format this duration string should be in.
