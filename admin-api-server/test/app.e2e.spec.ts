@@ -2184,7 +2184,7 @@ describe('AppController (e2e)', () => {
         { id: 5, name: 'Painting', description: 'Sub fine art category' },
       ],
       formats: {
-        artifact: { uri: 'someuri', metadata: { height: 500, width: 450 } },
+        artifact: { height: 500, width: 450 },
       },
       metadata: null,
       editionsSize: 4,
