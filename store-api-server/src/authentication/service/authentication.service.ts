@@ -5,7 +5,12 @@ import { ITokenPayload } from '../../interfaces/token.interface.js';
 import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
 import { Result } from 'ts-results';
 import ts_results from 'ts-results';
-import { SIGNED_LOGIN_ENABLED, TOKEN_GATE } from '../../constants.js';
+import {
+  SIGNED_LOGIN_ENABLED,
+  REGISTRATION_FIELDS_VERIFY_EMAIL,
+  TOKEN_GATE,
+} from '../../constants.js';
+import validator from 'validator';
 const { Ok } = ts_results;
 
 import type { IAuthentication } from './authentication.js';
@@ -109,6 +114,20 @@ export class AuthenticationService {
     let newUser = { ...user };
     if (SIGNED_LOGIN_ENABLED) {
       newUser.signedPayload = await bcrypt.hash(user.signedPayload, 10);
+    }
+
+    for (const f of REGISTRATION_FIELDS_VERIFY_EMAIL) {
+      const email = user[f];
+      if (typeof email === 'undefined') {
+        continue;
+      }
+      if (
+        !validator.isEmail(email, {
+          allow_ip_domain: true,
+        })
+      ) {
+        throw new HttpException('invalid email format', HttpStatus.BAD_REQUEST);
+      }
     }
 
     const createdUser = await this.userService.create(newUser);

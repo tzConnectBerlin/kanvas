@@ -81,6 +81,10 @@ export class AuthenticationController {
   @Post('register')
   async register(@Body() user: UserEntity): Promise<any> {
     return this.authService.register(user).catch((err: any) => {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+
       if (err?.code === PG_NOT_NULL_VIOLATION_ERRCODE) {
         Logger.warn(
           `Error on creating user=${JSON.stringify(user)}, err: ${err}`,

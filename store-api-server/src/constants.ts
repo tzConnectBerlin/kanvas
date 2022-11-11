@@ -2,6 +2,8 @@ import { assertEnv, maybe } from './utils.js';
 
 export const EXTRA_USER_FIELDS: string[] =
   maybe(process.env['EXTRA_USER_FIELDS'], JSON.parse) ?? [];
+export const REGISTRATION_FIELDS_VERIFY_EMAIL: string[] =
+  maybe(process.env['REGISTRATION_FIELDS_VERIFY_EMAIL'], JSON.parse) ?? [];
 
 export const PG_CONNECTION = 'PG_CONNECTION';
 export const IPFS_PIN_PROVIDER = 'IPFS_PIN_PROVIDER';
