@@ -10,9 +10,8 @@ import {
   ProfileEntity,
   UserCart,
   UserTotalPaid,
-  NftOwnershipStatus,
 } from '../entity/user.entity.js';
-import { NftEntity, OwnershipInfo } from '../../nft/entity/nft.entity.js';
+import { OwnershipInfo } from '../../nft/entity/nft.entity.js';
 import { NftService } from '../../nft/service/nft.service.js';
 import { PaginationParams } from '../../nft/params.js';
 import {
@@ -22,6 +21,7 @@ import {
   NUM_TOP_BUYERS,
   CART_EXPIRATION_MILLI_SECS,
   CART_MAX_ITEMS,
+  EXTRA_USER_FIELDS,
 } from '../../constants.js';
 import { CurrencyService } from 'kanvas-api-lib';
 import { Result } from 'ts-results';
@@ -60,11 +60,21 @@ export class UserService {
     const qryRes = await this.conn.query(
       `
 INSERT INTO kanvas_user(
-  address, signed_payload
+  address, signed_payload ${
+    EXTRA_USER_FIELDS.length ? ',' + EXTRA_USER_FIELDS : ''
+  }
 )
-VALUES ($1, $2)
+VALUES ($1, $2 ${
+        EXTRA_USER_FIELDS.length
+          ? ',' + EXTRA_USER_FIELDS.map((_, i) => '$' + (3 + i))
+          : ''
+      })
 RETURNING id`,
-      [user.userAddress, user.signedPayload],
+      [
+        user.userAddress,
+        user.signedPayload,
+        ...EXTRA_USER_FIELDS.map((f) => user[f]),
+      ],
     );
 
     return { ...user, id: qryRes.rows[0]['id'] };
@@ -98,6 +108,7 @@ SELECT
   usr.picture_url,
   usr.signed_payload,
   usr.created_at
+  ${EXTRA_USER_FIELDS.length ? ',' + EXTRA_USER_FIELDS : ''}
 FROM kanvas_user usr
 WHERE address = $1
 `,
@@ -106,13 +117,17 @@ WHERE address = $1
     if (qryRes.rows.length === 0) {
       return new Err(`no user found with address=${addr}`);
     }
-    const res = {
-      id: qryRes.rows[0]['id'],
-      userAddress: qryRes.rows[0]['address'],
-      createdAt: Math.floor(qryRes.rows[0]['created_at'].getTime() / 1000),
-      profilePicture: qryRes.rows[0]['picture_url'],
-      signedPayload: qryRes.rows[0]['signed_payload'],
+    const row = qryRes.rows[0];
+    const res: UserEntity = {
+      id: row['id'],
+      userAddress: row['address'],
+      createdAt: Math.floor(row['created_at'].getTime() / 1000),
+      profilePicture: row['picture_url'],
+      signedPayload: row['signed_payload'],
     };
+    for (const f of EXTRA_USER_FIELDS) {
+      res[f] = row[f];
+    }
 
     return Ok(res);
   }

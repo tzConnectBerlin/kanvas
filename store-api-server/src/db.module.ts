@@ -4,7 +4,7 @@ import pg from 'pg';
 const { types } = pg;
 import Pool from 'pg-pool';
 import { assertEnv } from './utils.js';
-import { PG_CONNECTION, PG_LOCK_NOT_AVAILABLE } from './constants.js';
+import { PG_CONNECTION, PG_LOCK_NOT_AVAILABLE_ERRCODE } from './constants.js';
 
 export type DbPool = Pool<Client>;
 export type DbTransaction = PoolClient;
@@ -108,7 +108,7 @@ export async function withMutexLock<ResTy>({
       if (noWait && createQry.rowCount === 0) {
         throw {
           message: `duplicate mutex creation of ${mutexName}`,
-          code: PG_LOCK_NOT_AVAILABLE,
+          code: PG_LOCK_NOT_AVAILABLE_ERRCODE,
         };
       }
     }
@@ -118,7 +118,7 @@ export async function withMutexLock<ResTy>({
 
     return res;
   }).catch((err: any) => {
-    if (noWait && err?.code === PG_LOCK_NOT_AVAILABLE) {
+    if (noWait && err?.code === PG_LOCK_NOT_AVAILABLE_ERRCODE) {
       return onLockedReturn;
     }
     throw err;

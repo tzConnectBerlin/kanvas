@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-cd $SCRIPT_DIR/..
+cd $SCRIPT_DIR/../db_schema
 
 PEPPERMINT_VERSION=ee538be4d156ffb456107587eb71f14671afb1c7
 QUEPASA_VERSION=${QUEPASA_VERSION:-'1.2.6'}
@@ -24,9 +24,10 @@ if [[ ${INIT_PEPPERMINT:-'true'} == "true" ]]; then
     curl "https://raw.githubusercontent.com/tzConnectBerlin/peppermint/${PEPPERMINT_VERSION}/database/schema.sql" 2>/dev/null | psql || exit 1
 fi
 
-psql < ../lib/tezpay/server/database/schema.sql || exit 1
+psql < ../../lib/tezpay/server/database/schema.sql || exit 1
 
-./script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1
+../script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1
+../script/shmig -m ./patches -s patch_version -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1
 psql <<EOF
 BEGIN;
 

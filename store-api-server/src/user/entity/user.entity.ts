@@ -7,6 +7,9 @@ export interface UserEntity {
   profilePicture: string;
   signedPayload?: string;
   cartSession?: string;
+
+  // any extra fields, aligning with the deployment's EXTRA_UESR_FIELDS setting
+  [key: string]: any;
 }
 
 export interface ProfileEntity {

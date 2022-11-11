@@ -19,6 +19,7 @@ import {
 import { AuthenticationService } from '../service/authentication.service.js';
 import {
   PG_UNIQUE_VIOLATION_ERRCODE,
+  PG_NOT_NULL_VIOLATION_ERRCODE,
   SIGNED_LOGIN_ENABLED,
 } from '../../constants.js';
 import { TokenGateEndpointInfo } from '../entity/authentication.entity.js';
@@ -80,9 +81,18 @@ export class AuthenticationController {
   @Post('register')
   async register(@Body() user: UserEntity): Promise<any> {
     return this.authService.register(user).catch((err: any) => {
+      if (err?.code === PG_NOT_NULL_VIOLATION_ERRCODE) {
+        Logger.warn(
+          `Error on creating user=${JSON.stringify(user)}, err: ${err}`,
+        );
+        throw new HttpException(
+          'not all required fields set',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
       if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
         throw new HttpException(
-          'User with these credentials already exists',
+          'user with these credentials already exists',
           HttpStatus.FORBIDDEN,
         );
       }
