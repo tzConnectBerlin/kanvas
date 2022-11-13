@@ -15,7 +15,7 @@ import CustomLayout from 'components/CustomLayout';
 import { UserList, UserEdit, UserCreate } from './components/Users';
 import { NftList, NftEdit, NftCreate } from './components/Nfts';
 import NotFound from 'components/NotFound';
-import { ActivityList } from 'components/Activities';
+import { ActivityList } from 'components/Activities/Activities';
 import TimeSeries from 'components/TimeSeries/TimeSeries';
 import Profile from 'components/Profile';
 
