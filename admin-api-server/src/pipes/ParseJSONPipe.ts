@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 
 @Injectable()
-export class ParseJSONArrayPipe implements PipeTransform<string, any[]> {
+export class ParseJSONPipe implements PipeTransform<string, any[]> {
   transform(value: any, metadata: ArgumentMetadata): any[] {
     try {
       if (typeof value === 'object') {

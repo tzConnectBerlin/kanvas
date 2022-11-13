@@ -17,7 +17,7 @@ import { RolesDecorator } from '../../role/role.decorator.js';
 import { Roles } from '../../role/entities/role.entity.js';
 import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard.js';
 import { RolesGuard } from '../../role/role.guard.js';
-import { ParseJSONArrayPipe } from '../../pipes/ParseJSONArrayPipe.js';
+import { ParseJSONPipe } from '../../pipes/ParseJSONPipe.js';
 import { UserFilterParams, UserFilters } from '../params.js';
 import { UserEntity } from '../entities/user.entity.js';
 import {
@@ -40,19 +40,14 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async findAll(
     @Query() filters: UserFilters,
-    @Query('sort', new ParseJSONArrayPipe())
+    @Query('sort', new ParseJSONPipe())
     sort?: [string, 'asc' | 'desc'],
-    @Query('range', new ParseJSONArrayPipe())
+    @Query('range', new ParseJSONPipe())
     range?: number[],
   ) {
     const params = this.#queryParamsToFilterParams(filters, sort, range);
 
-    validatePaginationParams(params, [
-      'id',
-      'email',
-      'userName',
-      'roles',
-    ]);
+    validatePaginationParams(params, ['id', 'email', 'userName', 'roles']);
 
     return await this.userService.findAll(params);
   }
