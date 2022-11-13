@@ -8,13 +8,23 @@ export class ActivityFilters {
   @IsOptional()
   kind?: string[];
 
-  @IsString()
+  @IsArray()
+  @Transform(({ value }) => parseStringArray(value))
   @IsOptional()
-  from?: string;
+  from?: string[];
+
+  @IsArray()
+  @Transform(({ value }) => parseStringArray(value))
+  @IsOptional()
+  to?: string[];
 
   @IsString()
   @IsOptional()
-  to?: string;
+  startDate?: string;
+
+  @IsString()
+  @IsOptional()
+  endDate?: string;
 }
 
 export class ActivityFilterParams extends PaginationParams {

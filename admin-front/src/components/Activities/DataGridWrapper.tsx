@@ -24,8 +24,8 @@ const DataGridWrapper = ({ fromValue, toValue }: WrapperProps) => {
   useEffect(() => {
     setFilters(
       {
-        from: dayjs(fromValue).utc().toISOString(),
-        to: dayjs(toValue).utc().toISOString(),
+        startDate: dayjs(fromValue).utc().toISOString(),
+        endDate: dayjs(toValue).utc().toISOString(),
       },
       {},
     );

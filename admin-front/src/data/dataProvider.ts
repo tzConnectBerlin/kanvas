@@ -63,24 +63,6 @@ const dataProvider = (
           [Object.keys(params.filter)[0]]: params.filter.resolution,
         };
         break;
-      case 'analytics/activities':
-        query = {
-          sort: JSON.stringify([
-            field.startsWith('attributes.')
-              ? field.slice('attributes.'.length)
-              : field,
-            order.toLowerCase(),
-          ]),
-          range: JSON.stringify([rangeStart, rangeEnd]),
-          filters:
-            Object.keys(params.filter).length === 0
-              ? JSON.stringify({
-                  from: dayjs(dayjs()).subtract(31, 'day'),
-                  to: dayjs(),
-                })
-              : JSON.stringify(params.filter),
-        };
-        break;
       default:
         query = {
           sort: JSON.stringify([
