@@ -2429,7 +2429,7 @@ describe('AppController (e2e)', () => {
     expect(res.statusCode).toEqual(401);
   });
 
-  describe.only('GET /analytics/activities with "startDate" and "endDate" filter', () => {
+  describe('GET /analytics/activities with "startDate" and "endDate" filter', () => {
     beforeEach(async () => {
       await clearEmulatedNftSales();
     });
