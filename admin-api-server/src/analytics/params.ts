@@ -1,10 +1,6 @@
-import { IsOptional, IsArray } from 'class-validator';
+import { IsOptional, IsArray, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
-import {
-  parseStringArray,
-  parseNumberParam,
-  PaginationParams,
-} from '../utils.js';
+import { parseStringArray, PaginationParams } from '../utils.js';
 
 export class ActivityFilters {
   @IsArray()
@@ -12,15 +8,13 @@ export class ActivityFilters {
   @IsOptional()
   kind?: string[];
 
-  @IsArray()
-  @Transform(({ value }) => parseStringArray(value))
+  @IsString()
   @IsOptional()
-  from?: string[];
+  from?: string;
 
-  @IsArray()
-  @Transform(({ value }) => parseStringArray(value))
+  @IsString()
   @IsOptional()
-  to?: string[];
+  to?: string;
 }
 
 export class ActivityFilterParams extends PaginationParams {

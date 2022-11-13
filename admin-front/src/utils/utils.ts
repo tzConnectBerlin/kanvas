@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 export const isValidEmail = (email?: string) =>
   (email ?? '')
     .toLowerCase()
@@ -19,4 +21,8 @@ export const removeNullObjKeys = (obj: Record<any, any>) => {
 
 export function clone(src: Array<any>) {
   return JSON.parse(JSON.stringify(src));
+}
+
+export function isUS(): boolean {
+  return navigator.languages[0] === 'en-US';
 }

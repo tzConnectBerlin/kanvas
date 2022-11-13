@@ -12,10 +12,12 @@ import {
   TextField,
 } from 'react-admin';
 import styled from '@emotion/styled';
-import { format } from 'date-fns';
-import useGetPriceWithCurrency from '../../shared/hooks/useGetPriceWithCurrency';
+import useGetPriceWithCurrency from 'shared/hooks/useGetPriceWithCurrency';
 import ToolbarActions from '../ToolbarActions';
 import { CustomDeleteButton } from '../Buttons/CustomDeleteButton';
+import { isUS } from 'utils/utils';
+import dayjs from 'dayjs';
+import { headerStyles } from 'shared/styles/headerStyles';
 
 const StyledTypography = styled(Typography)({
   fontSize: '0.8rem',
@@ -23,6 +25,8 @@ const StyledTypography = styled(Typography)({
 
 export const NftList = ({ ...props }) => {
   const { getPriceWithCurrency } = useGetPriceWithCurrency();
+
+  const classes = headerStyles();
 
   const renderState = (
     state: 'creation' | 'setup_nft' | 'proposed' | 'prototype' | 'finish',
@@ -42,6 +46,8 @@ export const NftList = ({ ...props }) => {
         return state;
     }
   };
+
+  const dateFormat = isUS() ? 'MM/DD' : 'DD/MM';
 
   return (
     <>
@@ -76,8 +82,12 @@ export const NftList = ({ ...props }) => {
         <Responsive
           medium={
             <Datagrid rowClick="edit">
-              <TextField source="id" />
-              <TextField source="attributes.name" label="Name" />
+              <TextField source="id" headerClassName={classes.header} />
+              <TextField
+                source="attributes.name"
+                label="Name"
+                headerClassName={classes.header}
+              />
               <FunctionField
                 label="Current state"
                 render={(record: any) => renderState(record.state)}
@@ -93,33 +103,37 @@ export const NftList = ({ ...props }) => {
               <NumberField
                 source="attributes.edition_size"
                 label="Token amount"
+                headerClassName={classes.header}
               />
               <FunctionField
                 label="Creation time"
                 render={(record: any) =>
-                  `${format(
+                  `${
                     record.createdAt * 1000
-                      ? new Date(record.createdAt * 1000)
-                      : new Date(),
-                    'dd/MM/yyyy - HH : mm : ss',
-                  )}`
+                      ? dayjs(new Date(record.createdAt * 1000)).format(
+                          dateFormat + '/YYYY - hh : mm : ss A',
+                        )
+                      : dayjs().format(dateFormat + '/YYYY - hh : mm : ss A')
+                  }`
                 }
               />
               <FunctionField
                 label="Last updated"
                 render={(record: any) =>
-                  `${format(
+                  `${
                     record.updatedAt * 1000
-                      ? new Date(record.updatedAt * 1000)
-                      : new Date(),
-                    'dd/MM/yyyy - HH : mm : ss',
-                  )}`
+                      ? dayjs(new Date(record.updatedAt * 1000)).format(
+                          dateFormat + '/YYYY - hh : mm : ss A',
+                        )
+                      : dayjs().format(dateFormat + '/YYYY - hh : mm : ss A')
+                  }`
                 }
               />
               <ReferenceField
                 label="Created by"
                 source="createdBy"
                 reference="user"
+                headerClassName={classes.header}
               >
                 <ChipField source="userName" />
               </ReferenceField>
@@ -130,12 +144,13 @@ export const NftList = ({ ...props }) => {
               primaryText={(record: any) => record.attributes.name}
               secondaryText={(record: any) => renderState(record.state)}
               tertiaryText={(record: any) =>
-                `${format(
+                `${
                   record.createdAt * 1000
-                    ? new Date(record.createdAt * 1000)
-                    : new Date(),
-                  'dd/MM/yyyy - HH : mm : ss',
-                )}`
+                    ? dayjs(new Date(record.createdAt * 1000)).format(
+                        dateFormat + '/YYYY - hh : mm : ss A',
+                      )
+                    : dayjs().format(dateFormat + '/YYYY - hh : mm : ss A')
+                }`
               }
             />
           }

@@ -187,8 +187,7 @@ FROM (
   WHERE payment.status = 'succeeded'
 ) q
 WHERE ($1::TEXT[] IS NULL OR kind = ANY($1::TEXT[]))
-  AND ($2::TEXT[] IS NULL OR "from" = ANY($2::TEXT[]))
-  AND ($3::TEXT[] IS NULL OR "to" = ANY($3::TEXT[]))
+  AND ($2::TIMESTAMP IS NULL OR $3::TIMESTAMP IS NULL OR q.timestamp BETWEEN $2 AND $3)
 ORDER BY "${params.orderBy}" ${params.orderDirection}
 OFFSET ${params.pageOffset}
 LIMIT ${params.pageSize}
