@@ -15,15 +15,18 @@ import {
   useNotify,
   useRedirect,
 } from 'react-admin';
-import { getDecodedToken } from '../../auth/authUtils';
+import { getDecodedToken } from 'auth/authUtils';
 import { CustomDeleteButton } from '../Buttons/CustomDeleteButton';
 import { TextArrayField } from '../TextArrayField';
 import ToolbarActions from '../ToolbarActions';
 import UseGetRolesFromAPI from './hooks/useGetRolesFromAPI';
 import useGetRolesFromAPI from './hooks/useGetRolesFromAPI';
+import { headerStyles } from 'shared/styles/headerStyles';
 
 export const UserList = ({ ...props }) => {
   const { roles } = UseGetRolesFromAPI({ withId: false });
+
+  const classes = headerStyles();
 
   return (
     <List
@@ -32,10 +35,14 @@ export const UserList = ({ ...props }) => {
       {...props}
     >
       <Datagrid rowClick="edit">
-        <TextField source="id" />
-        <TextField source="userName" />
-        <EmailField source="email" />
-        <TextArrayField source="roles" value={roles as string[]}>
+        <TextField source="id" headerClassName={classes.header} />
+        <TextField source="userName" headerClassName={classes.header} />
+        <EmailField source="email" headerClassName={classes.header} />
+        <TextArrayField
+          source="roles"
+          value={roles as string[]}
+          headerClassName={classes.header}
+        >
           <SingleFieldList>
             <ChipField />
           </SingleFieldList>
