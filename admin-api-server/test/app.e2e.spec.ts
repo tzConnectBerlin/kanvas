@@ -2430,12 +2430,10 @@ describe('AppController (e2e)', () => {
   });
 
   describe('GET /analytics/activities with "startDate" and "endDate" filter', () => {
-    beforeEach(async () => {
-      await clearEmulatedNftSales();
-    });
     skipOnPriorFail(
       'will only return data that is between startDate and endDate',
       async () => {
+        await clearEmulatedNftSales();
         await emulateNftSale(
           1,
           [1, 30],
