@@ -31,6 +31,13 @@ export const DEFAULT_ROYALTIES_MINTER_SHARE = 10;
 
 export const STORE_PUBLISHERS = ['Tezos'];
 
+export const IPFS_RIGHTS_URI: string | undefined =
+  process.env['IPFS_RIGHTS_URI'];
+export const IPFS_RIGHTS_MIMETYPE: string | undefined =
+  typeof IPFS_RIGHTS_URI === 'undefined'
+    ? undefined
+    : assertEnv('IPFS_RIGHTS_MIMETYPE');
+
 export const RATE_LIMIT_TTL = Number(process.env['RATE_LIMIT_TTL'] ?? 60); // in seconds
 export const RATE_LIMIT = Number(process.env['RATE_LIMIT'] ?? 100);
 
