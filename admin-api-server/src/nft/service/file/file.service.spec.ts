@@ -130,7 +130,7 @@ describe('FileService', () => {
           expect(afterManipulation).toStrictEqual([artifact, display]);
         });
 
-        it('scaled down to size 250, when the display size is larger then 350', async () => {
+        it('scaled down to size 350, when the display width or height is larger than 350', async () => {
           const buffer = fs.readFileSync(__dirname + '/shortvideo.spec.mov');
           const artifact = artifactMock(buffer, 'video');
           const display = await displayMock(400, 340);
@@ -145,8 +145,8 @@ describe('FileService', () => {
           expect(isImage(thumbnail!)).toBe(true);
 
           const thumbnailDimensions = sizeOf(thumbnail!.buffer);
-          expect(thumbnailDimensions.width).toBe(250);
-          expect(thumbnailDimensions.height).toBeLessThan(250);
+          expect(thumbnailDimensions.width).toBe(350);
+          expect(thumbnailDimensions.height).toBeLessThan(350);
 
           const afterManipulation = res.filter(
             (file) =>
