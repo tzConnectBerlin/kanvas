@@ -3,6 +3,8 @@ import {
   IsString,
   IsInt,
   IsNumber,
+  IsBooleanString,
+  IsBoolean,
   IsOptional,
   IsArray,
 } from 'class-validator';
@@ -36,7 +38,7 @@ export class PaginationParams {
 export class FilterParams extends PaginationParams {
   @IsArray()
   @Transform(({ value }) =>
-    value
+    typeof value !== 'undefined'
       ? parseStringArray(value, ',').map((v: string) => parseNumberParam(v))
       : undefined,
   )
@@ -58,9 +60,27 @@ export class FilterParams extends PaginationParams {
   priceAtMost?: number;
 
   @IsArray()
-  @Transform(({ value }) => (value ? parseStringArray(value, ',') : undefined))
+  @Transform(({ value }) =>
+    typeof value !== 'undefined' ? parseStringArray(value, ',') : undefined,
+  )
   @IsOptional()
   availability?: string[];
+
+  @IsString()
+  @Transform(({ value }) => {
+    if (
+      typeof value !== 'undefined' &&
+      !['fold', 'unfold', 'both'].includes(value)
+    ) {
+      throw new HttpException(
+        `${value} is not a valid value for proxyFolding`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return value;
+  })
+  @IsOptional()
+  proxyFolding?: 'fold' | 'unfold' | 'both' = 'both';
 }
 
 export class SearchParam {

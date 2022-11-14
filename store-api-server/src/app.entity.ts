@@ -6,4 +6,6 @@ export interface AppConstants {
 
   tezosNetwork: string;
   kanvasContract: string;
+
+  tokenGated?: boolean;
 }

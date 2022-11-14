@@ -2,8 +2,8 @@ attributes:
   name: string
   create_ready: boolean
   description: string
-  artifact: string
-  thumbnail: string
+  artifact: any
+  thumbnail: any
   price: number
   edition_size: number
   onsale_from: date
@@ -43,8 +43,8 @@ states:
     - next_state: finish
       when:
       - nft.publish_vote.yes.length >= 2
-      - nft.artifact.length > 0
-      - nft.thumbnail.length > 0
+      - nft.artifact.uri.length > 0
+      - nft.thumbnail.uri.length > 0
       - nft.description.length > 0
     - next_state: setup_nft
       when:

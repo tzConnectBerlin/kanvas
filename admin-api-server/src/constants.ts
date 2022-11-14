@@ -1,5 +1,4 @@
-import { assertEnv } from './utils.js';
-import { maybe } from 'kanvas-api-lib';
+import { assertEnv, maybe } from './utils.js';
 
 export const PG_CONNECTION = 'PG_CONNECTION';
 export const PG_CONNECTION_STORE_REPLICATION =
@@ -32,4 +31,12 @@ export const ADMIN_PRIVATE_KEY = assertEnv('ADMIN_PRIVATE_KEY');
 // It will enable things like the rate limiter to take the incoming IP address
 // from the X-Forwarded-For header.
 export const BEHIND_PROXY: boolean =
-  (process.env['BEHIND_PROXY'] || 'no') === 'yes';
+  (process.env['BEHIND_PROXY'] ?? 'no') === 'yes';
+// if LOCAL_CORS is true, the API will set CORS related response headers (usually should be kept default as the inverse of BEHIND_PROXY)
+export const LOCAL_CORS: boolean =
+  maybe(
+    process.env['LOCAL_CORS'],
+    (cors_env) =>
+      cors_env === 'yes' ||
+      cors_env === 'true' /* note: true value here is deprecated */,
+  ) ?? !BEHIND_PROXY;

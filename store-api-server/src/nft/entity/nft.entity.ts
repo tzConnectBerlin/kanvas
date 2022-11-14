@@ -5,6 +5,10 @@ export interface OwnershipInfo {
   receivalOperationHash?: string;
 }
 
+export interface NftFormats {
+  [key: string]: { [key: string]: any };
+}
+
 export interface NftEntity {
   id: number;
   createdAt: number;
@@ -12,16 +16,20 @@ export interface NftEntity {
   description: string;
   price: string;
   categories: CategoryEntity[];
-  launchAt: number;
+  launchAt?: number; // deprecated by onsaleFrom
+  metadata?: any;
+
   editionsSize: number;
   editionsAvailable: number;
-  metadata?: any;
+  editionsSold: number;
 
   ipfsHash?: string; // deprecated by metadataIpfs field
   metadataIpfs?: string;
   artifactIpfs?: string;
   displayIpfs?: string;
   thumbnailIpfs?: string;
+
+  formats?: NftFormats;
 
   artifactUri: string;
   displayUri?: string;
@@ -30,10 +38,18 @@ export interface NftEntity {
   mintOperationHash?: string;
   ownerStatuses?: string[]; // deprecated by ownershipInfo
   ownershipInfo?: OwnershipInfo[];
+
+  onsaleFrom?: number;
+  onsaleUntil?: number;
+
+  isProxy: boolean;
+  proxyNftId?: number;
 }
 
 export interface CreateNft {
   id: number;
+  proxyNftId?: number;
+
   name: string;
   description: string;
 
@@ -47,6 +63,25 @@ export interface CreateNft {
 
   onsaleFrom?: number;
   onsaleUntil?: number;
+
+  formats?: NftFormats;
+  metadata?: any;
+
+  signature: string;
+}
+
+export interface CreateProxiedNft {
+  id: number;
+  proxyNftId: number;
+
+  name?: string; // if null/undefined: copied from the proxy nft
+  description?: string; // if null/undefined: copied from the proxy nft
+
+  artifactUri: string;
+  displayUri?: string;
+  thumbnailUri?: string;
+
+  categories: number[];
 
   metadata?: any;
 

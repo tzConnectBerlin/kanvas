@@ -2,19 +2,53 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
+set -e
+
+try_kill_bg() {
+  bg_pids="$(jobs -p)"
+  if [[ "$bg_pids" == "" ]]; then
+    return 0
+  fi
+
+  echo "killing background pids: `echo $bg_pids | paste -sd' '`.."
+  echo "$bg_pids" | xargs -I'{}' pkill -TERM -P '{}' || return 0
+}
+TRAP='try_kill_bg'
+trap "$TRAP" EXIT
+
+TRAP="$TRAP; rm -rf test/.workdir 2>/dev/null || return 0"
+trap "$TRAP" EXIT
+mkdir -p test/.workdir
+
 set -a
 . .env.test
 set +a
-export $(grep --regexp='^ADMIN_PRIVATE_KEY' ../admin-api-server/.env.test | xargs)
+export NODE_URL=http://localhost:$FLEXTESA_RPC_PORT
+# using the newest version for --polling-interval parameter, to reduce required testing duration
+export QUEPASA_VERSION=1.3.0
 
-db_docker=`DBSETUP_LOG=quiet DOCKER_ARGS='-d' ./script/local-db 2>/dev/null`
-if [[ "$?" != "0" ]]; then
-    process=`docker ps | grep $PGPORT | awk '{print $1}'`
-    docker kill $process
-    echo failed to start testdb, cannot run tests
-    exit 1
-fi
-trap "docker kill $db_docker" EXIT
+function cleanup_docker_container {
+    echo "stopping $2 docker container, id: ${1:0:12}"
+    docker kill $1 >/dev/null || return 0
+}
+
+
+tz=`
+docker run \
+    --name ${DOCKER_NAME:-local-tezos} \
+    --detach \
+    --rm \
+    -p $FLEXTESA_RPC_PORT:20000 \
+    -e block_time=1 \
+    oxheadalpha/flextesa:20220715 \
+    kathmandubox start`
+TRAP="$TRAP; cleanup_docker_container $tz local-tezos"
+trap "$TRAP" EXIT
+
+pg=`DBSETUP_LOG=quiet INIT_QUEPASA=false DOCKER_ARGS='-d' ./script/local-db 2>/dev/null`
+TRAP="$TRAP; cleanup_docker_container $pg testdb"
+trap "$TRAP" EXIT
+
 
 sig_err_file=`mktemp`
 rm $sig_err_file
@@ -23,25 +57,151 @@ rm $sig_err_file
 
     echo "ensuring up to date build w/ yarn linked deps (api-lib, etc)..."
     ./script/build-deps || exit 1
+    echo build-deps done
 ) &
 (
     trap "echo 'db setup failed' >> $sig_err_file" ERR
 
-    echo "waiting for testdb setup.. (docker: $db_docker)"
+    echo "waiting for testdb setup.. (docker: $pg)"
     ./script/wait-db
 
     while [ "`HOST=$PGHOST PORT=$PGPORT LOGIN=$PGUSER PASSWORD=$PGPASSWORD ./script/shmig -t postgresql -d $PGDATABASE pending`" != "" ]; do
+        # echo 'testdb setup migrations not done..'
         sleep 1
     done
 ) &
+
+
+tzInfo=`docker exec local-tezos kathmandubox info 2>&1`
+aliceInfo=`echo "$tzInfo" | grep '* ' | head -n 3 | awk '{print $2}'`
+
+export ADMIN_PUBLIC_KEY=`echo "$aliceInfo" | sed '1q;d'`
+export MINTER_TZ_ADDRESS=`echo "$aliceInfo" | sed '2q;d'`
+export ADMIN_PRIVATE_KEY=`echo "$aliceInfo" | sed '3q;d' | awk -F':' '{print $2}'`
+
+bobInfo=`echo "$tzInfo" | grep '* ' | tail -n 3 | awk '{print $2}'`
+export BOB_PKH=`echo "$bobInfo" | sed '2q;d'`
+export BOB_SK=`echo "$bobInfo" | tail -n 1 | awk -F':' '{print $2}'`
+
+echo -n "setting up a private tezos network"
+while ! http --quiet :$FLEXTESA_RPC_PORT/chains/main/blocks/head 2>/dev/null; do
+    sleep 1
+done
+
+function tz-cli() {
+    docker exec local-tezos tezos-client --endpoint http://localhost:20000 "$@"
+}
+
+tz-cli config reset
+tz-cli bootstrapped
+tz-cli config update
+
+while ! tz-cli man | grep --quiet originate; do
+    echo -n "."
+    sleep 1
+done
+echo
+
+tmpdir=test/.workdir/`basename $(mktemp -d -u)`
+mkdir "$tmpdir"
+mintery="$tmpdir/mintery"
+git clone https://github.com/tzConnectBerlin/mintery.git "$tmpdir/mintery" >/dev/null 2>&1
+
+cd "$tmpdir/mintery"
+
+echo "
+ORIGINATOR_ADDRESS=$MINTER_TZ_ADDRESS
+ORIGINATOR_PUB_KEY=$ADMIN_PUBLIC_KEY
+ORIGINATOR_PRIV_KEY=$ADMIN_PRIVATE_KEY
+" > env
+
+echo 'deploying the paypoint contract onto the private tezos network..'
+CONTRACT=paypoint PAYPOINT_RECEIVER_ADDRESS=$MINTER_TZ_ADDRESS BURN_CAP=0.104 DOCKER_ARGS='--network=host' ./script/deploy-contract >/dev/null 2>&1
+export TEZPAY_PAYPOINT_ADDRESS=`cat env | grep CONTRACT_ADDRESS | awk -F'=' '{print $2}' | sed 's/"//g'`
+
+echo 'deploying the FA2 contract (for Nfts) onto the private tezos network..'
+CONTRACT=fa2 BURN_CAP=0.87725 DOCKER_ARGS='--network=host' ./script/deploy-contract >/dev/null 2>&1
+export KANVAS_CONTRACT=`cat env | grep CONTRACT_ADDRESS | awk -F'=' '{print $2}' | sed 's/"//g'`
+
+echo 'deploying the FA2 contract (for token gating) onto the private tezos network..'
+CONTRACT=fa2 BURN_CAP=0.87725 DOCKER_ARGS='--network=host' ./script/deploy-contract >/dev/null 2>&1
+export TOKEN_GATE_CONTRACT=`cat env | grep CONTRACT_ADDRESS | awk -F'=' '{print $2}' | sed 's/"//g'`
+
+echo 'setting up faucet for the token gate tests..'
+tz-cli call $TOKEN_GATE_CONTRACT from alice \
+    --entrypoint create_token \
+    --arg 'Pair 0 {Elt "" 0xDEADC0DE}' \
+    --burn-cap 0.04 >/dev/null 2>&1
+tz-cli call $TOKEN_GATE_CONTRACT from alice \
+    --entrypoint create_token \
+    --arg 'Pair 1 {Elt "" 0xDEADC0DE}' \
+    --burn-cap 0.04 >/dev/null 2>&1
+tz-cli call $TOKEN_GATE_CONTRACT from alice \
+    --entrypoint mint_tokens \
+    --arg "{Pair \"$MINTER_TZ_ADDRESS\" (Pair 0 1000); Pair \"$MINTER_TZ_ADDRESS\" (Pair 1 1000)}" \
+    --burn-cap 0.04 >/dev/null 2>&1
+
+echo "$TEZPAY_PAYPOINT_ADDRESS,$KANVAS_CONTRACT,$TOKEN_GATE_CONTRACT"
+cd $SCRIPT_DIR/..
+
+qp=`
+docker run \
+    -e DATABASE_URL=postgres://$PGUSER:$PGPASSWORD@localhost:$PGPORT/$PGDATABASE \
+    -e NODE_URL=$NODE_URL \
+    --network=host \
+    --detach \
+    ghcr.io/tzconnectberlin/que-pasa:${QUEPASA_VERSION} \
+    --contracts onchain_kanvas=$KANVAS_CONTRACT \
+    --contracts paypoint=$TEZPAY_PAYPOINT_ADDRESS \
+    --contracts test_token_gate=$TOKEN_GATE_CONTRACT \
+    --allowed-unbootstrapped-offset 0s \
+    --polling-interval 10ms`
+TRAP="cleanup_docker_container $qp que-pasa; $TRAP"
+trap "$TRAP" EXIT
+
+mkdir "$tmpdir"/config
+cat <<EOF > $tmpdir/config/peppermint.json
+{
+    "batchSize": 110,
+    "confirmations": 1,
+    "timeout": 300,
+    "privateKey": "$ADMIN_PRIVATE_KEY",
+    "rpcUrl": "$NODE_URL",
+    "pollingDelay": 10,
+    "dbConnection": {
+            "user": "$PGUSER",
+            "password": "$PGPASSWORD",
+            "host": "localhost",
+            "port": $PGPORT,
+            "database": "$PGDATABASE"
+    },
+    "handlers": {
+        "nft": {
+            "handler": "MultiassetHandler",
+            "args": {
+                "contract_address": "$KANVAS_CONTRACT"
+            }
+        }
+    }
+}
+EOF
+./script/wait-db 'select 1 from peppermint.operations'
+pm=`
+docker run \
+    --detach \
+    --network=host \
+    --mount type=bind,source="$PWD/$tmpdir"/config/peppermint.json,target=/build/config.json \
+    ghcr.io/tzconnectberlin/peppermint:1.2
+`
+TRAP="cleanup_docker_container $pm peppermint 2>/dev/null; $TRAP"
+trap "$TRAP" EXIT
+
 wait
 [ -f $sig_err_file ] && {
     cat $sig_err_file
     rm $sig_err_file
     exit 1
 }
-
-echo "running tests.."
 
 mkdir -p test/coverage
 node --experimental-vm-modules node_modules/.bin/jest "$@" --coverage | tee test/coverage/summary.txt || exit 1

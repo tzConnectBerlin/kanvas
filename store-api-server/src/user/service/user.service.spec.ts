@@ -3,7 +3,8 @@ import { UserService } from './user.service';
 import { NftService } from '../../nft/service/nft.service';
 import { MintService } from '../../nft/service/mint.service';
 import { CategoryService } from '../../category/service/category.service';
-import { IpfsService } from '../../nft/service/ipfs.service';
+import { NftIpfsService } from '../../nft/service/ipfs.service';
+import { IpfsPinMock } from '../../mock/ipfs_pin.module';
 import { S3Service } from '../../s3.service';
 import { DbMock } from '../../mock/db.module';
 import { CacheMock } from '../../mock/cache.module';
@@ -14,13 +15,13 @@ describe('UserService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DbMock, CacheMock],
+      imports: [DbMock, CacheMock, IpfsPinMock],
       providers: [
         NftService,
         CategoryService,
         UserService,
         MintService,
-        IpfsService,
+        NftIpfsService,
         S3Service,
         mockedRatesProvider,
         CurrencyService,

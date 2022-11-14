@@ -9,7 +9,7 @@ echo "building stm-lib.."
     trap "echo 'stm-lib build failed' >> $sig_err_file" ERR
 
     cd stm-lib
-    yarn install
+    yarn install --frozen-lockfile --link-duplicates
     yarn build
 ) &
 echo "building api-lib.."
@@ -17,7 +17,7 @@ echo "building api-lib.."
     trap "echo 'api-lib build failed' >> $sig_err_file" ERR
 
     cd ../lib/api-lib
-    yarn install
+    yarn install --frozen-lockfile --link-duplicates
     yarn build
 ) &
 wait
@@ -28,7 +28,7 @@ wait
 }
 
 links=`ls -l node_modules | grep ^l`
-echo "$links" | grep --silent 'kanvas-stm-lib ->' || {
+echo "$links" | grep -q 'kanvas-stm-lib ->' || {
     echo "linking stm-lib.."
     (
         cd stm-lib
@@ -36,7 +36,7 @@ echo "$links" | grep --silent 'kanvas-stm-lib ->' || {
     )
     yarn link $YARN_LINK_ARGS kanvas-stm-lib
 }
-echo "$links" | grep --silent 'kanvas-api-lib ->' || {
+echo "$links" | grep -q 'kanvas-api-lib ->' || {
     echo "linking api-lib.."
     (
         cd ../lib/api-lib

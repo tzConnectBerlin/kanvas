@@ -2,9 +2,28 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
+set -e
+
+try_kill_bg() {
+  bg_pids="$(jobs -p)"
+  if [[ "$bg_pids" == "" ]]; then
+    return 0
+  fi
+
+  echo "killing background pids: `echo $bg_pids | paste -sd' '`.."
+  echo "$bg_pids" | xargs -I'{}' pkill -TERM -P '{}' || return 0
+}
+TRAP='try_kill_bg'
+trap "$TRAP" EXIT
+
 set -a
 . .env.test
 set +a
+
+function cleanup_docker_container {
+    echo "stopping $2 docker container, id: ${1:0:12}"
+    docker kill $1 >/dev/null || return 0
+}
 
 function store_env_exec {
     PGHOST=$STORE_PGHOST \
@@ -16,20 +35,9 @@ function store_env_exec {
         $@
 }
 
-function assert_docker_ok {
-    port=$1
-
-    if [[ "$?" != "0" ]]; then
-        process=`docker ps | grep $port | awk '{print $1}'`
-        docker kill $process
-        echo failed to start testdb, cannot run tests
-        exit 1
-    fi
-}
-
 db_docker=`DOCKER_ARGS='-d' DBSETUP_LOG=quiet INIT_QUEPASA=false ./script/local-db -c wal_level=logical -c log_statement=all`
-assert_docker_ok $PGPORT
-trap "docker kill $db_docker" EXIT
+TRAP="$TRAP; cleanup_docker_container $db_docker testdb"
+trap "$TRAP" EXIT
 
 sig_err_file=`mktemp`
 rm $sig_err_file
@@ -38,11 +46,14 @@ rm $sig_err_file
 
     echo "ensuring up to date build w/ yarn linked deps (api-lib, etc)..."
     ./script/build-deps || exit 1
+    yarn build
 ) &
 (
     trap "echo 'store build failed' >> $sig_err_file" ERR
 
     cd $SCRIPT_DIR/../../store-api-server;
+
+    yarn install
     ./script/build-deps >/dev/null 2>&1 || exit 1
     yarn build || exit 1
 ) &
@@ -74,18 +85,11 @@ wait
 }
 
 echo "starting the store api in the background"
-# enabling job control with set -m here, this will enforce a new process group
-# for the following background spawned store api, which in turn will allow
-# proper kill of all child processes by kill on process group id.
-set -m
 (
     cd "$SCRIPT_DIR/../../store-api-server"
 
     DOTENV_CONFIG_PATH=.env.test store_env_exec yarn run start:prod >/dev/null 2>&1
 ) &
-store_api_pid=$!
-set +m
-trap "kill -- -$store_api_pid; docker kill $db_docker" EXIT
 
 yarn run seed || exit 1
 
@@ -94,11 +98,12 @@ while ! http --quiet :$STORE_API_PORT 2>/dev/null; do
     sleep 1
 done
 
+
 echo "running tests.."
 
+summary_tmp=`mktemp`
 mkdir -p test/coverage
 LOG_LEVEL=warning node --experimental-vm-modules node_modules/.bin/jest "$@" --coverage | tee test/coverage/summary.txt || exit 1
-sed -n '/^-----/,$p' test/coverage/summary.txt > test/coverage/summary_.txt
-head -n 4 test/coverage/summary_.txt | awk -F '|' '{print $2 $3 $4 $5}'
-sed 's/^/\n/' test/coverage/summary_.txt > test/coverage/summary.txt
-rm test/coverage/summary_.txt
+sed -n '/^-----/,$p' test/coverage/summary.txt > "$summary_tmp"
+head -n 4 "$summary_tmp" | awk -F '|' '{print $2 $3 $4 $5}'
+sed 's/^/\n/' "$summary_tmp" > test/coverage/summary.txt

@@ -29,12 +29,8 @@ import ts_results from 'ts-results';
 const { Ok, Err } = ts_results;
 import { S3Service } from '../../s3.service.js';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { assertEnv } from '../../utils.js';
+import { isBottom } from '../../utils.js';
 import { DbPool, DbTransaction, withTransaction } from '../../db.module.js';
-
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const generate = require('meaningful-string');
 
 enum OwnershipStatus {
   PAYMENT_PROCESSING = 'payment processing',
@@ -149,8 +145,8 @@ WHERE address = $1
     ]);
     for (const nft of owned.nfts) {
       nft.ownershipInfo = [
-        ...(nft.ownershipInfo || []),
-        ...statuses[nft.id].filter(
+        ...(nft.ownershipInfo ?? []),
+        ...(statuses[nft.id] ?? []).filter(
           (x: OwnershipInfo) => x.status === OwnershipStatus.PENDING_ONCHAIN,
         ),
       ];
@@ -305,13 +301,14 @@ LIMIT $1
   async ensureUserCartSession(
     userId: number,
     session: string,
+    dbTx: DbPool | DbTransaction = this.conn,
   ): Promise<string> {
-    await this.touchCart(session);
+    await this.touchCart(session, dbTx);
 
     // set user cart session to cookie session if:
     // - cookie session has a non-empty cart
     // - or, the user has no active cart session
-    const qryRes = await this.conn.query(
+    const qryRes = await dbTx.query(
       `
 UPDATE kanvas_user AS update
 SET cart_session = coalesce((
@@ -333,7 +330,7 @@ RETURNING
     const oldSession = qryRes.rows[0]['old_session'];
     const newSession = qryRes.rows[0]['new_session'];
     if (oldSession !== newSession) {
-      this.conn.query(
+      dbTx.query(
         `
 DELETE FROM cart_session
 WHERE session_id = $1
@@ -434,20 +431,35 @@ VALUES ($1, $2)`,
 SELECT
   (SELECT reserved + owned FROM nft_editions_locked($1)) AS editions_locked,
   nft.editions_size,
-  nft.onsale_from
+  nft.onsale_from,
+  nft.onsale_until,
+  nft.proxy_nft_id
 FROM nft
 WHERE nft.id = $1`,
         [nftId],
       );
-      if (qryRes.rows[0]['editions_locked'] > qryRes.rows[0]['editions_size']) {
+      const nft = qryRes.rows[0];
+      if (nft['editions_locked'] > nft['editions_size']) {
         throw new HttpException(
           'All editions of this nft have been reserved/bought',
           HttpStatus.BAD_REQUEST,
         );
       }
-      if (qryRes.rows[0]['onsale_from'] > new Date()) {
+      if (nft['onsale_from'] > new Date()) {
         throw new HttpException(
           'This nft is not yet for sale',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      if (!isBottom(nft['onsale_until']) && nft['onsale_until'] < new Date()) {
+        throw new HttpException(
+          'This nft is no longer for sale',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      if (!isBottom(nft['proxy_nft_id'])) {
+        throw new HttpException(
+          'This nft is not for sale, only obtainable randomly via its proxy nft',
           HttpStatus.BAD_REQUEST,
         );
       }
@@ -488,8 +500,11 @@ WHERE id = $1
     );
   }
 
-  async touchCart(session: string): Promise<CartMeta> {
-    const cartMeta = await this.getCartMeta(session);
+  async touchCart(
+    session: string,
+    dbTx: DbPool | DbTransaction = this.conn,
+  ): Promise<CartMeta> {
+    const cartMeta = await this.getCartMeta(session, dbTx);
     if (typeof cartMeta !== 'undefined') {
       return cartMeta;
     }
@@ -497,7 +512,7 @@ WHERE id = $1
     const expiresAt = this.newCartExpiration();
 
     try {
-      const qryRes = await this.conn.query(
+      const qryRes = await dbTx.query(
         `
 INSERT INTO cart_session (
   session_id, expires_at
@@ -508,11 +523,11 @@ RETURNING id, expires_at`,
       );
       return {
         id: qryRes.rows[0]['id'],
-        expiresAt: qryRes.rows[0]['expires_at'],
+        expiresAt: qryRes.rows[0]['expires_at'].getTime(),
       };
     } catch (err: any) {
       if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
-        const cartMeta = await this.getCartMeta(session);
+        const cartMeta = await this.getCartMeta(session, dbTx);
         if (typeof cartMeta !== 'undefined') {
           return cartMeta;
         }
@@ -553,7 +568,7 @@ ORDER BY expires_at DESC
     }
     return <CartMeta>{
       id: qryRes.rows[0]['id'],
-      expiresAt: qryRes.rows[0]['expires_at'],
+      expiresAt: qryRes.rows[0]['expires_at'].getTime(),
       orderId: qryRes.rows[0]['order_id'],
     };
   }

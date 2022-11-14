@@ -8,6 +8,9 @@ import {
 import { PG_CONNECTION_STORE_REPLICATION } from '../../constants.js';
 import { ActivityFilterParams } from '../params.js';
 import { BASE_CURRENCY, CurrencyService } from 'kanvas-api-lib';
+import dayjs, { ManipulateType } from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
+dayjs.extend(utc);
 
 @Injectable()
 export class AnalyticsService {
@@ -46,13 +49,13 @@ export class AnalyticsService {
   ): Promise<MetricEntity[]> {
     const qryRes = await this.#timeseries(params);
 
-    return qryRes.rows.map(
-      (row: any) =>
-        <MetricEntity>{
-          timestamp: Math.floor(row['timestamp'].getTime() / 1000),
-          value: Number(row['nft_count']),
-        },
-    );
+    const nftCountMap: Record<string, number> = {};
+    qryRes.rows.forEach((row: any) => {
+      const key = Math.floor(row['timestamp'].getTime() / 1000).toString();
+      nftCountMap[key] = Number(row['nft_count']);
+    });
+
+    return this.zeroFillTimeseries(nftCountMap, params.resolution);
   }
 
   async getTimeseriesSalesPriceVolume(
@@ -60,18 +63,58 @@ export class AnalyticsService {
   ): Promise<MetricEntity[]> {
     const qryRes = await this.#timeseries(params);
 
-    return qryRes.rows.map(
-      (row: any) =>
-        <MetricEntity>{
-          timestamp: Math.floor(row['timestamp'].getTime() / 1000),
-          value: Number(
-            this.currencyService.convertToCurrency(
-              Number(row['price_volume']),
-              BASE_CURRENCY,
-            ),
-          ),
-        },
-    );
+    const priceVolumeMap: Record<string, number> = {};
+    qryRes.rows.forEach((row: any) => {
+      const key = Math.floor(row['timestamp'].getTime() / 1000).toString();
+
+      priceVolumeMap[key] = Number(
+        this.currencyService.convertToCurrency(
+          Number(row['price_volume']),
+          BASE_CURRENCY,
+        ),
+      );
+    });
+
+    return this.zeroFillTimeseries(priceVolumeMap, params.resolution);
+  }
+
+  zeroFillTimeseries(
+    timestampMap: Record<string, number>,
+    resolution: Resolution,
+  ): MetricEntity[] {
+    const timestampKeys = Object.keys(timestampMap);
+    let current = dayjs.unix(Number(timestampKeys.at(0))).toDate();
+    const end = dayjs
+      .unix(Number(timestampKeys.at(timestampKeys.length - 1)))
+      .toDate();
+
+    let manipulate: ManipulateType;
+    switch (resolution) {
+      case Resolution.Hour:
+        manipulate = 'hour';
+        break;
+      case Resolution.Day:
+        manipulate = 'day';
+        break;
+      case Resolution.Week:
+        manipulate = 'week';
+        break;
+      case Resolution.Month:
+        manipulate = 'month';
+        break;
+      default:
+        manipulate = 'day';
+    }
+
+    while (current <= end) {
+      const key = Math.floor(current.getTime() / 1000);
+      timestampMap[key] ??= 0;
+      current = dayjs(current).utc().add(1, manipulate).toDate();
+    }
+
+    return Object.entries(timestampMap).map(([key, value]) => {
+      return { timestamp: Number(key), value };
+    });
   }
 
   async getActivities(

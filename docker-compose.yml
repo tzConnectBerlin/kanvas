@@ -39,8 +39,12 @@ services:
     entrypoint: |-
       bash -c '
         set -e
-        ./script/wait-db
-        INIT_QUEPASA=false ./script/migrate up
+
+        if [ "${STORE_API_ENABLED:-yes}" == "no" ]; then
+          exit 0
+        fi
+        INIT_QUEPASA=false INIT_PEPPERMINT=false ./script/migrate up
+
         if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
           if [ "${DEPLOYMENT:-no}" == "yes" ]; then
             psql < script/populate-stagingdb.sql
@@ -48,9 +52,8 @@ services:
             psql < script/populate-testdb.sql
           fi
         fi
-        if [ "${STORE_API_ENABLED:-yes}" == "yes" ]; then
-          yarn start:prod
-        fi
+
+        yarn start:prod
       '
     restart: on-failure
 
@@ -65,10 +68,11 @@ services:
     entrypoint: |-
       bash -c '
         set -e
-
-        if [ "${STORE_FRONT_ENABLED:-yes}" == "yes" ]; then
-          yarn start:prod
+        if [ "${STORE_FRONT_ENABLED:-yes}" == "no" ]; then
+          exit 0
         fi
+
+        yarn start:prod
       '
     restart: on-failure
 
@@ -86,14 +90,8 @@ services:
       CONTRACT_SETTINGS: /config/kanvas.yaml
     env_file:
       - config/.env-kanvas
-    entrypoint: |-
-      bash -c '
-        set -e
-        while ! psql -d "$$DATABASE_URL" -c "select 1" ; do
-          sleep 1
-        done
-        /que-pasa/que-pasa --bcd-enable
-      '
+    command:
+      - --bcd-enable
     restart: on-failure
 
   peppermint:
@@ -104,11 +102,12 @@ services:
       - store-db
     entrypoint: |-
       bash -c '
-        set -e -x
-        while ! psql -d "$$DATABASE_URL" -c "select 1 from peppermint.operations" ; do
-          sleep 1
-        done
+        set -e
+        psql -d "$$DATABASE_URL" < database/schema.sql
 
+        if [ "${PEPPERMINT_ENABLED:-yes}" == "no" ]; then
+          exit 0
+        fi
         cp /config/peppermint.json config.json
         node app.mjs
       '
@@ -132,16 +131,18 @@ services:
       dockerfile: ./admin-api-server/Dockerfile
     entrypoint: |-
       bash -c '
-        set -e -x
-        ./script/wait-db
+        set -e
+        if [ "${ADMIN_API_ENABLED:-yes}" == "no" ]; then
+          exit 0
+        fi
+
         INIT_QUEPASA=false ./script/migrate
         if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
           yarn seed
           ./script/setup-replication-sub
         fi
-        if [ "${ADMIN_API_ENABLED:-yes}" == "yes" ]; then
-          yarn run start:prod
-        fi
+
+        yarn run start:prod
       '
     ports:
       - 3006:3001
@@ -177,29 +178,25 @@ services:
       context: .
       dockerfile: ./admin-front/Dockerfile
     ports:
-      - 5000:4000
+      - 5050:4000
     environment:
       REACT_APP_PORT: 4000
     entrypoint: |-
       bash -c '
         set -e
 
-        if [ "${STORE_FRONT_ENABLED:-yes}" == "yes" ]; then
-          yarn start:prod
+        if [ "${STORE_FRONT_ENABLED:-yes}" == "no" ]; then
+          exit 0
         fi
+
+        yarn start:prod
       '
     restart: on-failure
 
   admin-quepasa:
     image: ghcr.io/tzconnectberlin/que-pasa:1.2.5
-    entrypoint: |-
-      bash -c '
-        set -e
-        while ! psql -d "$$DATABASE_URL" -c "select 1" ; do
-          sleep 1
-        done
-        /que-pasa/que-pasa --bcd-enable
-      '
+    command:
+      - --bcd-enable
     env_file:
       - config/.env-kanvas
     volumes:

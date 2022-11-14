@@ -214,7 +214,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
     useEffect(() => {
         if (nftResponse.data) {
             setLaunchTime(
-                new Date(nftResponse.data.launchAt * 1000).getTime() -
+                new Date((nftResponse.data.launchAt ?? 0) * 1000).getTime() -
                 new Date().getTime()
             );
         }
@@ -226,7 +226,7 @@ export const ProductPage: FC<ProductPageProps> = ({ ...props }) => {
         if (nftResponse.data) {
             setTimeout(() => {
                 setLaunchTime(
-                    new Date(nftResponse.data.launchAt! * 1000).getTime() -
+                    new Date((nftResponse.data.launchAt || 0) * 1000).getTime() -
                     new Date().getTime() - new Date().getTimezoneOffset(),
                 );
             }, 1000);

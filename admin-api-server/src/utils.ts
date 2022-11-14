@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { AUTH_SALT_ROUNDS } from './constants.js';
+import { AUTH_SALT_ROUNDS, BEHIND_PROXY } from './constants.js';
 
 class AssertionError extends Error {
   constructor(message: string) {
@@ -118,4 +118,26 @@ export function sleep(ms: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+}
+
+export function getClientIp(request: any): string {
+  const { ip } = request;
+  return BEHIND_PROXY ? request.get('X-Forwarded-For') || ip : ip;
+}
+
+export function isBottom(v: any): boolean {
+  // note: v here is checked for Javascripts' bottom values (null and undefined)
+  //       because undefined coerces into null. It's safe because nothing
+  //       else coerces into null (other than null itself).
+  return v == null;
+}
+
+export function maybe<ValTy, ResTy>(
+  x: ValTy | null | undefined,
+  f: (x: ValTy) => ResTy,
+): ResTy | undefined {
+  if (isBottom(x)) {
+    return undefined;
+  }
+  return f(x!);
 }

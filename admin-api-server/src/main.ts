@@ -1,17 +1,16 @@
-import * as dotenv from 'dotenv';
-dotenv.config();
+import 'dotenv/config';
 
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module.js';
-import { BEHIND_PROXY } from './constants.js';
+import { BEHIND_PROXY, LOCAL_CORS } from './constants.js';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
 import bodyParser from 'body-parser';
 
 async function bootstrap() {
   let cors: any = false;
-  if (process.env.LOCAL_CORS === 'true') {
+  if (LOCAL_CORS) {
     cors = {
       credentials: true,
       origin: true,
@@ -36,5 +35,6 @@ async function bootstrap() {
   const port = process.env['ADMIN_API_PORT'] || 3001;
   await app.listen(port);
   console.log('Listening on ', port);
+  console.log(cors);
 }
 bootstrap();
