@@ -11,8 +11,8 @@ echo waiting for subscription target database to be up..
     export PGPORT=$STORE_PGPORT
     ./wait-db
 
-    cd $SCRIPT_DIR/../../store-api-server
-    while [ "`HOST=$PGHOST PORT=$PGPORT LOGIN=$PGUSER PASSWORD=$PGPASSWORD ./script/shmig -t postgresql -d $PGDATABASE pending`" != "" ]; do
+    cd $SCRIPT_DIR/../../store-api-server/db_schema
+    while [ "`HOST=$PGHOST PORT=$PGPORT LOGIN=$PGUSER PASSWORD=$PGPASSWORD ../script/shmig -t postgresql -d $PGDATABASE pending`" != "" ]; do
         echo store pub not ready yet..
         sleep 1
     done

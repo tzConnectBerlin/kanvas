@@ -27,11 +27,11 @@ fi
 psql < ../../lib/tezpay/server/database/schema.sql || exit 1
 
 ../script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1
-../script/shmig -m ./patches -s patch_version -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1
+../script/shmig -m ./deployment_patches -s deployment_patch_version -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1
 psql <<EOF
 BEGIN;
 
-`cat db_procedures/*`
+`cat procedures/*`
 
 COMMIT;
 EOF

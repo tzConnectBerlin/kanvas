@@ -23,7 +23,7 @@ RUN addgroup --system --gid 1001 nodejs && \
 # has finished it's setup (whether all migrations have been applied),
 # before continuing with subscribing to the replication subscription
 ADD --chown=nodejs:nodejs store-api-server/script/shmig /store-api-server/script/shmig
-ADD --chown=nodejs:nodejs store-api-server/migrations /store-api-server/migrations
+ADD --chown=nodejs:nodejs store-api-server/db_schema /store-api-server/db_schema
 
 COPY --chown=nodejs:nodejs --from=build /build /build
 COPY --chown=nodejs:nodejs --from=build /lib /lib

@@ -65,7 +65,8 @@ rm $sig_err_file
     echo "waiting for testdb setup.. (docker: $pg)"
     ./script/wait-db
 
-    while [ "`HOST=$PGHOST PORT=$PGPORT LOGIN=$PGUSER PASSWORD=$PGPASSWORD ./script/shmig -t postgresql -d $PGDATABASE pending`" != "" ]; do
+    cd db_schema/
+    while [ "`HOST=$PGHOST PORT=$PGPORT LOGIN=$PGUSER PASSWORD=$PGPASSWORD ../script/shmig -t postgresql -d $PGDATABASE pending`" != "" ]; do
         # echo 'testdb setup migrations not done..'
         sleep 1
     done
