@@ -303,6 +303,7 @@ export async function resetDb(resetForLegacyTest = false): Promise<number[]> {
       'nft',
       'nft_category',
       'peppermint.operations',
+      'marketing',
     ];
     for (const t of tables) {
       await db.query(`delete from ${t}`);

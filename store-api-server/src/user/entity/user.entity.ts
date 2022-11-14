@@ -1,3 +1,4 @@
+import { IsString, IsBoolean } from 'class-validator';
 import type { NftEntity, NftEntityPage } from '../../nft/entity/nft.entity.js';
 
 export interface UserEntity {
@@ -29,4 +30,13 @@ export interface UserTotalPaid {
 export interface NftOwnershipStatus {
   nftId: number;
   ownerStatuses: string[]; // List, because 1 user can have multiple editions of a single nft
+}
+
+export class EmailRegistration {
+  @IsString()
+  walletAddress: string;
+  @IsString()
+  email: string;
+  @IsBoolean()
+  marketingConsent: boolean;
 }
