@@ -7,7 +7,7 @@ export enum OrderStatus {
   DELIVERED = 'delivered',
 }
 
-export type OrderStatusString =  `${OrderStatus}`
+export type OrderStatusString = `${OrderStatus}`;
 
 export enum NftDeliveryStatus {
   UNKNOWN = 'unknown',
@@ -16,7 +16,7 @@ export enum NftDeliveryStatus {
   DELIVERED = 'delivered',
 }
 
-export type OrderStatusStringString =  `${NftDeliveryStatus}`
+export type OrderStatusStringString = `${NftDeliveryStatus}`;
 
 export interface NftDeliveryInfo {
   status: OrderStatusStringString;
@@ -49,12 +49,14 @@ export enum PaymentStatus {
   SUCCEEDED = 'succeeded',
 }
 
-export type PaymentStatusString =  `${PaymentStatus}`
+export type PaymentStatusString = `${PaymentStatus}`;
 
 export interface StripeDetails {
+  amount: string;
   clientSecret: string;
 }
 export interface WertDetails {
+  amount: string;
   wertData: any;
 }
 
