@@ -10,9 +10,9 @@ import {
   ProfileEntity,
   UserCart,
   UserTotalPaid,
-  NftOwnershipStatus,
+  EmailRegistration,
 } from '../entity/user.entity.js';
-import { NftEntity, OwnershipInfo } from '../../nft/entity/nft.entity.js';
+import { OwnershipInfo } from '../../nft/entity/nft.entity.js';
 import { NftService } from '../../nft/service/nft.service.js';
 import { PaginationParams } from '../../nft/params.js';
 import {
@@ -86,6 +86,20 @@ SET
 WHERE id = $1
 `,
       [userId, profilePicture],
+    );
+  }
+
+  async registerEmail(registration: EmailRegistration) {
+    await this.conn.query(
+      `
+INSERT INTO marketing (address, email, consent)
+VALUES ($1, $2, $3)
+    `,
+      [
+        registration.walletAddress,
+        registration.email,
+        registration.marketingConsent,
+      ],
     );
   }
 
