@@ -21,7 +21,8 @@ import { Cache } from 'cache-manager';
 import { Response } from 'express';
 import { wrapCache } from '../../utils.js';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UserEntity } from '../entity/user.entity.js';
+import validator from 'validator';
+import { UserEntity, EmailRegistration } from '../entity/user.entity.js';
 import { OwnershipInfo } from '../../nft/entity/nft.entity.js';
 import { UserService } from '../service/user.service.js';
 import { CurrentUser } from '../../decoraters/user.decorator.js';
@@ -126,6 +127,19 @@ export class UserController {
     }
   }
 
+  @Post('register/email')
+  async registerEmail(@Body() registration: EmailRegistration): Promise<any> {
+    if (
+      !validator.isEmail(registration.email, {
+        allow_ip_domain: true,
+      })
+    ) {
+      throw new HttpException('invalid email', HttpStatus.BAD_REQUEST);
+    }
+
+    return await this.userService.registerEmail(registration);
+  }
+
   @Get('topBuyers')
   async topBuyers(
     @Query('currency') currency: string = BASE_CURRENCY,
@@ -136,7 +150,7 @@ export class UserController {
       this.cache,
       resp,
       'user.getTopBuyers' + currency,
-      () => {
+      async () => {
         return this.userService.getTopBuyers(currency).then((topBuyers) => {
           return { topBuyers };
         });

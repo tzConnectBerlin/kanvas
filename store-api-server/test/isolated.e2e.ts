@@ -374,5 +374,117 @@ SELECT
         ]);
       });
     });
+
+    for (const testCase of [
+      'abcAtMissingAt.com',
+      '@.com',
+      'doubleAt@another@dot.com',
+      // in principle the RFC doc that specifies the email format does allow the
+      // ip format below, but it should be very uncommon and the popular library
+      // that we use to assert correct email formats does not allow supporting
+      // this. Adding this test case here for visibility that we do not support
+      // this format
+      'ipDomainInSingleNumberFormat@12411',
+    ]) {
+      it(`bad email shape (${testCase}) => 400`, async () => {
+        const res = await request(app.getHttpServer())
+          .post('/users/register/email')
+          .send({
+            email: testCase,
+            marketingConsent: true,
+          });
+        expect(res.statusCode).toEqual(400);
+
+        await testUtils.withDbConn(async (db) => {
+          expect(
+            (await db.query('SELECT * FROM marketing')).rows,
+          ).toStrictEqual([]);
+        });
+      });
+    }
+
+    for (const testCase of ['walletAddress', 'email', 'marketingConsent']) {
+      it(`missing required field (${testCase}) => 400`, async () => {
+        const params: any = {
+          walletAddress: 'tz1..',
+          email: 'abc@testing.com',
+          marketingConsent: true,
+        };
+        delete params[testCase];
+
+        const res = await request(app.getHttpServer())
+          .post('/users/register/email')
+          .send(params);
+        expect(res.statusCode).toEqual(400);
+
+        await testUtils.withDbConn(async (db) => {
+          expect(
+            (await db.query('SELECT * FROM marketing')).rows,
+          ).toStrictEqual([]);
+        });
+      });
+    }
+
+    for (const testCase of [true, false]) {
+      it(`correct email registration with marketingConsent as ${testCase} => 201`, async () => {
+        const email = 'test@test.email';
+        const walletAddress = 'tz1..';
+        const res = await request(app.getHttpServer())
+          .post('/users/register/email')
+          .send({
+            walletAddress,
+            email,
+            marketingConsent: testCase,
+          });
+        expect(res.statusCode).toEqual(201);
+
+        await testUtils.withDbConn(async (db) => {
+          expect(
+            (await db.query('SELECT * FROM marketing')).rows,
+          ).toStrictEqual([
+            {
+              id: 1,
+              address: walletAddress,
+              email,
+              consent: testCase,
+            },
+          ]);
+        });
+      });
+    }
+
+    for (const testCase of [
+      'abc@domain.test',
+      'doubleDot@test.com.tech',
+      'ipDomain@192.0.0.0',
+      'squareBracketedIpDomain@[192.0.0.0]',
+    ]) {
+      it(`correct email (${testCase}) registration for well-formed email address => 201`, async () => {
+        const walletAddress = 'tz1..';
+        const marketingConsent = true;
+        const email = testCase;
+        const res = await request(app.getHttpServer())
+          .post('/users/register/email')
+          .send({
+            walletAddress,
+            email,
+            marketingConsent,
+          });
+        expect(res.statusCode).toEqual(201);
+
+        await testUtils.withDbConn(async (db) => {
+          expect(
+            (await db.query('SELECT * FROM marketing')).rows,
+          ).toStrictEqual([
+            {
+              id: 1,
+              address: walletAddress,
+              email,
+              consent: marketingConsent,
+            },
+          ]);
+        });
+      });
+    }
   });
 }
