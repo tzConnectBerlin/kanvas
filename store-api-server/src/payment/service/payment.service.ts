@@ -83,7 +83,9 @@ export interface PaymentIntentInternal {
   id: string;
 
   amount: string;
+  amountExclVat: string;
   currency: string;
+
   paymentDetails?: StripeDetails | WertDetails | TezpayDetails | SimplexDetails;
 }
 
@@ -208,17 +210,17 @@ WHERE id = $1
         requestCurrency = 'XTZ';
       }
 
-      const order = await this.#getOrder(orderId, requestCurrency, true, dbTx);
+      const order = await this.#getOrder(orderId, requestCurrency, false, dbTx);
 
-      const currencyUnitAmount: number = order.nfts.reduce(
+      const amountInCurrency: number = order.nfts.reduce(
         (sum, nft) => sum + Number(nft.price),
         0,
       );
+
       let paymentIntent = await this.#createPaymentIntent(
         provider,
-        usr.userAddress,
         currency,
-        currencyUnitAmount,
+        amountInCurrency,
         usr,
         clientIp,
       );
@@ -468,12 +470,39 @@ WHERE nft_order_id = $1
 
   async #createPaymentIntent(
     provider: PaymentProvider,
-    userAddress: string,
+    currency: string,
+    amountInCurrency: number,
+    usr: UserEntity,
+    clientIp: string,
+  ): Promise<PaymentIntentInternal> {
+    const vatRate = await this.#getVatRate(clientIp);
+
+    const decimals = SUPPORTED_CURRENCIES['XTZ'];
+    const vatAmount = amountInCurrency - amountInCurrency / (1 + vatRate;
+
+    return {
+      id: 'bla',
+      amount: '',
+      amountExclVat: '',
+      currency,
+      paymentDetails: await this.#createPaymentDetails(
+        provider,
+        currency,
+        amountInCurrency,
+        vatAmount,
+        usr,
+        clientIp,
+      ),
+    };
+  }
+
+  async #createPaymentDetails(
+    provider: PaymentProvider,
     currency: string,
     currencyUnitAmount: number,
     usr: UserEntity,
     clientIp: string,
-  ): Promise<PaymentIntentInternal> {
+  ) {
     switch (provider) {
       case PaymentProvider.TEZPAY:
         if (currency !== 'XTZ') {
@@ -482,40 +511,39 @@ WHERE nft_order_id = $1
             HttpStatus.BAD_REQUEST,
           );
         }
-        return await this.#createTezPaymentIntent(currencyUnitAmount);
+        return await this.#createTezPaymentDetails(currencyUnitAmount);
       case PaymentProvider.STRIPE:
-        return await this.#createStripePaymentIntent(
-          usr,
+        return await this.#createStripePaymentDetails(
           currency,
           currencyUnitAmount,
         );
       case PaymentProvider.WERT:
-        return await this.#createWertPaymentIntent(
-          userAddress,
+        return await this.#createWertPaymentDetails(
+          usr.userAddress,
           currency,
           currencyUnitAmount,
         );
       case PaymentProvider.SIMPLEX:
-        return await this.#createSimplexPaymentIntent(
+        return await this.#createSimplexPaymentDetails(
           currency,
           currencyUnitAmount,
           usr,
           clientIp,
         );
       case PaymentProvider.TEST:
-        return {
-          amount: currencyUnitAmount.toFixed(0),
-          currency: currency,
-          id: `stripe_test_id${new Date().getTime().toString()}`,
-        };
+        return undefined;
+      //  amount: currencyUnitAmount.toFixed(0),
+      //  currency: currency,
+      //  id: `stripe_test_id${new Date().getTime().toString()}`,
+      //};
     }
   }
 
-  async #createWertPaymentIntent(
+  async #createWertPaymentDetails(
     userAddress: string,
     fiatCurrency: string,
     mutezAmount: number,
-  ): Promise<PaymentIntentInternal> {
+  ): Promise<WertDetails> {
     if (
       typeof WERT_PRIV_KEY === 'undefined' ||
       typeof TEZPAY_PAYPOINT_ADDRESS === 'undefined'
@@ -532,8 +560,7 @@ WHERE nft_order_id = $1
       );
     }
 
-    const tezpayIntent = await this.#createTezPaymentIntent(mutezAmount);
-    const tezpayDetails = <TezpayDetails>tezpayIntent.paymentDetails;
+    const tezpayDetails = await this.#createTezPaymentDetails(mutezAmount);
 
     const decimals = SUPPORTED_CURRENCIES['XTZ'];
     const tezAmount = Number(
@@ -555,28 +582,26 @@ WHERE nft_order_id = $1
       WERT_PRIV_KEY,
     );
 
+    // id: tezpayIntent.id,
+    // currency: fiatCurrency,
     return {
-      id: tezpayIntent.id,
       amount: this.currencyService.convertToCurrency(
         this.currencyService.convertFromCurrency(tezAmount, 'XTZ'),
         fiatCurrency,
       ),
-      currency: fiatCurrency,
-      paymentDetails: {
-        wertData: {
-          ...signedData,
-          currency: fiatCurrency,
-        },
+      wertData: {
+        ...signedData,
+        currency: fiatCurrency,
       },
     };
   }
 
-  async #createSimplexPaymentIntent(
+  async #createSimplexPaymentDetails(
     fiatCurrency: string,
     currencyUnitAmount: number,
     usr: UserEntity,
     clientIp: string,
-  ): Promise<PaymentIntentInternal> {
+  ): Promise<SimplexDetails> {
     if (
       typeof SIMPLEX_API_URL === 'undefined' ||
       typeof SIMPLEX_API_KEY === 'undefined' ||
@@ -732,25 +757,22 @@ WHERE nft_order_id = $1
       );
     }
 
+    //id: paymentId,
+    //amount: amount,
+    //currency: fiatCurrency,
     return {
-      id: paymentId,
-      amount: amount,
-      currency: fiatCurrency,
-      paymentDetails: {
-        simplexData: {
-          paymentId: paymentId,
-          orderId: orderId,
-          publicApiKey: SIMPLEX_PUBLIC_KEY,
-        },
+      simplexData: {
+        paymentId: paymentId,
+        orderId: orderId,
+        publicApiKey: SIMPLEX_PUBLIC_KEY,
       },
     };
   }
 
-  async #createStripePaymentIntent(
-    usr: UserEntity,
+  async #createStripePaymentDetails(
     currency: string,
     currencyUnitAmount: number,
-  ): Promise<PaymentIntentInternal> {
+  ): Promise<StripeDetails> {
     if (typeof this.stripe === 'undefined') {
       throw new HttpException(
         'stripe payment provider not supported by this API instance',
@@ -770,35 +792,25 @@ WHERE nft_order_id = $1
       payment_method_types: STRIPE_PAYMENT_METHODS,
     });
 
-    const decimals = SUPPORTED_CURRENCIES[currency];
+    //id: paymentIntent.id,
+    //amount: currencyUnitAmount.toFixed(0), // TODO
     return {
-      id: paymentIntent.id,
+      clientSecret: paymentIntent.client_secret,
       amount: currencyUnitAmount.toFixed(0),
-      currency: currency,
-      paymentDetails: {
-        clientSecret: paymentIntent.client_secret,
-      },
     };
   }
 
-  async #createTezPaymentIntent(
-    mutezAmount: number,
-  ): Promise<PaymentIntentInternal> {
+  async #createTezPaymentDetails(mutezAmount: number): Promise<TezpayDetails> {
     const id = uuidv4();
     const tezpayIntent = await this.tezpay.init_payment({
       external_id: id,
       mutez_amount: mutezAmount,
     });
-    const decimals = SUPPORTED_CURRENCIES['XTZ'];
+    //amount: (Number(mutezAmount) * Math.pow(10, -decimals)).toFixed(decimals),
     return {
-      id,
-      amount: (Number(mutezAmount) * Math.pow(10, -decimals)).toFixed(decimals),
-      currency: 'XTZ',
-      paymentDetails: {
-        receiverAddress: tezpayIntent.receiver_address,
-        paypointMessage: tezpayIntent.message,
-        mutezAmount: mutezAmount,
-      },
+      receiverAddress: tezpayIntent.receiver_address,
+      paypointMessage: tezpayIntent.message,
+      mutezAmount: mutezAmount,
     };
   }
 
@@ -1424,9 +1436,9 @@ ORDER BY payment.id DESC
     );
   }
 
-  // Note: returned value is a percentage (number between 0 and 100)
-  async getVatRate(ipAddress: string): Promise<number | undefined> {
-    const intIpAddress = this.dot2num(ipAddress);
+  // Note: returned value is a rate between 0 and 1 (with 1 translating to 100%)
+  async #getVatRate(ipAddr: string): Promise<number> {
+    const ip: number = this.ipAddrToNum(ipAddr);
 
     const qryRes = await this.conn.query(
       `
@@ -1441,17 +1453,20 @@ LEFT JOIN vat
 WHERE ip_country.ip_from <= $1
   AND ip_country.ip_to >= $1
       `,
-      [intIpAddress],
+      [ip],
     );
 
-    if (qryRes.rows[0]['country_id'] === null) {
-      Logger.warn(`Unmapped country for ip address ${ipAddress}`);
+    if (isBottom(qryRes.rows[0]['country_id'])) {
+      Logger.warn(
+        `Unmapped country for ip address ${ipAddr} (ip in numeric format: ${ip}`,
+      );
+      return 0;
     }
 
-    return qryRes.rows[0]['rate'];
+    return qryRes.rows[0]['rate'] / 100;
   }
 
-  dot2num(ip: string) {
+  ipAddrToNum(ip: string): number {
     const ipParts = ip.split('.');
     return (
       ((+ipParts[0] * 256 + +ipParts[1]) * 256 + +ipParts[2]) * 256 +
