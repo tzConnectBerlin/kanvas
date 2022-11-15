@@ -87,6 +87,7 @@ export interface PaymentIntentInternal {
   amountExclVat: string;
   vatRate: number;
 
+  provider: PaymentProvider;
   paymentDetails?: StripeDetails | WertDetails | TezpayDetails | SimplexDetails;
 }
 
@@ -220,14 +221,7 @@ WHERE id = $1
         amountUnit,
         clientIp,
       );
-      await this.#registerPayment(
-        dbTx,
-        orderId,
-        paymentIntent.id,
-        provider,
-        currency,
-        Number(paymentIntent.amount),
-      );
+      await this.#registerPayment(dbTx, orderId, paymentIntent);
 
       return paymentIntent;
     }).catch((err: any) => {
@@ -489,6 +483,7 @@ WHERE nft_order_id = $1
       ),
       vatRate,
 
+      provider,
       paymentDetails: await this.#createPaymentDetails(
         id,
         usr,
@@ -601,7 +596,6 @@ WHERE nft_order_id = $1
       WERT_PRIV_KEY,
     );
 
-    // currency: fiatCurrency,
     return {
       wertData: {
         ...signedData,
@@ -771,9 +765,6 @@ WHERE nft_order_id = $1
       );
     }
 
-    //id: paymentId,
-    //amount: amount,
-    //currency: fiatCurrency,
     return {
       simplexData: {
         paymentId: paymentId,
@@ -806,8 +797,6 @@ WHERE nft_order_id = $1
       payment_method_types: STRIPE_PAYMENT_METHODS,
     });
 
-    //id: paymentIntent.id,
-    //amount: currencyUnitAmount.toFixed(0), // TODO
     return {
       clientSecret: paymentIntent.client_secret,
       amount: currencyUnitAmount.toFixed(0),
@@ -822,7 +811,6 @@ WHERE nft_order_id = $1
       external_id: paymentId,
       mutez_amount: mutezAmount,
     });
-    //amount: (Number(mutezAmount) * Math.pow(10, -decimals)).toFixed(decimals),
     return {
       receiverAddress: tezpayIntent.receiver_address,
       paypointMessage: tezpayIntent.message,
@@ -833,27 +821,38 @@ WHERE nft_order_id = $1
   async #registerPayment(
     dbTx: DbTransaction,
     nftOrderId: number,
-    paymentId: string,
-    provider: PaymentProvider,
-    currency: string,
-    currencyUnitAmount: number,
+    paymentIntent: PaymentIntentInternal,
   ) {
     try {
-      if (await this.#orderHasProviderOpen(nftOrderId, provider)) {
-        await this.cancelNftOrderPayment(dbTx, nftOrderId, provider);
+      if (
+        await this.#orderHasProviderOpen(nftOrderId, paymentIntent.provider)
+      ) {
+        await this.cancelNftOrderPayment(
+          dbTx,
+          nftOrderId,
+          paymentIntent.provider,
+        );
       }
       await dbTx.query(
         `
 INSERT INTO payment (
-  payment_id, status, nft_order_id, provider, currency, amount
+  payment_id, status, nft_order_id, provider, currency, amount, vat_rate, amount_excl_vat
 )
-VALUES ($1, 'created', $2, $3, $4, $5)
+VALUES ($1, 'created', $2, $3, $4, $5, $6, $7)
 RETURNING id`,
-        [paymentId, nftOrderId, provider, currency, currencyUnitAmount],
+        [
+          paymentIntent.id,
+          nftOrderId,
+          paymentIntent.provider,
+          paymentIntent.currency,
+          paymentIntent.amount,
+          paymentIntent.vatRate,
+          paymentIntent.amountExclVat,
+        ],
       );
     } catch (err: any) {
       Logger.error(
-        `Err on storing payment intent in db (provider=${provider}, paymentId=${paymentId}, nftOrderId=${nftOrderId}), err: ${err}`,
+        `Err on storing payment intent in db (provider=${paymentIntent.provider}, paymentId=${paymentIntent.id}, nftOrderId=${nftOrderId}), err: ${err}`,
       );
       throw err;
     }
@@ -1309,8 +1308,9 @@ WHERE payment_id = $1
     });
     this.userService.dropCartByOrderId(orderId);
 
-    // This step is done after committing the database related assigning of the NFTs to the user,
-    // if any issues occur with Blockchain related assigning they should be resolved asynchronously
+    // This step is done after committing the database related assigning of the
+    // NFTs to the user, if any issues occur with Blockchain related assigning
+    // they should be resolved asynchronously
     const opIds = await this.mintService.transferNfts(
       Object.values(nfts),
       order.userAddress,
