@@ -22,6 +22,15 @@ CREATE TABLE ip_country (
     country_id INT REFERENCES country(id)
 );
 
+ALTER TABLE payment ADD COLUMN vat_rate DOUBLE PRECISION;
+ALTER TABLE payment ADD COLUMN amount_excl_vat NUMERIC;
+UPDATE payment
+SET
+  vat_rate = 0,
+  amount_excl_vat = amount;
+ALTER TABLE payment ALTER COLUMN vat_rate SET NOT NULL;
+ALTER TABLE payment ALTER COLUMN amount_excl_vat SET NOT NULL;
+
 COMMIT;
 
 -- ==== DOWN ====
