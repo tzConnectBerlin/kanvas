@@ -2,6 +2,8 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
+set -x
+
 if [ -z $COUNTRY_IP_DEFINITIONS_FILE ]; then
     echo "warning: cannot fill country,ip_country tables for VAT, COUNTRY_IP_DEFINITIONS_FILE env var not set"
     exit 1

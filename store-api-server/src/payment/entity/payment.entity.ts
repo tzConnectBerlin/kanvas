@@ -56,7 +56,6 @@ export interface StripeDetails {
   clientSecret: string;
 }
 export interface WertDetails {
-  amount: string;
   wertData: any;
 }
 
@@ -72,8 +71,21 @@ export interface TezpayDetails {
 export interface PaymentIntent {
   id: string;
 
-  amount: string;
   currency: string;
+  // Don't use following toplevel amount fields for finalizing payment forms in
+  // the client! If an amount must be passed to the relevant payment provider's
+  // form, then the relevant amount field will be present in the
+  // paymentDetails object that is in the correct format for the provider.
+  //
+  // Why: the toplevel amount field here is only for display purposes, and may
+  // or may not be in the right format for finalizing payment forms (some
+  // providers expect the amount to be in base unit (ie cents in case of fiat
+  // currencies), some expect it to be in decimal unit (ie euros in case of
+  // EUR, etc.))
+  amount: string;
+  amountExclVat: string;
+  vatRate: number;
+
   paymentDetails?: StripeDetails | WertDetails | TezpayDetails | SimplexDetails;
 
   nfts: NftEntity[];
