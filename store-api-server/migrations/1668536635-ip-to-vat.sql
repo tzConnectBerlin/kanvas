@@ -1,5 +1,5 @@
--- Migration: add-vat
--- Created at: 2022-04-08 16:20:30
+-- Migration: ip-to-vat
+-- Created at: 2022-11-15 19:23:55
 -- ====  UP  ====
 
 BEGIN;

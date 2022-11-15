@@ -56,6 +56,32 @@ export class CurrencyService {
     return Number((amount / this.#getRate(fromCurrency, maxAge)).toFixed(0));
   }
 
+  convertToBaseUnit(
+    currency: string,
+    amount: number,
+  ): number {
+      const decimals = SUPPORTED_CURRENCIES[currency];
+      const amountUnit = Math.round(amount * Math.pow(10, decimals));
+      return amountUnit;
+  }
+
+  convertFromBaseUnit(
+    currency: string,
+    amountUnit: number,
+  ): number {
+      const decimals = SUPPORTED_CURRENCIES[currency];
+      const amount = amountUnit * Math.pow(10, -decimals);
+      return amount;
+  }
+
+  toFixedDecimals(
+    currency: string,
+    amount: number,
+  ): string {
+      const decimals = SUPPORTED_CURRENCIES[currency];
+      return amount.toFixed(decimals);
+  }
+
   #getRate(
     toCurrency: string,
     maxAge: Duration,

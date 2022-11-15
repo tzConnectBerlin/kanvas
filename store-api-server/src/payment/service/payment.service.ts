@@ -82,9 +82,10 @@ export interface NftOrder {
 export interface PaymentIntentInternal {
   id: string;
 
+  currency: string;
   amount: string;
   amountExclVat: string;
-  currency: string;
+  vatRate: number;
 
   paymentDetails?: StripeDetails | WertDetails | TezpayDetails | SimplexDetails;
 }
@@ -205,23 +206,18 @@ WHERE id = $1
 
       const orderId = await this.#createOrder(dbTx, usr.id, recreateOrder);
 
-      let requestCurrency = currency;
-      if (provider === PaymentProvider.WERT) {
-        requestCurrency = 'XTZ';
-      }
+      const order = await this.#getOrder(orderId, currency, true, dbTx);
 
-      const order = await this.#getOrder(orderId, requestCurrency, false, dbTx);
-
-      const amountInCurrency: number = order.nfts.reduce(
+      const amountUnit: number = order.nfts.reduce(
         (sum, nft) => sum + Number(nft.price),
         0,
       );
 
       let paymentIntent = await this.#createPaymentIntent(
+        usr,
         provider,
         currency,
-        amountInCurrency,
-        usr,
+        amountUnit,
         clientIp,
       );
       await this.#registerPayment(
@@ -469,38 +465,47 @@ WHERE nft_order_id = $1
   }
 
   async #createPaymentIntent(
+    usr: UserEntity,
     provider: PaymentProvider,
     currency: string,
-    amountInCurrency: number,
-    usr: UserEntity,
+    amountUnit: number,
     clientIp: string,
   ): Promise<PaymentIntentInternal> {
     const vatRate = await this.#getVatRate(clientIp);
 
-    const decimals = SUPPORTED_CURRENCIES['XTZ'];
-    const vatAmount = amountInCurrency - amountInCurrency / (1 + vatRate;
+    let amount = this.currencyService
+      .convertFromBaseUnit(currency, amountUnit)
+      .toFixed(0);
 
+    const id = uuidv4();
     return {
-      id: 'bla',
-      amount: '',
-      amountExclVat: '',
+      id,
+
       currency,
+      amount,
+      amountExclVat: this.currencyService.toFixedDecimals(
+        currency,
+        Number(amount) - Number(amount) / (1 + vatRate),
+      ),
+      vatRate,
+
       paymentDetails: await this.#createPaymentDetails(
+        id,
+        usr,
         provider,
         currency,
-        amountInCurrency,
-        vatAmount,
-        usr,
+        amountUnit,
         clientIp,
       ),
     };
   }
 
   async #createPaymentDetails(
+    paymentId: string,
+    usr: UserEntity,
     provider: PaymentProvider,
     currency: string,
-    currencyUnitAmount: number,
-    usr: UserEntity,
+    amountUnit: number,
     clientIp: string,
   ) {
     switch (provider) {
@@ -511,35 +516,47 @@ WHERE nft_order_id = $1
             HttpStatus.BAD_REQUEST,
           );
         }
-        return await this.#createTezPaymentDetails(currencyUnitAmount);
+        return await this.#createTezPaymentDetails(paymentId, amountUnit);
       case PaymentProvider.STRIPE:
-        return await this.#createStripePaymentDetails(
-          currency,
-          currencyUnitAmount,
-        );
+        return await this.#createStripePaymentDetails(currency, amountUnit);
       case PaymentProvider.WERT:
+        const fiatCurrency = currency;
+
+        // Always require receival of XTZ for WERT payments (Fiat is sent to
+        // WERT by the customer, WERT then calls _our_ paypoint smart contract,
+        // which finalizes the payment with the sent equivalent XTZ value to
+        // us)
+        const mutezAmount = Number(
+          this.currencyService.convertToCurrency(
+            this.currencyService.convertFromCurrency(
+              this.currencyService.convertFromBaseUnit(currency, amountUnit),
+              currency,
+            ),
+            'XTZ',
+            true,
+          ),
+        );
+
         return await this.#createWertPaymentDetails(
+          paymentId,
           usr.userAddress,
-          currency,
-          currencyUnitAmount,
+          fiatCurrency,
+          mutezAmount,
         );
       case PaymentProvider.SIMPLEX:
         return await this.#createSimplexPaymentDetails(
-          currency,
-          currencyUnitAmount,
           usr,
+          currency,
+          amountUnit,
           clientIp,
         );
       case PaymentProvider.TEST:
         return undefined;
-      //  amount: currencyUnitAmount.toFixed(0),
-      //  currency: currency,
-      //  id: `stripe_test_id${new Date().getTime().toString()}`,
-      //};
     }
   }
 
   async #createWertPaymentDetails(
+    paymentId: string,
     userAddress: string,
     fiatCurrency: string,
     mutezAmount: number,
@@ -560,17 +577,19 @@ WHERE nft_order_id = $1
       );
     }
 
-    const tezpayDetails = await this.#createTezPaymentDetails(mutezAmount);
-
-    const decimals = SUPPORTED_CURRENCIES['XTZ'];
-    const tezAmount = Number(
-      (tezpayDetails.mutezAmount * Math.pow(10, -decimals)).toFixed(decimals),
+    const tezpayDetails = await this.#createTezPaymentDetails(
+      paymentId,
+      mutezAmount,
     );
+
     const signedData = signSmartContractData(
       {
         address: userAddress,
         commodity: 'XTZ',
-        commodity_amount: tezAmount,
+        commodity_amount: this.currencyService.convertFromBaseUnit(
+          'XTZ',
+          mutezAmount,
+        ),
         pk_id: 'key1',
         sc_id: new Buffer(tezpayDetails.paypointMessage).toString('hex'),
         sc_address: TEZPAY_PAYPOINT_ADDRESS,
@@ -582,13 +601,8 @@ WHERE nft_order_id = $1
       WERT_PRIV_KEY,
     );
 
-    // id: tezpayIntent.id,
     // currency: fiatCurrency,
     return {
-      amount: this.currencyService.convertToCurrency(
-        this.currencyService.convertFromCurrency(tezAmount, 'XTZ'),
-        fiatCurrency,
-      ),
       wertData: {
         ...signedData,
         currency: fiatCurrency,
@@ -597,9 +611,9 @@ WHERE nft_order_id = $1
   }
 
   async #createSimplexPaymentDetails(
-    fiatCurrency: string,
-    currencyUnitAmount: number,
     usr: UserEntity,
+    fiatCurrency: string,
+    amountUnit: number,
     clientIp: string,
   ): Promise<SimplexDetails> {
     if (
@@ -619,9 +633,9 @@ WHERE nft_order_id = $1
       );
     }
     const decimals = SUPPORTED_CURRENCIES[fiatCurrency];
-    const amount = (
-      Number(currencyUnitAmount) * Math.pow(10, -decimals)
-    ).toFixed(decimals);
+    const amount = (Number(amountUnit) * Math.pow(10, -decimals)).toFixed(
+      decimals,
+    );
     async function getSimplexQuoteId() {
       try {
         let quoteResponse = await axios.post(
@@ -633,7 +647,7 @@ WHERE nft_order_id = $1
             requested_currency: 'USD',
             requested_amount: Number(amount),
             wallet_id: SIMPLEX_WALLET_ID,
-            client_ip: '1.2.3.4', // TODO ?
+            client_ip: clientIp,
             payment_methods: ['credit_card'],
           },
           {
@@ -800,10 +814,12 @@ WHERE nft_order_id = $1
     };
   }
 
-  async #createTezPaymentDetails(mutezAmount: number): Promise<TezpayDetails> {
-    const id = uuidv4();
+  async #createTezPaymentDetails(
+    paymentId: string,
+    mutezAmount: number,
+  ): Promise<TezpayDetails> {
     const tezpayIntent = await this.tezpay.init_payment({
-      external_id: id,
+      external_id: paymentId,
       mutez_amount: mutezAmount,
     });
     //amount: (Number(mutezAmount) * Math.pow(10, -decimals)).toFixed(decimals),
@@ -1456,7 +1472,7 @@ WHERE ip_country.ip_from <= $1
       [ip],
     );
 
-    if (isBottom(qryRes.rows[0]['country_id'])) {
+    if (isBottom(qryRes.rows.at[0]?.['country_id'])) {
       Logger.warn(
         `Unmapped country for ip address ${ipAddr} (ip in numeric format: ${ip}`,
       );
