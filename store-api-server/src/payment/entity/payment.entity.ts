@@ -84,9 +84,15 @@ export interface PaymentIntent {
   // EUR, etc.))
   amount: string;
   amountExclVat: string;
+
   vatRate: number;
 
-  paymentDetails?: StripeDetails | WertDetails | TezpayDetails | SimplexDetails;
+  provider: PaymentProviderString;
+  providerDetails?:
+    | StripeDetails
+    | WertDetails
+    | TezpayDetails
+    | SimplexDetails;
 
   nfts: NftEntity[];
   expiresAt: number;
