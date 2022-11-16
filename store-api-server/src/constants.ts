@@ -115,3 +115,6 @@ export const STRIPE_PAYMENT_METHODS: string[] = ['card'];
 export const PINATA_API_KEY: string | undefined = process.env['PINATA_API_KEY'];
 export const PINATA_API_SECRET: string | undefined =
   process.env['PINATA_API_SECRET'];
+
+export const VAT_FALLBACK_COUNTRY_SHORT: string =
+  process.env['VAT_FALLBACK_COUNTRY_SHORT'] ?? 'GB';

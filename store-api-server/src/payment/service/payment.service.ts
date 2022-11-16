@@ -20,6 +20,7 @@ import {
   SIMPLEX_ALLOWED_FIAT,
   STRIPE_PAYMENT_METHODS,
   STRIPE_SECRET,
+  VAT_FALLBACK_COUNTRY_SHORT,
 } from '../../constants.js';
 import { UserService } from '../../user/service/user.service.js';
 import { NftService } from '../../nft/service/nft.service.js';
@@ -53,11 +54,13 @@ import { signSmartContractData } from '@wert-io/widget-sc-signer';
 import { createRequire } from 'module';
 import {
   PaymentProvider,
+  PaymentProviderString,
   PaymentStatus,
   OrderInfo,
   OrderStatus,
   NftDeliveryInfo,
   NftDeliveryStatus,
+  PaymentIntent,
 } from '../entity/payment.entity.js';
 
 import type { NftEntity } from '../../nft/entity/nft.entity.js';
@@ -71,7 +74,7 @@ import type {
 const require = createRequire(import.meta.url);
 const stripe = require('stripe');
 
-export interface NftOrder {
+interface NftOrder {
   id: number;
   userId: number;
   userAddress: string;
@@ -79,16 +82,9 @@ export interface NftOrder {
   expiresAt: number;
 }
 
-export interface PaymentIntentInternal {
-  id: string;
-
-  currency: string;
-  amount: string;
-  amountExclVat: string;
-  vatRate: number;
-
-  provider: PaymentProvider;
-  paymentDetails?: StripeDetails | WertDetails | TezpayDetails | SimplexDetails;
+interface PaymentIntentInternal
+  extends Omit<PaymentIntent, 'nfts' | 'expiresAt'> {
+  clientIp: string;
 }
 
 @Injectable()
@@ -192,7 +188,7 @@ WHERE id = $1
   async createPayment(
     usr: UserEntity,
     cookieSession: string,
-    provider: PaymentProvider,
+    provider: PaymentProviderString,
     currency: string,
     clientIp: string,
     recreateOrder: boolean = false,
@@ -224,8 +220,6 @@ WHERE id = $1
       await this.#registerPayment(dbTx, orderId, paymentIntent);
 
       return paymentIntent;
-    }).catch((err: any) => {
-      throw `Err on creating nft order (userId=${usr.id}), err: ${err}`;
     });
   }
 
@@ -245,7 +239,13 @@ WHERE id = $1
 
     const cartMeta = await this.userService.getCartMeta(cartSession, dbTx);
     if (typeof cartMeta === 'undefined') {
-      throw `cannot create order for userId=${userId} (cartSession=${cartSession}), empty cart`;
+      Logger.warn(
+        `cannot create order for userId=${userId} (cartSession=${cartSession}), no cart exists`,
+      );
+      throw new HttpException(
+        'cannot create order, cart empty',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (!isBottom(cartMeta.orderId)) {
@@ -279,7 +279,13 @@ WHERE cart_session_id = $1
       [cartMeta.id, nftOrderId],
     );
     if (orderNftsQry.rowCount === 0) {
-      throw `cannot create order for userId=${userId} (cartSession=${cartSession}), empty cart`;
+      Logger.warn(
+        `cannot create order for userId=${userId} (cartSession=${cartSession}), empty cart`,
+      );
+      throw new HttpException(
+        'cannot create order, cart is empty',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await dbTx.query(
@@ -432,10 +438,14 @@ WHERE nft_order_id = $1
     return res;
   }
 
-  async #getOrderPaymentIntents(
-    orderId: number,
-  ): Promise<
-    [{ paymentId: string; provider: PaymentProvider; status: PaymentStatus }]
+  async #getOrderPaymentIntents(orderId: number): Promise<
+    [
+      {
+        paymentId: string;
+        provider: PaymentProviderString;
+        status: PaymentStatus;
+      },
+    ]
   > {
     return (
       await this.conn.query(
@@ -460,31 +470,31 @@ WHERE nft_order_id = $1
 
   async #createPaymentIntent(
     usr: UserEntity,
-    provider: PaymentProvider,
+    provider: PaymentProviderString,
     currency: string,
     amountUnit: number,
     clientIp: string,
   ): Promise<PaymentIntentInternal> {
-    const vatRate = await this.#getVatRate(clientIp);
+    const vatRate = await this.#ipAddrVatRate(clientIp);
 
-    let amount = this.currencyService
-      .convertFromBaseUnit(currency, amountUnit)
-      .toFixed(0);
+    let amount = this.currencyService.convertFromBaseUnit(currency, amountUnit);
 
     const id = uuidv4();
     return {
       id,
 
       currency,
-      amount,
+      amount: this.currencyService.toFixedDecimals(currency, amount),
       amountExclVat: this.currencyService.toFixedDecimals(
         currency,
-        Number(amount) - Number(amount) / (1 + vatRate),
+        amount / (1 + vatRate),
       ),
+
+      clientIp,
       vatRate,
 
       provider,
-      paymentDetails: await this.#createPaymentDetails(
+      providerDetails: await this.#createPaymentDetails(
         id,
         usr,
         provider,
@@ -498,7 +508,7 @@ WHERE nft_order_id = $1
   async #createPaymentDetails(
     paymentId: string,
     usr: UserEntity,
-    provider: PaymentProvider,
+    provider: PaymentProviderString,
     currency: string,
     amountUnit: number,
     clientIp: string,
@@ -836,9 +846,9 @@ WHERE nft_order_id = $1
       await dbTx.query(
         `
 INSERT INTO payment (
-  payment_id, status, nft_order_id, provider, currency, amount, vat_rate, amount_excl_vat
+  payment_id, status, nft_order_id, provider, currency, amount, vat_rate, amount_excl_vat, client_ip
 )
-VALUES ($1, 'created', $2, $3, $4, $5, $6, $7)
+VALUES ($1, 'created', $2, $3, $4, $5, $6, $7, $8)
 RETURNING id`,
         [
           paymentIntent.id,
@@ -848,6 +858,7 @@ RETURNING id`,
           paymentIntent.amount,
           paymentIntent.vatRate,
           paymentIntent.amountExclVat,
+          paymentIntent.clientIp,
         ],
       );
     } catch (err: any) {
@@ -860,7 +871,7 @@ RETURNING id`,
 
   async #orderHasProviderOpen(
     orderId: number,
-    provider: PaymentProvider,
+    provider: PaymentProviderString,
     dbTx: DbTransaction | DbPool = this.conn,
   ): Promise<boolean> {
     const qryRes = await dbTx.query(
@@ -1212,7 +1223,7 @@ WHERE nft_order_id = $1
   async cancelNftOrderPayment(
     dbTx: DbTransaction,
     orderId: number,
-    provider: PaymentProvider,
+    provider: PaymentProviderString,
     newStatus:
       | PaymentStatus.CANCELED
       | PaymentStatus.TIMED_OUT = PaymentStatus.CANCELED,
@@ -1453,33 +1464,60 @@ ORDER BY payment.id DESC
   }
 
   // Note: returned value is a rate between 0 and 1 (with 1 translating to 100%)
-  async #getVatRate(ipAddr: string): Promise<number> {
+  async #ipAddrVatRate(ipAddr: string): Promise<number> {
     const ip: number = this.ipAddrToNum(ipAddr);
 
     const qryRes = await this.conn.query(
       `
 SELECT
-  country.id as country_id,
-  vat.rate
+  country.country_short,
+  country.vat_id IS NOT NULL AS vat_rate_defined
 FROM ip_country
 LEFT JOIN country
   ON country.id = ip_country.country_id
-LEFT JOIN vat
-  ON vat.id = country.vat_id
 WHERE ip_country.ip_from <= $1
   AND ip_country.ip_to >= $1
       `,
       [ip],
     );
 
-    if (isBottom(qryRes.rows.at[0]?.['country_id'])) {
+    let countryShort = qryRes.rows[0]?.['country_short'];
+    if (isBottom(countryShort)) {
       Logger.warn(
-        `Unmapped country for ip address ${ipAddr} (ip in numeric format: ${ip}`,
+        `Unmapped country for ip address ${ipAddr}, falling back to ${VAT_FALLBACK_COUNTRY_SHORT}`,
       );
-      return 0;
+      countryShort = VAT_FALLBACK_COUNTRY_SHORT;
+    } else if (!qryRes.rows[0]['vat_rate_defined']) {
+      Logger.warn(
+        `Unmapped vat for ${countryShort}, falling back to ${VAT_FALLBACK_COUNTRY_SHORT}`,
+      );
+      countryShort = VAT_FALLBACK_COUNTRY_SHORT;
     }
 
-    return qryRes.rows[0]['rate'] / 100;
+    return await this.#countryVatRate(
+      countryShort ?? VAT_FALLBACK_COUNTRY_SHORT,
+    );
+  }
+
+  async #countryVatRate(countryShort: string): Promise<number> {
+    const qryRes = await this.conn.query(
+      `
+SELECT
+  vat.percentage
+FROM country
+LEFT JOIN vat
+  ON vat.id = country.vat_id
+WHERE country_short = $1
+      `,
+      [countryShort],
+    );
+
+    const vatPercentage = qryRes.rows[0]?.['percentage'];
+    if (isBottom(vatPercentage)) {
+      throw `Unmapped vat rate for country short '${countryShort}'`;
+    }
+
+    return vatPercentage / 100;
   }
 
   ipAddrToNum(ip: string): number {

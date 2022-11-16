@@ -17,6 +17,9 @@ psql -c "$(cat<<EOF
 
 BEGIN;
 
+DELETE FROM country;
+DELETE FROM ip_country;
+
 INSERT INTO country (country_short, country_long)
 SELECT DISTINCT
     countryshort,
@@ -32,7 +35,15 @@ FROM ipcountry
 JOIN country
   ON ipcountry.countryshort = country.country_short;
 
--- DROP TABLE ipcountry;
+DROP TABLE ipcountry;
+
+INSERT INTO vat (rate)
+VALUES (5)
+ON CONFLICT DO NOTHING;
+
+UPDATE country
+SET vat_id = (SELECT id FROM vat WHERE rate = 5)
+WHERE country_short IN ('DE', 'GB');
 
 COMMIT;
 
