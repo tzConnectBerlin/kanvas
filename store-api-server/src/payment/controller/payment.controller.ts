@@ -128,27 +128,33 @@ export class PaymentController {
     const clientIp = getClientIp(request);
 
     try {
-      let paymentIntent = await this.paymentService.createPayment(
-        user,
-        cookieSession.uuid,
-        paymentProvider,
-        currency,
-        clientIp,
-        recreateNftOrder,
-      );
+      // extracting clientIp from paymentIntent like this, best way to get the
+      // spread syntax below to not pickup clientIp (we don't want to have this
+      // field in the response of this API call)
+      const { clientIp: undefined, ...paymentIntent } =
+        await this.paymentService.createPayment(
+          user,
+          cookieSession.uuid,
+          paymentProvider,
+          currency,
+          clientIp,
+          recreateNftOrder,
+        );
       const order = await this.paymentService.getPaymentOrder(paymentIntent.id);
 
-      let resp = {
+      return {
         ...paymentIntent,
         nfts: order.nfts,
         expiresAt: order.expiresAt,
       };
-      return resp;
     } catch (err: any) {
+      Logger.error(
+        `Err on creating nft order (userId=${user.id}), err: ${err}`,
+      );
+
       if (err instanceof HttpException) {
         throw err;
       }
-      Logger.error(err);
       throw new HttpException(
         'Unable to place the order',
         HttpStatus.INTERNAL_SERVER_ERROR,
