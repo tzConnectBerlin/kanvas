@@ -13,3 +13,7 @@ export interface NftUpdate {
   value?: string;
   file?: any;
 }
+
+export interface UrlParams {
+  id: number;
+}
