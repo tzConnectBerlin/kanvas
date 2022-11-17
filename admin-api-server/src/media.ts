@@ -86,7 +86,7 @@ export function videoMetadataFromFfprobe(err: any, metadata: FfprobeData) {
 
   const bitRate = metadata.streams.reduce(
     (rate: number | undefined, s: FfprobeStream) => {
-      if (s.bit_rate == null || Number(s.bit_rate) === NaN) {
+      if (s.bit_rate == null || isNaN(Number(s.bit_rate))) {
         return rate;
       }
       return (rate ?? 0) + Number(s.bit_rate);
