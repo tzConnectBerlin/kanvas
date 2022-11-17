@@ -1,10 +1,10 @@
 import { List } from 'react-admin';
-import { Grid, SxProps } from '@mui/material';
+import { Grid } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import DataGridWrapper from './DataGridWrapper';
 import { useState } from 'react';
 import utc from 'dayjs/plugin/utc';
-import DateTimePicker from './DatetTimePicker';
+import DateTimePicker from './DateTimePicker';
 dayjs.extend(utc);
 
 export const ActivityList = ({ ...props }) => {
