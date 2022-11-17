@@ -7,6 +7,31 @@ import { CategoryService } from '../service/category.service.js';
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
+  /**
+   * @apiGroup Categories
+   * @api {get} /categories/assignable Request nft categories
+   * @apiPermission user
+   *
+   * @apiSuccessExample Example Success-Response:
+   *    {
+   *        "data": [
+   *            {
+   *             "id": 3,
+   *             "name": "Applied Art"
+   *            },
+   *            {
+   *             "id": 4,
+   *             "name": "Drawing"
+   *            },
+   *            {
+   *             "id": 5,
+   *             "name": "Painting"
+   *            },
+   *            ...
+   *        ]
+   *    }
+   * @apiName nftAssignable
+   */
   @Get('/assignable')
   @UseGuards(JwtAuthGuard)
   async nftAssignable(): Promise<{ data: CategoryEntity[] }> {

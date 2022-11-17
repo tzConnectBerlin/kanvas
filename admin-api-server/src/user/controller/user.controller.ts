@@ -29,6 +29,32 @@ import {
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  /**
+   * @apiGroup User
+   * @api {post} /user Create a user
+   * @apiPermission admin
+   * @apiBody {UserEntity} user The user to be created.
+   * @apiParamExample {json} Request Body Example:
+   *    {
+   *      "email": "max@muster.com",
+   *      "userName": "MaxMuster",
+   *      "roles": [1, 2],
+   *      "password": "123456",
+   *      "disabled": false
+   *    }
+   * @apiSuccessExample Example Success-Response:
+   *   {
+   *     "id": 103,
+   *     "roles": [
+   *         1,
+   *         2
+   *     ],
+   *     "email": "max@muster.com",
+   *     "userName": "MaxMuster",
+   *     "disabled": false
+   *   }
+   * @apiName create
+   */
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesDecorator(Roles.admin)
@@ -36,6 +62,39 @@ export class UserController {
     return await this.userService.create(usr);
   }
 
+  /**
+   * @apiGroup User
+   * @api {get} /user Request all users
+   * @apiPermission user
+   * @apiQuery {Object="id: number[]","userName: string[]","roleIds: number[]"} [filter] URL-decoded example: filter: {"id":[1,20]}
+   * @apiQuery {String[]="id","userName","email","roles"} [sort] URL-decoded examples: sort: [$value,"desc"] or sort: [$value,"asc"]
+   * @apiQuery {Number[]="[number, number] e.g. [10, 5]"} [range] URL-decoded example: range: [10, 5] results in 5 records from the 10th record on
+   *
+   * @apiSuccessExample Example Success-Response:
+   *    {
+   *     "data": [
+   *         {
+   *             "id": 1,
+   *             "email": "admin@tzconnect.com",
+   *             "userName": "admin",
+   *             "roles": [
+   *                 1
+   *             ]
+   *         },
+   *         {
+   *             "id": 20,
+   *             "email": "moderator@tzconnect.com",
+   *             "userName": "moderator",
+   *             "roles": [
+   *                 3
+   *             ]
+   *         },
+   *         ...
+   *     ],
+   *     "count": 10
+   * }
+   * @apiName findAll
+   */
   @Get()
   @UseGuards(JwtAuthGuard)
   async findAll(
@@ -47,26 +106,63 @@ export class UserController {
   ) {
     const params = this.#queryParamsToFilterParams(filters, sort, range);
 
-    validatePaginationParams(params, [
-      'id',
-      'email',
-      'userName',
-      'roles',
-    ]);
+    validatePaginationParams(params, ['id', 'email', 'userName', 'roles']);
 
     return await this.userService.findAll(params);
   }
 
+  /**
+   * @apiGroup User
+   * @api {get} /user/:id Request a single user
+   * @apiPermission user
+   * @apiParam {Number} id Unique ID of user
+   * @apiSuccessExample Example Success-Response:
+   *   {
+   *     "id": 1,
+   *     "email": "admin@tzconnect.com",
+   *     "userName": "admin",
+   *     "roles": [
+   *         1
+   *     ]
+   * }
+   * @apiExample {http} Example http request url (make sure to replace $base_url with the admin-api-server endpoint):
+   *  $base_url/user/5
+   * @apiName findOne
+   */
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   async findOne(@Param('id') id: string) {
     return await this.userService.findOne(+id);
   }
 
+  /**
+   * @apiGroup User
+   * @api {patch} /user/:id Update a single user
+   * @apiPermission admin
+   * @apiParam {Number} id Unique ID of user
+   * @apiBody {UserEntity} user The updated user entity. Currently only role updates are enabled.
+   * @apiParamExample {json} Request Body Example for updating roles:
+   *    {
+   *      "roles": [1, 2, 3]
+   *    }
+   *
+   * @apiSuccessExample Example Success-Response:
+   *   {
+   *     "id": 1,
+   *     "email": "admin@tzconnect.com",
+   *     "userName": "admin",
+   *     "roles": [
+   *         1, 2, 3
+   *     ]
+   * }
+   * @apiExample {http} Example http request url (make sure to replace $base_url with the admin-api-server endpoint):
+   *  $base_url/user/5
+   * @apiName update
+   */
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesDecorator(Roles.admin)
-  async update(@Param('id') id: string, @Body() updateUser: any) {
+  async update(@Param('id') id: number, @Body() updateUser: UserEntity) {
     try {
       return await this.userService.update(+id, updateUser);
     } catch (error) {
@@ -75,6 +171,15 @@ export class UserController {
     }
   }
 
+  /**
+   * @apiGroup User
+   * @api {delete} /user/:id Delete a single user
+   * @apiPermission admin
+   * @apiParam {Number} id Unique ID of user
+   * @apiExample {http} Example http request url (make sure to replace $base_url with the admin-api-server endpoint):
+   *  $base_url/user/5
+   * @apiName remove
+   */
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesDecorator(Roles.admin)
