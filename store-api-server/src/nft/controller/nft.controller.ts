@@ -50,9 +50,9 @@ export class NftController {
   /**
    * @apiGroup nfts
    * @api {post} /nfts/create Create a nft
-   * @apiBody {CreateNft} nft The nft data needed to create a nft
+   * @apiBody {CreateNft} nft The NFT data needed to create a nft
    * @apiBody {Number} nft[id] The id used to create the nft
-   * @apiBody {Number} [nft[proxyNftId]] The proxy nft id
+   * @apiBody {Number} [nft[proxyNftId]] The proxy NFT id
    * @apiBody {String} nft[name] The name of the nft
    * @apiBody {String} nft[description] The description of the nft
    * @apiBody {String} nft[artifactUri] The artifact uri of the nft
@@ -62,8 +62,8 @@ export class NftController {
    * @apiBody {Number} nft[price] The price of the nft
    * @apiBody {Number[]} nft[categories] The categories of the nft
    * @apiBody {Number} nft[editionsSize] The edition size of the nft
-   * @apiBody {Number} [nft[onsaleFrom]] The date from when the nft will be on sale
-   * @apiBody {Number} [nft[onsaleUntil]] The date till when the nft will be on sale
+   * @apiBody {Number} [nft[onsaleFrom]] The date from when the NFT will be on sale
+   * @apiBody {Number} [nft[onsaleUntil]] The date till when the NFT will be on sale
    * @apiBody {Object} [nft[formats]] The formats of the nft
    * @apiBody {Any} nft[metadata] The metadata of the nft
    * @apiBody {String} nft[signature] The signature of the nft
@@ -98,9 +98,9 @@ export class NftController {
   /**
    * @apiGroup nfts
    * @api {post} /nfts/create-proxied Create a proxied nft
-   * @apiBody {CreateProxiedNft} nft The nft data needed to create the proxied nft
+   * @apiBody {CreateProxiedNft} nft The NFT data needed to create the proxied nft
    * @apiBody {Number} nft[id] The id used to create the nft
-   * @apiBody {Number} nft[proxyNftId] The proxy nft id
+   * @apiBody {Number} nft[proxyNftId] The proxy NFT id
    * @apiBody {String} [nft[name]] The name of the nft
    * @apiBody {String} [nft[description]] The description of the nft
    * @apiBody {String} nft[artifactUri] The artifact uri of the nft
@@ -198,8 +198,24 @@ export class NftController {
   /**
    * @apiGroup nfts
    * @api {get} /nfts Get all nfts (optionally filtered by filterParam)
+   * @apiDescription Results are paginated.
+   *
+   * Optionally, a set of filters can be specified. NFTs can be filtered by: categories, userAddress, priceAtLeast, priceAtMost, availability (for more info see the Query parameters section below).
+   *
+   * For each filter, if not specified, it's not applied (so, for example, if no availability is specified, NFTs of all availability status' are returned).
+   * If multiple filters are specified, NFTs that fit each criteria are returned (AND logic, not OR).
+   *
+   * Note: ipfsHash may be null in the response. It's only set (not null) for NFTs that have already been purchased at least once.
+   * We do this to allow remaining uncommitted to the existence of an NFT for as long as possible.
+   * This would be useful in case for some reason an NFT no longer is deemed appropriate and should be delisted.
+   * Delisting is always possible, in the sense of blacklisting it from the store, however once the IPFS hash is shared and the NFT is minted on the blockchain, it is no longer possible to erase the NFT entirely.
    * @apiQuery {String} [currency] Defaults to a base currency if not provided
    * @apiQuery {Object="categories: number[]","userAddress: string","priceAtLeast: number","priceAtMost: number","availability: string[]","proxyFolding: 'fold' | 'unfold' | 'both'"} [filters]
+   * @apiQuery {Number[]} filters[categories] Get NFTs that belong to any of a comma separated set of category identifiers (eg: 1,4,10). Multiple entries here means: find NFTs that belong to at least one of the given categories
+   * @apiQuery {String} filters[userAddress] Get NFTs that are owned by some tezos address.
+   * @apiQuery {Number} filters[priceAtLeast] Get NFTs that at least cost x amount (x is inclusive).
+   * @apiQuery {Number} filters[priceAtMost] Get NFTs that at most cost x amount (x is inclusive).
+   * @apiQuery {String[]} filters[availability] Comma separated enable-list of availability status (each entry being one of 'onSale','soldOut','upcoming'). Multiple entries means find NFTs that belong to one of the entries.
    * @apiSuccessExample Example Success-Response:
    *  {
    *     "currentPage": 1,
@@ -267,6 +283,9 @@ export class NftController {
   /**
    * @apiGroup nfts
    * @api {get} /nfts/search Get all nfts (filtered by searchParam)
+   * @apiDescription This searches for:
+   * - NFTs by name and description
+   * - For categories by name
    * @apiQuery {String} [currency] Defaults to a base currency if not provided
    * @apiQuery {Object="searchString: string"} searchParams string to filter all nfts
    * @apiSuccessExample Example Success-Response:
@@ -314,9 +333,9 @@ export class NftController {
 
   /**
    * @apiGroup nfts
-   * @api {get} /nfts/:id Get nft by id
-   * @apiParam {Number} id The id of the nft
-   * @apiQuery {String} [userAddress] userAddress of the user that owns the nft on chain
+   * @api {get} /nfts/:id Get NFT by id
+   * @apiParam {Number} id The id of the NFT to retrieve
+   * @apiQuery {String} [userAddress] userAddress of the user that owns the NFT on chain
    * @apiQuery {String} [currency] Defaults to a base currency if not provided
    * @apiSuccessExample Example Success-Response:
    * {

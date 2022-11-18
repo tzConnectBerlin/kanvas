@@ -234,7 +234,11 @@ export class UserController {
 
   /**
    * @apiGroup Users
-   * @api {get} /users/nftOwnershipsPending Gets a list of nftIds whose ownership status is "pending"
+   * @api {get} /users/nftOwnershipsPending Get pending ownership status for NFTs
+   * @apiDescription This endpoint is used to find out after having finished payment whether the purchased NFTs have arrived to the user's wallet onchain or if this process is still pending.
+   *
+   * Note that a user can own multiple editions of a single NFT (though limited by 1 edition per NFT per cart,
+   * users can own multiple editions regardless either through multiple payments or through onchain transfers). Therefore, this endpoint returns per requested nftId a list of ownerships.
    * @apiPermission logged-in user
    * @apiName nftOwnershipStatus
    */
@@ -262,7 +266,11 @@ export class UserController {
   /**
    * @apiGroup Users
    * @api {post} /users/cart/add/:nftId Add a nft to cart
-   * @apiParam {Number} nftId The id of the nft
+   * @apiDescription Note, this may fail if
+   * - This NFT is not for sale (e.g. it's already sold out, or it's not yet released)
+   * - All remaining editions of this NFT are already in other active carts
+   * - This NFT is already in the active cart (currently we only allow 1 edition per NFT per active cart)
+   * @apiParam {Number} nftId The id of the NFT to add to the cart
    * @apiPermission logged-in user
    * @apiExample {http} Example http request url (make sure to replace $base_url with the store-api-server endpoint):
    *  $base_url/users/cart/add/10

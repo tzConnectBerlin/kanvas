@@ -78,6 +78,9 @@ export class PaymentController {
   /**
    * @apiGroup Payment
    * @api {post} /payment/create-payment-intent Create a payment intent
+   * @apiDescription Checking out the cart involves creating a payment intent, which then has to be met (finalized) in the frontend application. For example, if paying with Stripe, the payment intent has to be finalized by applying Stripe's SDK in the frontend.
+   *
+   * The "clientSecret" in the response is the important piece that links the following finalization of the payment with the newly created payment intent.
    * @apiPermission logged-in user
    * @apiBody {String="tezpay","stripe","wert","simplex","test_provider"} [paymentProvider="stripe"] The payment provider used for the intent
    * @apiBody {String} [currency] The currency used for the payment intent, uses a base currency if not provided
@@ -87,6 +90,14 @@ export class PaymentController {
    *      currency: 'XTZ',
    *      paymentProvider: 'tezpay'
    *    }
+   *
+   * @apiSuccessExample Example Success-Response:
+   *  {
+   *    "amount": "0.66",
+   *    "currency": "EUR",
+   *    "clientSecret": "pi_3L2foUEdRDZNp7JF0yajTKrM_secret_cs3SWGJy7xdd5M19EwShCjbdE",
+   *    "id": "pi_3L2foUEdRDZNp7JF0yajTKrM"
+   *  }
    * @apiName createPaymentIntent
    */
   @Post('/create-payment-intent')
