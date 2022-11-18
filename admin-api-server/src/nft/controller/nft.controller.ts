@@ -13,6 +13,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { v4 as uuidv4 } from 'uuid';
 import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard.js';
 import { MAX_FILE_UPLOADS_PER_CALL } from '../../constants.js';
 import { NftEntity, NftUpdate, UrlParams } from '../entities/nft.entity.js';
@@ -229,7 +230,7 @@ export class NftController {
     }
 
     if (filesArray?.length) {
-      filesArray = await this.fileService.addMissingFiles(filesArray);
+      filesArray = await this.fileService.addMissingFiles(filesArray, uuidv4());
     }
 
     const nftUpdates = this.#transformFormDataToNftUpdates(
