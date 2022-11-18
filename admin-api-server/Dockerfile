@@ -4,7 +4,6 @@ RUN apk add bash
 
 WORKDIR /build
 ENV YARN_LINK_ARGS='--link-folder /build/yarn_links'
-# ENV NODE_ENV=production
 
 ADD admin-api-server/ .
 ADD lib/ /lib/

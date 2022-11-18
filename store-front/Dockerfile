@@ -1,5 +1,5 @@
 # note: expected build context is the git root directory
-FROM node:16-alpine
+FROM node:18-alpine
 # ENV DEBIAN_FRONTEND=noninteractive
 ENV NODE_OPTIONS --openssl-legacy-provider
 # ENV TZ=UTC
