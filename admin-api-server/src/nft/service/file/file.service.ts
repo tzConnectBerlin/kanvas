@@ -6,7 +6,6 @@ import { fileURLToPath } from 'url';
 import * as path from 'path';
 import sharp from 'sharp';
 import sizeOf from 'image-size';
-import { v4 as uuidv4 } from 'uuid';
 import mime from 'mime';
 import { getVideoMetadata } from '../../../media.js';
 
@@ -32,7 +31,7 @@ export interface File {
 
 type FileType = 'thumbnail' | 'display';
 type Path = string;
-type Dimension = {
+export type Dimension = {
   width: number;
   height: number;
 };
@@ -46,6 +45,7 @@ interface ResizedImgParams {
 }
 
 interface ImageFromVideoParams {
+  tempDir: string;
   videoFile: File;
   typeOfImage: FileType;
   imageWidth: number;
@@ -59,6 +59,7 @@ interface GenerateImageFileParams {
 }
 
 interface ScreenshotFromVideoParams {
+  tempDir: string;
   imageWidth: number;
   imageHeight: number;
   videoPath: string;
@@ -66,17 +67,18 @@ interface ScreenshotFromVideoParams {
 }
 
 interface HandleMediaParams {
+  tempDir: string;
   artifact: File;
   display?: File;
   thumbnail?: File;
 }
-
 @Injectable()
 export class FileService {
-  private MEDIA_TEMP_DIR: string;
-
-  async addMissingFiles(filesArray: File[]): Promise<File[]> {
-    this.MEDIA_TEMP_DIR = __dirname + `/${uuidv4()}/`;
+  async addMissingFiles(
+    filesArray: File[],
+    tempDirId: string,
+  ): Promise<File[]> {
+    const MEDIA_TEMP_DIR = __dirname + `/${tempDirId}/`;
     const artifact = filesArray.find(
       (file) => file.originalname === 'artifact',
     ) as File; // we always assume that we get an artifact from the client
@@ -90,40 +92,40 @@ export class FileService {
     const isImage = (artifact.mimetype.match(/image/g) || []).length > 0;
 
     try {
+      let addedFiles: File[] = [];
       if (isVideo) {
-        this.#createTempDir();
-        const addedFiles = await this.#handleVideo({
+        fs.mkdirSync(MEDIA_TEMP_DIR);
+        addedFiles = await this.#handleVideo({
+          tempDir: MEDIA_TEMP_DIR,
           artifact,
           display,
           thumbnail,
         });
-
-        if (addedFiles.length) {
-          addedFiles.forEach((file) => {
-            filesArray.push(file);
-          });
-        }
       } else if (isImage) {
-        this.#createTempDir();
-        const addedFiles = await this.#handleImage({
+        fs.mkdirSync(MEDIA_TEMP_DIR);
+        addedFiles = await this.#handleImage({
+          tempDir: MEDIA_TEMP_DIR,
           artifact,
           display,
           thumbnail,
         });
+      }
 
-        if (addedFiles.length) {
-          addedFiles.forEach((file) => {
-            filesArray.push(file);
-          });
-        }
+      if (addedFiles.length) {
+        addedFiles.forEach((file) => {
+          filesArray.push(file);
+        });
       }
     } catch (error) {
       Logger.error(
         `Failed during nft file imgae/video processing. err: ${error}`,
       );
     } finally {
-      if (fs.existsSync(this.MEDIA_TEMP_DIR)) {
-        this.#deleteTempDir();
+      if (fs.existsSync(MEDIA_TEMP_DIR)) {
+        fs.rmSync(MEDIA_TEMP_DIR, {
+          recursive: true,
+          force: true,
+        });
       }
     }
 
@@ -131,57 +133,62 @@ export class FileService {
   }
 
   async #handleVideo({
+    tempDir,
     artifact,
     display,
     thumbnail,
   }: HandleMediaParams): Promise<File[]> {
-    const artifactResolution = await getVideoMetadata(artifact);
+    const { width: artifactWidth, height: artifactHeight } =
+      await getVideoMetadata(artifact);
     const addedFiles: Array<File> = [];
     if (!display) {
       const generatedDisplay = await this.#imageFromVideo({
+        tempDir,
         videoFile: artifact,
         typeOfImage: 'display',
-        imageWidth: artifactResolution.width,
-        imageHeight: artifactResolution.height,
+        imageWidth: artifactWidth,
+        imageHeight: artifactHeight,
       });
 
-      if (generatedDisplay) {
-        addedFiles.push(generatedDisplay);
-      } else {
+      if (!generatedDisplay) {
         Logger.warn('Generating display from video failed');
+        return addedFiles;
       }
+
+      addedFiles.push(generatedDisplay);
     }
 
     if (!thumbnail) {
       const availableDisplay =
         display || addedFiles.find((file) => file.originalname === 'display');
 
-      if (availableDisplay) {
-        const displayDimension = sizeOf(availableDisplay.buffer) as Dimension;
-        if (displayDimension.width > 350 || displayDimension.height > 350) {
-          const thumbnailDimension = this.scaledDimensions(
-            displayDimension.width,
-            displayDimension.height,
-            350,
-            350,
-          );
-          const generatedThumbnail = await this.#resizedImg({
-            buffer: availableDisplay.buffer,
-            width: thumbnailDimension.width,
-            height: thumbnailDimension.height,
-            type: 'thumbnail',
-            extension: 'png',
-          });
-          addedFiles.push(generatedThumbnail);
-        } else {
-          const generatedThumbnail = Object.assign({}, availableDisplay);
-          generatedThumbnail.originalname = 'thumbnail';
-          addedFiles.push(generatedThumbnail);
-        }
-      } else {
+      if (!availableDisplay) {
         Logger.warn(
           "Thumbnail wasn't created as there was no available display",
         );
+        return addedFiles;
+      }
+
+      const displayDimension = sizeOf(availableDisplay.buffer) as Dimension;
+      if (displayDimension.width > 350 || displayDimension.height > 350) {
+        const thumbnailDimension = this.scaledDimensions(
+          displayDimension.width,
+          displayDimension.height,
+          350,
+          350,
+        );
+        const generatedThumbnail = await this.#resizedImg({
+          buffer: availableDisplay.buffer,
+          width: thumbnailDimension.width,
+          height: thumbnailDimension.height,
+          type: 'thumbnail',
+          extension: 'png',
+        });
+        addedFiles.push(generatedThumbnail);
+      } else {
+        const generatedThumbnail = Object.assign({}, availableDisplay);
+        generatedThumbnail.originalname = 'thumbnail';
+        addedFiles.push(generatedThumbnail);
       }
     }
 
@@ -203,40 +210,43 @@ export class FileService {
     if (!thumbnail) {
       const availableDisplay =
         display || addedFiles.find((file) => file.originalname === 'display');
-      if (availableDisplay) {
-        const displayDimension = sizeOf(availableDisplay.buffer) as Dimension;
-        if (displayDimension.width > 350 || displayDimension.height > 350) {
-          const thumbnailDimension = this.scaledDimensions(
-            displayDimension.width,
-            displayDimension.height,
-            350,
-            350,
-          );
-          const artifactExtension = mime.getExtension(artifact.mimetype);
 
-          if (artifactExtension) {
-            const generatedThumbnail = await this.#resizedImg({
-              buffer: availableDisplay.buffer,
-              width: thumbnailDimension.width,
-              height: thumbnailDimension.height,
-              type: 'thumbnail',
-              extension: artifactExtension,
-            });
-            addedFiles.push(generatedThumbnail);
-          } else {
-            Logger.warn(
-              'Thumbnail could not be created because of missing artifact extension',
-            );
-          }
-        } else {
-          const generatedThumbnail = Object.assign({}, artifact);
-          generatedThumbnail.originalname = 'thumbnail';
-          addedFiles.push(generatedThumbnail);
-        }
-      } else {
+      if (!availableDisplay) {
         Logger.warn(
           "Thumbnail wasn't created as there was no available display",
         );
+        return addedFiles;
+      }
+
+      const displayDimension = sizeOf(availableDisplay.buffer) as Dimension;
+      if (displayDimension.width > 350 || displayDimension.height > 350) {
+        const thumbnailDimension = this.scaledDimensions(
+          displayDimension.width,
+          displayDimension.height,
+          350,
+          350,
+        );
+        const displayExtension = mime.getExtension(availableDisplay.mimetype);
+
+        if (!displayExtension) {
+          Logger.warn(
+            'Thumbnail could not be created because of missing display extension',
+          );
+          return addedFiles;
+        }
+
+        const generatedThumbnail = await this.#resizedImg({
+          buffer: availableDisplay.buffer,
+          width: thumbnailDimension.width,
+          height: thumbnailDimension.height,
+          type: 'thumbnail',
+          extension: displayExtension,
+        });
+        addedFiles.push(generatedThumbnail);
+      } else {
+        const generatedThumbnail = Object.assign({}, availableDisplay);
+        generatedThumbnail.originalname = 'thumbnail';
+        addedFiles.push(generatedThumbnail);
       }
     }
 
@@ -244,37 +254,44 @@ export class FileService {
   }
 
   async #imageFromVideo({
+    tempDir,
     videoFile,
     typeOfImage,
     imageWidth,
     imageHeight,
   }: ImageFromVideoParams): Promise<File | undefined> {
     const videoExtension = mime.getExtension(videoFile.mimetype);
-    if (videoExtension) {
-      const imagePath = `${this.MEDIA_TEMP_DIR}${typeOfImage}.png`;
-      const videoPath = `${this.MEDIA_TEMP_DIR}video.${videoExtension}`;
 
-      // generating screenshots doesn't work with input streams, therefore we write the buffer to a file
-      fs.writeFileSync(videoPath, videoFile.buffer);
-
-      try {
-        await this.#screenshotFromVideo({
-          imageWidth,
-          imageHeight,
-          videoPath: videoPath,
-          filename: `${typeOfImage}`,
-        });
-      } catch (error) {
-        Logger.error('taking screenshot from video failed');
-        throw error;
-      }
-
-      return this.#generateImageFile({
-        source: imagePath,
-        type: typeOfImage,
-        extension: 'png',
-      });
+    if (!videoExtension) {
+      Logger.warn(
+        'Could not create image from video as the extension from the video is missing but it is needed to fulfill this procedure.',
+      );
+      return;
     }
+    const imagePath = `${tempDir}${typeOfImage}.png`;
+    const videoPath = `${tempDir}video.${videoExtension}`;
+
+    // generating screenshots doesn't work with input streams, therefore we write the buffer to a file
+    fs.writeFileSync(videoPath, videoFile.buffer);
+
+    try {
+      await this.#screenshotFromVideo({
+        tempDir,
+        imageWidth,
+        imageHeight,
+        videoPath: videoPath,
+        filename: `${typeOfImage}`,
+      });
+    } catch (error) {
+      Logger.error('taking screenshot from video failed');
+      throw error;
+    }
+
+    return this.#generateImageFile({
+      source: imagePath,
+      type: typeOfImage,
+      extension: 'png',
+    });
   }
 
   async #resizedImg({
@@ -315,6 +332,7 @@ export class FileService {
   }
 
   async #screenshotFromVideo({
+    tempDir,
     videoPath,
     imageWidth,
     imageHeight,
@@ -334,19 +352,8 @@ export class FileService {
             size: `${imageWidth}x${imageHeight}`,
             filename,
           },
-          this.MEDIA_TEMP_DIR,
+          tempDir,
         );
-    });
-  }
-
-  #createTempDir() {
-    fs.mkdirSync(this.MEDIA_TEMP_DIR);
-  }
-
-  #deleteTempDir() {
-    fs.rmSync(this.MEDIA_TEMP_DIR, {
-      recursive: true,
-      force: true,
     });
   }
 
