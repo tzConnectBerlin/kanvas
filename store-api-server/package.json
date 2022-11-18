@@ -17,7 +17,8 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "./script/test -w 2"
+    "test": "./script/test -w 2",
+    "doc": "apidoc -i src -o public"
   },
   "dependencies": {
     "@nestjs/cli": "^9.1.0",
@@ -44,6 +45,7 @@
     "@types/uuid": "^8.3.1",
     "@types/validator": "^13.7.1",
     "@wert-io/widget-sc-signer": "^1.0.0",
+    "apidoc": "^0.53.1",
     "aws-sdk": "^2.1036.0",
     "axios-retry": "^3.2.4",
     "bcrypt": "^5.1.0",

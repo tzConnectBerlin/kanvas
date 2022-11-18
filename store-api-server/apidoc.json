@@ -1,0 +1,5 @@
+{
+  "name": "Kanvas store REST API",
+  "title": "This is the API documentation of Kanvas store api",
+  "description": "Endpoints that require a logged in user expect a valid token in the Authorization header. To get a new token, call /auth/login"
+}

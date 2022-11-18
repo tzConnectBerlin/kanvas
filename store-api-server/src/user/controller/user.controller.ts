@@ -50,6 +50,26 @@ export class UserController {
     @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
 
+  /**
+   * @apiGroup Users
+   * @api {get} /users/profile Get a users profile
+   * @apiQuery {String} [currency] The currency used, uses a base currency if not provided
+   * @apiQuery {String} [userAddress] The userAddress of the profile. This parameter is required if user is not logged in
+   * @apiQuery {Object="page: number","pageSize: number","orderDirection: 'asc' | 'desc'","orderBy: string","firstRequestAt: number"} [paginationParams]
+   * @apiPermission logged-in user
+   * @apiSuccessExample Example Success-Response:
+   * {
+   *     "nftCount": 2,
+   *     "user": {
+   *         "createdAt": 1638452668,
+   *         "id": 2,
+   *         "profilePicture": "some url (e.g. S3 hosted)",
+   *         "userAddress": "tz1",
+   *         "userName": "test user"
+   *     }
+   * }
+   * @apiName getProfile
+   */
   @Get('/profile')
   @UseGuards(JwtFailableAuthGuard)
   async getProfile(
@@ -91,6 +111,15 @@ export class UserController {
     return profileRes.val;
   }
 
+  /**
+   * @apiGroup Users
+   * @api {post} /users/profile/edit Edit a users profile
+   * @apiBody {Any[]} profilePicture Attached profile picture
+   * @apiPermission logged-in user
+   * @apiExample {http} Http Request:
+   *  POST /users/profile/edit (form, content-type: multipart/form-data
+   * @apiName editProfile
+   */
   @Post('/profile/edit')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
@@ -127,6 +156,18 @@ export class UserController {
     }
   }
 
+  /**
+   * @apiGroup Users
+   * @api {post} /users/register/email Register an email
+   * @apiBody {Object="walletAddress: string, email: string, marketingConsent: boolean"} registration data used to register the email address
+   * @apiParamExample {json} Request Body Example:
+   *    {
+   *      "walletAddress": "valid wallet address",
+   *      "email": "max@muster.com",
+   *      "marketingConsent": false
+   *    }
+   * @apiName registerEmail
+   */
   @Post('register/email')
   async registerEmail(@Body() registration: EmailRegistration): Promise<any> {
     if (
@@ -140,6 +181,39 @@ export class UserController {
     return await this.userService.registerEmail(registration);
   }
 
+  /**
+   * @apiGroup Users
+   * @api {get} /users/topBuyers Get the top buyers
+   * @apiQuery {String} [currency] Defaults to a base currency if not provided
+   * @apiSuccessExample Example Success-Response:
+   * {
+   *     "topBuyers": [
+   *         {
+   *             "totalPaid": "3019.91",
+   *             "userAddress": "tz1g3coajkc9N77XDy55pVEgBGWspQfYqMiH",
+   *             "userId": 1,
+   *             "userName": "Setter_agitated_17",
+   *             "userPicture": null
+   *         },
+   *         {
+   *             "totalPaid": "1019.84",
+   *             "userAddress": "tz2D1s4VvB8HU8YrYGjKQJ3zXxiJw6QHyZQa",
+   *             "userId": 3,
+   *             "userName": "utan_second-hand_10",
+   *             "userPicture": null
+   *         },
+   *         {
+   *             "totalPaid": "25.00",
+   *             "userAddress": "tz1WWcuiKUN4Ed5zouETqr7MbVzd3vkC4ubr",
+   *             "userId": 16,
+   *             "userName": "Rattlesnake_naive_7",
+   *             "userPicture": null
+   *         },
+   *         ...
+   *     ]
+   * }
+   * @apiName topBuyers
+   */
   @Get('topBuyers')
   async topBuyers(
     @Query('currency') currency: string = BASE_CURRENCY,
@@ -158,6 +232,12 @@ export class UserController {
     );
   }
 
+  /**
+   * @apiGroup Users
+   * @api {get} /users/nftOwnershipsPending Gets a list of nftIds whose ownership status is "pending"
+   * @apiPermission logged-in user
+   * @apiName nftOwnershipStatus
+   */
   @Get('nftOwnershipsPending')
   @UseGuards(JwtAuthGuard)
   @Header('cache-control', 'no-store,must-revalidate')
@@ -179,6 +259,16 @@ export class UserController {
     return res;
   }
 
+  /**
+   * @apiGroup Users
+   * @api {post} /users/cart/add/:nftId Add a nft to cart
+   * @apiParam {Number} nftId The id of the nft
+   * @apiPermission logged-in user
+   * @apiExample {http} Example http request url (make sure to replace $base_url with the store-api-server endpoint):
+   *  $base_url/users/cart/add/10
+   *
+   * @apiName cartAdd
+   */
   @Post('cart/add/:nftId')
   @UseGuards(JwtFailableAuthGuard)
   async cartAdd(
@@ -219,6 +309,16 @@ export class UserController {
     });
   }
 
+  /**
+   * @apiGroup Users
+   * @api {post} /users/cart/remove/:nftId Remove a nft from a cart
+   * @apiParam {Number} nftId The id of the nft
+   * @apiPermission logged-in user
+   * @apiExample {http} Example http request url (make sure to replace $base_url with the store-api-server endpoint):
+   *  $base_url/users/cart/remove/10
+   *
+   * @apiName cartRemove
+   */
   @Post('cart/remove/:nftId')
   @UseGuards(JwtFailableAuthGuard)
   async cartRemove(
@@ -242,6 +342,51 @@ export class UserController {
     throw new HttpException('', HttpStatus.NO_CONTENT);
   }
 
+  /**
+   * @apiGroup Users
+   * @api {get} /users/cart/list List all nfts in a cart
+   * @apiDescription Will use the cookie session as the cart session if no logged-in user is provided
+   * @apiQuery {String} [currency] The currency used, uses a base currency if not provided
+   * @apiPermission logged-in user
+   * @apiSuccessExample Example Success-Response:
+   * {
+   *   nfts: [
+   *      {
+   *        "id": 5,
+   *        "name": "scotland",
+   *        "description": "Thumbnail probably has nothing to do with Scotland. Maybe the guy is scottish. Who knows",
+   *        "isProxy": false,
+   *        "ipfsHash": "ipfs://QmVFPACwpMSMszsh26eBpBL33L5umUvkUCnYzJhqxzUS82",
+   *        "metadataIpfs": "ipfs://QmVFPACwpMSMszsh26eBpBL33L5umUvkUCnYzJhqxzUS82",
+   *        "artifactIpfs": null,
+   *        "displayIpfs": null,
+   *        "thumbnailIpfs": null,
+   *        "artifactUri": "https://kanvas-admin-files.s3.amazonaws.com/NFT_FILE__5_image.png",
+   *        "displayUri": "https://kanvas-admin-files.s3.amazonaws.com/NFT_FILE__5_image.png",
+   *        "thumbnailUri": "https://kanvas-admin-files.s3.eu-central-1.amazonaws.com/NFT_FILE__5_thumbnail.png",
+   *        "price": "0.30",
+   *        "categories": [
+   *            {
+   *                "id": 10,
+   *                "name": "Landscape",
+   *                "description": "Sub photography category"
+   *            }
+   *        ],
+   *        "metadata": null,
+   *        "editionsSize": 10,
+   *        "editionsAvailable": 7,
+   *        "editionsSold": 3,
+   *        "createdAt": 1645709306,
+   *        "launchAt": 1647342000,
+   *        "onsaleFrom": 1647342000,
+   *        "mintOperationHash": null
+   *      },
+   *      ...
+   *   ]
+   * }
+   *
+   * @apiName cartList
+   */
   @Get('cart/list')
   @UseGuards(JwtFailableAuthGuard)
   @Header('cache-control', 'no-store,must-revalidate')
