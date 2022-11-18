@@ -30,7 +30,7 @@ export class AuthenticationController {
   /**
    * @apiGroup Auth
    * @apiPermission logged-in user
-   * @api {get} /auth/logged_user Get the logger user
+   * @api {get} /auth/logged_user Get information about the logged in user
    * @apiSuccessExample Example Success-Response:
    *    {
    *       "id": 60,
@@ -79,14 +79,14 @@ export class AuthenticationController {
   /**
    * @apiGroup Auth
    * @api {post} /auth/login Login a user
-   * @apiDescription The "token" in the response is a JWT, it's the token that can be passed to any endpoints that require authorization by setting the "Authorization" header to "Bearer $token".
+   * @apiDescription The "token" in the response is a JWT, it's the token that can be passed to any endpoints that require authorization by setting the "Authorization" header to "Bearer $token". signedPayload is only necessary when the API has been setup to require proving account ownership, otherwise this field can be omitted.
    * @apiBody {UserEntity} user The user who wants to log in
-   * @apiBody {String} user[userAddress] The tezos address used to login
-   * @apiBody {String} user[signedPayload] The user password used to login
+   * @apiBody {String} user[userAddress] The Tezos address used to login
+   * @apiBody {String} user[signedPayload] A signed message (message was defined on /auth/register when the user registered) with the users' Tezos wallet corresponding to the provided userAddress, proving the ownership of the Tezos address. Only relevant if the API is running with environment variable SIGNED_LOGIN_ENABLED set to 'yes'.
    * @apiParamExample {json} Request Body Example:
    *    {
    *      "userAddress": "$user_address",
-   *      "signedPayload": "$user_password",
+   *      "signedPayload": "$signed_message",
    *    }
    *
    * @apiSuccessExample Example Success-Response:
@@ -124,12 +124,12 @@ export class AuthenticationController {
    * @api {post} /auth/register Register a user
    * @apiBody {UserEntity} user The user to be registered.
    * @apiBody {String} user[userAddress] The tezos address from the user
-   * @apiBody {String} user[signedPayload] password
+   * @apiBody {String} user[signedPayload] A signed message, signed with the user's Tezos wallet. The message can be anything so long as on `/auth/login` the same message is signed. Note: only relevant if the API is running with environment variable SIGNED_LOGIN_ENABLED set to 'yes'.
    * @apiBody {String} user[profilePicture] The profile picture for the user
    * @apiParamExample {json} Request Body Example:
    *    {
    *      "userAddress": "anyaddress",
-   *      "signedPayload": "123456",
+   *      "signedPayload": "...",
    *      "profilePicture": "anypicture"
    *    }
    *
@@ -163,7 +163,7 @@ export class AuthenticationController {
 
   /**
    * @apiGroup Auth
-   * @api {get} /auth/token-gate/tokens Get owned tokens by user
+   * @api {get} /auth/token-gate/tokens Get owned token gate tokens by user. Note: only relevant if the API is running with a token gate defined.
    * @apiPermission logged-in user
    * @apiSuccessExample Example Success-Response:
    *    ["common"]
@@ -182,7 +182,7 @@ export class AuthenticationController {
 
   /**
    * @apiGroup Auth
-   * @api {get} /auth/token-gate/endpoint Get client allowance for token-gate endpoint
+   * @api {get} /auth/token-gate/endpoint Get client allowance related to a setup token gate for an endpoint.
    * @apiPermission logged-in user
    * @apiQuery {String} endpoint The endpoint in question
    * @apiSuccessExample Example Success-Response:

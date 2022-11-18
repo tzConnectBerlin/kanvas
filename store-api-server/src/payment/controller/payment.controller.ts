@@ -32,8 +32,8 @@ export class PaymentController {
 
   /**
    * @apiGroup Payment
-   * @api {post} /payment/stripe-webhook Stripe webhook
-   * @apiHeader {String} stripe-signature Stripe signature
+   * @api {post} /payment/stripe-webhook Stripe webhook, only to be called by Stripe
+   * @apiHeader {String} stripe-signature Stripe signature, proving it was Stripe who called this endpoint
    * @apiHeaderExample {json} Header-Example:
    *     {
    *      "stripe-signature": "a valid stripe signature"
@@ -84,7 +84,7 @@ export class PaymentController {
    * @apiPermission logged-in user
    * @apiBody {String="tezpay","stripe","wert","simplex","test_provider"} [paymentProvider="stripe"] The payment provider used for the intent
    * @apiBody {String} [currency] The currency used for the payment intent, uses a base currency if not provided
-   * @apiBody {Boolean} [recreateNftOrder=false] Will cancel nft order if set to true
+   * @apiBody {Boolean} [recreateNftOrder=false] Will cancel an already pending NFT order if the user has one if set to true
    * @apiParamExample {json} Request Body Example:
    *    {
    *      currency: 'XTZ',
@@ -160,12 +160,12 @@ export class PaymentController {
   /**
    * @apiGroup Payment
    * @api {post} /payment/promise-paid Inform promise paid
-   * @apiDescription Informs the API that payment is made
+   * @apiDescription Informs the API that payment is made, allowing the API to communicate pro-actively to the user that it understands the payment should be finalized soon. Especially useful for payments made in tez, where it may take 2 minutes before the API acknowledges the payment successful
    * @apiPermission logged-in user
    * @apiBody {String} payment_id The payment id
    * @apiParamExample {json} Request Body Example:
    *    {
-   *      "payment_id": "some valid payment id"
+   *      "payment_id": "some valid payment id (the id field in the response of /create-payment-intent"
    *    }
    * @apiName promisePaymentPaid
    */
@@ -193,7 +193,7 @@ export class PaymentController {
   /**
    * @apiGroup Payment
    * @api {get} /payment/order-info/:paymentId Get order info via paymentId
-   * @apiParam {Number} paymentId The id of the nft
+   * @apiParam {Number} paymentId The id of one of the opened payment intents
    * @apiPermission logged-in user
    * @apiExample {http} Example http request url (make sure to replace $base_url with the store-api-server endpoint):
    *  $base_url/payment/order-info/12345678910
