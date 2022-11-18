@@ -1,18 +1,28 @@
-# note: expected build context is the git root directory
-FROM node:18-alpine
-# ENV DEBIAN_FRONTEND=noninteractive
-ENV NODE_OPTIONS --openssl-legacy-provider
-# ENV TZ=UTC
+FROM node:18-alpine as builder
 
-RUN apk add bash
+WORKDIR /app
 
-ADD admin-front /build
-
-WORKDIR /build
-
-RUN yarn global add serve
+COPY admin-front/ .
 
 RUN yarn install
+
+ARG REACT_APP_STORE_BASE_URL
+ARG REACT_APP_API_SERVER_BASE_URL
+
+ENV REACT_APP_STORE_BASE_URL=$REACT_APP_STORE_BASE_URL
+ENV REACT_APP_API_SERVER_BASE_URL=$REACT_APP_API_SERVER_BASE_URL
+
+# Build the project and copy the files
 RUN yarn build
 
-ENTRYPOINT yarn start:prod
+FROM nginx:alpine
+
+## Remove default nginx index page
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy from the stahg 1
+COPY --from=builder /app/build /usr/share/nginx/html
+
+EXPOSE 80
+
+ENTRYPOINT ["nginx", "-g", "daemon off;"]

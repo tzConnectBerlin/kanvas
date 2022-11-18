@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+INIT_QUEPASA=false $SCRIPT_DIR/migrate
+
+if [[ '`psql -c \"select count(1) from kanvas_user\" -tA`' != '0' ]]; then 
+    psql -c 'ALTER USER replication_user REPLICATION'
+    psql < script/populate-stagingdb.sql
+fi
+
+node dist/src/main.js

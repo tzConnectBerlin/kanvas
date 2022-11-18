@@ -1,7 +1,6 @@
 # Kanvas is a distributed system with multiple databases, servers, and web browser clients
 # For development, we can spin everything up via docker-compose
 
-
 services:
   store-db:
     image: postgres:13
@@ -27,6 +26,7 @@ services:
       - 3005:3000
     links:
       - store-db
+      - admin-db
     environment:
       PGHOST: store-db
       PGPORT: 5432
@@ -34,6 +34,7 @@ services:
       PGPASSWORD: store_pgpass
       PGDATABASE: dev_database
       KANVAS_API_PORT: 3000
+      LOCAL_CORS: true
     env_file:
       - store-api-server/.env
     entrypoint: |-
@@ -43,7 +44,7 @@ services:
         if [ "${STORE_API_ENABLED:-yes}" == "no" ]; then
           exit 0
         fi
-        INIT_QUEPASA=false INIT_PEPPERMINT=false ./script/migrate up
+        INIT_QUEPASA=false INIT_PEPPERMINT=false ./script/migrate
 
         if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
           if [ "${DEPLOYMENT:-no}" == "yes" ]; then
@@ -53,7 +54,7 @@ services:
           fi
         fi
 
-        yarn start:prod
+        node dist/src/main.js
       '
     restart: on-failure
 
@@ -65,6 +66,8 @@ services:
       - 3000:3000
     environment:
       REACT_APP_PORT: 3000
+    env_file:
+      - store-front/.env
     entrypoint: |-
       bash -c '
         set -e
@@ -170,17 +173,19 @@ services:
       STORE_PGDATABASE: dev_database
 
       ADMIN_API_PORT: 3001
-      STORE_API: http://store-api:3000
+      STORE_API: http://localhost:3005
+      LOCAL_CORS: true
     restart: on-failure
 
   admin-front:
     build:
       context: .
       dockerfile: ./admin-front/Dockerfile
+      args:
+        REACT_APP_API_SERVER_BASE_URL: http://localhost:3006
+        REACT_APP_STORE_BASE_URL: http://localhost:3000
     ports:
-      - 5050:4000
-    environment:
-      REACT_APP_PORT: 4000
+      - 5050:80
     entrypoint: |-
       bash -c '
         set -e
@@ -189,7 +194,7 @@ services:
           exit 0
         fi
 
-        yarn start:prod
+        nginx -g daemon off
       '
     restart: on-failure
 
