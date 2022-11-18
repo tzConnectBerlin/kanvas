@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+INIT_QUEPASA=false $SCRIPT_DIR/migrate
+
+if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
+    yarn seed
+    $SCRIPT_DIR/setup-replication-sub
+fi
+
+node dist/src/main.js
