@@ -233,7 +233,11 @@ WHERE id = $1
       dbTx,
     );
     if (!cartSessionRes.ok || typeof cartSessionRes.val !== 'string') {
-      throw 'cannot create an order, no active cart session';
+      Logger.warn(`cannot create order for userId=${userId}, no cart exists`);
+      throw new HttpException(
+        'cannot create order, cart empty',
+        HttpStatus.BAD_REQUEST,
+      );
     }
     const cartSession: string = cartSessionRes.val;
 
@@ -494,7 +498,7 @@ WHERE nft_order_id = $1
       vatRate,
 
       provider,
-      providerDetails: await this.#createPaymentDetails(
+      providerPaymentDetails: await this.#createPaymentDetails(
         id,
         usr,
         provider,
@@ -788,6 +792,7 @@ WHERE nft_order_id = $1
     currency: string,
     currencyUnitAmount: number,
   ): Promise<StripeDetails> {
+    console.log(this.stripe);
     if (typeof this.stripe === 'undefined') {
       throw new HttpException(
         'stripe payment provider not supported by this API instance',
@@ -806,6 +811,14 @@ WHERE nft_order_id = $1
       currency: currency,
       payment_method_types: STRIPE_PAYMENT_METHODS,
     });
+
+    if (typeof paymentIntent.client_secret === 'undefined') {
+      const errShort = 'failed to create payment intent with stripe';
+      Logger.error(
+        `${errShort}, unexpected response from stripe.paymentIntents.create: ${paymentIntent}`,
+      );
+      throw new HttpException(errShort, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     return {
       clientSecret: paymentIntent.client_secret,
