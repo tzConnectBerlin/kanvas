@@ -79,8 +79,9 @@ export class AuthenticationController {
   /**
    * @apiGroup Auth
    * @api {post} /auth/login Login a user
+   * @apiDescription The "token" in the response is a JWT, it's the token that can be passed to any endpoints that require authorization by setting the "Authorization" header to "Bearer $token".
    * @apiBody {UserEntity} user The user who wants to log in
-   * @apiBody {String} user[userAddress] The user address used to login
+   * @apiBody {String} user[userAddress] The tezos address used to login
    * @apiBody {String} user[signedPayload] The user password used to login
    * @apiParamExample {json} Request Body Example:
    *    {
@@ -122,12 +123,14 @@ export class AuthenticationController {
    * @apiGroup Auth
    * @api {post} /auth/register Register a user
    * @apiBody {UserEntity} user The user to be registered.
-   * @apiBody {String} user[userAddress] The user address from the user.
-   * @apiBody {String} user[profilePicture] The profile picture for the user.
+   * @apiBody {String} user[userAddress] The tezos address from the user
+   * @apiBody {String} user[signedPayload] password
+   * @apiBody {String} user[profilePicture] The profile picture for the user
    * @apiParamExample {json} Request Body Example:
    *    {
    *      "userAddress": "anyaddress",
-   *      "profilePicture": "anypicture",
+   *      "signedPayload": "123456",
+   *      "profilePicture": "anypicture"
    *    }
    *
    * @apiSuccessExample Example Success-Response:
