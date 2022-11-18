@@ -28,6 +28,7 @@ import { runOnchainTests } from './onchain.e2e';
 import { runTokenGateTests } from './token_gate.e2e';
 import { runProxyNftTests } from './proxy_nft.e2e';
 import { runIsolatedTests } from './isolated.e2e';
+import { runPaymentTests } from './payment.e2e';
 import { TokenGate } from 'token-gate';
 import { setupKanvasServer, kanvasNestOptions } from '../src/server.js';
 import { MintService } from '../src/nft/service/mint.service';
@@ -100,6 +101,7 @@ describe('AppController (e2e)', () => {
   });
 
   runIsolatedTests(() => [app, paymentService]);
+  runPaymentTests(() => [app, paymentService]);
   runProxyNftTests(() => [app]);
   runOnchainTests(() => [app, paymentService, mintService]);
   runTokenGateTests(() => [app, tokenGate]);
@@ -3387,9 +3389,11 @@ describe('AppController (e2e)', () => {
     );
     const intentId = paymentIntentRes.body.id;
     delete paymentIntentRes.body.id;
-    delete paymentIntentRes.body.paymentDetails.paypointMessage;
-    expect(paymentIntentRes.body.paymentDetails.mutezAmount).toBeGreaterThan(0);
-    delete paymentIntentRes.body.paymentDetails.mutezAmount;
+    delete paymentIntentRes.body.providerPaymentDetails.paypointMessage;
+    expect(
+      paymentIntentRes.body.providerPaymentDetails.mutezAmount,
+    ).toBeGreaterThan(0);
+    delete paymentIntentRes.body.providerPaymentDetails.mutezAmount;
     expect(Number(paymentIntentRes.body.amount)).toBeGreaterThan(0);
     delete paymentIntentRes.body.amount;
     expect(typeof paymentIntentRes.body.expiresAt).toBe('number');
@@ -3415,7 +3419,7 @@ describe('AppController (e2e)', () => {
       }
     }
     expect(paymentIntentRes.body).toMatchObject({
-      paymentDetails: {
+      providerPaymentDetails: {
         receiverAddress: TEZPAY_PAYPOINT_ADDRESS,
       },
       currency: 'XTZ',

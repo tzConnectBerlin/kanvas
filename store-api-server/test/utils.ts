@@ -181,6 +181,18 @@ export async function cartAdd(
   expect(resp.statusCode).toEqual(expStatus);
 }
 
+export async function cartRemove(
+  app: any,
+  nftId: number,
+  wallet: Wallet,
+  expStatus = 204,
+) {
+  const resp = await request(app.getHttpServer())
+    .post(`/users/cart/remove/${nftId}`)
+    .set('authorization', wallet.login.bearer);
+  expect(resp.statusCode).toEqual(expStatus);
+}
+
 export async function cartList(app: any, wallet: Wallet) {
   const resp = await request(app.getHttpServer())
     .get(`/users/cart/list`)
