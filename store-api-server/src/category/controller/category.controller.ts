@@ -13,7 +13,7 @@ export class CategoryController {
 
   /**
    * @apiGroup Categories
-   * @api {get} /categories Get all categories
+   * @api {get} /categories Get all categories.
    * @apiSuccessExample Example Success-Response:
    *  [
    *    {
@@ -39,7 +39,7 @@ export class CategoryController {
 
   /**
    * @apiGroup Categories
-   * @api {get} /categories/extendedInfo Get extended categories
+   * @api {get} /categories/extendedInfo Get all categories with extended info.
    * @apiSuccessExample Example Success-Response:
    *  {
    *    "categories": [
