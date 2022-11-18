@@ -26,7 +26,6 @@ import {
 } from '../entity/nft.entity.js';
 import {
   FilterParams,
-  PaginationParams,
   SearchParam,
   validatePaginationParams,
 } from '../params.js';
@@ -48,6 +47,43 @@ export class NftController {
     @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
 
+  /**
+   * @apiGroup nfts
+   * @api {post} /nfts/create Create a nft
+   * @apiBody {CreateNft} nft The nft data needed to create a nft
+   * @apiBody {Number} nft[id] The id used to create the nft
+   * @apiBody {Number} [nft[proxyNftId]] The proxy nft id
+   * @apiBody {String} nft[name] The name of the nft
+   * @apiBody {String} nft[description] The description of the nft
+   * @apiBody {String} nft[artifactUri] The artifact uri of the nft
+   * @apiBody {String} [nft[displayUri]] The display uri of the nft
+   * @apiBody {String} [nft[thumbnailUri]] The thumbnail uri of the nft
+   * @apiBody {String} [nft[displayUri]] The display uri of the nft
+   * @apiBody {Number} nft[price] The price of the nft
+   * @apiBody {Number[]} nft[categories] The categories of the nft
+   * @apiBody {Number} nft[editionsSize] The edition size of the nft
+   * @apiBody {Number} [nft[onsaleFrom]] The date from when the nft will be on sale
+   * @apiBody {Number} [nft[onsaleUntil]] The date till when the nft will be on sale
+   * @apiBody {Object} [nft[formats]] The formats of the nft
+   * @apiBody {Any} nft[metadata] The metadata of the nft
+   * @apiBody {String} nft[signature] The signature of the nft
+   *
+   * @apiParamExample {json} Request Body Example:
+   *    {
+   *      "id": 10,
+   *      "name": "test",
+   *      "description": "test description',
+   *      "artifactUri": "some_s3_uri",
+   *      "price": '200,
+   *      "isProxy": false,
+   *      "categories": [10],
+   *      "editionsSize": 4,
+   *      "signature": "a valid signature",
+   *    }
+   *
+   *
+   * @apiName createNft
+   */
   @Post('/create')
   async createNft(@Body() nft: CreateNft) {
     await this.#verifySignature(
@@ -59,6 +95,37 @@ export class NftController {
     return await this.nftService.createNft(nft);
   }
 
+  /**
+   * @apiGroup nfts
+   * @api {post} /nfts/create-proxied Create a proxied nft
+   * @apiBody {CreateProxiedNft} nft The nft data needed to create the proxied nft
+   * @apiBody {Number} nft[id] The id used to create the nft
+   * @apiBody {Number} nft[proxyNftId] The proxy nft id
+   * @apiBody {String} [nft[name]] The name of the nft
+   * @apiBody {String} [nft[description]] The description of the nft
+   * @apiBody {String} nft[artifactUri] The artifact uri of the nft
+   * @apiBody {String} [nft[displayUri]] The display uri of the nft
+   * @apiBody {String} [nft[thumbnailUri]] The thumbnail uri of the nft
+   * @apiBody {String} [nft[displayUri]] The display uri of the nft
+   * @apiBody {Number[]} nft[categories] The categories of the nft
+   * @apiBody {Any} [nft[metadata]] The metadata of the nft
+   * @apiBody {String} nft[signature] The signature of the nft
+   *
+   * @apiParamExample {json} Request Body Example:
+   *    {
+   *      "id": 10,
+   *      "proxyNftId": 20,
+   *      "name": "test",
+   *      "description": "test description",
+   *      "artifactUri": "some_s3_uri",
+   *      "price": 200,
+   *      "isProxy": false,
+   *      "categories": [10],
+   *      "editionsSize": 4,
+   *      "signature": "a valid signature"
+   *    }
+   * @apiName createProxiedNft
+   */
   @Post('/create-proxied')
   async createProxiedNft(@Body() nft: CreateProxiedNft) {
     await this.#verifySignature(
@@ -70,13 +137,26 @@ export class NftController {
     return await this.nftService.createProxiedNft(nft);
   }
 
+  /**
+   * @apiGroup nfts
+   * @api {post} /nfts/delist/:id Delist a nft
+   * @apiParam {Number} id The id of the nft
+   * @apiBody {String} signature The signature of the nft
+   * @apiParamExample {json} Request Body Example:
+   *    {
+   *      "signature": "a valid signature"
+   *    }
+   * @apiExample {http} Example http request url (make sure to replace $base_url with the store-api-server endpoint):
+   *  $base_url/nfts/delist/5
+   * @apiName delistNft
+   */
   @Post('/delist/:id')
   async delistNft(
     @Param('id') nftId: number,
     @Body('signature') signature: string,
   ) {
     nftId = Number(nftId);
-    if (nftId === NaN) {
+    if (isNaN(nftId)) {
       throw new HttpException(`invalid nft id`, HttpStatus.BAD_REQUEST);
     }
     await this.#verifySignature(
@@ -88,13 +168,26 @@ export class NftController {
     await this.nftService.delistNft(nftId);
   }
 
+  /**
+   * @apiGroup nfts
+   * @api {post} /nfts/relist/:id Relist a nft
+   * @apiParam {Number} id The id of the nft
+   * @apiBody {String} signature The signature of the nft
+   * @apiParamExample {json} Request Body Example:
+   *    {
+   *      "signature": "a valid signature"
+   *    }
+   * @apiExample {http} Example http request url (make sure to replace $base_url with the store-api-server endpoint):
+   *  $base_url/nfts/relist/5
+   * @apiName relistNft
+   */
   @Post('/relist/:id')
   async relistNft(
     @Param('id') nftId: number,
     @Body('signature') signature: string,
   ) {
     nftId = Number(nftId);
-    if (nftId === NaN) {
+    if (isNaN(nftId)) {
       throw new HttpException(`invalid nft id`, HttpStatus.BAD_REQUEST);
     }
     await this.#verifySignature(SIGNATURE_PREFIX_RELIST_NFT, nftId, signature);
@@ -102,6 +195,56 @@ export class NftController {
     await this.nftService.relistNft(nftId);
   }
 
+  /**
+   * @apiGroup nfts
+   * @api {get} /nfts Get all nfts (optionally filtered by filterParam)
+   * @apiQuery {String} [currency] Defaults to a base currency if not provided
+   * @apiQuery {Object="categories: number[]","userAddress: string","priceAtLeast: number","priceAtMost: number","availability: string[]","proxyFolding: 'fold' | 'unfold' | 'both'"} [filters]
+   * @apiSuccessExample Example Success-Response:
+   *  {
+   *     "currentPage": 1,
+   *     "numberOfPages": 7,
+   *     "totalNftCount": 67,
+   *     "nfts": [
+   *         {
+   *             "id": 5,
+   *             "name": "scotland",
+   *             "description": "Thumbnail probably has nothing to do with Scotland. Maybe the guy is scottish. Who knows",
+   *             "isProxy": false,
+   *             "ipfsHash": "ipfs://QmVFPACwpMSMszsh26eBpBL33L5umUvkUCnYzJhqxzUS82",
+   *             "metadataIpfs": "ipfs://QmVFPACwpMSMszsh26eBpBL33L5umUvkUCnYzJhqxzUS82",
+   *             "artifactIpfs": null,
+   *             "displayIpfs": null,
+   *             "thumbnailIpfs": null,
+   *             "artifactUri": "https://kanvas-admin-files.s3.amazonaws.com/NFT_FILE__5_image.png",
+   *             "displayUri": "https://kanvas-admin-files.s3.amazonaws.com/NFT_FILE__5_image.png",
+   *             "thumbnailUri": "https://kanvas-admin-files.s3.eu-central-1.amazonaws.com/NFT_FILE__5_thumbnail.png",
+   *             "price": "0.30",
+   *             "categories": [
+   *                 {
+   *                     "id": 10,
+   *                     "name": "Landscape",
+   *                     "description": "Sub photography category"
+   *                 }
+   *             ],
+   *             "metadata": null,
+   *             "editionsSize": 10,
+   *             "editionsAvailable": 7,
+   *             "editionsSold": 3,
+   *             "createdAt": 1645709306,
+   *             "launchAt": 1647342000,
+   *             "onsaleFrom": 1647342000,
+   *             "mintOperationHash": null
+   *         },
+   *         ...
+   *      ],
+   *      "lowerPriceBound": "0.04",
+   *      "upperPriceBound": "9999.99"
+   *  }
+   * @apiExample {http} Example http request url (make sure to replace $base_url with the store-api-server endpoint):
+   *  $base_url/nfts?currency=EUR
+   * @apiName getFiltered
+   */
   @Get()
   async getFiltered(
     @Res() resp: Response,
@@ -121,6 +264,26 @@ export class NftController {
     );
   }
 
+  /**
+   * @apiGroup nfts
+   * @api {get} /nfts/search Get all nfts (filtered by searchParam)
+   * @apiQuery {String} [currency] Defaults to a base currency if not provided
+   * @apiQuery {Object="searchString: string"} searchParams string to filter all nfts
+   * @apiSuccessExample Example Success-Response:
+   * {
+   *   "nfts": [...],
+   *     "categories": [
+   *         {
+   *             "id": 13,
+   *             "name": "Honk Kong",
+   *             "description": "Sub cities category"
+   *         }
+   *     ]
+   * }
+   * @apiExample {http} Example http request url (make sure to replace $base_url with the store-api-server endpoint):
+   *  $base_url/nfts/search?currency=EUR&searchString=honk%20kong%20festival
+   * @apiName search
+   */
   @Get('/search')
   async search(
     @Res() resp: Response,
@@ -149,6 +312,47 @@ export class NftController {
     );
   }
 
+  /**
+   * @apiGroup nfts
+   * @api {get} /nfts/:id Get nft by id
+   * @apiParam {Number} id The id of the nft
+   * @apiQuery {String} [userAddress] userAddress of the user that owns the nft on chain
+   * @apiQuery {String} [currency] Defaults to a base currency if not provided
+   * @apiSuccessExample Example Success-Response:
+   * {
+   *     "id": 5,
+   *     "name": "scotland",
+   *     "description": "Thumbnail probably has nothing to do with Scotland. Maybe the guy is scottish. Who knows",
+   *     "isProxy": false,
+   *     "ipfsHash": "ipfs://QmVFPACwpMSMszsh26eBpBL33L5umUvkUCnYzJhqxzUS82",
+   *     "metadataIpfs": "ipfs://QmVFPACwpMSMszsh26eBpBL33L5umUvkUCnYzJhqxzUS82",
+   *     "artifactIpfs": null,
+   *     "displayIpfs": null,
+   *     "thumbnailIpfs": null,
+   *     "artifactUri": "https://kanvas-admin-files.s3.amazonaws.com/NFT_FILE__5_image.png",
+   *     "displayUri": "https://kanvas-admin-files.s3.amazonaws.com/NFT_FILE__5_image.png",
+   *     "thumbnailUri": "https://kanvas-admin-files.s3.eu-central-1.amazonaws.com/NFT_FILE__5_thumbnail.png",
+   *     "price": "0.30",
+   *     "categories": [
+   *         {
+   *             "id": 10,
+   *             "name": "Landscape",
+   *             "description": "Sub photography category"
+   *         }
+   *     ],
+   *     "metadata": null,
+   *     "editionsSize": 10,
+   *     "editionsAvailable": 7,
+   *     "editionsSold": 3,
+   *     "createdAt": 1645709306,
+   *     "launchAt": 1647342000,
+   *     "onsaleFrom": 1647342000,
+   *     "mintOperationHash": null
+   * }
+   * @apiExample {http} Example http request url (make sure to replace $base_url with the store-api-server endpoint):
+   *  $base_url/nfts/5?currency=EUR
+   * @apiName byId
+   */
   @Get('/:id')
   @Header('cache-control', 'no-store,must-revalidate')
   async byId(
