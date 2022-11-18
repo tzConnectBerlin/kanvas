@@ -17,7 +17,9 @@ export const getBaseCurrencyFromAPI = async ({
 }: GetBaseCurrencyFromAPI): Promise<SupportedCurrency> => {
   try {
     const response = await axios.get(
-      process.env.REACT_APP_STORE_BASE_URL + '/api/constants',
+      (process.env.REACT_APP_STORE_API_URL??
+        process.env.REACT_APP_STORE_BASE_URL + '/api' ) +
+        '/constants',
     );
 
     const { baseCurrency } = response.data;
