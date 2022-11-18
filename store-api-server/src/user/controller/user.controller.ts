@@ -53,8 +53,8 @@ export class UserController {
   /**
    * @apiGroup Users
    * @api {get} /users/profile Get a users profile
-   * @apiQuery {String} [currency] The currency used, uses a base currency if not provided
-   * @apiQuery {String} [userAddress] The userAddress of the profile. This parameter is required if user is not logged in
+   * @apiQuery {String} [currency] The currency to show NFT prices in, uses the base currency if not provided
+   * @apiQuery {String} [userAddress] The userAddress of the profile. Defaults to the logged in user's userAddress if not provided
    * @apiQuery {Object="page: number","pageSize: number","orderDirection: 'asc' | 'desc'","orderBy: string","firstRequestAt: number"} [paginationParams]
    * @apiPermission logged-in user
    * @apiSuccessExample Example Success-Response:
@@ -113,7 +113,7 @@ export class UserController {
 
   /**
    * @apiGroup Users
-   * @api {post} /users/profile/edit Edit a users profile
+   * @api {post} /users/profile/edit Edit a users profile, only allowed if the API is running with environment variable PROFILE_PICTURES_ENABLED set to 'yes'.
    * @apiBody {Any[]} profilePicture Attached profile picture
    * @apiPermission logged-in user
    * @apiExample {http} Http Request:
@@ -158,7 +158,7 @@ export class UserController {
 
   /**
    * @apiGroup Users
-   * @api {post} /users/register/email Register an email
+   * @api {post} /users/register/email Register an email for marketing purposes.
    * @apiBody {Object="walletAddress: string, email: string, marketingConsent: boolean"} registration data used to register the email address
    * @apiParamExample {json} Request Body Example:
    *    {
@@ -184,7 +184,7 @@ export class UserController {
   /**
    * @apiGroup Users
    * @api {get} /users/topBuyers Get the top buyers
-   * @apiQuery {String} [currency] Defaults to a base currency if not provided
+   * @apiQuery {String} [currency] Defaults to the base currency if not provided
    * @apiSuccessExample Example Success-Response:
    * {
    *     "topBuyers": [
@@ -265,11 +265,14 @@ export class UserController {
 
   /**
    * @apiGroup Users
-   * @api {post} /users/cart/add/:nftId Add a nft to cart
+   * @api {post} /users/cart/add/:nftId Add an NFT to cart
    * @apiDescription Note, this may fail if
-   * - This NFT is not for sale (e.g. it's already sold out, or it's not yet released)
+   * - This NFT is not for sale (e.g. it's already sold out, or it's not yet released, or its no longer on sale)
    * - All remaining editions of this NFT are already in other active carts
    * - This NFT is already in the active cart (currently we only allow 1 edition per NFT per active cart)
+   * - This NFT is a proxied NFT, it can only be claimed on purchase of the related Proxy NFT
+   * - The user's cart is full (there is an environment variable defining the maximum allowed cart size)
+   * - The NFT id does not exist
    * @apiParam {Number} nftId The id of the NFT to add to the cart
    * @apiPermission logged-in user
    * @apiExample {http} Example http request url (make sure to replace $base_url with the store-api-server endpoint):
@@ -319,7 +322,7 @@ export class UserController {
 
   /**
    * @apiGroup Users
-   * @api {post} /users/cart/remove/:nftId Remove a nft from a cart
+   * @api {post} /users/cart/remove/:nftId Remove an nft from the user's cart
    * @apiParam {Number} nftId The id of the nft
    * @apiPermission logged-in user
    * @apiExample {http} Example http request url (make sure to replace $base_url with the store-api-server endpoint):
@@ -354,7 +357,7 @@ export class UserController {
    * @apiGroup Users
    * @api {get} /users/cart/list List all nfts in a cart
    * @apiDescription Will use the cookie session as the cart session if no logged-in user is provided
-   * @apiQuery {String} [currency] The currency used, uses a base currency if not provided
+   * @apiQuery {String} [currency] The currency used, uses the base currency if not provided
    * @apiPermission logged-in user
    * @apiSuccessExample Example Success-Response:
    * {

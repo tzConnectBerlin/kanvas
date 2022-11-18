@@ -49,24 +49,23 @@ export class NftController {
 
   /**
    * @apiGroup nfts
-   * @api {post} /nfts/create Create a nft
+   * @api {post} /nfts/create Create a new nft. In a normal Kanvas deployment this is only called from the Admin API.
    * @apiBody {CreateNft} nft The NFT data needed to create a nft
-   * @apiBody {Number} nft[id] The id used to create the nft
-   * @apiBody {Number} [nft[proxyNftId]] The proxy NFT id
+   * @apiBody {Number} nft[id] The identifier to assign to this NFT
    * @apiBody {String} nft[name] The name of the nft
    * @apiBody {String} nft[description] The description of the nft
    * @apiBody {String} nft[artifactUri] The artifact uri of the nft
    * @apiBody {String} [nft[displayUri]] The display uri of the nft
    * @apiBody {String} [nft[thumbnailUri]] The thumbnail uri of the nft
    * @apiBody {String} [nft[displayUri]] The display uri of the nft
-   * @apiBody {Number} nft[price] The price of the nft
-   * @apiBody {Number[]} nft[categories] The categories of the nft
+   * @apiBody {Number} nft[price] The price of the nft, in the API's base currency's base unit (eg if the base currency is set to EUR, price is defined in eurocents)
+   * @apiBody {Number[]} nft[categories] The categories of the nft, in number format referencing the category identifiers
    * @apiBody {Number} nft[editionsSize] The edition size of the nft
-   * @apiBody {Number} [nft[onsaleFrom]] The date from when the NFT will be on sale
-   * @apiBody {Number} [nft[onsaleUntil]] The date till when the NFT will be on sale
-   * @apiBody {Object} [nft[formats]] The formats of the nft
-   * @apiBody {Any} nft[metadata] The metadata of the nft
-   * @apiBody {String} nft[signature] The signature of the nft
+   * @apiBody {Number} [nft[onsaleFrom]] The date from when the NFT will be on sale, if left undefined it will go on sale immediately
+   * @apiBody {Number} [nft[onsaleUntil]] The date till when the NFT will be on sale. If undefined it will be on sale until it sells out
+   * @apiBody {Object} [nft[formats]] Specification of artifact,display,thumbnail content. Eg, mimeType can be specified here, or width and height, etc.
+   * @apiBody {Any} nft[metadata] Any custom metadata of the nft, useful for deployment specific aspects or to enable special features for one off NFTs
+   * @apiBody {String} nft[signature] The signed nft id, proving the caller has authorization to push new NFTs into the store. In a normal Kanvas deployment only the Admin API is able to provide correct signatures
    *
    * @apiParamExample {json} Request Body Example:
    *    {
@@ -97,19 +96,19 @@ export class NftController {
 
   /**
    * @apiGroup nfts
-   * @api {post} /nfts/create-proxied Create a proxied nft
+   * @api {post} /nfts/create-proxied Create a proxied nft that can only be claimed via purchase of a Proxy nft.
    * @apiBody {CreateProxiedNft} nft The NFT data needed to create the proxied nft
    * @apiBody {Number} nft[id] The id used to create the nft
-   * @apiBody {Number} nft[proxyNftId] The proxy NFT id
+   * @apiBody {Number} nft[proxyNftId] The NFT is only to be delivered on purchase of the proxy NFT.
    * @apiBody {String} [nft[name]] The name of the nft
    * @apiBody {String} [nft[description]] The description of the nft
    * @apiBody {String} nft[artifactUri] The artifact uri of the nft
    * @apiBody {String} [nft[displayUri]] The display uri of the nft
    * @apiBody {String} [nft[thumbnailUri]] The thumbnail uri of the nft
    * @apiBody {String} [nft[displayUri]] The display uri of the nft
-   * @apiBody {Number[]} nft[categories] The categories of the nft
-   * @apiBody {Any} [nft[metadata]] The metadata of the nft
-   * @apiBody {String} nft[signature] The signature of the nft
+   * @apiBody {Number[]} nft[categories] The categories of the nft (see createNft docs for more info)
+   * @apiBody {Any} [nft[metadata]] The metadata of the nft (see createNft docs for more info)
+   * @apiBody {String} nft[signature] The signature of the nft (see createNft docs for more info)
    *
    * @apiParamExample {json} Request Body Example:
    *    {
@@ -139,9 +138,9 @@ export class NftController {
 
   /**
    * @apiGroup nfts
-   * @api {post} /nfts/delist/:id Delist a nft
+   * @api {post} /nfts/delist/:id Delist an nft. This will exclude this NFT from the API's responses and allowed parameters, for example it will not be present in the store, and if someone has already purchased this NFT the they will no longer see it in their profile
    * @apiParam {Number} id The id of the nft
-   * @apiBody {String} signature The signature of the nft
+   * @apiBody {String} signature The signature of the nft (see createNft for more info)
    * @apiParamExample {json} Request Body Example:
    *    {
    *      "signature": "a valid signature"
@@ -170,9 +169,9 @@ export class NftController {
 
   /**
    * @apiGroup nfts
-   * @api {post} /nfts/relist/:id Relist a nft
+   * @api {post} /nfts/relist/:id Relist an nft, this undos a previous nft delisting
    * @apiParam {Number} id The id of the nft
-   * @apiBody {String} signature The signature of the nft
+   * @apiBody {String} signature The signature of the nft (see createNft for more info)
    * @apiParamExample {json} Request Body Example:
    *    {
    *      "signature": "a valid signature"
@@ -209,13 +208,14 @@ export class NftController {
    * We do this to allow remaining uncommitted to the existence of an NFT for as long as possible.
    * This would be useful in case for some reason an NFT no longer is deemed appropriate and should be delisted.
    * Delisting is always possible, in the sense of blacklisting it from the store, however once the IPFS hash is shared and the NFT is minted on the blockchain, it is no longer possible to erase the NFT entirely.
-   * @apiQuery {String} [currency] Defaults to a base currency if not provided
+   * @apiQuery {String} [currency] Defaults to the base currency if not provided
    * @apiQuery {Object="categories: number[]","userAddress: string","priceAtLeast: number","priceAtMost: number","availability: string[]","proxyFolding: 'fold' | 'unfold' | 'both'"} [filters]
    * @apiQuery {Number[]} filters[categories] Get NFTs that belong to any of a comma separated set of category identifiers (eg: 1,4,10). Multiple entries here means: find NFTs that belong to at least one of the given categories
    * @apiQuery {String} filters[userAddress] Get NFTs that are owned by some tezos address.
    * @apiQuery {Number} filters[priceAtLeast] Get NFTs that at least cost x amount (x is inclusive).
    * @apiQuery {Number} filters[priceAtMost] Get NFTs that at most cost x amount (x is inclusive).
    * @apiQuery {String[]} filters[availability] Comma separated enable-list of availability status (each entry being one of 'onSale','soldOut','upcoming'). Multiple entries means find NFTs that belong to one of the entries.
+   * @apiQuery {Number} filters[proxyFolding] If set to 'fold' exclude proxied NFTs, if set to 'unfold' exclude proxy NFTs, if set to 'both' (default) include both
    * @apiSuccessExample Example Success-Response:
    *  {
    *     "currentPage": 1,
@@ -282,11 +282,11 @@ export class NftController {
 
   /**
    * @apiGroup nfts
-   * @api {get} /nfts/search Get all nfts (filtered by searchParam)
+   * @api {get} /nfts/search Find NFTs based on a search string
    * @apiDescription This searches for:
    * - NFTs by name and description
    * - For categories by name
-   * @apiQuery {String} [currency] Defaults to a base currency if not provided
+   * @apiQuery {String} [currency] Defaults to the base currency if not provided
    * @apiQuery {Object="searchString: string"} searchParams string to filter all nfts
    * @apiSuccessExample Example Success-Response:
    * {
@@ -336,7 +336,7 @@ export class NftController {
    * @api {get} /nfts/:id Get NFT by id
    * @apiParam {Number} id The id of the NFT to retrieve
    * @apiQuery {String} [userAddress] userAddress of the user that owns the NFT on chain
-   * @apiQuery {String} [currency] Defaults to a base currency if not provided
+   * @apiQuery {String} [currency] Defaults to the base currency if not provided
    * @apiSuccessExample Example Success-Response:
    * {
    *     "id": 5,
