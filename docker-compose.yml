@@ -44,17 +44,7 @@ services:
         if [ "${STORE_API_ENABLED:-yes}" == "no" ]; then
           exit 0
         fi
-        INIT_QUEPASA=false INIT_PEPPERMINT=false ./script/migrate
-
-        if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
-          if [ "${DEPLOYMENT:-no}" == "yes" ]; then
-            psql < script/populate-stagingdb.sql
-          else
-            psql < script/populate-testdb.sql
-          fi
-        fi
-
-        node dist/src/main.js
+        ./script/entrypoint
       '
     restart: on-failure
 
@@ -138,14 +128,7 @@ services:
         if [ "${ADMIN_API_ENABLED:-yes}" == "no" ]; then
           exit 0
         fi
-
-        INIT_QUEPASA=false ./script/migrate
-        if [[ "`psql -c \"select count(1) from kanvas_user\" -tA`" == "0" ]]; then
-          yarn seed
-          ./script/setup-replication-sub
-        fi
-
-        yarn run start:prod
+        ./script/entrypoint
       '
     ports:
       - 3006:3001
@@ -173,7 +156,7 @@ services:
       STORE_PGDATABASE: dev_database
 
       ADMIN_API_PORT: 3001
-      STORE_API: http://localhost:3005
+      STORE_API: http://stpre-api:3000
       LOCAL_CORS: true
     restart: on-failure
 
@@ -184,17 +167,18 @@ services:
       args:
         REACT_APP_API_SERVER_BASE_URL: http://localhost:3006
         REACT_APP_STORE_BASE_URL: http://localhost:3000
+        REACT_APP_STORE_API_URL: http://localhost:3005
     ports:
       - 5050:80
     entrypoint: |-
-      bash -c '
+      sh -c '
         set -e
 
         if [ "${STORE_FRONT_ENABLED:-yes}" == "no" ]; then
           exit 0
         fi
 
-        nginx -g daemon off
+        nginx -g "daemon off;"
       '
     restart: on-failure
 
