@@ -29,7 +29,6 @@
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^9.1.0",
     "@nestjs/schedule": "2.1.0",
-    "@nestjs/serve-static": "^3.0.0",
     "@nestjs/throttler": "^2.0.0",
     "@types/bcrypt": "^5.0.0",
     "@types/cron": "^1.7.3",

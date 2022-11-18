@@ -15,13 +15,13 @@ import {
 } from '@nestjs/common';
 import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { JwtAuthGuard } from '../../authentication/guards/jwt-auth.guard.js';
-import { PaymentService } from '../../payment/service/payment.service.js';
+import { PaymentService } from "../service/payment.service";
 import { UserEntity } from '../../user/entity/user.entity.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
 import { validateRequestedCurrency } from '../../paramUtils.js';
-import { PaymentProvider } from '../../payment/entity/payment.entity.js';
+import { PaymentProvider } from "../entity/payment.entity";
 
-import type { PaymentIntent } from '../../payment/entity/payment.entity.js';
+import type { PaymentIntent } from "../entity/payment.entity";
 import { getClientIp } from '../../utils.js';
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -30,6 +30,16 @@ const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
+  /**
+   * @apiGroup Payment
+   * @api {post} /payment/stripe-webhook Stripe webhook
+   * @apiHeader {String} stripe-signature Stripe signature
+   * @apiHeaderExample {json} Header-Example:
+   *     {
+   *      "stripe-signature": "a valid stripe signature"
+   *     }
+   * @apiName stripeWebhook
+   */
   @Post('/stripe-webhook')
   async stripeWebhook(
     @Headers('stripe-signature') signature: string,
@@ -65,6 +75,20 @@ export class PaymentController {
     throw new HttpException('', HttpStatus.NO_CONTENT);
   }
 
+  /**
+   * @apiGroup Payment
+   * @api {post} /payment/create-payment-intent Create a payment intent
+   * @apiPermission logged-in user
+   * @apiBody {String="tezpay","stripe","wert","simplex","test_provider"} [paymentProvider="stripe"] The payment provider used for the intent
+   * @apiBody {String} [currency] The currency used for the payment intent, uses a base currency if not provided
+   * @apiBody {Boolean} [recreateNftOrder=false] Will cancel nft order if set to true
+   * @apiParamExample {json} Request Body Example:
+   *    {
+   *      currency: 'XTZ',
+   *      paymentProvider: 'tezpay'
+   *    }
+   * @apiName createPaymentIntent
+   */
   @Post('/create-payment-intent')
   @UseGuards(JwtAuthGuard)
   async createPaymentIntent(
@@ -122,6 +146,18 @@ export class PaymentController {
     }
   }
 
+  /**
+   * @apiGroup Payment
+   * @api {post} /payment/promise-paid Inform promise paid
+   * @apiDescription Informs the API that payment is made
+   * @apiPermission logged-in user
+   * @apiBody {String} payment_id The payment id
+   * @apiParamExample {json} Request Body Example:
+   *    {
+   *      "payment_id": "some valid payment id"
+   *    }
+   * @apiName promisePaymentPaid
+   */
   @Post('/promise-paid')
   @UseGuards(JwtAuthGuard)
   async promisePaymentPaid(
@@ -143,6 +179,15 @@ export class PaymentController {
     }
   }
 
+  /**
+   * @apiGroup Payment
+   * @api {get} /payment/order-info/:paymentId Get order info via paymentId
+   * @apiParam {Number} paymentId The id of the nft
+   * @apiPermission logged-in user
+   * @apiExample {http} Example http request url (make sure to replace $base_url with the store-api-server endpoint):
+   *  $base_url/payment/order-info/12345678910
+   * @apiName getNftOrder
+   */
   @Get('/order-info/:paymentId')
   @UseGuards(JwtAuthGuard)
   @Header('cache-control', 'no-store,must-revalidate')
