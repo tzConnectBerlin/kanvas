@@ -88,7 +88,7 @@ export interface PaymentIntent {
   vatRate: number;
 
   provider: PaymentProviderString;
-  providerDetails?:
+  providerPaymentDetails?:
     | StripeDetails
     | WertDetails
     | TezpayDetails
