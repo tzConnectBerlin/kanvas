@@ -6,8 +6,9 @@ export async function fetchMostViewed(
 ): Promise<Nft[]> {
   try {
     const response = await axios.get(
-      process.env.REACT_APP_STORE_BASE_URL +
-        '/api/nfts?pageSize=8&orderBy=views&orderDirection=desc',
+      (process.env.REACT_APP_STORE_API_URL??
+        process.env.REACT_APP_STORE_BASE_URL + '/api' ) +
+        '/nfts?pageSize=8&orderBy=views&orderDirection=desc',
       {
         withCredentials: true,
       },
