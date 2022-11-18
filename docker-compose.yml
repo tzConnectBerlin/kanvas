@@ -26,7 +26,6 @@ services:
       - 3005:3000
     links:
       - store-db
-      - admin-db
     environment:
       PGHOST: store-db
       PGPORT: 5432
@@ -40,10 +39,11 @@ services:
     entrypoint: |-
       bash -c '
         set -e
-
         if [ "${STORE_API_ENABLED:-yes}" == "no" ]; then
           exit 0
         fi
+
+        ./script/wait-db
         ./script/entrypoint
       '
     restart: on-failure
@@ -128,6 +128,8 @@ services:
         if [ "${ADMIN_API_ENABLED:-yes}" == "no" ]; then
           exit 0
         fi
+        
+        ./script/wait-db
         ./script/entrypoint
       '
     ports:
