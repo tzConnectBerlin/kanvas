@@ -12,7 +12,7 @@ export async function fetchTopBuyers(
 ): Promise<TopBuyer[]> {
   try {
     const response = await axios.get(
-      (process.env.REACT_APP_STORE_API_URL??
+      (process.env.REACT_APP_STORE_API_URL ??
         process.env.REACT_APP_STORE_BASE_URL + '/api' ) +
         '/users/topBuyers',
       {
