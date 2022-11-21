@@ -78,7 +78,7 @@ export class FileService {
     tempDirId,
     nftId,
   }: AddMissingFiles): Promise<File[]> {
-    const MEDIA_TEMP_DIR = __dirname + `/${tempDirId}/`;
+    const tempDir = __dirname + `/${tempDirId}/`;
     const artifact = filesArray.find(
       (file) => file.originalname === 'artifact',
     ) as File; // we always assume that we get an artifact from the client
@@ -94,19 +94,19 @@ export class FileService {
     try {
       let addedFiles: File[] = [];
       if (isVideo) {
-        fs.mkdirSync(MEDIA_TEMP_DIR);
+        fs.mkdirSync(tempDir);
         addedFiles = await this.#handleVideo({
           nftId,
-          tempDir: MEDIA_TEMP_DIR,
+          tempDir,
           artifact,
           display,
           thumbnail,
         });
       } else if (isImage) {
-        fs.mkdirSync(MEDIA_TEMP_DIR);
+        fs.mkdirSync(tempDir);
         addedFiles = await this.#handleImage({
           nftId,
-          tempDir: MEDIA_TEMP_DIR,
+          tempDir,
           artifact,
           display,
           thumbnail,
@@ -120,11 +120,11 @@ export class FileService {
       }
     } catch (error) {
       Logger.error(
-        `Failed during nft file imgae/video processing. err: ${error}`,
+        `Failed during nft file image/video processing. err: ${error}`,
       );
     } finally {
-      if (fs.existsSync(MEDIA_TEMP_DIR)) {
-        fs.rmSync(MEDIA_TEMP_DIR, {
+      if (fs.existsSync(tempDir)) {
+        fs.rmSync(tempDir, {
           recursive: true,
           force: true,
         });
