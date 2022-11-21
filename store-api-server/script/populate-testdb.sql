@@ -138,4 +138,10 @@ values
 update nft set metadata = '{"test": {"nested": 10}}' where id = (select min(id) from nft);
 update nft_category set metadata = '{"test": {"nested": true}}' where id = 1;
 
+INSERT INTO vat (percentage) VALUES (5) ON CONFLICT DO NOTHING;
+
+INSERT INTO country (country_short, country_long, vat_id)
+SELECT 'GB', 'Great Britain', (SELECT id FROM vat)
+ON CONFLICT DO NOTHING;
+
 commit;
