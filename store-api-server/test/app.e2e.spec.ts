@@ -3380,7 +3380,7 @@ describe('AppController (e2e)', () => {
       .send({ currency: 'XTZ', paymentProvider: 'tezpay' });
     expect(paymentIntentRes.status).toEqual(201);
     const usr = <UserEntity>{ userAddress: address, id: id };
-    const intentRes = await paymentService.createPayment(
+    await paymentService.createPayment(
       usr,
       uuidv4(),
       PaymentProvider.TEST,

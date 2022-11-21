@@ -2,10 +2,7 @@ import request from 'supertest';
 
 import { TEZPAY_PAYPOINT_ADDRESS } from '../src/constants';
 import { PaymentService } from '../src/payment/service/payment.service';
-import {
-  PaymentStatus,
-  OrderStatus,
-} from '../src/payment/entity/payment.entity.js';
+import Tezpay from 'tezpay-server';
 
 import * as testUtils from './utils';
 
@@ -61,7 +58,7 @@ export async function runPaymentTests(appReference: () => any) {
       });
     });
 
-    it('basic payment test case (tezpay)', async () => {
+    it('basic tez payment test case', async () => {
       const w = await testUtils.newWallet(app);
 
       await testUtils.cartAdd(app, nftIds[0], w);
@@ -120,7 +117,7 @@ export async function runPaymentTests(appReference: () => any) {
       });
     }
 
-    it('basic payment test case (mocked stripe)', async () => {
+    it('basic stripe payment test case (mocked)', async () => {
       const w = await testUtils.newWallet(app);
 
       await testUtils.cartAdd(app, nftIds[0], w);
@@ -141,7 +138,6 @@ export async function runPaymentTests(appReference: () => any) {
           currency: 'EUR',
           paymentProvider: 'stripe',
         });
-      testUtils.logFullObject(resp.body);
       expect(resp.statusCode).toEqual(201);
       const paymentIntent = resp.body;
       expect(paymentIntent).toMatchObject({
@@ -162,10 +158,38 @@ export async function runPaymentTests(appReference: () => any) {
       const eurDecimals = 2;
       expect(
         (
-          paymentIntent.providerPaymentDetails.mutezAmount *
+          paymentIntent.providerPaymentDetails.amount *
           Math.pow(10, -eurDecimals)
         ).toFixed(eurDecimals),
       ).toEqual(paymentIntent.amount);
+    });
+
+    it('stripe payment with XTZ currency => 400', async () => {
+      const w = await testUtils.newWallet(app);
+
+      await testUtils.cartAdd(app, nftIds[0], w);
+
+      paymentService.stripe = {
+        paymentIntents: {
+          create: () => {
+            return {
+              client_secret: 'secret identifier',
+            };
+          },
+        },
+      };
+      const resp = await request(app.getHttpServer())
+        .post('/payment/create-payment-intent')
+        .set('authorization', w.login.bearer)
+        .send({
+          currency: 'XTZ',
+          paymentProvider: 'stripe',
+        });
+      expect(resp.statusCode).toEqual(400);
+      expect(resp.body).toStrictEqual({
+        statusCode: 400,
+        message: 'currency (XTZ) is not supported for stripe',
+      });
     });
 
     it('stripe payment fails with 500 if stripe fails to give us a client_secret value', async () => {
@@ -190,7 +214,44 @@ export async function runPaymentTests(appReference: () => any) {
           paymentProvider: 'stripe',
         });
       expect(resp.statusCode).toEqual(500);
-      testUtils.logFullObject(resp.body);
+      expect(resp.body).toStrictEqual({
+        statusCode: 500,
+        message: 'failed to create payment intent with stripe',
+      });
+    });
+
+    it(`a call to /stripe-webhook fails with 501 if stripe isn't enabled`, async () => {
+      const w = await testUtils.newWallet(app);
+
+      await testUtils.cartAdd(app, nftIds[0], w);
+      const resp = await request(app.getHttpServer()).post(
+        '/payment/stripe-webhook',
+      );
+
+      expect(resp.statusCode).toEqual(501);
+      expect(resp.body).toStrictEqual({
+        statusCode: 501,
+        message: 'stripe is not enabled in this kanvas instance',
+      });
+    });
+
+    it(`create payment intent for non existing provider => 400`, async () => {
+      const w = await testUtils.newWallet(app);
+
+      await testUtils.cartAdd(app, nftIds[0], w);
+      const resp = await request(app.getHttpServer())
+        .post('/payment/create-payment-intent')
+        .set('authorization', w.login.bearer)
+        .send({
+          currency: 'EUR',
+          paymentProvider: 'payment provider that doesnt exist',
+        });
+
+      expect(resp.statusCode).toEqual(400);
+      expect(resp.body).toStrictEqual({
+        statusCode: 400,
+        message: `requested payment provider not available`,
+      });
     });
 
     it('vat behavior for an extremely cheap NFT', async () => {
@@ -214,7 +275,6 @@ export async function runPaymentTests(appReference: () => any) {
           currency: 'EUR',
           paymentProvider: 'stripe',
         });
-      testUtils.logFullObject(resp.body);
       expect(resp.statusCode).toEqual(201);
       const paymentIntent = resp.body;
       expect(paymentIntent).toMatchObject({
@@ -230,7 +290,227 @@ export async function runPaymentTests(appReference: () => any) {
         ],
         vatRate: 0.05,
       });
-      expect(Number(paymentIntent.amountExclVat)).toEqual(0.1); // TODO
+      expect(Number(paymentIntent.amountExclVat)).toBeCloseTo(0.095238, 6);
+    });
+
+    it('basic wert payment test case (mocked)', async () => {
+      const w = await testUtils.newWallet(app);
+
+      await testUtils.cartAdd(app, nftIds[0], w);
+
+      paymentService.signWertData = (args: any) => {
+        const { commodity_amount, ...verifyArgFields } = args;
+        return verifyArgFields;
+      };
+      const currency = 'USD';
+      const resp = await request(app.getHttpServer())
+        .post('/payment/create-payment-intent')
+        .set('authorization', w.login.bearer)
+        .send({
+          currency,
+          paymentProvider: 'wert',
+        });
+      expect(resp.statusCode).toEqual(201);
+
+      const tezpayExternalId = await testUtils.withDbConn(async (db) => {
+        return (await db.query('SELECT external_id FROM tezpay.payments'))
+          .rows[0]['external_id'];
+      });
+
+      const paymentIntent = resp.body;
+      expect(paymentIntent).toMatchObject({
+        provider: 'wert',
+        providerPaymentDetails: {
+          wertData: {
+            currency,
+            commodity: 'XTZ',
+            pk_id: 'key1',
+            sc_address: TEZPAY_PAYPOINT_ADDRESS,
+            address: w.pkh,
+            sc_id: Buffer.from(tezpayExternalId).toString('hex'),
+            sc_input_data: Buffer.from(
+              `{
+  "entrypoint": "pay",
+  "value": {"string":"${tezpayExternalId}"}
+}`,
+            ).toString('hex'),
+          },
+        },
+        nfts: [
+          {
+            id: nftIds[0],
+          },
+        ],
+        vatRate: 0.05,
+      });
+      expect(Number(paymentIntent.amountExclVat)).toBeLessThan(
+        Number(paymentIntent.amount),
+      );
+    });
+
+    for (const currency of ['EUR', 'GBP', 'XTZ']) {
+      it(`${currency} not allowed for wert payments`, async () => {
+        const w = await testUtils.newWallet(app);
+
+        await testUtils.cartAdd(app, nftIds[0], w);
+
+        paymentService.signWertData = () => {
+          return {
+            wert_field1: 'some field',
+            wert_field2: true,
+            wert_field3: 104.3,
+          };
+        };
+        const resp = await request(app.getHttpServer())
+          .post('/payment/create-payment-intent')
+          .set('authorization', w.login.bearer)
+          .send({
+            currency,
+            paymentProvider: 'wert',
+          });
+        expect(resp.statusCode).toEqual(400);
+        expect(resp.body).toStrictEqual({
+          statusCode: 400,
+          message: `requested fiat (${currency}) is not supported by Wert`,
+        });
+      });
+    }
+
+    for (const provider of ['wert', 'simplex', 'stripe']) {
+      it(`create payment intent with optionally enabled provider ${provider} not enabled => 501`, async () => {
+        const w = await testUtils.newWallet(app);
+
+        await testUtils.cartAdd(app, nftIds[0], w);
+        const resp = await request(app.getHttpServer())
+          .post('/payment/create-payment-intent')
+          .set('authorization', w.login.bearer)
+          .send({
+            currency: 'EUR',
+            paymentProvider: provider,
+          });
+
+        expect(resp.statusCode).toEqual(501);
+        expect(resp.body).toStrictEqual({
+          statusCode: 501,
+          message: `${provider} payment provider not supported by this API instance`,
+        });
+      });
+    }
+
+    it(`trigger weird internal error on create payment intent => 500`, async () => {
+      const w = await testUtils.newWallet(app);
+
+      paymentService.tezpay = new Tezpay({
+        paypoint_schema_name: 'paypoint',
+        db_pool: undefined,
+        block_confirmations: 2,
+      });
+
+      await testUtils.cartAdd(app, nftIds[0], w);
+      const resp = await request(app.getHttpServer())
+        .post('/payment/create-payment-intent')
+        .set('authorization', w.login.bearer)
+        .send({
+          currency: 'XTZ',
+          paymentProvider: 'tezpay',
+        });
+
+      expect(resp.statusCode).toEqual(500);
+      expect(resp.body).toStrictEqual({
+        statusCode: 500,
+        message: 'unable to place the order',
+      });
+    });
+
+    it(`user cannot promisePaid of another user's payment => 500 without too insightful message`, async () => {
+      const w1 = await testUtils.newWallet(app);
+      const w2 = await testUtils.newWallet(app);
+
+      await testUtils.cartAdd(app, nftIds[0], w1);
+      const resp = await request(app.getHttpServer())
+        .post('/payment/create-payment-intent')
+        .set('authorization', w1.login.bearer)
+        .send({
+          currency: 'XTZ',
+          paymentProvider: 'tezpay',
+        });
+      expect(resp.statusCode).toEqual(201);
+
+      const respW2 = await request(app.getHttpServer())
+        .post('/payment/promise-paid')
+        .set('authorization', w2.login.bearer)
+        .send({
+          payment_id: resp.body.id,
+        });
+      expect(respW2.statusCode).toEqual(400);
+      expect(respW2.body).toStrictEqual({
+        statusCode: 400,
+        message: 'nft order not found',
+      });
+
+      const respW1 = await request(app.getHttpServer())
+        .post('/payment/promise-paid')
+        .set('authorization', w1.login.bearer)
+        .send({
+          payment_id: resp.body.id,
+        });
+      expect(respW1.statusCode).toEqual(201);
+    });
+
+    it(`user cannot see order information of another user's payment => 400 without too insightful message`, async () => {
+      const w1 = await testUtils.newWallet(app);
+      const w2 = await testUtils.newWallet(app);
+
+      await testUtils.cartAdd(app, nftIds[0], w1);
+      const resp = await request(app.getHttpServer())
+        .post('/payment/create-payment-intent')
+        .set('authorization', w1.login.bearer)
+        .send({
+          currency: 'XTZ',
+          paymentProvider: 'tezpay',
+        });
+      expect(resp.statusCode).toEqual(201);
+
+      const respW2 = await request(app.getHttpServer())
+        .get(`/payment/order-info/${resp.body.id}`)
+        .set('authorization', w2.login.bearer);
+      expect(respW2.statusCode).toEqual(400);
+      expect(respW2.body).toStrictEqual({
+        statusCode: 400,
+        message: 'nft order not found',
+      });
+
+      const respW1 = await request(app.getHttpServer())
+        .get(`/payment/order-info/${resp.body.id}`)
+        .set('authorization', w1.login.bearer);
+      expect(respW1.statusCode).toEqual(200);
+    });
+
+    it(`get order info on weird internal err (lost payment) => 500`, async () => {
+      const w = await testUtils.newWallet(app);
+
+      await testUtils.cartAdd(app, nftIds[0], w);
+      const resp = await request(app.getHttpServer())
+        .post('/payment/create-payment-intent')
+        .set('authorization', w.login.bearer)
+        .send({
+          currency: 'XTZ',
+          paymentProvider: 'tezpay',
+        });
+      expect(resp.statusCode).toEqual(201);
+
+      await testUtils.withDbConn(async (db) => {
+        await db.query('DELETE FROM payment');
+      });
+
+      const respOrderInfo = await request(app.getHttpServer())
+        .get(`/payment/order-info/${resp.body.id}`)
+        .set('authorization', w.login.bearer);
+      expect(respOrderInfo.statusCode).toEqual(500);
+      expect(respOrderInfo.body).toStrictEqual({
+        statusCode: 500,
+        message: 'failed to get order info',
+      });
     });
   });
 }

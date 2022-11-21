@@ -20,32 +20,25 @@ import { UserEntity } from '../../user/entity/user.entity.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
 import { validateRequestedCurrency } from '../../paramUtils.js';
 import { PaymentIntent, PaymentProvider } from '../entity/payment.entity.js';
+import { STRIPE_WEBHOOK_SECRET } from '../../constants.js';
 
 import { getClientIp } from '../../utils.js';
 
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 @Controller('payment')
 export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
-  /**
-   * @apiGroup Payment
-   * @api {post} /payment/stripe-webhook Stripe webhook, only to be called by Stripe
-   * @apiHeader {String} stripe-signature Stripe signature, proving it was Stripe who called this endpoint
-   * @apiHeaderExample {json} Header-Example:
-   *     {
-   *      "stripe-signature": "a valid stripe signature"
-   *     }
-   * @apiName stripeWebhook
-   */
   @Post('/stripe-webhook')
   async stripeWebhook(
     @Headers('stripe-signature') signature: string,
     @Req() request: any,
   ) {
-    if (!endpointSecret) {
-      throw new HttpException('Stripe not enabled', HttpStatus.BAD_REQUEST);
+    if (typeof STRIPE_WEBHOOK_SECRET === 'undefined') {
+      throw new HttpException(
+        'stripe is not enabled in this kanvas instance',
+        HttpStatus.NOT_IMPLEMENTED,
+      );
     }
     // Get the signature sent by Stripe
     let constructedEvent;
@@ -55,7 +48,7 @@ export class PaymentController {
         await this.paymentService.stripe.webhooks.constructEvent(
           request.body,
           signature,
-          endpointSecret,
+          STRIPE_WEBHOOK_SECRET,
         );
     } catch (err) {
       Logger.error(`Err on payment webhook signature verification: ${err}`);
@@ -121,12 +114,6 @@ export class PaymentController {
       );
     }
 
-    if (currency === 'XTZ') {
-      // temporary for backwards compatibility, until frontend has been updated
-      paymentProvider = PaymentProvider.TEZPAY;
-    }
-    const clientIp = getClientIp(request);
-
     try {
       // extracting clientIp from paymentIntent like this, best way to get the
       // spread syntax below to not pickup clientIp (we don't want to have this
@@ -137,7 +124,7 @@ export class PaymentController {
           cookieSession.uuid,
           paymentProvider,
           currency,
-          clientIp,
+          getClientIp(request),
           recreateNftOrder,
         );
       const order = await this.paymentService.getPaymentOrder(paymentIntent.id);
@@ -156,7 +143,7 @@ export class PaymentController {
         throw err;
       }
       throw new HttpException(
-        'Unable to place the order',
+        'unable to place the order',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -189,8 +176,8 @@ export class PaymentController {
 
       Logger.error(err);
       throw new HttpException(
-        `logged in user (id=${user.id}) does not have an unfinished payment with payment_id=${paymentId} that hasn't been promised payment yet`,
-        HttpStatus.BAD_REQUEST,
+        'something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -214,6 +201,10 @@ export class PaymentController {
     try {
       return await this.paymentService.getOrderInfo(usr, paymentId);
     } catch (err) {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+
       Logger.error(err);
       throw new HttpException(
         'failed to get order info',

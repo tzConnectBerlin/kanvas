@@ -116,7 +116,7 @@ WHERE id = ${nftIds[0]}
           afterPaymentStatus: PaymentStatus.CANCELED,
         },
         exp: {
-          statusCode: 400,
+          statusCode: 500,
           paymentStatus: PaymentStatus.CANCELED,
           orderStatus: OrderStatus.CANCELED,
         },
@@ -126,7 +126,7 @@ WHERE id = ${nftIds[0]}
           afterPaymentStatus: PaymentStatus.TIMED_OUT,
         },
         exp: {
-          statusCode: 400,
+          statusCode: 500,
           paymentStatus: PaymentStatus.TIMED_OUT,
           orderStatus: OrderStatus.CANCELED,
         },

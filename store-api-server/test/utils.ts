@@ -314,8 +314,9 @@ export async function resetDb(resetForLegacyTest = false): Promise<number[]> {
       'proxy_unfold',
       'nft',
       'nft_category',
-      'peppermint.operations',
       'marketing',
+      'peppermint.operations',
+      'tezpay.payments',
     ];
     for (const t of tables) {
       await db.query(`delete from ${t}`);
