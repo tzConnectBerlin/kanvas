@@ -109,6 +109,8 @@ export const CART_MAX_ITEMS: number = Number(
 export const API_KEY_SECRET: string | undefined = process.env['API_KEY_SECRET'];
 
 export const STRIPE_SECRET: string | undefined = process.env['STRIPE_SECRET'];
+export const STRIPE_WEBHOOK_SECRET: string | undefined =
+  process.env['STRIPE_WEBHOOK_SECRET'];
 
 export const STRIPE_PAYMENT_METHODS: string[] = ['card'];
 

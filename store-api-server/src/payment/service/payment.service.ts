@@ -90,6 +90,10 @@ interface PaymentIntentInternal
 @Injectable()
 export class PaymentService {
   stripe = STRIPE_SECRET ? stripe(STRIPE_SECRET) : undefined;
+  signWertData: any =
+    !isBottom(WERT_PRIV_KEY) && !isBottom(TEZPAY_PAYPOINT_ADDRESS)
+      ? signSmartContractData
+      : undefined;
 
   FINAL_STATES = [
     PaymentStatus.SUCCEEDED,
@@ -144,9 +148,17 @@ export class PaymentService {
   }
 
   async promisePaid(userId: number, paymentId: string) {
+    const notFoundErr = new HttpException(
+      'nft order not found',
+      HttpStatus.BAD_REQUEST,
+    );
+
     const order = await this.getPaymentOrder(paymentId);
     if (order.userId !== userId) {
-      throw `user (id=${userId}) not allowed to promise payment paid for order of other user (id=${order.userId})`;
+      Logger.error(
+        `user with id=${userId} is not allowed to promise-paid a payment of another user with id=${order.userId}`,
+      );
+      throw notFoundErr;
     }
 
     try {
@@ -356,14 +368,21 @@ WHERE nft_order.id = $1
     const orderId = await this.getPaymentOrderId(paymentId);
 
     const [order, intents] = await Promise.all([
-      this.#getOrder(orderId),
+      this.#getOrder(orderId).catch((err) => {
+        Logger.error(err);
+        throw new HttpException(
+          'err on getting order information',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }),
       this.#getOrderPaymentIntents(orderId),
     ]);
 
     if (order.userId !== usr.id) {
-      throw new Error(
-        'user does not have any orders with given payment intent identifier',
+      Logger.error(
+        `user with id=${usr.id} is not allowed to view order of another user with id=${order.userId}`,
       );
+      throw new HttpException('nft order not found', HttpStatus.BAD_REQUEST);
     }
 
     const paymentStatus = this.furthestPaymentStatus(
@@ -489,13 +508,10 @@ WHERE nft_order_id = $1
 
       currency,
       amount: this.currencyService.toFixedDecimals(currency, amount),
-      amountExclVat: this.currencyService.toFixedDecimals(
-        currency,
-        amount / (1 + vatRate),
-      ),
 
-      clientIp,
+      amountExclVat: amount / (1 + vatRate),
       vatRate,
+      clientIp,
 
       provider,
       providerPaymentDetails: await this.#createPaymentDetails(
@@ -570,12 +586,9 @@ WHERE nft_order_id = $1
     fiatCurrency: string,
     mutezAmount: number,
   ): Promise<WertDetails> {
-    if (
-      typeof WERT_PRIV_KEY === 'undefined' ||
-      typeof TEZPAY_PAYPOINT_ADDRESS === 'undefined'
-    ) {
+    if (typeof this.signWertData === 'undefined') {
       throw new HttpException(
-        'Wert payment provider not supported by this API instance',
+        'wert payment provider not supported by this API instance',
         HttpStatus.NOT_IMPLEMENTED,
       );
     }
@@ -591,7 +604,7 @@ WHERE nft_order_id = $1
       mutezAmount,
     );
 
-    const signedData = signSmartContractData(
+    const signedData = this.signWertData(
       {
         address: userAddress,
         commodity: 'XTZ',
@@ -600,12 +613,14 @@ WHERE nft_order_id = $1
           mutezAmount,
         ),
         pk_id: 'key1',
-        sc_id: new Buffer(tezpayDetails.paypointMessage).toString('hex'),
+        sc_id: Buffer.from(tezpayDetails.paypointMessage).toString('hex'),
         sc_address: TEZPAY_PAYPOINT_ADDRESS,
-        sc_input_data: new Buffer(`{
-            "entrypoint": "pay",
-            "value": {"string":"${tezpayDetails.paypointMessage}"}
-          }`).toString('hex'),
+        sc_input_data: Buffer.from(
+          `{
+  "entrypoint": "pay",
+  "value": {"string":"${tezpayDetails.paypointMessage}"}
+}`,
+        ).toString('hex'),
       },
       WERT_PRIV_KEY,
     );
@@ -630,7 +645,7 @@ WHERE nft_order_id = $1
       typeof SIMPLEX_WALLET_ID === 'undefined'
     ) {
       throw new HttpException(
-        'Simplex payment provider not supported by this API instance',
+        'simplex payment provider not supported by this API instance',
         HttpStatus.NOT_IMPLEMENTED,
       );
     }
@@ -792,7 +807,6 @@ WHERE nft_order_id = $1
     currency: string,
     currencyUnitAmount: number,
   ): Promise<StripeDetails> {
-    console.log(this.stripe);
     if (typeof this.stripe === 'undefined') {
       throw new HttpException(
         'stripe payment provider not supported by this API instance',

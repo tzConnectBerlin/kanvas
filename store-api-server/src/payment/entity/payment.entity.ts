@@ -83,8 +83,8 @@ export interface PaymentIntent {
   // currencies), some expect it to be in decimal unit (ie euros in case of
   // EUR, etc.))
   amount: string;
-  amountExclVat: string;
 
+  amountExclVat: number;
   vatRate: number;
 
   provider: PaymentProviderString;
