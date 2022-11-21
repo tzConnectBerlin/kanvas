@@ -7,7 +7,7 @@ import * as path from 'path';
 import sharp from 'sharp';
 import sizeOf from 'image-size';
 import mime from 'mime';
-import { getVideoMetadata } from '../../../media.js';
+import { getContentMetadata, File } from '../../../media.js';
 
 mime.define(
   {
@@ -19,15 +19,6 @@ mime.define(
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-export interface File {
-  originalname: string;
-  fieldname: string;
-  mimetype: string;
-  encoding: string;
-  buffer: Buffer;
-  size: number;
-}
 
 type FileType = 'thumbnail' | 'display';
 type Path = string;
@@ -67,17 +58,26 @@ interface ScreenshotFromVideoParams {
 }
 
 interface HandleMediaParams {
+  nftId: number;
   tempDir: string;
   artifact: File;
   display?: File;
   thumbnail?: File;
 }
+
+interface AddMissingFiles {
+  filesArray: File[];
+  tempDirId: string;
+  nftId: number;
+}
+
 @Injectable()
 export class FileService {
-  async addMissingFiles(
-    filesArray: File[],
-    tempDirId: string,
-  ): Promise<File[]> {
+  async addMissingFiles({
+    filesArray,
+    tempDirId,
+    nftId,
+  }: AddMissingFiles): Promise<File[]> {
     const MEDIA_TEMP_DIR = __dirname + `/${tempDirId}/`;
     const artifact = filesArray.find(
       (file) => file.originalname === 'artifact',
@@ -96,6 +96,7 @@ export class FileService {
       if (isVideo) {
         fs.mkdirSync(MEDIA_TEMP_DIR);
         addedFiles = await this.#handleVideo({
+          nftId,
           tempDir: MEDIA_TEMP_DIR,
           artifact,
           display,
@@ -104,6 +105,7 @@ export class FileService {
       } else if (isImage) {
         fs.mkdirSync(MEDIA_TEMP_DIR);
         addedFiles = await this.#handleImage({
+          nftId,
           tempDir: MEDIA_TEMP_DIR,
           artifact,
           display,
@@ -133,25 +135,33 @@ export class FileService {
   }
 
   async #handleVideo({
+    nftId,
     tempDir,
     artifact,
     display,
     thumbnail,
   }: HandleMediaParams): Promise<File[]> {
-    const { width: artifactWidth, height: artifactHeight } =
-      await getVideoMetadata(artifact);
     const addedFiles: Array<File> = [];
+
+    const artifactMetadata = await getContentMetadata(nftId, artifact);
+    if (!artifactMetadata.width || !artifactMetadata.height) {
+      Logger.warn(
+        `Failed to inspect video dimensions for nft: ${nftId}, therefore no display or thumbnail was created.`,
+      );
+      return addedFiles;
+    }
+
     if (!display) {
       const generatedDisplay = await this.#imageFromVideo({
         tempDir,
         videoFile: artifact,
         typeOfImage: 'display',
-        imageWidth: artifactWidth,
-        imageHeight: artifactHeight,
+        imageWidth: artifactMetadata.width,
+        imageHeight: artifactMetadata.height,
       });
 
       if (!generatedDisplay) {
-        Logger.warn('Generating display from video failed');
+        Logger.warn(`Generating display from video nft: ${nftId} failed`);
         return addedFiles;
       }
 
@@ -164,7 +174,7 @@ export class FileService {
 
       if (!availableDisplay) {
         Logger.warn(
-          "Thumbnail wasn't created as there was no available display",
+          `Thumbnail wasn't created as there was no available display for nft: ${nftId}`,
         );
         return addedFiles;
       }
@@ -196,6 +206,7 @@ export class FileService {
   }
 
   async #handleImage({
+    nftId,
     artifact,
     display,
     thumbnail,
@@ -213,7 +224,7 @@ export class FileService {
 
       if (!availableDisplay) {
         Logger.warn(
-          "Thumbnail wasn't created as there was no available display",
+          `Thumbnail wasn't created as there was no available display for nft ${nftId}`,
         );
         return addedFiles;
       }
@@ -230,7 +241,7 @@ export class FileService {
 
         if (!displayExtension) {
           Logger.warn(
-            'Thumbnail could not be created because of missing display extension',
+            `Thumbnail could not be created because of missing display extension`,
           );
           return addedFiles;
         }
@@ -264,7 +275,7 @@ export class FileService {
 
     if (!videoExtension) {
       Logger.warn(
-        'Could not create image from video as the extension from the video is missing but it is needed to fulfill this procedure.',
+        'Could not create image from video as the extension from the video is missing.',
       );
       return;
     }
