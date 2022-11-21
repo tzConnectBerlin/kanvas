@@ -11,6 +11,62 @@ export async function runPaymentTests(appReference: () => any) {
   let paymentService: PaymentService;
   let nftIds: number[];
 
+  const defineCountryIp = async (
+    ipAddr: string,
+    countryShort: string,
+    countryLong: string,
+  ) => {
+    const ip = paymentService.ipAddrToNum(ipAddr);
+
+    return await testUtils.withDbConn(async (db) => {
+      const countryId = (
+        await db.query(
+          `
+INSERT INTO country (country_short, country_long)
+VALUES ($1, $2)
+RETURNING id
+        `,
+          [countryShort, countryLong],
+        )
+      ).rows[0]['id'];
+      await db.query(
+        `
+INSERT INTO ip_country (ip_from, ip_to, country_id)
+VALUES ($1, $1, $2)
+        `,
+        [ip, countryId],
+      );
+
+      return countryId;
+    });
+  };
+
+  const defineCountryVatPercentage = async (
+    countryId: number,
+    vatPercentage: number,
+  ) => {
+    await testUtils.withDbConn(async (db) => {
+      const vatId = (
+        await db.query(
+          `
+INSERT INTO vat (percentage)
+VALUES ($1)
+RETURNING id
+        `,
+          [vatPercentage],
+        )
+      ).rows[0]['id'];
+      await db.query(
+        `
+UPDATE country
+SET vat_id = $1
+WHERE id = $2
+        `,
+        [vatId, countryId],
+      );
+    });
+  };
+
   describe('payment e2e tests', () => {
     beforeEach(async () => {
       [app, paymentService] = appReference();
@@ -510,6 +566,54 @@ export async function runPaymentTests(appReference: () => any) {
       expect(respOrderInfo.body).toStrictEqual({
         statusCode: 500,
         message: 'failed to get order info',
+      });
+    });
+
+    it('vat for a country that has no vat defined => defaults to the fallback vat country', async () => {
+      const ipAddr = '240.200.10.5';
+      await defineCountryIp(ipAddr, 'XX', 'test country');
+
+      const w = await testUtils.newWallet(app);
+
+      await testUtils.cartAdd(app, nftIds[0], w);
+
+      const resp = await request(app.getHttpServer())
+        .post('/payment/create-payment-intent')
+        .set('authorization', w.login.bearer)
+        .set('X-Forwarded-For', ipAddr)
+        .send({
+          currency: 'XTZ',
+          paymentProvider: 'tezpay',
+        });
+      expect(resp.statusCode).toEqual(201);
+      const paymentIntent = resp.body;
+      expect(paymentIntent).toMatchObject({
+        vatRate: 0.05,
+      });
+    });
+
+    it('vat for a country that has vat defined => vat from that country is applied', async () => {
+      const vatRate = 0.15;
+      const ipAddr = '240.200.10.5';
+      const countryId = await defineCountryIp(ipAddr, 'XX', 'test country');
+      await defineCountryVatPercentage(countryId, vatRate * 100);
+
+      const w = await testUtils.newWallet(app);
+
+      await testUtils.cartAdd(app, nftIds[0], w);
+
+      const resp = await request(app.getHttpServer())
+        .post('/payment/create-payment-intent')
+        .set('authorization', w.login.bearer)
+        .set('X-Forwarded-For', ipAddr)
+        .send({
+          currency: 'XTZ',
+          paymentProvider: 'tezpay',
+        });
+      expect(resp.statusCode).toEqual(201);
+      const paymentIntent = resp.body;
+      expect(paymentIntent).toMatchObject({
+        vatRate,
       });
     });
   });
