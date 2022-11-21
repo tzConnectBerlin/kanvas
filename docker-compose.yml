@@ -43,7 +43,6 @@ services:
           exit 0
         fi
 
-        ./script/wait-db
         ./script/entrypoint
       '
     restart: on-failure
@@ -158,8 +157,7 @@ services:
       STORE_PGDATABASE: dev_database
 
       ADMIN_API_PORT: 3001
-      STORE_API: http://stpre-api:3000
-      LOCAL_CORS: true
+      STORE_API: http://store-api:3000
     restart: on-failure
 
   admin-front:
