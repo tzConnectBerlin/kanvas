@@ -18,7 +18,7 @@ import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard.js';
 import { MAX_FILE_UPLOADS_PER_CALL } from '../../constants.js';
 import { NftEntity, NftUpdate, UrlParams } from '../entities/nft.entity.js';
 import { NftService } from '../service/nft.service.js';
-import { FileService, File } from '../service/file/file.service.js';
+import { FileService } from '../service/file/file.service.js';
 import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { UserEntity } from '../../user/entities/user.entity.js';
 import { NftFilterParams, NftFilters } from '../params.js';
@@ -28,6 +28,7 @@ import {
   validatePaginationParams,
 } from '../../utils.js';
 import { ContentRestrictions } from 'kanvas-stm-lib';
+import { File } from '../../media.js';
 
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
@@ -230,7 +231,11 @@ export class NftController {
     }
 
     if (filesArray?.length) {
-      filesArray = await this.fileService.addMissingFiles(filesArray, uuidv4());
+      filesArray = await this.fileService.addMissingFiles({
+        filesArray,
+        tempDirId: uuidv4(),
+        nftId,
+      });
     }
 
     const nftUpdates = this.#transformFormDataToNftUpdates(

@@ -1,11 +1,11 @@
-import { FileService, File, Dimension } from './file.service';
+import { FileService, Dimension } from './file.service';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import sizeOf from 'image-size';
 import sharp from 'sharp';
 import { Buffer } from 'node:buffer';
-import { getVideoMetadata } from '../../../media';
+import { getVideoMetadata, File } from '../../../media.js';
 import { v4 as uuidv4 } from 'uuid';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -90,7 +90,11 @@ describe('FileService', () => {
               await getVideoMetadata(artifact);
             const filesArray = [artifact];
 
-            const res = await fileService.addMissingFiles(filesArray, uuidv4());
+            const res = await fileService.addMissingFiles({
+              filesArray,
+              tempDirId: uuidv4(),
+              nftId: 123,
+            });
             const display = res.find((file) => file.originalname === 'display');
             const thumbnail = res.find(
               (file) => file.originalname === 'thumbnail',
@@ -101,7 +105,7 @@ describe('FileService', () => {
             expect(isImage(thumbnail!)).toBe(true);
 
             expect(
-              expectedDimensions(display!, artifactWidth, artifactHeight),
+              expectedDimensions(display!, artifactWidth!, artifactHeight!),
             ).toBe(true);
 
             const { width: displayWidth, height: displayHeight } = sizeOf(
@@ -137,7 +141,11 @@ describe('FileService', () => {
               await getVideoMetadata(artifact);
             const filesArray = [artifact];
 
-            const res = await fileService.addMissingFiles(filesArray, uuidv4());
+            const res = await fileService.addMissingFiles({
+              filesArray,
+              tempDirId: uuidv4(),
+              nftId: 123,
+            });
             const display = res.find((file) => file.originalname === 'display');
             const thumbnail = res.find(
               (file) => file.originalname === 'thumbnail',
@@ -147,10 +155,10 @@ describe('FileService', () => {
             expect(isImage(thumbnail!)).toBe(true);
 
             expect(
-              expectedDimensions(display!, artifactWidth, artifactHeight),
+              expectedDimensions(display!, artifactWidth!, artifactHeight!),
             ).toBe(true);
             expect(
-              expectedDimensions(thumbnail!, artifactWidth, artifactHeight),
+              expectedDimensions(thumbnail!, artifactWidth!, artifactHeight!),
             ).toBe(true);
 
             const artifactAfterManipulation = res.find(
@@ -168,7 +176,11 @@ describe('FileService', () => {
           const display = await displayMock(300, 320);
           const filesArray = [artifact, display];
 
-          const res = await fileService.addMissingFiles(filesArray, uuidv4());
+          const res = await fileService.addMissingFiles({
+            filesArray,
+            tempDirId: uuidv4(),
+            nftId: 123,
+          });
           const thumbnail = res.find(
             (file) => file.originalname === 'thumbnail',
           );
@@ -192,7 +204,11 @@ describe('FileService', () => {
           const display = await displayMock(400, 340);
           const filesArray = [artifact, display];
 
-          const res = await fileService.addMissingFiles(filesArray, uuidv4());
+          const res = await fileService.addMissingFiles({
+            filesArray,
+            tempDirId: uuidv4(),
+            nftId: 123,
+          });
           const thumbnail = res.find(
             (file) => file.originalname === 'thumbnail',
           );
@@ -222,14 +238,18 @@ describe('FileService', () => {
             await getVideoMetadata(artifact);
           const filesArray = [artifact, thumbnail];
 
-          const res = await fileService.addMissingFiles(filesArray, uuidv4());
+          const res = await fileService.addMissingFiles({
+            filesArray,
+            tempDirId: uuidv4(),
+            nftId: 123,
+          });
           const display = res.find((file) => file.originalname === 'display');
 
           expect(res.length).toBe(3);
           expect(isImage(display!)).toBe(true);
 
           expect(
-            expectedDimensions(display!, artifactWidth, artifactHeight),
+            expectedDimensions(display!, artifactWidth!, artifactHeight!),
           ).toBe(true);
 
           const afterManipulation = res.filter(
@@ -254,7 +274,11 @@ describe('FileService', () => {
           const artifact = artifactMock(buffer, 'image');
           const filesArray = [artifact];
 
-          const res = await fileService.addMissingFiles(filesArray, uuidv4());
+          const res = await fileService.addMissingFiles({
+            filesArray,
+            tempDirId: uuidv4(),
+            nftId: 123,
+          });
           const display = res.find((file) => file.originalname === 'display');
           const thumbnail = res.find(
             (file) => file.originalname === 'thumbnail',
@@ -282,7 +306,11 @@ describe('FileService', () => {
           const artifact = artifactMock(buffer, 'image');
           const filesArray = [artifact];
 
-          const res = await fileService.addMissingFiles(filesArray, uuidv4());
+          const res = await fileService.addMissingFiles({
+            filesArray,
+            tempDirId: uuidv4(),
+            nftId: 123,
+          });
           const display = res.find((file) => file.originalname === 'display');
           const thumbnail = res.find(
             (file) => file.originalname === 'thumbnail',
@@ -312,7 +340,11 @@ describe('FileService', () => {
           const display = await displayMock(300, 320);
           const filesArray = [artifact, display];
 
-          const res = await fileService.addMissingFiles(filesArray, uuidv4());
+          const res = await fileService.addMissingFiles({
+            filesArray,
+            tempDirId: uuidv4(),
+            nftId: 123,
+          });
           const thumbnail = res.find(
             (file) => file.originalname === 'thumbnail',
           );
@@ -335,7 +367,11 @@ describe('FileService', () => {
           const display = await displayMock(350, 360);
           const filesArray = [artifact, display];
 
-          const res = await fileService.addMissingFiles(filesArray, uuidv4());
+          const res = await fileService.addMissingFiles({
+            filesArray,
+            tempDirId: uuidv4(),
+            nftId: 123,
+          });
           const thumbnail = res.find(
             (file) => file.originalname === 'thumbnail',
           );
@@ -367,7 +403,11 @@ describe('FileService', () => {
           const thumbnail = await thumbnailMock();
           const filesArray = [artifact, thumbnail];
 
-          const res = await fileService.addMissingFiles(filesArray, uuidv4());
+          const res = await fileService.addMissingFiles({
+            filesArray,
+            tempDirId: uuidv4(),
+            nftId: 123,
+          });
           const display = res.find((file) => file.originalname === 'display');
 
           expect(res.length).toBe(3);
