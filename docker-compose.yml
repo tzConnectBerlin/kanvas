@@ -128,7 +128,6 @@ services:
           exit 0
         fi
         
-        ./script/wait-db
         ./script/entrypoint
       '
     ports:
