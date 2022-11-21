@@ -317,6 +317,9 @@ export async function resetDb(resetForLegacyTest = false): Promise<number[]> {
       'marketing',
       'peppermint.operations',
       'tezpay.payments',
+      'ip_country',
+      'country',
+      'vat',
     ];
     for (const t of tables) {
       await db.query(`delete from ${t}`);

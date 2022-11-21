@@ -1547,8 +1547,8 @@ WHERE country_short = $1
     return vatPercentage / 100;
   }
 
-  ipAddrToNum(ip: string): number {
-    const ipParts = ip.split('.');
+  ipAddrToNum(ipAddr: string): number {
+    const ipParts = ipAddr.split('.');
     return (
       ((+ipParts[0] * 256 + +ipParts[1]) * 256 + +ipParts[2]) * 256 +
       +ipParts[3]
