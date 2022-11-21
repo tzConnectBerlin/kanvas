@@ -441,7 +441,7 @@ SELECT
         await testUtils.withDbConn(async (db) => {
           expect(
             (await db.query('SELECT * FROM marketing')).rows,
-          ).toStrictEqual([
+          ).toMatchObject([
             {
               id: 1,
               address: walletAddress,
@@ -475,7 +475,7 @@ SELECT
         await testUtils.withDbConn(async (db) => {
           expect(
             (await db.query('SELECT * FROM marketing')).rows,
-          ).toStrictEqual([
+          ).toMatchObject([
             {
               id: 1,
               address: walletAddress,
