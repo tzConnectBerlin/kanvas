@@ -4,6 +4,16 @@ import { FfprobeStream, FfprobeData } from 'fluent-ffmpeg';
 import { isBottom, maybe } from './utils.js';
 import { Logger } from '@nestjs/common';
 import { imageSize } from 'image-size';
+import { Buffer } from 'node:buffer';
+
+export interface File {
+  originalname: string;
+  fieldname: string;
+  mimetype: string;
+  encoding: string;
+  buffer: Buffer;
+  size: number;
+}
 
 export interface ContentMetadata {
   mimeType: string;
@@ -18,7 +28,7 @@ export interface ContentMetadata {
 
 export async function getContentMetadata(
   nftId: number,
-  file: any,
+  file: File,
 ): Promise<ContentMetadata> {
   let res = {
     mimeType: file.mimetype,
@@ -56,7 +66,7 @@ interface VideoMetadata {
   dataRate?: { value: number; unit: string };
 }
 
-function getVideoMetadata(file: any): Promise<VideoMetadata> {
+export function getVideoMetadata(file: File): Promise<VideoMetadata> {
   return new Promise((resolve) => {
     ffmpeg(intoStream(file.buffer)).ffprobe((err, metadata) => {
       resolve(videoMetadataFromFfprobe(err, metadata));
@@ -135,7 +145,7 @@ interface ImageMetadata {
   height?: number;
 }
 
-function getImageMetadata(file: any): ImageMetadata {
+function getImageMetadata(file: File): ImageMetadata {
   const dimensions = imageSize(file.buffer);
   return {
     width: dimensions.width,
