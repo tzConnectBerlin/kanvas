@@ -192,6 +192,7 @@ WHERE id = $2
         paymentIntents: {
           create: () => {
             return {
+              id: 'identifier',
               client_secret: 'secret identifier',
             };
           },
@@ -209,6 +210,7 @@ WHERE id = $2
       expect(paymentIntent).toMatchObject({
         provider: 'stripe',
         providerPaymentDetails: {
+          id: 'identifier',
           clientSecret: 'secret identifier',
         },
         nfts: [
@@ -236,7 +238,7 @@ WHERE id = $2
           (await db.query('SELECT external_payment_id FROM payment')).rows[0][
             'external_payment_id'
           ],
-        ).toEqual('secret identifier');
+        ).toEqual('identifier');
       });
     });
 
@@ -249,6 +251,7 @@ WHERE id = $2
         paymentIntents: {
           create: () => {
             return {
+              id: 'identifier',
               client_secret: 'secret identifier',
             };
           },
@@ -277,6 +280,7 @@ WHERE id = $2
         paymentIntents: {
           create: () => {
             return {
+              id: 'identifier',
               somethingDifferent: '',
             };
           },
@@ -339,6 +343,7 @@ WHERE id = $2
         paymentIntents: {
           create: () => {
             return {
+              id: 'identifier',
               client_secret: 'secret identifier',
             };
           },
@@ -356,6 +361,7 @@ WHERE id = $2
       expect(paymentIntent).toMatchObject({
         provider: 'stripe',
         providerPaymentDetails: {
+          id: 'identifier',
           clientSecret: 'secret identifier',
         },
         nfts: [
