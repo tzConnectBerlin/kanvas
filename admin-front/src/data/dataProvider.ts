@@ -48,35 +48,19 @@ const dataProvider = (
     const rangeStart = (page - 1) * perPage;
     const rangeEnd = perPage;
 
-    let query = {};
-    switch (resource) {
-      case 'analytics/sales/priceVolume/snapshot':
-        query = {
-          sort: JSON.stringify([
-            field.startsWith('attributes.')
-              ? field.slice('attributes.'.length)
-              : field,
-            order.toLowerCase(),
-          ]),
-          range: JSON.stringify([rangeStart, rangeEnd]),
-          [Object.keys(params.filter)[0]]: params.filter.resolution,
-        };
-        break;
-      default:
-        query = {
-          sort: JSON.stringify([
-            field.startsWith('attributes.')
-              ? field.slice('attributes.'.length)
-              : field,
-            order.toLowerCase(),
-          ]),
-          range: JSON.stringify([rangeStart, rangeEnd]),
-          filters:
-            Object.keys(params.filter).length === 0
-              ? undefined
-              : JSON.stringify(params.filter),
-        };
-    }
+    const query = {
+      sort: JSON.stringify([
+        field.startsWith('attributes.')
+          ? field.slice('attributes.'.length)
+          : field,
+        order.toLowerCase(),
+      ]),
+      range: JSON.stringify([rangeStart, rangeEnd]),
+      filters:
+        Object.keys(params.filter).length === 0
+          ? undefined
+          : JSON.stringify(params.filter),
+    };
 
     const url = `${apiUrl}/${resource}?${stringify(query, {
       arrayFormat: 'bracket',

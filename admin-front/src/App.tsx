@@ -3,8 +3,10 @@ import { Admin, Resource } from 'react-admin';
 import { Route } from 'react-router-dom';
 // import jsonServerProvider from 'ra-data-json-server';
 import BurstMode from '@mui/icons-material/BurstMode';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
 import InsightsIcon from '@mui/icons-material/Insights';
+import RecentActorsIcon from '@mui/icons-material/RecentActors';
 import { theme } from 'theme';
 
 import authProvider from 'auth/authProvider';
@@ -18,6 +20,7 @@ import NotFound from 'components/NotFound';
 import { ActivityList } from 'components/Activities/Activities';
 import TimeSeries from 'components/TimeSeries/TimeSeries';
 import Profile from 'components/Profile';
+import { UsersActivityList } from './components/UsersActivity/UsersActivityList';
 
 //for data from the nest admin api
 
@@ -52,6 +55,10 @@ function App() {
         list={UserList}
         edit={UserEdit}
         create={UserCreate}
+        icon={ManageAccountsIcon}
+        options={{
+          label: 'Accounts',
+        }}
       />
       <Resource
         name="nft"
@@ -59,6 +66,17 @@ function App() {
         edit={NftEdit}
         create={NftCreate}
         icon={BurstMode}
+        options={{
+          label: 'Nfts',
+        }}
+      />
+      <Resource
+        name="analytics/users"
+        list={UsersActivityList}
+        icon={RecentActorsIcon}
+        options={{
+          label: 'User activity',
+        }}
       />
       <Resource
         name="analytics/activities"
