@@ -15,13 +15,12 @@ import {
 } from '@nestjs/common';
 import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { JwtAuthGuard } from '../../authentication/guards/jwt-auth.guard.js';
-import { PaymentService } from "../service/payment.service";
+import { PaymentService } from '../service/payment.service.js';
 import { UserEntity } from '../../user/entity/user.entity.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
 import { validateRequestedCurrency } from '../../paramUtils.js';
-import { PaymentProvider } from "../entity/payment.entity";
+import { PaymentIntent, PaymentProvider } from '../entity/payment.entity.js';
 
-import type { PaymentIntent } from "../entity/payment.entity";
 import { getClientIp } from '../../utils.js';
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
