@@ -146,7 +146,7 @@ export class PaymentService {
     const externalPaymentId = constructedEvent.data.object.id;
     const paymentId = (
       await this.conn.query(
-        `SELECT payment_id WHERE external_payment_id = $1`,
+        `SELECT payment_id FROM payment WHERE external_payment_id = $1`,
         [externalPaymentId],
       )
     ).rows[0]['payment_id'];
