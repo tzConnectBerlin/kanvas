@@ -1272,7 +1272,7 @@ SET status = $3
 WHERE nft_order_id = $1
   AND provider = $2
   AND NOT status = ANY($4)
-RETURNING COALESCE(external_payment_id, payment_id)
+RETURNING COALESCE(external_payment_id, payment_id) AS payment_id
       `,
       [orderId, provider, newStatus, this.FINAL_STATES],
     );
