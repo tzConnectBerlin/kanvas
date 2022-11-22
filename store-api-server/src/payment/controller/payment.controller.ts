@@ -24,11 +24,20 @@ import { STRIPE_WEBHOOK_SECRET } from '../../constants.js';
 
 import { getClientIp } from '../../utils.js';
 
-
 @Controller('payment')
 export class PaymentController {
   constructor(private paymentService: PaymentService) {}
 
+  /**
+   * @apiGroup Payment
+   * @api {post} /payment/stripe-webhook Stripe webhook, only to be called by Stripe
+   * @apiHeader {String} stripe-signature Stripe signature, proving it was Stripe who called this endpoint
+   * @apiHeaderExample {json} Header-Example:
+   *     {
+   *      "stripe-signature": "a valid stripe signature"
+   *     }
+   * @apiName stripeWebhook
+   */
   @Post('/stripe-webhook')
   async stripeWebhook(
     @Headers('stripe-signature') signature: string,
@@ -73,7 +82,7 @@ export class PaymentController {
    * @apiDescription Checking out the cart involves creating a payment intent, which then has to be met (finalized) in the frontend application. For example, if paying with Stripe, the payment intent has to be finalized by applying Stripe's SDK in the frontend.
    *
    * The "clientSecret" in the response is the important piece that links the following finalization of the payment with the newly created payment intent.
-   * @apiPermission logged-in user
+   * @apiPermission logged-in user. The vatRate in the response is a range from 0 (0%) to 1 (100%)
    * @apiBody {String="tezpay","stripe","wert","simplex","test_provider"} [paymentProvider="stripe"] The payment provider used for the intent
    * @apiBody {String} [currency] The currency used for the payment intent, uses a base currency if not provided
    * @apiBody {Boolean} [recreateNftOrder=false] Will cancel an already pending NFT order if the user has one if set to true
@@ -85,10 +94,16 @@ export class PaymentController {
    *
    * @apiSuccessExample Example Success-Response:
    *  {
+   *    "id": "pi_3L2foUEdRDZNp7JF0yajTKrM",
    *    "amount": "0.66",
-   *    "currency": "EUR",
-   *    "clientSecret": "pi_3L2foUEdRDZNp7JF0yajTKrM_secret_cs3SWGJy7xdd5M19EwShCjbdE",
-   *    "id": "pi_3L2foUEdRDZNp7JF0yajTKrM"
+   *    "currency": "XTZ",
+   *    "vatRate": 0.1,
+   *    "amountExclVat": "0.55",
+   *    "providerPaymentDetails": {
+   *      "paypointMessage": "pi_3L2foUEdRDZNp7JF0yajTKrM_secret_cs3SWGJy7xdd5M19EwShCjbdE",
+   *      "receiverAddress": "KT1..",
+   *      "mutezAmount": "660000"
+   *    }
    *  }
    * @apiName createPaymentIntent
    */
@@ -118,19 +133,26 @@ export class PaymentController {
       // extracting clientIp from paymentIntent like this, best way to get the
       // spread syntax below to not pickup clientIp (we don't want to have this
       // field in the response of this API call)
-      const { clientIp: undefined, ...paymentIntent } =
-        await this.paymentService.createPayment(
-          user,
-          cookieSession.uuid,
-          paymentProvider,
-          currency,
-          getClientIp(request),
-          recreateNftOrder,
-        );
+      const {
+        clientIp: undefined,
+        amountExclVat,
+        ...paymentIntent
+      } = await this.paymentService.createPayment(
+        user,
+        cookieSession.uuid,
+        paymentProvider,
+        currency,
+        getClientIp(request),
+        recreateNftOrder,
+      );
       const order = await this.paymentService.getPaymentOrder(paymentIntent.id);
 
       return {
         ...paymentIntent,
+        amountExclVat: this.paymentService.currencyService.toFixedDecimals(
+          paymentIntent.currency,
+          amountExclVat,
+        ),
         paymentDetails: paymentIntent.providerPaymentDetails,
         nfts: order.nfts,
         expiresAt: order.expiresAt,
