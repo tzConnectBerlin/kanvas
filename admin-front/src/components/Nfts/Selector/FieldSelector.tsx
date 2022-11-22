@@ -206,7 +206,7 @@ export const FieldSelector: FC<FieldSelectorProps> = ({ ...props }) => {
     );
   }
 
-  if (props.type === 'content_uri' && props.attributesName !== 'artifact') {
+  if (props.type === 'content' && props.attributesName !== 'artifact') {
     return (
       <Stack direction="column">
         <Typography
@@ -215,7 +215,11 @@ export const FieldSelector: FC<FieldSelectorProps> = ({ ...props }) => {
         >
           {props.label}
         </Typography>
-        {renderContent('100px', '100px', props.record[props.attributesName])}
+        {renderContent(
+          '100px',
+          '100px',
+          props.record[props.attributesName]?.uri,
+        )}
       </Stack>
     );
   } else return null;

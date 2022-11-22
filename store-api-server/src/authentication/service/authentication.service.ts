@@ -8,13 +8,12 @@ import ts_results from 'ts-results';
 import { SIGNED_LOGIN_ENABLED, TOKEN_GATE } from '../../constants.js';
 const { Ok } = ts_results;
 
-import { createRequire } from 'module';
-
 import type { IAuthentication } from './authentication.js';
 import { TokenGate } from 'token-gate';
 import { TokenGateEndpointInfo } from '../entity/authentication.entity.js';
 import { maybe } from '../../utils.js';
 
+import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcrypt');
 

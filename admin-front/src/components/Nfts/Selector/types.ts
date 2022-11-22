@@ -2,7 +2,7 @@ export type FormFieldInputType =
   | 'string'
   | 'boolean'
   | 'number'
-  | 'content_uri'
+  | 'content'
   | 'number[]'
   | 'votes'
   | 'date'

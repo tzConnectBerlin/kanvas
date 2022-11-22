@@ -120,6 +120,13 @@ export class AnalyticsService {
   async getActivities(
     params: ActivityFilterParams,
   ): Promise<{ data: Activity[]; count: number }> {
+    const values = [
+      params.filters?.kind,
+      params.filters?.from,
+      params.filters?.to,
+      params.filters?.startDate,
+      params.filters?.endDate,
+    ];
     const qryRes = await this.storeRepl.query(
       `
 SELECT
@@ -189,11 +196,12 @@ FROM (
 WHERE ($1::TEXT[] IS NULL OR kind = ANY($1::TEXT[]))
   AND ($2::TEXT[] IS NULL OR "from" = ANY($2::TEXT[]))
   AND ($3::TEXT[] IS NULL OR "to" = ANY($3::TEXT[]))
+  AND ($4::TIMESTAMP IS NULL OR $5::TIMESTAMP IS NULL OR q.timestamp BETWEEN $4 AND $5)
 ORDER BY "${params.orderBy}" ${params.orderDirection}
 OFFSET ${params.pageOffset}
 LIMIT ${params.pageSize}
 `,
-      [params.filters.kind, params.filters.from, params.filters.to],
+      values,
     );
 
     if (qryRes.rowCount === 0) {

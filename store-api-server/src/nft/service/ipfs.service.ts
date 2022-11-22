@@ -5,19 +5,49 @@ import {
   STORE_PUBLISHERS,
   MINTER_ADDRESS,
   IPFS_PIN_PROVIDER,
+  IPFS_RIGHTS_URI,
+  IPFS_RIGHTS_MIMETYPE,
   DEFAULT_ROYALTIES_MINTER_SHARE,
 } from '../../constants.js';
 import { NftEntity } from '../../nft/entity/nft.entity.js';
 import { isBottom } from '../../utils.js';
-import { PinataService } from '../../ipfs_pin.module.js';
-
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const mime = require('mime');
 
 interface Royalties {
   decimals: number;
   shares: { [key: string]: number };
+}
+interface IpfsFormat {
+  [key: string]: any;
+  uri: string;
+}
+
+interface NftMetadata {
+  name: string;
+  description: string;
+  date: string;
+  tags: string[];
+
+  decimals: number;
+  isBooleanAmount: boolean;
+
+  artifactUri: string;
+  displayUri: string;
+  thumbnailUri: string;
+  rightsUri?: string;
+  // also setting rightUrl, this is a typo in the TZ-21 spec, but best to
+  // support the intended name format (rightsUrl) as well as the typod
+  // format (rightUrl)
+  rightUri?: string;
+  formats: IpfsFormat[];
+
+  minter: string;
+  creators: string[];
+  contributors: string[];
+  publishers: string[];
+
+  royalties: Royalties;
+
+  signature: string;
 }
 
 @Injectable()
@@ -86,7 +116,10 @@ WHERE id = $1
     );
   }
 
-  async nftMetadataJson(nft: NftEntity, signature: string): Promise<any> {
+  async nftMetadataJson(
+    nft: NftEntity,
+    signature: string,
+  ): Promise<NftMetadata> {
     const createdAt = new Date(nft.createdAt * 1000).toISOString();
 
     let [artifactIpfs, displayIpfs, thumbnailIpfs] = [
@@ -99,37 +132,11 @@ WHERE id = $1
         : undefined),
     ];
 
-    const formats: { uri: string; mimeType: string }[] = [
-      [artifactIpfs, nft.artifactUri],
-      [displayIpfs, nft.displayUri],
-      [thumbnailIpfs, nft.thumbnailUri],
-    ]
-      .reduce(
-        (xs: string[][], [ipfsUri, origAssetUri]: (string | undefined)[]) => {
-          if (
-            typeof ipfsUri === 'undefined' ||
-            typeof origAssetUri === 'undefined' ||
-            typeof xs.find((x) => x[0] === ipfsUri) !== 'undefined'
-          ) {
-            return xs;
-          }
-          return [...xs, [ipfsUri, origAssetUri]];
-        },
-        [],
-      )
-      .flatMap(([ipfsUri, origAssetUri]) => {
-        const format = this.#specifyIpfsUriFormat(ipfsUri, origAssetUri);
-        if (typeof format === 'undefined') {
-          return [];
-        }
-        return [format];
-      });
-
     const royalties = this.#defaultRoyalties();
 
     displayIpfs = displayIpfs ?? artifactIpfs;
     thumbnailIpfs = thumbnailIpfs ?? displayIpfs;
-    return {
+    const res: NftMetadata = {
       decimals: 0,
 
       name: nft.name,
@@ -140,8 +147,34 @@ WHERE id = $1
       artifactUri: artifactIpfs,
       displayUri: displayIpfs,
       thumbnailUri: thumbnailIpfs,
-      formats,
-
+      formats: Object.keys(nft.formats ?? []).reduce(
+        (res: IpfsFormat[], k: string) => {
+          let uri: string | undefined;
+          switch (k) {
+            case 'artifact':
+              uri = artifactIpfs;
+              break;
+            case 'display':
+              uri = displayIpfs;
+              break;
+            case 'thumbnail':
+              uri = thumbnailIpfs;
+              break;
+          }
+          if (
+            typeof uri === 'undefined' ||
+            res.map((format) => format.uri).includes(uri)
+          ) {
+            return res;
+          }
+          res.push({
+            uri,
+            ...nft.formats![k],
+          });
+          return res;
+        },
+        [],
+      ),
       minter: MINTER_ADDRESS,
       creators: [MINTER_ADDRESS],
       contributors: [], // TODO
@@ -152,6 +185,19 @@ WHERE id = $1
 
       royalties,
     };
+
+    if (typeof IPFS_RIGHTS_URI !== 'undefined') {
+      res.rightsUri = IPFS_RIGHTS_URI;
+      res.rightUri = IPFS_RIGHTS_URI;
+      if (typeof IPFS_RIGHTS_MIMETYPE !== 'undefined') {
+        res.formats.push({
+          uri: IPFS_RIGHTS_URI,
+          mimeType: IPFS_RIGHTS_MIMETYPE,
+        });
+      }
+    }
+
+    return res;
   }
 
   #defaultRoyalties(): Royalties {
@@ -161,22 +207,5 @@ WHERE id = $1
     };
     royalties.shares[`${MINTER_ADDRESS}`] = DEFAULT_ROYALTIES_MINTER_SHARE;
     return royalties;
-  }
-
-  #specifyIpfsUriFormat(
-    ipfsUri: string,
-    origAssetUri: string,
-  ): { uri: string; mimeType: string } | undefined {
-    const mimeType = mime.getType(origAssetUri);
-    if (isBottom(mimeType)) {
-      Logger.warn(
-        `failed to determine content type from asset uri, ipfsUri=${ipfsUri}, origAssetUri=${origAssetUri}`,
-      );
-      return undefined;
-    }
-    return {
-      uri: ipfsUri,
-      mimeType,
-    };
   }
 }

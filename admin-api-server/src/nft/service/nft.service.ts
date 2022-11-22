@@ -43,12 +43,14 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const mime = require('mime');
 
+import { getContentMetadata, ContentMetadata } from '../../media.js';
+
 @Injectable()
 export class NftService {
   stmFileWatcher: FSWatcher;
   stm: StateTransitionMachine;
   nftLock: Lock<number>;
-  CONTENT_TYPE = 'content_uri';
+  CONTENT_TYPE = 'content';
   TOP_LEVEL_IDENTIFIERS = ['id', 'state', 'created_at', 'updated_at'];
   DELETABLE_IN_STATES = ['creation', 'setup_nft'];
 
@@ -292,7 +294,7 @@ RETURNING id
       const actor = await this.#getActorForNft(user, nft);
       if (
         !actor.roles.some(
-          (userRole) => userRole === 'creator' || userRole === 'admin',
+          (userRole: string) => userRole === 'creator' || userRole === 'admin',
         )
       ) {
         throw new HttpException(
@@ -367,12 +369,14 @@ WHERE id = $1
 
     const extension = mime.getExtension(file.mimetype);
     const fileName = `${FILE_PREFIX}_${nftId}_${attribute}.${extension}`;
-    // we'll simply store the uri as a pointer to the image in our own db
     const contentUri = await this.s3Service.uploadFile(file, fileName);
 
     return <NftUpdate>{
       attribute: attribute,
-      value: JSON.stringify(contentUri),
+      value: JSON.stringify({
+        uri: contentUri,
+        metadata: await getContentMetadata(nftId, file),
+      }),
     };
   }
 
@@ -484,14 +488,26 @@ WHERE TARGET.value != EXCLUDED.value
       ADMIN_PRIVATE_KEY,
     );
 
+    const formats: { [key: string]: ContentMetadata } = {};
+    if (typeof attr.artifact.metadata !== 'undefined') {
+      formats['artifact'] = attr.artifact.metadata;
+    }
+    if (typeof attr.display?.metadata !== 'undefined') {
+      formats['display'] = attr.display.metadata;
+    }
+    if (typeof attr.thumbnail?.metadata !== 'undefined') {
+      formats['thumbnail'] = attr.thumbnail.metadata;
+    }
+
     await axios.post(STORE_API + '/nfts/create', {
       id: nft.id,
       name: attr.name,
       description: attr.description,
 
-      artifactUri: attr.artifact,
-      displayUri: attr.display,
-      thumbnailUri: attr.thumbnail,
+      artifactUri: attr.artifact.uri,
+      displayUri: attr.display?.uri,
+      thumbnailUri: attr.thumbnail?.uri,
+      formats,
 
       price: attr.price,
       categories: attr.categories,

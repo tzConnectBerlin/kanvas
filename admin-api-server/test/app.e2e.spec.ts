@@ -2133,8 +2133,11 @@ describe('AppController (e2e)', () => {
       .set('authorization', bearer)
       .send({
         publish_vote: JSON.stringify('yes'),
-        artifact: JSON.stringify('someuri'),
-        thumbnail: JSON.stringify('somethumbnailuri'),
+        artifact: JSON.stringify({
+          uri: 'someuri',
+          metadata: { height: 500, width: 450 },
+        }),
+        thumbnail: JSON.stringify({ uri: 'somethumbnailuri' }),
         description: JSON.stringify('some long description'),
       });
     expect(res.statusCode).toEqual(200);
@@ -2149,31 +2152,55 @@ describe('AppController (e2e)', () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body.state).toEqual('finish');
 
-    const storeNft = await queryStoreDbNft(nftId);
-    delete storeNft.nft.created_at;
-    delete storeNft.nft.onsale_from;
-    delete storeNft.nft.onsale_until;
+    const storeNft = (
+      await axios({
+        url: process.env['STORE_API'] + `/nfts/${nftId}`,
+        method: 'GET',
+      })
+    ).data;
+
+    delete storeNft.createdAt;
+    delete storeNft.launchAt;
+    delete storeNft.onsaleFrom;
+    delete storeNft.onsaleUntil;
 
     expect(storeNft).toStrictEqual({
+      id: nftId,
+      name: 'some name',
+      description: 'some long description',
+      isProxy: false,
+      ipfsHash: null,
+      metadataIpfs: null,
+      artifactIpfs: null,
+      displayIpfs: null,
+      thumbnailIpfs: null,
+      artifactUri: 'someuri',
+      displayUri: 'someuri',
+      thumbnailUri: 'somethumbnailuri',
+      price: '105.10',
+      categories: [
+        { id: 3, name: 'Applied Art', description: 'Not actually visual' },
+        { id: 4, name: 'Drawing', description: 'Sub fine art category' },
+        { id: 5, name: 'Painting', description: 'Sub fine art category' },
+      ],
+      formats: {
+        artifact: { height: 500, width: 450 },
+      },
+      metadata: null,
+      editionsSize: 4,
+      editionsAvailable: 4,
+      editionsSold: 0,
+      mintOperationHash: null,
+    });
+
+    expect(await queryStoreDbNft(nftId)).toMatchObject({
       nft: {
-        id: 35,
-        nft_name: 'some name',
         artifact_ipfs: 'ipfs-mock://someuri',
         display_ipfs: 'ipfs-mock://someuri',
         thumbnail_ipfs: 'ipfs-mock://somethumbnailuri',
-        metadata: null,
-        metadata_ipfs: 'ipfs-mock://some name',
-        artifact_uri: 'someuri',
-        price: '10510', // in cents in the db
-        editions_size: 4,
-        view_count: 0,
-        description: 'some long description',
-        display_uri: null,
-        thumbnail_uri: 'somethumbnailuri',
         signature:
           'sigXLxpqc2gGdUTb2hgqvwq2mjoAGVY3eY9HBQCQxDTiJ257kbaQ3BxrrM6kC7ppW3K2foNMW44xk5C1wcHh8uStmyFhxjRk',
       },
-      categories: [3, 4, 5],
     });
   });
 
@@ -2273,8 +2300,8 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer)
         .send({
           publish_vote: JSON.stringify('yes'),
-          artifact: JSON.stringify('someuri'),
-          thumbnail: JSON.stringify('somethumbnailuri'),
+          artifact: JSON.stringify({ uri: 'someuri' }),
+          thumbnail: JSON.stringify({ uri: 'somethumbnailuri' }),
           description: JSON.stringify('some long description'),
         });
       expect(res.statusCode).toEqual(200); // need 2 votes
@@ -2411,8 +2438,8 @@ describe('AppController (e2e)', () => {
       create_ready: 'boolean',
       delist_vote: 'votes',
       description: 'string',
-      artifact: 'string',
-      thumbnail: 'string',
+      artifact: 'any',
+      thumbnail: 'any',
       price: 'number',
       edition_size: 'number',
       onsale_from: 'date',
@@ -2426,6 +2453,163 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail('GET /nft/attributes requires logged in user', async () => {
     const res = await request(app.getHttpServer()).get('/nft/attributes');
     expect(res.statusCode).toEqual(401);
+  });
+
+  describe('GET /analytics/activities with "startDate" and "endDate" filter', () => {
+    skipOnPriorFail(
+      'will only return data that is between startDate and endDate',
+      async () => {
+        await clearEmulatedNftSales();
+        await emulateNftSale(
+          1,
+          [1, 30],
+          new Date('August 12, 1995 12:34:00'), // 808223640
+        );
+        await emulateNftSale(
+          1,
+          [4, 7, 10],
+          new Date('November 24, 1995 01:00:00'), // 817171200
+        );
+        await emulateNftSale(
+          2,
+          [2, 27],
+          new Date('December 01, 1995 08:24:00'), // 817802640
+        );
+        const { bearer } = await loginAsAdmin(app);
+        let res = await request(app.getHttpServer())
+          .get('/analytics/activities')
+          .set('authorization', bearer)
+          .query({
+            filters: {
+              startDate: '1995-08-12T23:00:00.000Z', // 808268400
+              endDate: '1995-12-01T03:21:00.000Z', // 817788060
+            },
+          });
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toStrictEqual({
+          count: 3,
+          data: [
+            {
+              amount: 1,
+              from: null,
+              id: 1,
+              kind: 'sale',
+              price: '4.30',
+              timestamp: 817171200,
+              to: 'addr',
+              tokenId: 4,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 2,
+              kind: 'sale',
+              price: '9.80',
+              timestamp: 817171200,
+              to: 'addr',
+              tokenId: 7,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 3,
+              kind: 'sale',
+              price: '9.20',
+              timestamp: 817171200,
+              to: 'addr',
+              tokenId: 10,
+            },
+          ],
+        });
+
+        res = await request(app.getHttpServer())
+          .get('/analytics/activities')
+          .set('authorization', bearer)
+          .query({
+            filters: {
+              startDate: '1995-08-12T10:00:00.000Z', // 808221600
+              endDate: '1995-12-01T10:00:00.000Z', // 817812000
+            },
+          });
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toStrictEqual({
+          count: 7,
+          data: [
+            {
+              amount: 1,
+              from: null,
+              id: 1,
+              kind: 'sale',
+              price: '0.10',
+              timestamp: 808223640,
+              to: 'addr',
+              tokenId: 1,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 2,
+              kind: 'sale',
+              price: '7.60',
+              timestamp: 808223640,
+              to: 'addr',
+              tokenId: 30,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 3,
+              kind: 'sale',
+              price: '4.30',
+              timestamp: 817171200,
+              to: 'addr',
+              tokenId: 4,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 4,
+              kind: 'sale',
+              price: '9.80',
+              timestamp: 817171200,
+              to: 'addr',
+              tokenId: 7,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 5,
+              kind: 'sale',
+              price: '9.20',
+              timestamp: 817171200,
+              to: 'addr',
+              tokenId: 10,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 6,
+              kind: 'sale',
+              price: '7.80',
+              timestamp: 817802640,
+              to: 'tz1',
+              tokenId: 2,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 7,
+              kind: 'sale',
+              price: '1.20',
+              timestamp: 817802640,
+              to: 'tz1',
+              tokenId: 27,
+            },
+          ],
+        });
+      },
+    );
   });
 
   describe('GET /analytics/sales/*/timeseries will fill missing datapoints', () => {
