@@ -7,6 +7,14 @@ export interface MetricEntity {
   value: number;
 }
 
+export interface MarketingEntity {
+  id: number;
+  address: string;
+  email?: string[];
+  consent: 'Yes' | 'No';
+  createdAt: string;
+}
+
 export enum Resolution {
   Hour = 'hour',
   Day = 'day',

@@ -1652,6 +1652,11 @@ describe('AppController (e2e)', () => {
         .get('/analytics/activities')
         .set('authorization', bearer);
       expect(res.statusCode).toEqual(403);
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/users')
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(403);
     },
   );
 
@@ -1694,6 +1699,12 @@ describe('AppController (e2e)', () => {
 
       res = await request(app.getHttpServer())
         .get('/analytics/activities')
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toStrictEqual({ count: 0, data: [] });
+
+      res = await request(app.getHttpServer())
+        .get('/analytics/users')
         .set('authorization', bearer);
       expect(res.statusCode).toEqual(200);
       expect(res.body).toStrictEqual({ count: 0, data: [] });
@@ -2087,6 +2098,34 @@ describe('AppController (e2e)', () => {
         ],
         count: 11,
       });
+    },
+  );
+
+  skipOnPriorFail(
+    'admin can access analytics endpoints (part 3; after emulated email register)',
+    async () => {
+      await emulateRegisterEmail('abc', 'max@muster.com', true);
+      await emulateRegisterEmail('defg', 'maxime@muster.com', false);
+      const { bearer } = await loginAsAdmin(app);
+      let res = await request(app.getHttpServer())
+        .get('/analytics/users')
+        .set('authorization', bearer);
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toStrictEqual({
+        data: [
+          {
+            id: 3,
+            timestamp: 819167040,
+            kind: 'sale',
+            from: null,
+            to: 'addr',
+            tokenId: 10,
+            price: '9.20',
+            amount: 1,
+          },
+        ],
+      });
+      await clearEmulatedRegisteredEmails();
     },
   );
 
@@ -2901,6 +2940,28 @@ function newStoreReplConn() {
     password: assertEnv('PGPASSWORD'),
     database: 'store_replication',
   });
+}
+
+async function clearEmulatedRegisteredEmails() {
+  const storeRepl = newStoreReplConn();
+  await storeRepl.query(`DELETE FROM marketing`);
+}
+
+async function emulateRegisterEmail(
+  address: string,
+  email: string,
+  consent: boolean,
+) {
+  const storeRepl = newStoreReplConn();
+  await storeRepl.query(
+    `
+INSERT INTO marketing (address, email, consent
+)
+VALUES ($1, $2, $3, $4)
+RETURNING id
+    `,
+    [address, email, consent],
+  );
 }
 
 async function clearEmulatedNftSales() {

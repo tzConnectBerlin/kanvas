@@ -4,12 +4,14 @@ import {
   MetricEntity,
   MetricParams,
   Activity,
+  MarketingEntity,
 } from '../entity/analytics.entity.js';
 import { PG_CONNECTION_STORE_REPLICATION } from '../../constants.js';
 import { ActivityFilterParams } from '../params.js';
 import { BASE_CURRENCY, CurrencyService } from 'kanvas-api-lib';
 import dayjs, { ManipulateType } from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
+import { PaginationParams } from '../../utils';
 dayjs.extend(utc);
 
 @Injectable()
@@ -115,6 +117,35 @@ export class AnalyticsService {
     return Object.entries(timestampMap).map(([key, value]) => {
       return { timestamp: Number(key), value };
     });
+  }
+
+  async getUsers(params: PaginationParams) {
+    const qryRes = await this.storeRepl.query(
+      `SELECT
+           * 
+        FROM marketing 
+        ORDER BY "${params.orderBy}" ${params.orderDirection}
+        OFFSET ${params.pageOffset}
+        LIMIT ${params.pageSize}`,
+    );
+
+    if (qryRes.rowCount === 0) {
+      return { data: [], count: 0 };
+    }
+
+    return {
+      data: qryRes.rows.map(
+        (row: any) =>
+          <MarketingEntity>{
+            id: row['id'],
+            address: row['address'],
+            email: row['email'],
+            consent: row['consent'] === true ? 'Yes' : 'No',
+            createdAt: row['created_at'],
+          },
+      ),
+      count: Number(qryRes['rowCount']),
+    };
   }
 
   async getActivities(
