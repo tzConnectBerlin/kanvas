@@ -86,6 +86,7 @@ interface PaymentIntentInternal
   extends Omit<PaymentIntent, 'nfts' | 'expiresAt' | 'amountExclVat'> {
   clientIp: string;
   amountExclVat: number;
+  externalPaymentId?: string;
 }
 
 @Injectable()
@@ -504,6 +505,15 @@ WHERE nft_order_id = $1
     let amount = this.currencyService.convertFromBaseUnit(currency, amountUnit);
 
     const id = uuidv4();
+
+    const providerPaymentDetails = await this.#createPaymentDetails(
+      id,
+      usr,
+      provider,
+      currency,
+      amountUnit,
+      clientIp,
+    );
     return {
       id,
 
@@ -515,14 +525,12 @@ WHERE nft_order_id = $1
       clientIp,
 
       provider,
-      providerPaymentDetails: await this.#createPaymentDetails(
-        id,
-        usr,
-        provider,
-        currency,
-        amountUnit,
-        clientIp,
-      ),
+      providerPaymentDetails,
+
+      externalPaymentId:
+        provider === PaymentProvider.STRIPE
+          ? (providerPaymentDetails as StripeDetails).clientSecret
+          : undefined,
     };
   }
 
@@ -874,9 +882,9 @@ WHERE nft_order_id = $1
       await dbTx.query(
         `
 INSERT INTO payment (
-  payment_id, status, nft_order_id, provider, currency, amount, vat_rate, amount_excl_vat, client_ip
+  payment_id, status, nft_order_id, provider, currency, amount, vat_rate, amount_excl_vat, client_ip, external_payment_id
 )
-VALUES ($1, 'created', $2, $3, $4, $5, $6, $7, $8)
+VALUES ($1, 'created', $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING id`,
         [
           paymentIntent.id,
@@ -887,6 +895,7 @@ RETURNING id`,
           paymentIntent.vatRate,
           paymentIntent.amountExclVat,
           paymentIntent.clientIp,
+          paymentIntent.externalPaymentId,
         ],
       );
     } catch (err: any) {
@@ -1263,7 +1272,7 @@ SET status = $3
 WHERE nft_order_id = $1
   AND provider = $2
   AND NOT status = ANY($4)
-RETURNING payment_id
+RETURNING COALESCE(external_payment_id, payment_id)
       `,
       [orderId, provider, newStatus, this.FINAL_STATES],
     );

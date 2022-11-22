@@ -133,18 +133,15 @@ export class PaymentController {
       // extracting clientIp from paymentIntent like this, best way to get the
       // spread syntax below to not pickup clientIp (we don't want to have this
       // field in the response of this API call)
-      const {
-        clientIp: undefined,
-        amountExclVat,
-        ...paymentIntent
-      } = await this.paymentService.createPayment(
-        user,
-        cookieSession.uuid,
-        paymentProvider,
-        currency,
-        getClientIp(request),
-        recreateNftOrder,
-      );
+      const { clientIp, externalPaymentId, amountExclVat, ...paymentIntent } =
+        await this.paymentService.createPayment(
+          user,
+          cookieSession.uuid,
+          paymentProvider,
+          currency,
+          getClientIp(request),
+          recreateNftOrder,
+        );
       const order = await this.paymentService.getPaymentOrder(paymentIntent.id);
 
       return {

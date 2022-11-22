@@ -153,6 +153,13 @@ WHERE id = $2
           Math.pow(10, -xtzDecimals)
         ).toFixed(xtzDecimals),
       ).toEqual(paymentIntent.amount);
+      await testUtils.withDbConn(async (db) => {
+        expect(
+          (await db.query('SELECT external_payment_id FROM payment')).rows[0][
+            'external_payment_id'
+          ],
+        ).toEqual(null);
+      });
     });
 
     for (const currency of ['GBP', 'USD', 'EUR']) {
@@ -224,6 +231,13 @@ WHERE id = $2
           Math.pow(10, -eurDecimals)
         ).toFixed(eurDecimals),
       ).toEqual(paymentIntent.amount);
+      await testUtils.withDbConn(async (db) => {
+        expect(
+          (await db.query('SELECT external_payment_id FROM payment')).rows[0][
+            'external_payment_id'
+          ],
+        ).toEqual('secret identifier');
+      });
     });
 
     it('stripe payment with XTZ currency => 400', async () => {
@@ -414,6 +428,13 @@ WHERE id = $2
       expect(Number(paymentIntent.amountExclVat)).toBeLessThan(
         Number(paymentIntent.amount),
       );
+      await testUtils.withDbConn(async (db) => {
+        expect(
+          (await db.query('SELECT external_payment_id FROM payment')).rows[0][
+            'external_payment_id'
+          ],
+        ).toEqual(null);
+      });
     });
 
     for (const currency of ['EUR', 'GBP', 'XTZ']) {
