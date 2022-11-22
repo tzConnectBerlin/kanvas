@@ -143,10 +143,12 @@ export class PaymentService {
         throw Err('Unknown stripe webhook event');
     }
 
-    await this.updatePaymentStatus(
-      constructedEvent.data.object.id,
-      paymentStatus,
+    const paymentId = await this.conn.query(
+      `SELECT payment_id WHERE external_payment_id = $1`,
+      [constructedEvent.data.object.id],
     );
+
+    await this.updatePaymentStatus(paymentId, paymentStatus);
   }
 
   async promisePaid(userId: number, paymentId: string) {
