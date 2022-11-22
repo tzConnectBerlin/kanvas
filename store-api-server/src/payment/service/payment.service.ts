@@ -143,10 +143,18 @@ export class PaymentService {
         throw Err('Unknown stripe webhook event');
     }
 
-    const paymentId = await this.conn.query(
-      `SELECT payment_id WHERE external_payment_id = $1`,
-      [constructedEvent.data.object.id],
-    );
+    const externalPaymentId = constructedEvent.data.object.id;
+    const paymentId = (
+      await this.conn.query(
+        `SELECT payment_id WHERE external_payment_id = $1`,
+        [externalPaymentId],
+      )
+    ).rows[0]['payment_id'];
+
+    if (typeof paymentId === 'undefined') {
+      Logger.warn(`unknown stripe external payment id ${externalPaymentId}`);
+      return;
+    }
 
     await this.updatePaymentStatus(paymentId, paymentStatus);
   }
