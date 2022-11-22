@@ -172,7 +172,7 @@ export class AnalyticsController {
 
   /**
    * @apiGroup Analytics
-   * @api {get} /analytics/users Request analytics user information regarding email registrations
+   * @api {get} /analytics/users Request analytics user information regarding email signups
    * @apiPermission admin
    * @apiQuery {String[]="id","address","email","consent"} [sort] URL-decoded examples: sort: [$value,"desc"] or sort: [$value,"asc"]
    * @apiQuery {Number[]="[number, number] e.g. [10, 25]"} [range] URL-decoded example: range: [10, 25] results in 25 records from the 10th record on
