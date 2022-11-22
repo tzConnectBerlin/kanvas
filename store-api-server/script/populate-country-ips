@@ -37,12 +37,12 @@ JOIN country
 
 DROP TABLE ipcountry;
 
-INSERT INTO vat (rate)
+INSERT INTO vat (percentage)
 VALUES (20)
 ON CONFLICT DO NOTHING;
 
 UPDATE country
-SET vat_id = (SELECT id FROM vat WHERE rate = 20)
+SET vat_id = (SELECT id FROM vat WHERE percentage = 20)
 WHERE country_short IN ('GB');
 
 COMMIT;
