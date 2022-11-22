@@ -51,7 +51,7 @@ DROP TABLE country;
 DROP TABLE ip_country;
 
 ALTER TABLE payment DROP COLUMN vat_rate;
-ALTER TABLE payment DROP COLUMN amount-excl_vat;
+ALTER TABLE payment DROP COLUMN amount_excl_vat;
 ALTER TABLE payment DROP COLUMN client_ip;
 
 COMMIT;

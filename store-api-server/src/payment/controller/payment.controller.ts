@@ -131,6 +131,7 @@ export class PaymentController {
 
       return {
         ...paymentIntent,
+        paymentDetails: paymentIntent.providerPaymentDetails,
         nfts: order.nfts,
         expiresAt: order.expiresAt,
       };

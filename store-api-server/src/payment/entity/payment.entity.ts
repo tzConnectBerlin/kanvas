@@ -94,6 +94,9 @@ export interface PaymentIntent {
     | TezpayDetails
     | SimplexDetails;
 
+  // deprecated, use providerPaymentDetails instead
+  paymentDetails?: StripeDetails | WertDetails | TezpayDetails | SimplexDetails;
+
   nfts: NftEntity[];
   expiresAt: number;
 }
