@@ -138,7 +138,7 @@ WHERE id = $2
             id: nftIds[0],
           },
         ],
-        vatRate: 0.05,
+        vatRate: 0.2,
       });
       expect(paymentIntent.paymentDetails).toStrictEqual(
         paymentIntent.providerPaymentDetails,
@@ -209,7 +209,7 @@ WHERE id = $2
             id: nftIds[0],
           },
         ],
-        vatRate: 0.05,
+        vatRate: 0.2,
       });
       expect(paymentIntent.paymentDetails).toStrictEqual(
         paymentIntent.providerPaymentDetails,
@@ -350,12 +350,12 @@ WHERE id = $2
             price: '0.10',
           },
         ],
-        vatRate: 0.05,
+        vatRate: 0.2,
       });
       expect(paymentIntent.paymentDetails).toStrictEqual(
         paymentIntent.providerPaymentDetails,
       );
-      expect(Number(paymentIntent.amountExclVat)).toBeCloseTo(0.095238, 6);
+      expect(Number(paymentIntent.amountExclVat)).toBeCloseTo(0.083333, 6);
     });
 
     it('basic wert payment test case (mocked)', async () => {
@@ -406,7 +406,7 @@ WHERE id = $2
             id: nftIds[0],
           },
         ],
-        vatRate: 0.05,
+        vatRate: 0.2,
       });
       expect(paymentIntent.paymentDetails).toStrictEqual(
         paymentIntent.providerPaymentDetails,
@@ -600,7 +600,7 @@ WHERE id = $2
       expect(resp.statusCode).toEqual(201);
       const paymentIntent = resp.body;
       expect(paymentIntent).toMatchObject({
-        vatRate: 0.05,
+        vatRate: 0.2,
       });
     });
 

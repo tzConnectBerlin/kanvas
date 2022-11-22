@@ -16,11 +16,10 @@ CREATE TABLE country (
     vat_id INT REFERENCES vat(id)
 );
 
-INSERT INTO vat (percentage) VALUES (5) ON CONFLICT DO NOTHING;
+INSERT INTO vat (percentage) VALUES (20);
 
 INSERT INTO country (country_short, country_long, vat_id)
-SELECT 'GB', 'Great Britain', (SELECT id FROM vat)
-ON CONFLICT DO NOTHING;
+SELECT 'GB', 'Great Britain', (SELECT id FROM vat WHERE percentage = 20);
 
 CREATE TABLE ip_country (
     ip_from numeric(39,0) NOT NULL,

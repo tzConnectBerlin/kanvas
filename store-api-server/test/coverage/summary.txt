@@ -39,7 +39,7 @@ All files                      |    80.2 |    52.49 |   89.07 |   79.55 |
 
  src/authentication/controller |   72.72 |    78.94 |    87.5 |   71.87 |                                                                                                                                                   
 
-  authentication.controller.ts |   72.72 |    78.94 |    87.5 |   71.87 | 33-42,67,71-73,90-93                                                                                                                              
+  authentication.controller.ts |   72.72 |    78.94 |    87.5 |   71.87 | 46-55,109,113-115,154-157                                                                                                                         
 
  src/authentication/guards     |      90 |       25 |     100 |    87.5 |                                                                                                                                                   
 
@@ -95,7 +95,7 @@ All files                      |    80.2 |    52.49 |   89.07 |   79.55 |
 
  src/nft/controller            |   92.72 |       60 |     100 |   92.59 |                                                                                                                                                   
 
-  nft.controller.ts            |   92.72 |       60 |     100 |   92.59 | 80,98,163,206                                                                                                                                     
+  nft.controller.ts            |   92.72 |       60 |     100 |   92.59 | 159,190,386,429                                                                                                                                   
 
  src/nft/service               |   88.88 |     76.4 |   97.77 |   88.62 |                                                                                                                                                   
 
@@ -127,7 +127,7 @@ All files                      |    80.2 |    52.49 |   89.07 |   79.55 |
 
  src/user/controller           |   83.87 |    79.31 |     100 |    83.6 |                                                                                                                                                   
 
-  user.controller.ts           |   83.87 |    79.31 |     100 |    83.6 | 81,106,119-123,137,200,212-215                                                                                                                    
+  user.controller.ts           |   83.87 |    79.31 |     100 |    83.6 | 101,135,148-152,178,301,313-316                                                                                                                   
 
  src/user/entity               |     100 |      100 |     100 |     100 |                                                                                                                                                   
 
