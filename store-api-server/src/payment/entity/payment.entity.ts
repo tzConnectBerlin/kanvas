@@ -84,7 +84,7 @@ export interface PaymentIntent {
   // EUR, etc.))
   amount: string;
 
-  amountExclVat: number;
+  amountExclVat: string;
   vatRate: number;
 
   provider: PaymentProviderString;

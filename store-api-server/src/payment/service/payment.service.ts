@@ -83,8 +83,9 @@ interface NftOrder {
 }
 
 interface PaymentIntentInternal
-  extends Omit<PaymentIntent, 'nfts' | 'expiresAt'> {
+  extends Omit<PaymentIntent, 'nfts' | 'expiresAt' | 'amountExclVat'> {
   clientIp: string;
+  amountExclVat: number;
 }
 
 @Injectable()
@@ -108,7 +109,7 @@ export class PaymentService {
     private readonly mintService: MintService,
     private readonly userService: UserService,
     private readonly nftService: NftService,
-    private readonly currencyService: CurrencyService,
+    readonly currencyService: CurrencyService,
   ) {
     this.tezpay = new Tezpay({
       paypoint_schema_name: PAYPOINT_SCHEMA,
