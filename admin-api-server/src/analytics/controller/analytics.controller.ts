@@ -172,6 +172,48 @@ export class AnalyticsController {
 
   /**
    * @apiGroup Analytics
+   * @api {get} /analytics/users Request analytics user information regarding email registrations
+   * @apiPermission admin
+   * @apiQuery {String[]="id","address","email","consent"} [sort] URL-decoded examples: sort: [$value,"desc"] or sort: [$value,"asc"]
+   * @apiQuery {Number[]="[number, number] e.g. [10, 25]"} [range] URL-decoded example: range: [10, 25] results in 25 records from the 10th record on
+   *
+   * @apiSuccessExample Example Success-Response:
+   *    {
+   *    "count": 2,
+   *        "data": [
+   *            {
+   *             "id": 1,
+   *             "address": "any valid user address",
+   *             "email": "maxime@muster.com",
+   *             "consent": "Yes",
+   *             "createdAt": "2022-11-21T10:59:01.741Z"
+   *            },
+   *            {
+   *             "id": 2,
+   *             "address": "any valid user address",
+   *             "email": "max@muster.com",
+   *             "consent": "No",
+   *             "createdAt": "2022-11-21T10:59:01.741Z"
+   *            }
+   *        ]
+   *    }
+   * @apiName users
+   */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RolesDecorator(Roles.admin)
+  @Get('users')
+  async users(
+    @Query('sort', new ParseJSONPipe()) sort?: [string, 'asc' | 'desc'],
+    @Query('range', new ParseJSONPipe()) range?: number[],
+  ) {
+    const params = queryParamsToPaginationParams(sort, range);
+
+    validatePaginationParams(params, ['id', 'address', 'email', 'consent']);
+    return await this.analyticsService.getUsers(params);
+  }
+
+  /**
+   * @apiGroup Analytics
    * @api {get} /analytics/activities Request the analytics activity information
    * @apiPermission admin
    * @apiQuery {Object="from: string[]","to: string[]","kind: string[]","startDate: string","endDate: string"} [filters] URL-decoded example: filters: { "startDate": "1970-01-20T07:28:39.307Z", "endDate": "1970-05-20T07:28:39.307Z" }
@@ -207,19 +249,6 @@ export class AnalyticsController {
    *    }
    * @apiName activities
    */
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @RolesDecorator(Roles.admin)
-  @Get('users')
-  async users(
-    @Query('sort', new ParseJSONPipe()) sort?: [string, 'asc' | 'desc'],
-    @Query('range', new ParseJSONPipe()) range?: number[],
-  ) {
-    const params = queryParamsToPaginationParams(sort, range);
-
-    validatePaginationParams(params, ['id', 'address', 'email', 'consent']);
-    return await this.analyticsService.getUsers(params);
-  }
-
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesDecorator(Roles.admin)
   @Get('activities')
