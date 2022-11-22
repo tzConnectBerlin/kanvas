@@ -351,11 +351,11 @@ WHERE id = $2
           },
         ],
         vatRate: 0.2,
+        amountExclVat: '0.08',
       });
       expect(paymentIntent.paymentDetails).toStrictEqual(
         paymentIntent.providerPaymentDetails,
       );
-      expect(Number(paymentIntent.amountExclVat)).toBeCloseTo(0.083333, 6);
     });
 
     it('basic wert payment test case (mocked)', async () => {
