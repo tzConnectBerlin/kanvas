@@ -529,7 +529,7 @@ WHERE nft_order_id = $1
 
       externalPaymentId:
         provider === PaymentProvider.STRIPE
-          ? (providerPaymentDetails as StripeDetails).clientSecret
+          ? (providerPaymentDetails as StripeDetails).id
           : undefined,
     };
   }
@@ -844,6 +844,7 @@ WHERE nft_order_id = $1
     }
 
     return {
+      id: paymentIntent.id,
       clientSecret: paymentIntent.client_secret,
       amount: currencyUnitAmount.toFixed(0),
     };
