@@ -20,7 +20,7 @@ import { NftService } from '../service/nft.service.js';
 import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { UserEntity } from '../../user/entities/user.entity.js';
 import { NftFilterParams, NftFilters } from '../params.js';
-import { ParseJSONArrayPipe } from '../../pipes/ParseJSONArrayPipe.js';
+import { ParseJSONPipe } from '../../pipes/ParseJSONPipe.js';
 import {
   queryParamsToPaginationParams,
   validatePaginationParams,
@@ -132,9 +132,9 @@ export class NftController {
   @UseGuards(JwtAuthGuard)
   async findAll(
     @Query() filters: NftFilters,
-    @Query('sort', new ParseJSONArrayPipe())
+    @Query('sort', new ParseJSONPipe())
     sort?: string[],
-    @Query('range', new ParseJSONArrayPipe())
+    @Query('range', new ParseJSONPipe())
     range?: number[],
   ) {
     const params = this.#queryParamsToFilterParams(filters, sort, range);

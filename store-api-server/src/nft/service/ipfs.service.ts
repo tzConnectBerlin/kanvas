@@ -5,6 +5,8 @@ import {
   STORE_PUBLISHERS,
   MINTER_ADDRESS,
   IPFS_PIN_PROVIDER,
+  IPFS_RIGHTS_URI,
+  IPFS_RIGHTS_MIMETYPE,
   DEFAULT_ROYALTIES_MINTER_SHARE,
 } from '../../constants.js';
 import { NftEntity } from '../../nft/entity/nft.entity.js';
@@ -17,6 +19,35 @@ interface Royalties {
 interface IpfsFormat {
   [key: string]: any;
   uri: string;
+}
+
+interface NftMetadata {
+  name: string;
+  description: string;
+  date: string;
+  tags: string[];
+
+  decimals: number;
+  isBooleanAmount: boolean;
+
+  artifactUri: string;
+  displayUri: string;
+  thumbnailUri: string;
+  rightsUri?: string;
+  // also setting rightUrl, this is a typo in the TZ-21 spec, but best to
+  // support the intended name format (rightsUrl) as well as the typod
+  // format (rightUrl)
+  rightUri?: string;
+  formats: IpfsFormat[];
+
+  minter: string;
+  creators: string[];
+  contributors: string[];
+  publishers: string[];
+
+  royalties: Royalties;
+
+  signature: string;
 }
 
 @Injectable()
@@ -85,7 +116,10 @@ WHERE id = $1
     );
   }
 
-  async nftMetadataJson(nft: NftEntity, signature: string): Promise<any> {
+  async nftMetadataJson(
+    nft: NftEntity,
+    signature: string,
+  ): Promise<NftMetadata> {
     const createdAt = new Date(nft.createdAt * 1000).toISOString();
 
     let [artifactIpfs, displayIpfs, thumbnailIpfs] = [
@@ -102,7 +136,7 @@ WHERE id = $1
 
     displayIpfs = displayIpfs ?? artifactIpfs;
     thumbnailIpfs = thumbnailIpfs ?? displayIpfs;
-    return {
+    const res: NftMetadata = {
       decimals: 0,
 
       name: nft.name,
@@ -151,6 +185,19 @@ WHERE id = $1
 
       royalties,
     };
+
+    if (typeof IPFS_RIGHTS_URI !== 'undefined') {
+      res.rightsUri = IPFS_RIGHTS_URI;
+      res.rightUri = IPFS_RIGHTS_URI;
+      if (typeof IPFS_RIGHTS_MIMETYPE !== 'undefined') {
+        res.formats.push({
+          uri: IPFS_RIGHTS_URI,
+          mimeType: IPFS_RIGHTS_MIMETYPE,
+        });
+      }
+    }
+
+    return res;
   }
 
   #defaultRoyalties(): Royalties {

@@ -2455,6 +2455,163 @@ describe('AppController (e2e)', () => {
     expect(res.statusCode).toEqual(401);
   });
 
+  describe('GET /analytics/activities with "startDate" and "endDate" filter', () => {
+    skipOnPriorFail(
+      'will only return data that is between startDate and endDate',
+      async () => {
+        await clearEmulatedNftSales();
+        await emulateNftSale(
+          1,
+          [1, 30],
+          new Date('August 12, 1995 12:34:00'), // 808223640
+        );
+        await emulateNftSale(
+          1,
+          [4, 7, 10],
+          new Date('November 24, 1995 01:00:00'), // 817171200
+        );
+        await emulateNftSale(
+          2,
+          [2, 27],
+          new Date('December 01, 1995 08:24:00'), // 817802640
+        );
+        const { bearer } = await loginAsAdmin(app);
+        let res = await request(app.getHttpServer())
+          .get('/analytics/activities')
+          .set('authorization', bearer)
+          .query({
+            filters: {
+              startDate: '1995-08-12T23:00:00.000Z', // 808268400
+              endDate: '1995-12-01T03:21:00.000Z', // 817788060
+            },
+          });
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toStrictEqual({
+          count: 3,
+          data: [
+            {
+              amount: 1,
+              from: null,
+              id: 1,
+              kind: 'sale',
+              price: '4.30',
+              timestamp: 817171200,
+              to: 'addr',
+              tokenId: 4,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 2,
+              kind: 'sale',
+              price: '9.80',
+              timestamp: 817171200,
+              to: 'addr',
+              tokenId: 7,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 3,
+              kind: 'sale',
+              price: '9.20',
+              timestamp: 817171200,
+              to: 'addr',
+              tokenId: 10,
+            },
+          ],
+        });
+
+        res = await request(app.getHttpServer())
+          .get('/analytics/activities')
+          .set('authorization', bearer)
+          .query({
+            filters: {
+              startDate: '1995-08-12T10:00:00.000Z', // 808221600
+              endDate: '1995-12-01T10:00:00.000Z', // 817812000
+            },
+          });
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toStrictEqual({
+          count: 7,
+          data: [
+            {
+              amount: 1,
+              from: null,
+              id: 1,
+              kind: 'sale',
+              price: '0.10',
+              timestamp: 808223640,
+              to: 'addr',
+              tokenId: 1,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 2,
+              kind: 'sale',
+              price: '7.60',
+              timestamp: 808223640,
+              to: 'addr',
+              tokenId: 30,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 3,
+              kind: 'sale',
+              price: '4.30',
+              timestamp: 817171200,
+              to: 'addr',
+              tokenId: 4,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 4,
+              kind: 'sale',
+              price: '9.80',
+              timestamp: 817171200,
+              to: 'addr',
+              tokenId: 7,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 5,
+              kind: 'sale',
+              price: '9.20',
+              timestamp: 817171200,
+              to: 'addr',
+              tokenId: 10,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 6,
+              kind: 'sale',
+              price: '7.80',
+              timestamp: 817802640,
+              to: 'tz1',
+              tokenId: 2,
+            },
+            {
+              amount: 1,
+              from: null,
+              id: 7,
+              kind: 'sale',
+              price: '1.20',
+              timestamp: 817802640,
+              to: 'tz1',
+              tokenId: 27,
+            },
+          ],
+        });
+      },
+    );
+  });
+
   describe('GET /analytics/sales/*/timeseries will fill missing datapoints', () => {
     beforeEach(async () => {
       await clearEmulatedNftSales();

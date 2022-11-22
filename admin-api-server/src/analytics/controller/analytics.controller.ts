@@ -12,7 +12,8 @@ import {
   Resolution,
   Activity,
 } from '../entity/analytics.entity.js';
-import { ParseJSONArrayPipe } from '../../pipes/ParseJSONArrayPipe.js';
+import { ParseJSONPipe } from '../../pipes/ParseJSONPipe.js';
+import { ParseJSONObjectPipe } from '../../pipes/ParseJSONObjectPipe.js';
 import { AnalyticsService } from '../service/analytics.service.js';
 import { enumFromStringValue } from '../../utils.js';
 import { RolesDecorator } from '../../role/role.decorator.js';
@@ -210,11 +211,9 @@ export class AnalyticsController {
   @RolesDecorator(Roles.admin)
   @Get('activities')
   async activities(
-    @Query() filters: ActivityFilters,
-    @Query('sort', new ParseJSONArrayPipe())
-    sort?: [string, 'asc' | 'desc'],
-    @Query('range', new ParseJSONArrayPipe())
-    range?: number[],
+    @Query('filters', new ParseJSONObjectPipe()) filters: ActivityFilters,
+    @Query('sort', new ParseJSONPipe()) sort?: [string, 'asc' | 'desc'],
+    @Query('range', new ParseJSONPipe()) range?: number[],
   ): Promise<{ data: Activity[]; count: number }> {
     const params = this.#queryParamsToFilterParams(filters, sort, range);
 
