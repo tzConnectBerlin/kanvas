@@ -2111,19 +2111,23 @@ describe('AppController (e2e)', () => {
         .get('/analytics/users')
         .set('authorization', bearer);
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toStrictEqual({
-        data: [
-          {
-            id: 3,
-            timestamp: 819167040,
-            kind: 'sale',
-            from: null,
-            to: 'addr',
-            tokenId: 10,
-            price: '9.20',
-            amount: 1,
-          },
-        ],
+      expect(res.body).toMatchObject({
+        count: 2,
+          data: [
+              {
+                  address: "abc",
+                  consent: 'Yes',
+                  email: "max@muster.com",
+                  id: 1
+              },
+              {
+                  address: "defg",
+                  consent: 'No',
+                  email: "maxime@muster.com",
+                  id: 2
+              }
+
+          ]
       });
       await clearEmulatedRegisteredEmails();
     },
@@ -2957,8 +2961,7 @@ async function emulateRegisterEmail(
     `
 INSERT INTO marketing (address, email, consent
 )
-VALUES ($1, $2, $3, $4)
-RETURNING id
+VALUES ($1, $2, $3)
     `,
     [address, email, consent],
   );
