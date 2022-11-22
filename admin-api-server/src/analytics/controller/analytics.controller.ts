@@ -209,6 +209,19 @@ export class AnalyticsController {
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RolesDecorator(Roles.admin)
+  @Get('users')
+  async users(
+    @Query('sort', new ParseJSONPipe()) sort?: [string, 'asc' | 'desc'],
+    @Query('range', new ParseJSONPipe()) range?: number[],
+  ) {
+    const params = queryParamsToPaginationParams(sort, range);
+
+    validatePaginationParams(params, ['id', 'address', 'email', 'consent']);
+    return await this.analyticsService.getUsers(params);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RolesDecorator(Roles.admin)
   @Get('activities')
   async activities(
     @Query('filters', new ParseJSONObjectPipe()) filters: ActivityFilters,
