@@ -140,6 +140,9 @@ WHERE id = $2
         ],
         vatRate: 0.05,
       });
+      expect(paymentIntent.paymentDetails).toStrictEqual(
+        paymentIntent.providerPaymentDetails,
+      );
       expect(Number(paymentIntent.amountExclVat)).toBeLessThan(
         Number(paymentIntent.amount),
       );
@@ -208,6 +211,9 @@ WHERE id = $2
         ],
         vatRate: 0.05,
       });
+      expect(paymentIntent.paymentDetails).toStrictEqual(
+        paymentIntent.providerPaymentDetails,
+      );
       expect(Number(paymentIntent.amountExclVat)).toBeLessThan(
         Number(paymentIntent.amount),
       );
@@ -346,6 +352,9 @@ WHERE id = $2
         ],
         vatRate: 0.05,
       });
+      expect(paymentIntent.paymentDetails).toStrictEqual(
+        paymentIntent.providerPaymentDetails,
+      );
       expect(Number(paymentIntent.amountExclVat)).toBeCloseTo(0.095238, 6);
     });
 
@@ -399,6 +408,9 @@ WHERE id = $2
         ],
         vatRate: 0.05,
       });
+      expect(paymentIntent.paymentDetails).toStrictEqual(
+        paymentIntent.providerPaymentDetails,
+      );
       expect(Number(paymentIntent.amountExclVat)).toBeLessThan(
         Number(paymentIntent.amount),
       );
