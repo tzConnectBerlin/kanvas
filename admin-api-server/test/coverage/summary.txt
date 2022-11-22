@@ -5,7 +5,7 @@ File                      | % Stmts | % Branch | % Funcs | % Lines | Uncovered L
 
 --------------------------|---------|----------|---------|---------|---------------------------------------------------------------------------------------------
 
-All files                 |   86.24 |    82.55 |   87.32 |   86.24 |                                                                                             
+All files                 |   87.75 |    82.55 |   87.32 |   87.75 |                                                                                             
 
  src                      |   84.65 |    80.82 |   85.18 |   84.65 |                                                                                             
 
@@ -31,7 +31,7 @@ All files                 |   86.24 |    82.55 |   87.32 |   86.24 |
 
  src/analytics/controller |     100 |    94.44 |     100 |     100 |                                                                                             
 
-  analytics.controller.ts |     100 |    94.44 |     100 |     100 | 123                                                                                         
+  analytics.controller.ts |     100 |    94.44 |     100 |     100 | 244                                                                                         
 
  src/analytics/entity     |     100 |      100 |     100 |     100 |                                                                                             
 
@@ -97,13 +97,13 @@ All files                 |   86.24 |    82.55 |   87.32 |   86.24 |
 
   params.ts               |     100 |       80 |     100 |     100 | 17                                                                                          
 
- src/nft/controller       |   70.55 |    76.92 |      80 |   70.55 |                                                                                             
+ src/nft/controller       |   81.76 |    76.92 |      80 |   81.76 |                                                                                             
 
-  nft.controller.ts       |   70.55 |    76.92 |      80 |   70.55 | 40-63,72-74,126-131,160-184                                                                 
+  nft.controller.ts       |   81.76 |    76.92 |      80 |   81.76 | 40-63,72-74,234-239,281-305                                                                 
 
  src/nft/entities         |       0 |        0 |       0 |       0 |                                                                                             
 
-  nft.entity.ts           |       0 |        0 |       0 |       0 | 1-15                                                                                        
+  nft.entity.ts           |       0 |        0 |       0 |       0 | 1-19                                                                                        
 
  src/nft/service          |   81.77 |     81.6 |    87.5 |   81.77 |                                                                                             
 
@@ -129,9 +129,9 @@ All files                 |   86.24 |    82.55 |   87.32 |   86.24 |
 
   role.module.ts          |     100 |      100 |     100 |     100 |                                                                                             
 
- src/role/controller      |   86.66 |      100 |       0 |   86.66 |                                                                                             
+ src/role/controller      |   94.87 |      100 |       0 |   94.87 |                                                                                             
 
-  role.controller.ts      |   86.66 |      100 |       0 |   86.66 | 13-14                                                                                       
+  role.controller.ts      |   94.87 |      100 |       0 |   94.87 | 37-38                                                                                       
 
  src/role/entities        |     100 |      100 |     100 |     100 |                                                                                             
 
