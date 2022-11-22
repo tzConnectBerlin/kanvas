@@ -5,4 +5,4 @@ set -a
 . .env
 set +a
 
-./script/run start:prod | tee logs.txt
+./script/run start:prod 2>&1 | tee logs.txt
