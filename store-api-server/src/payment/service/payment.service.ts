@@ -524,6 +524,17 @@ WHERE nft_order_id = $1
       amountUnit,
       clientIp,
     );
+
+    let externalPaymentId: string | undefined;
+    switch (provider) {
+      case PaymentProvider.STRIPE:
+        externalPaymentId = (providerPaymentDetails as StripeDetails).id;
+        break;
+      case PaymentProvider.TEST:
+        externalPaymentId = id;
+        break;
+    }
+
     return {
       id,
 
@@ -537,10 +548,7 @@ WHERE nft_order_id = $1
       provider,
       providerPaymentDetails,
 
-      externalPaymentId:
-        provider === PaymentProvider.STRIPE
-          ? (providerPaymentDetails as StripeDetails).id
-          : undefined,
+      externalPaymentId,
     };
   }
 
