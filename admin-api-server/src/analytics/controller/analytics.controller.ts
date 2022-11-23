@@ -273,7 +273,8 @@ export class AnalyticsController {
       'to',
       'tokenId',
       'price',
-      'amount',
+      'edition_size',
+      'currency',
     ]);
     return await this.analyticsService.getActivities(params);
   }
