@@ -137,8 +137,6 @@ export class AnalyticsService {
       return { data: [], count: 0 };
     }
 
-    console.log(qryRes.rows);
-
     return {
       data: qryRes.rows.map(
         (row: any) =>
