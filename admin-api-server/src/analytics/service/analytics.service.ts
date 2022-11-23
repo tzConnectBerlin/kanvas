@@ -267,14 +267,14 @@ LIMIT ${params.pageSize}
           price,
           edition_size: Number(row['edition_size']),
           currency: row['currency'],
-          transactionValue:
+          transaction_value:
             price &&
             row['conversion_rate'] &&
             (
               Math.round(Number(price) * Number(row['conversion_rate']) * 100) /
               100
             ).toFixed(2),
-          conversionRate:
+          conversion_rate:
             row['conversion_rate'] &&
             (Math.round(Number(row['conversion_rate']) * 100) / 100).toFixed(2),
         };

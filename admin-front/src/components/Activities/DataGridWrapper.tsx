@@ -71,7 +71,7 @@ const DataGridWrapper = ({ fromValue, toValue }: WrapperProps) => {
           headerClassName={classes.header}
         />
         <TextField
-            source="transactionValue"
+            source="transaction_value"
             label="Transaction value"
             sortable={false}
         />
@@ -81,7 +81,7 @@ const DataGridWrapper = ({ fromValue, toValue }: WrapperProps) => {
             headerClassName={classes.header}
         />
         <TextField
-            source="conversionRate"
+            source="conversion_rate"
             label="Transaction conversion rate"
             sortable={false}
         />
