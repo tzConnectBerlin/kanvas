@@ -122,7 +122,11 @@ export class AnalyticsService {
   async getUsers(params: PaginationParams) {
     const qryRes = await this.storeRepl.query(
       `SELECT
-           * 
+        id,
+        address,
+        email,
+        consent,
+        created_at
         FROM marketing 
         ORDER BY "${params.orderBy}" ${params.orderDirection}
         OFFSET ${params.pageOffset}
@@ -132,6 +136,8 @@ export class AnalyticsService {
     if (qryRes.rowCount === 0) {
       return { data: [], count: 0 };
     }
+
+    console.log(qryRes.rows);
 
     return {
       data: qryRes.rows.map(
