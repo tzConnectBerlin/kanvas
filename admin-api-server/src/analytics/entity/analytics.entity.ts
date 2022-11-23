@@ -32,6 +32,6 @@ export interface Activity {
   price: string;
   edition_size: number;
   currency: string;
-  transactionValue: string;
-  conversionRate: string;
+  transaction_value: string;
+  conversion_rate: string;
 }
