@@ -2939,9 +2939,9 @@ SELECT $1, UNNEST($2::INTEGER[])
   await storeRepl.query(
     `
 INSERT INTO payment (
-  payment_id, status, nft_order_id, provider, currency, amount
+  payment_id, status, nft_order_id, provider, currency, amount, vat_rate, amount_excl_vat, client_ip
 )
-VALUES ('bla', 'succeeded', $1, 'test_provider', 'EUR', 4.45)
+VALUES ('bla', 'succeeded', $1, 'test_provider', 'EUR', 4.45, 0.2, 4.4, '0.0.0.0')
     `,
     [orderId],
   );
