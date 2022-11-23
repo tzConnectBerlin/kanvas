@@ -1,6 +1,6 @@
 import { IsString, IsBoolean } from 'class-validator';
 
-export * from './user.types';
+export * from './user.types.js';
 
 export class EmailRegistration {
   @IsString()
