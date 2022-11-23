@@ -30,5 +30,8 @@ export interface Activity {
   to: string;
   tokenId: number;
   price: string;
-  amount: number;
+  edition_size: number;
+  currency: string;
+  transactionValue: string;
+  conversionRate: string;
 }

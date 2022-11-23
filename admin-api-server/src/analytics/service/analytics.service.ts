@@ -168,9 +168,11 @@ SELECT
   "to",
   token_id AS "tokenId",
   price,
-  amount,
+  edition_size,
   ROW_NUMBER() OVER (ORDER BY timestamp, kind, "from", "to", token_id) AS id,
-  COUNT(1) OVER () AS total_activity_count
+  COUNT(1) OVER () AS total_activity_count,
+  currency,
+  amount / transaction_value AS conversion_rate
 FROM (
   SELECT
     lvl.baked_at AT TIME ZONE 'UTC' AS timestamp,
@@ -179,7 +181,10 @@ FROM (
     owner AS "to",
     mint.token_id,
     NULL::NUMERIC AS price,
-    mint.amount
+    mint.amount AS edition_size,
+    NULL::TEXT AS currency,
+    NULL::NUMERIC AS transaction_value,
+    NULL::NUMERIC AS amount
   FROM onchain_kanvas."entry.mint_tokens.noname" AS mint
   JOIN que_pasa.tx_contexts AS ctx
     ON ctx.id = mint.tx_context_id
@@ -195,7 +200,10 @@ FROM (
     tr_dest.to_ AS "to",
     tr_dest.token_id,
     NULL::NUMERIC AS price,
-    tr_dest.amount
+    tr_dest.amount AS edition_size,
+    NULL::TEXT AS currency,
+    NULL::NUMERIC AS transaction_value,
+    NULL::NUMERIC AS amount
   FROM onchain_kanvas."entry.transfer.noname" AS tr_from
   JOIN onchain_kanvas."entry.transfer.noname.txs" AS tr_dest
     ON tr_dest.noname_id = tr_from.id
@@ -213,7 +221,10 @@ FROM (
     usr.address AS "to",
     nft.id AS token_id,
     nft.price,
-    1 AS amount
+    1 AS edition_size,
+    payment.currency,
+    SUM(nft.price) OVER (PARTITION BY payment.nft_order_id) AS transaction_value,
+    amount
   FROM payment
   JOIN nft_order
     ON nft_order.id = payment.nft_order_id
@@ -241,22 +252,33 @@ LIMIT ${params.pageSize}
     }
 
     return {
-      data: qryRes.rows.map(
-        (row: any) =>
-          <Activity>{
-            id: Number(row['id']),
-            timestamp: Math.floor(row['timestamp'].getTime() / 1000),
-            kind: row['kind'],
-            from: row['from'],
-            to: row['to'],
-            tokenId: Number(row['tokenId']),
-            price: this.currencyService.convertToCurrency(
-              Number(row['price']),
-              BASE_CURRENCY,
-            ),
-            amount: Number(row['amount']),
-          },
-      ),
+      data: qryRes.rows.map((row: any) => {
+        const price = this.currencyService.convertToCurrency(
+          Number(row['price']),
+          BASE_CURRENCY,
+        );
+        return <Activity>{
+          id: Number(row['id']),
+          timestamp: Math.floor(row['timestamp'].getTime() / 1000),
+          kind: row['kind'],
+          from: row['from'],
+          to: row['to'],
+          tokenId: Number(row['tokenId']),
+          price,
+          edition_size: Number(row['edition_size']),
+          currency: row['currency'],
+          transactionValue:
+            price &&
+            row['conversion_rate'] &&
+            (
+              Math.round(Number(price) * Number(row['conversion_rate']) * 100) /
+              100
+            ).toFixed(2),
+          conversionRate:
+            row['conversion_rate'] &&
+            (Math.round(Number(row['conversion_rate']) * 100) / 100).toFixed(2),
+        };
+      }),
       count: Number(qryRes.rows[0]['total_activity_count']),
     };
   }
