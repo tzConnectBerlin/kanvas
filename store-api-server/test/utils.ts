@@ -426,6 +426,7 @@ RETURNING id
     editionsSize: 0,
     categories: [proxyCategoryId],
   });
+  await sleep(1); // sleeping for 1ms to make sure if we fail to copy the createdAt of the proxy NFT this shows up in the test results
   const proxiedNftId0 = newNftId();
   await createProxiedNft(app, {
     id: proxiedNftId0,
@@ -436,6 +437,7 @@ RETURNING id
     editionsSize: 0,
     categories: [proxiedCategoryId],
   });
+  await sleep(1); // sleeping for 1ms to make sure if we fail to copy the createdAt of the proxy NFT this shows up in the test results
   const proxiedNftId1 = newNftId();
   await createProxiedNft(app, {
     id: proxiedNftId1,
