@@ -160,6 +160,13 @@ WHERE id = $2
           ],
         ).toEqual(null);
       });
+      await testUtils.withDbConn(async (db) => {
+        expect(
+          (await db.query('SELECT purchaser_country FROM payment')).rows[0][
+            'purchaser_country'
+          ],
+        ).toStrictEqual(null); // if ip cannot be placed this field should be null
+      });
     });
 
     for (const currency of ['GBP', 'USD', 'EUR']) {
@@ -629,12 +636,19 @@ WHERE id = $2
       expect(paymentIntent).toMatchObject({
         vatRate: 0.2,
       });
+      await testUtils.withDbConn(async (db) => {
+        expect(
+          (await db.query('SELECT purchaser_country FROM payment')).rows[0][
+            'purchaser_country'
+          ],
+        ).toStrictEqual('XX');
+      });
     });
 
     it('vat for a country that has vat defined => vat from that country is applied', async () => {
       const vatRate = 0.15;
       const ipAddr = '240.200.10.5';
-      const countryId = await defineCountryIp(ipAddr, 'XX', 'test country');
+      const countryId = await defineCountryIp(ipAddr, 'AX', 'test country');
       await defineCountryVatPercentage(countryId, vatRate * 100);
 
       const w = await testUtils.newWallet(app);
@@ -653,6 +667,13 @@ WHERE id = $2
       const paymentIntent = resp.body;
       expect(paymentIntent).toMatchObject({
         vatRate,
+      });
+      await testUtils.withDbConn(async (db) => {
+        expect(
+          (await db.query('SELECT purchaser_country FROM payment')).rows[0][
+            'purchaser_country'
+          ],
+        ).toStrictEqual('AX');
       });
     });
   });
