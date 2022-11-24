@@ -21,6 +21,12 @@ interface IpfsFormat {
   uri: string;
 }
 
+interface Attribute {
+  name: string;
+  value: string;
+  type: string;
+}
+
 interface NftMetadata {
   name: string;
   description: string;
@@ -39,6 +45,8 @@ interface NftMetadata {
   // format (rightUrl)
   rightUri?: string;
   formats: IpfsFormat[];
+
+  attributes?: Attribute[];
 
   minter: string;
   creators: string[];
@@ -132,6 +140,25 @@ WHERE id = $1
         : undefined),
     ];
 
+    let attributes: Attribute[] | undefined;
+    if (typeof nft.metadata?.attributes !== 'undefined') {
+      attributes = nft.metadata.attributes.flatMap((attr: any): Attribute[] => {
+        if (
+          typeof attr.name === 'undefined' ||
+          typeof attr.value === 'undefined'
+        ) {
+          return [];
+        }
+        return [
+          {
+            name: attr.name,
+            value: attr.value,
+            type: typeof attr.value,
+          },
+        ];
+      });
+    }
+
     const royalties = this.#defaultRoyalties();
 
     displayIpfs = displayIpfs ?? artifactIpfs;
@@ -175,6 +202,7 @@ WHERE id = $1
         },
         [],
       ),
+      attributes,
       minter: MINTER_ADDRESS,
       creators: [MINTER_ADDRESS],
       contributors: [], // TODO

@@ -970,6 +970,105 @@ describe('NftService', () => {
         tags: [],
       },
     },
+    {
+      name: 'test with attributes inside the nft metadata',
+      nft: {
+        artifactUri: 'artifact.mp4',
+        displayUri: 'display.jpeg',
+        thumbnailUri: 'thumbnail.png',
+        formats: {
+          artifact: {
+            mimeType: 'video/mp4',
+          },
+          display: {
+            mimeType: 'image/jpeg',
+          },
+          thumbnail: {
+            mimeType: 'image/png',
+          },
+        },
+        createdAt: 0,
+        name: 'test',
+        description: 'descr',
+        editionsSize: 1,
+        categories: [],
+        metadata: {
+          attributes: [
+            {
+              name: 'hat color',
+              value: 'blue',
+            },
+            {
+              name: 'has shoes',
+              value: true,
+            },
+            {
+              name: 'hats amount',
+              value: 5,
+            },
+          ],
+        },
+
+        id: 1,
+        price: '15.30',
+        launchAt: 0,
+        editionsAvailable: 0,
+        editionsSold: 0,
+        isProxy: false,
+      },
+      exp: {
+        artifactUri: 'ipfs-mock://artifact',
+        displayUri: 'ipfs-mock://display',
+        thumbnailUri: 'ipfs-mock://thumbnail',
+        contributors: [],
+        date: '1970-01-01T00:00:00.000Z',
+        decimals: 0,
+        description: 'descr',
+        formats: [
+          {
+            uri: 'ipfs-mock://artifact',
+            mimeType: 'video/mp4',
+          },
+          {
+            uri: 'ipfs-mock://display',
+            mimeType: 'image/jpeg',
+          },
+          {
+            uri: 'ipfs-mock://thumbnail',
+            mimeType: 'image/png',
+          },
+          {
+            uri: 'ipfs://testing',
+            mimeType: 'application/pdf',
+          },
+        ],
+        isBooleanAmount: true,
+        minter: process.env['MINTER_TZ_ADDRESS'],
+        name: 'test',
+        publishers: ['Tezos'],
+        signature: 'not signed',
+        rightUri: 'ipfs://testing',
+        rightsUri: 'ipfs://testing',
+        tags: [],
+        attributes: [
+          {
+            name: 'hat color',
+            value: 'blue',
+            type: 'string',
+          },
+          {
+            name: 'has shoes',
+            value: true,
+            type: 'boolean',
+          },
+          {
+            name: 'hats amount',
+            value: 5,
+            type: 'number',
+          },
+        ],
+      },
+    },
   ];
   for (const tc of testcases) {
     it(tc.name, async () => {

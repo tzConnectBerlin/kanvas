@@ -856,7 +856,9 @@ WHERE nft_order_id = $1
     if (typeof paymentIntent.client_secret === 'undefined') {
       const errShort = 'failed to create payment intent with stripe';
       Logger.error(
-        `${errShort}, unexpected response from stripe.paymentIntents.create: ${paymentIntent}`,
+        `${errShort}, unexpected response from stripe.paymentIntents.create: ${JSON.stringify(
+          paymentIntent,
+        )}`,
       );
       throw new HttpException(errShort, HttpStatus.INTERNAL_SERVER_ERROR);
     }

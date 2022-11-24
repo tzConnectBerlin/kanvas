@@ -23,9 +23,13 @@ import {
   ENDING_SOON_DURATION,
 } from '../../constants.js';
 import { CurrencyService, BASE_CURRENCY } from 'kanvas-api-lib';
-import { sleep, maybe, isBottom } from '../../utils.js';
+import { sleep, maybe } from '../../utils.js';
 import { NftIpfsService } from './ipfs.service.js';
 import { DbTransaction, withTransaction } from '../../db.module.js';
+
+interface CreateNftInternal extends CreateNft {
+  createdAt?: number;
+}
 
 @Injectable()
 export class NftService {
@@ -35,7 +39,7 @@ export class NftService {
     private currencyService: CurrencyService,
   ) {}
 
-  async createNft(newNft: CreateNft) {
+  async createNft(newNft: CreateNftInternal) {
     const insertFormats = async (
       dbTx: DbTransaction,
       formats?: NftFormats,
@@ -75,15 +79,20 @@ WHERE content_name = $1
       return formatIds;
     };
     const insert = async (dbTx: DbTransaction) => {
-      let onsaleFrom: Date | undefined = undefined;
+      let onsaleFrom: Date | undefined;
       if (typeof newNft.onsaleFrom !== 'undefined') {
         onsaleFrom = new Date();
         onsaleFrom.setTime(newNft.onsaleFrom);
       }
-      let onsaleUntil: Date | undefined = undefined;
+      let onsaleUntil: Date | undefined;
       if (typeof newNft.onsaleUntil !== 'undefined') {
         onsaleUntil = new Date();
         onsaleUntil.setTime(newNft.onsaleUntil);
+      }
+      let createdAt: Date | undefined;
+      if (typeof newNft.createdAt !== 'undefined') {
+        createdAt = new Date();
+        createdAt.setTime(newNft.createdAt);
       }
 
       const formatIds = await insertFormats(dbTx, newNft.formats);
@@ -91,9 +100,9 @@ WHERE content_name = $1
       await dbTx.query(
         `
 INSERT INTO nft (
-  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, onsale_from, onsale_until, price, editions_size, metadata, proxy_nft_id
+  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, onsale_from, onsale_until, price, editions_size, metadata, proxy_nft_id, created_at
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, COALESCE($14, now() AT TIME ZONE 'UTC'))
       `,
 
         [
@@ -110,6 +119,7 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
           newNft.editionsSize,
           newNft.metadata,
           newNft.proxyNftId,
+          createdAt?.toUTCString(),
         ],
       );
 
@@ -183,6 +193,7 @@ SELECT $1, UNNEST($2::INTEGER[])
       description: newNft.description ?? proxyNft.description,
       price: Number(proxyNft.price),
       editionsSize: 1,
+      createdAt: proxyNft.createdAt * 1000,
     });
 
     await withTransaction(this.conn, async (dbTx: DbTransaction) => {
