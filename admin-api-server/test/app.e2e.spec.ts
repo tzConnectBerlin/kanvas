@@ -2113,21 +2113,20 @@ describe('AppController (e2e)', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body).toMatchObject({
         count: 2,
-          data: [
-              {
-                  address: "abc",
-                  consent: 'Yes',
-                  email: "max@muster.com",
-                  id: 1
-              },
-              {
-                  address: "defg",
-                  consent: 'No',
-                  email: "maxime@muster.com",
-                  id: 2
-              }
-
-          ]
+        data: [
+          {
+            address: 'abc',
+            marketing_consent: true,
+            email: 'max@muster.com',
+            id: 1,
+          },
+          {
+            address: 'defg',
+            marketing_consent: false,
+            email: 'maxime@muster.com',
+            id: 2,
+          },
+        ],
       });
       await clearEmulatedRegisteredEmails();
     },
@@ -2954,7 +2953,7 @@ async function clearEmulatedRegisteredEmails() {
 async function emulateRegisterEmail(
   address: string,
   email: string,
-  consent: boolean,
+  marketing_consent: boolean,
 ) {
   const storeRepl = newStoreReplConn();
   await storeRepl.query(
@@ -2963,7 +2962,7 @@ INSERT INTO marketing (address, email, consent
 )
 VALUES ($1, $2, $3)
     `,
-    [address, email, consent],
+    [address, email, marketing_consent],
   );
 }
 
