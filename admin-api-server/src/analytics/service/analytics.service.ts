@@ -172,7 +172,8 @@ SELECT
   ROW_NUMBER() OVER (ORDER BY timestamp, kind, "from", "to", token_id) AS id,
   COUNT(1) OVER () AS total_activity_count,
   currency,
-  amount / transaction_value AS conversion_rate
+  nft_price_sum,
+  nft_order_price
 FROM (
   SELECT
     lvl.baked_at AT TIME ZONE 'UTC' AS timestamp,
@@ -183,8 +184,8 @@ FROM (
     NULL::NUMERIC AS price,
     mint.amount AS edition_size,
     NULL::TEXT AS currency,
-    NULL::NUMERIC AS transaction_value,
-    NULL::NUMERIC AS amount
+    NULL::NUMERIC AS nft_price_sum,
+    NULL::NUMERIC AS nft_order_price
   FROM onchain_kanvas."entry.mint_tokens.noname" AS mint
   JOIN que_pasa.tx_contexts AS ctx
     ON ctx.id = mint.tx_context_id
@@ -202,8 +203,8 @@ FROM (
     NULL::NUMERIC AS price,
     tr_dest.amount AS edition_size,
     NULL::TEXT AS currency,
-    NULL::NUMERIC AS transaction_value,
-    NULL::NUMERIC AS amount
+    NULL::NUMERIC AS nft_price_sum,
+    NULL::NUMERIC AS nft_order_price
   FROM onchain_kanvas."entry.transfer.noname" AS tr_from
   JOIN onchain_kanvas."entry.transfer.noname.txs" AS tr_dest
     ON tr_dest.noname_id = tr_from.id
@@ -223,8 +224,13 @@ FROM (
     nft.price,
     1 AS edition_size,
     payment.currency,
-    SUM(nft.price) OVER (PARTITION BY payment.nft_order_id) AS transaction_value,
-    amount
+    (SELECT SUM(nft.price)
+     FROM nft
+     JOIN mtm_nft_order_nft AS mtm
+       ON mtm.nft_order_id = nft_order.id
+       AND nft.id = mtm.nft_id
+    ) AS nft_price_sum,
+    amount AS nft_order_price
   FROM payment
   JOIN nft_order
     ON nft_order.id = payment.nft_order_id
@@ -257,6 +263,15 @@ LIMIT ${params.pageSize}
           Number(row['price']),
           BASE_CURRENCY,
         );
+
+        const nftPriceSumBase = this.currencyService.convertToCurrency(
+          row['nft_price_sum'],
+          BASE_CURRENCY,
+        );
+        const conversionRate =
+          row['nft_order_price'] &&
+          Number(nftPriceSumBase) / row['nft_order_price'];
+
         return <Activity>{
           id: Number(row['id']),
           timestamp: Math.floor(row['timestamp'].getTime() / 1000),
@@ -269,10 +284,9 @@ LIMIT ${params.pageSize}
           currency: row['currency'],
           transaction_value:
             price &&
-            row['conversion_rate'] &&
-            (Number(price) * Number(row['conversion_rate'])).toFixed(2),
-          conversion_rate:
-            row['conversion_rate'] && Number(row['conversion_rate']).toFixed(2),
+            conversionRate &&
+            (Number(price) / conversionRate).toFixed(2),
+          conversion_rate: conversionRate && conversionRate.toFixed(2),
         };
       }),
       count: Number(qryRes.rows[0]['total_activity_count']),
