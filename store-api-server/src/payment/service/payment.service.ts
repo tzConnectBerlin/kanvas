@@ -87,6 +87,7 @@ interface PaymentIntentInternal
   clientIp: string;
   amountExclVat: number;
   externalPaymentId?: string;
+  purchaserCountry: string;
 }
 
 @Injectable()
@@ -510,7 +511,7 @@ WHERE nft_order_id = $1
     amountUnit: number,
     clientIp: string,
   ): Promise<PaymentIntentInternal> {
-    const vatRate = await this.#ipAddrVatRate(clientIp);
+    const { vatRate, ipCountry } = await this.#ipAddrVatRate(clientIp);
 
     let amount = this.currencyService.convertFromBaseUnit(currency, amountUnit);
 
@@ -544,6 +545,7 @@ WHERE nft_order_id = $1
       amountExclVat: amount / (1 + vatRate),
       vatRate,
       clientIp,
+      purchaserCountry: ipCountry,
 
       provider,
       providerPaymentDetails,
@@ -903,9 +905,9 @@ WHERE nft_order_id = $1
       await dbTx.query(
         `
 INSERT INTO payment (
-  payment_id, status, nft_order_id, provider, currency, amount, vat_rate, amount_excl_vat, client_ip, external_payment_id
+  payment_id, status, nft_order_id, provider, currency, amount, vat_rate, amount_excl_vat, client_ip, external_payment_id, purchaser_country
 )
-VALUES ($1, 'created', $2, $3, $4, $5, $6, $7, $8, $9)
+VALUES ($1, 'created', $2, $3, $4, $5, $6, $7, $8, $9, $10)
 RETURNING id`,
         [
           paymentIntent.id,
@@ -917,6 +919,7 @@ RETURNING id`,
           paymentIntent.amountExclVat,
           paymentIntent.clientIp,
           paymentIntent.externalPaymentId,
+          paymentIntent.purchaserCountry,
         ],
       );
     } catch (err: any) {
@@ -1522,7 +1525,9 @@ ORDER BY payment.id DESC
   }
 
   // Note: returned value is a rate between 0 and 1 (with 1 translating to 100%)
-  async #ipAddrVatRate(ipAddr: string): Promise<number> {
+  async #ipAddrVatRate(
+    ipAddr: string,
+  ): Promise<{ vatRate: number; ipCountry: string }> {
     const ip: number = this.ipAddrToNum(ipAddr);
 
     const qryRes = await this.conn.query(
@@ -1539,22 +1544,26 @@ WHERE ip_country.ip_from <= $1
       [ip],
     );
 
-    let countryShort = qryRes.rows[0]?.['country_short'];
-    if (isBottom(countryShort)) {
+    const ipCountryShort = qryRes.rows[0]?.['country_short'];
+    let vatCountryShort = ipCountryShort;
+    if (isBottom(vatCountryShort)) {
       Logger.warn(
         `Unmapped country for ip address ${ipAddr}, falling back to ${VAT_FALLBACK_COUNTRY_SHORT}`,
       );
-      countryShort = VAT_FALLBACK_COUNTRY_SHORT;
+      vatCountryShort = VAT_FALLBACK_COUNTRY_SHORT;
     } else if (!qryRes.rows[0]['vat_rate_defined']) {
       Logger.warn(
-        `Unmapped vat for ${countryShort}, falling back to ${VAT_FALLBACK_COUNTRY_SHORT}`,
+        `Unmapped vat for ${ipCountryShort}, falling back to ${VAT_FALLBACK_COUNTRY_SHORT}`,
       );
-      countryShort = VAT_FALLBACK_COUNTRY_SHORT;
+      vatCountryShort = VAT_FALLBACK_COUNTRY_SHORT;
     }
 
-    return await this.#countryVatRate(
-      countryShort ?? VAT_FALLBACK_COUNTRY_SHORT,
-    );
+    return {
+      ipCountry: ipCountryShort,
+      vatRate: await this.#countryVatRate(
+        vatCountryShort ?? VAT_FALLBACK_COUNTRY_SHORT,
+      ),
+    };
   }
 
   async #countryVatRate(countryShort: string): Promise<number> {
