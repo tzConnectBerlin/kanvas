@@ -11,7 +11,7 @@ export interface MarketingEntity {
   id: number;
   address: string;
   email?: string[];
-  consent: 'Yes' | 'No';
+  marketing_consent: boolean;
   createdAt: string;
 }
 
