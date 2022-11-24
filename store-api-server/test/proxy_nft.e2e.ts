@@ -49,6 +49,9 @@ export async function runProxyNftTests(appReference: () => any) {
           },
         ],
       });
+      const proxyCreatedAt = resp.body.nfts[0].createdAt;
+      expect(resp.body.nfts[1].createdAt).toStrictEqual(proxyCreatedAt);
+      expect(resp.body.nfts[2].createdAt).toStrictEqual(proxyCreatedAt);
     });
 
     it(`setting proxiesFolded to true returns only the proxy`, async () => {
