@@ -33,7 +33,6 @@ services:
       PGPASSWORD: store_pgpass
       PGDATABASE: dev_database
       KANVAS_API_PORT: 3000
-      LOCAL_CORS: true
     env_file:
       - store-api-server/.env
     entrypoint: |-
@@ -127,7 +126,7 @@ services:
         if [ "${ADMIN_API_ENABLED:-yes}" == "no" ]; then
           exit 0
         fi
-        
+
         ./script/entrypoint
       '
     ports:
