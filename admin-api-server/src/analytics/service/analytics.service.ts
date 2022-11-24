@@ -121,21 +121,18 @@ export class AnalyticsService {
 
   async getUsers(params: PaginationParams) {
     const qryRes = await this.storeRepl.query(
-      `SELECT
-        id,
-        address,
-        email,
-        consent,
-        created_at
-        FROM marketing 
-        ORDER BY "${params.orderBy}" ${params.orderDirection}
-        OFFSET ${params.pageOffset}
-        LIMIT ${params.pageSize}`,
+      `
+SELECT
+  id,
+  address,
+  email,
+  consent AS marketing_consent,
+  created_at
+FROM marketing 
+ORDER BY "${params.orderBy}" ${params.orderDirection}
+OFFSET ${params.pageOffset}
+LIMIT ${params.pageSize}`,
     );
-
-    if (qryRes.rowCount === 0) {
-      return { data: [], count: 0 };
-    }
 
     return {
       data: qryRes.rows.map(
@@ -144,11 +141,11 @@ export class AnalyticsService {
             id: row['id'],
             address: row['address'],
             email: row['email'],
-            consent: row['consent'] === true ? 'Yes' : 'No',
+            marketing_consent: row['marketing_consent'],
             createdAt: row['created_at'],
           },
       ),
-      count: Number(qryRes['rowCount']),
+      count: qryRes['rowCount'],
     };
   }
 

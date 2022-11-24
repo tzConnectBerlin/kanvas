@@ -185,14 +185,14 @@ export class AnalyticsController {
    *             "id": 1,
    *             "address": "any valid user address",
    *             "email": "maxime@muster.com",
-   *             "consent": "Yes",
+   *             "marketing_consent": true,
    *             "createdAt": "2022-11-21T10:59:01.741Z"
    *            },
    *            {
    *             "id": 2,
    *             "address": "any valid user address",
    *             "email": "max@muster.com",
-   *             "consent": "No",
+   *             "marketing_consent": false,
    *             "createdAt": "2022-11-21T10:59:01.741Z"
    *            }
    *        ]
@@ -208,7 +208,13 @@ export class AnalyticsController {
   ) {
     const params = queryParamsToPaginationParams(sort, range);
 
-    validatePaginationParams(params, ['id', 'address', 'email', 'consent']);
+    validatePaginationParams(params, [
+      'id',
+      'address',
+      'email',
+      'marketing_consent',
+    ]);
+
     return await this.analyticsService.getUsers(params);
   }
 

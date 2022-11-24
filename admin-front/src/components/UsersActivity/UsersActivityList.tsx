@@ -39,7 +39,7 @@ export const UsersActivityList = ({ ...props }) => {
           headerClassName={classes.header}
         />
         <TextField
-          source="consent"
+          source="marketing_consent"
           label="Marketing consent"
           headerClassName={classes.header}
         />
