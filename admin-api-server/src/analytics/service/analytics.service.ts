@@ -270,13 +270,9 @@ LIMIT ${params.pageSize}
           transaction_value:
             price &&
             row['conversion_rate'] &&
-            (
-              Math.round(Number(price) * Number(row['conversion_rate']) * 100) /
-              100
-            ).toFixed(2),
+            (Number(price) * Number(row['conversion_rate'])).toFixed(2),
           conversion_rate:
-            row['conversion_rate'] &&
-            (Math.round(Number(row['conversion_rate']) * 100) / 100).toFixed(2),
+            row['conversion_rate'] && Number(row['conversion_rate']).toFixed(2),
         };
       }),
       count: Number(qryRes.rows[0]['total_activity_count']),
