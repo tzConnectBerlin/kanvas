@@ -3,12 +3,19 @@ import { CurrencyService, getRatesFromCoinbase, GetRatesFunc } from './currency.
 
 @Module({})
 export class CurrencyModule {
-  public static forRoot(getRatesFunc: GetRatesFunc = getRatesFromCoinbase): DynamicModule {
+  public static forRoot(dbModule: any, getRatesFunc: GetRatesFunc = getRatesFromCoinbase): DynamicModule {
     return {
       module: CurrencyModule,
+      imports: [dbModule],
       providers: [{provide: 'RATES GETTER', useValue: getRatesFunc}, CurrencyService],
       exports: [CurrencyService],
       global: true,
     };
+  }
+
+  constructor(private currencyService: CurrencyService) {}
+
+  async onModuleDestroy() {
+    this.currencyService.dbConn = undefined;
   }
 }

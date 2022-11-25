@@ -14,6 +14,7 @@ import { LoggerMiddleware } from './middleware/logger.js';
 import { CookieSessionMiddleware } from './middleware/cookie_session.js';
 import { ProxiedThrottlerGuard } from './decoraters/proxied_throttler.js';
 import { RATE_LIMIT_WINDOW_SECS, RATE_LIMIT } from './constants.js';
+import { DbModule } from './db.module.js';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { RATE_LIMIT_WINDOW_SECS, RATE_LIMIT } from './constants.js';
     CategoryModule,
     AnalyticsModule,
     RoleModule,
-    CurrencyModule.forRoot(),
+    CurrencyModule.forRoot(DbModule),
     ThrottlerModule.forRoot({
       ttl: RATE_LIMIT_WINDOW_SECS,
       limit: RATE_LIMIT,

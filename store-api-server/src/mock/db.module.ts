@@ -1,11 +1,20 @@
 import { Module } from '@nestjs/common';
 import { PG_CONNECTION } from '../constants.js';
 
-class dbConnMock {}
+class DbConnMock {
+  query() {}
+  release() {}
+}
+
+class DbPoolMock {
+  connect() {
+    return new DbConnMock();
+  }
+}
 
 const dbMockProvider = {
   provide: PG_CONNECTION,
-  useValue: new dbConnMock(),
+  useValue: new DbPoolMock(),
 };
 
 @Module({
