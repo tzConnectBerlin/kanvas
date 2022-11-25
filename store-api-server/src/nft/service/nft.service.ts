@@ -21,6 +21,7 @@ import {
   SEARCH_MAX_NFTS,
   SEARCH_SIMILARITY_LIMIT,
   ENDING_SOON_DURATION,
+  PHASE2_TOKEN_ID,
 } from '../../constants.js';
 import { CurrencyService, BASE_CURRENCY } from 'kanvas-api-lib';
 import { sleep, maybe } from '../../utils.js';
@@ -329,6 +330,26 @@ LIMIT $3
       .map((row: any) => nfts.find((nft) => nft.id === row.id))
       .filter(Boolean);
   }
+
+  async findKeysWithAddress(address: string): Promise<Record<string, number>> {
+    const keys = await this.conn.query(
+      `
+SELECT
+  idx_nat AS token_id,
+  nat AS count
+FROM token_gate."storage.ledger_live"
+WHERE idx_address = $1
+`,
+      [address],
+    );
+    return Object.keys(PHASE2_TOKEN_ID).reduce(
+      (acc, el) => {
+        acc[el] = parseInt(Array(keys.rows).find(r => parseInt(r.token_id, 10) === PHASE2_TOKEN_ID[el])?.count ?? '0', 10);
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+  };
 
   async findNftsWithFilter(
     filters: FilterParams,

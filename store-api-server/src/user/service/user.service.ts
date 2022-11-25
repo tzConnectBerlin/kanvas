@@ -192,10 +192,18 @@ WHERE address = $1
       nft.ownerStatuses = nft.ownershipInfo.map((x: OwnershipInfo) => x.status);
     }
 
+    let keys: Record<string, number> = {};
+    try {
+      let keys = await this.nftService.findKeysWithAddress(address);
+    } catch (err) {
+      Logger.error('Error on keys query, err: ' + err);
+    }
+
     return new Ok({
       user: user,
       collection: owned,
       pendingOwnership: paymentPromisedNfts,
+      keys,
     });
   }
 

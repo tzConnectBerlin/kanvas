@@ -120,3 +120,10 @@ export const PINATA_API_SECRET: string | undefined =
 
 export const VAT_FALLBACK_COUNTRY_SHORT: string =
   process.env['VAT_FALLBACK_COUNTRY_SHORT'] ?? 'GB';
+
+// Phase 2 TOKEN_ID
+export const PHASE2_TOKEN_ID: Record<string, number> = {
+  "A": parseInt(process.env['A_TOKEN_ID'] ?? '1', 10),
+  "B": parseInt(process.env['B_TOKEN_ID'] ?? '2', 10),
+  "C": parseInt(process.env['C_TOKEN_ID'] ?? '3', 10),
+};

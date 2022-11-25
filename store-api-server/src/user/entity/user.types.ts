@@ -13,6 +13,7 @@ export interface ProfileEntity {
   user: UserEntity;
   collection: NftEntityPage;
   pendingOwnership: NftEntity[];
+  keys: Record<string, number>;
 }
 
 export interface UserCart {
