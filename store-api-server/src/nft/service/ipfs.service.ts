@@ -24,7 +24,7 @@ interface IpfsFormat {
 interface Attribute {
   name: string;
   value: string;
-  type: string;
+  type?: string;
 }
 
 interface NftMetadata {
@@ -140,25 +140,6 @@ WHERE id = $1
         : undefined),
     ];
 
-    let attributes: Attribute[] | undefined;
-    if (typeof nft.metadata?.attributes !== 'undefined') {
-      attributes = nft.metadata.attributes.flatMap((attr: any): Attribute[] => {
-        if (
-          typeof attr.name === 'undefined' ||
-          typeof attr.value === 'undefined'
-        ) {
-          return [];
-        }
-        return [
-          {
-            name: attr.name,
-            value: attr.value,
-            type: typeof attr.value,
-          },
-        ];
-      });
-    }
-
     const royalties = this.#defaultRoyalties();
 
     displayIpfs = displayIpfs ?? artifactIpfs;
@@ -202,7 +183,6 @@ WHERE id = $1
         },
         [],
       ),
-      attributes,
       minter: MINTER_ADDRESS,
       creators: [MINTER_ADDRESS],
       contributors: [], // TODO
@@ -213,6 +193,27 @@ WHERE id = $1
 
       royalties,
     };
+
+    if (typeof nft.metadata?.attributes !== 'undefined') {
+      res.attributes = nft.metadata.attributes.flatMap(
+        (attr: any): Attribute[] => {
+          if (
+            typeof attr.name === 'undefined' ||
+            typeof attr.value === 'undefined'
+          ) {
+            return [];
+          }
+          const attrRes: Attribute = {
+            name: attr.name,
+            value: attr.value,
+          };
+          if (typeof attr.type !== 'undefined') {
+            attrRes.type = attr.type;
+          }
+          return [attrRes];
+        },
+      );
+    }
 
     if (typeof IPFS_RIGHTS_URI !== 'undefined') {
       res.rightsUri = IPFS_RIGHTS_URI;

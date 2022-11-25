@@ -1001,10 +1001,13 @@ describe('NftService', () => {
             {
               name: 'has shoes',
               value: true,
+              type: 'flag', // note: probably not a sensible type example, but just to indicate that type does not have to be a purely type level description, putting here something different than boolean
+              notCopiedOverField: 'bla',
             },
             {
               name: 'hats amount',
               value: 5,
+              type: 'integer',
             },
           ],
         },
@@ -1054,17 +1057,16 @@ describe('NftService', () => {
           {
             name: 'hat color',
             value: 'blue',
-            type: 'string',
           },
           {
             name: 'has shoes',
             value: true,
-            type: 'boolean',
+            type: 'flag',
           },
           {
             name: 'hats amount',
             value: 5,
-            type: 'number',
+            type: 'integer',
           },
         ],
       },
@@ -1080,7 +1082,7 @@ describe('NftService', () => {
       tc.exp.royalties.shares[`${MINTER_ADDRESS}`] = 10;
 
       const got = await service.nftMetadataJson(tc.nft, 'not signed');
-      expect(got).toEqual(tc.exp);
+      expect(got).toStrictEqual(tc.exp);
     });
   }
 });
