@@ -7,7 +7,7 @@ File                      | % Stmts | % Branch | % Funcs | % Lines | Uncovered L
 
 All files                 |   88.15 |    82.68 |    87.5 |   88.15 |                                                                                             
 
- src                      |   84.65 |    80.82 |   85.18 |   84.65 |                                                                                             
+ src                      |   84.68 |    80.82 |   85.18 |   84.68 |                                                                                             
 
   app.module.ts           |     100 |      100 |     100 |     100 |                                                                                             
 
