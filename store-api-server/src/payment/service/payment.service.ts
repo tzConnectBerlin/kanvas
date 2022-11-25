@@ -1053,15 +1053,21 @@ ORDER BY 1
         for (const row of cancelOrderIds.rows) {
           const orderId = Number(row['nft_order_id']);
           const provider = row['provider'];
-          await withTransaction(this.conn, async (dbTx: DbTransaction) => {
-            await this.cancelNftOrderPayment(
-              dbTx,
-              orderId,
-              provider,
-              PaymentStatus.TIMED_OUT,
-            );
-            Logger.warn(`canceled following expired order session: ${orderId}`);
-          });
+          try {
+            await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+              await this.cancelNftOrderPayment(
+                dbTx,
+                orderId,
+                provider,
+                PaymentStatus.TIMED_OUT,
+              );
+              Logger.warn(
+                `canceled following expired order session: ${orderId}`,
+              );
+            });
+          } catch (err: any) {
+            Logger.error(err);
+          }
         }
       },
     });
