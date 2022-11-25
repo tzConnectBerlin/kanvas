@@ -161,7 +161,7 @@ SELECT DISTINCT
   )
 FROM currency_rate
 WHERE at <= $1
-      `, [t]);
+      `, [t.toUTCString()]);
     return qryRes.rows.reduce((res: Rates, row: any) => {
       res[row['currency']] = row['rate'];
       return res;
