@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import axios from 'axios';
 import { DateTime, Duration } from 'luxon';
 import { DEFAULT_MAX_RATE_AGE_MINUTES, BASE_CURRENCY, SUPPORTED_CURRENCIES, LOG_CURRENCY_RATES_UPDATES } from './constants';
+import { DbPool, DbTransaction, withTransaction } from './utils';
 
 export type Rates = { [key: string]: number };
 export type GetRatesFunc = (currencies: string[]) => Promise<Rates>;
@@ -19,9 +20,11 @@ export class CurrencyService {
   lastUpdatedAt: DateTime;
   getNewRatesFunc: GetRatesFunc;
   logUpdates: boolean = LOG_CURRENCY_RATES_UPDATES;
+  dbConn?: DbPool;
 
-  constructor(@Inject('RATES GETTER') getNewRatesFunc: GetRatesFunc) {
+  constructor(@Inject('RATES GETTER') getNewRatesFunc: GetRatesFunc, @Inject('PG_CONNECTION') dbConn: DbPool) {
     this.getNewRatesFunc = getNewRatesFunc;
+    this.dbConn = dbConn;
 
     this.rates = {};
     for (const currency of this.currencies) {
@@ -36,6 +39,7 @@ export class CurrencyService {
     baseUnitAmount: number,
     toCurrency: string,
     inBaseUnit: boolean = false,
+    withRates?: Rates,
     maxAge: Duration = Duration.fromObject({ minutes: DEFAULT_MAX_RATE_AGE_MINUTES }),
   ): string {
     if (inBaseUnit && toCurrency === BASE_CURRENCY) {
@@ -43,7 +47,7 @@ export class CurrencyService {
     }
 
     const decimals = inBaseUnit ? 0 : SUPPORTED_CURRENCIES[toCurrency];
-    return (baseUnitAmount * this.#getRate(toCurrency, maxAge, inBaseUnit)).toFixed(
+    return (baseUnitAmount * this.#getRate(toCurrency, maxAge, withRates, inBaseUnit)).toFixed(
       decimals,
     );
   }
@@ -51,9 +55,10 @@ export class CurrencyService {
   convertFromCurrency(
     amount: number,
     fromCurrency: string,
+    withRates?: Rates,
     maxAge: Duration = Duration.fromObject({ minutes: DEFAULT_MAX_RATE_AGE_MINUTES }),
   ): number {
-    return Number((amount / this.#getRate(fromCurrency, maxAge)).toFixed(0));
+    return Number((amount / this.#getRate(fromCurrency, maxAge, withRates)).toFixed(0));
   }
 
   convertToBaseUnit(
@@ -85,6 +90,7 @@ export class CurrencyService {
   #getRate(
     toCurrency: string,
     maxAge: Duration,
+    withRates?: Rates,
     inBaseUnit: boolean = false,
   ): number {
     if (toCurrency === BASE_CURRENCY) {
@@ -101,7 +107,7 @@ export class CurrencyService {
     }
 
     return (
-      this.rates[toCurrency] *
+      (withRates ?? this.rates)[toCurrency] *
       Math.pow(
         10,
         -this.baseCurrencyDecimals +
@@ -130,6 +136,52 @@ export class CurrencyService {
     if (this.logUpdates) {
       Logger.log(logMsg);
     }
+
+    try {
+      await this.#storeRates();
+    } catch(err) {
+      Logger.log(`failed to store currency rates into db: ${err}`)
+    }
+  }
+
+  async ratesAt(t: Date): Promise<Rates> {
+    if (typeof this.dbConn === 'undefined') {
+      throw `failed to get rates at ${t}, dbConn is undefined`;
+    }
+    const qryRes = await this.dbConn.query(
+      `
+SELECT DISTINCT
+  currency,
+  last_value(rate) OVER (
+    PARTITION BY currency
+    ORDER BY at
+    ROWS BETWEEN
+      UNBOUNDED PRECEDING AND
+      UNBOUNDED FOLLOWING
+  )
+FROM currency_rate
+WHERE at <= $1
+      `, [t]);
+    return qryRes.rows.reduce((res: Rates, row: any) => {
+      res[row['currency']] = row['rate'];
+      return res;
+    }, {});
+  }
+
+  async #storeRates() {
+    if (typeof this.dbConn === 'undefined') {
+      return;
+    }
+    await withTransaction(this.dbConn, async (dbTx: DbTransaction) => {
+      for (const currency of Object.keys(this.rates)) {
+        dbTx.query(`
+INSERT INTO currency_rate (
+  currency, rate
+)
+VALUES ($1, $2)
+        `, [currency, this.rates[currency]]);
+      }
+    });
   }
 }
 
