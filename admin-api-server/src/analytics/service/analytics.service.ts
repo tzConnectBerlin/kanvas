@@ -173,24 +173,33 @@ SELECT
   COUNT(1) OVER () AS total_activity_count,
   currency,
   nft_price_sum,
-  nft_order_price
+  nft_order_price,
+  mutez_fee
 FROM (
   SELECT
     lvl.baked_at AT TIME ZONE 'UTC' AS timestamp,
     'mint' AS kind,
     NULL AS "from",
     owner AS "to",
-    mint.token_id,
+    mint_params.token_id,
     NULL::NUMERIC AS price,
-    mint.amount AS edition_size,
+    mint_params.amount AS edition_size,
     NULL::TEXT AS currency,
     NULL::NUMERIC AS nft_price_sum,
-    NULL::NUMERIC AS nft_order_price
-  FROM onchain_kanvas."entry.mint_tokens.noname" AS mint
+    NULL::NUMERIC AS nft_order_price,
+    create_tx.fee + mint_tx.fee + (coalesce(create_tx.paid_storage_size_diff, 0) + coalesce(mint_tx.paid_storage_size_diff, 0)) * 250 AS mutez_fee
+  FROM onchain_kanvas."entry.mint_tokens.noname" AS mint_params
   JOIN que_pasa.tx_contexts AS ctx
-    ON ctx.id = mint.tx_context_id
+    ON ctx.id = mint_params.tx_context_id
   JOIN que_pasa.levels AS lvl
     ON lvl.level = ctx.level
+  JOIN que_pasa.txs AS mint_tx
+    ON mint_tx.tx_context_id = mint_params.tx_context_id
+  JOIN onchain_kanvas."entry.create_token" AS create_params
+    ON create_params.token_id = mint_params.token_id
+  JOIN que_pasa.txs AS create_tx
+    ON create_tx.tx_context_id = create_params.tx_context_id
+  
 
   UNION ALL
 
@@ -204,7 +213,8 @@ FROM (
     tr_dest.amount AS edition_size,
     NULL::TEXT AS currency,
     NULL::NUMERIC AS nft_price_sum,
-    NULL::NUMERIC AS nft_order_price
+    NULL::NUMERIC AS nft_order_price,
+    transfer_tx.fee + coalesce(transfer_tx.paid_storage_size_diff, 0) * 250 AS mutez_fee
   FROM onchain_kanvas."entry.transfer.noname" AS tr_from
   JOIN onchain_kanvas."entry.transfer.noname.txs" AS tr_dest
     ON tr_dest.noname_id = tr_from.id
@@ -212,6 +222,9 @@ FROM (
     ON ctx.id = tr_from.tx_context_id
   JOIN que_pasa.levels AS lvl
     ON lvl.level = ctx.level
+  JOIN que_pasa.txs AS transfer_tx
+    ON transfer_tx.tx_context_id = tr_dest.tx_context_id
+  
 
   UNION ALL
 
@@ -225,12 +238,13 @@ FROM (
     1 AS edition_size,
     payment.currency,
     (SELECT SUM(nft.price)
-     FROM nft
-     JOIN mtm_nft_order_nft AS mtm
-       ON mtm.nft_order_id = nft_order.id
-       AND nft.id = mtm.nft_id
+      FROM nft
+      JOIN mtm_nft_order_nft AS mtm
+        ON mtm.nft_order_id = nft_order.id
+        AND nft.id = mtm.nft_id
     ) AS nft_price_sum,
-    amount AS nft_order_price
+    amount AS nft_order_price,
+    NULL::NUMERIC AS mutez_fee
   FROM payment
   JOIN nft_order
     ON nft_order.id = payment.nft_order_id
@@ -248,7 +262,6 @@ WHERE ($1::TEXT[] IS NULL OR kind = ANY($1::TEXT[]))
   AND ($4::TIMESTAMP IS NULL OR $5::TIMESTAMP IS NULL OR q.timestamp BETWEEN $4 AND $5)
 ORDER BY "${params.orderBy}" ${params.orderDirection}
 OFFSET ${params.pageOffset}
-LIMIT ${params.pageSize}
 `,
       values,
     );
@@ -258,37 +271,56 @@ LIMIT ${params.pageSize}
     }
 
     return {
-      data: qryRes.rows.map((row: any) => {
-        const price = this.currencyService.convertToCurrency(
-          Number(row['price']),
-          BASE_CURRENCY,
-        );
+      data: await Promise.all(
+        qryRes.rows.map(async (row: any) => {
+          const price = this.currencyService.convertToCurrency(
+            Number(row['price']),
+            BASE_CURRENCY,
+          );
 
-        const nftPriceSumBase = this.currencyService.convertToCurrency(
-          row['nft_price_sum'],
-          BASE_CURRENCY,
-        );
-        const conversionRate =
-          row['nft_order_price'] &&
-          Number(nftPriceSumBase) / row['nft_order_price'];
+          const feeXTZ = Number(row['mutez_fee'] / 1000000);
+          const historicRates = await this.currencyService.ratesAt(
+            row['timestamp'],
+          );
+          const feeInBaseCurrency = this.currencyService.convertFromCurrency(
+            feeXTZ,
+            'XTZ',
+            historicRates,
+            false,
+          );
 
-        return <Activity>{
-          id: Number(row['id']),
-          timestamp: Math.floor(row['timestamp'].getTime() / 1000),
-          kind: row['kind'],
-          from: row['from'],
-          to: row['to'],
-          tokenId: Number(row['tokenId']),
-          price,
-          edition_size: Number(row['edition_size']),
-          currency: row['currency'],
-          transaction_value:
-            price &&
-            conversionRate &&
-            (Number(price) / conversionRate).toFixed(2),
-          conversion_rate: conversionRate && conversionRate.toFixed(2),
-        };
-      }),
+          const baseCurrencyValue = this.currencyService.convertFromBaseUnit(
+            BASE_CURRENCY,
+            feeInBaseCurrency,
+          );
+
+          const nftPriceSumBase = this.currencyService.convertToCurrency(
+            row['nft_price_sum'],
+            BASE_CURRENCY,
+          );
+          const conversionRate =
+            row['nft_order_price'] &&
+            Number(nftPriceSumBase) / row['nft_order_price'];
+
+          return <Activity>{
+            id: Number(row['id']),
+            timestamp: Math.floor(row['timestamp'].getTime() / 1000),
+            kind: row['kind'],
+            from: row['from'],
+            to: row['to'],
+            tokenId: Number(row['tokenId']),
+            price,
+            edition_size: Number(row['edition_size']),
+            currency: row['currency'],
+            transaction_value:
+              price &&
+              conversionRate &&
+              (Number(price) / conversionRate).toFixed(2),
+            conversion_rate: conversionRate && conversionRate.toFixed(2),
+            fee_in_base_currency: baseCurrencyValue,
+          };
+        }),
+      ),
       count: Number(qryRes.rows[0]['total_activity_count']),
     };
   }
