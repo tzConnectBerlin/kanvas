@@ -1034,8 +1034,8 @@ WHERE payment_id = $2
       mutexName: 'deleteExpiredPayments',
       dbPool: this.conn,
       onLockedReturn: null,
-      f: async (dbTx: DbTransaction) => {
-        const cancelOrderIds = await dbTx.query(
+      f: async () => {
+        const cancelOrderIds = await this.conn.query(
           `
 SELECT
   nft_order.id AS nft_order_id,
@@ -1053,14 +1053,15 @@ ORDER BY 1
         for (const row of cancelOrderIds.rows) {
           const orderId = Number(row['nft_order_id']);
           const provider = row['provider'];
-          await this.cancelNftOrderPayment(
-            dbTx,
-            orderId,
-            provider,
-            PaymentStatus.TIMED_OUT,
-          );
-          await dbTx.query('SAVEPOINT s');
-          Logger.warn(`canceled following expired order session: ${orderId}`);
+          await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+            await this.cancelNftOrderPayment(
+              dbTx,
+              orderId,
+              provider,
+              PaymentStatus.TIMED_OUT,
+            );
+            Logger.warn(`canceled following expired order session: ${orderId}`);
+          });
         }
       },
     });
@@ -1303,7 +1304,7 @@ RETURNING COALESCE(external_payment_id, payment_id) AS payment_id
 
     if (payment.rowCount === 0) {
       throw Err(
-        `paymentIntentCancel failed (orderId=${orderId}), err: no payment exists with matching orderId and cancellable status`,
+        `paymentIntentCancel failed (orderId=${orderId}, provider=${provider}), err: no payment exists with matching orderId and cancellable status`,
       );
     }
 
