@@ -56,9 +56,11 @@ export class CurrencyService {
     amount: number,
     fromCurrency: string,
     withRates?: Rates,
+    roundBaseUnit = true,
     maxAge: Duration = Duration.fromObject({ minutes: DEFAULT_MAX_RATE_AGE_MINUTES }),
   ): number {
-    return Number((amount / this.#getRate(fromCurrency, maxAge, withRates)).toFixed(0));
+    const res = (amount / this.#getRate(fromCurrency, maxAge, withRates))
+    return roundBaseUnit ? Math.round(res) : res;
   }
 
   convertToBaseUnit(
@@ -158,7 +160,7 @@ SELECT DISTINCT
     ROWS BETWEEN
       UNBOUNDED PRECEDING AND
       UNBOUNDED FOLLOWING
-  )
+  ) AS rate
 FROM currency_rate
 WHERE at <= $1
       `, [t.toUTCString()]);

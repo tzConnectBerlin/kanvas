@@ -85,6 +85,11 @@ const DataGridWrapper = ({ fromValue, toValue }: WrapperProps) => {
             label="Transaction conversion rate"
             sortable={false}
         />
+        <TextField
+            source="fee_in_base_currency"
+            label="Fee"
+            sortable={false}
+        />
         <TextField source="to" headerClassName={classes.header} label="To" />
       </Datagrid>
     </>
