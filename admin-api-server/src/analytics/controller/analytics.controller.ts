@@ -236,18 +236,25 @@ export class AnalyticsController {
    *             "from": null,
    *             "to": "1a2b3c4d5e6f7g8h9i10j",
    *             "tokenId": 8,
-   *             "price": "9999.99",
-   *             "amount": 1
+   *             "price": "10.00",
+   *             "edition_size": 1,
+   *             "currency": "EUR",
+   *             "transaction_value": "5.00",
+   *             "conversion_rate": "0.50"
    *            },
    *            {
    *             "id": 2,
    *             "timestamp": 1645717832,
-   *             "kind": "sale",
-   *             "from": null,
+   *             "kind": "transfer",
+   *             "from": "q1w2e3r4t5z6u77i8o90p",
    *             "to": "1a2b3c4d5e6f7g8h9i10j",
    *             "tokenId": 8,
-   *             "price": "9999.99",
-   *             "amount": 1
+   *             "price": "25.00",
+   *             "edition_size": 1,
+   *             "currency": null,
+   *             "transaction_value": null,
+   *             "conversion_rate": null,
+   *             "fee_in_base_currency": 5.23
    *            }
    *            ...,
    *            "count": 75
