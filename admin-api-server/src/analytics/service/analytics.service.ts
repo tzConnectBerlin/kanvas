@@ -313,9 +313,10 @@ LIMIT ${params.pageSize}
             conversion_rate: conversionRate && conversionRate.toFixed(2),
             fee_in_base_currency:
               feeInBaseCurrency > 0
-                ? this.currencyService.convertFromBaseUnit(
-                    BASE_CURRENCY,
-                    feeInBaseCurrency,
+                ? Number(
+                    this.currencyService
+                      .convertFromBaseUnit(BASE_CURRENCY, feeInBaseCurrency)
+                      .toFixed(4),
                   )
                 : null,
           };

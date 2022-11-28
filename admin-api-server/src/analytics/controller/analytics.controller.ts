@@ -254,7 +254,7 @@ export class AnalyticsController {
    *             "currency": null,
    *             "transaction_value": null,
    *             "conversion_rate": null,
-   *             "fee_in_base_currency": 5.23
+   *             "fee_in_base_currency": 5.2300
    *            }
    *            ...,
    *            "count": 75
