@@ -2391,11 +2391,6 @@ describe('AppController (e2e)', () => {
 
   skipOnPriorFail('NFT test voting behavior', async () => {
     const { bearer } = await loginAsAdmin(app);
-    const moderator = await loginUser(
-      app,
-      'regular_joe@bigbrother.co',
-      'somepass',
-    );
 
     let res = await request(app.getHttpServer())
       .patch('/nft')
@@ -2565,7 +2560,7 @@ describe('AppController (e2e)', () => {
           data: [
             {
               from: null,
-              id: 1,
+              id: 3,
               kind: 'sale',
               price: '4.30',
               timestamp: 817171200,
@@ -2578,7 +2573,7 @@ describe('AppController (e2e)', () => {
             },
             {
               from: null,
-              id: 2,
+              id: 4,
               kind: 'sale',
               price: '9.80',
               timestamp: 817171200,
@@ -2591,7 +2586,7 @@ describe('AppController (e2e)', () => {
             },
             {
               from: null,
-              id: 3,
+              id: 5,
               kind: 'sale',
               price: '9.20',
               timestamp: 817171200,
