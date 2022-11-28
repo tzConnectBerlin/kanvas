@@ -162,104 +162,108 @@ LIMIT ${params.pageSize}`,
     const qryRes = await this.storeRepl.query(
       `
 SELECT
-  timestamp,
-  kind,
-  "from",
-  "to",
-  token_id AS "tokenId",
-  price,
-  edition_size,
-  ROW_NUMBER() OVER (ORDER BY timestamp, kind, "from", "to", token_id) AS id,
-  COUNT(1) OVER () AS total_activity_count,
-  currency,
-  nft_price_sum,
-  nft_order_price,
-  mutez_fee
+  *,
+  COUNT(1) OVER () AS selected_activities_count
 FROM (
   SELECT
-    lvl.baked_at AT TIME ZONE 'UTC' AS timestamp,
-    'mint' AS kind,
-    NULL AS "from",
-    owner AS "to",
-    mint_params.token_id,
-    NULL::NUMERIC AS price,
-    mint_params.amount AS edition_size,
-    NULL::TEXT AS currency,
-    NULL::NUMERIC AS nft_price_sum,
-    NULL::NUMERIC AS nft_order_price,
-    create_tx.fee + mint_tx.fee + (coalesce(create_tx.paid_storage_size_diff, 0) + coalesce(mint_tx.paid_storage_size_diff, 0)) * 250 AS mutez_fee
-  FROM onchain_kanvas."entry.mint_tokens.noname" AS mint_params
-  JOIN que_pasa.tx_contexts AS ctx
-    ON ctx.id = mint_params.tx_context_id
-  JOIN que_pasa.levels AS lvl
-    ON lvl.level = ctx.level
-  JOIN que_pasa.txs AS mint_tx
-    ON mint_tx.tx_context_id = mint_params.tx_context_id
-  JOIN onchain_kanvas."entry.create_token" AS create_params
-    ON create_params.token_id = mint_params.token_id
-  JOIN que_pasa.txs AS create_tx
-    ON create_tx.tx_context_id = create_params.tx_context_id
+    timestamp,
+    kind,
+    "from",
+    "to",
+    token_id AS "tokenId",
+    price,
+    edition_size,
+    ROW_NUMBER() OVER (ORDER BY timestamp, kind, "from", "to", token_id) AS id,
+    currency,
+    nft_price_sum,
+    nft_order_price,
+    mutez_fee
+  FROM (
+    SELECT
+      lvl.baked_at AT TIME ZONE 'UTC' AS timestamp,
+      'mint' AS kind,
+      NULL AS "from",
+      owner AS "to",
+      mint_params.token_id,
+      NULL::NUMERIC AS price,
+      mint_params.amount AS edition_size,
+      NULL::TEXT AS currency,
+      NULL::NUMERIC AS nft_price_sum,
+      NULL::NUMERIC AS nft_order_price,
+      create_tx.fee + mint_tx.fee + (coalesce(create_tx.paid_storage_size_diff, 0) + coalesce(mint_tx.paid_storage_size_diff, 0)) * 250 AS mutez_fee
+    FROM onchain_kanvas."entry.mint_tokens.noname" AS mint_params
+    JOIN que_pasa.tx_contexts AS ctx
+      ON ctx.id = mint_params.tx_context_id
+    JOIN que_pasa.levels AS lvl
+      ON lvl.level = ctx.level
+    JOIN que_pasa.txs AS mint_tx
+      ON mint_tx.tx_context_id = mint_params.tx_context_id
+    JOIN onchain_kanvas."entry.create_token" AS create_params
+      ON create_params.token_id = mint_params.token_id
+    JOIN que_pasa.txs AS create_tx
+      ON create_tx.tx_context_id = create_params.tx_context_id
+    
   
-
-  UNION ALL
-
-  SELECT
-    lvl.baked_at AT TIME ZONE 'UTC' AS timestamp,
-    'transfer' AS kind,
-    tr_from.from_ AS "from",
-    tr_dest.to_ AS "to",
-    tr_dest.token_id,
-    NULL::NUMERIC AS price,
-    tr_dest.amount AS edition_size,
-    NULL::TEXT AS currency,
-    NULL::NUMERIC AS nft_price_sum,
-    NULL::NUMERIC AS nft_order_price,
-    transfer_tx.fee + coalesce(transfer_tx.paid_storage_size_diff, 0) * 250 AS mutez_fee
-  FROM onchain_kanvas."entry.transfer.noname" AS tr_from
-  JOIN onchain_kanvas."entry.transfer.noname.txs" AS tr_dest
-    ON tr_dest.noname_id = tr_from.id
-  JOIN que_pasa.tx_contexts AS ctx
-    ON ctx.id = tr_from.tx_context_id
-  JOIN que_pasa.levels AS lvl
-    ON lvl.level = ctx.level
-  JOIN que_pasa.txs AS transfer_tx
-    ON transfer_tx.tx_context_id = tr_dest.tx_context_id
+    UNION ALL
   
-
-  UNION ALL
-
-  SELECT
-    nft_order.order_at AS timestamp,
-    'sale' AS kind,
-    NULL AS "from",
-    usr.address AS "to",
-    nft.id AS token_id,
-    nft.price,
-    1 AS edition_size,
-    payment.currency,
-    (SELECT SUM(nft.price)
-      FROM nft
-      JOIN mtm_nft_order_nft AS mtm
-        ON mtm.nft_order_id = nft_order.id
-        AND nft.id = mtm.nft_id
-    ) AS nft_price_sum,
-    amount AS nft_order_price,
-    NULL::NUMERIC AS mutez_fee
-  FROM payment
-  JOIN nft_order
-    ON nft_order.id = payment.nft_order_id
-  JOIN mtm_nft_order_nft AS mtm
-    ON mtm.nft_order_id = nft_order.id
-  JOIN nft
-    ON nft.id = mtm.nft_id
-  JOIN kanvas_user AS usr
-    ON usr.id = nft_order.user_id
-  WHERE payment.status = 'succeeded'
-) q
+    SELECT
+      lvl.baked_at AT TIME ZONE 'UTC' AS timestamp,
+      'transfer' AS kind,
+      tr_from.from_ AS "from",
+      tr_dest.to_ AS "to",
+      tr_dest.token_id,
+      NULL::NUMERIC AS price,
+      tr_dest.amount AS edition_size,
+      NULL::TEXT AS currency,
+      NULL::NUMERIC AS nft_price_sum,
+      NULL::NUMERIC AS nft_order_price,
+      transfer_tx.fee + coalesce(transfer_tx.paid_storage_size_diff, 0) * 250 AS mutez_fee
+    FROM onchain_kanvas."entry.transfer.noname" AS tr_from
+    JOIN onchain_kanvas."entry.transfer.noname.txs" AS tr_dest
+      ON tr_dest.noname_id = tr_from.id
+    JOIN que_pasa.tx_contexts AS ctx
+      ON ctx.id = tr_from.tx_context_id
+    JOIN que_pasa.levels AS lvl
+      ON lvl.level = ctx.level
+    JOIN que_pasa.txs AS transfer_tx
+      ON transfer_tx.tx_context_id = tr_dest.tx_context_id
+    
+  
+    UNION ALL
+  
+    SELECT
+      nft_order.order_at AS timestamp,
+      'sale' AS kind,
+      NULL AS "from",
+      usr.address AS "to",
+      nft.id AS token_id,
+      nft.price,
+      1 AS edition_size,
+      payment.currency,
+      (SELECT SUM(nft.price)
+        FROM nft
+        JOIN mtm_nft_order_nft AS mtm
+          ON mtm.nft_order_id = nft_order.id
+          AND nft.id = mtm.nft_id
+      ) AS nft_price_sum,
+      amount AS nft_order_price,
+      NULL::NUMERIC AS mutez_fee
+    FROM payment
+    JOIN nft_order
+      ON nft_order.id = payment.nft_order_id
+    JOIN mtm_nft_order_nft AS mtm
+      ON mtm.nft_order_id = nft_order.id
+    JOIN nft
+      ON nft.id = mtm.nft_id
+    JOIN kanvas_user AS usr
+      ON usr.id = nft_order.user_id
+    WHERE payment.status = 'succeeded'
+  ) q
+) q2
 WHERE ($1::TEXT[] IS NULL OR kind = ANY($1::TEXT[]))
   AND ($2::TEXT[] IS NULL OR "from" = ANY($2::TEXT[]))
   AND ($3::TEXT[] IS NULL OR "to" = ANY($3::TEXT[]))
-  AND ($4::TIMESTAMP IS NULL OR $5::TIMESTAMP IS NULL OR q.timestamp BETWEEN $4 AND $5)
+  AND ($4::TIMESTAMP IS NULL OR $5::TIMESTAMP IS NULL OR q2.timestamp BETWEEN $4 AND $5)
 ORDER BY "${params.orderBy}" ${params.orderDirection}
 OFFSET ${params.pageOffset}
 LIMIT ${params.pageSize}
@@ -322,7 +326,7 @@ LIMIT ${params.pageSize}
           };
         }),
       ),
-      count: Number(qryRes.rows[0]['total_activity_count']),
+      count: Number(qryRes.rows[0]['selected_activities_count']),
     };
   }
 
