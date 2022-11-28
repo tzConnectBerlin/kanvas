@@ -1994,6 +1994,7 @@ describe('AppController (e2e)', () => {
         .set('authorization', bearer);
       expect(res.statusCode).toEqual(200);
       expect(res.body).toMatchObject({
+        // TODO: add toStrictEqual back when fee_in_base_currency stops being null
         data: [
           {
             id: 1,
@@ -2559,6 +2560,7 @@ describe('AppController (e2e)', () => {
           });
         expect(res.statusCode).toEqual(200);
         expect(res.body).toMatchObject({
+          // TODO: add toStrictEqual back when fee_in_base_currency stops being null
           count: 3,
           data: [
             {
