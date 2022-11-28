@@ -34,4 +34,5 @@ export interface Activity {
   currency: string;
   transaction_value: string;
   conversion_rate: string;
+  fee_in_base_currency: number;
 }
