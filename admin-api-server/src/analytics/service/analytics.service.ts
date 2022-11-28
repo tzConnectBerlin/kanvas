@@ -262,6 +262,7 @@ WHERE ($1::TEXT[] IS NULL OR kind = ANY($1::TEXT[]))
   AND ($4::TIMESTAMP IS NULL OR $5::TIMESTAMP IS NULL OR q.timestamp BETWEEN $4 AND $5)
 ORDER BY "${params.orderBy}" ${params.orderDirection}
 OFFSET ${params.pageOffset}
+LIMIT ${params.pageSize}
 `,
       values,
     );
@@ -277,23 +278,16 @@ OFFSET ${params.pageOffset}
             Number(row['price']),
             BASE_CURRENCY,
           );
-
-          const feeXTZ = Number(row['mutez_fee'] / 1000000);
           const historicRates = await this.currencyService.ratesAt(
             row['timestamp'],
           );
-          const feeInBaseCurrency = this.currencyService.convertFromCurrency(
-            feeXTZ,
-            'XTZ',
-            historicRates,
-            false,
-          );
-
-          const baseCurrencyValue = this.currencyService.convertFromBaseUnit(
-            BASE_CURRENCY,
-            feeInBaseCurrency,
-          );
-
+          const feeInBaseCurrency: number =
+            this.currencyService.convertFromCurrency(
+              Number(row['mutez_fee']) / 1000000,
+              'XTZ',
+              historicRates,
+              false,
+            );
           const nftPriceSumBase = this.currencyService.convertToCurrency(
             row['nft_price_sum'],
             BASE_CURRENCY,
@@ -317,7 +311,13 @@ OFFSET ${params.pageOffset}
               conversionRate &&
               (Number(price) / conversionRate).toFixed(2),
             conversion_rate: conversionRate && conversionRate.toFixed(2),
-            fee_in_base_currency: baseCurrencyValue,
+            fee_in_base_currency:
+              feeInBaseCurrency > 0
+                ? this.currencyService.convertFromBaseUnit(
+                    BASE_CURRENCY,
+                    feeInBaseCurrency,
+                  )
+                : null,
           };
         }),
       ),
