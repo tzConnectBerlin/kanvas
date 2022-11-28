@@ -2,19 +2,21 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 
-set -a
-. ../.env
-set +a
+PGDATABASE=store_replication psql -c '
+BEGIN;
 
-function msg_wait {
-    echo "$@ (press any button to proceed, or ^C to stop)"
-    read -s -n 1
-}
+DROP SCHEMA onchain_kanvas CASCADE;
 
-msg_wait 'please make sure que-pasa is not running. if it is, stop it before proceeding here..' || exit 1
+-- dropping the following set of schemas in case they exist, they might if the
+-- admin quepasa was started with the same que pasa config as the store quepasa
+DROP SCHEMA IF EXISTS paypoint CASCADE;
+DROP SCHEMA IF EXISTS token_gate CASCADE;
 
+DROP SCHEMA que_pasa CASCADE;
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+
+COMMIT;' || exit 1
 PGDATABASE=store_replication psql -c 'DROP SUBSCRIPTION store_sub' || exit 1
-psql -c 'drop database store_replication' || exit 1
-psql -c 'create database store_replication' || exit 1
 
 ./setup-replication-sub

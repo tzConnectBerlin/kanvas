@@ -2,22 +2,6 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 
-echo waiting for subscription target database to be up..
-(
-    export PGUSER=$STORE_PGUSER
-    export PGPASSWORD=$STORE_PGPASSWORD
-    export PGDATABASE=$STORE_PGDATABASE
-    export PGHOST=$STORE_PGHOST
-    export PGPORT=$STORE_PGPORT
-    ./wait-db
-
-    cd $SCRIPT_DIR/../../store-api-server
-    while [ "`HOST=$PGHOST PORT=$PGPORT LOGIN=$PGUSER PASSWORD=$PGPASSWORD ./script/shmig -t postgresql -d $PGDATABASE pending`" != "" ]; do
-        echo store pub not ready yet..
-        sleep 1
-    done
-)
-
 # must copy over table, enum definitions, etc first. Otherwise the
 # subscription will not work (it will not bring over these definitions, unfortunately)
 
