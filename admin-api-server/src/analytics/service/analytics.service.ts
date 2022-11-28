@@ -127,12 +127,17 @@ SELECT
   address,
   email,
   consent AS marketing_consent,
-  created_at
+  created_at,
+  COUNT(1) OVER () AS users_count
 FROM marketing 
 ORDER BY "${params.orderBy}" ${params.orderDirection}
 OFFSET ${params.pageOffset}
 LIMIT ${params.pageSize}`,
     );
+
+    if (qryRes.rowCount === 0) {
+      return { data: [], count: 0 };
+    }
 
     return {
       data: qryRes.rows.map(
@@ -145,7 +150,7 @@ LIMIT ${params.pageSize}`,
             createdAt: row['created_at'],
           },
       ),
-      count: qryRes['rowCount'],
+      count: Number(qryRes.rows[0]['users_count']),
     };
   }
 

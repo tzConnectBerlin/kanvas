@@ -23,15 +23,7 @@ export const UsersActivityList = ({ ...props }) => {
         />
         <FunctionField
           label="Creation time"
-          render={(record: any) =>
-            `${
-              record.createdAt * 1000
-                ? dayjs(new Date(record.createdAt * 1000)).format(
-                    dateFormat + '/YYYY - hh : mm : ss A',
-                  )
-                : dayjs().format(dateFormat + '/YYYY - hh : mm : ss A')
-            }`
-          }
+          render={(record: any) => dayjs(new Date(record.createdAt)).format(dateFormat + '/YYYY - hh : mm : ss A')}
         />
         <TextField
           source="email"
