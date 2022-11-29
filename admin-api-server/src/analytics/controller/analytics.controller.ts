@@ -221,7 +221,7 @@ export class AnalyticsController {
   /**
    * @apiGroup Analytics
    * @api {get} /analytics/activities Request the analytics activity information
-   * @apiDescription Result field "fee" is in base currency unit format. The base currency means, whatever the main currency of the store is.
+   * @apiDescription Result field "fee" is in base currency unit format. The base currency equals to the main currency of the store.
    * @apiPermission admin
    * @apiQuery {Object="from: string[]","to: string[]","kind: string[]","startDate: string","endDate: string"} [filters] URL-decoded example: filters: { "startDate": "1970-01-20T07:28:39.307Z", "endDate": "1970-05-20T07:28:39.307Z" }
    * @apiQuery {String[]="timestamp","id","kind","amount","token","from","to"} [sort] URL-decoded examples: sort: [$value,"desc"] or sort: [$value,"asc"]
@@ -241,7 +241,8 @@ export class AnalyticsController {
    *             "edition_size": 1,
    *             "currency": "EUR",
    *             "transaction_value": "5.00",
-   *             "conversion_rate": "0.50"
+   *             "conversion_rate": "0.50",
+   *             "purchaser_country": "GB"
    *            },
    *            {
    *             "id": 2,
@@ -255,7 +256,8 @@ export class AnalyticsController {
    *             "currency": null,
    *             "transaction_value": null,
    *             "conversion_rate": null,
-   *             "fee": 5.2300
+   *             "fee": 5.2300,
+   *             "purchaser_country": "GB"
    *            }
    *            ...,
    *            "count": 75
