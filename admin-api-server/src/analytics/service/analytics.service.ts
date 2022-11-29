@@ -123,13 +123,15 @@ export class AnalyticsService {
     const qryRes = await this.storeRepl.query(
       `
 SELECT
-  id,
-  address,
-  email,
-  consent AS marketing_consent,
-  created_at,
-  COUNT(1) OVER () AS users_count
-FROM marketing 
+  usr.address AS address,
+  marketing.email AS email,
+  marketing.consent AS marketing_consent,
+  usr.created_at AS created_at,
+  COUNT(1) OVER () AS users_count,
+  ROW_NUMBER() OVER (ORDER BY usr.created_at) AS id
+FROM kanvas_user AS usr 
+  LEFT JOIN marketing
+  ON marketing.address = usr.address
 ORDER BY "${params.orderBy}" ${params.orderDirection}
 OFFSET ${params.pageOffset}
 LIMIT ${params.pageSize}`,
@@ -143,7 +145,7 @@ LIMIT ${params.pageSize}`,
       data: qryRes.rows.map(
         (row: any) =>
           <MarketingEntity>{
-            id: row['id'],
+            id: Number(row['id']),
             address: row['address'],
             email: row['email'],
             marketing_consent: row['marketing_consent'],
@@ -325,12 +327,11 @@ LIMIT ${params.pageSize}
               (Number(price) / conversionRate).toFixed(2),
             conversion_rate: conversionRate && conversionRate.toFixed(2),
             purchaser_country: row['purchaser_country'],
-            fee_in_base_currency:
+            fee:
               feeInBaseCurrency > 0
-                ? Number(
-                    this.currencyService
-                      .convertFromBaseUnit(BASE_CURRENCY, feeInBaseCurrency)
-                      .toFixed(4),
+                ? this.currencyService.convertFromBaseUnit(
+                    BASE_CURRENCY,
+                    feeInBaseCurrency,
                   )
                 : null,
           };
