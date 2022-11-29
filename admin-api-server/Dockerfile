@@ -32,12 +32,6 @@ RUN addgroup --system --gid 1001 nodejs && \
 USER nodejs
 WORKDIR /build
 
-# these are added to allow the admin-api to check whether the store-db
-# has finished it's setup (whether all migrations have been applied),
-# before continuing with subscribing to the replication subscription
-ADD --chown=nodejs:nodejs store-api-server/script/shmig /store-api-server/script/shmig
-ADD --chown=nodejs:nodejs store-api-server/migrations /store-api-server/migrations
-
 COPY --chown=nodejs:nodejs --from=build /build/result/ .
 COPY --chown=nodejs:nodejs --from=build /lib /lib
 
