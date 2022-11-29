@@ -92,6 +92,11 @@ const DataGridWrapper = ({ fromValue, toValue }: WrapperProps) => {
             }}
         />
         <TextField source="to" headerClassName={classes.header} label="To" />
+        <TextField
+            source="purchaser_country"
+            label="Country of purchase"
+            headerClassName={classes.header}
+        />
       </Datagrid>
     </>
   );

@@ -182,7 +182,8 @@ FROM (
     currency,
     nft_price_sum,
     nft_order_price,
-    mutez_fee
+    mutez_fee,
+    purchaser_country
   FROM (
     SELECT
       lvl.baked_at AT TIME ZONE 'UTC' AS timestamp,
@@ -195,7 +196,8 @@ FROM (
       NULL::TEXT AS currency,
       NULL::NUMERIC AS nft_price_sum,
       NULL::NUMERIC AS nft_order_price,
-      create_tx.fee + mint_tx.fee + (coalesce(create_tx.paid_storage_size_diff, 0) + coalesce(mint_tx.paid_storage_size_diff, 0)) * 250 AS mutez_fee
+      create_tx.fee + mint_tx.fee + (coalesce(create_tx.paid_storage_size_diff, 0) + coalesce(mint_tx.paid_storage_size_diff, 0)) * 250 AS mutez_fee,
+      NULL::TEXT AS purchaser_country
     FROM onchain_kanvas."entry.mint_tokens.noname" AS mint_params
     JOIN que_pasa.tx_contexts AS ctx
       ON ctx.id = mint_params.tx_context_id
@@ -222,7 +224,8 @@ FROM (
       NULL::TEXT AS currency,
       NULL::NUMERIC AS nft_price_sum,
       NULL::NUMERIC AS nft_order_price,
-      transfer_tx.fee + coalesce(transfer_tx.paid_storage_size_diff, 0) * 250 AS mutez_fee
+      transfer_tx.fee + coalesce(transfer_tx.paid_storage_size_diff, 0) * 250 AS mutez_fee,
+      NULL::TEXT AS purchaser_country
     FROM onchain_kanvas."entry.transfer.noname" AS tr_from
     JOIN onchain_kanvas."entry.transfer.noname.txs" AS tr_dest
       ON tr_dest.noname_id = tr_from.id
@@ -252,7 +255,8 @@ FROM (
           AND nft.id = mtm.nft_id
       ) AS nft_price_sum,
       amount AS nft_order_price,
-      NULL::NUMERIC AS mutez_fee
+      NULL::NUMERIC AS mutez_fee,
+      payment.purchaser_country
     FROM payment
     JOIN nft_order
       ON nft_order.id = payment.nft_order_id
@@ -320,6 +324,7 @@ LIMIT ${params.pageSize}
               conversionRate &&
               (Number(price) / conversionRate).toFixed(2),
             conversion_rate: conversionRate && conversionRate.toFixed(2),
+            purchaser_country: row['purchaser_country'],
             fee_in_base_currency:
               feeInBaseCurrency > 0
                 ? Number(
