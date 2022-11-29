@@ -273,6 +273,7 @@ export class AnalyticsController {
     const params = this.#queryParamsToFilterParams(filters, sort, range);
 
     validatePaginationParams(params, [
+      'purchaser_country',
       'id',
       'timestamp',
       'kind',

@@ -1993,8 +1993,7 @@ describe('AppController (e2e)', () => {
         .get('/analytics/activities')
         .set('authorization', bearer);
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toMatchObject({
-        // TODO: add toStrictEqual back when fee_in_base_currency stops being null
+      expect(res.body).toStrictEqual({
         data: [
           {
             id: 1,
@@ -2008,6 +2007,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '0.82',
+            fee_in_base_currency: null,
+            purchaser_country: null,
           },
           {
             id: 2,
@@ -2021,6 +2022,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '1.87',
+            fee_in_base_currency: null,
+            purchaser_country: null,
           },
           {
             id: 3,
@@ -2034,6 +2037,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '1.76',
+            fee_in_base_currency: null,
+            purchaser_country: null,
           },
           {
             id: 4,
@@ -2047,6 +2052,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '1.30',
+            fee_in_base_currency: null,
+            purchaser_country: null,
           },
           {
             id: 5,
@@ -2060,6 +2067,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '0.72',
+            fee_in_base_currency: null,
+            purchaser_country: null,
           },
           {
             id: 6,
@@ -2073,6 +2082,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '1.54',
+            fee_in_base_currency: null,
+            purchaser_country: null,
           },
           {
             id: 7,
@@ -2086,6 +2097,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '0.69',
+            fee_in_base_currency: null,
+            purchaser_country: null,
           },
           {
             id: 8,
@@ -2099,6 +2112,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '0.20',
+            fee_in_base_currency: null,
+            purchaser_country: null,
           },
           {
             id: 9,
@@ -2112,6 +2127,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '0.02',
+            fee_in_base_currency: null,
+            purchaser_country: null,
           },
           {
             id: 10,
@@ -2125,6 +2142,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '2.56',
+            fee_in_base_currency: null,
+            purchaser_country: null,
           },
         ],
         count: 11,
@@ -2554,8 +2573,7 @@ describe('AppController (e2e)', () => {
             },
           });
         expect(res.statusCode).toEqual(200);
-        expect(res.body).toMatchObject({
-          // TODO: add toStrictEqual back when fee_in_base_currency stops being null
+        expect(res.body).toStrictEqual({
           count: 3,
           data: [
             {
@@ -2570,6 +2588,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '0.82',
+              fee_in_base_currency: null,
+              purchaser_country: null,
             },
             {
               from: null,
@@ -2583,6 +2603,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '1.87',
+              fee_in_base_currency: null,
+              purchaser_country: null,
             },
             {
               from: null,
@@ -2596,6 +2618,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '1.76',
+              fee_in_base_currency: null,
+              purchaser_country: null,
             },
           ],
         });
@@ -2611,8 +2635,7 @@ describe('AppController (e2e)', () => {
           });
 
         expect(res.statusCode).toEqual(200);
-        expect(res.body).toMatchObject({
-          // TODO: add toStrictEqual back when fee_in_base_currency stops being null
+        expect(res.body).toStrictEqual({
           count: 7,
           data: [
             {
@@ -2627,6 +2650,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '0.06',
+              fee_in_base_currency: null,
+              purchaser_country: null,
             },
             {
               from: null,
@@ -2640,6 +2665,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '4.39',
+              fee_in_base_currency: null,
+              purchaser_country: null,
             },
             {
               from: null,
@@ -2653,6 +2680,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '0.82',
+              fee_in_base_currency: null,
+              purchaser_country: null,
             },
             {
               from: null,
@@ -2666,6 +2695,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '1.87',
+              fee_in_base_currency: null,
+              purchaser_country: null,
             },
             {
               from: null,
@@ -2679,6 +2710,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '1.76',
+              fee_in_base_currency: null,
+              purchaser_country: null,
             },
             {
               from: null,
@@ -2692,6 +2725,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '3.86',
+              fee_in_base_currency: null,
+              purchaser_country: null,
             },
             {
               from: null,
@@ -2705,6 +2740,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '0.59',
+              fee_in_base_currency: null,
+              purchaser_country: null,
             },
           ],
         });
