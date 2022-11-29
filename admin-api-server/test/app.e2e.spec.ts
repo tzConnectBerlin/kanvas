@@ -1707,7 +1707,24 @@ describe('AppController (e2e)', () => {
         .get('/analytics/users')
         .set('authorization', bearer);
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toStrictEqual({ count: 0, data: [] });
+      expect(res.body).toMatchObject({
+        // TODO: use toStrictEqual when the createdAt timestamp does not start from "now" anymore
+        count: 2,
+        data: [
+          {
+            address: 'addr',
+            email: null,
+            id: 1,
+            marketing_consent: null,
+          },
+          {
+            address: 'tz1',
+            email: null,
+            id: 2,
+            marketing_consent: null,
+          },
+        ],
+      });
     },
   );
 
@@ -1912,21 +1929,23 @@ describe('AppController (e2e)', () => {
     'admin can access analytics endpoints (part 2; after emulated sales)',
     async () => {
       await clearEmulatedNftSales();
-      await emulateNftSale(
-        1,
-        [4, 7, 10],
-        new Date('December 17, 1995 03:24:00'),
-      );
-      await emulateNftSale(
-        2,
-        [2, 27, 11, 10, 4],
-        new Date('December 17, 1995 13:24:00'),
-      );
-      await emulateNftSale(
-        1,
-        [1, 3, 30],
-        new Date('December 17, 1995 13:34:00'),
-      );
+      await emulateNftSale({
+        userId: 1,
+        nftIds: [4, 7, 10],
+        at: new Date('December 17, 1995 03:24:00'),
+        purchaserCountry: 'DE',
+      });
+      await emulateNftSale({
+        userId: 2,
+        nftIds: [2, 27, 11, 10, 4],
+        at: new Date('December 17, 1995 13:24:00'),
+        purchaserCountry: 'US',
+      });
+      await emulateNftSale({
+        userId: 1,
+        nftIds: [1, 3, 30],
+        at: new Date('December 17, 1995 13:34:00'),
+      });
 
       const { bearer } = await loginAsAdmin(app);
       let res = await request(app.getHttpServer())
@@ -2007,8 +2026,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '0.82',
-            fee_in_base_currency: null,
-            purchaser_country: null,
+            fee: null,
+            purchaser_country: 'DE',
           },
           {
             id: 2,
@@ -2022,8 +2041,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '1.87',
-            fee_in_base_currency: null,
-            purchaser_country: null,
+            fee: null,
+            purchaser_country: 'DE',
           },
           {
             id: 3,
@@ -2037,8 +2056,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '1.76',
-            fee_in_base_currency: null,
-            purchaser_country: null,
+            fee: null,
+            purchaser_country: 'DE',
           },
           {
             id: 4,
@@ -2052,8 +2071,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '1.30',
-            fee_in_base_currency: null,
-            purchaser_country: null,
+            fee: null,
+            purchaser_country: 'US',
           },
           {
             id: 5,
@@ -2067,8 +2086,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '0.72',
-            fee_in_base_currency: null,
-            purchaser_country: null,
+            fee: null,
+            purchaser_country: 'US',
           },
           {
             id: 6,
@@ -2082,8 +2101,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '1.54',
-            fee_in_base_currency: null,
-            purchaser_country: null,
+            fee: null,
+            purchaser_country: 'US',
           },
           {
             id: 7,
@@ -2097,8 +2116,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '0.69',
-            fee_in_base_currency: null,
-            purchaser_country: null,
+            fee: null,
+            purchaser_country: 'US',
           },
           {
             id: 8,
@@ -2112,8 +2131,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '0.20',
-            fee_in_base_currency: null,
-            purchaser_country: null,
+            fee: null,
+            purchaser_country: 'US',
           },
           {
             id: 9,
@@ -2127,8 +2146,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '0.02',
-            fee_in_base_currency: null,
-            purchaser_country: null,
+            fee: null,
+            purchaser_country: 'GB',
           },
           {
             id: 10,
@@ -2142,8 +2161,8 @@ describe('AppController (e2e)', () => {
             currency: 'EUR',
             edition_size: 1,
             transaction_value: '2.56',
-            fee_in_base_currency: null,
-            purchaser_country: null,
+            fee: null,
+            purchaser_country: 'GB',
           },
         ],
         count: 11,
@@ -2165,15 +2184,15 @@ describe('AppController (e2e)', () => {
         count: 2,
         data: [
           {
-            address: 'abc',
-            marketing_consent: true,
-            email: 'max@muster.com',
+            address: 'addr',
+            marketing_consent: null,
+            email: null,
             id: 1,
           },
           {
-            address: 'defg',
-            marketing_consent: false,
-            email: 'maxime@muster.com',
+            address: 'tz1',
+            marketing_consent: null,
+            email: null,
             id: 2,
           },
         ],
@@ -2547,21 +2566,21 @@ describe('AppController (e2e)', () => {
       'will only return data that is between startDate and endDate',
       async () => {
         await clearEmulatedNftSales();
-        await emulateNftSale(
-          1,
-          [1, 30],
-          new Date('August 12, 1995 12:34:00'), // 808223640
-        );
-        await emulateNftSale(
-          1,
-          [4, 7, 10],
-          new Date('November 24, 1995 01:00:00'), // 817171200
-        );
-        await emulateNftSale(
-          2,
-          [2, 27],
-          new Date('December 01, 1995 08:24:00'), // 817802640
-        );
+        await emulateNftSale({
+          userId: 1,
+          nftIds: [1, 30],
+          at: new Date('August 12, 1995 12:34:00'), // 808223640
+        });
+        await emulateNftSale({
+          userId: 1,
+          nftIds: [4, 7, 10],
+          at: new Date('November 24, 1995 01:00:00'), // 817171200
+        });
+        await emulateNftSale({
+          userId: 2,
+          nftIds: [2, 27],
+          at: new Date('December 01, 1995 08:24:00'), // 817802640
+        });
         const { bearer } = await loginAsAdmin(app);
         let res = await request(app.getHttpServer())
           .get('/analytics/activities')
@@ -2588,8 +2607,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '0.82',
-              fee_in_base_currency: null,
-              purchaser_country: null,
+              fee: null,
+              purchaser_country: 'GB',
             },
             {
               from: null,
@@ -2603,8 +2622,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '1.87',
-              fee_in_base_currency: null,
-              purchaser_country: null,
+              fee: null,
+              purchaser_country: 'GB',
             },
             {
               from: null,
@@ -2618,8 +2637,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '1.76',
-              fee_in_base_currency: null,
-              purchaser_country: null,
+              fee: null,
+              purchaser_country: 'GB',
             },
           ],
         });
@@ -2650,8 +2669,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '0.06',
-              fee_in_base_currency: null,
-              purchaser_country: null,
+              fee: null,
+              purchaser_country: 'GB',
             },
             {
               from: null,
@@ -2665,8 +2684,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '4.39',
-              fee_in_base_currency: null,
-              purchaser_country: null,
+              fee: null,
+              purchaser_country: 'GB',
             },
             {
               from: null,
@@ -2680,8 +2699,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '0.82',
-              fee_in_base_currency: null,
-              purchaser_country: null,
+              fee: null,
+              purchaser_country: 'GB',
             },
             {
               from: null,
@@ -2695,8 +2714,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '1.87',
-              fee_in_base_currency: null,
-              purchaser_country: null,
+              fee: null,
+              purchaser_country: 'GB',
             },
             {
               from: null,
@@ -2710,8 +2729,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '1.76',
-              fee_in_base_currency: null,
-              purchaser_country: null,
+              fee: null,
+              purchaser_country: 'GB',
             },
             {
               from: null,
@@ -2725,8 +2744,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '3.86',
-              fee_in_base_currency: null,
-              purchaser_country: null,
+              fee: null,
+              purchaser_country: 'GB',
             },
             {
               from: null,
@@ -2740,8 +2759,8 @@ describe('AppController (e2e)', () => {
               currency: 'EUR',
               edition_size: 1,
               transaction_value: '0.59',
-              fee_in_base_currency: null,
-              purchaser_country: null,
+              fee: null,
+              purchaser_country: 'GB',
             },
           ],
         });
@@ -2755,22 +2774,22 @@ describe('AppController (e2e)', () => {
     });
 
     skipOnPriorFail('for resolution=hour', async () => {
-      await emulateNftSale(
-        1,
-        [4, 7, 10],
-        new Date('December 17, 1995 03:24:00'),
-      );
-      await emulateNftSale(
-        2,
-        [2, 27, 11, 10, 4],
-        new Date('December 17, 1995 08:24:00'),
-      );
+      await emulateNftSale({
+        userId: 1,
+        nftIds: [4, 7, 10],
+        at: new Date('December 17, 1995 03:24:00'),
+      });
+      await emulateNftSale({
+        userId: 2,
+        nftIds: [2, 27, 11, 10, 4],
+        at: new Date('December 17, 1995 08:24:00'),
+      });
 
-      await emulateNftSale(
-        1,
-        [1, 3, 30],
-        new Date('December 17, 1995 12:34:00'),
-      );
+      await emulateNftSale({
+        userId: 1,
+        nftIds: [1, 3, 30],
+        at: new Date('December 17, 1995 12:34:00'),
+      });
 
       const { bearer } = await loginAsAdmin(app);
       const timeDiff = 819198000 - 819165600;
@@ -2823,22 +2842,22 @@ describe('AppController (e2e)', () => {
     });
 
     skipOnPriorFail('for resolution=day', async () => {
-      await emulateNftSale(
-        1,
-        [4, 7, 10],
-        new Date('December 17, 1995 03:24:00'),
-      );
-      await emulateNftSale(
-        2,
-        [2, 27, 11, 10, 4],
-        new Date('December 20, 1995 08:24:00'),
-      );
+      await emulateNftSale({
+        userId: 1,
+        nftIds: [4, 7, 10],
+        at: new Date('December 17, 1995 03:24:00'),
+      });
+      await emulateNftSale({
+        userId: 2,
+        nftIds: [2, 27, 11, 10, 4],
+        at: new Date('December 20, 1995 08:24:00'),
+      });
 
-      await emulateNftSale(
-        1,
-        [1, 3, 30],
-        new Date('December 26, 1995 12:34:00'),
-      );
+      await emulateNftSale({
+        userId: 1,
+        nftIds: [1, 3, 30],
+        at: new Date('December 26, 1995 12:34:00'),
+      });
 
       const { bearer } = await loginAsAdmin(app);
       const timeDiff = 819936000 - 819158400;
@@ -2891,23 +2910,23 @@ describe('AppController (e2e)', () => {
     });
 
     skipOnPriorFail('for resolution=week', async () => {
-      await emulateNftSale(
-        1,
-        [4, 7, 10],
-        new Date('December 17, 1995 03:24:00'),
-      );
+      await emulateNftSale({
+        userId: 1,
+        nftIds: [4, 7, 10],
+        at: new Date('December 17, 1995 03:24:00'),
+      });
 
-      await emulateNftSale(
-        1,
-        [1, 3, 30],
-        new Date('January 14, 1996 12:41:00'),
-      );
+      await emulateNftSale({
+        userId: 1,
+        nftIds: [1, 3, 30],
+        at: new Date('January 14, 1996 12:41:00'),
+      });
 
-      await emulateNftSale(
-        1,
-        [1, 3, 30],
-        new Date('February 01, 1996 03:24:00'),
-      );
+      await emulateNftSale({
+        userId: 1,
+        nftIds: [1, 3, 30],
+        at: new Date('February 01, 1996 03:24:00'),
+      });
 
       const { bearer } = await loginAsAdmin(app);
       const timeDiff = 822873600 - 818640000;
@@ -2956,19 +2975,23 @@ describe('AppController (e2e)', () => {
     });
 
     skipOnPriorFail('for resolution=month', async () => {
-      await emulateNftSale(
-        2,
-        [2, 27, 11, 10, 4],
-        new Date('December 17, 1995 03:24:00'),
-      );
+      await emulateNftSale({
+        userId: 2,
+        nftIds: [2, 27, 11, 10, 4],
+        at: new Date('December 17, 1995 03:24:00'),
+      });
 
-      await emulateNftSale(
-        2,
-        [2, 27, 11, 10, 4],
-        new Date('March 05, 1996 04:41:00'),
-      );
+      await emulateNftSale({
+        userId: 2,
+        nftIds: [2, 27, 11, 10, 4],
+        at: new Date('March 05, 1996 04:41:00'),
+      });
 
-      await emulateNftSale(1, [1, 3, 30], new Date('July 26, 1996 12:21:00'));
+      await emulateNftSale({
+        userId: 1,
+        nftIds: [1, 3, 30],
+        at: new Date('July 26, 1996 12:21:00'),
+      });
 
       const { bearer } = await loginAsAdmin(app);
       const timeDiff = 836179200 - 817776000;
@@ -3069,7 +3092,23 @@ async function clearEmulatedNftSales() {
   await storeRepl.end();
 }
 
-async function emulateNftSale(userId: number, nftIds: number[], at: Date) {
+interface EmulateNftSale {
+  userId: number;
+  nftIds: number[];
+  at: Date;
+  purchaserCountry?: string;
+}
+
+async function emulateNftSale({
+  userId,
+  nftIds,
+  at,
+  purchaserCountry,
+}: EmulateNftSale) {
+  if (!purchaserCountry) {
+    purchaserCountry = 'GB';
+  }
+
   const storeRepl = newStoreReplConn();
   const qryRes = await storeRepl.query(
     `
@@ -3097,11 +3136,11 @@ SELECT $1, UNNEST($2::INTEGER[])
   await storeRepl.query(
     `
 INSERT INTO payment (
-  payment_id, status, nft_order_id, provider, currency, amount, vat_rate, amount_excl_vat, client_ip
+  payment_id, status, nft_order_id, provider, currency, amount, vat_rate, amount_excl_vat, client_ip, purchaser_country
 )
-VALUES ('bla', 'succeeded', $1, 'test_provider', 'EUR', 4.45, 0.2, 4.4, '0.0.0.0')
+VALUES ('bla', 'succeeded', $1, 'test_provider', 'EUR', 4.45, 0.2, 4.4, '0.0.0.0', $2)
     `,
-    [orderId],
+    [orderId, purchaserCountry],
   );
 
   await storeRepl.end();
