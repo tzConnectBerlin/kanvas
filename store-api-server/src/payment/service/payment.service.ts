@@ -896,11 +896,7 @@ WHERE nft_order_id = $1
       if (
         await this.#orderHasProviderOpen(nftOrderId, paymentIntent.provider)
       ) {
-        await this.cancelNftOrderPayment(
-          dbTx,
-          nftOrderId,
-          paymentIntent.provider,
-        );
+        await this.cancelNftOrderPayment(nftOrderId, paymentIntent.provider);
       }
       await dbTx.query(
         `
@@ -1053,21 +1049,12 @@ ORDER BY 1
         for (const row of cancelOrderIds.rows) {
           const orderId = Number(row['nft_order_id']);
           const provider = row['provider'];
-          try {
-            await withTransaction(this.conn, async (dbTx: DbTransaction) => {
-              await this.cancelNftOrderPayment(
-                dbTx,
-                orderId,
-                provider,
-                PaymentStatus.TIMED_OUT,
-              );
-              Logger.warn(
-                `canceled following expired order session: ${orderId}`,
-              );
-            });
-          } catch (err: any) {
-            Logger.error(err);
-          }
+          await this.cancelNftOrderPayment(
+            orderId,
+            provider,
+            PaymentStatus.TIMED_OUT,
+          );
+          Logger.warn(`canceled following expired order session: ${orderId}`);
         }
       },
     });
@@ -1282,22 +1269,24 @@ WHERE nft_order_id = $1
     );
 
     await Promise.all(
-      openPaymentsQryResp.rows.map((row) =>
-        this.cancelNftOrderPayment(dbTx, orderId, row['provider'], newStatus),
+      openPaymentsQryResp.rows.map(
+        async (row) =>
+          await this.cancelNftOrderPayment(orderId, row['provider'], newStatus),
       ),
     );
   }
 
   async cancelNftOrderPayment(
-    dbTx: DbTransaction,
     orderId: number,
     provider: PaymentProviderString,
     newStatus:
       | PaymentStatus.CANCELED
       | PaymentStatus.TIMED_OUT = PaymentStatus.CANCELED,
   ) {
-    const payment = await dbTx.query(
-      `
+    try {
+      await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+        const payment = await dbTx.query(
+          `
 UPDATE payment
 SET status = $3
 WHERE nft_order_id = $1
@@ -1305,30 +1294,30 @@ WHERE nft_order_id = $1
   AND NOT status = ANY($4)
 RETURNING COALESCE(external_payment_id, payment_id) AS payment_id
       `,
-      [orderId, provider, newStatus, this.FINAL_STATES],
-    );
+          [orderId, provider, newStatus, this.FINAL_STATES],
+        );
 
-    if (payment.rowCount === 0) {
-      throw Err(
-        `paymentIntentCancel failed (orderId=${orderId}, provider=${provider}), err: no payment exists with matching orderId and cancellable status`,
-      );
-    }
+        if (payment.rowCount === 0) {
+          throw Err(
+            `paymentIntentCancel failed (orderId=${orderId}, provider=${provider}), err: no payment exists with matching orderId and cancellable status`,
+          );
+        }
 
-    const paymentId = payment.rows[0]['payment_id'];
+        const paymentId = payment.rows[0]['payment_id'];
 
-    try {
-      switch (provider) {
-        // we could not add SIMPLEX. Because Simplex Team does not support cancel payment.
-        case PaymentProvider.STRIPE:
-          await this.stripe.paymentIntents.cancel(paymentId);
-          break;
-        case PaymentProvider.TEZPAY:
-        case PaymentProvider.WERT:
-          await this.tezpay.cancel_payment(paymentId);
-          break;
-      }
+        switch (provider) {
+          // we could not add SIMPLEX. Because Simplex Team does not support cancel payment.
+          case PaymentProvider.STRIPE:
+            await this.stripe.paymentIntents.cancel(paymentId);
+            break;
+          case PaymentProvider.TEZPAY:
+          case PaymentProvider.WERT:
+            await this.tezpay.cancel_payment(paymentId);
+            break;
+        }
+      });
     } catch (err: any) {
-      throw Err(
+      Logger.error(
         `Err on canceling nft order (orderId=${orderId}, provider=${provider}), err: ${err}`,
       );
     }
