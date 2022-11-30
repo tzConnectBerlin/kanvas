@@ -36,3 +36,38 @@ export interface Activity {
   conversion_rate: string;
   fee: number;
 }
+
+export interface Purchase {
+  index: number;
+
+  wallet_address: string;
+  email?: string;
+  marketing_consent?: boolean;
+  age_verification?: boolean;
+
+  token_collection: string;
+  token_id: number;
+  token_value: number; // base currency
+  token_purchased_at: Date;
+
+  transaction_currency: string;
+  transaction_value: number;
+  conversion_rate: number;
+
+  vat_rate: number;
+  purchaser_country: string;
+
+  gas_fees: number;
+}
+
+export interface UserAnalytics {
+  index: number;
+  wallet_address: string;
+  registered_at: Date;
+
+  email?: string;
+  marketing_consent?: boolean;
+  age_verification?: boolean;
+
+  has_purchases: boolean;
+}

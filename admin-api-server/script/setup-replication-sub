@@ -9,6 +9,8 @@ store_schema_file=`mktemp`
 PGPASSWORD=$STORE_PGPASSWORD pg_dump --host=$STORE_PGHOST --port=$STORE_PGPORT --dbname=$STORE_PGDATABASE --username=$STORE_PGUSER --schema-only --format c --no-privileges --no-owner > $store_schema_file
 
 pg_restore --no-publications --schema=public --host=$PGHOST --port=$PGPORT --username=$PGUSER --schema-only --clean --dbname=store_replication < $store_schema_file
+PGDATABASE=store_replication psql -c 'create schema peppermint'
+pg_restore --no-publications --schema=peppermint --host=$PGHOST --port=$PGPORT --username=$PGUSER --schema-only --clean --dbname=store_replication < $store_schema_file
 
 PGDATABASE=store_replication psql -c "
     CREATE SUBSCRIPTION store_sub

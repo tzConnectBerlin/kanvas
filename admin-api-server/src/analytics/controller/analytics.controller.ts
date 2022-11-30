@@ -6,11 +6,15 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
+import { IsInt, IsString, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
 import {
   MetricEntity,
   MetricParams,
   Resolution,
   Activity,
+  Purchase,
+  UserAnalytics,
 } from '../entity/analytics.entity.js';
 import { ParseJSONPipe } from '../../pipes/ParseJSONPipe.js';
 import { ParseJSONObjectPipe } from '../../pipes/ParseJSONObjectPipe.js';
@@ -25,6 +29,24 @@ import {
   queryParamsToPaginationParams,
   validatePaginationParams,
 } from '../../utils.js';
+
+class ConcordiaAnalyticsPagination {
+  @IsInt()
+  @Type(() => Number)
+  @IsOptional()
+  from_index?: number;
+
+  @IsInt()
+  @Type(() => Number)
+  @IsOptional()
+  to_index?: number;
+}
+
+class UsersConcordiaAnalytics extends ConcordiaAnalyticsPagination {
+  @IsString()
+  @IsOptional()
+  filter?: string;
+}
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -324,5 +346,37 @@ export class AnalyticsController {
       ...queryParamsToPaginationParams(sort, range),
       filters: filters,
     };
+  }
+
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @RolesDecorator(Roles.admin)
+  @Get('purchases_concordia')
+  async purchases(
+    @Query() params: ConcordiaAnalyticsPagination,
+  ): Promise<Purchase[]> {
+    return await this.analyticsService.getPurchases(
+      params.from_index,
+      params.to_index,
+    );
+  }
+
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @RolesDecorator(Roles.admin)
+  @Get('users_concordia')
+  async usersConcordiaAnalytics(
+    @Query() params: UsersConcordiaAnalytics,
+  ): Promise<UserAnalytics[]> {
+    let filterOnHasPurchases: boolean | undefined;
+    if (typeof params.filter !== 'undefined') {
+      if (!['has_purchases', 'has_no_purchases'].includes(params.filter)) {
+        throw new HttpException('invalid filter value', HttpStatus.BAD_REQUEST);
+      }
+      filterOnHasPurchases = params.filter === 'has_purchases';
+    }
+    return await this.analyticsService.getUsersConcordiaAnalytics(
+      params.from_index,
+      params.to_index,
+      filterOnHasPurchases,
+    );
   }
 }
