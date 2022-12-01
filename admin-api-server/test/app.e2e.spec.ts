@@ -1929,6 +1929,16 @@ describe('AppController (e2e)', () => {
     'admin can access analytics endpoints (part 2; after emulated sales)',
     async () => {
       await clearEmulatedNftSales();
+
+      await emulateNftTransaction({
+        entrypoints: ['mint_tokens', 'create_token', 'transfer'],
+        levelId: 1,
+        contextId: 1,
+        tokenId: 40005,
+        mintTokensId: 15,
+        transferId: 27,
+      });
+
       await emulateNftSale({
         userId: 1,
         nftIds: [4, 7, 10],
@@ -2009,7 +2019,7 @@ describe('AppController (e2e)', () => {
       });
 
       res = await request(app.getHttpServer())
-        .get('/analytics/activities')
+        .get('/analytics/activities?range%3D%5B0%2C%2020%5D')
         .set('authorization', bearer);
       expect(res.statusCode).toEqual(200);
       expect(res.body).toStrictEqual({
@@ -3082,6 +3092,155 @@ VALUES ($1, $2, $3)
     `,
     [address, email, marketing_consent],
   );
+}
+
+interface EmulateNftTransaction {
+  entrypoints: string[];
+  levelId: number;
+  contextId: number;
+  tokenId: number;
+  mintTokensId: number;
+  transferId: number;
+  operation_hash?: string;
+  source?: string;
+  destination?: string;
+  fee?: number;
+}
+/*
+onchain_kanvas."entry.create_token"
+onchain_kanvas."entry.mint_tokens.noname"
+onchain_kanvas."entry.transfer.noname"
+onchain_kanvas."entry.transfer.noname.txs"
+*/
+
+async function emulateNftTransaction({
+  entrypoints,
+  levelId,
+  contextId,
+  tokenId,
+  mintTokensId,
+  transferId,
+  fee,
+  operation_hash,
+  source,
+  destination,
+}: EmulateNftTransaction) {
+  if (!operation_hash) {
+    operation_hash = 'opZgU21ygLZXoe8k9JcsYswpkajTpqSLTsP9UKXryzF4pWYZmq4';
+  }
+  if (!source) {
+    source = 'tz1f53nnjb8ShXgHTDdKz1a4tRRE23XtxL5W';
+  }
+  if (!fee) {
+    fee = 600;
+  }
+  if (!destination) {
+    destination = 'KT1N8sZn1vs4RrZyinHbmEQmBcKaoJg9Fqjy';
+  }
+
+  let paid_storage_size_diff: number | null = 67;
+
+  const storeRepl = newStoreReplConn();
+  const qryResLevels = await storeRepl.query(
+    `
+INSERT INTO que_pasa.levels (
+  level, hash, prev_hash
+)
+VALUES ($1, $2, $3)
+RETURNING level
+    `,
+    [levelId, `123_unique_${levelId}`, `456_unique_${levelId}`],
+  );
+  const level = qryResLevels.rows[0]['level'];
+
+  await storeRepl.query(
+    `
+INSERT INTO que_pasa.tx_contexts (
+  id, level, contract, operation_group_number, operation_number, content_number
+)
+VALUES ($1, $2, $3, $4, $5, $6)
+    `,
+    [contextId, level, 'KT1N8sZn1vs4RrZyinHbmEQmBcKaoJg9Fqjy', 3, 2, 1],
+  );
+
+  await storeRepl.query(
+    `
+INSERT INTO que_pasa.txs (
+    tx_context_id, operation_hash, source, destination, entrypoint, fee, storage_limit, paid_storage_size_diff
+)
+VALUES ($1, $2, $3, $4, UNNEST($5::TEXT[]), 67, $6, $7)
+    `,
+    [
+      contextId,
+      operation_hash,
+      source,
+      destination,
+      entrypoints,
+      fee,
+      paid_storage_size_diff,
+    ],
+  );
+
+  await storeRepl.query(
+    `
+INSERT INTO onchain_kanvas."entry.create_token" (
+    tx_context_id, id, token_id
+)
+VALUES ($1, $2, $3)
+        `,
+    [contextId, contextId + 3, tokenId],
+  );
+
+  await storeRepl.query(
+    `
+INSERT INTO onchain_kanvas."entry.mint_tokens.noname" (
+    mint_tokens_id, tx_context_id, id, owner, token_id, amount
+)
+VALUES ($1, $2, $3, $4, $5, $6)
+        `,
+    [
+      mintTokensId,
+      contextId,
+      mintTokensId + 1,
+      'tz1f53nnjb8ShXgHTDdKz1a4tRRE23XtxL5W',
+      tokenId,
+      1,
+    ],
+  );
+
+  await storeRepl.query(
+    `
+INSERT INTO onchain_kanvas."entry.transfer.noname" (
+    transfer_id, tx_context_id, id, from
+)
+VALUES ($1, $2, $3, $4)
+        `,
+    [
+      transferId,
+      contextId,
+      transferId + 1,
+      'tz1f53nnjb8ShXgHTDdKz1a4tRRE23XtxL5W',
+    ],
+  );
+
+  await storeRepl.query(
+    `
+INSERT INTO onchain_kanvas."entry.transfer.noname.txs" (
+    noname_id, tx_context_id, id, to_, token_id, amount
+)
+VALUES ($1, $2, $3, $4, $5, $6)
+        `,
+    [
+      transferId - 1,
+      contextId,
+      transferId,
+      'tz1f53nnjb8ShXgHTDdKz1a4tRRE23XtxL5W',
+      tokenId,
+      1,
+    ],
+  );
+
+  await storeRepl.end();
 }
 
 async function clearEmulatedNftSales() {
