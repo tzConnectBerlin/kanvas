@@ -11,8 +11,9 @@ export interface MarketingEntity {
   id: number;
   address: string;
   email?: string[];
-  marketing_consent: boolean;
-  createdAt: string;
+  marketing_consent?: boolean;
+  email_registered_at: string;
+  created_at: string;
 }
 
 export enum Resolution {
