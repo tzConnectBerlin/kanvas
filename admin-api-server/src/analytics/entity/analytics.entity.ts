@@ -12,7 +12,6 @@ export interface MarketingEntity {
   address: string;
   email?: string[];
   marketing_consent?: boolean;
-  email_registered_at: string;
   created_at: string;
 }
 
