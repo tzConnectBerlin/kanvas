@@ -463,8 +463,14 @@ WHERE payment.status = 'succeeded'
       `
 SELECT DISTINCT ON (q.index)
   q.*,
-  last_value(marketing.email) OVER w AS email,
-  last_value(marketing.consent) OVER w AS marketing_consent
+
+  last_value(marketing.email) OVER marketing_window AS email,
+  last_value(marketing.consent) OVER marketing_window AS marketing_consent,
+
+  last_value(wallet_data.provider) OVER wallet_window AS wallet_provider,
+  last_value(wallet_data.sso_id) OVER wallet_window AS sso_id,
+  last_value(wallet_data.sso_type) OVER wallet_window AS sso_type,
+  last_value(wallet_data.sso_email) OVER wallet_window AS sso_email
 FROM
 (
   SELECT
@@ -535,13 +541,19 @@ FROM
 ) q
 LEFT JOIN marketing
   ON marketing.address = q.address
+LEFT JOIN wallet_data
+  ON wallet_data.address = q.address
 
 WHERE ($1::int IS NULL OR index >= $1)
   AND ($2::int IS NULL OR index <= $2)
 
-WINDOW w AS (
+WINDOW marketing_window AS (
   PARTITION BY q.index
   ORDER BY marketing.created_at
+  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+), wallet_window AS (
+  PARTITION BY q.index
+  ORDER BY wallet_data.created_at
   ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
 )
 
@@ -586,6 +598,11 @@ ORDER BY index
             row['email'] != null ? row['marketing_consent'] : undefined,
           age_verification: row['email'] != null ? true : false,
 
+          wallet_provider: row['wallet_provider'] != null ? row['wallet_provider'] : undefined,
+          sso_id: row['sso_id'] != null ? row['sso_id'] : undefined,
+          sso_type: row['sso_type'] != null ? row['sso_type'] : undefined,
+          sso_email: row['sso_email'] != null ? row['sso_email'] : undefined,
+
           token_collection: 'concordia',
           token_id: row['token_id'],
           token_value: price,
@@ -620,8 +637,14 @@ ORDER BY index
       `
 SELECT DISTINCT ON (index)
   q.*,
-  last_value(marketing.email) OVER w AS email,
-  last_value(consent) OVER w AS marketing_consent
+
+  last_value(marketing.email) OVER marketing_window AS email,
+  last_value(marketing.consent) OVER marketing_window AS marketing_consent,
+
+  last_value(wallet_data.provider) OVER wallet_window AS wallet_provider,
+  last_value(wallet_data.sso_id) OVER wallet_window AS sso_id,
+  last_value(wallet_data.sso_type) OVER wallet_window AS sso_type,
+  last_value(wallet_data.sso_email) OVER wallet_window AS sso_email
 FROM (
   SELECT
     ROW_NUMBER() OVER (ORDER BY q.id) AS index,
@@ -638,13 +661,19 @@ FROM (
 ) q
 LEFT JOIN marketing
   ON marketing.address = q.address
+LEFT JOIN wallet_data
+  ON wallet_data.address = q.address
 
 WHERE ($1::int IS NULL OR q.index >= $1)
   AND ($2::int IS NULL OR q.index <= $2)
 
-WINDOW w AS (
+WINDOW marketing_window AS (
   PARTITION BY q.index
   ORDER BY marketing.created_at
+  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+), wallet_window AS (
+  PARTITION BY q.index
+  ORDER BY wallet_data.created_at
   ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
 )
 
@@ -663,6 +692,11 @@ ORDER BY index
         marketing_consent:
           row['email'] != null ? row['marketing_consent'] : undefined,
         age_verification: row['email'] != null ? true : false,
+
+        wallet_provider: row['wallet_provider'] != null ? row['wallet_provider'] : undefined,
+        sso_id: row['sso_id'] != null ? row['sso_id'] : undefined,
+        sso_type: row['sso_type'] != null ? row['sso_type'] : undefined,
+        sso_email: row['sso_email'] != null ? row['sso_email'] : undefined,
 
         has_purchases: row['has_purchases'],
       };
