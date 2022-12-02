@@ -1,0 +1,60 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - '-t'
+      - >-
+        ${_REPO_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE_NAME}:$COMMIT_SHA
+      - '-f'
+      - admin-api-server/Dockerfile
+      - .
+    id: Build Image
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - >-
+        ${_REPO_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE_NAME}:$COMMIT_SHA
+    id: Push Image
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    args:
+      - run
+      - deploy
+      - '${_SERVICE_NAME}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--min-instances=${_MIN_INSTANCE}'
+      - '--max-instances=${_MAX_INSTANCE}'
+      - '--cpu=${_CPU}'
+      - '--memory=${_MEMORY}'
+      - '--service-account=${_SERVICE_ACCOUNT}'
+      - '--vpc-egress=private-ranges-only'
+      - '--vpc-connector=${_VPC_CONNECTOR}'
+      - >-
+        --image=${_REPO_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE_NAME}:$COMMIT_SHA
+      - >-
+        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID
+      - >-
+        --set-secrets=PGHOST=ADMIN_PGHOST:latest,PGPASSWORD=ADMIN_PGPASSWORD:latest,PGPORT=ADMIN_PGPORT:latest,PGUSER=ADMIN_PGUSER:latest,PGDATABASE=ADMIN_PGDATABASE:latest,JWT_SECRET=ADMIN_JWT_SECRET:latest,AWS_S3_BUCKET=ADMIN_AWS_S3_BUCKET:latest,AWS_S3_ACCESS_KEY=AWS_S3_ACCESS_KEY:latest,AWS_S3_KEY_SECRET=AWS_S3_KEY_SECRET:latest,ADMIN_PRIVATE_KEY=ADMIN_PRIVATE_KEY:latest
+      - >-
+        --set-env-vars=STORE_API=${_STORE_API},ADMIN_API_PORT=${_ADMIN_API_PORT},JWT_EXPIRATION_TIME=86400000,BEHIND_PROXY=no,INIT_QUEPASA=false
+      - '--region=${_DEPLOY_REGION}'
+      - '--quiet'
+      - '--port=${_ADMIN_API_PORT}'
+    id: Deploy to Cloud Run
+    entrypoint: gcloud
+options:
+  machineType: E2_HIGHCPU_32
+  dynamicSubstitutions: true
+substitutions:
+  _REPO_REGION: europe-west2
+  _MIN_INSTANCE: '1'
+  _DEPLOY_REGION: europe-west2
+  _VPC_CONNECTOR: central-serverless
+  _CPU: '1'
+  _REPOSITORY: tznftwebshop
+  _STORE_API: 'https://phase3-api-lgcyj3d5ja-nw.a.run.app'
+  _SERVICE_NAME: admin-api
+  _ADMIN_API_PORT: '3000'
+  _MEMORY: 1Gi
+  _MAX_INSTANCE: '4'
+  _SERVICE_ACCOUNT: cloud-run-sa@concordia-development.iam.gserviceaccount.com
