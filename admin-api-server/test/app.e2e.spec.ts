@@ -1716,12 +1716,14 @@ describe('AppController (e2e)', () => {
             email: null,
             id: 1,
             marketing_consent: null,
+            wallet_provider: null,
           },
           {
             address: 'tz1',
             email: null,
             id: 2,
             marketing_consent: null,
+            wallet_provider: null,
           },
         ],
       });
@@ -2173,27 +2175,43 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     'admin can access analytics endpoints (part 3; after emulated email register)',
     async () => {
-      await emulateRegisterEmail('abc', 'max@muster.com', true);
-      await emulateRegisterEmail('defg', 'maxime@muster.com', false);
+      await emulateRegisterEmail('addr', 'max@muster.com', true);
+      await emulateRegisterEmail('tz1', 'maxime@muster.com', false);
       const { bearer } = await loginAsAdmin(app);
       let res = await request(app.getHttpServer())
         .get('/analytics/users')
         .set('authorization', bearer);
       expect(res.statusCode).toEqual(200);
       expect(res.body).toMatchObject({
-        count: 2,
+        count: 4,
         data: [
           {
             address: 'addr',
             marketing_consent: null,
+            wallet_provider: null,
             email: null,
             id: 1,
           },
           {
             address: 'tz1',
             marketing_consent: null,
+            wallet_provider: null,
             email: null,
             id: 2,
+          },
+          {
+            address: 'addr',
+            marketing_consent: true,
+            wallet_provider: 'test',
+            email: 'max@muster.com',
+            id: 3,
+          },
+          {
+            address: 'tz1',
+            marketing_consent: false,
+            wallet_provider: 'test',
+            email: 'maxime@muster.com',
+            id: 4,
           },
         ],
       });
@@ -3072,15 +3090,15 @@ async function emulateRegisterEmail(
   address: string,
   email: string,
   marketing_consent: boolean,
+  wallet_provider: string = 'test',
 ) {
   const storeRepl = newStoreReplConn();
   await storeRepl.query(
     `
-INSERT INTO marketing (address, email, consent
-)
-VALUES ($1, $2, $3)
+INSERT INTO marketing (address, email, consent, wallet_provider)
+VALUES ($1, $2, $3, $4)
     `,
-    [address, email, marketing_consent],
+    [address, email, marketing_consent, wallet_provider],
   );
 }
 
