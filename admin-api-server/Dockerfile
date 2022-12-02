@@ -35,4 +35,4 @@ WORKDIR /build
 COPY --chown=nodejs:nodejs --from=build /build/result/ .
 COPY --chown=nodejs:nodejs --from=build /lib /lib
 
-ENTRYPOINT node dist/src/main.js
+ENTRYPOINT script/entrypoint
