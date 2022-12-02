@@ -39,6 +39,26 @@ export const UsersActivityList = ({ ...props }) => {
           label="Marketing consent"
           headerClassName={classes.header}
         />
+        <TextField
+          source="wallet_provider"
+          label="Wallet provider"
+          headerClassName={classes.header}
+        />
+        <TextField
+          source="sso_id"
+          label="Sso id"
+          headerClassName={classes.header}
+        />
+        <TextField
+          source="sso_type"
+          label="Sso type"
+          headerClassName={classes.header}
+        />
+        <TextField
+          source="sso_email"
+          label="Sso email"
+          headerClassName={classes.header}
+        />
       </Datagrid>
     </List>
   );
