@@ -5,4 +5,7 @@ set -a
 . .env
 set +a
 
-script/entrypoint 2>&1 | tee --append logs.txt
+while true; do
+  script/entrypoint 2>&1 | tee --append logs.txt
+  sleep 1
+done
