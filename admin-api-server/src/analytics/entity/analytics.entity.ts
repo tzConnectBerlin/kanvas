@@ -14,7 +14,7 @@ export interface MarketingEntity {
   marketing_consent?: boolean;
   created_at: string;
 
-  wallet_provider: string;
+  wallet_provider?: string;
   sso_id?: string;
   sso_type?: string;
   sso_email?: string;
