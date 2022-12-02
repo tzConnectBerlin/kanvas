@@ -38,4 +38,4 @@ ADD --chown=nodejs:nodejs config /config
 COPY --chown=nodejs:nodejs --from=build /lib /lib
 COPY --chown=nodejs:nodejs --from=build /build/result .
 
-ENTRYPOINT node dist/src/main.js
+ENTRYPOINT script/entrypoint
