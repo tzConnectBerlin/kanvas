@@ -125,15 +125,32 @@ export class AnalyticsService {
     const qryRes = await this.storeRepl.query(
       `
 SELECT
-  usr.address AS address,
-  marketing.email AS email,
-  marketing.consent AS marketing_consent,
-  usr.created_at AS created_at,
-  COUNT(1) OVER () AS users_count,
-  ROW_NUMBER() OVER (ORDER BY usr.created_at) AS id
-FROM kanvas_user AS usr 
-  LEFT JOIN marketing
-  ON marketing.address = usr.address
+  COUNT(1) OVER () AS total_count,
+  q2.*
+FROM (
+  SELECT
+    ROW_NUMBER() OVER (ORDER BY created_at, email) AS id,
+    q.*
+  FROM (
+    SELECT
+      usr.address AS address,
+      usr.created_at AS created_at,
+      null AS email,
+      null AS marketing_consent
+    FROM kanvas_user AS usr
+
+    UNION ALL
+
+    SELECT
+      usr.address AS address,
+      marketing.created_at AS created_at,
+      marketing.email AS email,
+      marketing.consent AS marketing_consent
+    FROM kanvas_user AS usr
+    JOIN marketing
+      ON marketing.address = usr.address
+  ) q
+) q2
 ORDER BY "${params.orderBy}" ${params.orderDirection}
 OFFSET ${params.pageOffset}
 LIMIT ${params.pageSize}`,
@@ -150,11 +167,12 @@ LIMIT ${params.pageSize}`,
             id: Number(row['id']),
             address: row['address'],
             email: row['email'],
+            email_registered_at: row['email_registered_at'],
             marketing_consent: row['marketing_consent'],
-            createdAt: row['created_at'],
+            created_at: row['created_at'],
           },
       ),
-      count: Number(qryRes.rows[0]['users_count']),
+      count: Number(qryRes.rows[0]['total_count']),
     };
   }
 
@@ -213,10 +231,10 @@ FROM (
       ON create_params.token_id = mint_params.token_id
     JOIN que_pasa.txs AS create_tx
       ON create_tx.tx_context_id = create_params.tx_context_id
-    
-  
+
+
     UNION ALL
-  
+
     SELECT
       lvl.baked_at AT TIME ZONE 'UTC' AS timestamp,
       'transfer' AS kind,
@@ -239,10 +257,10 @@ FROM (
       ON lvl.level = ctx.level
     JOIN que_pasa.txs AS transfer_tx
       ON transfer_tx.tx_context_id = tr_dest.tx_context_id
-    
-  
+
+
     UNION ALL
-  
+
     SELECT
       nft_order.order_at AS timestamp,
       'sale' AS kind,

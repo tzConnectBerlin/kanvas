@@ -27,7 +27,7 @@ fi
 psql < ../lib/tezpay/server/database/schema.sql || exit 1
 
 ./script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1
-psql <<EOF
+psql -v ON_ERROR_STOP=1 <<EOF
 BEGIN;
 
 `cat db_procedures/*`
