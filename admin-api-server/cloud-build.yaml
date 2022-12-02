@@ -34,7 +34,7 @@ steps:
       - >-
         --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID
       - >-
-        --set-secrets=PGHOST=PGHOST_REPLICA:latest,PGPASSWORD=PGPASSWORD:latest,PGPORT=PGPORT:latest,PGUSER=PGUSER:latest,PGDATABASE=PGDATABASE:latest,JWT_SECRET=ADMIN_JWT_SECRET:latest,AWS_S3_BUCKET=AWS_S3_BUCKET:latest,AWS_S3_ACCESS_KEY=AWS_S3_ACCESS_KEY:latest,AWS_S3_KEY_SECRET=AWS_S3_KEY_SECRET:latest,ADMIN_PRIVATE_KEY=ADMIN_PRIVATE_KEY:latest
+        --set-secrets=PGHOST=ADMIN_PGHOST:latest,PGPASSWORD=ADMIN_PGPASSWORD:latest,PGPORT=ADMIN_PGPORT:latest,PGUSER=ADMIN_PGUSER:latest,PGDATABASE=ADMIN_PGDATABASE:latest,JWT_SECRET=ADMIN_JWT_SECRET:latest,AWS_S3_BUCKET=ADMIN_AWS_S3_BUCKET:latest,AWS_S3_ACCESS_KEY=AWS_S3_ACCESS_KEY:latest,AWS_S3_KEY_SECRET=AWS_S3_KEY_SECRET:latest,ADMIN_PRIVATE_KEY=ADMIN_PRIVATE_KEY:latest
       - >-
         --set-env-vars=STORE_API=${_STORE_API},ADMIN_API_PORT=${_ADMIN_API_PORT},JWT_EXPIRATION_TIME=86400000,BEHIND_PROXY=no,INIT_QUEPASA=false
       - '--region=${_DEPLOY_REGION}'
@@ -52,7 +52,7 @@ substitutions:
   _VPC_CONNECTOR: central-serverless
   _CPU: '1'
   _REPOSITORY: tznftwebshop
-  _STORE_API: 'http://phase3.dev.concordia.trili.tech/api'
+  _STORE_API: 'https://phase3-api-lgcyj3d5ja-nw.a.run.app'
   _SERVICE_NAME: admin-api
   _ADMIN_API_PORT: '3000'
   _MEMORY: 1Gi
