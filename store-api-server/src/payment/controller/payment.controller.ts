@@ -69,8 +69,14 @@ export class PaymentController {
 
     try {
       await this.paymentService.webhookHandler(constructedEvent);
-    } catch (error) {
-      new HttpException('', HttpStatus.UNPROCESSABLE_ENTITY);
+    } catch (err) {
+      Logger.error(
+        `err on processing stripe webhook call: ${JSON.stringify(err)}`,
+      );
+      throw new HttpException(
+        'something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     throw new HttpException('', HttpStatus.NO_CONTENT);
