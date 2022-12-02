@@ -344,7 +344,7 @@ WHERE idx_address = $1
     );
     return Object.keys(PHASE2_TOKEN_ID).reduce(
       (acc, el) => {
-        acc[el] = parseInt(Array(keys.rows).find(r => parseInt(r.token_id, 10) === PHASE2_TOKEN_ID[el])?.count ?? '0', 10);
+        acc[el] = parseInt(keys.rows.find((r: Record<string, string>) => parseInt(r.token_id, 10) === PHASE2_TOKEN_ID[el])?.count ?? '0', 10);
         return acc;
       },
       {} as Record<string, number>,

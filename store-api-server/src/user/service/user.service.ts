@@ -194,7 +194,7 @@ WHERE address = $1
 
     let keys: Record<string, number> = {};
     try {
-      let keys = await this.nftService.findKeysWithAddress(address);
+      keys = await this.nftService.findKeysWithAddress(address);
     } catch (err) {
       Logger.error('Error on keys query, err: ' + err);
     }
