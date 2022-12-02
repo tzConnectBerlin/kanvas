@@ -3,6 +3,8 @@ steps:
     args:
       - build
       - --build-arg
+      - REACT_APP_STORE_API_URL=${_REACT_APP_STORE_API_URL}
+      - --build-arg
       - REACT_APP_STORE_BASE_URL=${_REACT_APP_STORE_BASE_URL}
       - --build-arg
       - REACT_APP_API_SERVER_BASE_URL=${_REACT_APP_API_SERVER_BASE_URL}
@@ -36,7 +38,7 @@ steps:
       - >-
         --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID
       - >-
-        --set-env-vars=REACT_APP_STORE_BASE_URL=${_REACT_APP_STORE_BASE_URL},REACT_APP_API_SERVER_BASE_URL=${_REACT_APP_API_SERVER_BASE_URL}
+        --set-env-vars=REACT_APP_STORE_API_URL=${_REACT_APP_STORE_API_URL},REACT_APP_STORE_BASE_URL=${_REACT_APP_STORE_BASE_URL},REACT_APP_API_SERVER_BASE_URL=${_REACT_APP_API_SERVER_BASE_URL}
       - '--region=${_DEPLOY_REGION}'
       - '--quiet'
       - '--port=${_PORT}'
@@ -56,5 +58,6 @@ substitutions:
   _CPU: '1'
   _SERVICE_NAME: frontend-admin
   _DEPLOY_REGION: europe-west2
+  _REACT_APP_STORE_API_URL: 'https://phase3-api-lgcyj3d5ja-nw.a.run.app'
   _REACT_APP_STORE_BASE_URL: 'https://frontend-phase-3-lgcyj3d5ja-nw.a.run.app'
   _REACT_APP_API_SERVER_BASE_URL: 'https://admin-api-lgcyj3d5ja-nw.a.run.app'
