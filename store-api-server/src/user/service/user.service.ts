@@ -92,13 +92,17 @@ WHERE id = $1
   async registerEmail(registration: EmailRegistration) {
     await this.conn.query(
       `
-INSERT INTO marketing (address, email, consent)
-VALUES ($1, $2, $3)
+INSERT INTO marketing (address, email, consent, wallet_provider, sso_id, sso_type, sso_email)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
     `,
       [
         registration.walletAddress,
         registration.email,
         registration.marketingConsent,
+        registration.walletProvider,
+        registration.ssoId,
+        registration.ssoType,
+        registration.ssoEmail,
       ],
     );
   }

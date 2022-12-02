@@ -386,6 +386,25 @@ SELECT
           .send({
             email: testCase,
             marketingConsent: true,
+            walletProvider: 'test',
+          });
+        expect(res.statusCode).toEqual(400);
+
+        await testUtils.withDbConn(async (db) => {
+          expect(
+            (await db.query('SELECT * FROM marketing')).rows,
+          ).toStrictEqual([]);
+        });
+      });
+
+      it(`bad ssoEmail shape (${testCase}) => 400`, async () => {
+        const res = await request(app.getHttpServer())
+          .post('/users/register/email')
+          .send({
+            email: 'correct@test.com',
+            ssoEmail: testCase,
+            marketingConsent: true,
+            walletProvider: 'test',
           });
         expect(res.statusCode).toEqual(400);
 
@@ -397,12 +416,18 @@ SELECT
       });
     }
 
-    for (const testCase of ['walletAddress', 'email', 'marketingConsent']) {
+    for (const testCase of [
+      'walletAddress',
+      'email',
+      'marketingConsent',
+      'walletProvider',
+    ]) {
       it(`missing required field (${testCase}) => 400`, async () => {
         const params: any = {
           walletAddress: 'tz1..',
           email: 'abc@testing.com',
           marketingConsent: true,
+          walletProvider: 'test',
         };
         delete params[testCase];
 
@@ -429,6 +454,7 @@ SELECT
             walletAddress,
             email,
             marketingConsent: testCase,
+            walletProvider: 'test',
           });
         expect(res.statusCode).toEqual(201);
 
@@ -463,6 +489,7 @@ SELECT
             walletAddress,
             email,
             marketingConsent,
+            walletProvider: 'test',
           });
         expect(res.statusCode).toEqual(201);
 
@@ -474,6 +501,35 @@ SELECT
               id: 1,
               address: walletAddress,
               email,
+              consent: marketingConsent,
+            },
+          ]);
+        });
+      });
+      it(`correct ssoEmail (${testCase}) registration for well-formed email address => 201`, async () => {
+        const walletAddress = 'tz1..';
+        const marketingConsent = true;
+        const email = testCase;
+        const res = await request(app.getHttpServer())
+          .post('/users/register/email')
+          .send({
+            walletAddress,
+            email: 'test@test.com',
+            ssoEmail: email,
+            marketingConsent,
+            walletProvider: 'test',
+          });
+        expect(res.statusCode).toEqual(201);
+
+        await testUtils.withDbConn(async (db) => {
+          expect(
+            (await db.query('SELECT * FROM marketing')).rows,
+          ).toMatchObject([
+            {
+              id: 1,
+              address: walletAddress,
+              email: 'test@test.com',
+              sso_email: email,
               consent: marketingConsent,
             },
           ]);
