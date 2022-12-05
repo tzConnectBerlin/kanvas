@@ -539,7 +539,7 @@ SELECT
           ).toMatchObject([
             {
               id: 1,
-              sso_type: '',
+              sso_id: '',
               address: walletAddress,
               sso_email: testCase,
               provider: walletProvider,
@@ -556,7 +556,6 @@ SELECT
           .send({
             userAddress: testCase,
           });
-        testUtils.logFullObject(res.body);
         expect(res.statusCode).toEqual(400);
         expect(res.body).toStrictEqual({
           statusCode: 400,

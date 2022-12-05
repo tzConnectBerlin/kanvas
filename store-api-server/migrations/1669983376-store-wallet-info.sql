@@ -11,11 +11,11 @@ CREATE TABLE wallet_data (
   address TEXT NOT NULL REFERENCES kanvas_user(address),
   provider TEXT NOT NULL,
 
-  sso_type TEXT NOT NULL DEFAULT '',
+  sso_id TEXT NOT NULL DEFAULT '',
+  sso_type TEXT,
   sso_email TEXT,
-  sso_id TEXT,
 
-  PRIMARY KEY(address, provider, sso_type)
+  PRIMARY KEY(address, provider, sso_id)
 );
 
 COMMIT;
