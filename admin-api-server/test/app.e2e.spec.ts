@@ -2187,23 +2187,23 @@ describe('AppController (e2e)', () => {
         data: [
           {
             address: 'addr',
-            marketing_consent: null,
+            marketing_consent: true,
             wallet_provider: null,
-            email: null,
+            email: 'max@muster.com',
             id: 1,
-          },
-          {
-            address: 'tz1',
-            marketing_consent: null,
-            wallet_provider: null,
-            email: null,
-            id: 2,
           },
           {
             address: 'addr',
             marketing_consent: true,
             wallet_provider: 'test',
             email: 'max@muster.com',
+            id: 2,
+          },
+          {
+            address: 'tz1',
+            marketing_consent: false,
+            wallet_provider: null,
+            email: 'maxime@muster.com',
             id: 3,
           },
           {
@@ -3095,10 +3095,18 @@ async function emulateRegisterEmail(
   const storeRepl = newStoreReplConn();
   await storeRepl.query(
     `
-INSERT INTO marketing (address, email, consent, wallet_provider)
-VALUES ($1, $2, $3, $4)
+INSERT INTO marketing (address, email, consent)
+VALUES ($1, $2, $3)
     `,
-    [address, email, marketing_consent, wallet_provider],
+    [address, email, marketing_consent],
+  );
+
+  await storeRepl.query(
+    `
+INSERT INTO wallet_data (address, provider)
+VALUES ($1, $2)
+    `,
+    [address, wallet_provider],
   );
 }
 
