@@ -1,5 +1,14 @@
 import type { NftEntity, NftEntityPage } from '../../nft/entity/nft.entity.js';
 
+export interface WalletData {
+  address: string;
+  provider: string;
+
+  ssoId?: string;
+  ssoType?: string;
+  ssoEmail?: string;
+}
+
 export interface UserEntity {
   id: number;
   userAddress: string;
@@ -7,6 +16,13 @@ export interface UserEntity {
   profilePicture: string;
   signedPayload?: string;
   cartSession?: string;
+}
+
+export interface UserEntityWithWalletData extends UserEntity {
+  walletProvider?: string;
+  ssoId?: string;
+  ssoType?: string;
+  ssoEmail?: string;
 }
 
 export interface ProfileEntity {

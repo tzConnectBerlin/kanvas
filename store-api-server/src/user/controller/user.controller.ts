@@ -185,15 +185,6 @@ export class UserController {
       throw new HttpException('invalid email', HttpStatus.BAD_REQUEST);
     }
 
-    if (
-      typeof registration.ssoEmail !== 'undefined' &&
-      !validator.isEmail(registration.ssoEmail, {
-        allow_ip_domain: true,
-      })
-    ) {
-      throw new HttpException('invalid ssoEmail', HttpStatus.BAD_REQUEST);
-    }
-
     return await this.userService.registerEmail(registration);
   }
 

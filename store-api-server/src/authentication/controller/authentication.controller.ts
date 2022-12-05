@@ -11,12 +11,18 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CurrentUser } from '../../decoraters/user.decorator.js';
-import { UserEntity } from '../../user/entity/user.entity.js';
+import {
+  UserEntity,
+  UserEntityWithWalletData,
+} from '../../user/entity/user.entity.js';
 import {
   JwtAuthGuard,
   JwtFailableAuthGuard,
 } from '../guards/jwt-auth.guard.js';
-import { AuthenticationService } from '../service/authentication.service.js';
+import {
+  AuthenticationService,
+  USER_NOT_REGISTERED_ERR_MSG,
+} from '../service/authentication.service.js';
 import {
   PG_UNIQUE_VIOLATION_ERRCODE,
   SIGNED_LOGIN_ENABLED,
@@ -80,7 +86,7 @@ export class AuthenticationController {
    * @apiGroup Auth
    * @api {post} /auth/login Login a user
    * @apiDescription The "token" in the response is a JWT, it's the token that can be passed to any endpoints that require authorization by setting the "Authorization" header to "Bearer $token". signedPayload is only necessary when the API has been setup to require proving account ownership, otherwise this field can be omitted.
-   * @apiBody {UserEntity} user The user who wants to log in
+   * @apiBody {UserEntityWithWalletData} user The user who wants to log in
    * @apiBody {String} user[userAddress] The Tezos address used to login
    * @apiBody {String} user[signedPayload] A signed message (message was defined on /auth/register when the user registered) with the users' Tezos wallet corresponding to the provided userAddress, proving the ownership of the Tezos address. Only relevant if the API is running with environment variable SIGNED_LOGIN_ENABLED set to 'yes'.
    * @apiParamExample {json} Request Body Example:
@@ -101,7 +107,7 @@ export class AuthenticationController {
    */
 
   @Post('login')
-  async login(@Body() user: UserEntity): Promise<any> {
+  async login(@Body() user: UserEntityWithWalletData): Promise<any> {
     try {
       return await this.authService.login(user);
     } catch (err: any) {
@@ -109,7 +115,10 @@ export class AuthenticationController {
         throw err;
       }
 
-      if (err.getStatus() === 400 && !SIGNED_LOGIN_ENABLED) {
+      if (
+        err.message === USER_NOT_REGISTERED_ERR_MSG &&
+        !SIGNED_LOGIN_ENABLED
+      ) {
         await this.register(user);
 
         return await this.authService.login(user);
@@ -144,6 +153,9 @@ export class AuthenticationController {
   @Post('register')
   async register(@Body() user: UserEntity): Promise<any> {
     return this.authService.register(user).catch((err: any) => {
+      if (err instanceof HttpException) {
+        throw err;
+      }
       if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
         throw new HttpException(
           'User with these credentials already exists',

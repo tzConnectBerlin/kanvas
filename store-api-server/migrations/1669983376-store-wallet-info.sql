@@ -4,14 +4,19 @@
 
 BEGIN;
 
-ALTER TABLE marketing ADD COLUMN sso_id TEXT;
-ALTER TABLE marketing ADD COLUMN sso_type TEXT;
-ALTER TABLE marketing ADD COLUMN sso_email TEXT;
+CREATE TABLE wallet_data (
+  id SERIAL NOT NULL,
+  created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'UTC'),
 
-ALTER TABLE marketing ADD COLUMN wallet_provider TEXT;
-UPDATE marketing
-SET wallet_provider = 'unknown; pre-migration';
-ALTER TABLE marketing ALTER COLUMN wallet_provider SET NOT NULL;
+  address TEXT NOT NULL REFERENCES kanvas_user(address),
+  provider TEXT NOT NULL,
+
+  sso_type TEXT NOT NULL DEFAULT '',
+  sso_email TEXT,
+  sso_id TEXT,
+
+  PRIMARY KEY(address, provider, sso_type)
+);
 
 COMMIT;
 
@@ -19,9 +24,6 @@ COMMIT;
 
 BEGIN;
 
-ALTER TABLE marketing DROP COLUMN wallet_provider;
-ALTER TABLE marketing DROP COLUMN sso_id;
-ALTER TABLE marketing DROP COLUMN sso_type;
-ALTER TABLE marketing DROP COLUMN sso_email;
+DROP TABLE wallet_info;
 
 COMMIT;

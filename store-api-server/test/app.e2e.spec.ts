@@ -34,6 +34,8 @@ import { setupKanvasServer, kanvasNestOptions } from '../src/server.js';
 import { MintService } from '../src/nft/service/mint.service';
 const { cryptoUtils } = sotez;
 
+import * as testUtils from './utils';
+
 let anyTestFailed = false;
 const skipOnPriorFail = (name: string, action: any) => {
   // Note: this will mark any test after a failed test as
@@ -57,6 +59,12 @@ describe('AppController (e2e)', () => {
   let mintService: MintService;
   let userService: UserService;
   let tokenGate: TokenGate;
+
+  let someaddr: string;
+
+  beforeAll(async () => {
+    someaddr = await testUtils.genWalletAddr();
+  });
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -1108,14 +1116,14 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail('/auth/register', async () => {
     const res = await request(app.getHttpServer())
       .post('/auth/register')
-      .send({ userAddress: 'someaddr', signedPayload: 'verysecret' });
+      .send({ userAddress: someaddr, signedPayload: 'verysecret' });
     expect(res.statusCode).toEqual(201);
   });
 
   skipOnPriorFail('/auth/register (existing addr => FORBIDDEN', async () => {
     const res = await request(app.getHttpServer())
       .post('/auth/register')
-      .send({ userAddress: 'someaddr', signedPayload: '...' });
+      .send({ userAddress: someaddr, signedPayload: '...' });
     expect(res.statusCode).toEqual(403);
   });
 
