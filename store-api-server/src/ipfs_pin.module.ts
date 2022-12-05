@@ -1,5 +1,5 @@
 // Implementation of Pinata for uploading assets (files) and json structured data into IPFS
-import { Module, Logger, Injectable, Inject } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import { createReadStream, createWriteStream } from 'fs';
@@ -18,14 +18,12 @@ axiosRetry(axios, {
 export class PinataService {
   enabled(): boolean {
     if (typeof PINATA_API_KEY === 'undefined') {
-      throw `failed to upload NFT to IPFS, NftIpfsService not enabled: PINATA_API_KEY env var not set`;
       Logger.warn(
         `failed to upload NFT to IPFS, NftIpfsService not enabled: PINATA_API_KEY env var not set`,
       );
       return false;
     }
     if (typeof PINATA_API_SECRET === 'undefined') {
-      throw `failed to upload NFT to IPFS, NftIpfsService not enabled: PINATA_API_SECRET env var not set`;
       Logger.warn(
         `failed to upload NFT to IPFS, NftIpfsService not enabled: PINATA_API_SECRET env var not set`,
       );

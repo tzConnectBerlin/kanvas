@@ -195,7 +195,7 @@ export class AnalyticsController {
   /**
    * @apiGroup Analytics
    * @api {get} /analytics/users Request analytics user information regarding email signups.
-   * @apiDescription Initially, users have not registered any email, for every user created there is an initial row in the response with email,marketing_consent,email_registered_at fields set to null. For every email registration (consecutive ones overwriting previously specified email addresses and marketing consent), an additional row will be present for this user to show the new email address and marketing consent value for this user.
+   * @apiDescription Initially, users have not registered any email, for every user created there is an initial row in the response with email,marketing_consent,wallet_provider,etc, fields set to null. For every email registration (consecutive ones overwriting previously specified email addresses and marketing consent), an additional row will be present for this user to show the new email address and marketing consent value for this user.
    * @apiPermission admin
    * @apiQuery {String[]="id","address","email","consent"} [sort] URL-decoded examples: sort: [$value,"desc"] or sort: [$value,"asc"]
    * @apiQuery {Number[]="[number, number] e.g. [10, 25]"} [range] URL-decoded example: range: [10, 25] results in 25 records from the 10th record on
@@ -209,6 +209,10 @@ export class AnalyticsController {
    *             "address": "any valid user address",
    *             "email": null,
    *             "marketing_consent": null,
+   *             "wallet_provider": null,
+   *             "sso_id": null,
+   *             "sso_type": null,
+   *             "sso_email": null,
    *             "createdAt": "2022-11-21T10:59:01.741Z"
    *            },
    *            {
@@ -216,6 +220,10 @@ export class AnalyticsController {
    *             "address": "any valid user address",
    *             "email": "max@muster.com",
    *             "marketing_consent": true,
+   *             "wallet_provider": "temple",
+   *             "sso_id": null,
+   *             "sso_type": null,
+   *             "sso_email": null,
    *             "created_at": "2022-11-21T11:59:01.741Z"
    *            }
    *        ]

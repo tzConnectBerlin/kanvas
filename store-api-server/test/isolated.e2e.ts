@@ -400,7 +400,7 @@ SELECT
     for (const testCase of ['walletAddress', 'email', 'marketingConsent']) {
       it(`missing required field (${testCase}) => 400`, async () => {
         const params: any = {
-          walletAddress: 'tz1..',
+          walletAddress: await testUtils.genWalletAddr(),
           email: 'abc@testing.com',
           marketingConsent: true,
         };
@@ -422,7 +422,7 @@ SELECT
     for (const testCase of [true, false]) {
       it(`correct email registration with marketingConsent as ${testCase} => 201`, async () => {
         const email = 'test@test.email';
-        const walletAddress = 'tz1..';
+        const walletAddress = await testUtils.genWalletAddr();
         const res = await request(app.getHttpServer())
           .post('/users/register/email')
           .send({
@@ -454,7 +454,7 @@ SELECT
       'squareBracketedIpDomain@[192.0.0.0]',
     ]) {
       it(`correct email (${testCase}) registration for well-formed email address => 201`, async () => {
-        const walletAddress = 'tz1..';
+        const walletAddress = await testUtils.genWalletAddr();
         const marketingConsent = true;
         const email = testCase;
         const res = await request(app.getHttpServer())
@@ -477,6 +477,89 @@ SELECT
               consent: marketingConsent,
             },
           ]);
+        });
+      });
+    }
+
+    for (const testCase of [
+      'abcAtMissingAt.com',
+      '@.com',
+      'doubleAt@another@dot.com',
+      // in principle the RFC doc that specifies the email format does allow the
+      // ip format below, but it should be very uncommon and the popular library
+      // that we use to assert correct email formats does not allow supporting
+      // this. Adding this test case here for visibility that we do not support
+      // this format
+      'ipDomainInSingleNumberFormat@12411',
+    ]) {
+      it(`bad email shape (${testCase}) => 400`, async () => {
+        const res = await request(app.getHttpServer())
+          .post('/auth/login')
+          .send({
+            userAddress: await testUtils.genWalletAddr(),
+            walletProvider: 'test',
+            ssoEmail: testCase,
+          });
+        expect(res.statusCode).toEqual(400);
+
+        await testUtils.withDbConn(async (db) => {
+          expect(
+            (await db.query('SELECT * FROM wallet_data')).rows,
+          ).toStrictEqual([]);
+        });
+      });
+    }
+
+    for (const testCase of [
+      'abc@domain.test',
+      'doubleDot@test.com.tech',
+      'ipDomain@192.0.0.0',
+      'squareBracketedIpDomain@[192.0.0.0]',
+    ]) {
+      it(`correct email (${testCase}) registration for well-formed email address => 201`, async () => {
+        const walletAddress = await testUtils.genWalletAddr();
+        const walletProvider = 'test';
+
+        await request(app.getHttpServer()).post('/auth/register').send({
+          userAddress: walletAddress,
+          signedPayload: 'pass',
+        });
+        const res = await request(app.getHttpServer())
+          .post('/auth/login')
+          .send({
+            userAddress: walletAddress,
+            walletProvider,
+            ssoEmail: testCase,
+          });
+        expect(res.statusCode).toEqual(201);
+
+        await testUtils.withDbConn(async (db) => {
+          expect(
+            (await db.query('SELECT * FROM wallet_data')).rows,
+          ).toMatchObject([
+            {
+              id: 1,
+              sso_id: '',
+              address: walletAddress,
+              sso_email: testCase,
+              provider: walletProvider,
+            },
+          ]);
+        });
+      });
+    }
+
+    for (const testCase of ['tz1..', 'KT1f..', 'bla']) {
+      it(`incorrect wallet address shape (${testCase}) registration => 400`, async () => {
+        const res = await request(app.getHttpServer())
+          .post('/auth/register')
+          .send({
+            userAddress: testCase,
+          });
+        expect(res.statusCode).toEqual(400);
+        expect(res.body).toStrictEqual({
+          statusCode: 400,
+          message: 'Invalid wallet address',
         });
       });
     }

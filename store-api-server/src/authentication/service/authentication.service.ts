@@ -1,9 +1,14 @@
 import { JwtService } from '@nestjs/jwt';
-import { UserEntity } from '../../user/entity/user.entity.js';
+import {
+  UserEntity,
+  UserEntityWithWalletData,
+} from '../../user/entity/user.entity.js';
+import { validateAddress } from '@taquito/utils';
 import { UserService } from '../../user/service/user.service.js';
 import { ITokenPayload } from '../../interfaces/token.interface.js';
 import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
 import { Result } from 'ts-results';
+import validator from 'validator';
 import ts_results from 'ts-results';
 import { SIGNED_LOGIN_ENABLED, TOKEN_GATE } from '../../constants.js';
 const { Ok } = ts_results;
@@ -17,6 +22,8 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const bcrypt = require('bcrypt');
 
+export const USER_NOT_REGISTERED_ERR_MSG = 'User not registered';
+
 @Injectable()
 export class AuthenticationService {
   constructor(
@@ -29,10 +36,15 @@ export class AuthenticationService {
     return await this.userService.findByAddress(userData.userAddress);
   }
 
-  async login(userData: UserEntity): Promise<any | { status: number }> {
+  async login(
+    userData: UserEntityWithWalletData,
+  ): Promise<any | { status: number }> {
     const userRes = await this.#validate(userData);
     if (!userRes.ok) {
-      throw new HttpException('User not registered', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        USER_NOT_REGISTERED_ERR_MSG,
+        HttpStatus.BAD_REQUEST,
+      );
     }
     const user = userRes.val;
 
@@ -43,6 +55,26 @@ export class AuthenticationService {
       ) {
         await this.verifyPassword(userData.signedPayload, user.signedPayload);
       }
+    }
+
+    if (typeof userData.walletProvider !== 'undefined') {
+      if (
+        typeof userData.ssoEmail !== 'undefined' &&
+        !validator.isEmail(userData.ssoEmail, {
+          allow_ip_domain: true,
+        })
+      ) {
+        throw new HttpException('Invalid ssoEmail', HttpStatus.BAD_REQUEST);
+      }
+
+      await this.userService.registerWalletData({
+        address: userData.userAddress,
+        provider: userData.walletProvider,
+
+        ssoType: userData.ssoType,
+        ssoId: userData.ssoId,
+        ssoEmail: userData.ssoEmail,
+      });
     }
 
     return this.getCookieWithJwtToken(
@@ -106,6 +138,9 @@ export class AuthenticationService {
   }
 
   async register(user: UserEntity): Promise<any> {
+    if (!this.#isWalletAddressValid(user.userAddress)) {
+      throw new HttpException('Invalid wallet address', HttpStatus.BAD_REQUEST);
+    }
     let newUser = { ...user };
     if (SIGNED_LOGIN_ENABLED) {
       newUser.signedPayload = await bcrypt.hash(user.signedPayload, 10);
@@ -151,5 +186,10 @@ export class AuthenticationService {
     } else {
       throw new Error('process.env.JWT_EXPIRATION_TIME not set');
     }
+  }
+
+  #isWalletAddressValid(addr: string): boolean {
+    const VALID = 3;
+    return validateAddress(addr) == VALID;
   }
 }

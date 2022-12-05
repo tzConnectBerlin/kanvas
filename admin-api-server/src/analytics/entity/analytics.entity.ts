@@ -13,6 +13,11 @@ export interface MarketingEntity {
   email?: string[];
   marketing_consent?: boolean;
   created_at: string;
+
+  wallet_provider?: string;
+  sso_id?: string;
+  sso_type?: string;
+  sso_email?: string;
 }
 
 export enum Resolution {

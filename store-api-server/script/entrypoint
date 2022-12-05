@@ -9,7 +9,7 @@ if [[ '`psql -c \"select count(1) from nft_category\" -tA`' == '0' ]]; then
 fi
 
 if [[ "`psql -c \"SELECT rolreplication FROM pg_roles WHERE rolname = '$PGUSER'\" -tA`" == 'f' ]]; then
-    psql -c "ALTER USER $PGUSER REPLICATION"
+    psql -c "ALTER USER \"$PGUSER\" REPLICATION"
 fi
 
 node dist/src/main.js

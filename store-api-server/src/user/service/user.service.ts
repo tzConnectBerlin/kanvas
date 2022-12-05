@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import {
   UserEntity,
+  WalletData,
   ProfileEntity,
   UserCart,
   UserTotalPaid,
@@ -99,6 +100,23 @@ VALUES ($1, $2, $3)
         registration.walletAddress,
         registration.email,
         registration.marketingConsent,
+      ],
+    );
+  }
+
+  async registerWalletData(data: WalletData) {
+    await this.conn.query(
+      `
+INSERT INTO wallet_data (address, provider, sso_id, sso_type, sso_email)
+VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT DO NOTHING
+      `,
+      [
+        data.address,
+        data.provider,
+        data.ssoId ?? '',
+        data.ssoType,
+        data.ssoEmail,
       ],
     );
   }

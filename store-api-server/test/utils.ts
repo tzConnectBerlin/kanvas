@@ -32,6 +32,12 @@ export interface Wallet {
   login: KanvasLogin;
 }
 
+export async function genWalletAddr() {
+  const mnemonic = cryptoUtils.generateMnemonic();
+  const keys = await cryptoUtils.generateKeys(mnemonic, 'bip39_seed_password');
+  return keys.pkh;
+}
+
 export async function newWallet(
   app: any,
   loadTez = 0,
@@ -308,13 +314,14 @@ export async function resetDb(resetForLegacyTest = false): Promise<number[]> {
       'mtm_nft_order_nft',
       'payment',
       'nft_order',
+      'marketing',
+      'wallet_data',
       'kanvas_user',
       'cart_session',
       'format',
       'proxy_unfold',
       'nft',
       'nft_category',
-      'marketing',
       'peppermint.operations',
       'tezpay.payments',
       'ip_country',

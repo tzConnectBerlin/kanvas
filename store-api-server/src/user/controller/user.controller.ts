@@ -159,12 +159,19 @@ export class UserController {
   /**
    * @apiGroup Users
    * @api {post} /users/register/email Register an email for marketing purposes.
-   * @apiBody {Object="walletAddress: string, email: string, marketingConsent: boolean"} registration data used to register the email address
+   * @apiBody {string} walletAddress The user's wallet address
+   * @apiBody {string} email The user's email address
+   * @apiBody {string} marketingConsent Whether the user expressed consent to receive marketing related messages
+   * @apiBody {string} walletProvider The kind of wallet the user is using (eg: Temple, Kukai, etc.)
+   * @apiBody {string} ssoId Optional, unique identifier associated to a social login
+   * @apiBody {string} ssoType Optional, provider associated to a social login (eg: Google, Facebook, etc)
+   * @apiBody {string} ssoEmail Optional, email address associated to a social login
    * @apiParamExample {json} Request Body Example:
    *    {
    *      "walletAddress": "valid wallet address",
    *      "email": "max@muster.com",
-   *      "marketingConsent": false
+   *      "marketingConsent": false,
+   *      "walletProvider": "Temple"
    *    }
    * @apiName registerEmail
    */
