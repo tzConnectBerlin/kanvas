@@ -46,3 +46,9 @@ export interface NftOwnershipStatus {
   nftId: number;
   ownerStatuses: string[]; // List, because 1 user can have multiple editions of a single nft
 }
+
+export interface HandleCart {
+  cookieSession: any;
+  user: UserEntity | undefined;
+  nftId: number;
+}

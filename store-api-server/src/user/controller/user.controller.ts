@@ -32,8 +32,6 @@ import {
   JwtFailableAuthGuard,
 } from '../../authentication/guards/jwt-auth.guard.js';
 import {
-  PG_UNIQUE_VIOLATION_ERRCODE,
-  PG_FOREIGN_KEY_VIOLATION_ERRCODE,
   PROFILE_PICTURE_MAX_BYTES,
   PROFILE_PICTURES_ENABLED,
 } from '../../constants.js';
@@ -294,37 +292,7 @@ export class UserController {
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    const cartSession = await this.userService.getCartSession(
-      cookieSession,
-      user,
-    );
-
-    await this.userService.cartAdd(cartSession, nftId).catch((err: any) => {
-      if (err instanceof HttpException) {
-        throw err;
-      }
-
-      if (err?.code === PG_FOREIGN_KEY_VIOLATION_ERRCODE) {
-        throw new HttpException(
-          'This nft does not exist',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
-        throw new HttpException(
-          'This nft is already in the cart',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      Logger.error(
-        `Error on adding nft to cart. cartSession=${cartSession}, nftId=${nftId}, err: ${err}`,
-      );
-      throw new HttpException(
-        'Something went wrong',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    });
+    await this.userService.handleCartAdd({ cookieSession, user, nftId });
   }
 
   /**
@@ -344,20 +312,7 @@ export class UserController {
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    const cartSession = await this.userService.getCartSession(
-      cookieSession,
-      user,
-    );
-
-    const removed = await this.userService.cartRemove(cartSession, nftId);
-    if (!removed) {
-      throw new HttpException(
-        'This nft was not in the cart',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    // return 204 (successful delete, returning nothing)
-    throw new HttpException('', HttpStatus.NO_CONTENT);
+    await this.userService.handleCartRemove({ cookieSession, user, nftId });
   }
 
   /**
