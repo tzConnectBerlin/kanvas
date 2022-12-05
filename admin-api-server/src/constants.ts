@@ -18,6 +18,8 @@ export const RATE_LIMIT_WINDOW_SECS = Number(
 );
 export const RATE_LIMIT = Number(process.env['RATE_LIMIT'] || 100);
 
+export const CONCORDIA_ANALYTICS_API_KEY: string = assertEnv('CONCORDIA_ANALYTICS_API_KEY');
+
 export const STM_CONFIG_FILE =
   process.env['STM_CONFIG_FILE'] || './config/stm_example.yaml';
 export const NFT_PUBLISH_STATE = 'finish';
