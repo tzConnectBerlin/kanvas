@@ -124,39 +124,60 @@ export class AnalyticsService {
       `
 SELECT
   COUNT(1) OVER () AS total_count,
-  q2.*
+  q3.*
 FROM (
   SELECT
-    ROW_NUMBER() OVER (ORDER BY created_at, email) AS id,
-    q.*
+    ROW_NUMBER() OVER (ORDER BY created_at) AS id,
+    q2.*
   FROM (
     SELECT
-      usr.address AS address,
-      usr.created_at AS created_at,
-      null AS email,
-      null AS marketing_consent,
-      null AS sso_email,
-      null AS sso_id,
-      null AS sso_type,
-      null AS wallet_provider
-    FROM kanvas_user AS usr
+      address AS address,
+      last_value_ignore_nulls(created_at) OVER w AS created_at,
 
-    UNION ALL
+      last_value_ignore_nulls(email) OVER w AS email,
+      last_value_ignore_nulls(marketing_consent) OVER w AS marketing_consent,
 
-    SELECT
-      usr.address AS address,
-      marketing.created_at AS created_at,
-      marketing.email AS email,
-      marketing.consent AS marketing_consent,
-      marketing.sso_email AS sso_email,
-      marketing.sso_id AS sso_id,
-      marketing.sso_type AS sso_type,
-      marketing.wallet_provider AS wallet_provider
-    FROM kanvas_user AS usr
-    JOIN marketing
-      ON marketing.address = usr.address
-  ) q
-) q2
+      last_value_ignore_nulls(sso_email) OVER w AS sso_email,
+      last_value_ignore_nulls(sso_id) OVER w AS sso_id,
+      last_value_ignore_nulls(sso_type) OVER w AS sso_type,
+      last_value_ignore_nulls(wallet_provider) OVER w AS wallet_provider
+    FROM (
+      SELECT
+        usr.address AS address,
+        coalesce(wallet_data.created_at, usr.created_at) AS created_at,
+
+        null AS email,
+        null AS marketing_consent,
+
+        wallet_data.sso_email AS sso_email,
+        wallet_data.sso_id AS sso_id,
+        wallet_data.sso_type AS sso_type,
+        wallet_data.provider AS wallet_provider
+      FROM kanvas_user AS usr
+      LEFT JOIN wallet_data
+        ON wallet_data.address = usr.address
+
+      UNION ALL
+
+      SELECT
+        marketing.address as address,
+        marketing.created_at AS created_at,
+
+        marketing.email AS email,
+        marketing.consent AS marketing_consent,
+
+        null AS sso_email,
+        null AS sso_id,
+        null AS sso_type,
+        null AS wallet_provider
+      FROM marketing
+    ) q
+    WINDOW w AS (
+      PARTITION BY address
+      ORDER BY created_at
+    )
+  ) q2
+) q3
 ORDER BY "${params.orderBy}" ${params.orderDirection}
 OFFSET ${params.pageOffset}
 LIMIT ${params.pageSize}`,
@@ -171,15 +192,14 @@ LIMIT ${params.pageSize}`,
         (row: any) =>
           <MarketingEntity>{
             id: Number(row['id']),
+            created_at: row['created_at'],
             address: row['address'],
             email: row['email'],
-            email_registered_at: row['email_registered_at'],
             marketing_consent: row['marketing_consent'],
             sso_id: row['sso_id'],
             sso_type: row['sso_type'],
             sso_email: row['sso_email'],
             wallet_provider: row['wallet_provider'],
-            created_at: row['created_at'],
           },
       ),
       count: Number(qryRes.rows[0]['total_count']),
