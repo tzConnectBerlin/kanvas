@@ -49,6 +49,10 @@ export interface Purchase {
   email?: string;
   marketing_consent?: boolean;
   age_verification?: boolean;
+  wallet_provider?: string;
+  sso_id?: string;
+  sso_type?: string;
+  sso_email?: string;
 
   token_collection: string;
   token_id: number;
@@ -73,6 +77,11 @@ export interface UserAnalytics {
   email?: string;
   marketing_consent?: boolean;
   age_verification?: boolean;
+
+  wallet_provider?: string;
+  sso_id?: string;
+  sso_type?: string;
+  sso_email?: string;
 
   has_purchases: boolean;
 }
