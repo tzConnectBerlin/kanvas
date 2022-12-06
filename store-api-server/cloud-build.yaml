@@ -32,6 +32,7 @@ steps:
       - '--min-instances=${_MIN_INSTANCE}'
       - '--max-instances=${_MAX_INSTANCE}'
       - '--cpu=${_CPU}'
+      - '--no-cpu-throttling'
       - '--memory=${_MEMORY}'
       - '--service-account=${_SERVICE_ACCOUNT}'
       - '--vpc-egress=private-ranges-only'
