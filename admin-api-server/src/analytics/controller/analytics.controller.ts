@@ -436,8 +436,8 @@ export class AnalyticsController {
    * @api {get} /analytics/users_concordia Request user analytics
    * @apiDescription This endpoint will return a list of registered users, including a has_purchases field which is true when the user has bought at least 1 Nft, from from_date to to_date.
    *
-   * @apiQuery {Number} [from_date] select rows from date=from_date (inclusive) in ISO date format
-   * @apiQuery {Number} [to_date] select rows until date=to_date (inclusive) in ISO date format
+   * @apiQuery {Number} [from_date] select rows from date=from_date (inclusive) in ISO date format e.g. 2022-11-02T17:07:45.878Z
+   * @apiQuery {Number} [to_date] select rows until date=to_date (inclusive) in ISO date format e.g. 2022-11-08T17:07:45.123Z
    * @apiQuery {String} [filter] select only users that have purchased (when filter is set to "has_purchases"), or select only users that have not purchased yet (when filter is set to "has_no_purchases")
    *
    * @apiSuccessExample Example Success-Response:

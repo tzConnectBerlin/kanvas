@@ -653,7 +653,7 @@ FROM (
     SELECT
       usr.id,
       usr.address,
-      usr.created_at,
+      usr.created_at::timestamp(3),
       EXISTS (SELECT 1 FROM mtm_kanvas_user_nft WHERE kanvas_user_id = usr.id LIMIT 1) AS has_purchases
     FROM kanvas_user AS usr
   ) q
@@ -664,7 +664,7 @@ LEFT JOIN marketing
 LEFT JOIN wallet_data
   ON wallet_data.address = q.address
 
-WHERE ($1::TIMESTAMP IS NULL OR $2::TIMESTAMP IS NULL OR q.created_at BETWEEN $1 AND $2)
+WHERE ($1::TIMESTAMP IS NULL OR $2::TIMESTAMP IS NULL OR q.created_at::timestamp(3) BETWEEN $1 AND $2)
 
 WINDOW marketing_window AS (
   PARTITION BY q.index
