@@ -456,8 +456,8 @@ WHERE payment.status = 'succeeded'
   }
 
   async getPurchases(
-    fromIndex?: number,
-    toIndex?: number,
+    startDate?: string,
+    endDate?: string,
   ): Promise<Purchase[]> {
     const qryRes = await this.storeRepl.query(
       `
@@ -544,8 +544,7 @@ LEFT JOIN marketing
 LEFT JOIN wallet_data
   ON wallet_data.address = q.address
 
-WHERE ($1::int IS NULL OR index >= $1)
-  AND ($2::int IS NULL OR index <= $2)
+WHERE ($1::TIMESTAMP IS NULL OR $2::TIMESTAMP IS NULL OR q.timestamp BETWEEN $1 AND $2)
 
 WINDOW marketing_window AS (
   PARTITION BY q.index
@@ -559,7 +558,7 @@ WINDOW marketing_window AS (
 
 ORDER BY index
       `,
-      [fromIndex, toIndex],
+      [startDate, endDate],
     );
     return await Promise.all(
       qryRes.rows.map(async (row: any): Promise<Purchase> => {
@@ -598,7 +597,8 @@ ORDER BY index
             row['email'] != null ? row['marketing_consent'] : undefined,
           age_verification: row['email'] != null ? true : false,
 
-          wallet_provider: row['wallet_provider'] != null ? row['wallet_provider'] : undefined,
+          wallet_provider:
+            row['wallet_provider'] != null ? row['wallet_provider'] : undefined,
           sso_id: row['sso_id'] != null ? row['sso_id'] : undefined,
           sso_type: row['sso_type'] != null ? row['sso_type'] : undefined,
           sso_email: row['sso_email'] != null ? row['sso_email'] : undefined,
@@ -629,8 +629,8 @@ ORDER BY index
   }
 
   async getUsersConcordiaAnalytics(
-    fromIndex?: number,
-    toIndex?: number,
+    startDate?: string,
+    endDate?: string,
     filterOnHasPurchases?: boolean,
   ): Promise<UserAnalytics[]> {
     const qryRes = await this.storeRepl.query(
@@ -664,8 +664,7 @@ LEFT JOIN marketing
 LEFT JOIN wallet_data
   ON wallet_data.address = q.address
 
-WHERE ($1::int IS NULL OR q.index >= $1)
-  AND ($2::int IS NULL OR q.index <= $2)
+WHERE ($1::TIMESTAMP IS NULL OR $2::TIMESTAMP IS NULL OR q.created_at BETWEEN $1 AND $2)
 
 WINDOW marketing_window AS (
   PARTITION BY q.index
@@ -679,7 +678,7 @@ WINDOW marketing_window AS (
 
 ORDER BY index
       `,
-      [fromIndex, toIndex, filterOnHasPurchases],
+      [startDate, endDate, filterOnHasPurchases],
     );
 
     return qryRes.rows.map((row: any): UserAnalytics => {
@@ -693,7 +692,8 @@ ORDER BY index
           row['email'] != null ? row['marketing_consent'] : undefined,
         age_verification: row['email'] != null ? true : false,
 
-        wallet_provider: row['wallet_provider'] != null ? row['wallet_provider'] : undefined,
+        wallet_provider:
+          row['wallet_provider'] != null ? row['wallet_provider'] : undefined,
         sso_id: row['sso_id'] != null ? row['sso_id'] : undefined,
         sso_type: row['sso_type'] != null ? row['sso_type'] : undefined,
         sso_email: row['sso_email'] != null ? row['sso_email'] : undefined,

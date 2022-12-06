@@ -7,7 +7,7 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { IsInt, IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 import {
   MetricEntity,
@@ -33,15 +33,15 @@ import {
 import { CONCORDIA_ANALYTICS_API_KEY } from '../../constants.js';
 
 class ConcordiaAnalyticsPagination {
-  @IsInt()
-  @Type(() => Number)
+  @IsString()
+  @Type(() => String)
   @IsOptional()
-  from_index?: number;
+  from_date?: string;
 
-  @IsInt()
-  @Type(() => Number)
+  @IsString()
+  @Type(() => String)
   @IsOptional()
-  to_index?: number;
+  to_date?: string;
 }
 
 class UsersConcordiaAnalytics extends ConcordiaAnalyticsPagination {
@@ -362,9 +362,9 @@ export class AnalyticsController {
   /**
    * @apiGroup Analytics
    * @api {get} /analytics/purchases_concordia Purchases analytics
-   * @apiDescription This endpoint will return a list of NFT purchases, from from_index to to_index. Note that there will be an upper limit of to_index - from_index.
-   * @apiQuery {Number} [from_index] select rows from index=from_index (inclusive)
-   * @apiQuery {Number} [to_index] select rows until index=from_index (inclusive)
+   * @apiDescription This endpoint will return a list of NFT purchases, from "from_date" to "to_date".
+   * @apiQuery {Number} [from_date] select rows from date=from_date (inclusive) in ISO date format
+   * @apiQuery {Number} [to_date] select rows until date=to_date (inclusive) in ISO date format
    *
    * @apiSuccessExample Example Success-Response:
    *
@@ -425,8 +425,8 @@ export class AnalyticsController {
     }
 
     return await this.analyticsService.getPurchases(
-      params.from_index,
-      params.to_index,
+      params.from_date,
+      params.to_date,
     );
   }
 
@@ -434,10 +434,10 @@ export class AnalyticsController {
    * @apiGroup Analytics
    *
    * @api {get} /analytics/users_concordia Request user analytics
-   * @apiDescription This endpoint will return a list of registered users, including a has_purchases field which is true when the user has bought at least 1 Nft, from from_index to to_index. Note that there will be an upper limit of to_index - from_index.
+   * @apiDescription This endpoint will return a list of registered users, including a has_purchases field which is true when the user has bought at least 1 Nft, from from_date to to_date.
    *
-   * @apiQuery {Number} [from_index] select rows from index=from_index (inclusive)
-   * @apiQuery {Number} [to_index] select rows until index=from_index (inclusive)
+   * @apiQuery {Number} [from_date] select rows from date=fromDate (inclusive) in ISO date format
+   * @apiQuery {Number} [to_date] select rows until date=toDate (inclusive) in ISO date format
    * @apiQuery {String} [filter] select only users that have purchased (when filter is set to "has_purchases"), or select only users that have not purchased yet (when filter is set to "has_no_purchases")
    *
    * @apiSuccessExample Example Success-Response:
@@ -488,8 +488,8 @@ export class AnalyticsController {
       filterOnHasPurchases = params.filter === 'has_purchases';
     }
     return await this.analyticsService.getUsersConcordiaAnalytics(
-      params.from_index,
-      params.to_index,
+      params.from_date,
+      params.to_date,
       filterOnHasPurchases,
     );
   }
