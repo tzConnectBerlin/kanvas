@@ -420,6 +420,12 @@ export class AnalyticsController {
     @Request() req: any,
     @Query() params: ConcordiaAnalyticsPagination,
   ): Promise<Purchase[]> {
+    if (typeof CONCORDIA_ANALYTICS_API_KEY === 'undefined') {
+      throw new HttpException(
+        'this endpoint is not enabled',
+        HttpStatus.NOT_IMPLEMENTED,
+      );
+    }
     if (req.get('AUTHORIZATION') !== CONCORDIA_ANALYTICS_API_KEY) {
       throw new HttpException('invalid api key', HttpStatus.UNAUTHORIZED);
     }
@@ -476,6 +482,12 @@ export class AnalyticsController {
     @Request() req: any,
     @Query() params: UsersConcordiaAnalytics,
   ): Promise<UserAnalytics[]> {
+    if (typeof CONCORDIA_ANALYTICS_API_KEY === 'undefined') {
+      throw new HttpException(
+        'this endpoint is not enabled',
+        HttpStatus.NOT_IMPLEMENTED,
+      );
+    }
     if (req.get('AUTHORIZATION') !== CONCORDIA_ANALYTICS_API_KEY) {
       throw new HttpException('invalid api key', HttpStatus.UNAUTHORIZED);
     }
