@@ -43,7 +43,8 @@ export interface Activity {
 }
 
 export interface Purchase {
-  index: number;
+  transaction_id: number;
+  type: string;
 
   wallet_address: string;
   email?: string;
