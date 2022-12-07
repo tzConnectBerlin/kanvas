@@ -370,7 +370,8 @@ export class AnalyticsController {
    *
    *    [
    *        {
-   *            "index": 1,
+   *            "transaction_id": 1,
+   *            "type": "sale",
    *            "wallet_address": "tz2JjcM2wo1GC3DxV8ra2Kb95Upswj39ueCa",
    *            "marketing_consent": false,
    *            "age_verification": true,
@@ -391,7 +392,8 @@ export class AnalyticsController {
    *            "purchaser_country": "GB",
    *        },
    *        {
-   *            "index": 2
+   *            "transaction_id": 2
+   *            "type": "sale,
    *            "wallet_address": "tz2JjcM2wo1GC3DxV8ra2Kb95Upswj39ueCc",
    *            "marketing_consent": true,
    *            "age_verification": true,

@@ -589,7 +589,8 @@ ORDER BY index
         );
 
         return {
-          index: Number(row['index']),
+          transaction_id: Number(row['index']),
+          type: 'sale',
 
           wallet_address: row['address'],
           email: row['email'] != null ? row['email'] : undefined,
