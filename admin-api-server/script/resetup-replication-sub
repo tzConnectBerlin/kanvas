@@ -17,6 +17,6 @@ DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
 
 COMMIT;' || exit 1
-PGDATABASE=store_replication psql -c 'DROP SUBSCRIPTION store_sub' || exit 1
+PGDATABASE=store_replication psql -c 'DROP SUBSCRIPTION store_sub'
 
 ./setup-replication-sub
