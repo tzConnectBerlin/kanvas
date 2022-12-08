@@ -15,3 +15,5 @@ PGDATABASE=store_replication psql -c "
     CONNECTION 'host=$STORE_PGHOST port=$STORE_PGPORT dbname=$STORE_PGDATABASE user=$STORE_PGUSER password=$STORE_PGPASSWORD'
     PUBLICATION store_pub;
 "
+
+script/db_procedures
