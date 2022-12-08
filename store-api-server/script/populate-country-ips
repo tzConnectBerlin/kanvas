@@ -12,10 +12,6 @@ fi
 echo $COUNTRY_IP_DEFINITIONS_FILE
 cat $COUNTRY_IP_DEFINITIONS_FILE
 
-function psql {
-  gcloud beta sql connect mu-nft-webshop-db-ed7f8c78 --user=default
-}
-
 psql -1 < $COUNTRY_IP_DEFINITIONS_FILE
 psql -c "$(cat<<EOF
 
