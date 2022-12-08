@@ -16,4 +16,4 @@ PGDATABASE=store_replication psql -c "
     PUBLICATION store_pub;
 "
 
-script/db_procedures
+./db_procedures
