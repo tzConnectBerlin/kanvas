@@ -24,6 +24,7 @@ steps:
     id: Push Image
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     args:
+      - beta
       - run
       - deploy
       - '${_SERVICE_NAME}'
