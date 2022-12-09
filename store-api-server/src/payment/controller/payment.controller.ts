@@ -224,11 +224,15 @@ export class PaymentController {
           [secondProvider.provider]: secondProviderIntent,
         };
       })
-      .catch((err) =>
+      .catch((err) => {
         Logger.error(
           `Unable to create payment intents for payment providers, err: ${err}`,
-        ),
-      );
+        );
+        throw new HttpException(
+          'failed to create payment intents for payment providers',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      });
   }
 
   /**
