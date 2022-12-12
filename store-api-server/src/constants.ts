@@ -46,6 +46,9 @@ export const CACHE_SIZE = Number(process.env['CACHE_SIZE'] ?? 10_000); // in max
 
 export const NUM_TOP_BUYERS = 12;
 
+export const SECURE_COOKIE_SETTINGS: boolean =
+  (process.env['SECURE_COOKIE_SETTINGS'] ?? 'no') === 'yes';
+
 // Enable this when for example NGINX sits between incoming traffic and the API.
 // It will enable things like the rate limiter to take the incoming IP address
 // from the X-Forwarded-For header.
@@ -120,3 +123,11 @@ export const PINATA_API_SECRET: string | undefined =
 
 export const VAT_FALLBACK_COUNTRY_SHORT: string =
   process.env['VAT_FALLBACK_COUNTRY_SHORT'] ?? 'GB';
+
+// Phase 2 TOKEN_ID
+export const PHASE2_TOKEN_ID: Record<string, number> = {
+  A: parseInt(process.env['A_TOKEN_ID'] ?? '1', 10),
+  B: parseInt(process.env['B_TOKEN_ID'] ?? '2', 10),
+  C: parseInt(process.env['C_TOKEN_ID'] ?? '3', 10),
+};
+
