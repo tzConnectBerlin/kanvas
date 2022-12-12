@@ -5,6 +5,8 @@ cd $SCRIPT_DIR
 PGDATABASE=store_replication psql -c '
 BEGIN;
 
+DROP SUBSCRIPTION IF EXISTS store_sub;
+
 DROP SCHEMA IF EXISTS peppermint CASCADE;
 DROP SCHEMA IF EXISTS onchain_kanvas CASCADE;
 
@@ -18,6 +20,5 @@ DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
 
 COMMIT;' || exit 1
-PGDATABASE=store_replication psql -c 'DROP SUBSCRIPTION store_sub'
 
 ./setup-replication-sub
