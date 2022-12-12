@@ -2,7 +2,18 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 
-PGDATABASE=store_replication psql -c 'DROP SUBSCRIPTION IF EXISTS store_sub;'
+PGDATABASE=store_replication psql -c 'DROP SUBSCRIPTION IF EXISTS store_sub;' || {
+  # drop subscription may fail if it couldn't reach the store-db for some reason
+  # , or if the replication slot was already cleaned up in a previous
+  # _partially failed_ drop subscription action
+  # (it tries to reach the store-db to cleanup resources)
+  PGDATABASE=store_replication psql -c '
+    ALTER SUBSCRIPTION store_sub DISABLE;
+    ALTER SUBSCRIPTION store_sub SET (slot_name = NONE);
+    DROP SUBSCRIPTION store_sub;
+  '
+}
+
 PGDATABASE=store_replication psql -c '
 BEGIN;
 
