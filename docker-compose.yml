@@ -26,6 +26,7 @@ services:
       - 3005:3000
     links:
       - store-db
+      - store-quepasa
     environment:
       PGHOST: store-db
       PGPORT: 5432
@@ -133,6 +134,7 @@ services:
       - 3006:3001
     links:
       - admin-db
+      - admin-quepasa
       - store-db
       - store-api
     env_file:
