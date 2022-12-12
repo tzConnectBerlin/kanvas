@@ -237,7 +237,7 @@ export class PaymentController {
       );
 
       const allProviderIntents = [
-        ...[{ [firstProvider.provider]: firstIntent }],
+        { [firstProvider.provider]: firstIntent },
         ...remainingIntents,
       ].reduce((previousIntents, nextIntent) => {
         return {
