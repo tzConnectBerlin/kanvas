@@ -1,9 +1,9 @@
-import { UserEntity } from '../../user/entity/user.types';
+import { UserEntity } from '../../user/entity/user.types.js';
 import {
   PaymentIntent,
   PaymentProvider,
   PaymentProviderString,
-} from '../entity/payment.entity';
+} from '../entity/payment.entity.js';
 import { DbTransaction } from '../../db.module';
 
 export interface HandleCreatePaymentIntent {

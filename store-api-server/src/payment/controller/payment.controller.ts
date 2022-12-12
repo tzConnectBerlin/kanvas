@@ -16,7 +16,7 @@ import {
 import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { JwtAuthGuard } from '../../authentication/guards/jwt-auth.guard.js';
 import { PaymentService } from '../service/payment.service.js';
-import { UserEntity } from '../../user/entity/user.types';
+import { UserEntity } from '../../user/entity/user.types.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
 import { PaymentIntent, PaymentProvider } from '../entity/payment.entity.js';
 import { STRIPE_WEBHOOK_SECRET } from '../../constants.js';
