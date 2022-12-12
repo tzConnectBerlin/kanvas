@@ -45,7 +45,7 @@ import {
 import Tezpay from 'tezpay-server';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { UserEntity } from '../../user/entity/user.types';
+import { UserEntity } from '../../user/entity/user.types.js';
 import {
   CurrencyService,
   BASE_CURRENCY,
