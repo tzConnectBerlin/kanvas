@@ -5,6 +5,7 @@ cd $SCRIPT_DIR
 PGDATABASE=store_replication psql -c '
 BEGIN;
 
+DROP SCHEMA IF EXISTS peppermint CASCADE;
 DROP SCHEMA IF EXISTS onchain_kanvas CASCADE;
 
 -- dropping the following set of schemas in case they exist, they might if the
