@@ -1666,9 +1666,13 @@ WHERE country_short = $1
       case PaymentProvider.SIMPLEX:
         return 'USD';
       case PaymentProvider.STRIPE:
-        return currency === PaymentProvider.TEZPAY ? 'USD' : currency;
+        return currency === 'XTZ'
+          ? BASE_CURRENCY === 'XTZ'
+            ? 'USD'
+            : BASE_CURRENCY
+          : currency;
       default:
-        return 'USD';
+        return BASE_CURRENCY;
     }
   }
 }

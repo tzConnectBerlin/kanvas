@@ -21,6 +21,7 @@ import { BASE_CURRENCY } from 'kanvas-api-lib';
 import { PaymentIntent, PaymentProvider } from '../entity/payment.entity.js';
 import { STRIPE_WEBHOOK_SECRET } from '../../constants.js';
 import { UserService } from '../../user/service/user.service.js';
+import { HandleCreatePaymentIntent } from '../service/payment.types';
 
 @Controller('payment')
 export class PaymentController {
@@ -180,9 +181,9 @@ export class PaymentController {
    *  $base_url/payment/order-now/10
    * @apiName orderNow
    */
-  @Post('/order-now/:id')
+  @Post('/order-now/:nftId')
   @UseGuards(JwtAuthGuard)
-  orderNow(
+  async orderNow(
     @Session() cookieSession: any,
     @Req() request: any,
     @CurrentUser() user: UserEntity,
@@ -191,48 +192,71 @@ export class PaymentController {
     @Body('recreateNftOrder') recreateNftOrder: boolean = false,
     @Body('currency') currency: string = BASE_CURRENCY,
   ) {
-    const [firstProvider, secondProvider] = paymentProviders.map((provider) => {
+    const providers = paymentProviders.map((provider) => {
       return {
         provider,
         currency: this.paymentService.getCurrency(provider, currency),
       };
     });
 
-    this.userService
-      .handleCartAdd({ cookieSession, user, nftId })
-      .then(async () => {
-        const args = {
-          cookieSession,
-          user,
-          request,
-          recreateNftOrder,
-        };
-        const firstProviderIntent =
-          await this.paymentService.handleCreatePaymentIntent({
-            ...args,
-            paymentProvider: firstProvider.provider,
-            currency: firstProvider.currency,
-          });
-        const secondProviderIntent =
-          await this.paymentService.handleCreatePaymentIntent({
-            ...args,
-            paymentProvider: secondProvider.provider,
-            currency: secondProvider.currency,
-          });
-        return {
-          [firstProvider.provider]: firstProviderIntent,
-          [secondProvider.provider]: secondProviderIntent,
-        };
-      })
-      .catch((err) => {
-        Logger.error(
-          `Unable to create payment intents for payment providers, err: ${err}`,
-        );
+    try {
+      await this.userService.handleCartAdd({ cookieSession, user, nftId });
+
+      const args = {
+        cookieSession,
+        user,
+        request,
+        recreateNftOrder,
+      };
+
+      const firstProvider = providers.shift();
+      if (!firstProvider) {
         throw new HttpException(
-          'failed to create payment intents for payment providers',
+          'No providers provided',
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
+      }
+      const firstIntent = await this.paymentService.handleCreatePaymentIntent({
+        ...args,
+        paymentProvider: firstProvider.provider,
+        currency: firstProvider.currency,
       });
+
+      const remainingIntents = await Promise.all(
+        providers.map(async (currentProvider) => {
+          const providerIntent =
+            await this.paymentService.handleCreatePaymentIntent({
+              ...args,
+              paymentProvider: currentProvider.provider,
+              currency: currentProvider.currency,
+            });
+
+          return {
+            [currentProvider.provider]: providerIntent,
+          };
+        }),
+      );
+
+      const allProviderIntents = [
+        ...[{ [firstProvider.provider]: firstIntent }],
+        ...remainingIntents,
+      ].reduce((previousIntents, nextIntent) => {
+        return {
+          ...previousIntents,
+          ...nextIntent,
+        };
+      }, {});
+
+      return allProviderIntents;
+    } catch (err) {
+      Logger.error(
+        `Unable to create payment intents for payment providers, err: ${err}`,
+      );
+      throw new HttpException(
+        'failed to create payment intents for payment providers',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   /**
