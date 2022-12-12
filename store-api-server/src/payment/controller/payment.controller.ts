@@ -21,7 +21,6 @@ import { BASE_CURRENCY } from 'kanvas-api-lib';
 import { PaymentIntent, PaymentProvider } from '../entity/payment.entity.js';
 import { STRIPE_WEBHOOK_SECRET } from '../../constants.js';
 import { UserService } from '../../user/service/user.service.js';
-import { HandleCreatePaymentIntent } from '../service/payment.types';
 
 @Controller('payment')
 export class PaymentController {
@@ -213,7 +212,7 @@ export class PaymentController {
       if (!firstProvider) {
         throw new HttpException(
           'No providers provided',
-          HttpStatus.INTERNAL_SERVER_ERROR,
+          HttpStatus.BAD_REQUEST,
         );
       }
       const firstIntent = await this.paymentService.handleCreatePaymentIntent({
