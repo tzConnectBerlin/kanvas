@@ -182,12 +182,11 @@ WHERE id = $2
         },
       };
       const resp = await request(app.getHttpServer())
-        .post('/payment/order-now/10')
+        .post(`/payment/order-now/${nftIds[0]}`)
         .set('authorization', w.login.bearer)
         .send({
           paymentProviders: ['tezpay', 'stripe'],
         });
-      expect(resp.statusCode).toEqual(201);
       const { tezpay, stripe } = resp.body;
       expect(tezpay).toMatchObject({
         provider: 'tezpay',
@@ -251,10 +250,10 @@ WHERE id = $2
       ).toEqual(stripe.amount);
       await testUtils.withDbConn(async (db) => {
         expect(
-          (await db.query('SELECT external_payment_id FROM payment')).rows[0][
-            'external_payment_id'
-          ],
-        ).toEqual('identifier');
+          (
+            await db.query('SELECT external_payment_id FROM payment ORDER BY 1')
+          ).rows.map((row) => row['external_payment_id']),
+        ).toStrictEqual(['identifier', null]);
       });
     });
 
