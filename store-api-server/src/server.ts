@@ -6,6 +6,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module.js';
 import { BEHIND_PROXY, LOCAL_CORS } from './constants.js';
+import bodyParser from 'body-parser';
 
 export async function runKanvasServer() {
   const server = await NestFactory.create<NestExpressApplication>(
@@ -40,6 +41,19 @@ export function setupKanvasServer(server: NestExpressApplication) {
   if (BEHIND_PROXY) {
     server.set('trust proxy', 1);
   }
+
+  // Hide JSON parsing errors from user
+  server.use(bodyParser.json());
+  server.use((err: any, _:any, res: any, next: any) => {
+    if (err.status >= 400 && err.status < 500 &&
+      err.message.indexOf('JSON') !== -1) {
+      res.send({
+        "statusCode": err.status,
+        "message": "Generic JSON error"
+      })
+    }
+    next()
+  });
 
   server.enableShutdownHooks();
 }
