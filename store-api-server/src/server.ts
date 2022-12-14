@@ -43,13 +43,17 @@ export function setupKanvasServer(server: NestExpressApplication) {
   }
 
   // Hide JSON parsing errors from user
-  server.use(bodyParser.json())
-  server.use((err:any, req:any, res:any, next:any) => {
+  server.use(bodyParser.json());
+  server.use((err: any, _:any, res: any, next: any) => {
     if (err.status >= 400 && err.status < 500 &&
       err.message.indexOf('JSON') !== -1) {
-        res.status(422).send()
+      res.send({
+        "statusCode": err.status,
+        "message": "Generic JSON error"
+      })
     }
-  })
+    next()
+  });
 
   server.enableShutdownHooks();
 }
