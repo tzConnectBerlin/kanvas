@@ -36,14 +36,14 @@ const tokenGateProvider = {
     if (typeof TOKEN_GATE_SPEC_FILE === 'undefined') {
       return w.gate;
     }
-    const jwtSecret = assertEnv('JWT_SECRET');
+    const jwtPublicKey = assertEnv('JWT_PUBLIC_KEY');
     w.gate
       .loadSpecFromFile(TOKEN_GATE_SPEC_FILE)
       .setTzAddrFromReqFunc((req: any): string | undefined => {
         try {
           const token = req.get('authorization')?.replace(/^Bearer\ /, '');
           if (typeof token !== 'undefined') {
-            return jwt.verify(token, jwtSecret).userAddress;
+            return jwt.verify(token, jwtPublicKey).userAddress;
           }
         } catch (err: any) {
           Logger.warn(`failed to verify JWT: ${err}`);
