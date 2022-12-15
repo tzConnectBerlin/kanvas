@@ -16,17 +16,18 @@ import {
 import { CurrentUser } from '../../decoraters/user.decorator.js';
 import { JwtAuthGuard } from '../../authentication/guards/jwt-auth.guard.js';
 import { PaymentService } from '../service/payment.service.js';
-import { UserEntity } from '../../user/entity/user.entity.js';
+import { UserEntity } from '../../user/entity/user.types.js';
 import { BASE_CURRENCY } from 'kanvas-api-lib';
-import { validateRequestedCurrency } from '../../paramUtils.js';
 import { PaymentIntent, PaymentProvider } from '../entity/payment.entity.js';
 import { STRIPE_WEBHOOK_SECRET } from '../../constants.js';
-
-import { getClientIp } from '../../utils.js';
+import { UserService } from '../../user/service/user.service.js';
 
 @Controller('payment')
 export class PaymentController {
-  constructor(private paymentService: PaymentService) {}
+  constructor(
+    private paymentService: PaymentService,
+    private userService: UserService,
+  ) {}
 
   /**
    * @apiGroup Payment
@@ -124,57 +125,134 @@ export class PaymentController {
     @Body('currency') currency: string = BASE_CURRENCY,
     @Body('recreateNftOrder') recreateNftOrder: boolean = false,
   ): Promise<PaymentIntent> {
-    validateRequestedCurrency(currency);
-    if (
-      paymentProvider === PaymentProvider.TEST ||
-      !Object.values(PaymentProvider).includes(paymentProvider)
-    ) {
-      throw new HttpException(
-        `requested payment provider not available`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    return this.paymentService.handleCreatePaymentIntent({
+      cookieSession,
+      user,
+      request,
+      paymentProvider,
+      currency,
+      recreateNftOrder,
+    });
+  }
+
+  /**
+   * @apiGroup Payment
+   * @api {post} /payment/order-now Add nft to cart and create payment intent for 2 payment providers
+   * @apiDescription Checking out the cart involves creating a payment intent, which then has to be met (finalized) in the frontend application. For example, if paying with Stripe, the payment intent has to be finalized by applying Stripe's SDK in the frontend.
+   * Note, this may fail if
+   * - This NFT is not for sale (e.g. it's already sold out, or it's not yet released, or its no longer on sale)
+   * - All remaining editions of this NFT are already in other active carts
+   * - This NFT is already in the active cart (currently we only allow 1 edition per NFT per active cart)
+   * - This NFT is a proxied NFT, it can only be claimed on purchase of the related Proxy NFT
+   * - The user's cart is full (there is an environment variable defining the maximum allowed cart size)
+   * - The NFT id does not exist
+   *
+   * The "clientSecret" in the response is the important piece that links the following finalization of the payment with the newly created payment intent.
+   * @apiParam {Number} nftId The id of the NFT to add to the cart
+   * @apiPermission logged-in user. The vatRate in the response is a range from 0 (0%) to 1 (100%)
+   * @apiBody {String[]} paymentProviders=["stripe","tezpay"] The 2 payment providers used for the intent
+   * @apiBody {String} [currency] The currency used for the stripe payment intent. Will default to a base currency if not provided. If base currency is XTZ, stripe will use USD.
+   * @apiBody {Boolean} [recreateNftOrder=false] Will cancel an already pending NFT order if the user has one if set to true
+   * @apiParamExample {json} Request Body Example:
+   *    {
+   *      "paymentProviders": ['tezpay', 'stripe']
+   *    }
+   *
+   * @apiSuccessExample Example Success-Response:
+   *  {
+   *    "tezpay": {
+   *        "id": "pi_3L2foUEdRDZNp7JF0yajTKrM",
+   *        "amount": "0.66",
+   *        "currency": "XTZ",
+   *        "vatRate": 0.1,
+   *        "amountExclVat": "0.55",
+   *        "providerPaymentDetails": {
+   *          "paypointMessage": "pi_3L2foUEdRDZNp7JF0yajTKrM_secret_cs3SWGJy7xdd5M19EwShCjbdE",
+   *          "receiverAddress": "KT1..",
+   *          "mutezAmount": "660000"
+   *        }
+   *    },
+   *    "stripe": {
+   *        ...
+   *    }
+   *  }
+   *  @apiExample {http} Example http request url (make sure to replace $base_url with the store-api-server endpoint):
+   *  $base_url/payment/order-now/10
+   * @apiName orderNow
+   */
+  @Post('/order-now/:nftId')
+  @UseGuards(JwtAuthGuard)
+  async orderNow(
+    @Session() cookieSession: any,
+    @Req() request: any,
+    @CurrentUser() user: UserEntity,
+    @Param('nftId') nftId: number,
+    @Body('paymentProviders') paymentProviders: PaymentProvider[],
+    @Body('recreateNftOrder') recreateNftOrder: boolean = false,
+    @Body('currency') currency: string = BASE_CURRENCY,
+  ) {
+    const providers = paymentProviders.map((provider) => {
+      return {
+        provider,
+        currency: this.paymentService.getCurrency(provider, currency),
+      };
+    });
 
     try {
-      // extracting some fields from paymentIntent like this, best way to get the
-      // spread syntax below to not pick them up (we don't want to expose these
-      // fields in the response of this API call)
-      const {
-        clientIp,
-        externalPaymentId,
-        amountExclVat,
-        purchaserCountry,
-        ...paymentIntent
-      } = await this.paymentService.createPayment(
+      await this.userService.handleCartAdd({ cookieSession, user, nftId });
+
+      const args = {
+        cookieSession,
         user,
-        cookieSession.uuid,
-        paymentProvider,
-        currency,
-        getClientIp(request),
+        request,
         recreateNftOrder,
-      );
-      const order = await this.paymentService.getPaymentOrder(paymentIntent.id);
-
-      return {
-        ...paymentIntent,
-        amountExclVat: this.paymentService.currencyService.toFixedDecimals(
-          paymentIntent.currency,
-          amountExclVat,
-        ),
-        paymentDetails: paymentIntent.providerPaymentDetails,
-        nfts: order.nfts,
-        expiresAt: order.expiresAt,
       };
-    } catch (err: any) {
-      Logger.error(
-        `Err on creating nft order (userId=${user.id}), err: ${err}`,
+
+      const firstProvider = providers.shift();
+      if (!firstProvider) {
+        throw new HttpException(
+          'No providers provided',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const firstIntent = await this.paymentService.handleCreatePaymentIntent({
+        ...args,
+        paymentProvider: firstProvider.provider,
+        currency: firstProvider.currency,
+      });
+
+      const remainingIntents = await Promise.all(
+        providers.map(async (currentProvider) => {
+          const providerIntent =
+            await this.paymentService.handleCreatePaymentIntent({
+              ...args,
+              paymentProvider: currentProvider.provider,
+              currency: currentProvider.currency,
+            });
+
+          return {
+            [currentProvider.provider]: providerIntent,
+          };
+        }),
       );
 
-      if (err instanceof HttpException) {
-        throw err;
-      }
+      const allProviderIntents = [
+        { [firstProvider.provider]: firstIntent },
+        ...remainingIntents,
+      ].reduce((previousIntents, nextIntent) => {
+        return {
+          ...previousIntents,
+          ...nextIntent,
+        };
+      }, {});
+
+      return allProviderIntents;
+    } catch (err) {
+      Logger.error(
+        `Unable to create payment intents for payment providers, err: ${err}`,
+      );
       throw new HttpException(
-        'unable to place the order',
+        'failed to create payment intents for payment providers',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

@@ -12,6 +12,7 @@ import {
   UserCart,
   UserTotalPaid,
   EmailRegistration,
+  HandleCart,
 } from '../entity/user.entity.js';
 import { OwnershipInfo } from '../../nft/entity/nft.entity.js';
 import { NftService } from '../../nft/service/nft.service.js';
@@ -23,6 +24,7 @@ import {
   NUM_TOP_BUYERS,
   CART_EXPIRATION_MILLI_SECS,
   CART_MAX_ITEMS,
+  PG_FOREIGN_KEY_VIOLATION_ERRCODE,
 } from '../../constants.js';
 import { CurrencyService } from 'kanvas-api-lib';
 import { Result } from 'ts-results';
@@ -56,6 +58,51 @@ export class UserService {
     private readonly currencyService: CurrencyService,
     public readonly nftService: NftService,
   ) {}
+
+  async handleCartAdd({ cookieSession, user, nftId }: HandleCart) {
+    const cartSession = await this.getCartSession(cookieSession, user);
+
+    await this.#cartAdd(cartSession, nftId).catch((err: any) => {
+      if (err instanceof HttpException) {
+        throw err;
+      }
+
+      if (err?.code === PG_FOREIGN_KEY_VIOLATION_ERRCODE) {
+        throw new HttpException(
+          'This nft does not exist',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      if (err?.code === PG_UNIQUE_VIOLATION_ERRCODE) {
+        throw new HttpException(
+          'This nft is already in the cart',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      Logger.error(
+        `Error on adding nft to cart. cartSession=${cartSession}, nftId=${nftId}, err: ${err}`,
+      );
+      throw new HttpException(
+        'Something went wrong',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    });
+  }
+
+  async handleCartRemove({ cookieSession, user, nftId }: HandleCart) {
+    const cartSession = await this.getCartSession(cookieSession, user);
+
+    const removed = await this.cartRemove(cartSession, nftId);
+    if (!removed) {
+      throw new HttpException(
+        'This nft was not in the cart',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    // return 204 (successful delete, returning nothing)
+    throw new HttpException('', HttpStatus.NO_CONTENT);
+  }
 
   async create(user: UserEntity): Promise<UserEntity> {
     const qryRes = await this.conn.query(
@@ -429,7 +476,7 @@ WHERE cart_session_id = $1`,
     return qryRes.rows.map((row: any) => row['nft_id']);
   }
 
-  async cartAdd(session: string, nftId: number) {
+  async #cartAdd(session: string, nftId: number) {
     const cartMeta = await this.touchCart(session);
 
     return await withTransaction(this.conn, async (dbTx: DbTransaction) => {

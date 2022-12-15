@@ -169,6 +169,94 @@ WHERE id = $2
       });
     });
 
+    it('basic order-now payment test case (stripe mocked)', async () => {
+      const w = await testUtils.newWallet(app);
+      paymentService.stripe = {
+        paymentIntents: {
+          create: () => {
+            return {
+              id: 'identifier',
+              client_secret: 'secret identifier',
+            };
+          },
+        },
+      };
+      const resp = await request(app.getHttpServer())
+        .post(`/payment/order-now/${nftIds[0]}`)
+        .set('authorization', w.login.bearer)
+        .send({
+          paymentProviders: ['tezpay', 'stripe'],
+        });
+      const { tezpay, stripe } = resp.body;
+      expect(tezpay).toMatchObject({
+        provider: 'tezpay',
+        providerPaymentDetails: {
+          receiverAddress: TEZPAY_PAYPOINT_ADDRESS,
+        },
+        nfts: [
+          {
+            id: nftIds[0],
+          },
+        ],
+        vatRate: 0.2,
+      });
+      expect(tezpay.paymentDetails).toStrictEqual(
+        tezpay.providerPaymentDetails,
+      );
+      expect(Number(tezpay.amountExclVat)).toBeLessThan(Number(tezpay.amount));
+      const xtzDecimals = 6;
+      expect(
+        (
+          tezpay.providerPaymentDetails.mutezAmount * Math.pow(10, -xtzDecimals)
+        ).toFixed(xtzDecimals),
+      ).toEqual(tezpay.amount);
+      await testUtils.withDbConn(async (db) => {
+        expect(
+          (await db.query('SELECT external_payment_id FROM payment')).rows[0][
+            'external_payment_id'
+          ],
+        ).toEqual(null);
+      });
+      await testUtils.withDbConn(async (db) => {
+        expect(
+          (await db.query('SELECT purchaser_country FROM payment')).rows[0][
+            'purchaser_country'
+          ],
+        ).toStrictEqual(null); // if ip cannot be placed this field should be null
+      });
+
+      expect(stripe).toMatchObject({
+        provider: 'stripe',
+        providerPaymentDetails: {
+          id: 'identifier',
+          clientSecret: 'secret identifier',
+        },
+        nfts: [
+          {
+            id: nftIds[0],
+          },
+        ],
+        vatRate: 0.2,
+      });
+      expect(stripe.paymentDetails).toStrictEqual(
+        stripe.providerPaymentDetails,
+      );
+      expect(Number(stripe.amountExclVat)).toBeLessThan(Number(stripe.amount));
+      const eurDecimals = 2;
+      expect(
+        (
+          stripe.providerPaymentDetails.amount * Math.pow(10, -eurDecimals)
+        ).toFixed(eurDecimals),
+      ).toEqual(stripe.amount);
+      await testUtils.withDbConn(async (db) => {
+        expect(
+          (
+            await db.query('SELECT external_payment_id FROM payment ORDER BY 1')
+          ).rows.map((row) => row['external_payment_id']),
+        ).toStrictEqual(['identifier', null]);
+      });
+    });
+
     for (const currency of ['GBP', 'USD', 'EUR']) {
       it(`non-xtz tezpay (with currency=${currency} => 400`, async () => {
         const w = await testUtils.newWallet(app);

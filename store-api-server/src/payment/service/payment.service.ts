@@ -34,6 +34,7 @@ import {
   maybe,
   stringEnumValueIndex,
   stringEnumIndexValue,
+  getClientIp,
 } from '../../utils.js';
 import {
   DbTransaction,
@@ -44,7 +45,7 @@ import {
 import Tezpay from 'tezpay-server';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { UserEntity } from '../../user/entity/user.entity.js';
+import { UserEntity } from '../../user/entity/user.types.js';
 import {
   CurrencyService,
   BASE_CURRENCY,
@@ -60,7 +61,6 @@ import {
   OrderStatus,
   NftDeliveryInfo,
   NftDeliveryStatus,
-  PaymentIntent,
 } from '../entity/payment.entity.js';
 
 import type { NftEntity } from '../../nft/entity/nft.entity.js';
@@ -70,6 +70,16 @@ import type {
   WertDetails,
   SimplexDetails,
 } from '../entity/payment.entity.js';
+import {
+  ICreatePaymentDetails,
+  ICreatePaymentIntent,
+  ICreateSimplexPaymentDetails,
+  ICreateWertPaymentDetails,
+  IRegisterPayment,
+  PaymentIntentInternal,
+  HandleCreatePaymentIntent,
+} from './payment.types';
+import { validateRequestedCurrency } from '../../paramUtils.js';
 
 const require = createRequire(import.meta.url);
 const stripe = require('stripe');
@@ -80,14 +90,6 @@ interface NftOrder {
   userAddress: string;
   nfts: NftEntity[];
   expiresAt: number;
-}
-
-interface PaymentIntentInternal
-  extends Omit<PaymentIntent, 'nfts' | 'expiresAt' | 'amountExclVat'> {
-  clientIp: string;
-  amountExclVat: number;
-  externalPaymentId?: string;
-  purchaserCountry: string;
 }
 
 @Injectable()
@@ -158,6 +160,70 @@ export class PaymentService {
     }
 
     await this.updatePaymentStatus(paymentId, paymentStatus);
+  }
+
+  async handleCreatePaymentIntent({
+    cookieSession,
+    user,
+    request,
+    paymentProvider,
+    currency,
+    recreateNftOrder,
+  }: HandleCreatePaymentIntent) {
+    validateRequestedCurrency(currency);
+    if (
+      paymentProvider === PaymentProvider.TEST ||
+      !Object.values(PaymentProvider).includes(paymentProvider)
+    ) {
+      throw new HttpException(
+        `requested payment provider not available`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    try {
+      // extracting some fields from paymentIntent like this, best way to get the
+      // spread syntax below to not pick them up (we don't want to expose these
+      // fields in the response of this API call)
+      const {
+        clientIp,
+        externalPaymentId,
+        amountExclVat,
+        purchaserCountry,
+        ...paymentIntent
+      } = await this.createPayment(
+        user,
+        cookieSession.uuid,
+        paymentProvider,
+        currency,
+        getClientIp(request),
+        recreateNftOrder,
+      );
+      const order = await this.getPaymentOrder(paymentIntent.id);
+
+      return {
+        ...paymentIntent,
+        amountExclVat: this.currencyService.toFixedDecimals(
+          paymentIntent.currency,
+          amountExclVat,
+        ),
+        paymentDetails: paymentIntent.providerPaymentDetails,
+        nfts: order.nfts,
+        expiresAt: order.expiresAt,
+      };
+    } catch (err: any) {
+      Logger.error(
+        `Err on creating nft order (userId=${user.id}), err: ${err}`,
+      );
+
+      if (err instanceof HttpException) {
+        throw err;
+      }
+      throw new HttpException(
+        'unable to place the order',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async promisePaid(userId: number, paymentId: string) {
@@ -235,14 +301,14 @@ WHERE id = $1
         0,
       );
 
-      let paymentIntent = await this.#createPaymentIntent(
-        usr,
+      let paymentIntent = await this.#createPaymentIntent({
+        user: usr,
         provider,
         currency,
         amountUnit,
         clientIp,
-      );
-      await this.#registerPayment(dbTx, orderId, paymentIntent);
+      });
+      await this.#registerPayment({ dbTx, nftOrderId: orderId, paymentIntent });
 
       return paymentIntent;
     });
@@ -504,27 +570,27 @@ WHERE nft_order_id = $1
     });
   }
 
-  async #createPaymentIntent(
-    usr: UserEntity,
-    provider: PaymentProviderString,
-    currency: string,
-    amountUnit: number,
-    clientIp: string,
-  ): Promise<PaymentIntentInternal> {
+  async #createPaymentIntent({
+    user,
+    provider,
+    currency,
+    amountUnit,
+    clientIp,
+  }: ICreatePaymentIntent): Promise<PaymentIntentInternal> {
     const { vatRate, ipCountry } = await this.#ipAddrVatRate(clientIp);
 
     let amount = this.currencyService.convertFromBaseUnit(currency, amountUnit);
 
     const id = uuidv4();
 
-    const providerPaymentDetails = await this.#createPaymentDetails(
-      id,
-      usr,
+    const providerPaymentDetails = await this.#createPaymentDetails({
+      paymentId: id,
+      user,
       provider,
       currency,
       amountUnit,
       clientIp,
-    );
+    });
 
     let externalPaymentId: string | undefined;
     switch (provider) {
@@ -554,14 +620,14 @@ WHERE nft_order_id = $1
     };
   }
 
-  async #createPaymentDetails(
-    paymentId: string,
-    usr: UserEntity,
-    provider: PaymentProviderString,
-    currency: string,
-    amountUnit: number,
-    clientIp: string,
-  ) {
+  async #createPaymentDetails({
+    paymentId,
+    user,
+    provider,
+    currency,
+    amountUnit,
+    clientIp,
+  }: ICreatePaymentDetails) {
     switch (provider) {
       case PaymentProvider.TEZPAY:
         if (currency !== 'XTZ') {
@@ -591,30 +657,30 @@ WHERE nft_order_id = $1
           ),
         );
 
-        return await this.#createWertPaymentDetails(
+        return await this.#createWertPaymentDetails({
           paymentId,
-          usr.userAddress,
+          userAddress: user.userAddress,
           fiatCurrency,
           mutezAmount,
-        );
+        });
       case PaymentProvider.SIMPLEX:
-        return await this.#createSimplexPaymentDetails(
-          usr,
-          currency,
+        return await this.#createSimplexPaymentDetails({
+          user,
+          fiatCurrency: currency,
           amountUnit,
           clientIp,
-        );
+        });
       case PaymentProvider.TEST:
         return undefined;
     }
   }
 
-  async #createWertPaymentDetails(
-    paymentId: string,
-    userAddress: string,
-    fiatCurrency: string,
-    mutezAmount: number,
-  ): Promise<WertDetails> {
+  async #createWertPaymentDetails({
+    paymentId,
+    userAddress,
+    fiatCurrency,
+    mutezAmount,
+  }: ICreateWertPaymentDetails): Promise<WertDetails> {
     if (typeof this.signWertData === 'undefined') {
       throw new HttpException(
         'wert payment provider not supported by this API instance',
@@ -662,12 +728,12 @@ WHERE nft_order_id = $1
     };
   }
 
-  async #createSimplexPaymentDetails(
-    usr: UserEntity,
-    fiatCurrency: string,
-    amountUnit: number,
-    clientIp: string,
-  ): Promise<SimplexDetails> {
+  async #createSimplexPaymentDetails({
+    user,
+    fiatCurrency,
+    amountUnit,
+    clientIp,
+  }: ICreateSimplexPaymentDetails): Promise<SimplexDetails> {
     if (
       typeof SIMPLEX_API_URL === 'undefined' ||
       typeof SIMPLEX_API_KEY === 'undefined' ||
@@ -693,7 +759,7 @@ WHERE nft_order_id = $1
         let quoteResponse = await axios.post(
           SIMPLEX_API_URL + '/wallet/merchant/v2/quote',
           {
-            end_user_id: '' + usr.id,
+            end_user_id: '' + user.id,
             digital_currency: 'USD-DEPOSIT',
             fiat_currency: 'USD',
             requested_currency: 'USD',
@@ -752,9 +818,9 @@ WHERE nft_order_id = $1
             account_details: {
               app_provider_id: SIMPLEX_WALLET_ID,
               app_version_id: '1.0.0',
-              app_end_user_id: '' + usr.id,
-              app_install_date: usr.createdAt
-                ? new Date(usr.createdAt * 1000).toISOString()
+              app_end_user_id: '' + user.id,
+              app_install_date: user.createdAt
+                ? new Date(user.createdAt * 1000).toISOString()
                 : new Date().toISOString(),
               email: '', // TODO NO WAY ?
               phone: '', // TODO NO WAY ?
@@ -770,7 +836,7 @@ WHERE nft_order_id = $1
                 order_id: orderId,
                 destination_wallet: {
                   currency: 'USD-DEPOSIT',
-                  address: usr.userAddress,
+                  address: user.userAddress,
                   tag: '',
                 },
                 original_http_ref_url: '', // TODO NO WAY ?
@@ -887,11 +953,11 @@ WHERE nft_order_id = $1
     };
   }
 
-  async #registerPayment(
-    dbTx: DbTransaction,
-    nftOrderId: number,
-    paymentIntent: PaymentIntentInternal,
-  ) {
+  async #registerPayment({
+    dbTx,
+    nftOrderId,
+    paymentIntent,
+  }: IRegisterPayment) {
     try {
       if (
         await this.#orderHasProviderOpen(nftOrderId, paymentIntent.provider)
@@ -1589,5 +1655,24 @@ WHERE country_short = $1
       ((+ipParts[0] * 256 + +ipParts[1]) * 256 + +ipParts[2]) * 256 +
       +ipParts[3]
     );
+  }
+
+  getCurrency(provider: PaymentProvider, currency: string): string {
+    switch (provider) {
+      case PaymentProvider.TEZPAY:
+        return 'XTZ';
+      case PaymentProvider.WERT:
+        return 'USD';
+      case PaymentProvider.SIMPLEX:
+        return 'USD';
+      case PaymentProvider.STRIPE:
+        return currency === 'XTZ'
+          ? BASE_CURRENCY === 'XTZ'
+            ? 'USD'
+            : BASE_CURRENCY
+          : currency;
+      default:
+        return BASE_CURRENCY;
+    }
   }
 }
