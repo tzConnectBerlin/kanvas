@@ -40,6 +40,15 @@ $ yarn run start:prod
 
 It should now be available at `http://localhost:3000/`.
 
+## Generate JWT Secret / Public Key
+
+```bash
+# generate secret
+ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key 
+# generate public key for secret
+openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+```
+
 ## Test
 
 ```bash
