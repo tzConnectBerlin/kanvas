@@ -40,7 +40,7 @@ export class AuthService {
       scope: user.roles,
     };
     return {
-      accessToken: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload, { algorithm: 'RS256'}),
     };
   }
 }
