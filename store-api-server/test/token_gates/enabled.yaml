@@ -5,8 +5,8 @@ columns:
   amount: assets_nat
 
 tokenNames:
-  0: common
-  1: rare
+  common: 0
+  rare: 1
 
 rules:
   /nfts:
