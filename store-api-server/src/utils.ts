@@ -78,7 +78,9 @@ export function maybe<ValTy, ResTy>(
 
 export function getClientIp(request: any): string {
   const { ip } = request;
-  return BEHIND_PROXY ? request.get('X-Forwarded-For') || ip : ip;
+  return BEHIND_PROXY
+    ? request.get('X-Forwarded-For')?.split(',')[0] || ip
+    : ip;
 }
 
 export function stringEnumValueIndex<T>(
