@@ -72,13 +72,31 @@ BEGIN
         ) AS accum_recv,
         tr_dest.token_id,
         array_fill(tx.operation_hash::text, ARRAY[tr_dest.amount::INT]) AS op_hashes
-      FROM onchain_kanvas."entry.transfer.noname.txs" AS tr_dest
+      FROM (
+        SELECT
+          to_,
+          token_id,
+          tx_context_id,
+          amount
+        FROM onchain_kanvas."entry.transfer.noname.txs" AS tr_tx
+        WHERE tr_tx.to_ = $2
+          AND tr_tx.token_id = ANY($1)
+
+        UNION ALL
+
+        SELECT
+          owner AS to_,
+          token_id,
+          tx_context_id,
+          amount
+        FROM onchain_kanvas."entry.mint_tokens.noname" AS mint_tx
+        WHERE mint_tx.owner = $2
+          AND mint_tx.token_id = ANY($1)
+      ) AS tr_dest
       JOIN que_pasa.tx_contexts AS ctx
         ON ctx.id = tr_dest.tx_context_id
       JOIN que_pasa.txs AS tx
         ON tx.tx_context_id = ctx.id
-      WHERE tr_dest.to_ = $2
-        AND tr_dest.token_id = ANY($1)
     ), for_address_owned AS (
       SELECT
         ledger.idx_assets_nat AS token_id,
