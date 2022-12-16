@@ -9,9 +9,7 @@ AS $$
       mint.command->'args'->>'amount' AS amount
     FROM peppermint.operations AS mint
     WHERE mint.command->>'handler' = 'nft'
-      AND mint.command->>'name'::TEXT = 'transfer'
       AND (mint.command->'args'->'token_id')::INTEGER = purchased_nft_id
-      AND mint.command->'args'->>'from_address' = minter_address
       AND mint.command->'args'->>'to_address' = buyer_address
       AND EXISTS (
         SELECT 1

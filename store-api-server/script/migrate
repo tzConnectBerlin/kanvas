@@ -34,3 +34,10 @@ BEGIN;
 
 COMMIT;
 EOF
+
+psql -v ON_ERROR_STOP=1 <<EOF
+CREATE INDEX IF NOT EXISTS onchain_transfer_entry_idx ON onchain_kanvas."entry.transfer.noname.txs"(token_id, to_);
+CREATE INDEX IF NOT EXISTS onchain_mint_entry_idx ON onchain_kanvas."entry.transfer.noname.txs"(token_id, owner);
+CREATE INDEX IF NOT EXISTS onchain_ledger_address_idx ON onchain_kanvas."storage.ledger_live"(idx_assets_address);
+CREATE INDEX IF NOT EXISTS onchain_txs_hash_idx ON que_pasa.txs(operation_hash);
+EOF
