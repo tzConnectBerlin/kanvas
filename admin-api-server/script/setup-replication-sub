@@ -12,6 +12,8 @@ PGDATABASE=store_replication psql -c "
   CREATE SCHEMA IF NOT EXISTS peppermint;
 " || exit 1
 
+cat $store_schema_file
+
 pg_restore --no-publications --schema=public --schema=peppermint --host=$PGHOST --port=$PGPORT --username=$PGUSER --schema-only --no-owner --clean --if-exists --dbname=store_replication < $store_schema_file
 
 PGDATABASE=store_replication psql -c "
