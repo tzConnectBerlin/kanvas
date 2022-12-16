@@ -6,7 +6,7 @@ cd $SCRIPT_DIR
 # subscription will not work (it will not bring over these definitions, unfortunately)
 
 store_schema_file=`mktemp`
-PGPASSWORD=$STORE_PGPASSWORD pg_dump --host=$STORE_PGHOST --port=$STORE_PGPORT --dbname=$STORE_PGDATABASE --username=$STORE_PGUSER --schema-only --format c --no-privileges --no-owner > $store_schema_file
+PGPASSWORD=$STORE_PGPASSWORD pg_dump --host=$STORE_PGHOST --port=$STORE_PGPORT --dbname=$STORE_PGDATABASE --username=$STORE_PGUSER --schema-only -T public.claims --format c --no-privileges --no-owner > $store_schema_file
 
 PGDATABASE=store_replication psql -c "
   CREATE SCHEMA IF NOT EXISTS peppermint;
