@@ -26,32 +26,35 @@ export class MintService {
 
   async transferNfts(
     nfts: NftEntity[],
-    buyer_address: string,
+    buyerAddress: string,
   ): Promise<{ [key: number]: number }> {
     const operationIds: { [key: number]: number } = {};
     for (const nft of nfts) {
       try {
-        const opId = await this.#transferNft(nft, buyer_address);
+        const opId = await this.#transferNft(nft, buyerAddress);
         operationIds[nft.id] = opId;
         Logger.log(
-          `transfer created for nft (id=${nft.id}) to buyer (address=${buyer_address})`,
+          `transfer created for nft (id=${nft.id}) to buyer (address=${buyerAddress})`,
         );
       } catch (err: any) {
         Logger.error(
-          `failed to transfer nft (id=${nft.id}) to buyer (address=${buyer_address}), err: ${err}`,
+          `failed to transfer nft (id=${nft.id}) to buyer (address=${buyerAddress}), err: ${err}`,
         );
       }
     }
     return operationIds;
   }
 
-  async #transferNft(nft: NftEntity, buyer_address: string): Promise<number> {
+  async #transferNft(nft: NftEntity, buyerAddress: string): Promise<number> {
     return await withMutexLock({
       mutexName: `transferNft:${nft.id}`,
       dbPool: this.conn,
       f: async (dbTx: DbTransaction) => {
         if (!(await this.#isNftSubmitted(dbTx, nft))) {
-          await this.#mint(dbTx, nft);
+          const operationId = await this.#mint(dbTx, nft, buyerAddress);
+          if (nft.editionsSize === 1) {
+            return operationId;
+          }
         }
 
         const cmd = {
@@ -60,7 +63,7 @@ export class MintService {
           args: {
             token_id: nft.id,
             from_address: MINTER_ADDRESS,
-            to_address: buyer_address,
+            to_address: buyerAddress,
             amount: 1,
           },
         };
@@ -69,7 +72,11 @@ export class MintService {
     });
   }
 
-  async #mint(dbTx: DbTransaction, nft: NftEntity) {
+  async #mint(
+    dbTx: DbTransaction,
+    nft: NftEntity,
+    buyerAddress: string,
+  ): Promise<number> {
     if (nft.isProxy) {
       throw `cannot mint a proxy nft (id=${nft.id})`;
     }
@@ -83,13 +90,13 @@ export class MintService {
       name: 'create_and_mint',
       args: {
         token_id: nft.id,
-        to_address: MINTER_ADDRESS,
+        to_address: nft.editionsSize === 1 ? buyerAddress : MINTER_ADDRESS,
         metadata_ipfs: metadataIpfs,
         amount: nft.editionsSize,
       },
     };
 
-    await this.#insertCommand(dbTx, cmd);
+    return await this.#insertCommand(dbTx, cmd);
   }
 
   async #insertCommand(dbTx: DbTransaction, cmd: Command): Promise<number> {
