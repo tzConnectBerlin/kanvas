@@ -495,16 +495,21 @@ FROM
     payment.purchaser_country,
     payment.vat_rate,
 
-    transfer_tx.fee + coalesce(transfer_tx.paid_storage_size_diff, 0) * 250 AS transfer_mutez_fee,
+    coalesce(transfer_tx.fee, 0) + coalesce(transfer_tx.paid_storage_size_diff, 0) * 250 AS transfer_mutez_fee,
     CASE
       WHEN (
+        EXISTS (
+          SELECT 1 FROM peppermint.operations
+          WHERE command->>'name' = 'create_and_mint'
+            AND (command->'args'->>'token_id')::int = delivery.transfer_nft_id
+        ) OR (
         SELECT
           min(id) = peppermint_op.id
         FROM peppermint.operations
         WHERE command->>'name' = 'transfer'
           AND (command->'args'->>'token_id')::int = delivery.transfer_nft_id
           AND state = 'confirmed') = true
-      THEN (
+      ) THEN (
         SELECT
           create_tx.fee + mint_tx.fee + (coalesce(create_tx.paid_storage_size_diff, 0) + coalesce(mint_tx.paid_storage_size_diff, 0)) * 250 AS mutez_fee
         FROM onchain_kanvas."entry.mint_tokens.noname" AS mint_params
@@ -530,10 +535,10 @@ FROM
 
   JOIN peppermint.operations AS peppermint_op
     ON peppermint_op.id = delivery.transfer_operation_id
-  JOIN onchain_kanvas."entry.transfer.noname.txs" AS tr_dest
+  LEFT JOIN onchain_kanvas."entry.transfer.noname.txs" AS tr_dest
     ON  tr_dest.token_id = delivery.transfer_nft_id
     AND tr_dest.to_ = usr.address
-  JOIN que_pasa.txs AS transfer_tx
+  LEFT JOIN que_pasa.txs AS transfer_tx
     ON  transfer_tx.tx_context_id = tr_dest.tx_context_id
     AND transfer_tx.operation_hash = peppermint_op.included_in
 
