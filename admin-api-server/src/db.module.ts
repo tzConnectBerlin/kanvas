@@ -53,11 +53,11 @@ const dbStoreReplProvider = {
       return w.storeDbPool;
     }
     w.storeDbPool = new Pool({
-      host: assertEnv('PGHOST'),
-      port: Number(assertEnv('PGPORT')),
-      user: assertEnv('PGUSER'),
-      password: assertEnv('PGPASSWORD'),
-      database: 'store_replication',
+      host: assertEnv('PGHOST_STORE_REPLICATION'),
+      port: Number(assertEnv('PGPORT_STORE_REPLICATION')),
+      user: assertEnv('PGUSER_STORE_REPLICATION'),
+      password: assertEnv('PGPASSWORD_STORE_REPLICATION'),
+      database: assertEnv('PGDATABASE_STORE_REPLICATION'),
     });
     return w.storeDbPool;
   },

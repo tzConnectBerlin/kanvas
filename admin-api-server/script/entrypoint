@@ -6,21 +6,23 @@ set -x
 
 INIT_QUEPASA=false script/migrate || exit 1
 
-QRY_NUM_KANVAS_USERS="SELECT COUNT(1) FROM kanvas_user"
-if [[ "`psql -c \"$QRY_NUM_KANVAS_USERS\" -tA`" == "0" ]]; then
-    yarn seed || exit 1
-fi
+if [[ "$PGHOST_STORE_REPLICATION" == "$PGHOST" ]]; then
+  QRY_NUM_KANVAS_USERS="SELECT COUNT(1) FROM kanvas_user"
+  if [[ "`psql -c \"$QRY_NUM_KANVAS_USERS\" -tA`" == "0" ]]; then
+      yarn seed || exit 1
+  fi
 
-QRY_NUM_STORE_SUB="SELECT count(1) FROM pg_subscription WHERE subname = 'store_sub'"
-QRY_NUM_STORE_SUB_WORKERS="SELECT count(1) FROM pg_stat_subscription WHERE subname = 'store_sub' AND pid IS NOT NULL"
-if [[ "`psql -c \"$QRY_NUM_STORE_SUB\" -tA`" == "0" ]]; then
-    script/resetup-replication-sub || exit 1
-elif [[ "`psql -c \"$QRY_NUM_STORE_SUB_WORKERS\" -tA`" == "0" ]]; then
-    # this happens (an inactive store_sub subscription) when there has been a
-    # schema change in one of the replicated tables in the store db, we solve
-    # this here in a simple way where we drop the replication schema and then
-    # recreate it
-    script/resetup-replication-sub || exit 1
+  QRY_NUM_STORE_SUB="SELECT count(1) FROM pg_subscription WHERE subname = 'store_sub'"
+  QRY_NUM_STORE_SUB_WORKERS="SELECT count(1) FROM pg_stat_subscription WHERE subname = 'store_sub' AND pid IS NOT NULL"
+  if [[ "`psql -c \"$QRY_NUM_STORE_SUB\" -tA`" == "0" ]]; then
+      script/resetup-replication-sub || exit 1
+  elif [[ "`psql -c \"$QRY_NUM_STORE_SUB_WORKERS\" -tA`" == "0" ]]; then
+      # this happens (an inactive store_sub subscription) when there has been a
+      # schema change in one of the replicated tables in the store db, we solve
+      # this here in a simple way where we drop the replication schema and then
+      # recreate it
+      script/resetup-replication-sub || exit 1
+  fi
 fi
 
 node dist/src/main.js
