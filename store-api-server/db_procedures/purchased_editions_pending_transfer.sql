@@ -3,6 +3,7 @@ DROP FUNCTION IF EXISTS purchased_editions_pending_transfer;
 CREATE FUNCTION purchased_editions_pending_transfer(
   purchased_nft_id INTEGER, buyer_address TEXT, minter_address TEXT)
 RETURNS INTEGER
+PARALLEL SAFE
 AS $$
   WITH onchain_registered AS (
     SELECT
@@ -15,6 +16,7 @@ AS $$
         SELECT 1
         FROM que_pasa.txs AS onchain_tx
         WHERE onchain_tx.operation_hash = mint.included_in
+        LIMIT 1
       )
   )
   SELECT

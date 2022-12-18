@@ -37,20 +37,24 @@ const { cryptoUtils } = sotez;
 import * as testUtils from './utils';
 
 let anyTestFailed = false;
-const skipOnPriorFail = (name: string, action: any) => {
+const skipOnPriorFail = (name: string, action: any, timeout = 5000) => {
   // Note: this will mark any test after a failed test as
   // succesful, not great, but it's the best that seems possible
   // with jest right now
-  test(name, async () => {
-    if (!anyTestFailed) {
-      try {
-        await action();
-      } catch (error) {
-        anyTestFailed = true;
-        throw error;
+  test(
+    name,
+    async () => {
+      if (!anyTestFailed) {
+        try {
+          await action();
+        } catch (error) {
+          anyTestFailed = true;
+          throw error;
+        }
       }
-    }
-  });
+    },
+    timeout,
+  );
 };
 
 describe('AppController (e2e)', () => {
@@ -1056,6 +1060,7 @@ describe('AppController (e2e)', () => {
   skipOnPriorFail(
     '/nfts/search (empty searchString gives most popular categories, based on GET /nfts/:id hits)',
     async () => {
+      await sleep(1000);
       const res = await request(app.getHttpServer())
         .get('/nfts/search')
         .query({ searchString: '' });
@@ -1641,6 +1646,7 @@ describe('AppController (e2e)', () => {
   );
 
   const getLockedCount = async (nftId: number) => {
+    await sleep(1000); // need to sleep to ensure we dont hit the cache
     const resp = await request(app.getHttpServer()).get(`/nfts/${nftId}`);
     return resp.body.editionsSize - resp.body.editionsAvailable;
   };
@@ -1667,7 +1673,7 @@ describe('AppController (e2e)', () => {
       expect(await getLockedCount(1)).toEqual(1);
 
       // Create one payment intent (we are not calling the stripe api)
-      const intentRes = await paymentService.createPayment(
+      await paymentService.createPayment(
         usr,
         uuidv4(),
         PaymentProvider.TEST,
@@ -1717,6 +1723,7 @@ describe('AppController (e2e)', () => {
       expect(nftList).toContain(4);
       expect(nftList).toContain(1);
     },
+    10000,
   );
 
   skipOnPriorFail(
@@ -1813,6 +1820,7 @@ describe('AppController (e2e)', () => {
       // 0 editions locked now that the cart is cleared too
       expect(await getLockedCount(2)).toEqual(0);
     },
+    10000,
   );
 
   skipOnPriorFail(

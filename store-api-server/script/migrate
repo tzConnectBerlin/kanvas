@@ -40,4 +40,18 @@ CREATE INDEX IF NOT EXISTS onchain_transfer_entry_idx ON onchain_kanvas."entry.t
 CREATE INDEX IF NOT EXISTS onchain_mint_entry_idx ON onchain_kanvas."entry.mint_tokens.noname"(token_id, owner);
 CREATE INDEX IF NOT EXISTS onchain_ledger_address_idx ON onchain_kanvas."storage.ledger_live"(idx_assets_address);
 CREATE INDEX IF NOT EXISTS onchain_txs_hash_idx ON que_pasa.txs(operation_hash);
+CREATE INDEX IF NOT EXISTS onchain_txs_hash_bpchar_idx ON que_pasa.txs((operation_hash::bpchar));
+
+CREATE INDEX IF NOT EXISTS paypoint_entry_pay_uuid_idx ON paypoint."entry.pay"(string);
+CREATE INDEX IF NOT EXISTS paypoint_entry_default_uuid_idx ON paypoint."entry.default"(pay);
+
+CREATE INDEX IF NOT EXISTS peppermint_command_name_state_idx ON peppermint.operations((command->>'name'), state);
+CREATE INDEX IF NOT EXISTS peppermint_command_token_id_state_idx ON peppermint.operations(state, (command->>'name'), ((command->'args'->'token_id')::int));
+CREATE INDEX IF NOT EXISTS peppermint_token_id_handler_to_idx ON peppermint.operations(((command->'args'->'token_id')::int), (command->>'handler'), (command->'args'->>'to_address'));
+
+CREATE INDEX IF NOT EXISTS mtm_nft_format_nft_id_idx ON mtm_nft_format (nft_id);
+CREATE INDEX IF NOT EXISTS mtm_cart_session_nft_nft_id_idx ON mtm_cart_session_nft (nft_id);
+CREATE INDEX IF NOT EXISTS mtm_kanvas_user_nft_nft_id_idx ON mtm_kanvas_user_nft (nft_id);
+
+CREATE INDEX IF NOT EXISTS payment_status_idx ON payment(nft_order_id, status);
 EOF
