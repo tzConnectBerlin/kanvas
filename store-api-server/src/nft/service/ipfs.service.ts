@@ -28,7 +28,7 @@ interface Attribute {
 }
 
 interface NftMetadata {
-  //id: number;
+  id: number;
   name: string;
   description: string;
   date: string;
@@ -146,7 +146,7 @@ WHERE id = $1
     displayIpfs = displayIpfs ?? artifactIpfs;
     thumbnailIpfs = thumbnailIpfs ?? displayIpfs;
     const res: NftMetadata = {
-      // id: nft.id,
+      id: nft.id,
       decimals: 0,
 
       name: nft.name,

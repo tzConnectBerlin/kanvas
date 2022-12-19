@@ -1080,6 +1080,7 @@ describe('NftService', () => {
       };
       tc.exp.creators = [MINTER_ADDRESS];
       tc.exp.royalties.shares[`${MINTER_ADDRESS}`] = 10;
+      tc.exp.id = tc.nft.id;
 
       const got = await service.nftMetadataJson(tc.nft, 'not signed');
       expect(got).toStrictEqual(tc.exp);
