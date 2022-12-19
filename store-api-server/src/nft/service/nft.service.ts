@@ -450,37 +450,9 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
       );
       const priceBounds = await this.conn.query(
         `
-SELECT
-  MIN(price) as min_price,
-  MAX(price) as max_price
-FROM nft
-JOIN mtm_nft_category
-  ON mtm_nft_category.nft_id = nft.id
-LEFT JOIN mtm_kanvas_user_nft
-  ON mtm_kanvas_user_nft.nft_id = nft.id
-LEFT JOIN kanvas_user
-  ON mtm_kanvas_user_nft.kanvas_user_id = kanvas_user.id
-WHERE ($5 IS NULL OR nft.created_at <= $5)
-  AND ($1 IS NULL OR kanvas_user.address = $1)
-  AND ($2 IS NULL OR nft_category_id = ANY($2))
-  AND ($3 IS NULL OR (
-        ('onSale' = ANY($3) AND (
-          (nft.onsale_from IS NULL OR nft.onsale_from <= now() AT TIME ZONE 'UTC')
-          AND (nft.onsale_until IS NULL OR nft.onsale_until > now())
-          AND ((SELECT reserved + owned FROM nft_editions_locked(nft.id)) < nft.editions_size)
-        )) OR
-        ('soldOut' = ANY($3) AND (
-          (
-            SELECT reserved + owned FROM nft_editions_locked(nft.id)
-          ) >= nft.editions_size
-        )) OR
-        ('upcoming' = ANY($3) AND (
-          nft.onsale_from > now() AT TIME ZONE 'UTC'
-        )) OR
-        ('endingSoon' = ANY($3) AND (
-          nft.onsale_until BETWEEN (now() AT TIME ZONE 'UTC') AND (now() AT TIME ZONE 'UTC' + $4)
-        ))
-      ))`,
+SELECT min_price, max_price
+FROM price_bounds($1, $2, $3, $4, $5)
+        `,
         [
           filters.userAddress,
           filters.categories,
