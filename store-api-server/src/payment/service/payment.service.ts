@@ -322,7 +322,7 @@ WHERE id = $1
     userId: number,
     recreateOrder: boolean,
   ): Promise<number> {
-    const cartSessionRes = await this.userService.getUserCartSession(userId);
+    const cartSessionRes = await this.userService.getUserCartSession(userId, dbTx);
     if (!cartSessionRes.ok || typeof cartSessionRes.val !== 'string') {
       Logger.warn(`cannot create order for userId=${userId}, no cart exists`);
       throw new HttpException(
@@ -332,7 +332,7 @@ WHERE id = $1
     }
     const cartSession: string = cartSessionRes.val;
 
-    const cartMeta = await this.userService.getCartMeta(cartSession);
+    const cartMeta = await this.userService.getCartMeta(cartSession, dbTx);
     if (typeof cartMeta === 'undefined') {
       Logger.warn(
         `cannot create order for userId=${userId} (cartSession=${cartSession}), no cart exists`,
@@ -375,7 +375,7 @@ WHERE cart_session_id = $1
     );
     if (orderNftsQry.rowCount === 0) {
       Logger.warn(
-        `cannot create order for userId=${userId} (cartId=${cartMeta.id}), empty cart`,
+        `cannot create order for userId=${userId} (cartSession=${cartSession}), empty cart`,
       );
       throw new HttpException(
         'cannot create order, cart is empty',
