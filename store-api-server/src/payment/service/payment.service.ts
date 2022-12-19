@@ -652,7 +652,7 @@ WHERE nft_order_id = $1
         }
         return await this.#createTezPaymentDetails(paymentId, amountUnit);
       case PaymentProvider.STRIPE:
-        return await this.#createStripePaymentDetails(user, currency, amountUnit, nfts);
+        return await this.#createStripePaymentDetails(paymentId, user, currency, amountUnit, nfts);
       case PaymentProvider.WERT:
         const fiatCurrency = currency;
 
@@ -913,6 +913,7 @@ WHERE nft_order_id = $1
   }
 
   async #createStripePaymentDetails(
+    paymentId: string,
     usr: UserEntity,
     currency: string,
     currencyUnitAmount: number,
@@ -948,7 +949,7 @@ WHERE nft_order_id = $1
         })),
         automatic_tax: { enabled: true },
         mode: 'payment',
-        success_url: `${STORE_FRONT_URL}/${usr.userAddress}`,
+        success_url: `${STORE_FRONT_URL}/order/${paymentId}`,
         cancel_url: `${STORE_FRONT_URL}/checkout`,
       });
 
