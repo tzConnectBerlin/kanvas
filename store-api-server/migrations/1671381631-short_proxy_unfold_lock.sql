@@ -12,4 +12,6 @@ COMMIT;
 
 BEGIN;
 
+ALTER TABLE proxy_unfold DROP COLUMN claimed_for_order;
+
 COMMIT;
