@@ -142,7 +142,6 @@ SELECT $1, UNNEST($2::INTEGER[])
         newNft.id,
         BASE_CURRENCY,
         undefined,
-        false,
         dbTx,
       );
 
@@ -477,7 +476,6 @@ FROM price_bounds($1, $2, $3, $4, $5)`,
     id: number,
     currency: string = BASE_CURRENCY,
     includeRecvForAddress?: string,
-    incrViewCount: boolean = true,
     dbConn: any = this.conn,
   ): Promise<NftEntity> {
     const nfts = await this.findByIds(
@@ -495,21 +493,24 @@ FROM price_bounds($1, $2, $3, $4, $5)`,
         HttpStatus.BAD_REQUEST,
       );
     }
-    if (incrViewCount) {
-      this.#incrementNftViewCount(id);
-    }
     return nfts[0];
   }
 
-  async #incrementNftViewCount(id: number) {
-    this.conn.query(
-      `
+  async incrementNftViewCount(id: number) {
+    try {
+      await this.conn.query(
+        `
 UPDATE nft
 SET view_count = view_count + 1
 WHERE id = $1
 `,
-      [id],
-    );
+        [id],
+      );
+    } catch (err: any) {
+      Logger.error(
+        `failed to increase nft view count, err: ${JSON.stringify(err)}`,
+      );
+    }
   }
 
   async findByIds(

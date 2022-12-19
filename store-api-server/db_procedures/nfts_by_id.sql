@@ -31,6 +31,7 @@ CREATE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT, for
 
     mint_op_hash TEXT,
     owned_recv_op_hashes TEXT[])
+PARALLEL SAFE
 AS $$
 BEGIN
   IF orderDirection NOT IN ('asc', 'desc') THEN

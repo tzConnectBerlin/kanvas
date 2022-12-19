@@ -5,6 +5,7 @@ CREATE FUNCTION price_bounds(
   availability_filter TEXT[], ending_soon_duration INTERVAL,
   until_filter TIMESTAMP WITHOUT TIME ZONE)
 RETURNS TABLE(min_price NUMERIC, max_price NUMERIC)
+PARALLEL SAFE
 AS $$
   SELECT
     MIN(price) as min_price,

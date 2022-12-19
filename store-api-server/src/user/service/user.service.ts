@@ -41,7 +41,7 @@ enum OwnershipStatus {
   OWNED = 'owned',
 }
 
-interface CartMeta {
+export interface CartMeta {
   id: number;
   expiresAt: number;
   orderId?: number;

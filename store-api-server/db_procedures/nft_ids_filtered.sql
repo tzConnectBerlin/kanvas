@@ -10,6 +10,7 @@ CREATE FUNCTION nft_ids_filtered(
     until TIMESTAMP WITHOUT TIME ZONE,
     minter_address TEXT)
   RETURNS TABLE(nft_id nft.id%TYPE, total_nft_count bigint)
+PARALLEL SAFE
 AS $$
 BEGIN
   IF order_direction NOT IN ('asc', 'desc') THEN

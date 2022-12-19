@@ -376,9 +376,10 @@ export class NftController {
   @Header('cache-control', 'no-store,must-revalidate')
   async byId(
     @Param('id') id: number,
+    @Res() resp: Response,
     @Query('userAddress') userOnchainOwnedInfo?: string,
     @Query('currency') currency: string = BASE_CURRENCY,
-  ): Promise<NftEntity> {
+  ) {
     validateRequestedCurrency(currency);
 
     id = Number(id);
@@ -388,7 +389,11 @@ export class NftController {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return await this.nftService.byId(id, currency, userOnchainOwnedInfo);
+
+    this.nftService.incrementNftViewCount(id);
+    return await wrapCache(this.cache, resp, `nft.byId${id}${currency}`, () => {
+      return this.nftService.byId(id, currency, userOnchainOwnedInfo);
+    });
   }
 
   #validateFilterParams(params: FilterParams): void {
