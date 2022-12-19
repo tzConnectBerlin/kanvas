@@ -430,8 +430,63 @@ ORDER BY claims.token_id
     try {
       const nftIds = await this.conn.query(
         `
-SELECT nft_id, total_nft_count
-FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+SELECT
+  nft_id,
+  total_nft_count
+FROM (
+  SELECT
+    nft.id as nft_id,
+    nft.created_at as nft_created_at,
+    COUNT(1) OVER () AS total_nft_count
+  FROM nft
+  JOIN mtm_nft_category
+    ON mtm_nft_category.nft_id = nft.id
+  LEFT JOIN mtm_kanvas_user_nft
+    ON mtm_kanvas_user_nft.nft_id = nft.id
+  LEFT JOIN kanvas_user
+    ON mtm_kanvas_user_nft.kanvas_user_id = kanvas_user.id
+  WHERE ($8::timestamp without time zone IS NULL OR nft.created_at <= $8::timestamp without time zone)
+    AND ($1::text IS NULL OR (
+          EXISTS (
+            SELECT 1
+            FROM onchain_kanvas."storage.ledger_live"
+            WHERE idx_assets_address = $1::text
+              AND idx_assets_nat = nft.id
+          ) OR (
+            purchased_editions_pending_transfer(nft.id, $1::text, $9::text) > 0
+          )
+        ))
+    AND ($2::int[] IS NULL OR nft_category_id = ANY($2::int[]))
+    AND ($3::numeric IS NULL OR nft.price >= $3::numeric)
+    AND ($4::numeric IS NULL OR nft.price <= $4::numeric)
+    AND ($5::text[] IS NULL OR (
+          ('onSale' = ANY($5::text[]) AND (
+                (nft.onsale_from IS NULL OR nft.onsale_from <= now() AT TIME ZONE 'UTC')
+            AND (nft.onsale_until IS NULL OR nft.onsale_until > now())
+            AND ((SELECT reserved + owned FROM nft_editions_locked(nft.id)) < nft.editions_size)
+          )) OR
+          ('soldOut' = ANY($5::text[]) AND (
+            (
+              SELECT reserved + owned FROM nft_editions_locked(nft.id)
+            ) >= nft.editions_size
+          )) OR
+          ('upcoming' = ANY($5::text[]) AND (
+            nft.onsale_from > now() AT TIME ZONE 'UTC'
+          )) OR
+          ('endingSoon' = ANY($5::text[]) AND (
+              nft.onsale_until BETWEEN (now() AT TIME ZONE 'UTC') AND (now() AT TIME ZONE 'UTC' + $7)
+          ))
+        ))
+    AND ($6::boolean IS NULL OR (
+          ($6::boolean AND nft.proxy_nft_id IS NULL) OR
+          ((NOT $6::boolean) AND NOT EXISTS (SELECT 1 FROM proxy_unfold WHERE proxy_nft_id = nft.id))
+        ))
+  GROUP BY nft.id, nft.created_at
+  ORDER BY ${orderBy} ${filters.orderDirection}
+) q
+OFFSET ${offset}
+LIMIT ${limit}
+`,
         [
           filters.userAddress,
           filters.categories,
@@ -440,10 +495,6 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
           filters.availability,
           proxiesFolded,
           ENDING_SOON_DURATION,
-          orderBy,
-          filters.orderDirection,
-          offset,
-          limit,
           untilNft,
           MINTER_ADDRESS,
         ],
