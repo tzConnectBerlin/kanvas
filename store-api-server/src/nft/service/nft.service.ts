@@ -356,7 +356,7 @@ JOIN peppermint.operations AS mint
 WHERE claims.token_id = ANY($1)
 ORDER BY claims.token_id
       `,
-      getKeysRawResult.rows.map((row: any) => Number(row.token_id)),
+      [getKeysRawResult.rows.map((row: any) => Number(row.token_id))],
     );
 
     return getKeysDataRawResult.rows.map((r: any) => {
