@@ -375,7 +375,7 @@ ORDER BY claims.token_id
         mint_operation_hash: r['mint_hash'],
       };
     });
-  };
+  }
 
   async findNftsWithFilter(
     filters: FilterParams,
@@ -480,7 +480,7 @@ WHERE ($5 IS NULL OR nft.created_at <= $5)
         ('endingSoon' = ANY($3) AND (
           nft.onsale_until BETWEEN (now() AT TIME ZONE 'UTC') AND (now() AT TIME ZONE 'UTC' + $4)
         ))
-      ))`
+      ))`,
         [
           filters.userAddress,
           filters.categories,
