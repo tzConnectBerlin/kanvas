@@ -352,6 +352,7 @@ SELECT
 FROM claims
 JOIN peppermint.operations AS mint
   ON  (mint.command->'args'->>'token_id')::int = claims.token_id
+  AND mint.command->>'handler' = 'key'
 WHERE claims.token_id = ANY($1)
 ORDER BY claims.token_id
       `,
