@@ -33,6 +33,11 @@ BEGIN
         ON mtm_kanvas_user_nft.nft_id = nft.id
       LEFT JOIN kanvas_user
         ON mtm_kanvas_user_nft.kanvas_user_id = kanvas_user.id
+      LEFT JOIN kanvas_user AS usr
+        ON usr.address = $2
+      LEFT JOIN mtm_kanvas_user_nft AS purchased
+        ON  purchased.nft_id = nft.id
+        AND purchased.kanvas_user_id = usr.id
       WHERE ($1 IS NULL OR nft.created_at <= $1)
         AND ($2 IS NULL OR (
               EXISTS (
@@ -41,7 +46,7 @@ BEGIN
                 WHERE idx_assets_address = $2
                   AND idx_assets_nat = nft.id
               ) OR (
-                purchased_editions_pending_transfer(nft.id, $2, $10) > 0
+                purchased_editions_pending_transfer(purchased.nft_id, $2, $10) > 0
               )
             ))
         AND ($3 IS NULL OR nft_category_id = ANY($3))
