@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION nft_editions_locked(nft_id INT)
   RETURNS TABLE(reserved BIGINT, owned BIGINT)
-  PARALLEL SAFE
+  STABLE PARALLEL SAFE
 AS $$
   WITH nft_ids AS (
     SELECT

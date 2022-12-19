@@ -29,7 +29,7 @@ CREATE OR REPLACE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirectio
 
     mint_op_hash TEXT,
     owned_recv_op_hashes TEXT[])
-PARALLEL SAFE
+STABLE PARALLEL SAFE
 AS $$
 BEGIN
   IF orderDirection NOT IN ('asc', 'desc') THEN
