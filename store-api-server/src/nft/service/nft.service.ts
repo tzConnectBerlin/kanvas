@@ -21,7 +21,7 @@ import {
   SEARCH_MAX_NFTS,
   SEARCH_SIMILARITY_LIMIT,
   ENDING_SOON_DURATION,
-  PHASE2_TOKEN_ID,
+  TOKEN_ARTIFACT,
 } from '../../constants.js';
 import { CurrencyService, BASE_CURRENCY } from 'kanvas-api-lib';
 import { sleep, maybe } from '../../utils.js';
@@ -330,8 +330,8 @@ LIMIT $3
       .filter(Boolean);
   }
 
-  async findKeysWithAddress(address: string): Promise<Record<string, number>> {
-    const keys = await this.conn.query(
+  async findKeysWithAddress(address: string): Promise<Record<string, any>> {
+    const getKeysRawResult = await this.conn.query(
       `
 SELECT
   idx_nat AS token_id,
@@ -341,13 +341,45 @@ WHERE idx_address = $1
 `,
       [address],
     );
-    return Object.keys(PHASE2_TOKEN_ID).reduce(
-      (acc, el) => {
-        acc[el] = parseInt(keys.rows.find((r: Record<string, string>) => parseInt(r.token_id, 10) === PHASE2_TOKEN_ID[el])?.count ?? '0', 10);
-        return acc;
-      },
-      {} as Record<string, number>,
+
+    const getKeysDataRawResult = await this.conn.query(
+      `
+SELECT
+  idx_nat AS token_id,
+  'owned' AS ownership_status
+FROM token_gate."storage.ledger_live"
+WHERE idx_address = $1
+UNION ALL
+SELECT
+  token_id,
+  'pending' AS ownership_status
+FROM claims
+WHERE wallet_address = $1
+  AND NOT EXISTS (
+    SELECT 1
+    FROM token_gate."storage.ledger_live"
+    WHERE idx_nat = claims.token_id
+  )
+      `,
+      getKeysRawResult.rows.map((row: any) => Number(row.token_id)),
     );
+
+    return getKeysDataRawResult.rows.map((r: any) => {
+      return {
+        token_type: r['token_type'],
+        token_id: r['token_id'],
+  
+        name: 'The Keys: Officially licensed Manchester United digital collectibles',
+        description:
+          'The first-ever official Manchester United digital collectible is a gift to fans and is available in Classic, Rare and Ultra Rare versions. Powered by Tezos and brought to you by Tezos ecosystem companies.',
+        categories: ['Sports'],
+        edition_size: 1,
+  
+        artifact: TOKEN_ARTIFACT[r['token_type']],
+  
+        mint_operation_hash: r['mint_hash'],
+      };
+    });
   };
 
   async findNftsWithFilter(
