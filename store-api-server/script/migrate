@@ -55,4 +55,6 @@ CREATE INDEX IF NOT EXISTS mtm_cart_session_nft_nft_id_idx ON mtm_cart_session_n
 CREATE INDEX IF NOT EXISTS mtm_kanvas_user_nft_nft_id_idx ON mtm_kanvas_user_nft (nft_id);
 
 CREATE INDEX IF NOT EXISTS payment_status_idx ON payment(nft_order_id, status);
+
+CREATE INDEX IF NOT EXISTS token_gate_ledger_address_idx ON token_gate."storage.ledger_live"(idx_address);
 EOF

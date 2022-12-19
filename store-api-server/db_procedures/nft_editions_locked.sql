@@ -1,7 +1,4 @@
-DROP FUNCTION IF EXISTS nft_editions_locked;
-DROP FUNCTION IF EXISTS nft_editions_locked_no_proxy;
-
-CREATE FUNCTION nft_editions_locked(nft_id INT)
+CREATE OR REPLACE FUNCTION nft_editions_locked(nft_id INT)
   RETURNS TABLE(reserved BIGINT, owned BIGINT)
   PARALLEL SAFE
 AS $$

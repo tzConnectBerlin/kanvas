@@ -1,6 +1,4 @@
-DROP FUNCTION IF ExISTS nfts_by_id;
-
-CREATE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT, forRecvAddress TEXT)
+CREATE OR REPLACE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT, forRecvAddress TEXT)
   RETURNS TABLE(
     nft_id INTEGER,
     nft_created_at TIMESTAMP WITHOUT TIME ZONE,

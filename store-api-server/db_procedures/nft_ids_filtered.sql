@@ -1,6 +1,4 @@
-DROP FUNCTION IF EXISTS nft_ids_filtered;
-
-CREATE FUNCTION nft_ids_filtered(
+CREATE OR REPLACE FUNCTION nft_ids_filtered(
     address TEXT, categories INTEGER[],
     price_at_least NUMERIC, price_at_most NUMERIC,
     availability TEXT[], proxies_folded BOOLEAN,

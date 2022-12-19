@@ -1,6 +1,4 @@
-DROP FUNCTION IF EXISTS purchased_editions_pending_transfer;
-
-CREATE FUNCTION purchased_editions_pending_transfer(
+CREATE OR REPLACE FUNCTION purchased_editions_pending_transfer(
   purchased_nft_id INTEGER, buyer_address TEXT, minter_address TEXT)
 RETURNS INTEGER
 PARALLEL SAFE
