@@ -345,21 +345,16 @@ WHERE idx_address = $1
     const getKeysDataRawResult = await this.conn.query(
       `
 SELECT
-  idx_nat AS token_id,
-  'owned' AS ownership_status
-FROM token_gate."storage.ledger_live"
-WHERE idx_address = $1
-UNION ALL
-SELECT
-  token_id,
-  'pending' AS ownership_status
+  claims.token_id AS token_id,
+  claims.token_type AS token_type,
+  mint.command->'args'->>'metadata_ipfs' AS metadata_ipfs,
+  mint.included_in AS mint_hash
 FROM claims
-WHERE wallet_address = $1
-  AND NOT EXISTS (
-    SELECT 1
-    FROM token_gate."storage.ledger_live"
-    WHERE idx_nat = claims.token_id
-  )
+JOIN peppermint.operations AS mint
+  ON  (mint.command->'args'->>'token_id')::int = claims.token_id
+  AND mint.command->>'name' = 'create_and_mint'
+WHERE claims.token_id = ANY($1)
+ORDER BY claims.token_id
       `,
       getKeysRawResult.rows.map((row: any) => Number(row.token_id)),
     );
