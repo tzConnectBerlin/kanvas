@@ -37,6 +37,8 @@ interface NftMetadata {
 
   decimals: number;
   isBooleanAmount: boolean;
+  isTransferable: boolean;
+  shouldPreferSymbol: boolean;
 
   artifactUri: string;
   displayUri: string;
@@ -201,6 +203,9 @@ WHERE id = $1
       publishers: STORE_PUBLISHERS,
 
       isBooleanAmount: nft.editionsSize === 1,
+      isTransferable: true,
+      shouldPreferSymbol: false,
+
       signature: signature,
 
       royalties,
