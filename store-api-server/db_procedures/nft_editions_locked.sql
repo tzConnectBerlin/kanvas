@@ -21,7 +21,7 @@ AS $$
         ON nft_order.id = cart.order_id
       LEFT JOIN payment
         ON  payment.nft_order_id = nft_order.id
-        AND payment.status IN ('created', 'promised', 'processing')
+        AND payment.status IN ('created', 'promised', 'processing', 'succeeded')
       WHERE cart_nfts.nft_id = nft_id_input
         AND payment.id IS NULL
     ) + (
