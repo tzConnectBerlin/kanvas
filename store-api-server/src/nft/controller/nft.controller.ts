@@ -154,6 +154,10 @@ export class NftController {
     @Param('id') nftId: number,
     @Body('signature') signature: string,
   ) {
+    throw new HttpException(
+      '{"error": "this endpoint is disabled"}',
+      HttpStatus.NOT_IMPLEMENTED,
+    );
     nftId = Number(nftId);
     if (isNaN(nftId)) {
       throw new HttpException(`invalid nft id`, HttpStatus.BAD_REQUEST);
@@ -185,6 +189,10 @@ export class NftController {
     @Param('id') nftId: number,
     @Body('signature') signature: string,
   ) {
+    throw new HttpException(
+      '{"error": "this endpoint is disabled"}',
+      HttpStatus.NOT_IMPLEMENTED,
+    );
     nftId = Number(nftId);
     if (isNaN(nftId)) {
       throw new HttpException(`invalid nft id`, HttpStatus.BAD_REQUEST);
@@ -267,6 +275,10 @@ export class NftController {
     @Query() filters: FilterParams,
     @Query('currency') currency: string = BASE_CURRENCY,
   ) {
+    throw new HttpException(
+      '{"error": "this endpoint is disabled"}',
+      HttpStatus.NOT_IMPLEMENTED,
+    );
     validateRequestedCurrency(currency);
     this.#validateFilterParams(filters);
 
@@ -309,6 +321,10 @@ export class NftController {
     @Query() searchParams: SearchParam,
     @Query('currency') currency: string = BASE_CURRENCY,
   ) {
+    throw new HttpException(
+      '{"error": "this endpoint is disabled"}',
+      HttpStatus.NOT_IMPLEMENTED,
+    );
     validateRequestedCurrency(currency);
 
     return await wrapCache(
