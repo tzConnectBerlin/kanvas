@@ -23,6 +23,7 @@ import {
   STRIPE_SECRET,
   VAT_FALLBACK_COUNTRY_SHORT,
   STORE_FRONT_URL,
+  ADDRESS_WHITELIST_ENABLED,
 } from '../../constants.js';
 import { UserService, CartMeta } from '../../user/service/user.service.js';
 import { NftService } from '../../nft/service/nft.service.js';
@@ -306,14 +307,15 @@ WHERE id = $1
         0,
       );
 
-      let paymentIntent = await this.#createPaymentIntent({
+      let paymentIntent = await this.#createPaymentIntent(
+        {
           user: usr,
           provider,
           currency,
           amountUnit,
           clientIp,
         },
-        order.nfts
+        order.nfts,
       );
       await this.#registerPayment({
         dbTx,
@@ -330,7 +332,10 @@ WHERE id = $1
     userId: number,
     recreateOrder: boolean,
   ): Promise<number> {
-    const cartSessionRes = await this.userService.getUserCartSession(userId, dbTx);
+    const cartSessionRes = await this.userService.getUserCartSession(
+      userId,
+      dbTx,
+    );
     if (!cartSessionRes.ok || typeof cartSessionRes.val !== 'string') {
       Logger.warn(`cannot create order for userId=${userId}, no cart exists`);
       throw new HttpException(
@@ -578,14 +583,9 @@ WHERE nft_order_id = $1
     });
   }
 
-  async #createPaymentIntent({
-      user,
-      provider,
-      currency,
-      amountUnit,
-      clientIp,
-    }: ICreatePaymentIntent,
-    nfts: NftEntity[]
+  async #createPaymentIntent(
+    { user, provider, currency, amountUnit, clientIp }: ICreatePaymentIntent,
+    nfts: NftEntity[],
   ): Promise<PaymentIntentInternal> {
     const { vatRate, ipCountry } = await this.#ipAddrVatRate(clientIp);
 
@@ -593,7 +593,8 @@ WHERE nft_order_id = $1
 
     const id = uuidv4();
 
-    const providerPaymentDetails = await this.#createPaymentDetails({
+    const providerPaymentDetails = await this.#createPaymentDetails(
+      {
         paymentId: id,
         user,
         provider,
@@ -601,7 +602,7 @@ WHERE nft_order_id = $1
         amountUnit,
         clientIp,
       },
-      nfts
+      nfts,
     );
 
     let externalPaymentId: string | undefined;
@@ -632,7 +633,8 @@ WHERE nft_order_id = $1
     };
   }
 
-  async #createPaymentDetails({
+  async #createPaymentDetails(
+    {
       paymentId,
       user,
       provider,
@@ -640,7 +642,7 @@ WHERE nft_order_id = $1
       amountUnit,
       clientIp,
     }: ICreatePaymentDetails,
-    nfts: NftEntity[]
+    nfts: NftEntity[],
   ) {
     switch (provider) {
       case PaymentProvider.TEZPAY:
@@ -652,7 +654,13 @@ WHERE nft_order_id = $1
         }
         return await this.#createTezPaymentDetails(paymentId, amountUnit);
       case PaymentProvider.STRIPE:
-        return await this.#createStripePaymentDetails(paymentId, user, currency, amountUnit, nfts);
+        return await this.#createStripePaymentDetails(
+          paymentId,
+          user,
+          currency,
+          amountUnit,
+          nfts,
+        );
       case PaymentProvider.WERT:
         const fiatCurrency = currency;
 
@@ -934,7 +942,7 @@ WHERE nft_order_id = $1
 
     if (STRIPE_CHECKOUT_ENABLED) {
       const session = await this.stripe.checkout.sessions.create({
-        line_items: nfts.map(nft => ({
+        line_items: nfts.map((nft) => ({
           price_data: {
             currency: currency,
             product_data: {
@@ -963,7 +971,7 @@ WHERE nft_order_id = $1
         amount: currencyUnitAmount,
         currency: currency,
         payment_method_types: STRIPE_PAYMENT_METHODS,
-        description: nfts.map(nft => nft.name).join("\n"),
+        description: nfts.map((nft) => nft.name).join('\n'),
       });
 
       if (typeof paymentIntent.client_secret === 'undefined') {
@@ -1500,6 +1508,19 @@ WHERE payment_id = $1
     const order = await this.#getOrder(orderId);
     let nfts = await this.#unfoldProxyNfts(orderId, order.nfts);
 
+    if (ADDRESS_WHITELIST_ENABLED) {
+      try {
+        await this.#markWhitelistedAddressClaimed(order.userId);
+      } catch (err: any) {
+        Logger.error(
+          `failed to mark whitelisted addresses devil claim, err: ${JSON.stringify(
+            err,
+          )}`,
+        );
+        // Note: dont throw err, just continue. Better to not break the Nft sending due to an err here (last minute code)
+      }
+    }
+
     nfts = await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       await this.#assignNftsToUser(
         dbTx,
@@ -1524,6 +1545,17 @@ WHERE payment_id = $1
       order.userAddress,
     );
     await this.#registerTransfers(orderId, nfts, opIds);
+  }
+
+  async #markWhitelistedAddressClaimed(userId: number) {
+    await this.conn.query(
+      `
+UPDATE addresses_whitelisted
+SET claimed = true
+WHERE address = (SELECT address FROM kanvas_user WHERE id = $1)
+`,
+      [userId],
+    );
   }
 
   async #registerTransfers(
