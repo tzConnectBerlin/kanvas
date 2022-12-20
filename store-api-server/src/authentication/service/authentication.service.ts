@@ -10,7 +10,11 @@ import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
 import { Result } from 'ts-results';
 import validator from 'validator';
 import ts_results from 'ts-results';
-import { SIGNED_LOGIN_ENABLED, TOKEN_GATE } from '../../constants.js';
+import {
+  SIGNED_LOGIN_ENABLED,
+  TOKEN_GATE,
+  ADDRESS_WHITELIST_ENABLED,
+} from '../../constants.js';
 const { Ok } = ts_results;
 
 import type { IAuthentication } from './authentication.js';
@@ -104,6 +108,9 @@ export class AuthenticationService {
       userOwnsTokens: userOwnsTokens ?? [],
       allowedTokens: this.tokenGate.getEndpointAllowedTokens(endpoint),
       userHasAccess,
+      userInAddressEnableList:
+        !ADDRESS_WHITELIST_ENABLED ||
+        (await this.tokenGate.isAddressInWhitelist(address)),
     };
   }
 
@@ -174,7 +181,7 @@ export class AuthenticationService {
     user: UserEntity,
   ): IAuthentication {
     const payload: ITokenPayload = data;
-    const token = this.jwtService.sign(payload, { algorithm: 'RS256'});
+    const token = this.jwtService.sign(payload, { algorithm: 'RS256' });
 
     if (typeof process.env.JWT_EXPIRATION_TIME == 'string') {
       return {
