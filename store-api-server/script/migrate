@@ -60,5 +60,5 @@ CREATE INDEX IF NOT EXISTS payment_status3_idx ON payment(nft_order_id, provider
 CREATE INDEX IF NOT EXISTS payment_payment_id_idx ON payment(payment_id);
 CREATE INDEX IF NOT EXISTS payment_external_id_idx ON payment(external_payment_id);
 
-CREATE INDEX IF NOT EXISTS token_gate_ledger_address_idx ON token_gate."storage.ledger_live"(idx_address);
+CREATE INDEX IF NOT EXISTS token_gate_ledger_address_amount_idx ON token_gate."storage.ledger_live"(idx_address, nat);
 EOF

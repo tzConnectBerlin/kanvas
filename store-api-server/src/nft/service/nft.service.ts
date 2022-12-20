@@ -95,7 +95,7 @@ WHERE content_name = $1
       await dbTx.query(
         `
 INSERT INTO nft (
-  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, onsale_from, onsale_until, price, editions_size, metadata, proxy_nft_id, created_at
+  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, onsale_from, onsale_until, price, editions_size, metadata, proxy_nft_id, created_at, artifact_ipfs, display_ipfs, thumbnail_ipfs
 )
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, COALESCE(
     (SELECT created_at FROM nft WHERE id = $13), now() AT TIME ZONE 'UTC'
@@ -116,6 +116,9 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, COALESCE(
           newNft.editionsSize,
           newNft.metadata,
           newNft.proxyNftId,
+          newNft.artifactIpfsUri,
+          newNft.displayIpfsUri,
+          newNft.thumbnailIpfsUri,
         ],
       );
 
