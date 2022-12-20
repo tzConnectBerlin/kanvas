@@ -104,14 +104,23 @@ export class AuthenticationService {
       this.tokenGate.hasAccess(endpoint, address),
     ]);
 
-    return {
+    let res = {
       userOwnsTokens: userOwnsTokens ?? [],
       allowedTokens: this.tokenGate.getEndpointAllowedTokens(endpoint),
       userHasAccess,
-      userInAddressEnableList:
-        !ADDRESS_WHITELIST_ENABLED ||
-        (await this.tokenGate.isAddressInWhitelist(address)),
+      userInAddressEnableList: true,
+      hadAlreadyClaimed: false,
     };
+
+    if (ADDRESS_WHITELIST_ENABLED) {
+      const addressWhitelist = await this.tokenGate.isAddressInWhitelist(
+        address,
+      );
+      res.userInAddressEnableList = addressWhitelist !== 'forbidden';
+      res.hadAlreadyClaimed = addressWhitelist !== 'claimed';
+    }
+
+    return res;
   }
 
   async tokenGateOwnedTokens(address: string): Promise<(number | string)[]> {
