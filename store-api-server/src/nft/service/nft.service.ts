@@ -22,6 +22,9 @@ import {
   SEARCH_SIMILARITY_LIMIT,
   ENDING_SOON_DURATION,
   TOKEN_ARTIFACT,
+  LEDGER_TOKEN_COLUMN,
+  LEDGER_AMOUNT_COLUMN,
+  LEDGER_ADDRESS_COLUMN,
 } from '../../constants.js';
 import { CurrencyService, BASE_CURRENCY } from 'kanvas-api-lib';
 import { sleep, maybe } from '../../utils.js';
@@ -431,7 +434,7 @@ ORDER BY claims.token_id
       const nftIds = await this.conn.query(
         `
 SELECT nft_id, total_nft_count
-FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
         [
           filters.userAddress,
           filters.categories,
@@ -446,6 +449,9 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
           limit,
           untilNft,
           MINTER_ADDRESS,
+          LEDGER_ADDRESS_COLUMN,
+          LEDGER_TOKEN_COLUMN,
+          LEDGER_AMOUNT_COLUMN,
         ],
       );
       const priceBounds = await this.conn.query(
@@ -585,8 +591,16 @@ SELECT
 
   mint_op_hash,
   owned_recv_op_hashes
-FROM nfts_by_id($1, $2, $3, $4)`,
-        [nftIds, orderBy, orderDirection, forRecvAddr],
+FROM nfts_by_id($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          nftIds,
+          orderBy,
+          orderDirection,
+          forRecvAddr,
+          LEDGER_ADDRESS_COLUMN,
+          LEDGER_TOKEN_COLUMN,
+          LEDGER_AMOUNT_COLUMN,
+        ],
       );
       return nftsQryRes.rows.map((nftRow: any) => {
         const editions = Number(nftRow['editions_size']);

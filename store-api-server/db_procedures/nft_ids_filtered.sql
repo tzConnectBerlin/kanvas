@@ -6,7 +6,8 @@ CREATE OR REPLACE FUNCTION nft_ids_filtered(
     order_by TEXT, order_direction TEXT,
     "offset" INTEGER, "limit" INTEGER,
     until TIMESTAMP WITHOUT TIME ZONE,
-    minter_address TEXT)
+    minter_address TEXT,
+    ledger_address_column TEXT, ledger_token_column TEXT, ledger_amount_column TEXT)
   RETURNS TABLE(nft_id nft.id%TYPE, total_nft_count bigint)
 STABLE PARALLEL SAFE
 AS $$
@@ -43,8 +44,9 @@ BEGIN
               EXISTS (
                 SELECT 1
                 FROM onchain_kanvas."storage.ledger_live"
-                WHERE idx_assets_address = $2
-                  AND idx_assets_nat = nft.id
+                WHERE ' || quote_ident(ledger_address_column) || ' = $2
+                  AND ' || quote_ident(ledger_token_column) || ' = nft.id
+                  AND ' || quote_ident(ledger_amount_column) || ' > 0
               ) OR (
                 purchased_editions_pending_transfer(purchased.nft_id, $2, $10) > 0
               )

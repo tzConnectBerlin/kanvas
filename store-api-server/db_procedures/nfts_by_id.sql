@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT, forRecvAddress TEXT)
+CREATE OR REPLACE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT, forRecvAddress TEXT, ledger_address_column TEXT, ledger_token_column TEXT, ledger_amount_column TEXT)
   RETURNS TABLE(
     nft_id INTEGER,
     nft_created_at TIMESTAMP WITHOUT TIME ZONE,
@@ -98,10 +98,10 @@ BEGIN
         ON tx.tx_context_id = ctx.id
     ), for_address_owned AS (
       SELECT
-        ledger.idx_assets_nat AS token_id,
-        ledger.assets_nat AS num
+        ledger.' || quote_ident(ledger_token_column) || ' AS token_id,
+        ledger.' || quote_ident(ledger_amount_column) || ' AS num
       FROM onchain_kanvas."storage.ledger_live" AS ledger
-      WHERE ledger.idx_assets_address = $2
+      WHERE ledger.' || quote_ident(ledger_address_column) || ' = $2
     ), for_address_owned_metadata AS (
       SELECT
         tr.token_id,
