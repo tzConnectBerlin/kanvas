@@ -1550,7 +1550,7 @@ WHERE payment_id = $1
   async #markWhitelistedAddressClaimed(userId: number) {
     await this.conn.query(
       `
-UPDATE addresses_whitelisted
+UPDATE whitelisted_wallet_addresses
 SET claimed = true
 WHERE address = (SELECT address FROM kanvas_user WHERE id = $1)
 `,
