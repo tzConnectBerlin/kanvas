@@ -141,3 +141,13 @@ export const TOKEN_ARTIFACT: Record<string, string> = {
   RARE: 'QmS9p3HfpASABwRdsxbb4UspogzTZtogobP5uX2GttKJwj',
   ULTRA_RARE: 'QmXSLJhunfxWK14puZmwn3WA1QSSy28C89uzcqDKk6UUXY',
 };
+
+export const LEDGER_ADDRESS_COLUMN: string =
+  process.env['LEDGER_ADDRESS_COLUMN'] ?? 'idx_assets_address';
+export const LEDGER_TOKEN_COLUMN: string =
+  process.env['LEDGER_TOKEN_COLUMN'] ?? 'idx_assets_nat';
+export const LEDGER_AMOUNT_COLUMN: string =
+  process.env['LEDGER_AMOUNT_COLUMN'] ?? 'assets_nat';
+
+export const TOKEN_METADATA_TOKEN_COLUMN: string =
+  process.env['TOKEN_METADATA_TOKEN_COLUMN'] ?? 'idx_assets_nat';

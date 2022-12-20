@@ -1,6 +1,4 @@
-DROP FUNCTION IF ExISTS nfts_by_id;
-
-CREATE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT, forRecvAddress TEXT)
+CREATE OR REPLACE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT, forRecvAddress TEXT, ledger_address_column TEXT, ledger_token_column TEXT, ledger_amount_column TEXT)
   RETURNS TABLE(
     nft_id INTEGER,
     nft_created_at TIMESTAMP WITHOUT TIME ZONE,
@@ -31,7 +29,7 @@ CREATE FUNCTION nfts_by_id(ids INTEGER[], orderBy TEXT, orderDirection TEXT, for
 
     mint_op_hash TEXT,
     owned_recv_op_hashes TEXT[])
-PARALLEL SAFE
+STABLE PARALLEL SAFE
 AS $$
 BEGIN
   IF orderDirection NOT IN ('asc', 'desc') THEN
@@ -100,10 +98,10 @@ BEGIN
         ON tx.tx_context_id = ctx.id
     ), for_address_owned AS (
       SELECT
-        ledger.idx_assets_nat AS token_id,
-        ledger.assets_nat AS num
+        ledger.' || quote_ident(ledger_token_column) || ' AS token_id,
+        ledger.' || quote_ident(ledger_amount_column) || ' AS num
       FROM onchain_kanvas."storage.ledger_live" AS ledger
-      WHERE ledger.idx_assets_address = $2
+      WHERE ledger.' || quote_ident(ledger_address_column) || ' = $2
     ), for_address_owned_metadata AS (
       SELECT
         tr.token_id,
@@ -151,7 +149,8 @@ BEGIN
     LEFT JOIN for_address_owned_metadata AS for_address
       ON for_address.token_id = nft.id
     LEFT JOIN peppermint.operations AS mint
-      ON  mint.command->>'||quote_literal('name')||' = '||quote_literal('create_and_mint')||'
+      ON  mint.command->>'||quote_literal('handler')||' = '||quote_literal('nft')||'
+      AND mint.command->>'||quote_literal('name')||' = '||quote_literal('create_and_mint')||'
       AND (mint.command->'||quote_literal('args')||'->'||quote_literal('token_id')||')::INT = nft.id
       AND mint.state = '||quote_literal('confirmed')||'
     WHERE nft.id = ANY($1)
