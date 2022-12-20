@@ -949,8 +949,8 @@ WHERE nft_order_id = $1
         })),
         automatic_tax: { enabled: true },
         mode: 'payment',
-        success_url: `${STORE_FRONT_URL}/order/${paymentId}`,
-        cancel_url: `${STORE_FRONT_URL}/checkout`,
+        success_url: `${STORE_FRONT_URL}/success`,
+        cancel_url: `${STORE_FRONT_URL}`,
       });
 
       return {
