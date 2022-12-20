@@ -8,6 +8,7 @@ import {
   IPFS_RIGHTS_URI,
   IPFS_RIGHTS_MIMETYPE,
   DEFAULT_ROYALTIES_MINTER_SHARE,
+  ROYALTIES_RECEIVER,
 } from '../../constants.js';
 import { NftEntity } from '../../nft/entity/nft.entity.js';
 import { isBottom } from '../../utils.js';
@@ -245,7 +246,7 @@ WHERE id = $1
       decimals: 2,
       shares: {},
     };
-    royalties.shares[`${MINTER_ADDRESS}`] = DEFAULT_ROYALTIES_MINTER_SHARE;
+    royalties.shares[`${ROYALTIES_RECEIVER}`] = DEFAULT_ROYALTIES_MINTER_SHARE;
     return royalties;
   }
 }

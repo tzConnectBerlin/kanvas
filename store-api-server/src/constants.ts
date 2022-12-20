@@ -27,6 +27,8 @@ export const KANVAS_CONTRACT = assertEnv('KANVAS_CONTRACT');
 export const MINTER_ADDRESS = assertEnv('MINTER_TZ_ADDRESS');
 export const ADMIN_PUBLIC_KEY = assertEnv('ADMIN_PUBLIC_KEY'); // this should be the revealed public key associated to the MINTER_ADDRESS (MINTER_ADDRESS is the public key hash)
 
+export const ROYALTIES_RECEIVER =
+  process.env['ROYALTIES_RECEIVER'] ?? MINTER_ADDRESS;
 export const DEFAULT_ROYALTIES_MINTER_SHARE = 10;
 
 export const STORE_PUBLISHERS = ['Tezos'];
@@ -120,7 +122,8 @@ export const STRIPE_PAYMENT_METHODS: string[] = ['card'];
 export const STRIPE_CHECKOUT_ENABLED: boolean =
   (process.env['STRIPE_CHECKOUT_ENABLED'] || 'no') === 'yes';
 
-export const STORE_FRONT_URL: string | undefined = process.env["STORE_FRONT_URL"];
+export const STORE_FRONT_URL: string | undefined =
+  process.env['STORE_FRONT_URL'];
 
 export const PINATA_API_KEY: string | undefined = process.env['PINATA_API_KEY'];
 export const PINATA_API_SECRET: string | undefined =
