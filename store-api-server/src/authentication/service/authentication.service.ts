@@ -117,7 +117,7 @@ export class AuthenticationService {
         address,
       );
       res.userInAddressEnableList = addressWhitelist !== 'forbidden';
-      res.hadAlreadyClaimed = addressWhitelist !== 'claimed';
+      res.hadAlreadyClaimed = addressWhitelist === 'claimed';
     }
 
     return res;
