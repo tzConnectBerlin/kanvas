@@ -149,7 +149,8 @@ BEGIN
     LEFT JOIN for_address_owned_metadata AS for_address
       ON for_address.token_id = nft.id
     LEFT JOIN peppermint.operations AS mint
-      ON  mint.command->>'||quote_literal('name')||' = '||quote_literal('create_and_mint')||'
+      ON  mint.command->>'||quote_literal('handler')||' = '||quote_literal('nft')||'
+      AND mint.command->>'||quote_literal('name')||' = '||quote_literal('create_and_mint')||'
       AND (mint.command->'||quote_literal('args')||'->'||quote_literal('token_id')||')::INT = nft.id
       AND mint.state = '||quote_literal('confirmed')||'
     WHERE nft.id = ANY($1)

@@ -46,7 +46,7 @@ CREATE INDEX IF NOT EXISTS paypoint_entry_pay_uuid_idx ON paypoint."entry.pay"(s
 CREATE INDEX IF NOT EXISTS paypoint_entry_default_uuid_idx ON paypoint."entry.default"(pay);
 
 CREATE INDEX IF NOT EXISTS peppermint_command_name_state_idx ON peppermint.operations((command->>'name'), state);
-CREATE INDEX IF NOT EXISTS peppermint_command_token_id_state_idx ON peppermint.operations(state, (command->>'name'), ((command->'args'->'token_id')::int));
+CREATE INDEX IF NOT EXISTS peppermint_command_token_id_state_handler_idx ON peppermint.operations(state, (command->>'name'), ((command->'args'->'token_id')::int), (command->>'handler'));
 CREATE INDEX IF NOT EXISTS peppermint_token_id_handler_to_idx ON peppermint.operations(((command->'args'->'token_id')::int), (command->>'handler'), (command->'args'->>'to_address'));
 CREATE INDEX IF NOT EXISTS peppermint_handler_idx ON peppermint.operations((command->>'handler'));
 
