@@ -243,7 +243,7 @@ WHERE id = $1
 
   #defaultRoyalties(): Royalties {
     const royalties: Royalties = {
-      decimals: 2,
+      decimals: 4,
       shares: {},
     };
     royalties.shares[`${ROYALTIES_RECEIVER}`] = DEFAULT_ROYALTIES_MINTER_SHARE;

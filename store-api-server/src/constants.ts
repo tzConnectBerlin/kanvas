@@ -29,7 +29,7 @@ export const ADMIN_PUBLIC_KEY = assertEnv('ADMIN_PUBLIC_KEY'); // this should be
 
 export const ROYALTIES_RECEIVER =
   process.env['ROYALTIES_RECEIVER'] ?? MINTER_ADDRESS;
-export const DEFAULT_ROYALTIES_MINTER_SHARE = 10;
+export const DEFAULT_ROYALTIES_MINTER_SHARE = 500;
 
 export const STORE_PUBLISHERS = ['Tezos'];
 
