@@ -141,8 +141,8 @@ export const PHASE2_TOKEN_ID: Record<string, number> = {
 
 export const TOKEN_ARTIFACT: Record<string, string> = {
   CLASSIC: 'QmYjCgwNQ69QJDSKADQNu638i2tQ2Q5LNL1iiedQrsAXLg',
-  RARE: 'QmS9p3HfpASABwRdsxbb4UspogzTZtogobP5uX2GttKJwj',
-  ULTRA_RARE: 'QmXSLJhunfxWK14puZmwn3WA1QSSy28C89uzcqDKk6UUXY',
+  RARE: 'QmXSLJhunfxWK14puZmwn3WA1QSSy28C89uzcqDKk6UUXY',
+  ULTRA_RARE: 'QmS9p3HfpASABwRdsxbb4UspogzTZtogobP5uX2GttKJwj',
 };
 
 export const LEDGER_ADDRESS_COLUMN: string =
