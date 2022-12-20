@@ -117,6 +117,11 @@ export const STRIPE_WEBHOOK_SECRET: string | undefined =
 
 export const STRIPE_PAYMENT_METHODS: string[] = ['card'];
 
+export const STRIPE_CHECKOUT_ENABLED: boolean =
+  (process.env['STRIPE_CHECKOUT_ENABLED'] || 'no') === 'yes';
+
+export const STORE_FRONT_URL: string | undefined = process.env["STORE_FRONT_URL"];
+
 export const PINATA_API_KEY: string | undefined = process.env['PINATA_API_KEY'];
 export const PINATA_API_SECRET: string | undefined =
   process.env['PINATA_API_SECRET'];
