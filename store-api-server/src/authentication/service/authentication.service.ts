@@ -10,7 +10,11 @@ import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
 import { Result } from 'ts-results';
 import validator from 'validator';
 import ts_results from 'ts-results';
-import { SIGNED_LOGIN_ENABLED, TOKEN_GATE } from '../../constants.js';
+import {
+  SIGNED_LOGIN_ENABLED,
+  TOKEN_GATE,
+  ADDRESS_WHITELIST_ENABLED,
+} from '../../constants.js';
 const { Ok } = ts_results;
 
 import type { IAuthentication } from './authentication.js';
@@ -100,11 +104,23 @@ export class AuthenticationService {
       this.tokenGate.hasAccess(endpoint, address),
     ]);
 
-    return {
+    let res = {
       userOwnsTokens: userOwnsTokens ?? [],
       allowedTokens: this.tokenGate.getEndpointAllowedTokens(endpoint),
       userHasAccess,
+      userInAddressEnableList: true,
+      hadAlreadyClaimed: false,
     };
+
+    if (ADDRESS_WHITELIST_ENABLED) {
+      const addressWhitelist = await this.tokenGate.isAddressInWhitelist(
+        address,
+      );
+      res.userInAddressEnableList = addressWhitelist !== 'forbidden';
+      res.hadAlreadyClaimed = addressWhitelist === 'claimed';
+    }
+
+    return res;
   }
 
   async tokenGateOwnedTokens(address: string): Promise<(number | string)[]> {
@@ -174,7 +190,7 @@ export class AuthenticationService {
     user: UserEntity,
   ): IAuthentication {
     const payload: ITokenPayload = data;
-    const token = this.jwtService.sign(payload, { algorithm: 'RS256'});
+    const token = this.jwtService.sign(payload, { algorithm: 'RS256' });
 
     if (typeof process.env.JWT_EXPIRATION_TIME == 'string') {
       return {
