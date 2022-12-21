@@ -152,7 +152,7 @@ export class CurrencyService {
     }
     const qryRes = await this.dbConn.query(
       `
-SELECT currency, rate FROM currency_rate WHERE at >= $1 - interval '3 minutes' AND currency = $2 ORDER BY id LIMIT 1
+SELECT currency, rate FROM currency_rate WHERE at >= (($1::timestamp without time zone) - interval '1 hour') AND currency = $2 ORDER BY id DESC LIMIT 1
       `, [t.toUTCString(), c]);
     return qryRes.rows.reduce((res: Rates, row: any) => {
       res[row['currency']] = row['rate'];
