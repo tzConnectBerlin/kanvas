@@ -497,7 +497,7 @@ FROM
     payment.vat_rate,
 
     coalesce(transfer_tx.fee, 0) + coalesce(transfer_tx.paid_storage_size_diff, 0) * 250 AS transfer_mutez_fee,
-    create_tx.fee + mint_tx.fee + (coalesce(create_tx.paid_storage_size_diff, 0) + coalesce(mint_tx.paid_storage_size_diff, 0)) * 250 AS mutez_fee
+    create_tx.fee + mint_tx.fee + (coalesce(create_tx.paid_storage_size_diff, 0) + coalesce(mint_tx.paid_storage_size_diff, 0)) * 250 AS mint_mutez_fee
   FROM payment
   JOIN nft_order
     ON nft_order.id = payment.nft_order_id
