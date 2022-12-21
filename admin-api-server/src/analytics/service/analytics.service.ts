@@ -347,6 +347,7 @@ LIMIT ${params.pageSize}
           );
           const historicRates = await this.currencyService.ratesAt(
             row['timestamp'],
+            'XTZ',
           );
           const feeInBaseCurrency: number =
             this.currencyService.convertFromCurrency(
@@ -572,6 +573,7 @@ ORDER BY index
           1000000;
         const historicRates = await this.currencyService.ratesAt(
           row['timestamp'],
+          'XTZ',
         );
         const feeInBaseCurrency = this.currencyService.convertFromCurrency(
           feeXTZ,
