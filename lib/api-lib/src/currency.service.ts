@@ -153,7 +153,7 @@ export class CurrencyService {
     const qryRes = await this.dbConn.query(
       `
 SELECT currency, rate FROM currency_rate WHERE at <= $1 AND currency = $2 ORDER BY id desc LIMIT 1;
-      `, [t.toUTCString(), currency]);
+      `, [t.toUTCString(), c]);
     return qryRes.rows.reduce((res: Rates, row: any) => {
       res[row['currency']] = row['rate'];
       return res;
