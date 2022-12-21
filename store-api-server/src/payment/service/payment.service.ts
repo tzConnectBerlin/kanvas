@@ -1551,7 +1551,7 @@ WHERE payment_id = $1
     await this.conn.query(
       `
 UPDATE whitelisted_wallet_addresses
-SET claimed = true
+SET claimed = claimed + 1
 WHERE address = (SELECT address FROM kanvas_user WHERE id = $1)
 `,
       [userId],
