@@ -52,7 +52,7 @@ const tokenGateProvider = {
         return undefined;
       });
     if (ADDRESS_WHITELIST_ENABLED) {
-      w.gate.enableAddressWhitelist();
+      w.gate.enableAddressWhitelist(7);
     }
 
     Logger.log(
