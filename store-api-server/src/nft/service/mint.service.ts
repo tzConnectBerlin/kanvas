@@ -125,7 +125,7 @@ RETURNING id AS operation_id
       `
 SELECT 1
 FROM onchain_kanvas."storage.token_metadata_live"
-WHERE ${TOKEN_METADATA_TOKEN_COLUMN}::INTEGER = $1
+WHERE idx_nat::INTEGER = $1
 
 UNION ALL
 
