@@ -249,6 +249,24 @@ export class PaymentService {
 
     try {
       await this.updatePaymentStatus(paymentId, PaymentStatus.PROMISED);
+
+      const openPaymentsQryResp = await this.conn.query(
+        `
+SELECT provider
+FROM payment
+WHERE nft_order_id = $1
+  AND id != $2
+  AND NOT status = ANY($3)
+      `,
+        [order.id, paymentId, this.FINAL_STATES],
+      );
+
+      await Promise.all(
+        openPaymentsQryResp.rows.map(
+          async (row: any) =>
+            await this.cancelNftOrderPayment(order.id, row['provider']),
+        ),
+      );
     } catch (err: any) {
       let paymentStatus;
 
