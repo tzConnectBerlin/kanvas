@@ -361,7 +361,7 @@ WHERE id = $1
         return cartMeta.orderId!;
       }
 
-      await this.cancelNftOrder(dbTx, cartMeta.orderId!);
+      await this.cancelNftOrder(dbTx, cartMeta.orderId!, false);
     }
 
     const orderAt = new Date();
@@ -1020,7 +1020,11 @@ WHERE nft_order_id = $1
           dbTx,
         )
       ) {
-        await this.cancelNftOrderPayment(nftOrderId, paymentIntent.provider);
+        await this.cancelNftOrderPayment(
+          nftOrderId,
+          paymentIntent.provider,
+          false,
+        );
       }
       await dbTx.query(
         `
@@ -1195,6 +1199,7 @@ ORDER BY 1
           await this.cancelNftOrderPayment(
             orderId,
             provider,
+            true,
             PaymentStatus.TIMED_OUT,
           );
           Logger.warn(`canceled following expired order session: ${orderId}`);
@@ -1401,6 +1406,7 @@ WHERE provider = 'simplex'
   async cancelNftOrder(
     dbTx: DbTransaction,
     orderId: number,
+    processingCancelable: boolean = true,
     newStatus:
       | PaymentStatus.CANCELED
       | PaymentStatus.TIMED_OUT = PaymentStatus.CANCELED,
@@ -1418,7 +1424,12 @@ WHERE nft_order_id = $1
     await Promise.all(
       openPaymentsQryResp.rows.map(
         async (row) =>
-          await this.cancelNftOrderPayment(orderId, row['provider'], newStatus),
+          await this.cancelNftOrderPayment(
+            orderId,
+            row['provider'],
+            processingCancelable,
+            newStatus,
+          ),
       ),
     );
   }
@@ -1426,12 +1437,43 @@ WHERE nft_order_id = $1
   async cancelNftOrderPayment(
     orderId: number,
     provider: PaymentProviderString,
+    processingCancelable: boolean = true,
     newStatus:
       | PaymentStatus.CANCELED
       | PaymentStatus.TIMED_OUT = PaymentStatus.CANCELED,
   ) {
     try {
       await withTransaction(this.conn, async (dbTx: DbTransaction) => {
+        if (!processingCancelable) {
+          const paymentStatus = await dbTx.query(
+            `
+SELECT
+  payment_id,
+  status
+FROM payment
+WHERE nft_order_id = $1
+  AND provider = $2
+  AND NOT status = ANY($3)
+          `,
+            [orderId, provider, this.FINAL_STATES],
+          );
+          if (
+            paymentStatus.rowCount > 0 &&
+            [PaymentStatus.PROMISED, PaymentStatus.PROCESSING].includes(
+              paymentStatus.rows[0]['status'],
+            )
+          ) {
+            throw new HttpException(
+              JSON.stringify({
+                error:
+                  'user already has an nft order open with payment status in processing state',
+                payment_id: paymentStatus.rows[0]['payment_id'],
+              }),
+              HttpStatus.CONFLICT,
+            );
+          }
+        }
+
         const payment = await dbTx.query(
           `
 UPDATE payment

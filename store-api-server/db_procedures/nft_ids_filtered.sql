@@ -30,26 +30,27 @@ BEGIN
       FROM nft
       JOIN mtm_nft_category
         ON mtm_nft_category.nft_id = nft.id
-      LEFT JOIN mtm_kanvas_user_nft
-        ON mtm_kanvas_user_nft.nft_id = nft.id
+
+      LEFT JOIN onchain_kanvas."storage.ledger_live" ledger
+        ON  ledger.' || quote_ident(ledger_address_column) || ' = $2
+        AND ledger.' || quote_ident(ledger_token_column) || ' = nft.id
+        AND ledger.' || quote_ident(ledger_amount_column) || ' > 0
+
       LEFT JOIN kanvas_user
-        ON mtm_kanvas_user_nft.kanvas_user_id = kanvas_user.id
-      LEFT JOIN kanvas_user AS usr
-        ON usr.address = $2
-      LEFT JOIN mtm_kanvas_user_nft AS purchased
-        ON  purchased.nft_id = nft.id
-        AND purchased.kanvas_user_id = usr.id
+        ON kanvas_user.address = $2
+      LEFT JOIN nft_order_delivery delivery
+        ON transfer_nft_id = nft.id
+      LEFT JOIN nft_order
+        ON  nft_order.id = delivery.nft_order_id
+        AND nft_order.user_id = kanvas_user.id
+      LEFT JOIN peppermint.operations delivery_op
+        ON delivery_op.id = delivery.transfer_operation_id
+      LEFT JOIN que_pasa.txs onchain_tx
+        ON onchain_tx.operation_hash = delivery_op.included_in
+
       WHERE ($1 IS NULL OR nft.created_at <= $1)
         AND ($2 IS NULL OR (
-              EXISTS (
-                SELECT 1
-                FROM onchain_kanvas."storage.ledger_live"
-                WHERE ' || quote_ident(ledger_address_column) || ' = $2
-                  AND ' || quote_ident(ledger_token_column) || ' = nft.id
-                  AND ' || quote_ident(ledger_amount_column) || ' > 0
-              ) OR (
-                purchased_editions_pending_transfer(purchased.nft_id, $2, $10) > 0
-              )
+              ledger.id IS NOT NULL OR (nft_order.id IS NOT NULL AND onchain_tx.id IS NULL)
             ))
         AND ($3 IS NULL OR nft_category_id = ANY($3))
         AND ($4 IS NULL OR nft.price >= $4)
