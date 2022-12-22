@@ -125,7 +125,7 @@ export class PaymentController {
     @Body('currency') currency: string = BASE_CURRENCY,
     @Body('recreateNftOrder') recreateNftOrder: boolean = false,
   ): Promise<PaymentIntent> {
-    return this.paymentService.handleCreatePaymentIntent({
+    return await this.paymentService.handleCreatePaymentIntent({
       cookieSession,
       user,
       request,
