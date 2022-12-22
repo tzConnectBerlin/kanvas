@@ -155,7 +155,7 @@ export const LEDGER_AMOUNT_COLUMN: string =
   process.env['LEDGER_AMOUNT_COLUMN'] ?? 'assets_nat';
 
 export const TOKEN_METADATA_TOKEN_COLUMN: string =
-  process.env['TOKEN_METADATA_TOKEN_COLUMN'] ?? 'idx_assets_nat';
+  process.env['TOKEN_METADATA_TOKEN_COLUMN'] ?? 'idx_nat';
 
 export const RECAPTCHA_ENABLED = process.env['RECAPTCHA_ENABLED'] === 'true';
 export const RECAPTCHA_SECRET = process.env['RECAPTCHA_SECRET'];
