@@ -1211,7 +1211,7 @@ describe('AppController (e2e)', () => {
           upperPriceBound: '0.00',
         },
         pendingOwnership: [],
-        keys: {},
+
         user: {
           id: 1,
           userAddress: 'addr',
@@ -1246,7 +1246,7 @@ describe('AppController (e2e)', () => {
           upperPriceBound: '0.00',
         },
         pendingOwnership: [],
-        keys: {},
+
         user: {
           id: 1,
           userAddress: 'addr',
@@ -1282,7 +1282,7 @@ describe('AppController (e2e)', () => {
           upperPriceBound: '0.00',
         },
         pendingOwnership: [],
-        keys: {},
+
         user: {
           id: 2,
           userAddress: 'tz1',
@@ -3674,7 +3674,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
         },
       ], // nothing new yet (just what was already in processing state from a previous test
-      keys: {},
+
       user: {
         id: 1,
         userAddress: 'addr',
@@ -4005,7 +4005,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
         },
       ],
-      keys: {},
+
       user: {
         id: 1,
         userAddress: 'addr',

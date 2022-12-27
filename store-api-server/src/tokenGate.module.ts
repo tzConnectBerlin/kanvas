@@ -5,7 +5,6 @@ import {
   PG_CONNECTION,
   TOKEN_GATE,
   TOKEN_GATE_SPEC_FILE,
-  ADDRESS_WHITELIST_ENABLED,
 } from './constants.js';
 import { assertEnv } from './utils.js';
 import { DbPool, DbModule } from './db.module.js';
@@ -51,9 +50,6 @@ const tokenGateProvider = {
         }
         return undefined;
       });
-    if (ADDRESS_WHITELIST_ENABLED) {
-      w.gate.enableAddressWhitelist(7);
-    }
 
     Logger.log(
       `token gate spec: ${JSON.stringify(w.gate.getSpec(), undefined, 2)}`,

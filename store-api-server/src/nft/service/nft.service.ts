@@ -336,53 +336,6 @@ LIMIT $3
       .filter(Boolean);
   }
 
-  async findKeysWithAddress(address: string): Promise<Record<string, any>> {
-    const getKeysRawResult = await this.conn.query(
-      `
-SELECT
-  idx_nat AS token_id,
-  nat AS count
-FROM token_gate."storage.ledger_live"
-WHERE idx_address = $1
-`,
-      [address],
-    );
-
-    const getKeysDataRawResult = await this.conn.query(
-      `
-SELECT
-  claims.token_id AS token_id,
-  claims.token_type AS token_type,
-  mint.command->'args'->>'metadata_ipfs' AS metadata_ipfs,
-  mint.included_in AS mint_hash
-FROM claims
-JOIN peppermint.operations AS mint
-  ON  (mint.command->'args'->>'token_id')::int = claims.token_id
-  AND mint.command->>'handler' = 'key'
-WHERE claims.token_id = ANY($1)
-ORDER BY claims.token_id
-      `,
-      [getKeysRawResult.rows.map((row: any) => Number(row.token_id))],
-    );
-
-    return getKeysDataRawResult.rows.map((r: any) => {
-      return {
-        token_type: r['token_type'],
-        token_id: r['token_id'],
-
-        name: 'The Keys: Officially licensed Manchester United digital collectibles',
-        description:
-          'The first-ever official Manchester United digital collectible is a gift to fans and is available in Classic, Rare and Ultra Rare versions. Powered by Tezos and brought to you by Tezos ecosystem companies.',
-        categories: ['Sports'],
-        edition_size: 1,
-
-        artifact: TOKEN_ARTIFACT[r['token_type']],
-
-        mint_operation_hash: r['mint_hash'],
-      };
-    });
-  }
-
   async findNftsWithFilter(
     filters: FilterParams,
     currency: string,

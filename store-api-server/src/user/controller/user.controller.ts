@@ -17,17 +17,12 @@ import {
   Logger,
   CACHE_MANAGER,
 } from '@nestjs/common';
-import axios from 'axios';
 import { Cache } from 'cache-manager';
 import { Response } from 'express';
 import { wrapCache } from '../../utils.js';
 import { FileInterceptor } from '@nestjs/platform-express';
 import validator from 'validator';
-import {
-  UserEntity,
-  EmailRegistration,
-  Recaptcha,
-} from '../entity/user.entity.js';
+import { UserEntity, EmailRegistration } from '../entity/user.entity.js';
 import { OwnershipInfo } from '../../nft/entity/nft.entity.js';
 import { UserService } from '../service/user.service.js';
 import { CurrentUser } from '../../decoraters/user.decorator.js';
@@ -39,8 +34,6 @@ import {
 import {
   PROFILE_PICTURE_MAX_BYTES,
   PROFILE_PICTURES_ENABLED,
-  RECAPTCHA_ENABLED,
-  RECAPTCHA_SECRET,
 } from '../../constants.js';
 import {
   PaginationParams,
@@ -278,7 +271,6 @@ export class UserController {
   /**
    * @apiGroup Users
    * @api {post} /users/cart/add/:nftId Add an NFT to cart
-   * @apiBody {string} recaptchaResponse The response from client recaptcha
    * @apiDescription Note, this may fail if
    * - This NFT is not for sale (e.g. it's already sold out, or it's not yet released, or its no longer on sale)
    * - All remaining editions of this NFT are already in other active carts
@@ -299,21 +291,7 @@ export class UserController {
     @Session() cookieSession: any,
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
-    @Body() recaptcha?: Recaptcha,
   ) {
-    if (RECAPTCHA_ENABLED) {
-      const response = await axios.get(
-        `https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTCHA_SECRET}&response=${recaptcha?.recaptchaResponse}`,
-      );
-
-      if (!response.data?.success) {
-        throw new HttpException(
-          'Unverified recaptcha response',
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-    }
-
     await this.userService.handleCartAdd({ cookieSession, user, nftId });
   }
 

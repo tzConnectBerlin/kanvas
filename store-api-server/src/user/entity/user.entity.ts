@@ -1,12 +1,6 @@
-import { IsString, IsBoolean, IsOptional } from 'class-validator';
+import { IsString, IsBoolean } from 'class-validator';
 
 export * from './user.types.js';
-
-export class Recaptcha {
-  @IsString()
-  @IsOptional()
-  recaptchaResponse?: string;
-}
 
 export class EmailRegistration {
   @IsString()

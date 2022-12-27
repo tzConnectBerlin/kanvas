@@ -23,7 +23,6 @@ import {
   STRIPE_SECRET,
   VAT_FALLBACK_COUNTRY_SHORT,
   STORE_FRONT_URL,
-  ADDRESS_WHITELIST_ENABLED,
 } from '../../constants.js';
 import { UserService, CartMeta } from '../../user/service/user.service.js';
 import { NftService } from '../../nft/service/nft.service.js';
@@ -307,16 +306,14 @@ WHERE id = $1
         0,
       );
 
-      let paymentIntent = await this.#createPaymentIntent(
-        {
-          user: usr,
-          provider,
-          currency,
-          amountUnit,
-          clientIp,
-        },
-        order.nfts,
-      );
+      let paymentIntent = await this.#createPaymentIntent({
+        user: usr,
+        provider,
+        currency,
+        amountUnit,
+        clientIp,
+        nfts: order.nfts,
+      });
       await this.#registerPayment({
         dbTx,
         nftOrderId: orderId,
@@ -583,27 +580,29 @@ WHERE nft_order_id = $1
     });
   }
 
-  async #createPaymentIntent(
-    { user, provider, currency, amountUnit, clientIp }: ICreatePaymentIntent,
-    nfts: NftEntity[],
-  ): Promise<PaymentIntentInternal> {
+  async #createPaymentIntent({
+    user,
+    provider,
+    currency,
+    amountUnit,
+    clientIp,
+    nfts,
+  }: ICreatePaymentIntent): Promise<PaymentIntentInternal> {
     const { vatRate, ipCountry } = await this.#ipAddrVatRate(clientIp);
 
     let amount = this.currencyService.convertFromBaseUnit(currency, amountUnit);
 
     const id = uuidv4();
 
-    const providerPaymentDetails = await this.#createPaymentDetails(
-      {
-        paymentId: id,
-        user,
-        provider,
-        currency,
-        amountUnit,
-        clientIp,
-      },
+    const providerPaymentDetails = await this.#createPaymentDetails({
+      paymentId: id,
+      user,
+      provider,
+      currency,
+      amountUnit,
+      clientIp,
       nfts,
-    );
+    });
 
     let externalPaymentId: string | undefined;
     switch (provider) {
@@ -633,17 +632,15 @@ WHERE nft_order_id = $1
     };
   }
 
-  async #createPaymentDetails(
-    {
-      paymentId,
-      user,
-      provider,
-      currency,
-      amountUnit,
-      clientIp,
-    }: ICreatePaymentDetails,
-    nfts: NftEntity[],
-  ) {
+  async #createPaymentDetails({
+    paymentId,
+    user,
+    provider,
+    currency,
+    amountUnit,
+    clientIp,
+    nfts,
+  }: ICreatePaymentDetails) {
     switch (provider) {
       case PaymentProvider.TEZPAY:
         if (currency !== 'XTZ') {
@@ -1508,19 +1505,6 @@ WHERE payment_id = $1
     const order = await this.#getOrder(orderId);
     let nfts = await this.#unfoldProxyNfts(orderId, order.nfts);
 
-    if (ADDRESS_WHITELIST_ENABLED) {
-      try {
-        await this.#markWhitelistedAddressClaimed(order.userId);
-      } catch (err: any) {
-        Logger.error(
-          `failed to mark whitelisted addresses devil claim, err: ${JSON.stringify(
-            err,
-          )}`,
-        );
-        // Note: dont throw err, just continue. Better to not break the Nft sending due to an err here (last minute code)
-      }
-    }
-
     nfts = await withTransaction(this.conn, async (dbTx: DbTransaction) => {
       await this.#assignNftsToUser(
         dbTx,
@@ -1545,17 +1529,6 @@ WHERE payment_id = $1
       order.userAddress,
     );
     await this.#registerTransfers(orderId, nfts, opIds);
-  }
-
-  async #markWhitelistedAddressClaimed(userId: number) {
-    await this.conn.query(
-      `
-UPDATE whitelisted_wallet_addresses
-SET claimed = claimed + 1
-WHERE address = (SELECT address FROM kanvas_user WHERE id = $1)
-`,
-      [userId],
-    );
   }
 
   async #registerTransfers(

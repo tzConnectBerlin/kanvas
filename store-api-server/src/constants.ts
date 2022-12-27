@@ -135,19 +135,6 @@ export const PINATA_API_SECRET: string | undefined =
 export const VAT_FALLBACK_COUNTRY_SHORT: string =
   process.env['VAT_FALLBACK_COUNTRY_SHORT'] ?? 'GB';
 
-// Phase 2 TOKEN_ID
-export const PHASE2_TOKEN_ID: Record<string, number> = {
-  A: parseInt(process.env['A_TOKEN_ID'] ?? '1', 10),
-  B: parseInt(process.env['B_TOKEN_ID'] ?? '2', 10),
-  C: parseInt(process.env['C_TOKEN_ID'] ?? '3', 10),
-};
-
-export const TOKEN_ARTIFACT: Record<string, string> = {
-  CLASSIC: 'QmYjCgwNQ69QJDSKADQNu638i2tQ2Q5LNL1iiedQrsAXLg',
-  RARE: 'QmXSLJhunfxWK14puZmwn3WA1QSSy28C89uzcqDKk6UUXY',
-  ULTRA_RARE: 'QmS9p3HfpASABwRdsxbb4UspogzTZtogobP5uX2GttKJwj',
-};
-
 export const LEDGER_ADDRESS_COLUMN: string =
   process.env['LEDGER_ADDRESS_COLUMN'] ?? 'idx_assets_address';
 export const LEDGER_TOKEN_COLUMN: string =
@@ -157,6 +144,3 @@ export const LEDGER_AMOUNT_COLUMN: string =
 
 export const TOKEN_METADATA_TOKEN_COLUMN: string =
   process.env['TOKEN_METADATA_TOKEN_COLUMN'] ?? 'idx_assets_nat';
-
-export const RECAPTCHA_ENABLED = process.env['RECAPTCHA_ENABLED'] === 'true';
-export const RECAPTCHA_SECRET = process.env['RECAPTCHA_SECRET'];
