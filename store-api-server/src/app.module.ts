@@ -37,6 +37,10 @@ import {
     DbModule,
     MOCK_IPFS_PINNING ? IpfsPinMock : IpfsPinModule,
     CurrencyModule.forRoot(DbModule),
+    ThrottlerModule.forRoot({
+      ttl: RATE_LIMIT_TTL,
+      limit: RATE_LIMIT,
+    }),
     CacheModule.register({
       ttl: CACHE_TTL,
       max: CACHE_SIZE,
@@ -44,7 +48,11 @@ import {
     }),
   ],
   controllers: [AppController],
-  providers: [StatsLogger, AppService],
+  providers: [
+    StatsLogger,
+    { provide: APP_GUARD, useClass: ProxiedThrottlerGuard },
+    AppService,
+  ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer): void {
