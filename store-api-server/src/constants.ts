@@ -50,6 +50,9 @@ export const CACHE_SIZE = Number(process.env['CACHE_SIZE'] ?? 10_000); // in max
 
 export const NUM_TOP_BUYERS = 12;
 
+// Enable this if the api is serving directly on https (ie, there is nothing in
+// front of it such as a load balancer that is communicating with the api over
+// an insecure line (http)
 export const SECURE_COOKIE_SETTINGS: boolean =
   (process.env['SECURE_COOKIE_SETTINGS'] ?? 'no') === 'yes';
 
@@ -58,7 +61,7 @@ export const SECURE_COOKIE_SETTINGS: boolean =
 // from the X-Forwarded-For header.
 export const BEHIND_PROXY: boolean =
   (process.env['BEHIND_PROXY'] ?? 'no') === 'yes';
-// if LOCAL_CORS is true, the API will set CORS related response headers (usually should be kept default as the inverse of BEHIND_PROXY)
+// If LOCAL_CORS is true, the API will set CORS related response headers (usually should be kept default as the inverse of BEHIND_PROXY)
 export const LOCAL_CORS: boolean =
   maybe(
     process.env.LOCAL_CORS,

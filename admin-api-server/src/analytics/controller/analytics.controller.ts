@@ -2,20 +2,15 @@ import {
   Controller,
   Get,
   Query,
-  Request,
   HttpException,
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { IsString, IsOptional } from 'class-validator';
-import { Type } from 'class-transformer';
 import {
   MetricEntity,
   MetricParams,
   Resolution,
   Activity,
-  Purchase,
-  UserAnalytics,
 } from '../entity/analytics.entity.js';
 import { ParseJSONPipe } from '../../pipes/ParseJSONPipe.js';
 import { ParseJSONObjectPipe } from '../../pipes/ParseJSONObjectPipe.js';
@@ -30,25 +25,6 @@ import {
   queryParamsToPaginationParams,
   validatePaginationParams,
 } from '../../utils.js';
-import { CONCORDIA_ANALYTICS_API_KEY } from '../../constants.js';
-
-class ConcordiaAnalyticsPagination {
-  @IsString()
-  @Type(() => String)
-  @IsOptional()
-  from_date?: string;
-
-  @IsString()
-  @Type(() => String)
-  @IsOptional()
-  to_date?: string;
-}
-
-class UsersConcordiaAnalytics extends ConcordiaAnalyticsPagination {
-  @IsString()
-  @IsOptional()
-  filter?: string;
-}
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -357,154 +333,5 @@ export class AnalyticsController {
       ...queryParamsToPaginationParams(sort, range),
       filters: filters,
     };
-  }
-
-  /**
-   * @apiGroup Analytics
-   * @api {get} /analytics/purchases_concordia Purchases analytics
-   * @apiDescription This endpoint will return a list of NFT purchases, from "from_date" to "to_date".
-   * @apiQuery {Number} [from_date] select rows from date=from_date (inclusive) in ISO date format
-   * @apiQuery {Number} [to_date] select rows until date=to_date (inclusive) in ISO date format
-   *
-   * @apiSuccessExample Example Success-Response:
-   *
-   *    [
-   *        {
-   *            "transaction_id": 1,
-   *            "type": "sale",
-   *            "wallet_address": "tz2JjcM2wo1GC3DxV8ra2Kb95Upswj39ueCa",
-   *            "marketing_consent": false,
-   *            "age_verification": true,
-   *            "email": "rick@test.com"
-   *            "wallet_provider": "Kukai",
-   *            "sso_id": "user1@test.com",
-   *            "sso_email": "user1@test.com",
-   *            "sso_type": "google",
-   *            "token_collection": "devils",
-   *            "token_id": 11,
-   *            "token_purchased_at": "2022-11-02T17:07:45.878Z",
-   *            "token_value": 50.10,
-   *            "transaction_currency": "GBP",
-   *            "transaction_value": 50.10,
-   *            "conversion_rate": 1,
-   *            "Vat_rate": 0.2,
-   *            "gas_fees": 0.20,
-   *            "purchaser_country": "GB",
-   *        },
-   *        {
-   *            "transaction_id": 2
-   *            "type": "sale,
-   *            "wallet_address": "tz2JjcM2wo1GC3DxV8ra2Kb95Upswj39ueCc",
-   *            "marketing_consent": true,
-   *            "age_verification": true,
-   *            "email": "rick2@test.com"
-   *            "wallet_provider": "Kukai",
-   *            "sso_id": "user1@test.com",
-   *            "sso_email": "user1@test.com",
-   *            "sso_type": "google",
-   *            "token_collection": "devils",
-   *            "token_id": 12,
-   *            "token_purchased_at": "2022-11-02T17:07:45.878Z",
-   *            "token_value": 50.10,
-   *            "transaction_currency": "XTZ",
-   *            "transaction_value": 33.67,
-   *            "conversion_rate": 1.5,
-   *            "vat_rate": 0.25,
-   *            "gas_fees": 0.20,
-   *            "purchaser_country": "DE",
-   *        }
-   *    ]
-   *
-   * @apiName purchases_concordia
-   */
-  @Get('purchases_concordia')
-  async purchases(
-    @Request() req: any,
-    @Query() params: ConcordiaAnalyticsPagination,
-  ): Promise<Purchase[]> {
-    if (typeof CONCORDIA_ANALYTICS_API_KEY === 'undefined') {
-      throw new HttpException(
-        'this endpoint is not enabled',
-        HttpStatus.NOT_IMPLEMENTED,
-      );
-    }
-    if (req.get('AUTHORIZATION') !== CONCORDIA_ANALYTICS_API_KEY) {
-      throw new HttpException('invalid api key', HttpStatus.UNAUTHORIZED);
-    }
-
-    return await this.analyticsService.getPurchases(
-      params.from_date,
-      params.to_date,
-    );
-  }
-
-  /**
-   * @apiGroup Analytics
-   *
-   * @api {get} /analytics/users_concordia Request user analytics
-   * @apiDescription This endpoint will return a list of registered users, including a has_purchases field which is true when the user has bought at least 1 Nft, from from_date to to_date.
-   *
-   * @apiQuery {Number} [from_date] select rows from date=from_date (inclusive) in ISO date format e.g. 2022-11-02T17:07:45.878Z
-   * @apiQuery {Number} [to_date] select rows until date=to_date (inclusive) in ISO date format e.g. 2022-11-08T17:07:45.123Z
-   * @apiQuery {String} [filter] select only users that have purchased (when filter is set to "has_purchases"), or select only users that have not purchased yet (when filter is set to "has_no_purchases")
-   *
-   * @apiSuccessExample Example Success-Response:
-   *
-   *    [
-   *        {
-   *            "index": 1
-   *            "wallet_address": "tz2JjcM2wo1GC3DxV8ra2Kb95Upswj39ueCa",
-   *            "marketing_consent": false,
-   *            "age_verification": true,
-   *            "wallet_provider": "Kukai",
-   *            "sso_id": "user1@test.com",
-   *            "sso_email": "user1@test.com",
-   *            "sso_type": "google",
-   *            "email": "rick@test.com",
-   *            "registered_at": "2022-11-02T17:07:45.878Z",
-   *            "has_purchases": true,
-   *        },{
-   *            "index": 1
-   *            "wallet_address": "tz2JjcM2wo1GC3DxV8ra2Kb95Upswj39ueCd",
-   *            "marketing_consent": false,
-   *            "wallet_provider": "Kukai",
-   *            "sso_id": "user1@test.com",
-   *            "sso_email": "user1@test.com",
-   *            "sso_type": "google",
-   *            "age_verification": true,
-   *            "email": "rick@test.com",
-   *            "registered_at": "2022-11-03T07:07:45.878Z",
-   *            "has_purchases": false,
-   *        }
-   *    ]
-   * @apiName users_concordia
-   */
-  @Get('users_concordia')
-  async usersConcordiaAnalytics(
-    @Request() req: any,
-    @Query() params: UsersConcordiaAnalytics,
-  ): Promise<UserAnalytics[]> {
-    if (typeof CONCORDIA_ANALYTICS_API_KEY === 'undefined') {
-      throw new HttpException(
-        'this endpoint is not enabled',
-        HttpStatus.NOT_IMPLEMENTED,
-      );
-    }
-    if (req.get('AUTHORIZATION') !== CONCORDIA_ANALYTICS_API_KEY) {
-      throw new HttpException('invalid api key', HttpStatus.UNAUTHORIZED);
-    }
-
-    let filterOnHasPurchases: boolean | undefined;
-    if (typeof params.filter !== 'undefined') {
-      if (!['has_purchases', 'has_no_purchases'].includes(params.filter)) {
-        throw new HttpException('invalid filter value', HttpStatus.BAD_REQUEST);
-      }
-      filterOnHasPurchases = params.filter === 'has_purchases';
-    }
-    return await this.analyticsService.getUsersConcordiaAnalytics(
-      params.from_date,
-      params.to_date,
-      filterOnHasPurchases,
-    );
   }
 }
