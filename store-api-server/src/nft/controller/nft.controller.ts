@@ -19,11 +19,7 @@ import sotez from 'sotez';
 const { cryptoUtils } = sotez;
 import { NftService } from '../service/nft.service.js';
 import { CategoryService } from '../../category/service/category.service.js';
-import {
-  NftEntity,
-  CreateNft,
-  CreateProxiedNft,
-} from '../entity/nft.entity.js';
+import { CreateNft, CreateProxiedNft } from '../entity/nft.entity.js';
 import {
   FilterParams,
   SearchParam,
@@ -390,10 +386,14 @@ export class NftController {
       );
     }
 
-    this.nftService.incrementNftViewCount(id);
-    return await wrapCache(this.cache, resp, `nft.byId${id}${currency}`, () => {
-      return this.nftService.byId(id, currency, userOnchainOwnedInfo);
-    });
+    const [_, res] = await Promise.all([
+      this.nftService.incrementNftViewCount(id),
+      wrapCache(this.cache, resp, `nft.byId${id}${currency}`, () => {
+        return this.nftService.byId(id, currency, userOnchainOwnedInfo);
+      }),
+    ]);
+
+    return res;
   }
 
   #validateFilterParams(params: FilterParams): void {

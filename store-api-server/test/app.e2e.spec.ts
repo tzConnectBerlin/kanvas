@@ -994,130 +994,6 @@ describe('AppController (e2e)', () => {
     },
   );
 
-  skipOnPriorFail('/nfts/search', async () => {
-    const res = await request(app.getHttpServer())
-      .get('/nfts/search')
-      .query({ searchString: 'honk kong festival' });
-    expect(res.statusCode).toEqual(200);
-
-    for (const i in res.body.nfts) {
-      expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
-      delete res.body.nfts[i].createdAt;
-
-      if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
-        expect(res.body.nfts[i].launchAt).toEqual(res.body.nfts[i].onsaleFrom);
-        expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
-        delete res.body.nfts[i].launchAt;
-        delete res.body.nfts[i].onsaleFrom;
-      }
-
-      if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
-        expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
-        delete res.body.nfts[i].onsaleUntil;
-      }
-    }
-
-    expect(res.body).toStrictEqual({
-      nfts: [
-        {
-          id: 14,
-          name: 'Light Festival - Korea',
-          description:
-            'In South Korea these sculptures are part of the light festival. Dragon vs. Tiger.',
-          ipfsHash: null,
-          metadata: null,
-          metadataIpfs: null,
-          mintOperationHash: null,
-          artifactIpfs: null,
-          displayIpfs: null,
-          thumbnailIpfs: null,
-          artifactUri:
-            'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
-          displayUri:
-            'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
-          thumbnailUri:
-            'https://images.unsplash.com/photo-1508454868649-abc39873d8bf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3870&q=80',
-          price: '343.20',
-          isProxy: false,
-          editionsSize: 8,
-          editionsAvailable: 8,
-          editionsSold: 0,
-          categories: [
-            {
-              description: 'Sub fine art category',
-              id: 6,
-              name: 'Sculpture',
-            },
-          ],
-        },
-      ],
-      categories: [
-        { id: 13, name: 'Honk Kong', description: 'Sub cities category' },
-      ],
-    });
-  });
-
-  skipOnPriorFail(
-    '/nfts/search (empty searchString gives most popular categories, based on GET /nfts/:id hits)',
-    async () => {
-      await sleep(1000);
-      const res = await request(app.getHttpServer())
-        .get('/nfts/search')
-        .query({ searchString: '' });
-      expect(res.statusCode).toEqual(200);
-
-      expect(res.body).toStrictEqual({
-        nfts: [],
-        categories: [
-          {
-            id: 13,
-            name: 'Honk Kong',
-            description: 'Sub cities category',
-            metadata: null,
-          },
-          {
-            id: 16,
-            name: 'Black & White',
-            description: 'Sub photography category',
-            metadata: null,
-          },
-          {
-            id: 10,
-            name: 'Landscape',
-            description: 'Sub photography category',
-            metadata: null,
-          },
-          {
-            id: 15,
-            name: 'London',
-            description: 'Sub cities category',
-            metadata: null,
-          },
-          {
-            id: 9,
-            name: 'Abstract',
-            description: 'Sub photography category',
-            metadata: null,
-          },
-          {
-            id: 4,
-            name: 'Drawing',
-            description: 'Sub fine art category',
-            metadata: null,
-          },
-        ],
-      });
-    },
-  );
-
-  skipOnPriorFail(
-    '/nfts/search (omitting searchString => BAD REQUEST)',
-    async () => {
-      const res = await request(app.getHttpServer()).get('/nfts/search');
-      expect(res.statusCode).toEqual(400);
-    },
-  );
-
   skipOnPriorFail('/auth/register', async () => {
     const res = await request(app.getHttpServer())
       .post('/auth/register')
@@ -1211,6 +1087,7 @@ describe('AppController (e2e)', () => {
           upperPriceBound: '0.00',
         },
         pendingOwnership: [],
+
         user: {
           id: 1,
           userAddress: 'addr',
@@ -1245,6 +1122,7 @@ describe('AppController (e2e)', () => {
           upperPriceBound: '0.00',
         },
         pendingOwnership: [],
+
         user: {
           id: 1,
           userAddress: 'addr',
@@ -1280,6 +1158,7 @@ describe('AppController (e2e)', () => {
           upperPriceBound: '0.00',
         },
         pendingOwnership: [],
+
         user: {
           id: 2,
           userAddress: 'tz1',
@@ -3671,6 +3550,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1615639164213-aab04da93c7c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80',
         },
       ], // nothing new yet (just what was already in processing state from a previous test
+
       user: {
         id: 1,
         userAddress: 'addr',
@@ -4001,6 +3881,7 @@ describe('AppController (e2e)', () => {
             'https://images.unsplash.com/photo-1638186824584-6d6367254927?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDJ8YkRvNDhjVWh3bll8fGVufDB8fHx8&auto=format&fit=crop&w=900&q=60',
         },
       ],
+
       user: {
         id: 1,
         userAddress: 'addr',

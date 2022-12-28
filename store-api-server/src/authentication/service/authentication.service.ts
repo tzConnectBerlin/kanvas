@@ -174,7 +174,7 @@ export class AuthenticationService {
     user: UserEntity,
   ): IAuthentication {
     const payload: ITokenPayload = data;
-    const token = this.jwtService.sign(payload, { algorithm: 'RS256'});
+    const token = this.jwtService.sign(payload, { algorithm: 'RS256' });
 
     if (typeof process.env.JWT_EXPIRATION_TIME == 'string') {
       return {

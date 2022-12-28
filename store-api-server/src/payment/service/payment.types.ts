@@ -1,4 +1,5 @@
 import { UserEntity } from '../../user/entity/user.types.js';
+import { NftEntity } from '../../nft/entity/nft.entity.js';
 import {
   PaymentIntent,
   PaymentProvider,
@@ -21,6 +22,7 @@ export interface ICreatePaymentIntent {
   currency: string;
   amountUnit: number;
   clientIp: string;
+  nfts: NftEntity[];
 }
 
 export interface ICreatePaymentDetails {
@@ -30,6 +32,7 @@ export interface ICreatePaymentDetails {
   currency: string;
   amountUnit: number;
   clientIp: string;
+  nfts: NftEntity[];
 }
 
 export interface ICreateWertPaymentDetails {

@@ -1,6 +1,4 @@
-DROP FUNCTION IF EXISTS nft_ids_filtered;
-
-CREATE FUNCTION nft_ids_filtered(
+CREATE OR REPLACE FUNCTION nft_ids_filtered(
     address TEXT, categories INTEGER[],
     price_at_least NUMERIC, price_at_most NUMERIC,
     availability TEXT[], proxies_folded BOOLEAN,
@@ -8,9 +6,10 @@ CREATE FUNCTION nft_ids_filtered(
     order_by TEXT, order_direction TEXT,
     "offset" INTEGER, "limit" INTEGER,
     until TIMESTAMP WITHOUT TIME ZONE,
-    minter_address TEXT)
+    minter_address TEXT,
+    ledger_address_column TEXT, ledger_token_column TEXT, ledger_amount_column TEXT)
   RETURNS TABLE(nft_id nft.id%TYPE, total_nft_count bigint)
-PARALLEL SAFE
+STABLE PARALLEL SAFE
 AS $$
 BEGIN
   IF order_direction NOT IN ('asc', 'desc') THEN
@@ -31,20 +30,27 @@ BEGIN
       FROM nft
       JOIN mtm_nft_category
         ON mtm_nft_category.nft_id = nft.id
-      LEFT JOIN mtm_kanvas_user_nft
-        ON mtm_kanvas_user_nft.nft_id = nft.id
+
+      LEFT JOIN onchain_kanvas."storage.ledger_live" ledger
+        ON  ledger.' || quote_ident(ledger_address_column) || ' = $2
+        AND ledger.' || quote_ident(ledger_token_column) || ' = nft.id
+        AND ledger.' || quote_ident(ledger_amount_column) || ' > 0
+
       LEFT JOIN kanvas_user
-        ON mtm_kanvas_user_nft.kanvas_user_id = kanvas_user.id
+        ON kanvas_user.address = $2
+      LEFT JOIN nft_order_delivery delivery
+        ON transfer_nft_id = nft.id
+      LEFT JOIN nft_order
+        ON  nft_order.id = delivery.nft_order_id
+        AND nft_order.user_id = kanvas_user.id
+      LEFT JOIN peppermint.operations delivery_op
+        ON delivery_op.id = delivery.transfer_operation_id
+      LEFT JOIN que_pasa.txs onchain_tx
+        ON onchain_tx.operation_hash = delivery_op.included_in
+
       WHERE ($1 IS NULL OR nft.created_at <= $1)
         AND ($2 IS NULL OR (
-              EXISTS (
-                SELECT 1
-                FROM onchain_kanvas."storage.ledger_live"
-                WHERE idx_assets_address = $2
-                  AND idx_assets_nat = nft.id
-              ) OR (
-                purchased_editions_pending_transfer(nft.id, $2, $10) > 0
-              )
+              ledger.id IS NOT NULL OR (nft_order.id IS NOT NULL AND onchain_tx.id IS NULL)
             ))
         AND ($3 IS NULL OR nft_category_id = ANY($3))
         AND ($4 IS NULL OR nft.price >= $4)

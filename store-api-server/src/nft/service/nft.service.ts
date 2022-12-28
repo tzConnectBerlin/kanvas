@@ -21,6 +21,9 @@ import {
   SEARCH_MAX_NFTS,
   SEARCH_SIMILARITY_LIMIT,
   ENDING_SOON_DURATION,
+  LEDGER_TOKEN_COLUMN,
+  LEDGER_AMOUNT_COLUMN,
+  LEDGER_ADDRESS_COLUMN,
 } from '../../constants.js';
 import { CurrencyService, BASE_CURRENCY } from 'kanvas-api-lib';
 import { sleep, maybe } from '../../utils.js';
@@ -91,11 +94,11 @@ WHERE content_name = $1
       await dbTx.query(
         `
 INSERT INTO nft (
-  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, onsale_from, onsale_until, price, editions_size, metadata, proxy_nft_id, created_at
+  id, signature, nft_name, artifact_uri, display_uri, thumbnail_uri, description, onsale_from, onsale_until, price, editions_size, metadata, proxy_nft_id, created_at, artifact_ipfs, display_ipfs, thumbnail_ipfs
 )
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, COALESCE(
     (SELECT created_at FROM nft WHERE id = $13), now() AT TIME ZONE 'UTC'
-  ))
+  ), $14, $15, $16)
       `,
 
         [
@@ -112,6 +115,9 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, COALESCE(
           newNft.editionsSize,
           newNft.metadata,
           newNft.proxyNftId,
+          newNft.artifactIpfsUri,
+          newNft.displayIpfsUri,
+          newNft.thumbnailIpfsUri,
         ],
       );
 
@@ -259,12 +265,16 @@ WHERE ${nftIdField} = $1
         mtm_kanvas_user_nft: 'nft_id',
         mtm_nft_category: 'nft_id',
         mtm_nft_order_nft: 'nft_id',
+        nft_order_delivery: 'order_nft_id',
+        mtm_nft_format: 'nft_id',
       };
       const tables = [
         'nft',
         'mtm_nft_order_nft',
         'mtm_kanvas_user_nft',
         'mtm_nft_category',
+        'nft_order_delivery',
+        'mtm_nft_format',
       ];
 
       for (const table of tables) {
@@ -383,7 +393,7 @@ LIMIT $3
       const nftIds = await this.conn.query(
         `
 SELECT nft_id, total_nft_count
-FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
         [
           filters.userAddress,
           filters.categories,
@@ -398,12 +408,16 @@ FROM nft_ids_filtered($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
           limit,
           untilNft,
           MINTER_ADDRESS,
+          LEDGER_ADDRESS_COLUMN,
+          LEDGER_TOKEN_COLUMN,
+          LEDGER_AMOUNT_COLUMN,
         ],
       );
       const priceBounds = await this.conn.query(
         `
 SELECT min_price, max_price
-FROM price_bounds($1, $2, $3, $4, $5)`,
+FROM price_bounds($1, $2, $3, $4, $5)
+        `,
         [
           filters.userAddress,
           filters.categories,
@@ -536,8 +550,16 @@ SELECT
 
   mint_op_hash,
   owned_recv_op_hashes
-FROM nfts_by_id($1, $2, $3, $4)`,
-        [nftIds, orderBy, orderDirection, forRecvAddr],
+FROM nfts_by_id($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          nftIds,
+          orderBy,
+          orderDirection,
+          forRecvAddr,
+          LEDGER_ADDRESS_COLUMN,
+          LEDGER_TOKEN_COLUMN,
+          LEDGER_AMOUNT_COLUMN,
+        ],
       );
       return nftsQryRes.rows.map((nftRow: any) => {
         const editions = Number(nftRow['editions_size']);

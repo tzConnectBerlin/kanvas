@@ -146,28 +146,45 @@ export class CurrencyService {
     }
   }
 
-  async ratesAt(t: Date): Promise<Rates> {
+  async ratesAt(t: Date, c: string): Promise<Rates> {
     if (typeof this.dbConn === 'undefined') {
       throw `failed to get rates at ${t}, dbConn is undefined`;
     }
     const qryRes = await this.dbConn.query(
       `
-SELECT DISTINCT
+SELECT DISTINCT ON (currency)
   currency,
-  last_value(rate) OVER (
-    PARTITION BY currency
-    ORDER BY at
-    ROWS BETWEEN
-      UNBOUNDED PRECEDING AND
-      UNBOUNDED FOLLOWING
-  ) AS rate
+  rate
 FROM currency_rate
 WHERE at <= $1
-      `, [t.toUTCString()]);
+ORDER BY currency, id DESC
+      `, [t.toUTCString(), c]);
     return qryRes.rows.reduce((res: Rates, row: any) => {
       res[row['currency']] = row['rate'];
       return res;
     }, {});
+  }
+
+  async ratesAtForCurrency(t: Date, c: string): Promise<Rates> {
+    if (typeof this.dbConn === 'undefined') {
+      throw `failed to get rates for currency ${c} at ${t}, dbConn is undefined`;
+    }
+    const qryRes = await this.dbConn.query(
+      `
+SELECT
+  rate
+FROM currency_rate
+WHERE at <= $1
+  AND currency = $2
+ORDER BY id DESC
+LIMIT 1
+      `, [t.toUTCString(), c]);
+    if (qryRes.rowCount === 0) {
+      throw `failed to get currency rates for currency ${c} at ${t}`;
+    }
+    return {
+      c: qryRes.rows[0]['rate']
+    }
   }
 
   async #storeRates() {

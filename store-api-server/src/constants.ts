@@ -18,16 +18,25 @@ export const PG_LOCK_NOT_AVAILABLE = '55P03';
 
 export const PROFILE_PICTURE_MAX_BYTES: number = 1000 * 1000 * 2; // 2MB
 
-export const SEARCH_MAX_NFTS = 3;
-export const SEARCH_MAX_CATEGORIES = 6;
-export const SEARCH_SIMILARITY_LIMIT = 0.4;
+export const SEARCH_MAX_NFTS: number = Number(
+  process.env['SEARCH_MAX_NFTS'] ?? 3,
+);
+export const SEARCH_MAX_CATEGORIES: number = Number(
+  process.env['SEARCH_MAX_CATEGORIES'] ?? 3,
+);
+// a ratio between 0 and 1
+export const SEARCH_SIMILARITY_LIMIT: number = Number(
+  process.env['SEARCH_SIMILARITY_LIMIT'] ?? 0.4,
+);
 
 export const TEZOS_NETWORK = assertEnv('TEZOS_NETWORK');
 export const KANVAS_CONTRACT = assertEnv('KANVAS_CONTRACT');
 export const MINTER_ADDRESS = assertEnv('MINTER_TZ_ADDRESS');
 export const ADMIN_PUBLIC_KEY = assertEnv('ADMIN_PUBLIC_KEY'); // this should be the revealed public key associated to the MINTER_ADDRESS (MINTER_ADDRESS is the public key hash)
 
-export const DEFAULT_ROYALTIES_MINTER_SHARE = 10;
+export const ROYALTIES_RECEIVER =
+  process.env['ROYALTIES_RECEIVER'] ?? MINTER_ADDRESS;
+export const DEFAULT_ROYALTIES_MINTER_SHARE = 500;
 
 export const STORE_PUBLISHERS = ['Tezos'];
 
@@ -46,12 +55,18 @@ export const CACHE_SIZE = Number(process.env['CACHE_SIZE'] ?? 10_000); // in max
 
 export const NUM_TOP_BUYERS = 12;
 
+// Enable this if the api is serving directly on https (ie, there is nothing in
+// front of it such as a load balancer that is communicating with the api over
+// an insecure line (http)
+export const SECURE_COOKIE_SETTINGS: boolean =
+  (process.env['SECURE_COOKIE_SETTINGS'] ?? 'no') === 'yes';
+
 // Enable this when for example NGINX sits between incoming traffic and the API.
 // It will enable things like the rate limiter to take the incoming IP address
 // from the X-Forwarded-For header.
 export const BEHIND_PROXY: boolean =
   (process.env['BEHIND_PROXY'] ?? 'no') === 'yes';
-// if LOCAL_CORS is true, the API will set CORS related response headers (usually should be kept default as the inverse of BEHIND_PROXY)
+// If LOCAL_CORS is true, the API will set CORS related response headers (usually should be kept default as the inverse of BEHIND_PROXY)
 export const LOCAL_CORS: boolean =
   maybe(
     process.env.LOCAL_CORS,
@@ -114,9 +129,25 @@ export const STRIPE_WEBHOOK_SECRET: string | undefined =
 
 export const STRIPE_PAYMENT_METHODS: string[] = ['card'];
 
+export const STRIPE_CHECKOUT_ENABLED: boolean =
+  (process.env['STRIPE_CHECKOUT_ENABLED'] || 'no') === 'yes';
+
+export const STORE_FRONT_URL: string | undefined =
+  process.env['STORE_FRONT_URL'];
+
 export const PINATA_API_KEY: string | undefined = process.env['PINATA_API_KEY'];
 export const PINATA_API_SECRET: string | undefined =
   process.env['PINATA_API_SECRET'];
 
 export const VAT_FALLBACK_COUNTRY_SHORT: string =
   process.env['VAT_FALLBACK_COUNTRY_SHORT'] ?? 'GB';
+
+export const LEDGER_ADDRESS_COLUMN: string =
+  process.env['LEDGER_ADDRESS_COLUMN'] ?? 'idx_assets_address';
+export const LEDGER_TOKEN_COLUMN: string =
+  process.env['LEDGER_TOKEN_COLUMN'] ?? 'idx_assets_nat';
+export const LEDGER_AMOUNT_COLUMN: string =
+  process.env['LEDGER_AMOUNT_COLUMN'] ?? 'assets_nat';
+
+export const TOKEN_METADATA_TOKEN_COLUMN: string =
+  process.env['TOKEN_METADATA_TOKEN_COLUMN'] ?? 'idx_assets_nat';
