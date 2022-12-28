@@ -1,11 +1,9 @@
-DROP FUNCTION IF EXISTS price_bounds;
-
-CREATE FUNCTION price_bounds(
+CREATE OR REPLACE FUNCTION price_bounds(
   address_filter TEXT, categories_filter INTEGER[],
   availability_filter TEXT[], ending_soon_duration INTERVAL,
   until_filter TIMESTAMP WITHOUT TIME ZONE)
 RETURNS TABLE(min_price NUMERIC, max_price NUMERIC)
-PARALLEL SAFE
+STABLE PARALLEL SAFE
 AS $$
   SELECT
     MIN(price) as min_price,

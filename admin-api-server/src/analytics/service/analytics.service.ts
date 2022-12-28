@@ -343,8 +343,9 @@ LIMIT ${params.pageSize}
             Number(row['price']),
             BASE_CURRENCY,
           );
-          const historicRates = await this.currencyService.ratesAt(
+          const historicRates = await this.currencyService.ratesAtForCurrency(
             row['timestamp'],
+            'XTZ',
           );
           const feeInBaseCurrency: number =
             this.currencyService.convertFromCurrency(

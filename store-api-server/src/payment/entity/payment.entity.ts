@@ -53,7 +53,8 @@ export type PaymentStatusString = `${PaymentStatus}`;
 
 export interface StripeDetails {
   amount: string;
-  clientSecret: string;
+  clientSecret?: string;
+  checkoutSessionUrl?: string;
   id: string;
 }
 export interface WertDetails {

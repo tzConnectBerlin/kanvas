@@ -57,6 +57,10 @@ export interface CreateNft {
   displayUri?: string;
   thumbnailUri?: string;
 
+  artifactIpfsUri: string;
+  displayIpfsUri?: string;
+  thumbnailIpfsUri?: string;
+
   price: number;
   categories: number[];
   editionsSize: number;
@@ -80,6 +84,10 @@ export interface CreateProxiedNft {
   artifactUri: string;
   displayUri?: string;
   thumbnailUri?: string;
+
+  artifactIpfsUri: string;
+  displayIpfsUri?: string;
+  thumbnailIpfsUri?: string;
 
   categories: number[];
 

@@ -69,19 +69,17 @@ LIMIT $3
       `
 SELECT cat.id, cat.category AS name, cat.description, cat.metadata
 FROM (
-  SELECT cat.id as cat_id, SUM(nft.view_count) AS view_count
-  FROM nft_category AS cat
-  JOIN mtm_nft_category AS mtm
-    ON mtm.nft_category_id = cat.id
+  SELECT nft_category_id as cat_id, SUM(nft.view_count) AS view_count
+  FROM mtm_nft_category
   JOIN nft
-    ON nft.id = mtm.nft_id
+    ON nft.id = nft_id
   GROUP BY 1
   ORDER BY 2 DESC
   LIMIT $1
 ) AS view_counts
 JOIN nft_category AS cat
   on cat.id = view_counts.cat_id
-ORDER BY view_count, cat.id
+ORDER BY view_count DESC, cat.id
 `,
       [SEARCH_MAX_CATEGORIES],
     );
