@@ -265,12 +265,16 @@ WHERE ${nftIdField} = $1
         mtm_kanvas_user_nft: 'nft_id',
         mtm_nft_category: 'nft_id',
         mtm_nft_order_nft: 'nft_id',
+        nft_order_delivery: 'order_nft_id',
+        mtm_nft_format: 'nft_id',
       };
       const tables = [
         'nft',
         'mtm_nft_order_nft',
         'mtm_kanvas_user_nft',
         'mtm_nft_category',
+        'nft_order_delivery',
+        'mtm_nft_format',
       ];
 
       for (const table of tables) {

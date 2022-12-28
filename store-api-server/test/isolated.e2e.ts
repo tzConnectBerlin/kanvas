@@ -666,28 +666,24 @@ SELECT
             name: 'Abstract',
             description: 'Sub photography category',
             metadata: null,
-            view_count: '8',
           },
           {
             id: 4,
             name: 'Drawing',
             description: 'Sub fine art category',
             metadata: null,
-            view_count: '6',
           },
           {
             id: 15,
             name: 'London',
             description: 'Sub cities category',
             metadata: null,
-            view_count: '6',
           },
           {
             id: 10,
             name: 'Landscape',
             description: 'Sub photography category',
             metadata: null,
-            view_count: '2',
           },
         ],
       });

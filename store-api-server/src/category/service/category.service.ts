@@ -67,7 +67,7 @@ LIMIT $3
   async getMostPopular(): Promise<CategoryEntity[]> {
     const qryRes = await this.conn.query(
       `
-SELECT cat.id, cat.category AS name, cat.description, cat.metadata, view_count
+SELECT cat.id, cat.category AS name, cat.description, cat.metadata
 FROM (
   SELECT nft_category_id as cat_id, SUM(nft.view_count) AS view_count
   FROM mtm_nft_category
