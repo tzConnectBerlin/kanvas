@@ -30,7 +30,12 @@ psql < ../lib/tezpay/server/database/schema.sql || exit 1
 psql -v ON_ERROR_STOP=1 <<EOF
 BEGIN;
 
-`cat db_procedures/*`
+`cat db_procedures/last_value_ignore_nulls.sql`
+`cat db_procedures/nft_editions_locked.sql`
+`cat db_procedures/price_bounds.sql`
+`cat db_procedures/purchased_editions_pending_transfer.sql`
+`cat db_procedures/nft_ids_filtered.sql`
+`cat db_procedures/nfts_by_id.sql`
 
 COMMIT;
 EOF
