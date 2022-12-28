@@ -563,5 +563,139 @@ SELECT
         });
       });
     }
+
+    it('/nfts/search', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/nfts/search')
+        .query({ searchString: 'honk kong festival' });
+      expect(res.statusCode).toEqual(200);
+
+      for (const i in res.body.nfts) {
+        expect(res.body.nfts[i].createdAt).toBeGreaterThan(0);
+        delete res.body.nfts[i].createdAt;
+
+        if (typeof res.body.nfts[i].onsaleFrom !== 'undefined') {
+          expect(res.body.nfts[i].launchAt).toEqual(
+            res.body.nfts[i].onsaleFrom,
+          );
+          expect(res.body.nfts[i].onsaleFrom).toBeGreaterThan(0);
+          delete res.body.nfts[i].launchAt;
+          delete res.body.nfts[i].onsaleFrom;
+        }
+
+        if (typeof res.body.nfts[i].onsaleUntil !== 'undefined') {
+          expect(res.body.nfts[i].onsaleUntil).toBeGreaterThan(0);
+          delete res.body.nfts[i].onsaleUntil;
+        }
+      }
+
+      expect(res.body).toMatchObject({
+        nfts: [
+          {
+            id: nftIds[13],
+            name: 'Light Festival - Korea',
+            description:
+              'In South Korea these sculptures are part of the light festival. Dragon vs. Tiger.',
+            categories: [
+              {
+                description: 'Sub fine art category',
+                id: 6,
+                name: 'Sculpture',
+              },
+            ],
+          },
+        ],
+        categories: [
+          { id: 13, name: 'Honk Kong', description: 'Sub cities category' },
+        ],
+      });
+    });
+
+    it('/nfts/search (empty searchString gives most popular categories, based on GET /nfts/:id hits)', async () => {
+      const nftRes = await Promise.all([
+        request(app.getHttpServer()).get(`/nfts/${nftIds[0]}`),
+        request(app.getHttpServer()).get(`/nfts/${nftIds[22]}`),
+        request(app.getHttpServer()).get(`/nfts/${nftIds[22]}`),
+        request(app.getHttpServer()).get(`/nfts/${nftIds[22]}`),
+        request(app.getHttpServer()).get(`/nfts/${nftIds[2]}`),
+        request(app.getHttpServer()).get(`/nfts/${nftIds[2]}`),
+
+        request(app.getHttpServer()).get(`/nfts/${nftIds[0]}`),
+        request(app.getHttpServer()).get(`/nfts/${nftIds[22]}`),
+        request(app.getHttpServer()).get(`/nfts/${nftIds[22]}`),
+        request(app.getHttpServer()).get(`/nfts/${nftIds[22]}`),
+        request(app.getHttpServer()).get(`/nfts/${nftIds[2]}`),
+        request(app.getHttpServer()).get(`/nfts/${nftIds[2]}`),
+
+        request(app.getHttpServer()).get(`/nfts/${nftIds[6]}`),
+        request(app.getHttpServer()).get(`/nfts/${nftIds[17]}`),
+        request(app.getHttpServer()).get(`/nfts/${nftIds[18]}`),
+        request(app.getHttpServer()).get(`/nfts/${nftIds[21]}`),
+        request(app.getHttpServer()).get(`/nfts/${nftIds[26]}`),
+        request(app.getHttpServer()).get(`/nfts/${nftIds[27]}`),
+      ]);
+      expect(
+        nftRes.map((resp) => resp.statusCode).some((status) => status !== 200),
+      ).toEqual(false);
+
+      /*
+       this created the following most active categories:
+
+       cat_id |   name    |       description        | metadata | view_count
+      --------+-----------+--------------------------+----------+------------
+        9     | Abstract  | Sub photography category |          |          8
+        4     | Drawing   | Sub fine art category    |          |          6
+       15     | London    | Sub cities category      |          |          6
+       10     | Landscape | Sub photography category |          |          2
+
+       the second and third most active categories have equal nft view counts,
+       they'll be sorted by their nft category id (to have deterministic
+       behavior)
+       */
+
+      const res = await request(app.getHttpServer())
+        .get('/nfts/search')
+        .query({ searchString: '' });
+      expect(res.statusCode).toEqual(200);
+
+      expect(res.body).toStrictEqual({
+        nfts: [],
+        categories: [
+          {
+            id: 9,
+            name: 'Abstract',
+            description: 'Sub photography category',
+            metadata: null,
+            view_count: '8',
+          },
+          {
+            id: 4,
+            name: 'Drawing',
+            description: 'Sub fine art category',
+            metadata: null,
+            view_count: '6',
+          },
+          {
+            id: 15,
+            name: 'London',
+            description: 'Sub cities category',
+            metadata: null,
+            view_count: '6',
+          },
+          {
+            id: 10,
+            name: 'Landscape',
+            description: 'Sub photography category',
+            metadata: null,
+            view_count: '2',
+          },
+        ],
+      });
+    });
+
+    it('/nfts/search (omitting searchString => BAD REQUEST)', async () => {
+      const res = await request(app.getHttpServer()).get('/nfts/search');
+      expect(res.statusCode).toEqual(400);
+    });
   });
 }

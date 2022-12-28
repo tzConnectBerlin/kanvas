@@ -312,10 +312,6 @@ export class UserController {
     @CurrentUser() user: UserEntity | undefined,
     @Param('nftId') nftId: number,
   ) {
-    throw new HttpException(
-      '{"error": "this endpoint is disabled"}',
-      HttpStatus.NOT_IMPLEMENTED,
-    );
     await this.userService.handleCartRemove({ cookieSession, user, nftId });
   }
 

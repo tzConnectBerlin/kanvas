@@ -18,9 +18,16 @@ export const PG_LOCK_NOT_AVAILABLE = '55P03';
 
 export const PROFILE_PICTURE_MAX_BYTES: number = 1000 * 1000 * 2; // 2MB
 
-export const SEARCH_MAX_NFTS = 3;
-export const SEARCH_MAX_CATEGORIES = 6;
-export const SEARCH_SIMILARITY_LIMIT = 0.4;
+export const SEARCH_MAX_NFTS: number = Number(
+  process.env['SEARCH_MAX_NFTS'] ?? 3,
+);
+export const SEARCH_MAX_CATEGORIES: number = Number(
+  process.env['SEARCH_MAX_CATEGORIES'] ?? 3,
+);
+// a ratio between 0 and 1
+export const SEARCH_SIMILARITY_LIMIT: number = Number(
+  process.env['SEARCH_SIMILARITY_LIMIT'] ?? 0.4,
+);
 
 export const TEZOS_NETWORK = assertEnv('TEZOS_NETWORK');
 export const KANVAS_CONTRACT = assertEnv('KANVAS_CONTRACT');

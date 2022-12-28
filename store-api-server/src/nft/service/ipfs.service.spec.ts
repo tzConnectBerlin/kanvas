@@ -1075,14 +1075,22 @@ describe('NftService', () => {
   for (const tc of testcases) {
     it(tc.name, async () => {
       tc.exp.royalties = {
-        decimals: 2,
+        decimals: 4,
         shares: {},
       };
       tc.exp.creators = [MINTER_ADDRESS];
-      tc.exp.royalties.shares[`${MINTER_ADDRESS}`] = 10;
+      tc.exp.royalties.shares[`${MINTER_ADDRESS}`] = 500;
       tc.exp.id = tc.nft.id;
+      tc.exp.isTransferable = true;
+      tc.exp.shouldPreferSymbol = false;
 
-      const got = await service.nftMetadataJson(tc.nft, 'not signed');
+      const got = await service.nftMetadataJson(
+        tc.nft,
+        'not signed',
+        null,
+        null,
+        null,
+      );
       expect(got).toStrictEqual(tc.exp);
     });
   }
