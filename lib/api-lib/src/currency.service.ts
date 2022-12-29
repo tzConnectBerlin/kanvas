@@ -180,7 +180,7 @@ ORDER BY id DESC
 LIMIT 1
       `, [t.toUTCString(), c]);
     if (qryRes.rowCount === 0) {
-      throw `failed to get currency rates for currency ${c} at ${t}`;
+      return {}
     }
     return {
       c: qryRes.rows[0]['rate']
