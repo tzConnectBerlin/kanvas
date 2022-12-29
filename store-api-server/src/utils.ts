@@ -2,7 +2,7 @@ import ts_results from 'ts-results';
 const { Ok, Err } = ts_results;
 import { Response } from 'express';
 import { Cache } from 'cache-manager';
-import { BEHIND_PROXY } from './constants.js';
+import { BEHIND_PROXY, CACHE_SIZE } from './constants.js';
 
 export async function wrapCache<T>(
   cache: Cache,
@@ -11,10 +11,17 @@ export async function wrapCache<T>(
   newValue: () => Promise<T>,
 ): Promise<Response> {
   let fromCache = true;
-  const res = await cache.wrap(key, () => {
+  let res;
+
+  if (CACHE_SIZE > 0) {
+    res = await cache.wrap(key, () => {
+      fromCache = false;
+      return newValue();
+    });
+  } else {
     fromCache = false;
-    return newValue();
-  });
+    res = await newValue();
+  }
 
   return resp.set({ cached: fromCache ? 'yes' : 'no' }).json(res);
 }

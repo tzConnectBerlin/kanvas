@@ -31,5 +31,4 @@ docker run ${DOCKER_ARGS} \
     -e POSTGRES_USER=$PGUSER \
     -e POSTGRES_DB=$PGDATABASE \
     postgres \
-        -c wal_level=logical \
         "$@"

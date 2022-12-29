@@ -26,12 +26,14 @@ function cleanup_docker_container {
 }
 
 function store_env_exec {
-    PGHOST=$STORE_PGHOST \
-        PGPORT=$STORE_PGPORT \
-        PGUSER=$STORE_PGUSER \
-        PGPASSWORD=$STORE_PGPASSWORD \
-        PGDATABASE=$STORE_PGDATABASE \
+    PGHOST=$PGHOST_STORE_REPLICATION \
+        PGPORT=$PGPORT_STORE_REPLICATION \
+        PGUSER=$PGUSER_STORE_REPLICATION \
+        PGPASSWORD=$PGPASSWORD_STORE_REPLICATION \
+        PGDATABASE=$PGDATABASE_STORE_REPLICATION \
         KANVAS_API_PORT=$STORE_API_PORT \
+        CACHE_SIZE=0 \
+        CACHE_TTL=0 \
         $@
 }
 
@@ -87,7 +89,6 @@ echo "starting the store api in the background"
     DOTENV_CONFIG_PATH=.env.test store_env_exec yarn run start:prod >/dev/null 2>&1
 ) &
 
-./script/db_procedures
 yarn run seed || exit 1
 
 while ! http --quiet :$STORE_API_PORT 2>/dev/null; do
