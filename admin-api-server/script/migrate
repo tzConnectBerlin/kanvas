@@ -2,8 +2,6 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
-QUEPASA_VERSION=1.2.6
-
 [ -z $PGHOST ] && export PGHOST=localhost
 [ -z $PGPORT ] && export PGPORT=5433
 [ -z $PGUSER ] && export PGUSER=dev_user
@@ -12,18 +10,3 @@ QUEPASA_VERSION=1.2.6
 
 
 ./script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1
-
-if [[ ${INIT_QUEPASA:-'true'} == "true" ]]; then
-    # to set up the database schema of onchain_kanvas:
-    source $SCRIPT_DIR/../../config/.env-kanvas
-    export DATABASE_URL="host=$PGHOST dbname=store_replication user=$PGUSER password=$PGPASSWORD port=$PGPORT"
-
-    docker run \
-        -v $SCRIPT_DIR/../../config:/config \
-        --network host \
-        -e NODE_URL=$NODE_URL \
-        -e DATABASE_URL="$DATABASE_URL" \
-        ghcr.io/tzconnectberlin/que-pasa:$QUEPASA_VERSION \
-        --contract-settings /config/kanvas.yaml --only-migrate \
-        || exit 1 # >/dev/null 2>&1 || exit 1
-fi
