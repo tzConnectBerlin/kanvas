@@ -6,7 +6,7 @@ import {
   Activity,
   MarketingEntity,
 } from '../entity/analytics.entity.js';
-import { PG_CONNECTION_STORE_REPLICATION } from '../../constants.js';
+import { PG_CONNECTION_STORE } from '../../constants.js';
 import { ActivityFilterParams } from '../params.js';
 import { BASE_CURRENCY, CurrencyService } from 'kanvas-api-lib';
 import dayjs, { ManipulateType } from 'dayjs';
@@ -17,7 +17,7 @@ dayjs.extend(utc);
 @Injectable()
 export class AnalyticsService {
   constructor(
-    @Inject(PG_CONNECTION_STORE_REPLICATION) private storeRepl: any,
+    @Inject(PG_CONNECTION_STORE) private storeDb: any,
     private readonly currencyService: CurrencyService,
   ) {}
 
@@ -120,7 +120,7 @@ export class AnalyticsService {
   }
 
   async getUsers(params: PaginationParams) {
-    const qryRes = await this.storeRepl.query(
+    const qryRes = await this.storeDb.query(
       `
 SELECT
   COUNT(1) OVER () AS total_count,
@@ -216,7 +216,7 @@ LIMIT ${params.pageSize}`,
       params.filters?.startDate,
       params.filters?.endDate,
     ];
-    const qryRes = await this.storeRepl.query(
+    const qryRes = await this.storeDb.query(
       `
 SELECT
   *,
@@ -393,7 +393,7 @@ LIMIT ${params.pageSize}
   }
 
   async #timeseries(params: MetricParams) {
-    return await this.storeRepl.query(
+    return await this.storeDb.query(
       `
 SELECT
   date_trunc($1, nft_order.order_at) AS timestamp,
@@ -434,7 +434,7 @@ ORDER BY timestamp
         break;
     }
 
-    return await this.storeRepl.query(
+    return await this.storeDb.query(
       `
 SELECT
   now() AT TIME ZONE 'UTC' AS timestamp,

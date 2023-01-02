@@ -6,15 +6,15 @@ import {
   Inject,
 } from '@nestjs/common';
 import { CategoryEntity } from '../entity/category.entity.js';
-import { PG_CONNECTION_STORE_REPLICATION } from '../../constants.js';
+import { PG_CONNECTION_STORE } from '../../constants.js';
 
 @Injectable()
 export class CategoryService {
-  constructor(@Inject(PG_CONNECTION_STORE_REPLICATION) private conn: any) {}
+  constructor(@Inject(PG_CONNECTION_STORE) private storeDb: any) {}
 
   async getNftAssignable(): Promise<CategoryEntity[]> {
     try {
-      const qryRes = await this.conn.query(
+      const qryRes = await this.storeDb.query(
         `
 SELECT leaf.id, leaf.category
 FROM nft_category leaf

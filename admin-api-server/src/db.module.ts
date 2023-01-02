@@ -5,7 +5,7 @@ const { types } = pg;
 import Pool from 'pg-pool';
 
 import { assertEnv } from './utils.js';
-import { PG_CONNECTION, PG_CONNECTION_STORE_REPLICATION } from './constants.js';
+import { PG_CONNECTION, PG_CONNECTION_STORE } from './constants.js';
 
 export type DbPool = Pool<Client>;
 
@@ -45,27 +45,27 @@ const dbProvider = {
   },
 };
 
-const dbStoreReplProvider = {
-  provide: PG_CONNECTION_STORE_REPLICATION,
+const dbStoreProvider = {
+  provide: PG_CONNECTION_STORE,
   inject: ['PG_POOL_WRAP'],
   useFactory: async (w: Wrap) => {
     if (typeof w.storeDbPool !== 'undefined') {
       return w.storeDbPool;
     }
     w.storeDbPool = new Pool({
-      host: assertEnv('PGHOST_STORE_REPLICATION'),
-      port: Number(assertEnv('PGPORT_STORE_REPLICATION')),
-      user: assertEnv('PGUSER_STORE_REPLICATION'),
-      password: assertEnv('PGPASSWORD_STORE_REPLICATION'),
-      database: assertEnv('PGDATABASE_STORE_REPLICATION'),
+      host: assertEnv('STORE_PGHOST'),
+      port: Number(assertEnv('STORE_PGPORT')),
+      user: assertEnv('STORE_PGUSER'),
+      password: assertEnv('STORE_PGPASSWORD'),
+      database: assertEnv('STORE_PGDATABASE'),
     });
     return w.storeDbPool;
   },
 };
 
 @Module({
-  providers: [wrapPool, dbProvider, dbStoreReplProvider],
-  exports: [dbProvider, dbStoreReplProvider],
+  providers: [wrapPool, dbProvider, dbStoreProvider],
+  exports: [dbProvider, dbStoreProvider],
 })
 export class DbModule {
   constructor(@Inject('PG_POOL_WRAP') private w: Wrap) {}

@@ -1,8 +1,6 @@
 import { assertEnv, maybe } from './utils.js';
 
 export const PG_CONNECTION = 'PG_CONNECTION';
-export const PG_CONNECTION_STORE_REPLICATION =
-  'PG_CONNECTION_STORE_REPLICATION';
 export const PG_CONNECTION_STORE = 'PG_CONNECTION_STORE';
 
 export const PG_UNIQUE_VIOLATION_ERRCODE = '23505';

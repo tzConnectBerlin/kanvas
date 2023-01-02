@@ -151,11 +151,11 @@ services:
       PGPASSWORD: admin_pgpass
       PGDATABASE: dev_database
 
-      PGHOST_STORE_REPLICATION: store-db
-      PGPORT_STORE_REPLICATION: 5432
-      PGUSER_STORE_REPLICATION: store_pguser
-      PGPASSWORD_STORE_REPLICATION: store_pgpass
-      PGDATABASE_STORE_REPLICATION: dev_database
+      STORE_PGHOST: store-db
+      STORE_PGPORT: 5432
+      STORE_PGUSER: store_pguser
+      STORE_PGPASSWORD: store_pgpass
+      STORE_PGDATABASE: dev_database
 
       ADMIN_API_PORT: 3001
       STORE_API: http://store-api:3000

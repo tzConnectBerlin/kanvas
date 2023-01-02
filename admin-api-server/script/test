@@ -26,11 +26,11 @@ function cleanup_docker_container {
 }
 
 function store_env_exec {
-    PGHOST=$PGHOST_STORE_REPLICATION \
-        PGPORT=$PGPORT_STORE_REPLICATION \
-        PGUSER=$PGUSER_STORE_REPLICATION \
-        PGPASSWORD=$PGPASSWORD_STORE_REPLICATION \
-        PGDATABASE=$PGDATABASE_STORE_REPLICATION \
+    PGHOST=$STORE_PGHOST \
+        PGPORT=$STORE_PGPORT \
+        PGUSER=$STORE_PGUSER \
+        PGPASSWORD=$STORE_PGPASSWORD \
+        PGDATABASE=$STORE_PGDATABASE \
         KANVAS_API_PORT=$STORE_API_PORT \
         CACHE_SIZE=0 \
         CACHE_TTL=0 \
@@ -61,6 +61,7 @@ rm $sig_err_file
     echo "waiting for testdb setup (admin).. (docker: $db_docker)"
     ./script/wait-db
 
+    psql -c 'create database store_replication'
     echo "setting up the store db"
     (
         cd "$SCRIPT_DIR/../../store-api-server"
@@ -71,7 +72,7 @@ rm $sig_err_file
 
         echo "waiting for testdb setup (store).."
         store_env_exec script/wait-db
-        store_env_exec script/migrate >/dev/null 2>&1 || exit 1
+        store_env_exec script/migrate || exit 1 # >/dev/null 2>&1 || exit 1
         store_env_exec psql < script/populate-testdb.sql || exit 1
     ) || exit 1
 ) &
