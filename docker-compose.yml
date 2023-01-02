@@ -4,6 +4,10 @@
 services:
   store-db:
     image: postgres:13
+    command:
+      - postgres
+      - -c
+      - wal_level=logical  # <- required for logical replication
     ports:
       - 54320:5432
     environment:
