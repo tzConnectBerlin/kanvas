@@ -2,20 +2,22 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 
-start_from=${1:-0}
-end_at=${2:-0}
+set -u -e
 
-tmpdir=`basename $(mktemp -d -u)`
-mkdir "$tmpdir"
-trap "rm -rf $tmpdir" EXIT
+startFromStep=${1:-0}
+endAfterStep=${2:-0}
 
-mintery="$tmpdir/mintery"
+tmpDir=`basename $(mktemp -d -u)`
+mkdir "$tmpDir"
+trap "rm -rf $tmpDir" EXIT
+
+mintery="$tmpDir/mintery"
 
 n=0
 function step {
     n=$(( n + 1 ))
-    [ $start_from -gt $n ] && return
-    [[ $end_at -ne 0 && $end_at -lt $n ]] && return
+    [ $startFromStep -gt $n ] && return
+    [[ $endAfterStep -ne 0 && $endAfterStep -lt $n ]] && return
 
     if [ $n -gt 1 ]; then
         echo
@@ -37,31 +39,54 @@ $1
     fi
 }
 
-function replace_env {
+function replaceEnv {
     # replaces var $1 with val $2 in $3 env file (or current dir's .env if not set)
 
-    set -u
-
     var=$1
-    val=$2
-    envfile=${3:-'.env'}
+    val="${2//$'\n'/\\\n}"
+    envFile=${3:-'.env'}
 
-    if grep "^$var=" "$envfile" >/dev/null ; then
-        sed -i'.bak' "s/^$var=.*$/$var=$val/" "$envfile"
-        rm "$envfile".bak
+    cat <<EOF
+,,
+var: $var
+val: $val
+,,
+EOF
+
+    ln=`grep "^$var=" --line-number $envFile | awk -F':' '{print $1}'`
+    echo "line number: $ln"
+
+    echo 'before:'
+    cat $envFile
+    if [[ "$ln" != '' ]]; then
+        if [ $ln -gt 1 ]; then
+          beforeLn="`head -n $(( ln - 1 )) $envFile; echo .`"
+          echo "${beforeLn%??}" >> $envFile.mod
+        fi
+
+        echo `echo "$var=$val"` >> $envFile.mod
+
+        if [ $ln -lt `wc -l $envFile | awk '{print $1}'` ]; then
+          afterLn="`tail -n +$(( ln + 1 )) $envFile; echo .`"
+          echo "${afterLn%??}" >> $envFile.mod
+        fi
+
+        mv $envFile.mod $envFile
     else
-        echo "$var=$val" >> "$envfile"
+        echo "$var=$val" >> $envFile
     fi
+    echo 'after:'
+    cat $envFile
 }
 
-function take_env {
-    # returns value of var $1 in $3 env file (or current directory's .env if not set)
+function takeEnv {
+    # returns value of var $1 in $2 env file (or current directory's .env if not set)
 
-    envfile=${2:-'.env'}
-    cat "$envfile" | grep --regexp "^$1=" | awk -F'=' '{print $2}'
+    envFile=${2:-'.env'}
+    cat "$envFile" | grep --regexp "^$1=" | sed 's/^[^=]*=//'
 }
 
-function cp_bak {
+function cpBak {
     # copies $1 to $2, but with preserving (if existing) $2 under $2.bak<n>,
     # where <n> equals the number of existing $2 bak files
     #
@@ -83,145 +108,171 @@ function cp_bak {
     fi
 }
 
-function run_mintery {
-    git clone https://github.com/tzConnectBerlin/mintery.git "$tmpdir/mintery" || exit 1
-    export NODE_URL="`take_env NODE_URL global.env`"
+function deployOnchainContracts {
+    git clone https://github.com/tzConnectBerlin/mintery.git "$tmpDir/mintery"
+    export NODE_URL="`takeEnv NODE_URL global.env`"
 
-    if [[ "`take_env NETWORK global.env`" == "mainnet" ]]; then
-        replace_env ORIGINATOR_ADDRESS "`take_env MINTER_TZ_ADDRESS global.env`" "$tmpdir/mintery/env" || exit 1
-        replace_env ORIGINATOR_PUB_KEY "`take_env ADMIN_PUB_KEY global.env`" "$tmpdir/mintery/env" || exit 1
-        replace_env ORIGINATOR_PRIV_KEY "`take_env ADMIN_PRIVATE_KEY global.env`" "$tmpdir/mintery/env" || exit 1
+    if [[ "`takeEnv NETWORK global.env`" == "mainnet" ]]; then
+        replaceEnv ORIGINATOR_ADDRESS "`takeEnv MINTER_TZ_ADDRESS global.env`" "$tmpDir/mintery/env"
+        replaceEnv ORIGINATOR_PUB_KEY "`takeEnv ADMIN_PUB_KEY global.env`" "$tmpDir/mintery/env"
+        replaceEnv ORIGINATOR_PRIV_KEY "`takeEnv ADMIN_PRIVATE_KEY global.env`" "$tmpDir/mintery/env"
     else
         # testnet deployment. create a tez loaded address w/ faucet
-        "$tmpdir"/mintery/script/initialize-address || exit 1
+        "$tmpDir"/mintery/script/initialize-address
 
-        replace_env MINTER_TZ_ADDRESS "`take_env ORIGINATOR_ADDRESS \"$mintery/env\"`" global.env || exit 1
-        replace_env ADMIN_PUB_KEY "`take_env ORIGINATOR_PUB_KEY \"$mintery/env\"`" global.env || exit 1
-        replace_env ADMIN_PRIVATE_KEY "`take_env ORIGINATOR_PRIV_KEY \"$mintery/env\"`" global.env || exit 1
+        replaceEnv MINTER_TZ_ADDRESS "`takeEnv ORIGINATOR_ADDRESS \"$mintery/env\"`" global.env
+        replaceEnv ADMIN_PUB_KEY "`takeEnv ORIGINATOR_PUB_KEY \"$mintery/env\"`" global.env
+        replaceEnv ADMIN_PRIVATE_KEY "`takeEnv ORIGINATOR_PRIV_KEY \"$mintery/env\"`" global.env
     fi
 
-    replace_env CONTRACT fa2 "$tmpdir/mintery/env" || exit 1
-    replace_env BURN_CAP 0.87725 "$tmpdir/mintery/env" || exit 1
-    "$tmpdir"/mintery/script/deploy-contract || exit 1
-    replace_env CONTRACT_ADDRESS "`take_env CONTRACT_ADDRESS \"$mintery/env\"`" global.env || exit 1
+    replaceEnv CONTRACT fa2 "$tmpDir/mintery/env"
+    replaceEnv BURN_CAP 0.87725 "$tmpDir/mintery/env"
+    "$tmpDir"/mintery/script/deploy-contract
+    replaceEnv CONTRACT_ADDRESS "`takeEnv CONTRACT_ADDRESS \"$mintery/env\"`" global.env
 
 
-    paypoint_recv="`take_env PAYPOINT_RECEIVER_ADDRESS global.env`"
-    if [[ "$paypoint_recv" == '' ]]; then
+    paypointRecv="`takeEnv PAYPOINT_RECEIVER_ADDRESS global.env`"
+    echo "recv: '$paypointRecv'"
+    if [[ "$paypointRecv" == '' ]]; then
         echo "Defaulting paypoint recv to the administrator address of the deployed FA2 contract"
-        paypoint_recv="`take_env ORIGINATOR_ADDRESS \"$mintery/env\"`"
+        paypointRecv="`takeEnv ORIGINATOR_ADDRESS \"$mintery/env\"`"
     fi
-    replace_env PAYPOINT_RECEIVER_ADDRESS "$paypoint_recv" "$tmpdir/mintery/env" || exit 1
+    replaceEnv PAYPOINT_RECEIVER_ADDRESS "$paypointRecv" "$tmpDir/mintery/env"
 
-    replace_env CONTRACT paypoint "$tmpdir/mintery/env" || exit 1
-    replace_env BURN_CAP 0.10325 "$tmpdir/mintery/env" || exit 1
-    "$tmpdir"/mintery/script/deploy-contract || exit 1
-    replace_env PAYPOINT_ADDRESS "`take_env CONTRACT_ADDRESS \"$mintery/env\"`" global.env
+    replaceEnv CONTRACT paypoint "$tmpDir/mintery/env"
+    replaceEnv BURN_CAP 0.10325 "$tmpDir/mintery/env"
+    "$tmpDir"/mintery/script/deploy-contract
+    replaceEnv PAYPOINT_ADDRESS "`takeEnv CONTRACT_ADDRESS \"$mintery/env\"`" global.env
 }
 
-function create_random_secrets {
-    replace_env JWT_SECRET_ADMIN "`tr -dc A-Za-z0-9 </dev/urandom | head -c 60 ; echo ''`" global.env || exit 1
-    replace_env JWT_SECRET_STORE "`tr -dc A-Za-z0-9 </dev/urandom | head -c 60 ; echo ''`" global.env
-    replace_env API_KEY_SECRET "`tr -dc A-Za-z0-9 </dev/urandom | head -c 40 ; echo ''`" global.env
+function genJwtKeyPair {
+    cd $(mktemp -d)
+
+    ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key -P '' >/dev/null
+    openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub >/dev/null
+
+    cat <<EOF
+{
+    "priv": "`cat $PWD/jwtRS256.key | sed 's/$/\\\\n/g' | tr -d '\n'`",
+    "pub": "`cat $PWD/jwtRS256.key.pub | sed 's/$/\\\\n/g' | tr -d '\n'`"
+}
+EOF
 }
 
-function setup_admin_api {
-    cp_bak '' admin-api-server/.env || exit 1
+function createRandomSecrets {
+    jwtAdmin="`genJwtKeyPair`"
+    jwtStore="`genJwtKeyPair`"
 
-    replace_env JWT_EXPIRATION_TIME "`take_env JWT_EXPIRATION_TIME global.env`" admin-api-server/.env || exit 1
-    replace_env JWT_SECRET "`take_env JWT_SECRET_ADMIN global.env`" admin-api-server/.env || exit 1
+    targetEnv=global.env
+    replaceEnv JWT_SECRET_ADMIN "\"`echo "$jwtAdmin" | jq -r '.priv'`\"" $targetEnv
+    replaceEnv JWT_PUBLIC_KEY_ADMIN "\"`echo "$jwtAdmin" | jq -r '.pub'`\"" $targetEnv
+    replaceEnv JWT_SECRET_STORE "\"`echo "$jwtStore" | jq -r '.priv'`\"" $targetEnv
+    replaceEnv JWT_PUBLIC_KEY_STORE "\"`echo "$jwtStore" | jq -r '.pub'`\"" $targetEnv
 
-    replace_env AWS_S3_BUCKET "`take_env AWS_S3_BUCKET_ADMIN global.env`" admin-api-server/.env || exit 1
-    replace_env AWS_S3_ACCESS_KEY "`take_env AWS_S3_ACCESS_KEY global.env`" admin-api-server/.env || exit 1
-    replace_env AWS_S3_KEY_SECRET "`take_env AWS_S3_KEY_SECRET global.env`" admin-api-server/.env || exit 1
-
-    replace_env STORE_API "`take_env STORE_API_URL global.env`" admin-api-server/.env || exit 1
-    replace_env ADMIN_PRIVATE_KEY "`take_env ADMIN_PRIVATE_KEY global.env`" admin-api-server/.env
-
-    replace_env BEHIND_PROXY "`take_env BEHIND_PROXY_ADMIN global.env`" admin-api-server/.env
+    replaceEnv API_KEY_SECRET "`tr -dc A-Za-z0-9 </dev/urandom | head -c 40 ; echo ''`" $targetEnv
 }
 
-function setup_store_api {
-    cp_bak '' store-api-server/.env || exit 1
+function setupAdminApi {
+    targetEnv=admin-api-server/.env
+    cpBak '' $targetEnv
 
-    replace_env JWT_EXPIRATION_TIME "`take_env JWT_EXPIRATION_TIME global.env`" store-api-server/.env || exit 1
-    replace_env JWT_SECRET "`take_env JWT_SECRET_STORE global.env`" store-api-server/.env || exit 1
+    replaceEnv AWS_S3_BUCKET "`takeEnv AWS_S3_BUCKET_ADMIN global.env`" $targetEnv
+    replaceEnv AWS_S3_ACCESS_KEY "`takeEnv AWS_S3_ACCESS_KEY global.env`" $targetEnv
+    replaceEnv AWS_S3_KEY_SECRET "`takeEnv AWS_S3_KEY_SECRET global.env`" $targetEnv
 
-    replace_env AWS_S3_BUCKET "`take_env AWS_S3_BUCKET_STORE global.env`" store-api-server/.env || exit 1
-    replace_env AWS_S3_ACCESS_KEY "`take_env AWS_S3_ACCESS_KEY global.env`" store-api-server/.env || exit 1
-    replace_env AWS_S3_KEY_SECRET "`take_env AWS_S3_KEY_SECRET global.env`" store-api-server/.env || exit 1
+    replaceEnv STORE_API "`takeEnv STORE_API_URL global.env`" $targetEnv
+    replaceEnv ADMIN_PRIVATE_KEY "`takeEnv ADMIN_PRIVATE_KEY global.env`" $targetEnv
 
-    replace_env STRIPE_SECRET "`take_env STRIPE_SECRET global.env`" store-api-server/.env || exit 1
-    replace_env STRIPE_WEBHOOK_SECRET "`take_env STRIPE_WEBHOOK_SECRET global.env`" store-api-server/.env || exit 1
+    replaceEnv BEHIND_PROXY "`takeEnv BEHIND_PROXY_ADMIN global.env`" $targetEnv
 
-    replace_env PINATA_API_KEY  "`take_env PINATA_API_KEY global.env`" store-api-server/.env || exit 1
-    replace_env PINATA_API_SECRET  "`take_env PINATA_API_SECRET global.env`" store-api-server/.env || exit 1
-
-    replace_env CART_EXPIRATION_MILLI_SECS  "`take_env CART_EXPIRATION_MILLI_SECS global.env`" store-api-server/.env || exit 1
-    replace_env ORDER_EXPIRATION_MILLI_SECS  "`take_env ORDER_EXPIRATION_MILLI_SECS global.env`" store-api-server/.env || exit 1
-
-    replace_env MINTER_TZ_ADDRESS  "`take_env MINTER_TZ_ADDRESS global.env`" store-api-server/.env || exit 1
-    replace_env ADMIN_PUBLIC_KEY  "`take_env ADMIN_PUB_KEY global.env`" store-api-server/.env || exit 1
-
-    replace_env BEHIND_PROXY "`take_env BEHIND_PROXY_STORE global.env`" store-api-server/.env || exit 1
-
-    replace_env PROFILE_PICTURES_ENABLED "`take_env PROFILE_PICTURES_ENABLED global.env`" store-api-server/.env || exit 1
-
-    replace_env KANVAS_CONTRACT "`take_env CONTRACT_ADDRESS global.env`" store-api-server/.env || exit 1
-    replace_env TEZOS_NETWORK "`take_env NETWORK global.env`" store-api-server/.env || exit 1
-
-    replace_env CACHE_TTL "`take_env CACHE_TTL global.env`" store-api-server/.env || exit 1
-    replace_env CART_MAX_ITEMS "`take_env CART_MAX_ITEMS global.env`" store-api-server/.env || exit 1
-
-    replace_env API_KEY_SECRET "`take_env API_KEY_SECRET global.env`" store-api-server/.env || exit 1
-
-    replace_env WERT_PRIV_KEY "`take_env WERT_PRIV_KEY global.env`" store-api-server/.env || exit 1
-
-    replace_env TEZPAY_PAYPOINT_ADDRESS "`take_env PAYPOINT_ADDRESS global.env`" store-api-server/.env
+    replaceEnv JWT_EXPIRATION_TIME "`takeEnv JWT_EXPIRATION_TIME global.env`" $targetEnv
+    replaceEnv JWT_SECRET "`takeEnv JWT_SECRET_ADMIN global.env`" $targetEnv
+    replaceEnv JWT_PUBLIC_KEY "`takeEnv JWT_PUBLIC_KEY_ADMIN global.env`" $targetEnv
 }
 
-function setup_store_front {
-    cp_bak '' store-front/.env || exit 1
+function setupStoreApi {
+    targetEnv=store-api-server/.env
+    cpBak '' $targetEnv
 
-    replace_env REACT_APP_API_SERVER_BASE_URL  "`take_env STORE_API_URL global.env`" store-front/.env || exit 1
-    replace_env REACT_APP_STRIPE_PK_KEY  "`take_env STRIPE_PUB_KEY global.env`" store-front/.env
+    replaceEnv JWT_EXPIRATION_TIME "`takeEnv JWT_EXPIRATION_TIME global.env`" $targetEnv
+    replaceEnv JWT_SECRET "`takeEnv JWT_SECRET_STORE global.env`" $targetEnv
+    replaceEnv JWT_PUBLIC_KEY "`takeEnv JWT_PUBLIC_KEY_STORE global.env`" $targetEnv
 
-    replace_env PROFILE_PICTURES_ENABLED "`take_env PROFILE_PICTURES_ENABLED global.env`" store-api-server/.env
+    replaceEnv AWS_S3_BUCKET "`takeEnv AWS_S3_BUCKET_STORE global.env`" $targetEnv
+    replaceEnv AWS_S3_ACCESS_KEY "`takeEnv AWS_S3_ACCESS_KEY global.env`" $targetEnv
+    replaceEnv AWS_S3_KEY_SECRET "`takeEnv AWS_S3_KEY_SECRET global.env`" $targetEnv
+
+    replaceEnv STRIPE_SECRET "`takeEnv STRIPE_SECRET global.env`" $targetEnv
+    replaceEnv STRIPE_WEBHOOK_SECRET "`takeEnv STRIPE_WEBHOOK_SECRET global.env`" $targetEnv
+
+    replaceEnv PINATA_API_KEY  "`takeEnv PINATA_API_KEY global.env`" $targetEnv
+    replaceEnv PINATA_API_SECRET  "`takeEnv PINATA_API_SECRET global.env`" $targetEnv
+
+    replaceEnv CART_EXPIRATION_MILLI_SECS  "`takeEnv CART_EXPIRATION_MILLI_SECS global.env`" $targetEnv
+    replaceEnv ORDER_EXPIRATION_MILLI_SECS  "`takeEnv ORDER_EXPIRATION_MILLI_SECS global.env`" $targetEnv
+
+    replaceEnv MINTER_TZ_ADDRESS  "`takeEnv MINTER_TZ_ADDRESS global.env`" $targetEnv
+    replaceEnv ADMIN_PUBLIC_KEY  "`takeEnv ADMIN_PUB_KEY global.env`" $targetEnv
+
+    replaceEnv BEHIND_PROXY "`takeEnv BEHIND_PROXY_STORE global.env`" $targetEnv
+
+    replaceEnv PROFILE_PICTURES_ENABLED "`takeEnv PROFILE_PICTURES_ENABLED global.env`" $targetEnv
+
+    replaceEnv KANVAS_CONTRACT "`takeEnv CONTRACT_ADDRESS global.env`" $targetEnv
+    replaceEnv TEZOS_NETWORK "`takeEnv NETWORK global.env`" $targetEnv
+
+    replaceEnv CACHE_TTL "`takeEnv CACHE_TTL global.env`" $targetEnv
+    replaceEnv CART_MAX_ITEMS "`takeEnv CART_MAX_ITEMS global.env`" $targetEnv
+
+    replaceEnv API_KEY_SECRET "`takeEnv API_KEY_SECRET global.env`" $targetEnv
+
+    replaceEnv WERT_PRIV_KEY "`takeEnv WERT_PRIV_KEY global.env`" $targetEnv
+
+    replaceEnv TEZPAY_PAYPOINT_ADDRESS "`takeEnv PAYPOINT_ADDRESS global.env`" $targetEnv
 }
 
-function setup_admin_front {
-    cp_bak '' admin-front/.env || exit 1
+function setupStoreFront {
+    targetEnv=store-front/.env
+    cpBak '' $targetEnv
 
-    replace_env REACT_APP_API_SERVER_BASE_URL  "`take_env ADMIN_API_URL global.env`" admin-front/.env || exit 1
-    replace_env REACT_APP_STORE_BASE_URL  "`take_env STORE_FRONT_URL global.env`" admin-front/.env
+    replaceEnv REACT_APP_API_SERVER_BASE_URL  "`takeEnv STORE_API_URL global.env`" $targetEnv
+    replaceEnv REACT_APP_STRIPE_PK_KEY  "`takeEnv STRIPE_PUB_KEY global.env`" $targetEnv
 }
 
-function setup_que_pasa {
-    cp_bak '' config/kanvas.yaml
-    cp_bak '' config/.env-kanvas
+function setupAdminFront {
+    targetEnv=admin-front/.env
+    cpBak '' $targetEnv
+
+    replaceEnv REACT_APP_API_SERVER_BASE_URL  "`takeEnv ADMIN_API_URL global.env`" $targetEnv
+    replaceEnv REACT_APP_STORE_BASE_URL  "`takeEnv STORE_FRONT_URL global.env`" $targetEnv
+}
+
+function setupQuePasa {
+    cpBak '' config/kanvas.yaml
+    cpBak '' config/.env-kanvas
 
     cat <<EOF > config/kanvas.yaml
 contracts:
 - name: "onchain_kanvas"
-  address: "`take_env CONTRACT_ADDRESS global.env | sed 's/\"//g'`"
+  address: "`takeEnv CONTRACT_ADDRESS global.env | sed 's/\"//g'`"
 - name: "paypoint"
-  address: "`take_env PAYPOINT_ADDRESS global.env | sed 's/\"//g'`"
+  address: "`takeEnv PAYPOINT_ADDRESS global.env | sed 's/\"//g'`"
 EOF
     cat <<EOF > config/.env-kanvas
-NODE_URL=`take_env NODE_URL global.env`
-BCD_NETWORK=`take_env NETWORK global.env`
+NODE_URL=`takeEnv NODE_URL global.env`
+BCD_NETWORK=`takeEnv NETWORK global.env`
 EOF
 }
 
-function setup_peppermint {
-    cp_bak '' config/peppermint.json
+function setupPeppermint {
+    cpBak '' config/peppermint.json
     cat <<EOF > config/peppermint.json
 {
     "batchSize": 110,
     "confirmations": 2,
     "timeout": 300,
-    "privateKey": "`take_env ADMIN_PRIVATE_KEY global.env | sed 's/\"//g'`",
-    "rpcUrl": "`take_env NODE_URL global.env | sed 's/\"//g'`",
+    "privateKey": "`takeEnv ADMIN_PRIVATE_KEY global.env | sed 's/\"//g'`",
+    "rpcUrl": "`takeEnv NODE_URL global.env | sed 's/\"//g'`",
     "pollingDelay": 1000,
     "dbConnection": {
             "user": "store_pguser",
@@ -234,7 +285,7 @@ function setup_peppermint {
         "nft": {
             "handler": "MultiassetHandler",
             "args": {
-                "contract_address": "`take_env CONTRACT_ADDRESS global.env | sed 's/\"//g'`"
+                "contract_address": "`takeEnv CONTRACT_ADDRESS global.env | sed 's/\"//g'`"
             }
         }
     }
@@ -242,10 +293,10 @@ function setup_peppermint {
 EOF
 }
 
-function setup_nginx {
+function setupNginx {
     sudo mv /etc/nginx/nginx.conf "/etc/nginx/nginx.conf.bak`ls -w 1 /etc/nginx | grep nginx.conf | wc -l`"
 
-    export nginx_conf=$(cat <<EOF
+    export nginxConf=$(cat <<EOF
 user  nginx;
 worker_processes  auto;
 
@@ -282,7 +333,7 @@ http {
     }
 
     server {
-        server_name `take_env STORE_FRONT_URL global.env | sed -E 's/^https?:\/\///'`;
+        server_name `takeEnv STORE_FRONT_URL global.env | sed -E 's/^https?:\/\///'`;
 
         location / {
             proxy_pass http://localhost:3000/;
@@ -298,7 +349,7 @@ http {
             add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE,PATCH' always;
             add_header 'Cache-Control' 'no-cache,max-age=86400';
 
-            add_header 'Access-Control-Allow-Origin' '`take_env ADMIN_FRONT_URL global.env`';
+            add_header 'Access-Control-Allow-Origin' '`takeEnv ADMIN_FRONT_URL global.env`';
             add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
 
             proxy_pass http://localhost:3005/;
@@ -314,7 +365,7 @@ http {
     }
 
     server {
-        server_name `take_env ADMIN_FRONT_URL global.env | sed -E 's/^https?:\/\///'`;
+        server_name `takeEnv ADMIN_FRONT_URL global.env | sed -E 's/^https?:\/\///'`;
         client_max_body_size 100M;
 
         location / {
@@ -345,19 +396,19 @@ http {
 }
 EOF
 )
-    sudo --preserve-env=nginx_conf bash -c 'echo "$nginx_conf" > /etc/nginx/nginx.conf' || exit 1
-    sudo certbot --nginx || exit 1
+    sudo --preserve-env=nginxConf bash -c 'echo "$nginxConf" > /etc/nginx/nginx.conf'
+    sudo certbot --nginx
 
     sudo nginx -s reload
 }
 
 step \
     'Creating a fresh global.env file (note: if one already existed it will be backed up under a .bak extension)' \
-    cp_bak global.env.example global.env || exit 1
+    cpBak global.env.example global.env
 
 step \
     'Setting up nested git repositories' \
-    git submodule update --init || exit 1
+    git submodule update --init
 
 step \
     'In global.env:
@@ -367,7 +418,7 @@ step \
 - set ADMIN_FRONT_URL
 - is the store api behind a proxy (eg nginx)? set BEHIND_PROXY_STORE to: yes
 - is the admin api behind a proxy (eg nginx)? set BEHIND_PROXY_ADMIN to: yes
-- have a look at all other parameters in the "tweakable parameters" section' || exit 1
+- have a look at all other parameters in the "tweakable parameters" section'
 
 step "$(cat <<EOF
 AWS S3 (https://s3.console.aws.amazon.com/s3/buckets):
@@ -382,12 +433,12 @@ NOTE: must set following options upon creation of each bucket:
 - unset all in "Block Public Access settings for this bucket"
 (the rest of the options' defaults are fine)
 EOF
-)" || exit 1
+)"
 
-step 'Set in global.env AWS_S3_BUCKET_STORE and AWS_S3_BUCKET_ADMIN to what the buckets have been named in the previous step' || exit 1
+step 'Set in global.env AWS_S3_BUCKET_STORE and AWS_S3_BUCKET_ADMIN to what the buckets have been named in the previous step'
 
 step \
-    'Set AWS_S3_ACCESS_KEY and AWS_S3_KEY_SECRET in global.env, these are related to your AWS account. Please find the correct values on their website (https://us-east-1.console.aws.amazon.com/iam/home#/security_credentials).' || exit 1
+    'Set AWS_S3_ACCESS_KEY and AWS_S3_KEY_SECRET in global.env, these are related to your AWS account. Please find the correct values on their website (https://us-east-1.console.aws.amazon.com/iam/home#/security_credentials).'
 
 step \
     'If Stripe enabled,  (https://dashboard.stripe.com/test/dashboard):
@@ -399,7 +450,7 @@ step \
     "If Stripe enabled, (https://dashboard.stripe.com/test/webhooks):
 
 add a new endpoint for a new webhook:
-1. set the endpoint url to: `take_env STORE_API_URL global.env`/payment/stripe-webhook
+1. set the endpoint url to: `takeEnv STORE_API_URL global.env`/payment/stripe-webhook
 2. under 'Select events' select all 'payment intent' events
 3. Add endpoint (click the button)
 4. Under the new webhook page, reveal the 'Signing secret', copy this value into STRIPE_WEBHOOK_SECRET in global.env"
@@ -426,40 +477,40 @@ If deploying on mainnet (TEZOS_NETWORK=mainnet), also set:
 - ADMIN_PRIVATE_KEY'
 
 step \
-    'Creating a testnet wallet loaded with tez, and deploying the FA2 contract...' \
-    run_mintery || exit 1
+  'Creating a testnet wallet loaded with tez (if targeting a testnet), and deploying the onchain contracts (FA2 and Paypoint)...' \
+    deployOnchainContracts
 
 step \
     'Creating secrets (for JWT, etc.)' \
-    create_random_secrets || exit 1
+    createRandomSecrets
 
 step \
     'Setting up admin-api-server/.env with values set in global.env' \
-    setup_admin_api || exit 1
+    setupAdminApi
 
 step \
     'Setting up store-api-server/.env with values set in global.env' \
-    setup_store_api || exit 1
+    setupStoreApi
 
 step \
     'Setting up store-front/.env with values set in global.env' \
-    setup_store_front || exit 1
+    setupStoreFront
 
 step \
     'Setting up admin-front/.env with values set in global.env' \
-    setup_admin_front || exit 1
+    setupAdminFront
 
 step \
     'Setting up Que Pasa config' \
-    setup_que_pasa || exit 1
+    setupQuePasa
 
 step \
     'Setting up Peppermint config' \
-    setup_peppermint || exit 1
+    setupPeppermint
 
 step \
     'Building docker images' \
-    docker-compose build || exit 1
+    docker-compose build
 
 step \
     'If running with nginx, continue. otherwise quit here.'
@@ -468,7 +519,7 @@ step \
     'Setting up the nginx config (this will append to the existing nginx config file)
 
 Note: Certbot will prompt for your information to setup SSL' \
-    setup_nginx || exit 1
+    setupNginx
 
 step \
     'ALL DONE
