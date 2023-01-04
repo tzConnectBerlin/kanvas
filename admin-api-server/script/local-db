@@ -2,6 +2,8 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
+set -e -u
+
 [ -z $PGHOST ] && export PGHOST=localhost
 [ -z $PGPORT ] && export PGPORT=5433
 [ -z $PGUSER ] && export PGUSER=dev_user

@@ -46,18 +46,7 @@ function replaceEnv {
     val="${2//$'\n'/\\\n}"
     envFile=${3:-'.env'}
 
-    cat <<EOF
-,,
-var: $var
-val: $val
-,,
-EOF
-
     ln=`grep "^$var=" --line-number $envFile | awk -F':' '{print $1}'`
-    echo "line number: $ln"
-
-    echo 'before:'
-    cat $envFile
     if [[ "$ln" != '' ]]; then
         if [ $ln -gt 1 ]; then
           beforeLn="`head -n $(( ln - 1 )) $envFile; echo .`"
@@ -75,8 +64,6 @@ EOF
     else
         echo "$var=$val" >> $envFile
     fi
-    echo 'after:'
-    cat $envFile
 }
 
 function takeEnv {

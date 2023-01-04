@@ -2,16 +2,18 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
-try_kill_bg() {
-  bg_pids="$(jobs -p)"
-  if [[ "$bg_pids" == "" ]]; then
+set -e -u
+
+tryKillBg() {
+  bgPids="$(jobs -p)"
+  if [[ "$bgPids" == "" ]]; then
     return 0
   fi
 
-  echo "killing background pids: `echo $bg_pids | paste -sd' '`.."
-  echo "$bg_pids" | xargs -I'{}' pkill -TERM -P '{}' || return 0
+  echo "killing background pids: `echo $bgPids | paste -sd' '`.."
+  echo "$bgPids" | xargs -I'{}' pkill -TERM -P '{}' || return 0
 }
-TRAP='try_kill_bg'
+TRAP='tryKillBg'
 trap "$TRAP" EXIT
 
 TRAP="$TRAP; rm -rf test/.workdir 2>/dev/null || return 0"
@@ -25,7 +27,7 @@ export NODE_URL=http://localhost:$FLEXTESA_RPC_PORT
 # using the newest version for --polling-interval parameter, to reduce required testing duration
 export QUEPASA_VERSION=1.3.0
 
-function cleanup_docker_container {
+function cleanupDockerContainer {
     echo "stopping $2 docker container, id: ${1:0:12}"
     docker kill $1 >/dev/null || return 0
 }
@@ -40,25 +42,25 @@ docker run \
     -e block_time=1 \
     oxheadalpha/flextesa:20220715 \
     kathmandubox start`
-TRAP="$TRAP; cleanup_docker_container $tz local-tezos"
+TRAP="$TRAP; cleanupDockerContainer $tz local-tezos"
 trap "$TRAP" EXIT
 
 pg=`DBSETUP_LOG=quiet INIT_QUEPASA=false DOCKER_ARGS='-d' ./script/local-db 2>/dev/null`
-TRAP="$TRAP; cleanup_docker_container $pg testdb"
+TRAP="$TRAP; cleanupDockerContainer $pg testdb"
 trap "$TRAP" EXIT
 
 
-sig_err_file=`mktemp`
-rm $sig_err_file
+sigErrFile=`mktemp`
+rm $sigErrFile
 (
-    trap "echo 'yarn linked deps build failed' >> $sig_err_file" ERR
+    trap "echo 'yarn linked deps build failed' >> $sigErrFile" ERR
 
     echo "ensuring up to date build w/ yarn linked deps (api-lib, etc)..."
-    ./script/build-deps || exit 1
+    ./script/build-deps
     echo build-deps done
 ) &
 (
-    trap "echo 'db setup failed' >> $sig_err_file" ERR
+    trap "echo 'db setup failed' >> $sigErrFile" ERR
 
     echo "waiting for testdb setup.. (docker: $pg)"
     ./script/wait-db
@@ -100,12 +102,12 @@ while ! tz-cli man | grep --quiet originate; do
 done
 echo
 
-tmpdir=test/.workdir/`basename $(mktemp -d -u)`
-mkdir "$tmpdir"
-mintery="$tmpdir/mintery"
-git clone https://github.com/tzConnectBerlin/mintery.git "$tmpdir/mintery" >/dev/null 2>&1
+tmpDir=test/.workdir/`basename $(mktemp -d -u)`
+mkdir "$tmpDir"
+mintery="$tmpDir/mintery"
+git clone https://github.com/tzConnectBerlin/mintery.git "$tmpDir/mintery" >/dev/null 2>&1
 
-cd "$tmpdir/mintery"
+cd "$tmpDir/mintery"
 
 echo "
 ORIGINATOR_ADDRESS=$MINTER_TZ_ADDRESS
@@ -154,11 +156,11 @@ docker run \
     --contracts test_token_gate=$TOKEN_GATE_CONTRACT \
     --allowed-unbootstrapped-offset 0s \
     --polling-interval 10ms`
-TRAP="cleanup_docker_container $qp que-pasa; $TRAP"
+TRAP="cleanupDockerContainer $qp que-pasa; $TRAP"
 trap "$TRAP" EXIT
 
-mkdir "$tmpdir"/config
-cat <<EOF > $tmpdir/config/peppermint.json
+mkdir "$tmpDir"/config
+cat <<EOF > $tmpDir/config/peppermint.json
 {
     "batchSize": 110,
     "confirmations": 1,
@@ -188,21 +190,21 @@ pm=`
 docker run \
     --detach \
     --network=host \
-    --mount type=bind,source="$PWD/$tmpdir"/config/peppermint.json,target=/build/config.json \
+    --mount type=bind,source="$PWD/$tmpDir"/config/peppermint.json,target=/build/config.json \
     ghcr.io/tzconnectberlin/peppermint:1.2
 `
-TRAP="cleanup_docker_container $pm peppermint 2>/dev/null; $TRAP"
+TRAP="cleanupDockerContainer $pm peppermint 2>/dev/null; $TRAP"
 trap "$TRAP" EXIT
 
 wait
-[ -f $sig_err_file ] && {
-    cat $sig_err_file
-    rm $sig_err_file
+[ -f $sigErrFile ] && {
+    cat $sigErrFile
+    rm $sigErrFile
     exit 1
 }
 
 mkdir -p test/coverage
-node --experimental-vm-modules node_modules/.bin/jest "$@" --coverage | tee test/coverage/summary.txt || exit 1
+node --experimental-vm-modules node_modules/.bin/jest "$@" --coverage | tee test/coverage/summary.txt
 sed -n '/^-----/,$p' test/coverage/summary.txt > test/coverage/summary_.txt
 head -n 4 test/coverage/summary_.txt | awk -F '|' '{print $2 $3 $4 $5}'
 sed 's/^/\n/' test/coverage/summary_.txt > test/coverage/summary.txt

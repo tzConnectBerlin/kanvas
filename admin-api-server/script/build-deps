@@ -2,11 +2,13 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
-sig_err_file=`mktemp`
-rm $sig_err_file
+set -e -u
+
+sigErrFile=`mktemp`
+rm $sigErrFile
 echo "building stm-lib.."
 (
-    trap "echo 'stm-lib build failed' >> $sig_err_file" ERR
+    trap "echo 'stm-lib build failed' >> $sigErrFile" ERR
 
     cd stm-lib
     yarn install --frozen-lockfile --link-duplicates
@@ -14,16 +16,16 @@ echo "building stm-lib.."
 ) &
 echo "building api-lib.."
 (
-    trap "echo 'api-lib build failed' >> $sig_err_file" ERR
+    trap "echo 'api-lib build failed' >> $sigErrFile" ERR
 
     cd ../lib/api-lib
     yarn install --frozen-lockfile --link-duplicates
     yarn build
 ) &
 wait
-[ -f $sig_err_file ] && {
-    cat $sig_err_file
-    rm $sig_err_file
+[ -f $sigErrFile ] && {
+    cat $sigErrFile
+    rm $sigErrFile
     exit 1
 }
 

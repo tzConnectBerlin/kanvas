@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e -u
+
 qry=${1:-'select 1'}
 while ! psql -c "$qry" >/dev/null 2>&1 ; do
     echo "$PGUSER@$PGHOST:$PGPORT/$PGDATABASE not up yet.."

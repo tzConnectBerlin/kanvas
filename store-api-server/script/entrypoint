@@ -2,14 +2,12 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
-INIT_QUEPASA=false script/migrate || exit 1
+set -e -u
+
+INIT_QUEPASA=false script/migrate
 
 if [[ '`psql -c \"select count(1) from nft_category\" -tA`' == '0' ]]; then
     psql < script/populate-stagingdb.sql
-fi
-
-if [[ "`psql -c \"SELECT rolreplication FROM pg_roles WHERE rolname = '$PGUSER'\" -tA`" == 'f' ]]; then
-    psql -c "ALTER USER \"$PGUSER\" REPLICATION"
 fi
 
 node dist/src/main.js

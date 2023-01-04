@@ -2,6 +2,8 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
+set -e -u
+
 [ -z $PGHOST ] && export PGHOST=localhost
 [ -z $PGPORT ] && export PGPORT=5433
 [ -z $PGUSER ] && export PGUSER=dev_user
@@ -9,4 +11,4 @@ cd $SCRIPT_DIR/..
 [ -z $PGDATABASE ] && export PGDATABASE=dev_database
 
 
-./script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up || exit 1
+./script/shmig -t postgresql -d postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE up

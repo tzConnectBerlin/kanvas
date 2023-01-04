@@ -2,6 +2,8 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
+set -e -u
+
 PEPPERMINT_VERSION=ee538be4d156ffb456107587eb71f14671afb1c7
 [ -z $PGPORT ] && export PGPORT=5432
 [ -z $PGPASSWORD ] && export PGPASSWORD=dev_password
@@ -18,7 +20,7 @@ PEPPERMINT_VERSION=ee538be4d156ffb456107587eb71f14671afb1c7
     if [[ ${INIT_QUEPASA:-'true'} != "true" ]]; then
         ./script/wait-db 'select 1 from que_pasa.levels'
     fi
-    ./script/migrate || exit 1
+    ./script/migrate
 
     psql < script/populate-testdb.sql
 ) &

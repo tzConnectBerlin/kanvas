@@ -2,30 +2,30 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/..
 
-set -e
+set -e -u
 
-try_kill_bg() {
-  bg_pids="$(jobs -p)"
-  if [[ "$bg_pids" == "" ]]; then
+tryKillBg() {
+  bgPids="$(jobs -p)"
+  if [[ "$bgPids" == "" ]]; then
     return 0
   fi
 
-  echo "killing background pids: `echo $bg_pids | paste -sd' '`.."
-  echo "$bg_pids" | xargs -I'{}' pkill -TERM -P '{}' || return 0
+  echo "killing background pids: `echo $bgPids | paste -sd' '`.."
+  echo "$bgPids" | xargs -I'{}' pkill -TERM -P '{}' || return 0
 }
-TRAP='try_kill_bg'
+TRAP='tryKillBg'
 trap "$TRAP" EXIT
 
 set -a
 . .env.test
 set +a
 
-function cleanup_docker_container {
+function cleanupDockerContainer {
     echo "stopping $2 docker container, id: ${1:0:12}"
     docker kill $1 >/dev/null || return 0
 }
 
-function store_env_exec {
+function storeEnvExec {
     PGHOST=$STORE_PGHOST \
         PGPORT=$STORE_PGPORT \
         PGUSER=$STORE_PGUSER \
@@ -37,26 +37,26 @@ function store_env_exec {
         $@
 }
 
-db_docker=`DOCKER_ARGS='-d' DBSETUP_LOG=quiet INIT_QUEPASA=false ./script/local-db -c wal_level=logical -c log_statement=all`
-TRAP="$TRAP; cleanup_docker_container $db_docker testdb"
+db_docker=`DOCKER_ARGS='-d' DBSETUP_LOG=quiet INIT_QUEPASA=false ./script/local-db -c log_statement=all`
+TRAP="$TRAP; cleanupDockerContainer $db_docker testdb"
 trap "$TRAP" EXIT
 
-sig_err_file=`mktemp`
-rm $sig_err_file
+sigErrFile=`mktemp`
+rm $sigErrFile
 (
-    trap "echo 'yarn linked deps build failed' >> $sig_err_file" ERR
+    trap "echo 'yarn linked deps build failed' >> $sigErrFile" ERR
     echo "ensuring up to date build w/ yarn linked deps (api-lib, etc)..."
     ./script/build-deps || exit 1
     yarn build || exit 1
 
-    trap "echo 'store build failed' >> $sig_err_file" ERR
+    trap "echo 'store build failed' >> $sigErrFile" ERR
     cd $SCRIPT_DIR/../../store-api-server;
     yarn install || exit 1
     ./script/build-deps >/dev/null 2>&1 || exit 1
     yarn build || exit 1
 ) &
 (
-    trap "echo 'db setup failed..' >> $sig_err_file" ERR
+    trap "echo 'db setup failed..' >> $sigErrFile" ERR
 
     echo "waiting for testdb setup (admin).. (docker: $db_docker)"
     ./script/wait-db
@@ -71,15 +71,15 @@ rm $sig_err_file
         set +a
 
         echo "waiting for testdb setup (store).."
-        store_env_exec script/wait-db
-        store_env_exec script/migrate || exit 1 # >/dev/null 2>&1 || exit 1
-        store_env_exec psql < script/populate-testdb.sql || exit 1
+        storeEnvExec script/wait-db
+        storeEnvExec script/migrate || exit 1 # >/dev/null 2>&1 || exit 1
+        storeEnvExec psql < script/populate-testdb.sql || exit 1
     ) || exit 1
 ) &
 wait
-[ -f $sig_err_file ] && {
-    cat $sig_err_file
-    rm $sig_err_file
+[ -f $sigErrFile ] && {
+    cat $sigErrFile
+    rm $sigErrFile
     exit 1
 }
 
@@ -87,7 +87,7 @@ echo "starting the store api in the background"
 (
     cd "$SCRIPT_DIR/../../store-api-server"
 
-    DOTENV_CONFIG_PATH=.env.test store_env_exec yarn run start:prod >/dev/null 2>&1
+    DOTENV_CONFIG_PATH=.env.test storeEnvExec yarn run start:prod >/dev/null 2>&1
 ) &
 
 yarn run seed || exit 1
@@ -100,9 +100,9 @@ done
 
 echo "running tests.."
 
-summary_tmp=`mktemp`
+summaryTmp=`mktemp`
 mkdir -p test/coverage
 LOG_LEVEL=warning node --experimental-vm-modules node_modules/.bin/jest "$@" --coverage | tee test/coverage/summary.txt || exit 1
-sed -n '/^-----/,$p' test/coverage/summary.txt > "$summary_tmp"
-head -n 4 "$summary_tmp" | awk -F '|' '{print $2 $3 $4 $5}'
-sed 's/^/\n/' "$summary_tmp" > test/coverage/summary.txt
+sed -n '/^-----/,$p' test/coverage/summary.txt > "$summaryTmp"
+head -n 4 "$summaryTmp" | awk -F '|' '{print $2 $3 $4 $5}'
+sed 's/^/\n/' "$summaryTmp" > test/coverage/summary.txt
