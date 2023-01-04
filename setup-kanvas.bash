@@ -8,10 +8,10 @@ startFromStep=${1:-0}
 endAfterStep=${2:-0}
 
 tmpDir=`basename $(mktemp -d -u)`
-mkdir "$tmpDir"
-trap "rm -rf $tmpDir" EXIT
+mkdir $tmpDir
+#trap "rm -rf $tmpDir" EXIT
 
-mintery="$tmpDir/mintery"
+mintery=$tmpDir/mintery
 
 n=0
 function step {
@@ -109,25 +109,25 @@ function cpBak {
 }
 
 function deployOnchainContracts {
-    git clone https://github.com/tzConnectBerlin/mintery.git "$tmpDir/mintery"
+    git clone https://github.com/tzConnectBerlin/mintery.git $tmpDir/mintery
     export NODE_URL="`takeEnv NODE_URL global.env`"
 
     if [[ "`takeEnv NETWORK global.env`" == "mainnet" ]]; then
-        replaceEnv ORIGINATOR_ADDRESS "`takeEnv MINTER_TZ_ADDRESS global.env`" "$tmpDir/mintery/env"
-        replaceEnv ORIGINATOR_PUB_KEY "`takeEnv ADMIN_PUB_KEY global.env`" "$tmpDir/mintery/env"
-        replaceEnv ORIGINATOR_PRIV_KEY "`takeEnv ADMIN_PRIVATE_KEY global.env`" "$tmpDir/mintery/env"
+        replaceEnv ORIGINATOR_ADDRESS "`takeEnv MINTER_TZ_ADDRESS global.env`" $tmpDir/mintery/env
+        replaceEnv ORIGINATOR_PUB_KEY "`takeEnv ADMIN_PUB_KEY global.env`" $tmpDir/mintery/env
+        replaceEnv ORIGINATOR_PRIV_KEY "`takeEnv ADMIN_PRIVATE_KEY global.env`" $tmpDir/mintery/env
     else
         # testnet deployment. create a tez loaded address w/ faucet
-        "$tmpDir"/mintery/script/initialize-address
+        $tmpDir/mintery/script/initialize-address
 
         replaceEnv MINTER_TZ_ADDRESS "`takeEnv ORIGINATOR_ADDRESS \"$mintery/env\"`" global.env
         replaceEnv ADMIN_PUB_KEY "`takeEnv ORIGINATOR_PUB_KEY \"$mintery/env\"`" global.env
         replaceEnv ADMIN_PRIVATE_KEY "`takeEnv ORIGINATOR_PRIV_KEY \"$mintery/env\"`" global.env
     fi
 
-    replaceEnv CONTRACT fa2 "$tmpDir/mintery/env"
-    replaceEnv BURN_CAP 0.87725 "$tmpDir/mintery/env"
-    "$tmpDir"/mintery/script/deploy-contract
+    replaceEnv CONTRACT fa2 $tmpDir/mintery/env
+    replaceEnv BURN_CAP 0.87725 $tmpDir/mintery/env
+    $tmpDir/mintery/script/deploy-contract
     replaceEnv CONTRACT_ADDRESS "`takeEnv CONTRACT_ADDRESS \"$mintery/env\"`" global.env
 
 
@@ -137,16 +137,17 @@ function deployOnchainContracts {
         echo "Defaulting paypoint recv to the administrator address of the deployed FA2 contract"
         paypointRecv="`takeEnv ORIGINATOR_ADDRESS \"$mintery/env\"`"
     fi
-    replaceEnv PAYPOINT_RECEIVER_ADDRESS "$paypointRecv" "$tmpDir/mintery/env"
+    replaceEnv PAYPOINT_RECEIVER_ADDRESS "$paypointRecv" $tmpDir/mintery/env
 
-    replaceEnv CONTRACT paypoint "$tmpDir/mintery/env"
-    replaceEnv BURN_CAP 0.10325 "$tmpDir/mintery/env"
-    "$tmpDir"/mintery/script/deploy-contract
+    replaceEnv CONTRACT paypoint $tmpDir/mintery/env
+    replaceEnv BURN_CAP 0.10325 $tmpDir/mintery/env
+    $tmpDir/mintery/script/deploy-contract
     replaceEnv PAYPOINT_ADDRESS "`takeEnv CONTRACT_ADDRESS \"$mintery/env\"`" global.env
 }
 
 function genJwtKeyPair {
-    cd $(mktemp -d)
+    mkdir $tmpDir/$1
+    cd $tmpDir/$1
 
     ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key -P '' >/dev/null
     openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub >/dev/null
@@ -160,8 +161,8 @@ EOF
 }
 
 function createRandomSecrets {
-    jwtAdmin="`genJwtKeyPair`"
-    jwtStore="`genJwtKeyPair`"
+    jwtAdmin="`genJwtKeyPair admin`"
+    jwtStore="`genJwtKeyPair store`"
 
     targetEnv=global.env
     replaceEnv JWT_SECRET_ADMIN "\"`echo "$jwtAdmin" | jq -r '.priv'`\"" $targetEnv

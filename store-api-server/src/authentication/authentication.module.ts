@@ -7,11 +7,12 @@ import { JwtStrategy } from './strategy/jwt-auth.strategy.js';
 import { DbModule } from '../db.module.js';
 import { S3Service } from '../s3.service.js';
 import { TokenGateModule } from '../tokenGate.module.js';
+import { JWT_SECRET } from '../constants.js';
 
 @Module({
   imports: [
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
+      secret: JWT_SECRET,
     }),
     DbModule,
     UserModule,
