@@ -10,7 +10,11 @@ import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
 import { Result } from 'ts-results';
 import validator from 'validator';
 import ts_results from 'ts-results';
-import { SIGNED_LOGIN_ENABLED, TOKEN_GATE } from '../../constants.js';
+import {
+  SIGNED_LOGIN_ENABLED,
+  TOKEN_GATE,
+  JWT_EXPIRATION_TIME,
+} from '../../constants.js';
 const { Ok } = ts_results;
 
 import type { IAuthentication } from './authentication.js';
@@ -176,16 +180,12 @@ export class AuthenticationService {
     const payload: ITokenPayload = data;
     const token = this.jwtService.sign(payload, { algorithm: 'RS256' });
 
-    if (typeof process.env.JWT_EXPIRATION_TIME == 'string') {
-      return {
-        token: token,
-        id: user.id,
-        maxAge: process.env.JWT_EXPIRATION_TIME,
-        userAddress: data.userAddress,
-      };
-    } else {
-      throw new Error('process.env.JWT_EXPIRATION_TIME not set');
-    }
+    return {
+      token: token,
+      id: user.id,
+      maxAge: JWT_EXPIRATION_TIME,
+      userAddress: data.userAddress,
+    };
   }
 
   #isWalletAddressValid(addr: string): boolean {

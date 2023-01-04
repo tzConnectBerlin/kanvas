@@ -123,6 +123,16 @@ export const CART_MAX_ITEMS: number = Number(
 // secret in their API calls are not rate limited.
 export const API_KEY_SECRET: string | undefined = process.env['API_KEY_SECRET'];
 
+export const JWT_SECRET: string = assertEnv('JWT_SECRET').replace(/\\n/g, '\n');
+export const JWT_PUBLIC_KEY: string = assertEnv('JWT_PUBLIC_KEY').replace(
+  /\\n/g,
+  '\n',
+);
+export const JWT_EXPIRATION_TIME: number | undefined = maybe(
+  process.env['JWT_EXPIRATION_TIME'],
+  Number,
+);
+
 export const STRIPE_SECRET: string | undefined = process.env['STRIPE_SECRET'];
 export const STRIPE_WEBHOOK_SECRET: string | undefined =
   process.env['STRIPE_WEBHOOK_SECRET'];

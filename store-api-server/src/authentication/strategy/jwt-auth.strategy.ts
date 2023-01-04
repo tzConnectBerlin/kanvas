@@ -1,22 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { ITokenPayload } from '../../interfaces/token.interface.js';
-import { assertEnv } from '../../utils.js';
+import { JWT_PUBLIC_KEY } from '../../constants.js';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
-    try {
-      super({
-        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-        ignoreExpiration: false,
-        secretOrKey: assertEnv('JWT_PUBLIC_KEY'),
-      });
-    } catch (err) {
-      Logger.error(err);
-      throw err;
-    }
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: JWT_PUBLIC_KEY,
+    });
   }
 
   async validate(payload: ITokenPayload) {

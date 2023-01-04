@@ -5,6 +5,7 @@ import {
   PG_CONNECTION,
   TOKEN_GATE,
   TOKEN_GATE_SPEC_FILE,
+  JWT_PUBLIC_KEY,
 } from './constants.js';
 import { assertEnv } from './utils.js';
 import { DbPool, DbModule } from './db.module.js';
@@ -36,14 +37,13 @@ const tokenGateProvider = {
     if (typeof TOKEN_GATE_SPEC_FILE === 'undefined') {
       return w.gate;
     }
-    const jwtPublicKey = assertEnv('JWT_PUBLIC_KEY');
     w.gate
       .loadSpecFromFile(TOKEN_GATE_SPEC_FILE)
       .setTzAddrFromReqFunc((req: any): string | undefined => {
         try {
           const token = req.get('authorization')?.replace(/^Bearer\ /, '');
           if (typeof token !== 'undefined') {
-            return jwt.verify(token, jwtPublicKey).userAddress;
+            return jwt.verify(token, JWT_PUBLIC_KEY).userAddress;
           }
         } catch (err: any) {
           Logger.warn(`failed to verify JWT: ${err}`);
