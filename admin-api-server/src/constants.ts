@@ -25,6 +25,16 @@ export const STORE_API = process.env['STORE_API'] || 'http://localhost:3005';
 
 export const ADMIN_PRIVATE_KEY = assertEnv('ADMIN_PRIVATE_KEY');
 
+export const JWT_SECRET: string = assertEnv('JWT_SECRET').replace(/\\n/g, '\n');
+export const JWT_PUBLIC_KEY: string = assertEnv('JWT_PUBLIC_KEY').replace(
+  /\\n/g,
+  '\n',
+);
+export const JWT_EXPIRATION_TIME: number | undefined = maybe(
+  process.env['JWT_EXPIRATION_TIME'],
+  Number,
+);
+
 // Enable this if the api is serving directly on https (ie, there is nothing in
 // front of it such as a load balancer that is communicating with the api over
 // an insecure line (http)

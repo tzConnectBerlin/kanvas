@@ -1,15 +1,14 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { assertEnv } from '../utils.js';
 import { createRequire } from 'module';
-import { SECURE_COOKIE_SETTINGS } from '../constants.js';
+import { SECURE_COOKIE_SETTINGS, JWT_SECRET } from '../constants.js';
 const require = createRequire(import.meta.url);
 const cookieSession = require('cookie-session');
 
 @Injectable()
 export class CookieSessionMiddleware implements NestMiddleware {
   private options: any = {
-    secret: assertEnv('JWT_SECRET'),
+    secret: JWT_SECRET,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   };
 
