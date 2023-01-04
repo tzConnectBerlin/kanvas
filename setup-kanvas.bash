@@ -9,7 +9,7 @@ endAfterStep=${2:-0}
 
 tmpDir=`basename $(mktemp -d -u)`
 mkdir $tmpDir
-#trap "rm -rf $tmpDir" EXIT
+trap "rm -rf $tmpDir" EXIT
 
 mintery=$tmpDir/mintery
 

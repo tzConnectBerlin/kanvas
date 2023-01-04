@@ -6,6 +6,7 @@ import { AuthController } from './controller/auth.controller.js';
 import { AuthService } from './service/auth.service.js';
 import { JwtStrategy } from './strategy/jwt.strategy.js';
 import { LocalStrategy } from './strategy/local.strategy.js';
+import { JWT_SECRET } from '../constants.js';
 
 @Module({
   providers: [AuthService, JwtStrategy, LocalStrategy],
@@ -13,7 +14,7 @@ import { LocalStrategy } from './strategy/local.strategy.js';
     UserModule,
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
+      secret: JWT_SECRET,
     }),
   ],
   controllers: [AuthController],
