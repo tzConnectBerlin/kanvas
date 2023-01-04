@@ -87,5 +87,4 @@ nginx.vars
 global.env
 .*.bak*
 
-config/token_gate.yaml
-config/peppermint.json
+config/
